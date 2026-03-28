@@ -138,7 +138,7 @@ export default function UpdatePassword() {
 
                 <Button
                   type="submit"
-                  className="w-full rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white"
+                  className="w-full rounded-2xl bg-gradient-to-r from-red-600 to-amber-500 text-white"
                   disabled={isLoading}
                 >
                   {isLoading ? (

@@ -359,12 +359,12 @@ export const AuthModal = ({
     : passwordStrengthInfo.color;
 
   const surfaceClass = isDark
-    ? 'bg-slate-950/95 text-white border border-white/10 ring-1 ring-indigo-500/20'
-    : 'bg-white text-slate-900 border border-slate-200/80 ring-1 ring-indigo-500/10';
+    ? 'bg-slate-950/95 text-white border border-white/10 ring-1 ring-orange-500/20'
+    : 'bg-white text-slate-900 border border-slate-200/80 ring-1 ring-orange-500/10';
   const subtleText = isDark ? 'text-slate-400' : 'text-slate-500';
   const inputClass = isDark
-    ? 'border border-white/10 bg-slate-900/70 text-slate-100 placeholder:text-slate-500 focus:border-indigo-400 focus:ring-indigo-400/30'
-    : 'border border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 focus:border-indigo-500 focus:ring-indigo-500/20';
+    ? 'border border-white/10 bg-slate-900/70 text-slate-100 placeholder:text-slate-500 focus:border-orange-400 focus:ring-orange-400/30'
+    : 'border border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 focus:border-orange-500 focus:ring-orange-500/20';
   const outlineButtonClass = isDark
     ? 'border-white/10 bg-white/5 text-slate-200 hover:bg-white/10'
     : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50';
@@ -386,7 +386,7 @@ export const AuthModal = ({
         aria-modal="true"
         onClick={(event) => event.stopPropagation()}
         className={`relative z-10 w-full max-w-md p-0 gap-0 rounded-2xl overflow-hidden shadow-2xl ${
-          isDark ? "shadow-indigo-500/20" : "shadow-indigo-200/60"
+          isDark ? "shadow-orange-500/20" : "shadow-orange-200/60"
         } ${surfaceClass}`}
       >
         <VisuallyHidden>
@@ -421,13 +421,13 @@ export const AuthModal = ({
 
         <div className="relative z-10 px-5 sm:px-8 pt-6 sm:pt-8 pb-4 sm:pb-6 text-center space-y-3 sm:space-y-4">
           {/* Logo */}
-          <div className="mx-auto w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/25">
+          <div className="mx-auto w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-br from-red-600 to-orange-500 flex items-center justify-center shadow-lg shadow-orange-500/25">
             <LogIn className="h-6 w-6 sm:h-7 sm:w-7 text-white" />
           </div>
           
           {/* Title */}
           <div className="space-y-1">
-            <h2 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+            <h2 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent">
               Gradlify
             </h2>
             <p className={`${subtleText} text-xs sm:text-sm`}>
@@ -571,7 +571,7 @@ export const AuthModal = ({
                   onClick={() => {
                     setView('reset');
                   }}
-                  className={`text-sm font-medium transition-colors ${isDark ? "text-indigo-300 hover:text-indigo-200" : "text-indigo-600 hover:text-indigo-700"}`}
+                  className={`text-sm font-medium transition-colors ${isDark ? "text-orange-300 hover:text-orange-200" : "text-orange-600 hover:text-orange-700"}`}
                 >
                   Forgot Password?
                 </button>
@@ -581,7 +581,7 @@ export const AuthModal = ({
             {/* Submit Button */}
             <Button
               type="submit" 
-              className="w-full h-11 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-semibold text-sm shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 transition-all duration-300 flex items-center justify-center gap-2" 
+              className="w-full h-11 rounded-xl bg-gradient-to-r from-red-600 to-orange-500 hover:from-orange-600 hover:to-red-700 text-white font-semibold text-sm shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 transition-all duration-300 flex items-center justify-center gap-2" 
               disabled={loading}
             >
               {loading && <Loader2 className="h-4 w-4 animate-spin" />}
@@ -608,14 +608,14 @@ export const AuthModal = ({
                   setIsSignUp(true);
                 }}
                 inputClassName={`h-11 rounded-xl px-4 text-sm transition-all focus:ring-2 ${inputClass}`}
-                submitClassName="h-11 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-semibold text-sm shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 transition-all duration-300"
+                submitClassName="h-11 rounded-xl bg-gradient-to-r from-red-600 to-orange-500 hover:from-orange-600 hover:to-red-700 text-white font-semibold text-sm shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 transition-all duration-300"
               />
 
               <div className="text-center">
                 <button
                   type="button"
                   onClick={() => setView('auth')}
-                  className={`text-sm font-medium transition-colors ${isDark ? "text-indigo-300 hover:text-indigo-200" : "text-indigo-600 hover:text-indigo-700"}`}
+                  className={`text-sm font-medium transition-colors ${isDark ? "text-orange-300 hover:text-orange-200" : "text-orange-600 hover:text-orange-700"}`}
                 >
                   Back to sign in
                 </button>
@@ -631,7 +631,7 @@ export const AuthModal = ({
               </span>
               <button 
                 type="button"
-                className={`text-sm font-semibold transition-colors ${isDark ? "text-indigo-300 hover:text-indigo-200" : "text-indigo-600 hover:text-indigo-700"}`}
+                className={`text-sm font-semibold transition-colors ${isDark ? "text-orange-300 hover:text-orange-200" : "text-orange-600 hover:text-orange-700"}`}
                 onClick={() => {
                   setIsSignUp(!isSignUp);
                   setPassword('');

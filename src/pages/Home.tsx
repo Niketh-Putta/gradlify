@@ -35,7 +35,7 @@ import { toast } from "sonner";
 import { LeaderboardSnapshot } from "@/components/LeaderboardSnapshot";
 import { PremiumUpgradeButton } from "@/components/PremiumUpgradeButton";
 import { useReadinessStore } from "@/lib/stores/useReadinessStore";
-import { FoundersBanner } from "@/components/FoundersBanner";
+
 import { FoundersSprintModal } from "@/components/FoundersSprintModal";
 import { DiscordFooterEntry } from "@/components/DiscordFooterEntry";
 import { getFoundersSprintInfo } from "@/lib/foundersSprint";
@@ -380,7 +380,7 @@ export function Home() {
     <div className="min-h-screen bg-background">
       <FoundersSprintModal open={showFoundersSprintModal} onOpenChange={setShowFoundersSprintModal} />
       <div className="pt-6 pb-10 sm:pt-8 sm:pb-14 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        <FoundersBanner className="mb-4" track={userTrack} />
+
         <div className="mb-4">
           <span className="inline-flex items-center rounded-full border border-primary/25 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
             {trackLabel}

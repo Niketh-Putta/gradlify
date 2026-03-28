@@ -11,7 +11,7 @@ const sanitizeReturnPath = (value: string) => {
 };
 
 export async function startPremiumCheckout(
-  plan: "monthly" | "annual" = "monthly",
+  plan: "monthly" | "annual" | "ultra" = "monthly",
   premiumTrack?: PremiumTrack,
 ) {
   if (typeof window === "undefined") {

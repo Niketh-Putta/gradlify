@@ -6,7 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getLeaderboard, LeaderboardEntry } from "@/lib/connectApi";
 import { FoundersSprintLabel } from "@/components/FoundersSprintLabel";
-import { ArrowRight, Target } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useMembership } from "@/hooks/useMembership";
@@ -88,7 +88,6 @@ export function LeaderboardSnapshot() {
           <div>
             <FoundersSprintLabel className="mb-2" />
             <CardTitle className="flex items-center gap-2">
-              <Target className="h-5 w-5 text-primary" />
               Top Learners This Month
             </CardTitle>
             <CardDescription>Correct answers</CardDescription>

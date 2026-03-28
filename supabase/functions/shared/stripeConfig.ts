@@ -70,11 +70,13 @@ export const getStripeWebhookSecretForMode = (mode: StripeMode): string =>
 export interface StripePriceIds {
   monthly: string;
   annual: string;
+  ultra?: string;
 }
 
 export const getStripePriceIdsForMode = (mode: StripeMode): StripePriceIds => ({
   monthly: requireEnvVar(`STRIPE_PRICE_MONTHLY_${mode}`),
   annual: requireEnvVar(`STRIPE_PRICE_ANNUAL_${mode}`),
+  ultra: readEnv(`STRIPE_PRICE_ULTRA_MONTHLY_${mode}`) || undefined,
 });
 
 export type PremiumTrack = 'gcse' | 'eleven_plus';
@@ -106,6 +108,9 @@ export const getStripeTrackPriceIdsForMode = (mode: StripeMode): StripeTrackPric
   const elevenPlusAnnual =
     readModeAware('STRIPE_PRICE_11PLUS_ANNUAL', mode) ||
     readModeAware('STRIPE_PRICE_ELEVEN_PLUS_ANNUAL', mode);
+  const elevenPlusUltra =
+    readModeAware('STRIPE_PRICE_11PLUS_ULTRA_MONTHLY', mode) ||
+    readModeAware('STRIPE_PRICE_ELEVEN_PLUS_ULTRA_MONTHLY', mode);
 
   if (!gcseMonthly || !gcseAnnual) {
     throw new Error(`Missing GCSE Stripe price IDs for mode ${mode}`);
@@ -117,7 +122,7 @@ export const getStripeTrackPriceIdsForMode = (mode: StripeMode): StripeTrackPric
 
   return {
     gcse: { monthly: gcseMonthly, annual: gcseAnnual },
-    eleven_plus: { monthly: elevenPlusMonthly, annual: elevenPlusAnnual },
+    eleven_plus: { monthly: elevenPlusMonthly, annual: elevenPlusAnnual, ultra: elevenPlusUltra },
   };
 };
 
@@ -128,8 +133,18 @@ export const getPremiumTrackFromPriceId = (
   if (!priceId) return null;
   const priceIds = getStripeTrackPriceIdsForMode(mode);
   if (priceId === priceIds.gcse.monthly || priceId === priceIds.gcse.annual) return 'gcse';
-  if (priceId === priceIds.eleven_plus.monthly || priceId === priceIds.eleven_plus.annual) return 'eleven_plus';
+  if (priceId === priceIds.eleven_plus.monthly || priceId === priceIds.eleven_plus.annual || priceId === priceIds.eleven_plus.ultra) return 'eleven_plus';
   return null;
+};
+
+export const getPlanFromPriceId = (
+  mode: StripeMode,
+  priceId: string | null | undefined,
+): 'ultra' | 'premium' | 'free' => {
+  if (!priceId) return 'free';
+  const priceIds = getStripeTrackPriceIdsForMode(mode);
+  if (priceId === priceIds.eleven_plus.ultra) return 'ultra';
+  return 'premium';
 };
 
 export const getStripeConfig = (): StripeConfig => {

@@ -269,7 +269,7 @@ export default function Auth() {
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex justify-center mb-6">
-            <div className="w-20 h-20 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg flex items-center justify-center shadow-lg">
+            <div className="w-20 h-20 bg-gradient-to-r from-red-700 to-orange-500 rounded-lg flex items-center justify-center shadow-lg">
               <LogIn className="h-10 w-10 text-white" />
             </div>
           </div>
@@ -332,14 +332,14 @@ export default function Auth() {
                     setShowReset(false);
                     setActiveTab("signup");
                   }}
-                  inputClassName="h-12 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-900 placeholder:text-gray-400 transition-colors focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
-                  submitClassName="h-12 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+                  inputClassName="h-12 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-900 placeholder:text-gray-400 transition-colors focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
+                  submitClassName="h-12 bg-gradient-to-r from-red-700 to-orange-500 hover:from-red-700 hover:to-orange-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
                 />
                 <div className="text-center">
                   <button
                     type="button"
                     onClick={() => setShowReset(false)}
-                    className="text-sm text-purple-600 hover:text-purple-700 transition-colors"
+                    className="text-sm text-red-600 hover:text-red-700 transition-colors"
                   >
                     Back to sign in
                   </button>
@@ -396,7 +396,7 @@ export default function Auth() {
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
                       required
-                      className="h-12 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-900 placeholder:text-gray-400 transition-colors focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
+                      className="h-12 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-900 placeholder:text-gray-400 transition-colors focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
                     />
                   </div>
                   <div className="space-y-2">
@@ -408,7 +408,7 @@ export default function Auth() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
-                      className="h-12 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-900 placeholder:text-gray-400 transition-colors focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
+                      className="h-12 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-900 placeholder:text-gray-400 transition-colors focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
                     />
                   </div>
                   <div className="space-y-2">
@@ -421,7 +421,7 @@ export default function Auth() {
                       onChange={(e) => setPassword(e.target.value)}
                       required
                       minLength={6}
-                      className="h-12 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-900 placeholder:text-gray-400 transition-colors focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
+                      className="h-12 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-900 placeholder:text-gray-400 transition-colors focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
                     />
                   </div>
                   <div className="space-y-2">
@@ -434,12 +434,12 @@ export default function Auth() {
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       required
                       minLength={6}
-                      className="h-12 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-900 placeholder:text-gray-400 transition-colors focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
+                      className="h-12 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-900 placeholder:text-gray-400 transition-colors focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
                     />
                   </div>
                   <Button 
                     type="submit" 
-                    className="w-full h-12 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+                    className="w-full h-12 bg-gradient-to-r from-red-700 to-orange-500 hover:from-red-700 hover:to-orange-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
                     disabled={isLoading}
                   >
                     {isLoading ? "Creating account..." : "Create Free Account"}
@@ -458,7 +458,7 @@ export default function Auth() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
-                      className="h-12 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-900 placeholder:text-gray-400 transition-colors focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
+                      className="h-12 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-900 placeholder:text-gray-400 transition-colors focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
                     />
                   </div>
                   <div className="space-y-2">
@@ -469,12 +469,12 @@ export default function Auth() {
                       placeholder="••••••"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="h-12 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-900 placeholder:text-gray-400 transition-colors focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
+                      className="h-12 rounded-md border border-gray-300 bg-white px-3 text-sm text-gray-900 placeholder:text-gray-400 transition-colors focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
                     />
                   </div>
                   <Button 
                     type="submit" 
-                    className="w-full h-12 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
+                    className="w-full h-12 bg-gradient-to-r from-red-700 to-orange-500 hover:from-red-700 hover:to-orange-700 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
                     disabled={isLoading}
                   >
                     {isLoading ? "Signing in..." : "Sign In"}
@@ -483,7 +483,7 @@ export default function Auth() {
                     <button 
                       type="button"
                       onClick={() => setShowReset(true)}
-                      className="text-sm text-purple-600 hover:text-purple-700 transition-colors"
+                      className="text-sm text-red-600 hover:text-red-700 transition-colors"
                     >
                       Forgot Password?
                     </button>

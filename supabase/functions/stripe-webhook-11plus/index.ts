@@ -8,6 +8,7 @@ import {
   getStripeTrackPriceIdsForMode,
   getPremiumTrackFromPriceId,
   normalizePremiumTrack,
+  getPlanFromPriceId,
   StripePriceIds,
   PremiumTrack,
   StripeMode
@@ -36,7 +37,7 @@ type ProfileUpdatePayload = {
   stripeCustomerId: string;
   subscriptionId: string;
   status: string | null;
-  plan: 'premium';
+  plan: 'premium' | 'ultra' | 'free';
   billingInterval: BillingInterval;
   currentPeriodEnd: string | null;
   cancelAtPeriodEnd: boolean | null;
@@ -357,12 +358,13 @@ serve(async (req: Request): Promise<Response> => {
             null;
           const billingInterval = determineBillingInterval(subscription, priceIds);
           const currentPeriodEnd = toIso(subscription.current_period_end);
+          const computedPlan = getPlanFromPriceId(mode, checkoutPriceId ?? priceIdList[0]);
           result = await updateProfile({
             mode,
             stripeCustomerId: customerId,
             subscriptionId,
             status: subscription.status,
-            plan: 'premium',
+            plan: computedPlan,
             billingInterval,
             currentPeriodEnd,
             cancelAtPeriodEnd: subscription.cancel_at_period_end,
@@ -394,6 +396,7 @@ serve(async (req: Request): Promise<Response> => {
             null;
           const billingInterval = determineBillingInterval(subscription, priceIds);
           const currentPeriodEnd = toIso(subscription.current_period_end);
+          const computedPlan = getPlanFromPriceId(mode, priceIdList[0]);
           logStep('Processing subscription update', {
             subscriptionId: subscription.id,
             customerId,
@@ -410,7 +413,7 @@ serve(async (req: Request): Promise<Response> => {
             stripeCustomerId: customerId,
             subscriptionId: subscription.id,
             status: subscription.status,
-            plan: 'premium',
+            plan: computedPlan,
             billingInterval,
             currentPeriodEnd,
             cancelAtPeriodEnd: subscription.cancel_at_period_end,
@@ -440,13 +443,14 @@ serve(async (req: Request): Promise<Response> => {
           if (!customerId) {
             throw new Error('Subscription deleted payload missing customer');
           }
+          const computedPlan = getPlanFromPriceId(mode, gatherPriceIds(subscription)[0]);
 
           result = await updateProfile({
             mode,
             stripeCustomerId: customerId,
             subscriptionId: subscription.id,
             status: 'canceled',
-            plan: 'premium',
+            plan: computedPlan,
             billingInterval,
             currentPeriodEnd,
             cancelAtPeriodEnd: subscription.cancel_at_period_end,
@@ -485,6 +489,7 @@ serve(async (req: Request): Promise<Response> => {
             null;
           const billingInterval = determineBillingInterval(subscription, priceIds);
           const currentPeriodEnd = toIso(subscription.current_period_end);
+          const computedPlan = getPlanFromPriceId(mode, priceIdList[0]);
           logStep('Processing invoice paid', { invoiceId: invoice.id, customerId, billingInterval });
 
           result = await updateProfile({
@@ -492,7 +497,7 @@ serve(async (req: Request): Promise<Response> => {
             stripeCustomerId: customerId,
             subscriptionId,
             status: subscription.status,
-            plan: 'premium',
+            plan: computedPlan,
             billingInterval,
             currentPeriodEnd,
             cancelAtPeriodEnd: subscription.cancel_at_period_end,
@@ -527,6 +532,7 @@ serve(async (req: Request): Promise<Response> => {
             null;
           const billingInterval = determineBillingInterval(subscription, priceIds);
           const currentPeriodEnd = toIso(subscription.current_period_end);
+          const computedPlan = getPlanFromPriceId(mode, priceIdList[0]);
           logStep('Processing invoice payment failed', { invoiceId: invoice.id, customerId, billingInterval });
 
           result = await updateProfile({
@@ -534,7 +540,7 @@ serve(async (req: Request): Promise<Response> => {
             stripeCustomerId: customerId,
             subscriptionId,
             status: 'past_due',
-            plan: 'premium',
+            plan: computedPlan,
             billingInterval,
             currentPeriodEnd,
             cancelAtPeriodEnd: subscription.cancel_at_period_end,

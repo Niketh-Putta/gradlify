@@ -342,7 +342,7 @@ export const AuthComponent = ({ onAuthSuccess, onBack, initialMode = 'login' }: 
             </Button>
           )}
           
-          <div className="mx-auto w-16 h-16 rounded-lg bg-gradient-to-r from-purple-600 to-pink-600 flex items-center justify-center shadow-md">
+          <div className="mx-auto w-16 h-16 rounded-lg bg-gradient-to-r from-red-700 to-orange-500 flex items-center justify-center shadow-md">
             <LogIn className="h-8 w-8 text-white" />
           </div>
           
@@ -371,15 +371,15 @@ export const AuthComponent = ({ onAuthSuccess, onBack, initialMode = 'login' }: 
                   setView('auth');
                   setIsSignUp(true);
                 }}
-                inputClassName="h-10 sm:h-11 rounded-md border border-gray-300 bg-white px-3 text-xs sm:text-sm text-gray-900 placeholder:text-gray-400 transition-colors focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
-                submitClassName="h-10 sm:h-11 rounded-md bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-medium text-xs sm:text-sm shadow-sm hover:shadow-md transition-all duration-200"
+                inputClassName="h-10 sm:h-11 rounded-md border border-gray-300 bg-white px-3 text-xs sm:text-sm text-gray-900 placeholder:text-gray-400 transition-colors focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
+                submitClassName="h-10 sm:h-11 rounded-md bg-gradient-to-r from-red-700 to-orange-500 hover:from-red-700 hover:to-orange-700 text-white font-medium text-xs sm:text-sm shadow-sm hover:shadow-md transition-all duration-200"
               />
 
               <div className="text-center">
                 <button
                   type="button"
                   onClick={() => setView('auth')}
-                  className="text-sm text-purple-600 hover:text-purple-700 transition-colors"
+                  className="text-sm text-red-600 hover:text-red-700 transition-colors"
                 >
                   Back to sign in
                 </button>
@@ -421,7 +421,7 @@ export const AuthComponent = ({ onAuthSuccess, onBack, initialMode = 'login' }: 
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required={isSignUp}
-                className="h-10 sm:h-11 rounded-md border border-gray-300 bg-white px-3 text-xs sm:text-sm text-gray-900 placeholder:text-gray-400 transition-colors focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
+                className="h-10 sm:h-11 rounded-md border border-gray-300 bg-white px-3 text-xs sm:text-sm text-gray-900 placeholder:text-gray-400 transition-colors focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
                 />
               </div>
             )}
@@ -434,7 +434,7 @@ export const AuthComponent = ({ onAuthSuccess, onBack, initialMode = 'login' }: 
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="h-10 sm:h-11 rounded-md border border-gray-300 bg-white px-3 text-xs sm:text-sm text-gray-900 placeholder:text-gray-400 transition-colors focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
+                className="h-10 sm:h-11 rounded-md border border-gray-300 bg-white px-3 text-xs sm:text-sm text-gray-900 placeholder:text-gray-400 transition-colors focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
               />
             </div>
             
@@ -447,7 +447,7 @@ export const AuthComponent = ({ onAuthSuccess, onBack, initialMode = 'login' }: 
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={6}
-                className="h-10 sm:h-11 rounded-md border border-gray-300 bg-white px-3 pr-10 text-xs sm:text-sm text-gray-900 placeholder:text-gray-400 transition-colors focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
+                className="h-10 sm:h-11 rounded-md border border-gray-300 bg-white px-3 pr-10 text-xs sm:text-sm text-gray-900 placeholder:text-gray-400 transition-colors focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
               />
               <Button
                 type="button"
@@ -490,7 +490,7 @@ export const AuthComponent = ({ onAuthSuccess, onBack, initialMode = 'login' }: 
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required={isSignUp}
-                  className="h-10 sm:h-11 rounded-md border border-gray-300 bg-white px-3 pr-10 text-xs sm:text-sm text-gray-900 placeholder:text-gray-400 transition-colors focus:border-purple-500 focus:outline-none focus:ring-1 focus:ring-purple-500"
+                  className="h-10 sm:h-11 rounded-md border border-gray-300 bg-white px-3 pr-10 text-xs sm:text-sm text-gray-900 placeholder:text-gray-400 transition-colors focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
                 />
                 <Button
                   type="button"
@@ -509,7 +509,7 @@ export const AuthComponent = ({ onAuthSuccess, onBack, initialMode = 'login' }: 
                 <button 
                   type="button"
                   onClick={() => setView('reset')}
-                  className="text-sm text-purple-600 hover:text-purple-700 transition-colors"
+                  className="text-sm text-red-600 hover:text-red-700 transition-colors"
                 >
                   Forgot Password?
                 </button>
@@ -519,7 +519,7 @@ export const AuthComponent = ({ onAuthSuccess, onBack, initialMode = 'login' }: 
             
             <Button
               type="submit" 
-              className="w-full h-10 sm:h-11 rounded-md bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-medium text-xs sm:text-sm shadow-sm hover:shadow-md transition-all duration-200 flex items-center justify-center gap-2" 
+              className="w-full h-10 sm:h-11 rounded-md bg-gradient-to-r from-red-700 to-orange-500 hover:from-red-700 hover:to-orange-700 text-white font-medium text-xs sm:text-sm shadow-sm hover:shadow-md transition-all duration-200 flex items-center justify-center gap-2" 
               disabled={loading}
             >
               {loading && <Loader2 className="h-4 w-4 animate-spin" />}
@@ -540,7 +540,7 @@ export const AuthComponent = ({ onAuthSuccess, onBack, initialMode = 'login' }: 
               </span>
               <Button 
                 variant="link" 
-                className="text-sm font-medium text-purple-600 hover:text-purple-700 p-0 h-auto"
+                className="text-sm font-medium text-red-600 hover:text-red-700 p-0 h-auto"
                 onClick={() => {
                   setIsSignUp(!isSignUp);
                   setPassword('');

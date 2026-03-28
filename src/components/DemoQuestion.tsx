@@ -344,17 +344,17 @@ export function DemoQuestion({ onStartPracticeClick, embedded = false, tone = "l
         <div
           className={cn(
             "rounded-2xl p-4 sm:p-8 flex items-center justify-center mb-4 sm:mb-6 border",
-            isDark ? "bg-gradient-to-br from-slate-900 to-slate-800 border-white/10" : "bg-gradient-to-br from-indigo-50 to-purple-50 border-indigo-100"
+            isDark ? "bg-gradient-to-br from-slate-900 to-slate-800 border-white/10" : "bg-gradient-to-br from-orange-50 to-red-50 border-orange-100"
           )}
         >
           <svg width="300" height="200" viewBox="0 0 300 200" className="max-w-full w-[140px] h-[90px] sm:w-[280px] sm:h-[186px]">
-            <polygon points="150,30 250,170 50,170" fill="none" stroke={isDark ? "#a5b4fc" : "#6366f1"} strokeWidth="2.5" />
+            <polygon points="150,30 250,170 50,170" fill="none" stroke={isDark ? "#fdba74" : "#f97316"} strokeWidth="2.5" />
             <text x="150" y="20" textAnchor="middle" className={cn("font-semibold", isDark ? "fill-slate-100" : "fill-gray-900")} fontSize="15">A</text>
             <text x="260" y="180" textAnchor="start" className={cn("font-semibold", isDark ? "fill-slate-100" : "fill-gray-900")} fontSize="15">C</text>
             <text x="35" y="180" textAnchor="end" className={cn("font-semibold", isDark ? "fill-slate-100" : "fill-gray-900")} fontSize="15">B</text>
-            <text x="150" y="55" textAnchor="middle" className={cn("font-semibold", isDark ? "fill-indigo-200" : "fill-indigo-600")} fontSize="13">55°</text>
-            <text x="230" y="162" textAnchor="middle" className={cn("font-semibold", isDark ? "fill-indigo-200" : "fill-indigo-600")} fontSize="13">70°</text>
-            <text x="70" y="162" textAnchor="middle" className={cn("font-bold", isDark ? "fill-fuchsia-300" : "fill-purple-600")} fontSize="14">?</text>
+            <text x="150" y="55" textAnchor="middle" className={cn("font-semibold", isDark ? "fill-orange-200" : "fill-orange-600")} fontSize="13">55°</text>
+            <text x="230" y="162" textAnchor="middle" className={cn("font-semibold", isDark ? "fill-orange-200" : "fill-orange-600")} fontSize="13">70°</text>
+            <text x="70" y="162" textAnchor="middle" className={cn("font-bold", isDark ? "fill-amber-300" : "fill-red-600")} fontSize="14">?</text>
           </svg>
         </div>
       );
@@ -365,23 +365,23 @@ export function DemoQuestion({ onStartPracticeClick, embedded = false, tone = "l
         <div
           className={cn(
             "rounded-2xl p-4 sm:p-8 flex items-center justify-center mb-4 sm:mb-6 border",
-            isDark ? "bg-gradient-to-br from-slate-900 to-slate-800 border-white/10" : "bg-gradient-to-br from-indigo-50 to-purple-50 border-indigo-100"
+            isDark ? "bg-gradient-to-br from-slate-900 to-slate-800 border-white/10" : "bg-gradient-to-br from-orange-50 to-red-50 border-orange-100"
           )}
         >
           <svg width="280" height="280" viewBox="0 0 280 280" className="max-w-full w-[160px] h-[160px] sm:w-[260px] sm:h-[260px]">
-            <circle cx="140" cy="140" r="95" fill="none" stroke={isDark ? "#a5b4fc" : "#6366f1"} strokeWidth="2.5" />
-            <circle cx="140" cy="140" r="4" fill={isDark ? "#a5b4fc" : "#6366f1"} />
+            <circle cx="140" cy="140" r="95" fill="none" stroke={isDark ? "#fdba74" : "#f97316"} strokeWidth="2.5" />
+            <circle cx="140" cy="140" r="4" fill={isDark ? "#fdba74" : "#f97316"} />
             <text x="140" y="132" textAnchor="middle" className={cn("font-semibold", isDark ? "fill-slate-100" : "fill-gray-900")} fontSize="14">O</text>
-            <line x1="140" y1="140" x2="140" y2="45" stroke={isDark ? "#a5b4fc" : "#6366f1"} strokeWidth="2" />
-            <line x1="140" y1="140" x2="218" y2="178" stroke={isDark ? "#a5b4fc" : "#6366f1"} strokeWidth="2" />
-            <line x1="140" y1="45" x2="218" y2="178" stroke={isDark ? "#d8b4fe" : "#a855f7"} strokeWidth="2" />
-            <line x1="140" y1="45" x2="62" y2="178" stroke={isDark ? "#d8b4fe" : "#a855f7"} strokeWidth="2" />
-            <line x1="218" y1="178" x2="62" y2="178" stroke={isDark ? "#d8b4fe" : "#a855f7"} strokeWidth="2" />
+            <line x1="140" y1="140" x2="140" y2="45" stroke={isDark ? "#fdba74" : "#f97316"} strokeWidth="2" />
+            <line x1="140" y1="140" x2="218" y2="178" stroke={isDark ? "#fdba74" : "#f97316"} strokeWidth="2" />
+            <line x1="140" y1="45" x2="218" y2="178" stroke={isDark ? "#fca5a5" : "#ef4444"} strokeWidth="2" />
+            <line x1="140" y1="45" x2="62" y2="178" stroke={isDark ? "#fca5a5" : "#ef4444"} strokeWidth="2" />
+            <line x1="218" y1="178" x2="62" y2="178" stroke={isDark ? "#fca5a5" : "#ef4444"} strokeWidth="2" />
             <text x="140" y="38" textAnchor="middle" className={cn("font-semibold", isDark ? "fill-slate-100" : "fill-gray-900")} fontSize="14">A</text>
             <text x="228" y="188" textAnchor="start" className={cn("font-semibold", isDark ? "fill-slate-100" : "fill-gray-900")} fontSize="14">B</text>
             <text x="52" y="188" textAnchor="end" className={cn("font-semibold", isDark ? "fill-slate-100" : "fill-gray-900")} fontSize="14">C</text>
-            <text x="158" y="105" textAnchor="middle" className={cn("font-semibold", isDark ? "fill-indigo-200" : "fill-indigo-600")} fontSize="12">140°</text>
-            <text x="140" y="168" textAnchor="middle" className={cn("font-bold", isDark ? "fill-fuchsia-300" : "fill-purple-600")} fontSize="13">?</text>
+            <text x="158" y="105" textAnchor="middle" className={cn("font-semibold", isDark ? "fill-orange-200" : "fill-orange-600")} fontSize="12">140°</text>
+            <text x="140" y="168" textAnchor="middle" className={cn("font-bold", isDark ? "fill-amber-300" : "fill-red-600")} fontSize="13">?</text>
           </svg>
         </div>
       );
@@ -403,14 +403,14 @@ export function DemoQuestion({ onStartPracticeClick, embedded = false, tone = "l
           <span
             className={cn(
               "inline-block max-w-[260px] rounded-full px-2.5 py-1 text-center text-[10px] font-medium sm:max-w-none sm:text-xs mb-3",
-              isDark ? "bg-white/10 text-indigo-200" : "bg-indigo-50 text-indigo-700"
+              isDark ? "bg-white/10 text-orange-200" : "bg-orange-50 text-orange-700"
             )}
           >
             Sample Gradlify exam-style practice • Free preview
           </span>
           <h2 className={cn("text-lg sm:text-3xl font-bold mb-2", textPrimary)}>
             Sample{" "}
-            <span className="bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent">Questions</span>
+            <span className="bg-gradient-to-r from-red-600 to-orange-500 bg-clip-text text-transparent">Questions</span>
           </h2>
           <p className={cn("text-xs sm:text-base max-w-lg mx-auto tracking-tight", textMuted)}>
             {AI_FEATURE_ENABLED
@@ -454,13 +454,13 @@ export function DemoQuestion({ onStartPracticeClick, embedded = false, tone = "l
         <div
           className={cn(
             "absolute top-0 right-0 w-32 h-32 rounded-bl-full pointer-events-none",
-            isDark ? "bg-gradient-to-bl from-indigo-500/20 to-transparent" : "bg-gradient-to-bl from-indigo-50 to-transparent"
+            isDark ? "bg-gradient-to-bl from-orange-500/20 to-transparent" : "bg-gradient-to-bl from-orange-50 to-transparent"
           )}
         />
         
         {/* Question Header */}
         <div className="flex items-center justify-between mb-4 sm:mb-5 relative">
-          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm sm:text-base shadow-lg shadow-indigo-500/25">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-red-600 to-orange-500 flex items-center justify-center text-white font-bold text-sm sm:text-base shadow-lg shadow-orange-500/25">
             Q{currentQuestion.id}
           </div>
           <span className={cn(
@@ -470,8 +470,8 @@ export function DemoQuestion({ onStartPracticeClick, embedded = false, tone = "l
                 ? "bg-emerald-500/15 text-emerald-200 border border-emerald-500/30"
                 : "bg-emerald-50 text-emerald-700 border border-emerald-200"
               : isDark
-                ? "bg-purple-500/15 text-purple-200 border border-purple-500/30"
-                : "bg-purple-50 text-purple-700 border border-purple-200"
+                ? "bg-red-500/15 text-red-200 border border-red-500/30"
+                : "bg-red-50 text-red-700 border border-red-200"
           )}>
             {currentQuestion.difficulty}
           </span>
@@ -502,10 +502,10 @@ export function DemoQuestion({ onStartPracticeClick, embedded = false, tone = "l
               className={cn(
                 "w-full text-left px-2.5 py-2 sm:px-3 sm:py-2.5 rounded-xl border-2 transition-all duration-200",
                   isDark
-                    ? "hover:border-indigo-400/60 hover:bg-indigo-500/10"
-                    : "hover:border-indigo-300 hover:bg-indigo-50/50",
+                    ? "hover:border-orange-400/60 hover:bg-orange-500/10"
+                    : "hover:border-orange-300 hover:bg-orange-50/50",
                   !hasSubmitted && !isSelected && (isDark ? "border-white/10 bg-slate-950/60" : "border-gray-200 bg-white"),
-                  isSelected && !hasSubmitted && (isDark ? "border-indigo-400 bg-indigo-500/15 shadow-sm" : "border-indigo-500 bg-indigo-50 shadow-sm"),
+                  isSelected && !hasSubmitted && (isDark ? "border-orange-400 bg-orange-500/15 shadow-sm" : "border-orange-500 bg-orange-50 shadow-sm"),
                   showCorrect && (isDark ? "border-emerald-400/60 bg-emerald-500/15" : "border-emerald-500 bg-emerald-50"),
                   showWrong && (isDark ? "border-rose-400/60 bg-rose-500/15" : "border-red-400 bg-red-50"),
                   hasSubmitted && "cursor-default"
@@ -515,7 +515,7 @@ export function DemoQuestion({ onStartPracticeClick, embedded = false, tone = "l
                   <div className="flex items-center gap-3">
                     <span className={cn(
                       "w-6 h-6 sm:w-7 sm:h-7 rounded-lg flex items-center justify-center text-[11px] sm:text-sm font-semibold transition-colors",
-                      isSelected && !hasSubmitted && "bg-indigo-500 text-white",
+                      isSelected && !hasSubmitted && "bg-orange-500 text-white",
                       showCorrect && "bg-emerald-500 text-white",
                       showWrong && "bg-rose-500 text-white",
                       !isSelected && !showCorrect && !showWrong && (isDark ? "bg-white/10 text-slate-300" : "bg-gray-100 text-gray-600")
@@ -539,7 +539,7 @@ export function DemoQuestion({ onStartPracticeClick, embedded = false, tone = "l
           <Button
             onClick={handleSubmit}
             disabled={!selectedAnswer}
-            className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-semibold py-2.5 rounded-xl shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 transition-all duration-300 text-xs sm:text-sm disabled:opacity-50 disabled:shadow-none"
+            className="w-full bg-gradient-to-r from-red-600 to-orange-500 hover:from-orange-600 hover:to-red-700 text-white font-semibold py-2.5 rounded-xl shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 transition-all duration-300 text-xs sm:text-sm disabled:opacity-50 disabled:shadow-none"
           >
           Submit Answer
         </Button>
@@ -613,7 +613,7 @@ export function DemoQuestion({ onStartPracticeClick, embedded = false, tone = "l
                   className={cn(
                     "h-2 rounded-full transition-all duration-300",
                     index === currentQuestionIndex 
-                      ? "w-6 sm:w-8 bg-gradient-to-r from-indigo-500 to-purple-600" 
+                      ? "w-6 sm:w-8 bg-gradient-to-r from-red-600 to-orange-500" 
                       : isCompleted && wasCorrect 
                         ? "w-2 bg-emerald-500" 
                         : isCompleted && !wasCorrect 
@@ -648,8 +648,8 @@ export function DemoQuestion({ onStartPracticeClick, embedded = false, tone = "l
             className={cn(
               "mt-6 p-5 sm:p-6 rounded-2xl border",
               isDark
-                ? "bg-gradient-to-br from-indigo-500/20 via-purple-500/15 to-cyan-400/10 border-indigo-400/30"
-                : "bg-gradient-to-br from-indigo-50 via-purple-50 to-cyan-50 border-indigo-100"
+                ? "bg-gradient-to-br from-orange-500/20 via-red-500/15 to-cyan-400/10 border-orange-400/30"
+                : "bg-gradient-to-br from-orange-50 via-red-50 to-cyan-50 border-orange-100"
             )}
           >
             <p className={cn("text-center font-semibold mb-4 text-base sm:text-lg", textPrimary)}>
@@ -657,7 +657,7 @@ export function DemoQuestion({ onStartPracticeClick, embedded = false, tone = "l
             </p>
             <Button 
               onClick={onStartPracticeClick}
-              className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-semibold py-3 rounded-xl shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 transition-all duration-300"
+              className="w-full bg-gradient-to-r from-red-600 to-orange-500 hover:from-orange-600 hover:to-red-700 text-white font-semibold py-3 rounded-xl shadow-lg shadow-orange-500/25 hover:shadow-orange-500/40 transition-all duration-300"
             >
               Start exam-style GCSE Maths practice (free)
             </Button>

@@ -54,6 +54,7 @@ const getStripeConfig = () => {
     priceAnnual: readEnv("STRIPE_PRICE_ANNUAL_LIVE") || readEnv("STRIPE_PRICE_YEARLY_LIVE"),
     price11PlusMonthly: readEnv("STRIPE_PRICE_11PLUS_MONTHLY_LIVE") || readEnv("STRIPE_PRICE_11PLUS_MONTHLY") || readEnv("STRIPE_PRICE_ELEVEN_PLUS_MONTHLY_LIVE") || readEnv("STRIPE_PRICE_ELEVEN_PLUS_MONTHLY"),
     price11PlusAnnual: readEnv("STRIPE_PRICE_11PLUS_ANNUAL_LIVE") || readEnv("STRIPE_PRICE_11PLUS_ANNUAL") || readEnv("STRIPE_PRICE_ELEVEN_PLUS_ANNUAL_LIVE") || readEnv("STRIPE_PRICE_ELEVEN_PLUS_ANNUAL"),
+    price11PlusUltra: readEnv("STRIPE_PRICE_11PLUS_ULTRA_MONTHLY_LIVE") || readEnv("STRIPE_PRICE_11PLUS_ULTRA_MONTHLY") || readEnv("STRIPE_PRICE_ELEVEN_PLUS_ULTRA_MONTHLY_LIVE"),
   };
   const test = {
     stripeSecretKey: readEnv("STRIPE_SECRET_KEY_TEST") || readEnv("STRIPE_SECRET_KEY"),
@@ -61,6 +62,7 @@ const getStripeConfig = () => {
     priceAnnual: readEnv("STRIPE_PRICE_ANNUAL_TEST") || readEnv("STRIPE_PRICE_YEARLY_TEST"),
     price11PlusMonthly: readEnv("STRIPE_PRICE_11PLUS_MONTHLY_TEST") || readEnv("STRIPE_PRICE_11PLUS_MONTHLY") || readEnv("STRIPE_PRICE_ELEVEN_PLUS_MONTHLY_TEST") || readEnv("STRIPE_PRICE_ELEVEN_PLUS_MONTHLY"),
     price11PlusAnnual: readEnv("STRIPE_PRICE_11PLUS_ANNUAL_TEST") || readEnv("STRIPE_PRICE_11PLUS_ANNUAL") || readEnv("STRIPE_PRICE_ELEVEN_PLUS_ANNUAL_TEST") || readEnv("STRIPE_PRICE_ELEVEN_PLUS_ANNUAL"),
+    price11PlusUltra: readEnv("STRIPE_PRICE_11PLUS_ULTRA_MONTHLY_TEST") || readEnv("STRIPE_PRICE_11PLUS_ULTRA_MONTHLY") || readEnv("STRIPE_PRICE_ELEVEN_PLUS_ULTRA_MONTHLY_TEST"),
   };
 
   const hasLive = Boolean(live.stripeSecretKey);
@@ -80,6 +82,7 @@ const getStripeConfig = () => {
   const priceGcseAnnual = config.priceAnnual;
   const price11PlusMonthly = config.price11PlusMonthly;
   const price11PlusAnnual = config.price11PlusAnnual;
+  const price11PlusUltra = config.price11PlusUltra;
 
   const stripeKeyPrefix = keyPrefix(stripeSecretKey, "sk_live_", "sk_test_");
   logStep("Stripe config loaded", {
@@ -130,6 +133,7 @@ const getStripeConfig = () => {
       eleven_plus: {
         monthly: price11PlusMonthly,
         annual: price11PlusAnnual,
+        ultra: price11PlusUltra,
       },
     },
   };
@@ -250,14 +254,23 @@ serve(async (req) => {
       ? "annual"
       : plan === "yearly"
       ? "annual"
+      : plan === "ultra"
+      ? "ultra"
       : "monthly";
     const checkoutTrack = requestedPremiumTrack ?? activeTrack;
-    const trackPrices = config.prices[checkoutTrack];
-    const priceId = normalizedPlan === "annual"
-      ? trackPrices.annual
-      : trackPrices.monthly;
-    if (normalizedPlan === "annual" && !priceId) {
-      throw new Error("Missing Stripe price ID for annual plan");
+    const trackPrices = config.prices[checkoutTrack as keyof typeof config.prices];
+    let priceId = trackPrices?.monthly;
+    if (normalizedPlan === "annual") {
+        priceId = trackPrices?.annual;
+    } else if (normalizedPlan === "ultra") {
+        priceId = (trackPrices as any)?.ultra;
+        if (!priceId) {
+            throw new Error(`Ultra pricing not configured for track: ${checkoutTrack}`);
+        }
+    }
+    
+    if (!priceId) {
+      throw new Error(`Missing Stripe price ID for ${normalizedPlan} plan`);
     }
     logStep("Creating checkout with plan", { plan: normalizedPlan, track: checkoutTrack, priceId: priceId.slice(0, 8) });
 

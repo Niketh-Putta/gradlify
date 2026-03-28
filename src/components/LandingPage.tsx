@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { DemoQuestion, elevenPlusDemoQuestions, mobileDemoQuestions } from "@/components/DemoQuestion";
-import { FoundersBanner } from "@/components/FoundersBanner";
+
 import { FoundersSprintLabel } from "@/components/FoundersSprintLabel";
 import { LogoMark } from "@/components/LogoMark";
 import { DiscordFooterEntry } from "@/components/DiscordFooterEntry";
@@ -225,14 +225,14 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
   const primaryText = isDark ? "text-white" : "text-slate-900";
   const mutedText = isDark ? "text-slate-200/90" : "text-slate-600";
   const subtleText = isDark ? "text-slate-300/75" : "text-slate-500";
-  const accentText = isElevenPlus ? (isDark ? "text-rose-200" : "text-rose-600") : isDark ? "text-indigo-300" : "text-indigo-600";
+  const accentText = isElevenPlus ? (isDark ? "text-rose-200" : "text-rose-600") : isDark ? "text-orange-300" : "text-orange-600";
   const sectionSurface = isDark ? "bg-[linear-gradient(180deg,#020617_0%,#050b1a_100%)]" : "bg-slate-50";
   const guidePromoSurface = isDark
-    ? "border-white/15 bg-[radial-gradient(120%_120%_at_0%_0%,rgba(129,140,248,0.18),transparent_55%),radial-gradient(120%_120%_at_100%_100%,rgba(14,165,233,0.15),transparent_60%)]"
-    : "border-slate-200/80 bg-[radial-gradient(120%_120%_at_0%_0%,rgba(99,102,241,0.16),transparent_58%),radial-gradient(120%_120%_at_100%_100%,rgba(14,165,233,0.12),transparent_62%)]";
+    ? (isElevenPlus ? "border-white/15 bg-[radial-gradient(120%_120%_at_0%_0%,rgba(251,191,36,0.18),transparent_55%),radial-gradient(120%_120%_at_100%_100%,rgba(239,68,68,0.15),transparent_60%)]" : "border-white/15 bg-[radial-gradient(120%_120%_at_0%_0%,rgba(129,140,248,0.18),transparent_55%),radial-gradient(120%_120%_at_100%_100%,rgba(14,165,233,0.15),transparent_60%)]")
+    : (isElevenPlus ? "border-slate-200/80 bg-[radial-gradient(120%_120%_at_0%_0%,rgba(245,158,11,0.16),transparent_58%),radial-gradient(120%_120%_at_100%_100%,rgba(239,68,68,0.12),transparent_62%)]" : "border-slate-200/80 bg-[radial-gradient(120%_120%_at_0%_0%,rgba(99,102,241,0.16),transparent_58%),radial-gradient(120%_120%_at_100%_100%,rgba(14,165,233,0.12),transparent_62%)]");
   const guidePromoGlow = isDark
-    ? "shadow-[0_30px_80px_-40px_rgba(99,102,241,0.55)]"
-    : "shadow-[0_30px_80px_-45px_rgba(79,70,229,0.35)]";
+    ? (isElevenPlus ? "shadow-[0_30px_80px_-40px_rgba(245,158,11,0.55)]" : (isElevenPlus ? "shadow-[0_30px_80px_-40px_rgba(245,158,11,0.55)]" : "shadow-[0_30px_80px_-40px_rgba(99,102,241,0.55)]"))
+    : (isElevenPlus ? "shadow-[0_30px_80px_-45px_rgba(217,119,6,0.35)]" : (isElevenPlus ? "shadow-[0_30px_80px_-45px_rgba(217,119,6,0.35)]" : "shadow-[0_30px_80px_-45px_rgba(79,70,229,0.35)]"));
   const guidePromoBadge = isDark
     ? "border-white/15 bg-white/10 text-slate-100"
     : "border-white/70 bg-white text-slate-800";
@@ -252,24 +252,24 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
     inline: "linear-gradient(135deg, #991B1B, #F97316, #FCD34D)",
   };
   const indigoGradient = {
-    tailwind: "from-indigo-500 via-blue-500 to-purple-500",
-    inline: "linear-gradient(90deg, #6366f1 0%, #2563eb 50%, #7c3aed 100%)",
+    tailwind: "from-orange-500 via-blue-500 to-red-500",
+    inline: "linear-gradient(90deg, #f97316 0%, #2563eb 50%, #7c3aed 100%)",
   };
   const accentGradient = isElevenPlus ? heatGradient : indigoGradient;
   const heroGradient = isElevenPlus
     ? accentGradient.tailwind
     : isDark
-      ? "from-indigo-300 via-sky-300 to-cyan-200"
+      ? "from-orange-300 via-sky-300 to-cyan-200"
       : indigoGradient.tailwind;
   const premiumCardGradient = isElevenPlus
     ? "bg-gradient-to-br from-red-600 via-orange-500 to-amber-400 border border-red-500/70 text-white"
-    : "bg-gradient-to-br from-indigo-600 via-blue-600 to-purple-600 border border-indigo-200 text-white";
+    : "bg-gradient-to-br from-orange-600 via-blue-600 to-red-600 border border-orange-200 text-white";
   const feedbackButtonGradient = isElevenPlus
     ? "bg-gradient-to-r from-red-600 via-orange-500 to-amber-400"
-    : "bg-gradient-to-r from-indigo-600 via-blue-600 to-purple-600";
+    : "bg-gradient-to-r from-orange-600 via-blue-600 to-red-600";
   const supportButtonActiveClass = isElevenPlus
     ? `rounded-full px-4 py-2 sm:px-5 sm:py-2.5 ${feedbackButtonGradient} text-white hover:brightness-95`
-    : "rounded-full px-4 py-2 sm:px-5 sm:py-2.5 bg-indigo-600/90 text-white hover:bg-indigo-600";
+    : "rounded-full px-4 py-2 sm:px-5 sm:py-2.5 bg-orange-600/90 text-white hover:bg-orange-600";
   const outlineButtonClass = isDark
     ? "border-white/20 text-white bg-white/10 hover:bg-white/20 hover:text-white"
     : "border-slate-200 text-slate-900 bg-white hover:bg-slate-100";
@@ -348,7 +348,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
             ? "bg-[radial-gradient(1200px_460px_at_20%_-5%,rgba(185,28,28,0.25),transparent_62%),radial-gradient(900px_420px_at_82%_8%,rgba(234,88,12,0.2),transparent_68%),#100404] text-white"
             : "bg-[radial-gradient(1200px_460px_at_20%_-5%,rgba(239,68,68,0.18),transparent_62%),radial-gradient(900px_420px_at_82%_8%,rgba(251,146,60,0.2),transparent_68%),#fff7ed] text-slate-900"
           : isDark
-            ? "bg-[radial-gradient(1200px_460px_at_20%_-5%,rgba(99,102,241,0.20),transparent_62%),radial-gradient(900px_420px_at_82%_8%,rgba(14,165,233,0.12),transparent_68%),#020617] text-white"
+            ? (isElevenPlus ? "bg-[radial-gradient(1200px_460px_at_20%_-5%,rgba(245,158,11,0.20),transparent_62%),radial-gradient(900px_420px_at_82%_8%,rgba(239,68,68,0.12),transparent_68%),#020617] text-white" : "bg-[radial-gradient(1200px_460px_at_20%_-5%,rgba(99,102,241,0.20),transparent_62%),radial-gradient(900px_420px_at_82%_8%,rgba(14,165,233,0.12),transparent_68%),#020617] text-white")
             : "bg-slate-50 text-slate-900"
       }`}
     >
@@ -365,7 +365,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
               : "bg-white text-slate-900 shadow-sm",
         ].join(" ")}
       >
-        <FoundersBanner track='11plus' />
+
         <div className="max-w-7xl mx-auto px-3 pr-4 sm:px-6 sm:pr-6 py-2.5 sm:py-4">
           <div className="flex items-center justify-between gap-3 sm:gap-4">
             <a href="#" className="flex items-center gap-3">
@@ -436,13 +436,13 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
             <div className="absolute inset-0 pointer-events-none">
               {isDark ? (
                 <>
-                  <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(900px_420px_at_20%_-5%,rgba(99,102,241,0.22),transparent_65%)]" />
-                  <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(720px_420px_at_80%_35%,rgba(56,189,248,0.14),transparent_62%)]" />
+                  <div className={isElevenPlus ? "absolute inset-0 pointer-events-none bg-[radial-gradient(900px_420px_at_20%_-5%,rgba(245,158,11,0.22),transparent_65%)]" : "absolute inset-0 pointer-events-none bg-[radial-gradient(900px_420px_at_20%_-5%,rgba(99,102,241,0.22),transparent_65%)]"} />
+                  <div className={isElevenPlus ? "absolute inset-0 pointer-events-none bg-[radial-gradient(720px_420px_at_80%_35%,rgba(248,113,113,0.14),transparent_62%)]" : "absolute inset-0 pointer-events-none bg-[radial-gradient(720px_420px_at_80%_35%,rgba(56,189,248,0.14),transparent_62%)]"} />
                 </>
               ) : (
                 <>
-                  <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(900px_420px_at_20%_-5%,rgba(79,70,229,0.14),transparent_65%)]" />
-                  <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(720px_420px_at_80%_35%,rgba(56,189,248,0.10),transparent_62%)]" />
+                  <div className={isElevenPlus ? "absolute inset-0 pointer-events-none bg-[radial-gradient(900px_420px_at_20%_-5%,rgba(217,119,6,0.14),transparent_65%)]" : "absolute inset-0 pointer-events-none bg-[radial-gradient(900px_420px_at_20%_-5%,rgba(79,70,229,0.14),transparent_65%)]"} />
+                  <div className={isElevenPlus ? "absolute inset-0 pointer-events-none bg-[radial-gradient(720px_420px_at_80%_35%,rgba(248,113,113,0.10),transparent_62%)]" : "absolute inset-0 pointer-events-none bg-[radial-gradient(720px_420px_at_80%_35%,rgba(56,189,248,0.10),transparent_62%)]"} />
                 </>
               )}
             </div>
@@ -452,7 +452,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
             <motion.div className="grid lg:grid-cols-12 gap-8 sm:gap-8 lg:gap-10 items-start" initial="hidden" animate="show" variants={motionCfg.stagger}>
               <motion.div variants={motionCfg.fadeUp} className="lg:col-span-6 lg:pr-6">
                 <div className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[11px] sm:px-4 sm:py-2 sm:text-xs font-semibold ${chipClass}`}>
-                <Sparkles className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${isDark ? (isElevenPlus ? "text-fuchsia-200" : "text-indigo-300") : (isElevenPlus ? "text-fuchsia-600" : "text-indigo-500")}`} />
+                <Sparkles className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${isDark ? (isElevenPlus ? "text-amber-200" : "text-orange-300") : (isElevenPlus ? "text-amber-600" : "text-orange-500")}`} />
                 Real {trackTitle} practice, without the noise.
               </div>
 
@@ -497,7 +497,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                     isElevenPlus ? "Speed + accuracy training" : "Calculator & Non-Calculator",
                   ].map((label) => (
                     <div key={label} className={`inline-flex items-center gap-2 rounded-full px-2 py-1 sm:px-3 sm:py-2 ${chipClass}`}>
-                    <CheckCircle className={`h-3 w-3 sm:h-4 sm:w-4 ${isDark ? (isElevenPlus ? "text-amber-200" : "text-indigo-300") : (isElevenPlus ? "text-amber-600" : "text-indigo-500")}`} />
+                    <CheckCircle className={`h-3 w-3 sm:h-4 sm:w-4 ${isDark ? (isElevenPlus ? "text-amber-200" : "text-orange-300") : (isElevenPlus ? "text-amber-600" : "text-orange-500")}`} />
                       <span>{label}</span>
                     </div>
                   ))}
@@ -509,8 +509,8 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                   <div
                     className={`absolute inset-0 pointer-events-none ${
                       isDark
-                        ? "bg-[radial-gradient(340px_200px_at_80%_0%,rgba(99,102,241,0.25),transparent_60%)]"
-                        : "bg-[radial-gradient(320px_200px_at_85%_0%,rgba(99,102,241,0.18),transparent_60%)]"
+                        ? (isElevenPlus ? "bg-[radial-gradient(340px_200px_at_80%_0%,rgba(245,158,11,0.25),transparent_60%)]" : "bg-[radial-gradient(340px_200px_at_80%_0%,rgba(99,102,241,0.25),transparent_60%)]")
+                        : (isElevenPlus ? "bg-[radial-gradient(320px_200px_at_85%_0%,rgba(245,158,11,0.18),transparent_60%)]" : "bg-[radial-gradient(320px_200px_at_85%_0%,rgba(99,102,241,0.18),transparent_60%)]")
                     }`}
                   />
                   <div className="relative p-3 sm:p-6 space-y-3 sm:space-y-4">
@@ -569,8 +569,8 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
             <div
               className={`absolute inset-0 pointer-events-none ${
                 isDark
-                  ? "bg-[radial-gradient(700px_420px_at_15%_10%,rgba(56,189,248,0.10),transparent_60%)]"
-                  : "bg-[radial-gradient(700px_420px_at_15%_10%,rgba(99,102,241,0.10),transparent_60%)]"
+                  ? (isElevenPlus ? "bg-[radial-gradient(700px_420px_at_15%_10%,rgba(248,113,113,0.10),transparent_60%)]" : "bg-[radial-gradient(700px_420px_at_15%_10%,rgba(56,189,248,0.10),transparent_60%)]")
+                  : (isElevenPlus ? "bg-[radial-gradient(700px_420px_at_15%_10%,rgba(245,158,11,0.10),transparent_60%)]" : "bg-[radial-gradient(700px_420px_at_15%_10%,rgba(99,102,241,0.10),transparent_60%)]")
               }`}
             />
           )}
@@ -605,8 +605,8 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
             <div
               className={`absolute inset-0 pointer-events-none ${
                 isDark
-                  ? "bg-[radial-gradient(600px_360px_at_85%_20%,rgba(99,102,241,0.12),transparent_62%)]"
-                  : "bg-[radial-gradient(600px_360px_at_85%_20%,rgba(99,102,241,0.08),transparent_62%)]"
+                  ? (isElevenPlus ? "bg-[radial-gradient(600px_360px_at_85%_20%,rgba(245,158,11,0.12),transparent_62%)]" : "bg-[radial-gradient(600px_360px_at_85%_20%,rgba(99,102,241,0.12),transparent_62%)]")
+                  : (isElevenPlus ? "bg-[radial-gradient(600px_360px_at_85%_20%,rgba(245,158,11,0.08),transparent_62%)]" : "bg-[radial-gradient(600px_360px_at_85%_20%,rgba(99,102,241,0.08),transparent_62%)]")
               }`}
             />
           )}
@@ -643,8 +643,8 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
             <div
               className={`absolute inset-0 pointer-events-none ${
                 isDark
-                  ? "bg-[radial-gradient(620px_360px_at_15%_25%,rgba(56,189,248,0.10),transparent_65%)]"
-                  : "bg-[radial-gradient(620px_360px_at_15%_25%,rgba(56,189,248,0.08),transparent_65%)]"
+                  ? (isElevenPlus ? "bg-[radial-gradient(620px_360px_at_15%_25%,rgba(248,113,113,0.10),transparent_65%)]" : "bg-[radial-gradient(620px_360px_at_15%_25%,rgba(56,189,248,0.10),transparent_65%)]")
+                  : (isElevenPlus ? "bg-[radial-gradient(620px_360px_at_15%_25%,rgba(248,113,113,0.08),transparent_65%)]" : "bg-[radial-gradient(620px_360px_at_15%_25%,rgba(56,189,248,0.08),transparent_65%)]")
               }`}
             />
           )}
@@ -673,7 +673,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                   <Button
                     size="sm"
                     onClick={handleSignup}
-                    className={`rounded-full px-5 py-2 text-white shadow-lg shadow-rose-500/30 ${isElevenPlus ? feedbackButtonGradient : "bg-indigo-600"}`}
+                    className={`rounded-full px-5 py-2 text-white shadow-lg shadow-rose-500/30 ${isElevenPlus ? feedbackButtonGradient : "bg-orange-600"}`}
                   >
                     Start practising free
                     <ArrowRight className="ml-2 h-4 w-4" />
@@ -725,74 +725,131 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                 <p className={`mt-4 ${mutedText} leading-relaxed`}>Honest pricing, cancel anytime.</p>
               </motion.div>
 
-              <div className="mt-8 sm:mt-10 grid md:grid-cols-2 gap-4 sm:gap-5 max-w-5xl">
-                <motion.div variants={motionCfg.fadeUp} className={`rounded-[20px] sm:rounded-[22px] border p-5 sm:p-7 shadow-sm ${cardSurface}`}>
-                  <div className={`text-sm font-semibold ${subtleText}`}>Free</div>
-                  <div className="mt-4 flex items-end gap-2">
-                    <div className={`text-3xl sm:text-4xl font-semibold ${primaryText}`}>£0</div>
-                    <div className={`text-sm ${subtleText} pb-1`}>/month</div>
-                  </div>
-                  <p className={`mt-3 text-[13px] sm:text-sm ${mutedText}`}>Everything you need to begin consistently.</p>
-                  <div className={`mt-5 sm:mt-6 space-y-3 text-[13px] sm:text-sm ${mutedText}`}>
-                    {[
-                      "Topic practice questions",
-                      "Mini mocks",
-                      AI_FEATURE_ENABLED ? "Daily AI help limit" : "Daily help limit",
-                      "Basic progress tracking",
-                    ].map((line) => (
-                      <div key={line} className="flex items-start gap-3">
-                        <CheckCircle className={`mt-0.5 h-5 w-5 ${accentText}`} />
-                        <span>{line}</span>
+              <div className="mt-8 sm:mt-10 grid lg:grid-cols-3 md:grid-cols-2 gap-4 sm:gap-5 max-w-6xl mx-auto flex-col-reverse md:flex-row">
+                {/* Ultra Tier */}
+                <motion.div variants={motionCfg.fadeUp} className={`font-sans rounded-[20px] sm:rounded-[22px] ${isDark ? 'bg-gradient-to-br from-amber-300 via-orange-500 to-red-600 shadow-[0_0_60px_-10px_rgba(245,158,11,0.55)]' : 'bg-gradient-to-br from-[#1a1c29] via-[#241e16] to-[#1a1c29] border border-amber-500/30 shadow-2xl'} p-[2px] scale-100 lg:scale-110 z-30 flex flex-col order-3 md:order-1 relative overflow-hidden group`}>
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(251,191,36,0.35),transparent_60%)] rounded-[20px]"></div>
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(239,68,68,0.35),transparent_60%)] rounded-[20px]"></div>
+                  <div className={`h-full rounded-[18px] sm:rounded-[20px] ${isDark ? 'bg-[linear-gradient(160deg,rgba(64,25,5,0.95),rgba(10,4,2,0.95))]' : 'bg-[linear-gradient(160deg,rgba(15,23,42,0.8),rgba(3,7,18,0.9))]'} backdrop-blur-xl p-5 sm:p-7 flex flex-col relative z-10`}>
+                    <div>
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="text-sm font-semibold bg-clip-text text-transparent bg-gradient-to-r from-amber-200 via-amber-400 to-amber-200 tracking-widest uppercase">ULTRA</div>
+                        <div className="rounded-full border border-amber-400/50 bg-amber-500/20 px-3 py-1 text-[10px] sm:text-xs font-semibold text-amber-300 backdrop-blur-sm shadow-[0_0_15px_rgba(245,158,11,0.3)]">
+                          1-to-1 Live
+                        </div>
                       </div>
-                    ))}
-                  </div>
-                  <Button
-                    onClick={handleSignup}
-                    className={`mt-6 sm:mt-8 w-full rounded-full font-semibold py-4 sm:py-6 ${
-                      isDark ? "bg-white text-slate-900 hover:bg-white" : "bg-slate-900 text-white hover:bg-slate-900"
-                    }`}
-                  >
-                    Start practising free
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Button>
-                  <div className={`mt-2 sm:mt-3 text-[11px] sm:text-xs text-center ${subtleText}`}>Free forever plan available</div>
-                </motion.div>
-
-                <motion.div variants={motionCfg.fadeUp} className={`rounded-[20px] sm:rounded-[22px] ${premiumCardGradient} p-5 sm:p-7 shadow-xl`}>
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="text-sm font-semibold text-white/90">Premium</div>
-                    <div className="rounded-full border border-white/30 bg-white/10 px-3 py-1 text-xs font-semibold text-white/90">
-                      Best for exams
+                      <div className="mt-4 flex items-end gap-2">
+                        <div className="text-3xl sm:text-4xl font-semibold text-white tracking-tight">£99.99</div>
+                        <div className="text-sm text-amber-200/60 pb-1">/month</div>
+                      </div>
+                      <p className="mt-4 text-[13px] sm:text-sm text-amber-100/80 leading-relaxed">
+                        Everything in Premium <span className="text-amber-400 font-semibold">+</span> weekly live human tutoring.
+                      </p>
+                      <div className="mt-6 sm:mt-8 space-y-4 text-[13px] sm:text-sm text-amber-50/90">
+                        {[
+                          "All Premium features unlocked",
+                          "Weekly live 1-to-1 tutoring sessions",
+                          "Personalised Sprint Plans",
+                          "Direct access to Founders & Tutors",
+                        ].map((line) => (
+                          <div key={line} className="flex items-start gap-3">
+                            <CheckCircle className="mt-[2px] h-5 w-5 text-amber-400 shrink-0 filter drop-shadow-[0_0_8px_rgba(251,191,36,0.5)]" />
+                            <span className="font-normal">{line}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="mt-auto pt-8 sm:pt-10 w-full relative">
+                      <div className="absolute inset-x-0 -top-px h-px bg-gradient-to-r from-transparent via-amber-500/20 to-transparent"></div>
+                      <Button
+                        onClick={handleSignup}
+                        className="w-full rounded-xl font-semibold py-5 sm:py-6 border-0 bg-gradient-to-r from-amber-500 hover:from-amber-400 via-amber-400 hover:via-amber-300 to-amber-600 hover:to-amber-500 text-slate-900 shadow-[0_0_20px_rgba(245,158,11,0.3)] hover:shadow-[0_0_30px_rgba(245,158,11,0.5)] transition-all duration-300"
+                      >
+                        Start your Ultra trial
+                        <ArrowRight className="ml-2 h-5 w-5" />
+                      </Button>
+                      <div className="mt-3 sm:mt-4 text-[11px] sm:text-xs text-center text-amber-200/50">Cancel anytime</div>
                     </div>
                   </div>
-                  <div className="mt-4 flex items-end gap-2">
-                    <div className="text-3xl sm:text-4xl font-semibold">£19.99</div>
-                    <div className="text-sm text-white/80 pb-1">/month</div>
-                  </div>
-                  <p className="mt-3 text-[13px] sm:text-sm text-white/80">
-                    {AI_FEATURE_ENABLED ? 'More mocks, deeper analytics, higher AI limits.' : 'More mocks, deeper analytics, higher limits.'}
-                  </p>
-                  <div className="mt-5 sm:mt-6 space-y-3 text-[13px] sm:text-sm text-white/90">
-                    {[
-                      "Full timed mock exams",
-                      "Deeper readiness analytics",
-                      AI_FEATURE_ENABLED ? "Higher AI explanation limits" : "Higher explanation limits",
-                      "Priority support",
-                    ].map((line) => (
-                      <div key={line} className="flex items-start gap-3">
-                        <CheckCircle className="mt-0.5 h-5 w-5 text-white" />
-                        <span>{line}</span>
+                </motion.div>
+
+                {/* Premium Tier */}
+                <motion.div variants={motionCfg.fadeUp} className={`rounded-[20px] sm:rounded-[22px] ${premiumCardGradient} p-5 sm:p-7 shadow-xl scale-100 lg:scale-105 z-10 flex flex-col order-1 md:order-2`}>
+                  <div>
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="text-sm font-semibold text-white/90">Premium</div>
+                      <div className="rounded-full border border-white/30 bg-white/10 px-3 py-1 text-xs font-semibold text-white/90">
+                        Best for exams
                       </div>
-                    ))}
+                    </div>
+                    <div className="mt-4 flex items-end gap-2">
+                      <div className="text-3xl sm:text-4xl font-semibold">£19.99</div>
+                      <div className="text-sm text-white/80 pb-1">/month</div>
+                    </div>
+                    <p className="mt-3 text-[13px] sm:text-sm text-white/80">
+                      {AI_FEATURE_ENABLED ? 'More mocks, deeper analytics, higher AI limits.' : 'More mocks, deeper analytics, higher limits.'}
+                    </p>
+                    <div className="mt-5 sm:mt-6 space-y-3 text-[13px] sm:text-sm text-white/90">
+                      {[
+                        "Full timed mock exams",
+                        "Deeper readiness analytics",
+                        AI_FEATURE_ENABLED ? "Higher AI explanation limits" : "Higher explanation limits",
+                        "Priority support",
+                      ].map((line) => (
+                        <div key={line} className="flex items-start gap-3">
+                          <CheckCircle className="mt-0.5 h-5 w-5 text-white" />
+                          <span>{line}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  <Button
-                    onClick={handleSignup}
-                    className="mt-6 sm:mt-8 w-full rounded-full bg-white text-indigo-700 font-semibold py-4 sm:py-6 hover:bg-white"
-                  >
-                    {sprintCopy.buttonSecondary}
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Button>
-                  <div className="mt-2 sm:mt-3 text-[11px] sm:text-xs text-white/80 text-center">Cancel anytime</div>
+                  <div className="mt-auto pt-6 sm:pt-8 w-full">
+                    <Button
+                      onClick={handleSignup}
+                      className="w-full rounded-full bg-white text-orange-700 font-semibold py-4 sm:py-6 hover:bg-white shadow-lg"
+                    >
+                      {sprintCopy.buttonSecondary}
+                      <ArrowRight className="ml-2 h-5 w-5" />
+                    </Button>
+                    <div className="mt-2 sm:mt-3 text-[11px] sm:text-xs text-white/80 text-center">Cancel anytime</div>
+                  </div>
+                </motion.div>
+
+                {/* Free Tier */}
+                <motion.div variants={motionCfg.fadeUp} className={`rounded-[20px] sm:rounded-[22px] border p-5 sm:p-7 shadow-sm flex flex-col ${cardSurface} order-2 md:order-3`}>
+                  <div>
+                    <div className={`text-sm font-semibold ${subtleText}`}>Free</div>
+                    <div className="mt-4 flex items-end gap-2">
+                      <div className={`text-3xl sm:text-4xl font-semibold ${primaryText}`}>£0</div>
+                      <div className={`text-sm ${subtleText} pb-1`}>/month</div>
+                    </div>
+                    <p className={`mt-3 text-[13px] sm:text-sm ${mutedText}`}>Everything you need to begin consistently.</p>
+                    <div className={`mt-5 sm:mt-6 space-y-3 text-[13px] sm:text-sm ${mutedText}`}>
+                      {[
+                        "Topic practice questions",
+                        "Mini mocks",
+                        AI_FEATURE_ENABLED ? "Daily AI help limit" : "Daily help limit",
+                        "Basic progress tracking",
+                      ].map((line) => (
+                        <div key={line} className="flex items-start gap-3">
+                          <CheckCircle className={`mt-0.5 h-5 w-5 ${accentText}`} />
+                          <span>{line}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="mt-auto pt-6 sm:pt-8 w-full">
+                    <Button
+                      onClick={handleSignup}
+                      className={`w-full rounded-full font-semibold py-4 sm:py-6 ${
+                        isDark ? "bg-white text-slate-900 hover:bg-white" : "bg-slate-900 text-white hover:bg-slate-900"
+                      }`}
+                    >
+                      Start practising free
+                      <ArrowRight className="ml-2 h-5 w-5" />
+                    </Button>
+                    <div className={`mt-2 sm:mt-3 text-[11px] sm:text-xs text-center ${subtleText}`}>Free forever plan available</div>
+                  </div>
                 </motion.div>
               </div>
 
@@ -811,7 +868,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
               className={`absolute inset-0 pointer-events-none ${
                 isDark
                   ? "bg-[radial-gradient(640px_320px_at_10%_30%,rgba(59,130,246,0.10),transparent_65%)]"
-                  : "bg-[radial-gradient(640px_320px_at_10%_30%,rgba(99,102,241,0.08),transparent_65%)]"
+                  : (isElevenPlus ? "bg-[radial-gradient(640px_320px_at_10%_30%,rgba(245,158,11,0.08),transparent_65%)]" : "bg-[radial-gradient(640px_320px_at_10%_30%,rgba(99,102,241,0.08),transparent_65%)]")
               }`}
             />
           )}
@@ -859,8 +916,8 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
             <div
               className={`absolute inset-0 pointer-events-none ${
                 isDark
-                  ? "bg-[radial-gradient(620px_340px_at_80%_25%,rgba(99,102,241,0.12),transparent_60%)]"
-                  : "bg-[radial-gradient(620px_340px_at_80%_25%,rgba(99,102,241,0.08),transparent_60%)]"
+                  ? (isElevenPlus ? "bg-[radial-gradient(620px_340px_at_80%_25%,rgba(245,158,11,0.12),transparent_60%)]" : "bg-[radial-gradient(620px_340px_at_80%_25%,rgba(99,102,241,0.12),transparent_60%)]")
+                  : (isElevenPlus ? "bg-[radial-gradient(620px_340px_at_80%_25%,rgba(245,158,11,0.08),transparent_60%)]" : "bg-[radial-gradient(620px_340px_at_80%_25%,rgba(99,102,241,0.08),transparent_60%)]")
               }`}
             />
           )}
@@ -1090,8 +1147,8 @@ function SpotlightButton({
   }), transparent 60%)`;
   const baseGradient = gradient;
   const glow = isHovering
-    ? "0 18px 52px rgba(79,70,229,0.55), 0 0 35px rgba(99,102,241,0.55)"
-    : "0 16px 40px rgba(79,70,229,0.4), 0 0 28px rgba(99,102,241,0.35)";
+    ? (is11Plus ? "0 18px 52px rgba(217,119,6,0.55), 0 0 35px rgba(245,158,11,0.55)" : (is11Plus ? "0 18px 52px rgba(217,119,6,0.55), 0 0 35px rgba(245,158,11,0.55)" : "0 18px 52px rgba(79,70,229,0.55), 0 0 35px rgba(99,102,241,0.55)"))
+    : (is11Plus ? "0 16px 40px rgba(217,119,6,0.4), 0 0 28px rgba(245,158,11,0.35)" : (is11Plus ? "0 16px 40px rgba(217,119,6,0.4), 0 0 28px rgba(245,158,11,0.35)" : "0 16px 40px rgba(79,70,229,0.4), 0 0 28px rgba(99,102,241,0.35)"));
 
   return (
     <button
@@ -1100,7 +1157,7 @@ function SpotlightButton({
       onPointerMove={handlePointerMove}
       onPointerEnter={handlePointerMove}
       onPointerLeave={handlePointerLeave}
-      className="group relative overflow-hidden rounded-full px-4 py-2.5 text-[13px] sm:px-6 sm:py-4 sm:text-base font-semibold text-white shadow-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-indigo-600"
+      className="group relative overflow-hidden rounded-full px-4 py-2.5 text-[13px] sm:px-6 sm:py-4 sm:text-base font-semibold text-white shadow-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-orange-600"
       style={{
         backgroundImage: isPointerFine ? `${spotlight}, ${baseGradient}` : baseGradient,
         transform: isHovering ? "translateY(-1px) scale(1.01)" : "translateY(0)",
@@ -1132,7 +1189,7 @@ function HoverVideo({
   playOnHover?: boolean;
   hint?: string;
   tone?: "dark" | "light";
-  accentGradient?: GradientDefinition;
+  accentGradient?: { from: string; via: string; to: string };
 }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const prefersReducedMotion = useReducedMotion();
@@ -1258,7 +1315,7 @@ function HoverVideo({
         playsInline
         preload="metadata"
       />
-      {accentGradient && (
+      {accentGradient && !isDark && (
         <div
           className="pointer-events-none absolute inset-0"
           style={{
@@ -1277,7 +1334,7 @@ function HoverVideo({
                 : "border-slate-200/80 bg-white/90 text-slate-700"
             } opacity-80 group-hover:opacity-100`}
           >
-            <MousePointer2 className={`h-3 w-3 sm:h-3.5 sm:w-3.5 ${isDark ? "text-indigo-300" : "text-indigo-500"}`} />
+            <MousePointer2 className={`h-3 w-3 sm:h-3.5 sm:w-3.5 ${isDark ? "text-orange-300" : "text-orange-500"}`} />
             {hoverHint}
           </div>
         </div>
@@ -1323,7 +1380,7 @@ function ShowcaseRow({
             isDark ? "border-white/10 bg-white/5 text-slate-200" : "border-slate-200/80 bg-white text-slate-700"
           }`}
         >
-          <Sparkles className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${isDark ? "text-indigo-300" : "text-indigo-600"}`} />
+          <Sparkles className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${isDark ? "text-orange-300" : "text-orange-600"}`} />
           {row.badge}
         </div>
         {row.hoverFact && (
@@ -1363,8 +1420,8 @@ function MediaFrame({
       <div
         className={`absolute inset-0 pointer-events-none ${
           isDark
-            ? "bg-[radial-gradient(280px_220px_at_20%_0%,rgba(99,102,241,0.18),transparent_70%)]"
-            : "bg-[radial-gradient(280px_220px_at_20%_0%,rgba(99,102,241,0.12),transparent_70%)]"
+            ? (is11Plus ? "bg-[radial-gradient(280px_220px_at_20%_0%,rgba(245,158,11,0.18),transparent_70%)]" : "bg-[radial-gradient(280px_220px_at_20%_0%,rgba(99,102,241,0.18),transparent_70%)]")
+            : (is11Plus ? "bg-[radial-gradient(280px_220px_at_20%_0%,rgba(245,158,11,0.12),transparent_70%)]" : "bg-[radial-gradient(280px_220px_at_20%_0%,rgba(99,102,241,0.12),transparent_70%)]")
         }`}
       />
       <div className={`relative ${aspectClassName} ${isDark ? "bg-slate-950/60" : "bg-slate-50"}`}>{children}</div>
@@ -1420,7 +1477,7 @@ function HoverFact({ tone, children }: { tone: "dark" | "light"; children: React
         isDark ? "border-white/10 bg-white/5 text-slate-300" : "border-slate-200/80 bg-white text-slate-600"
       } opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0`}
     >
-      <MousePointer2 className={`h-3 w-3 sm:h-3.5 sm:w-3.5 ${isDark ? "text-indigo-300" : "text-indigo-500"}`} />
+      <MousePointer2 className={`h-3 w-3 sm:h-3.5 sm:w-3.5 ${isDark ? "text-orange-300" : "text-orange-500"}`} />
       {children}
     </div>
   );
@@ -1446,8 +1503,8 @@ function MockBuilderPreview({ tone }: { tone: "dark" | "light" }) {
               className={`rounded-xl border px-2.5 py-2 text-[10px] sm:text-[11px] ${
                 item.active
                   ? isDark
-                    ? "border-indigo-400/40 bg-indigo-500/15 text-indigo-100"
-                    : "border-indigo-500/30 bg-indigo-500/10 text-indigo-700"
+                    ? "border-orange-400/40 bg-orange-500/15 text-orange-100"
+                    : "border-orange-500/30 bg-orange-500/10 text-orange-700"
                   : isDark
                     ? "border-white/10 bg-white/5 text-slate-300"
                     : "border-slate-200/80 bg-white text-slate-600"
@@ -1528,7 +1585,7 @@ function LeaderboardPreview({ tone }: { tone: "dark" | "light" }) {
         </div>
         <div
           className={`rounded-full border text-[11px] sm:text-xs font-semibold px-3 py-1 ${
-            isDark ? "border-indigo-400/30 bg-indigo-500/10 text-indigo-200" : "border-indigo-500/30 bg-indigo-500/10 text-indigo-700"
+            isDark ? "border-orange-400/30 bg-orange-500/10 text-orange-200" : "border-orange-500/30 bg-orange-500/10 text-orange-700"
           }`}
         >
           #3 this week
@@ -1568,8 +1625,8 @@ function LeaderboardPreview({ tone }: { tone: "dark" | "light" }) {
             className={`grid grid-cols-[40px,1fr,80px] gap-3 px-4 py-3 text-[13px] sm:text-sm ${
               row.highlight
                 ? isDark
-                  ? "bg-indigo-500/15 text-indigo-100 font-semibold"
-                  : "bg-indigo-500/10 text-indigo-700 font-semibold"
+                  ? "bg-orange-500/15 text-orange-100 font-semibold"
+                  : "bg-orange-500/10 text-orange-700 font-semibold"
                 : isDark
                   ? "bg-slate-950/40 text-slate-200"
                   : "bg-white text-slate-700"

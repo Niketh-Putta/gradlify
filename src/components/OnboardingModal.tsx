@@ -64,14 +64,6 @@ type Step =
 
 const UNSURE = 'Unsure';
 
-const TRACK_STEP: Step = {
-  kind: 'options',
-  key: 'preferredTrack',
-  title: 'Which are you preparing for:',
-  description: 'Choose your maths track.',
-  options: ['11+ Maths', 'GCSE Maths'],
-};
-
 const ELEVEN_PLUS_SCHOOLS = [
   'Queen Elizabeth’s School, Barnet',
   'The Henrietta Barnett School',
@@ -263,15 +255,15 @@ export function OnboardingModal({ isOpen, userId, tier, premiumTrack, founderTra
   // updates in realtime (e.g. onboarding_completed_at gets set).
   const dialogOpen = isOpen || phase === 'generating' || phase === 'upsell';
 
-  const selectedTrackLabel = answers.preferredTrack;
+  const is11Plus = import.meta.env.VITE_APP_TRACK === '11PLUS';
   const steps = useMemo<Step[]>(
-    () => [TRACK_STEP, ...(selectedTrackLabel === '11+ Maths' ? ELEVEN_PLUS_STEPS : GCSE_STEPS)],
-    [selectedTrackLabel]
+    () => (is11Plus ? ELEVEN_PLUS_STEPS : GCSE_STEPS),
+    [is11Plus]
   );
   const step = steps[stepIndex];
   const selected = answers[step.key];
   const isLast = stepIndex === steps.length - 1;
-  const selectedTrack = answers.preferredTrack === 'GCSE Maths' ? 'gcse' : '11plus';
+  const selectedTrack = is11Plus ? '11plus' : 'gcse';
   const normalizedPremiumTrack = premiumTrack === 'eleven_plus' ? '11plus' : premiumTrack ?? null;
   const hasPremiumForSelectedTrack = tier === 'premium' && (
     normalizedPremiumTrack ? normalizedPremiumTrack === selectedTrack : selectedTrack === 'gcse'
@@ -542,8 +534,6 @@ export function OnboardingModal({ isOpen, userId, tier, premiumTrack, founderTra
                   <div className="mt-4 grid grid-cols-1 gap-2">
                     {step.options.map((opt) => {
                       const active = opt === selected;
-                      const isTrackStep = step.key === 'preferredTrack';
-                      const isElevenPlusOption = isTrackStep && opt === '11+ Maths';
                       return (
                         <Button
                           key={opt}
@@ -559,14 +549,6 @@ export function OnboardingModal({ isOpen, userId, tier, premiumTrack, founderTra
                         >
                           <span className="flex flex-col items-start gap-0.5 text-left">
                             <span>{opt}</span>
-                            {isElevenPlusOption ? (
-                              <span className={cn(
-                                'text-[11px] font-medium',
-                                active ? 'text-primary-foreground/90' : 'text-primary'
-                              )}>
-                                Sprint with cash prizes of £100 starting soon!!
-                              </span>
-                            ) : null}
                           </span>
                         </Button>
                       );

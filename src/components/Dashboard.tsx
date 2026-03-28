@@ -10,7 +10,7 @@ import { AIUsageCard } from './AIUsageCard';
 import { ReadinessSummary } from './ReadinessSummary';
 import { MathRenderer } from './MathRenderer';
 import { PremiumUpgradeButton } from './PremiumUpgradeButton';
-import { FoundersBanner } from "@/components/FoundersBanner";
+
 import { AI_FEATURE_ENABLED } from "@/lib/featureFlags";
 import { usePremium } from '@/hooks/usePremium';
 import { 
@@ -156,7 +156,7 @@ export function Dashboard({
       </header>
 
       <main className="container mx-auto px-2 sm:px-3 py-3 sm:py-4 md:py-6">
-        <FoundersBanner className="mb-4 rounded-xl overflow-hidden border border-border/60" />
+
         {/* Welcome Section */}
         <div className="mb-4 sm:mb-6">
           <div className="bg-gradient-hero rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 text-primary-foreground relative overflow-hidden">

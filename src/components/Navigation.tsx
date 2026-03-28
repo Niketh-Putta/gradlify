@@ -134,6 +134,7 @@ export function Navigation({ user, profile, onSettings, onSignOut }: NavigationP
     if (!profile) {
       return {
         isPremium: membership.isPremium,
+        isUltra: membership.isUltra,
         founderTrack: membership.founderTrack ?? null,
       };
     }
@@ -147,12 +148,13 @@ export function Navigation({ user, profile, onSettings, onSignOut }: NavigationP
     const premiumTrack = normalizePremiumTrack(profile.premium_track ?? null);
     const hasTrackPremium = premiumTrack ? premiumTrack === userTrack : userTrack === 'gcse';
     const isPremium = (profile.tier === 'premium' || isPlanActive || isPremiumFlag) && hasTrackPremium;
+    const isUltra = profile.plan === 'ultra' && hasTrackPremium;
     const founderTrack = profile.founder_track ?? null;
 
-    return { isPremium, founderTrack };
+    return { isPremium, isUltra, founderTrack };
   };
 
-  const { isPremium, founderTrack } = resolveTier();
+  const { isPremium, isUltra, founderTrack } = resolveTier();
   const homePath = '/dashboard';
   const trackLabel = getTrackLabel(userTrack);
   const trackLabelWithAI = userTrack === '11plus' ? 'AI-Powered 11+ Maths Practice' : 'AI-Powered GCSE Maths Practice';
@@ -178,6 +180,7 @@ export function Navigation({ user, profile, onSettings, onSignOut }: NavigationP
   const getTierDisplay = () => {
     if (isAdmin) return 'Admin';
     if (founderTrack === 'founder') return 'Founder';
+    if (isUltra) return 'Ultra';
     if (isPremium) return 'Premium';
     return 'Free';
   };
@@ -185,6 +188,7 @@ export function Navigation({ user, profile, onSettings, onSignOut }: NavigationP
   const getTierVariant = () => {
     if (isAdmin) return 'secondary';
     if (founderTrack === 'founder') return 'default';
+    if (isUltra) return 'outline'; // Ultra has its own inline styling or badge below
     if (isPremium) return 'default';
     return 'outline';
   };
@@ -277,7 +281,10 @@ export function Navigation({ user, profile, onSettings, onSignOut }: NavigationP
               </p>
               <Badge 
                 variant={getTierVariant()}
-                className="text-[10px] mt-0.5 whitespace-nowrap h-4 px-1.5"
+                className={cn(
+                  "text-[10px] mt-0.5 whitespace-nowrap h-4 px-1.5",
+                  isUltra && "bg-gradient-to-r from-amber-200 to-amber-400 text-slate-900 border-0 font-bold shadow-[0_0_10px_rgba(245,158,11,0.2)]"
+                )}
               >
                 {getTierDisplay()}
               </Badge>
@@ -404,7 +411,10 @@ export function Navigation({ user, profile, onSettings, onSignOut }: NavigationP
             <DevModeBadge />
             <Badge 
               variant={getTierVariant()}
-              className="text-xs whitespace-nowrap"
+              className={cn(
+                "text-xs whitespace-nowrap",
+                isUltra && "bg-gradient-to-r from-amber-200 to-amber-400 text-slate-900 border-0 font-bold shadow-[0_0_10px_rgba(245,158,11,0.2)]"
+              )}
             >
               {getTierDisplay()}
             </Badge>

@@ -12,6 +12,7 @@ interface MembershipData {
   track?: 'gcse' | '11plus' | null;
   hasPremiumSubscription?: boolean;
   hasTrackPremium?: boolean;
+  isUltra?: boolean;
   subscription: string | null;
   subscription_status: string | null;
   current_period_end: string | null;
@@ -58,6 +59,7 @@ export function useMembership() {
             track: premiumStatus.track ?? null,
             hasPremiumSubscription: premiumStatus.hasPremiumSubscription,
             hasTrackPremium: premiumStatus.hasTrackPremium,
+            isUltra: premiumStatus.plan === 'ultra',
             subscription: premiumStatus.billingCycle,
             subscription_status: premiumStatus.subscriptionStatus || null,
             current_period_end: premiumStatus.currentPeriodEnd || null,
@@ -120,9 +122,11 @@ export function useMembership() {
     loading, 
     error,
     tier: data?.tier || 'free',
+    plan: data?.plan || 'free',
     founderTrack: data?.founderTrack ?? null,
     isFounder: data?.founderTrack === 'founder',
     isPremium: data ? data.tier === 'premium' : false,
-    statusLabel: data?.founderTrack === 'founder' ? 'Founder' : data?.tier === 'premium' ? 'Premium' : 'Free'
+    isUltra: data?.isUltra ?? false,
+    statusLabel: data?.founderTrack === 'founder' ? 'Founder' : data?.isUltra ? 'Ultra' : data?.tier === 'premium' ? 'Premium' : 'Free'
   };
 }
