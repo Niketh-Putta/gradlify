@@ -55,6 +55,7 @@ const getStripeConfig = () => {
     price11PlusMonthly: readEnv("STRIPE_PRICE_11PLUS_MONTHLY_LIVE") || readEnv("STRIPE_PRICE_11PLUS_MONTHLY") || readEnv("STRIPE_PRICE_ELEVEN_PLUS_MONTHLY_LIVE") || readEnv("STRIPE_PRICE_ELEVEN_PLUS_MONTHLY"),
     price11PlusAnnual: readEnv("STRIPE_PRICE_11PLUS_ANNUAL_LIVE") || readEnv("STRIPE_PRICE_11PLUS_ANNUAL") || readEnv("STRIPE_PRICE_ELEVEN_PLUS_ANNUAL_LIVE") || readEnv("STRIPE_PRICE_ELEVEN_PLUS_ANNUAL"),
     price11PlusUltra: readEnv("STRIPE_PRICE_11PLUS_ULTRA_MONTHLY_LIVE") || readEnv("STRIPE_PRICE_11PLUS_ULTRA_MONTHLY") || readEnv("STRIPE_PRICE_ELEVEN_PLUS_ULTRA_MONTHLY_LIVE"),
+    price11PlusUltraAnnual: readEnv("STRIPE_PRICE_11PLUS_ULTRA_ANNUAL_LIVE") || readEnv("STRIPE_PRICE_11PLUS_ULTRA_ANNUAL") || readEnv("STRIPE_PRICE_ELEVEN_PLUS_ULTRA_ANNUAL_LIVE"),
   };
   const test = {
     stripeSecretKey: readEnv("STRIPE_SECRET_KEY_TEST") || readEnv("STRIPE_SECRET_KEY"),
@@ -63,6 +64,7 @@ const getStripeConfig = () => {
     price11PlusMonthly: readEnv("STRIPE_PRICE_11PLUS_MONTHLY_TEST") || readEnv("STRIPE_PRICE_11PLUS_MONTHLY") || readEnv("STRIPE_PRICE_ELEVEN_PLUS_MONTHLY_TEST") || readEnv("STRIPE_PRICE_ELEVEN_PLUS_MONTHLY"),
     price11PlusAnnual: readEnv("STRIPE_PRICE_11PLUS_ANNUAL_TEST") || readEnv("STRIPE_PRICE_11PLUS_ANNUAL") || readEnv("STRIPE_PRICE_ELEVEN_PLUS_ANNUAL_TEST") || readEnv("STRIPE_PRICE_ELEVEN_PLUS_ANNUAL"),
     price11PlusUltra: readEnv("STRIPE_PRICE_11PLUS_ULTRA_MONTHLY_TEST") || readEnv("STRIPE_PRICE_11PLUS_ULTRA_MONTHLY") || readEnv("STRIPE_PRICE_ELEVEN_PLUS_ULTRA_MONTHLY_TEST"),
+    price11PlusUltraAnnual: readEnv("STRIPE_PRICE_11PLUS_ULTRA_ANNUAL_TEST") || readEnv("STRIPE_PRICE_11PLUS_ULTRA_ANNUAL") || readEnv("STRIPE_PRICE_ELEVEN_PLUS_ULTRA_ANNUAL_TEST"),
   };
 
   const hasLive = Boolean(live.stripeSecretKey);
@@ -83,6 +85,7 @@ const getStripeConfig = () => {
   const price11PlusMonthly = config.price11PlusMonthly;
   const price11PlusAnnual = config.price11PlusAnnual;
   const price11PlusUltra = config.price11PlusUltra;
+  const price11PlusUltraAnnual = config.price11PlusUltraAnnual;
 
   const stripeKeyPrefix = keyPrefix(stripeSecretKey, "sk_live_", "sk_test_");
   logStep("Stripe config loaded", {
@@ -134,6 +137,7 @@ const getStripeConfig = () => {
         monthly: price11PlusMonthly,
         annual: price11PlusAnnual,
         ultra: price11PlusUltra,
+        ultra_annual: price11PlusUltraAnnual,
       },
     },
   };
@@ -239,17 +243,16 @@ serve(async (req) => {
     } = await req.json();
     const requestedPremiumTrack = normalizePremiumTrack(requestedPremiumTrackRaw);
     if (requestedPremiumTrack && requestedPremiumTrack !== activeTrack) {
-      return jsonResponse(
-        {
-          error: `Track mismatch: you are on ${activeTrack}. Switch track before subscribing to ${requestedPremiumTrack}.`,
-        },
-        400,
-      );
+      logStep("Track mismatch ignored for 11plus dedicated checkout", { requestedPremiumTrack, activeTrack });
     }
-    const normalizedPlan = planInterval === "annual"
+    const normalizedPlan = planInterval === "ultra_annual"
+      ? "ultra_annual"
+      : planInterval === "annual"
       ? "annual"
       : planInterval === "yearly"
       ? "annual"
+      : plan === "ultra_annual"
+      ? "ultra_annual"
       : plan === "annual"
       ? "annual"
       : plan === "yearly"
@@ -257,7 +260,7 @@ serve(async (req) => {
       : plan === "ultra"
       ? "ultra"
       : "monthly";
-    const checkoutTrack = requestedPremiumTrack ?? activeTrack;
+    const checkoutTrack = "eleven_plus";
     const trackPrices = config.prices[checkoutTrack as keyof typeof config.prices];
     let priceId = trackPrices?.monthly;
     if (normalizedPlan === "annual") {
@@ -266,6 +269,11 @@ serve(async (req) => {
         priceId = (trackPrices as any)?.ultra;
         if (!priceId) {
             throw new Error(`Ultra pricing not configured for track: ${checkoutTrack}`);
+        }
+    } else if (normalizedPlan === "ultra_annual") {
+        priceId = (trackPrices as any)?.ultra_annual;
+        if (!priceId) {
+            throw new Error(`Ultra Annual pricing not configured for track: ${checkoutTrack}`);
         }
     }
     
@@ -355,7 +363,7 @@ serve(async (req) => {
         errorType,
         errorJson,
       },
-      500,
+      200,
     );
   }
 });

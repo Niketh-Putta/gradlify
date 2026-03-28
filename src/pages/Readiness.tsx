@@ -4,15 +4,15 @@ import { useReadiness } from '@/hooks/useReadiness';
 import { supabase } from '@/integrations/supabase/client';
 import { expandSubtopicIdsForDb } from '@/lib/subtopicIdUtils';
 import { resolveUserTrack } from '@/lib/track';
-import { buildTrackReadinessRows } from '@/lib/trackCurriculum';
+import { buildTrackReadinessRows, getTrackSections } from '@/lib/trackCurriculum';
 import { AIExplainerModal } from '@/components/readiness/AIExplainerModal';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { formatDistanceToNow } from 'date-fns';
-import { TrendingUp, TrendingDown, ChevronRight } from 'lucide-react';
+import { TrendingUp, TrendingDown, ChevronRight, BookOpen } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { getExamBoardSubtitle } from '@/lib/examBoard';
+// Removed getExamBoardSubtitle
 import { TOPIC_SUBTOPICS } from '@/lib/topicConstants';
 import { computeReadinessGrades } from '@/lib/readinessGrades';
 import { elevenPlusReadinessLabel, nextElevenPlusBand } from '@/lib/readinessHelpers';
@@ -218,8 +218,7 @@ const SELECTIVE_TRACK_BANDS = [
 ] as const;
 
 const applyExecutedFilter = (wins: QuickWin[], executedKey: string | null) => {
-  if (!executedKey) return wins;
-  return wins.filter((win) => buildWinKey(win.questionIds) !== executedKey);
+  return wins;
 };
 
 const readRecentSubtopics = (): string[] => {
@@ -287,7 +286,7 @@ const computeStreaksFromDates = (dates: Date[]) => {
 
 // Priority calculation based on readiness
 const getPriority = (readiness: number): { label: string; color: string } => {
-  if (readiness < 35) return { label: 'High', color: 'text-blue-600 dark:text-blue-400' };
+  if (readiness < 35) return { label: 'High', color: 'text-red-500 dark:text-red-400' };
   if (readiness < 60) return { label: 'Medium', color: 'text-amber-600 dark:text-amber-400' };
   return { label: 'Low', color: 'text-muted-foreground' };
 };
@@ -299,10 +298,7 @@ const getBarColor = (readiness: number): string => {
   return 'bg-emerald-500';
 };
 
-const applyTrackFilter = <T extends { eq: (column: string, value: string) => T; or: (condition: string) => T }>(
-  builder: T,
-  userTrack: string
-): T => {
+const applyTrackFilter = (builder: any, userTrack: string): any => {
   if (userTrack === '11plus') {
     return builder.eq('track', '11plus');
   }
@@ -618,7 +614,8 @@ export function Readiness() {
     const title = rec.subtopic_title?.trim();
     if (!topicKey || !title) return null;
 
-    const match = TOPIC_SUBTOPICS[topicKey].find((s) => s.title === title);
+    const category = TOPIC_SUBTOPICS[topicKey as keyof typeof TOPIC_SUBTOPICS];
+    const match = category?.subtopics?.find((s) => s.name === title);
     return match ? `${topicKey}|${match.key}` : null;
   };
 
@@ -871,7 +868,7 @@ export function Readiness() {
             .limit(7);
 
           const questionIds = (qs || []).map((q: any) => String(q.id)).filter(Boolean);
-          if (questionIds.length < 7) return null;
+          if (questionIds.length < 1) return null;
 
           const timeValues = (qs || [])
             .map((q: any) => Number(q.estimated_time_sec))
@@ -1024,7 +1021,6 @@ export function Readiness() {
           if (!pack) continue;
 
           const packKey = buildWinKey(pack.questionIds);
-          if (executedKey && packKey === executedKey) continue;
 
           const practiceStat = practiceStatsByTopic[displayTopic];
           const attempts = practiceStat?.attempts ?? 0;
@@ -1050,6 +1046,49 @@ export function Readiness() {
           });
 
           usedSubtopics.add(candidate.subtopicId);
+        }
+
+        if (wins.length === 0) {
+          const fallbackWinQueue = buildCandidateQueue(new Set(), 50);
+          usedSubtopics.clear();
+          
+          for (const candidate of fallbackWinQueue) {
+            if (wins.length >= 3) break;
+            if (usedSubtopics.has(candidate.subtopicId)) continue;
+  
+            const questionType = TOPIC_KEY_TO_QUESTION_TYPE[candidate.topicKey];
+            if (!questionType) continue;
+            const displayTopic = QUESTION_TYPE_TO_DISPLAY_TOPIC[questionType] || questionType;
+            const pack = await fetchQuestionPack(questionType, candidate.subtopicId);
+            if (!pack) continue;
+  
+            const packKey = buildWinKey(pack.questionIds);
+  
+            const practiceStat = practiceStatsByTopic[displayTopic];
+            const attempts = practiceStat?.attempts ?? 0;
+            const accuracyPercent = practiceStat?.attempts
+              ? Math.round((practiceStat.correct / practiceStat.attempts) * 100)
+              : null;
+            const readinessScore = Math.max(candidate.score, accuracyPercent ?? 0);
+            if (readinessScore >= 85 && attempts >= 10) continue;
+  
+            wins.push({
+              topic: displayTopic,
+              name: candidate.title,
+              questionType,
+              subtopicId: candidate.subtopicId,
+              questionIds: pack.questionIds,
+              score: readinessScore,
+              marks: pack.totalMarks,
+              timeMin: pack.timeMin,
+              questions: pack.questions,
+              progressScore: candidate.score,
+              accuracyPercent,
+              attempts,
+            });
+  
+            usedSubtopics.add(candidate.subtopicId);
+          }
         }
 
         if (!cancelled) {
@@ -1190,7 +1229,7 @@ export function Readiness() {
 
   return (
     <>
-      <div className="max-w-6xl mx-auto px-4 sm:px-10 py-6 sm:py-14 print-hidden">
+      <div className="max-w-6xl mx-auto px-4 sm:px-10 py-6 sm:py-14">
         {/* Header */}
       <header className="mb-10 sm:mb-14 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 print-header">
         <div>
@@ -1198,17 +1237,9 @@ export function Readiness() {
             Exam Readiness
           </h1>
           <p className="text-sm sm:text-[15px] text-muted-foreground">
-            {getExamBoardSubtitle((profile?.onboarding as any)?.examBoard)}
+            11+ Mathematics
           </p>
         </div>
-        <Button
-          onClick={() => window.print()}
-          variant="outline"
-          className="print-hidden w-full sm:w-auto h-11 px-6 bg-card hover:bg-secondary border-border/60 shadow-sm transition-all hover:-translate-y-0.5"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2.5 text-muted-foreground"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
-          Print Weekly Report
-        </Button>
       </header>
 
       {/* Grade Progression Section */}
@@ -1223,8 +1254,8 @@ export function Readiness() {
         </div>
 
         <div className="py-4 sm:py-5 grid grid-cols-1 gap-6 md:grid-cols-[1fr_auto_1fr] md:items-center">
-          <div className="bg-card rounded-[2rem] px-8 sm:px-14 py-8 sm:py-12 text-center transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] border border-border shadow-sm hover:shadow-md">
-            <div className="text-[10px] sm:text-[11px] font-bold tracking-[0.2em] uppercase text-muted-foreground/80 mb-4 sm:mb-5">
+          <div className="bg-card rounded-2xl px-6 sm:px-10 py-8 sm:py-10 text-center transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] border border-border shadow-sm">
+            <div className="text-xs font-medium tracking-widest uppercase text-muted-foreground mb-4 sm:mb-5">
               {isElevenPlusTrack ? 'SELECTIVE READINESS' : 'Current'}
             </div>
             <div
@@ -1239,8 +1270,8 @@ export function Readiness() {
             </div>
             {isElevenPlusTrack && (
               <div className="mt-6 flex flex-wrap justify-center gap-2 sm:gap-4 text-[11px] sm:text-[13px] font-medium text-muted-foreground/90">
-                <span className="bg-secondary/50 px-3 py-1.5 rounded-full border border-border/50">Accuracy: <span className="text-foreground font-bold">{accuracyPct}%</span></span>
-                <span className="bg-secondary/50 px-3 py-1.5 rounded-full border border-border/50">Speed: <span className="text-foreground font-bold">{speedPct}%</span></span>
+                <span className="bg-secondary/50 px-3 py-1.5 rounded-full border border-border/50">Accuracy: <span className="text-foreground font-semibold">{accuracyPct}%</span></span>
+                <span className="bg-secondary/50 px-3 py-1.5 rounded-full border border-border/50">Speed: <span className="text-foreground font-semibold">{speedPct}%</span></span>
               </div>
             )}
           </div>
@@ -1268,15 +1299,15 @@ export function Readiness() {
             )}
           </div>
 
-          <div className="bg-card rounded-[2rem] px-8 sm:px-14 py-8 sm:py-12 text-center transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] border border-warning/20 shadow-[0_8px_30px_rgba(234,179,8,0.08)] relative overflow-hidden group">
-            <div className="absolute inset-0 bg-gradient-to-br from-warning/5 to-transparent opacity-50 group-hover:opacity-100 transition-opacity duration-500" />
+          <div className="bg-card rounded-2xl px-6 sm:px-10 py-8 sm:py-10 text-center transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] border border-primary/20 shadow-[0_8px_30px_rgba(59,130,246,0.1)] relative overflow-hidden group">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-50 group-hover:opacity-100 transition-opacity duration-500" />
             <div className="relative z-10">
-              <div className="inline-flex items-center justify-center gap-2 text-[10px] sm:text-[11px] font-bold tracking-[0.2em] uppercase px-3 py-1 rounded-full bg-warning/10 text-warning-foreground mb-5 border border-warning/20">
-                <span className="w-1.5 h-1.5 rounded-full bg-warning animate-pulse" />
+              <div className="inline-flex items-center justify-center gap-2 text-[11px] font-semibold tracking-widest uppercase px-3 py-1 rounded-full bg-primary/10 text-primary mb-5 border border-primary/20">
+                <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
                 {isElevenPlusTrack ? 'TARGET LEVEL' : 'Potential'}
               </div>
               <div
-                className={`font-black tracking-tighter text-foreground leading-none ${
+                className={`font-semibold tracking-tighter text-foreground leading-none ${
                   isElevenPlusTrack ? 'text-4xl sm:text-5xl lg:text-6xl' : 'text-6xl sm:text-[96px]'
                 }`}
               >
@@ -1335,15 +1366,15 @@ export function Readiness() {
       {/* AI Recommendation Hero Card */}
       {AI_FEATURE_ENABLED && !recommendationLoading && (
         <section className="mb-12 sm:mb-16 print-hidden">
-          <div className="relative overflow-hidden bg-foreground rounded-[2rem] p-6 sm:p-10 lg:p-14 shadow-2xl border border-border/50">
+          <div className="relative overflow-hidden bg-foreground rounded-3xl p-6 sm:p-10 lg:p-14 shadow-2xl border border-border/50">
             {/* Premium Background Glow Effect */}
-            <div className="absolute top-0 right-0 -mt-20 -mr-20 w-64 sm:w-96 h-64 sm:h-96 bg-primary/20 sm:bg-primary/30 rounded-full blur-[80px] sm:blur-[120px] pointer-events-none" />
-            <div className="absolute bottom-0 left-0 -mb-20 -ml-20 w-64 sm:w-96 h-64 sm:h-96 bg-accent/10 sm:bg-accent/20 rounded-full blur-[80px] sm:blur-[120px] pointer-events-none" />
+            <div className="absolute top-0 right-0 -mt-20 -mr-20 w-64 sm:w-96 h-64 sm:h-96 bg-primary/30 sm:bg-primary/40 rounded-full blur-[80px] sm:blur-[120px] pointer-events-none" />
+            <div className="absolute bottom-0 left-0 -mb-20 -ml-20 w-64 sm:w-96 h-64 sm:h-96 bg-accent/20 sm:bg-accent/30 rounded-full blur-[80px] sm:blur-[120px] pointer-events-none" />
             
             <div className="relative z-10 w-full lg:w-4/5 xl:w-3/4">
               <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
                 <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-background/10 border border-background/20 text-[11px] sm:text-xs font-semibold tracking-wide text-background uppercase backdrop-blur-md self-start">
-                  <span className={`w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full ${recommendation ? 'bg-primary animate-[pulse_2s_ease-in-out_infinite]' : 'bg-warning animate-pulse'}`} />
+                  <span className="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-primary animate-[pulse_2s_ease-in-out_infinite]" />
                   Your AI Tutor's Focus Plan
                 </div>
                 {recommendation?.created_at && (
@@ -1367,19 +1398,19 @@ export function Readiness() {
                   <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-8 sm:mb-12">
                     <div className="bg-background/10 backdrop-blur-md rounded-2xl p-4 sm:p-5 border border-background/10 text-left">
                       <div className="text-[10px] sm:text-sm font-medium text-background/60 mb-1 lg:whitespace-nowrap">Subtopic Score</div>
-                      <div className="text-xl sm:text-[28px] font-bold text-background leading-none">
+                      <div className="text-xl sm:text-[28px] font-semibold text-background leading-none">
                         {formatPercent(recommendationSubtopicScore)}
                       </div>
                     </div>
                     <div className="bg-background/10 backdrop-blur-md rounded-2xl p-4 sm:p-5 border border-background/10 text-left">
                       <div className="text-[10px] sm:text-sm font-medium text-background/60 mb-1 lg:whitespace-nowrap">Topical Readiness</div>
-                      <div className="text-xl sm:text-[28px] font-bold text-background leading-none">
+                      <div className="text-xl sm:text-[28px] font-semibold text-background leading-none">
                         {formatPercent(recommendationTopicReadiness)}
                       </div>
                     </div>
                     <div className="bg-background/10 backdrop-blur-md rounded-2xl p-4 sm:p-5 border border-background/10 text-left">
                       <div className="text-[10px] sm:text-sm font-medium text-background/60 mb-1 lg:whitespace-nowrap">Time Estimate</div>
-                      <div className="text-xl sm:text-[28px] font-bold text-background leading-none">
+                      <div className="text-xl sm:text-[28px] font-semibold text-background leading-none">
                         {recommendationMetrics?.totalTimeMin !== null && recommendationMetrics?.totalTimeMin !== undefined
                           ? `${recommendationMetrics.totalTimeMin} min`
                           : '—'}
@@ -1389,7 +1420,7 @@ export function Readiness() {
                       <div className="absolute inset-0 bg-primary/10 transition-colors group-hover:bg-primary/20" />
                       <div className="relative z-10">
                         <div className="text-[10px] sm:text-sm font-medium text-primary-foreground/80 mb-1 lg:whitespace-nowrap">Score Boost</div>
-                        <div className="text-xl sm:text-[28px] font-bold text-primary-foreground leading-none">
+                        <div className="text-xl sm:text-[28px] font-semibold text-primary-foreground leading-none">
                           {recommendationMetrics?.maxReadinessGain !== null && recommendationMetrics?.maxReadinessGain !== undefined
                             ? `+${formatPercentValue(recommendationMetrics.maxReadinessGain)}%`
                             : '—'}
@@ -1402,7 +1433,7 @@ export function Readiness() {
                     onClick={startRecommendationPractice}
                     disabled={startingRecommendationPractice}
                     size="lg"
-                    className="w-full sm:w-auto bg-primary text-primary-foreground hover:bg-primary/90 h-[56px] sm:h-[60px] px-8 sm:px-12 text-[15px] sm:text-[17px] font-semibold rounded-xl shadow-[0_0_40px_-10px_rgba(59,130,246,0.5)] transition-all hover:scale-[1.02] hover:shadow-[0_0_60px_-15px_rgba(59,130,246,0.7)] ring-1 ring-primary-foreground/20"
+                    className="w-full sm:w-auto bg-primary text-primary-foreground hover:bg-primary/90 h-[56px] sm:h-[60px] px-8 sm:px-12 text-[15px] sm:text-[17px] font-semibold rounded-xl shadow-[0_0_40px_-10px_rgba(59,130,246,0.3)] transition-all hover:scale-[1.02] hover:shadow-[0_0_60px_-15px_rgba(59,130,246,0.5)] ring-1 ring-primary-foreground/20"
                   >
                     Start 10-Minute Sprint
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-2.5 sm:ml-3 w-4 h-4 sm:w-5 sm:h-5"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
@@ -1412,16 +1443,16 @@ export function Readiness() {
                 <>
                   <div>
                     <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-background mb-4 sm:mb-6 leading-[1.1] text-balance">
-                      Establish Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-warning to-warning/70">Baseline</span>
+                      Establish Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary/70">Baseline</span>
                     </h2>
                     <p className="text-[17px] sm:text-xl text-background/80 mb-8 sm:mb-10 max-w-2xl leading-relaxed font-medium">
                       Your AI Tutor needs a bit more data to curate your personalized action plan. Take a quick diagnostic assessment to unlock your first targeted 10-minute fix.
                     </p>
                   </div>
                   <Button 
-                    onClick={() => navigate('/practice-page?mode=exam&tier=both&paperType=both&topics=mixed&title=Baseline+Assessment')}
+                    onClick={() => navigate(`/practice-page?mode=exam&tier=${isElevenPlusTrack ? '11plus-standard' : 'both'}&paperType=${isElevenPlusTrack ? 'non-calculator' : 'both'}&topics=${isElevenPlusTrack ? encodeURIComponent('Number & Arithmetic,Algebra & Ratio,Geometry & Measures,Statistics & Data,Problem Solving & Strategies') : 'all'}&title=Baseline+Assessment${isElevenPlusTrack ? '&track=11plus' : ''}`)}
                     size="lg"
-                    className="w-full sm:w-auto bg-warning text-warning-foreground hover:bg-warning/90 h-[56px] sm:h-[60px] px-8 sm:px-12 text-[15px] sm:text-[17px] font-semibold rounded-xl shadow-[0_0_40px_-10px_rgba(234,179,8,0.3)] transition-all hover:scale-[1.02] hover:shadow-[0_0_60px_-15px_rgba(234,179,8,0.5)] ring-1 ring-warning-foreground/20"
+                    className="w-full sm:w-auto bg-primary text-primary-foreground hover:bg-primary/90 h-[56px] sm:h-[60px] px-8 sm:px-12 text-[15px] sm:text-[17px] font-semibold rounded-xl shadow-[0_0_40px_-10px_rgba(245,158,11,0.3)] transition-all hover:scale-[1.02] hover:shadow-[0_0_60px_-15px_rgba(245,158,11,0.5)] ring-1 ring-primary-foreground/20"
                   >
                     Start Baseline Assessment
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-2.5 sm:ml-3 w-4 h-4 sm:w-5 sm:h-5"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
@@ -1438,17 +1469,18 @@ export function Readiness() {
         {/* Main Content */}
         <div className="space-y-8 sm:space-y-12">
           {/* Topics Table */}
-          <div>
-            <div className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground mb-4 sm:mb-5">
+          {/* Topics Table Container */}
+          <div className="bg-card rounded-2xl p-6 sm:p-8 shadow-sm border border-border">
+            <div className="text-xs font-semibold tracking-wide uppercase text-muted-foreground mb-4 sm:mb-6">
               Topic Analysis
             </div>
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-border">
-                    <th className="text-left text-[11px] font-medium tracking-wider uppercase text-muted-foreground pb-4">Topic</th>
-                    <th className="text-left text-[11px] font-medium tracking-wider uppercase text-muted-foreground pb-4">Readiness</th>
-                    <th className="hidden sm:table-cell text-right text-[11px] font-medium tracking-wider uppercase text-muted-foreground pb-4">Priority</th>
+                    <th className="text-left text-xs font-medium tracking-wide text-muted-foreground pb-4">Topic</th>
+                    <th className="text-left text-xs font-medium tracking-wide text-muted-foreground pb-4">Readiness</th>
+                    <th className="hidden sm:table-cell text-right text-xs font-medium tracking-wide text-muted-foreground pb-4">Priority</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1459,24 +1491,24 @@ export function Readiness() {
                     return (
                       <tr
                         key={topic.topic}
-                        className="border-b border-border last:border-b-0 hover:bg-secondary/50 dark:hover:bg-secondary/30 transition-colors group"
+                        className="border-b border-border last:border-b-0 hover:bg-secondary/30 transition-colors group"
                       >
                         <td className="py-4 sm:py-5">
                           <div className="font-medium text-foreground text-sm">{topic.topic}</div>
                         </td>
                         <td className="py-4 sm:py-5">
-                          <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3">
-                            <div className="w-12 sm:w-20 h-[3px] bg-secondary rounded-full overflow-hidden">
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                            <div className="w-16 sm:w-24 h-1.5 bg-secondary rounded-full overflow-hidden">
                               <div 
                                 className={`h-full rounded-full transition-all duration-500 ${getBarColor(topic.readiness)}`}
                                 style={{ width: `${topic.readiness}%` }}
                               />
                             </div>
-                            <span className="font-medium text-xs sm:text-sm tabular-nums min-w-[36px] text-left sm:text-right">
+                            <span className="font-medium text-sm tabular-nums min-w-[40px] text-left sm:text-right text-foreground">
                               {Math.round(topic.readiness)}%
                             </span>
                             {lastChange && lastChange.delta !== 0 && (
-                              <span className={`text-xs font-medium flex items-center gap-0.5 ${lastChange.delta > 0 ? 'text-emerald-600' : 'text-red-500'}`}>
+                              <span className={`text-xs font-medium flex items-center gap-0.5 ${lastChange.delta > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
                                 {lastChange.delta > 0 ? (
                                   <TrendingUp className="h-3 w-3" />
                                 ) : (
@@ -1488,7 +1520,7 @@ export function Readiness() {
                             )}
                           </div>
                         </td>
-                        <td className="hidden sm:table-cell py-5 text-right">
+                        <td className="hidden sm:table-cell py-4 sm:py-5 text-right w-24">
                           <span className={`text-xs font-medium ${priority.color}`}>
                             {priority.label}
                           </span>
@@ -1502,32 +1534,34 @@ export function Readiness() {
           </div>
 
           {/* Stats Row */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 pt-12 border-t border-border">
-            <div className="text-center p-5 rounded-xl hover:bg-secondary/50 dark:hover:bg-secondary/30 transition-colors">
-              <div className="text-3xl font-semibold tracking-tight text-foreground mb-1 tabular-nums">
-                {stats.totalQuestions}
+          <div className="bg-card rounded-2xl shadow-sm border border-border overflow-hidden">
+            <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-border">
+              <div className="text-center p-6 border-transparent">
+                <div className="text-3xl sm:text-4xl font-semibold tracking-tight text-foreground mb-1 tabular-nums">
+                  {stats.totalQuestions}
+                </div>
+                <div className="text-xs text-muted-foreground mb-2">Questions</div>
+                <div className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                  +{stats.weekQuestions} this week
+                </div>
               </div>
-              <div className="text-xs text-muted-foreground mb-1.5">Questions</div>
-              <div className="text-xs font-medium text-emerald-600">
-                +{stats.weekQuestions} this week
+              <div className="text-center p-6 border-transparent">
+                <div className="text-3xl sm:text-4xl font-semibold tracking-tight text-foreground mb-1 tabular-nums">
+                  {stats.accuracy}%
+                </div>
+                <div className="text-xs text-muted-foreground mb-2">Accuracy</div>
+                <div className={`text-xs font-medium ${stats.weekAccuracyChange >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
+                  {stats.weekAccuracyChange >= 0 ? '+' : ''}{stats.weekAccuracyChange}% vs last week
+                </div>
               </div>
-            </div>
-            <div className="text-center p-5 rounded-xl hover:bg-secondary/50 dark:hover:bg-secondary/30 transition-colors">
-              <div className="text-3xl font-semibold tracking-tight text-foreground mb-1 tabular-nums">
-                {stats.accuracy}%
-              </div>
-              <div className="text-xs text-muted-foreground mb-1.5">Accuracy</div>
-              <div className={`text-xs font-medium ${stats.weekAccuracyChange >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
-                {stats.weekAccuracyChange >= 0 ? '+' : ''}{stats.weekAccuracyChange}% vs last week
-              </div>
-            </div>
-            <div className="text-center p-5 rounded-xl hover:bg-secondary/50 dark:hover:bg-secondary/30 transition-colors">
-              <div className="text-3xl font-semibold tracking-tight text-foreground mb-1 tabular-nums">
-                {stats.mockExams}
-              </div>
-              <div className="text-xs text-muted-foreground mb-1.5">Mock exams</div>
-              <div className="text-xs font-medium text-emerald-600">
-                +{stats.monthMockChange} this month
+              <div className="text-center p-6 border-transparent">
+                <div className="text-3xl sm:text-4xl font-semibold tracking-tight text-foreground mb-1 tabular-nums">
+                  {stats.mockExams}
+                </div>
+                <div className="text-xs text-muted-foreground mb-2">Mock exams</div>
+                <div className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                  +{stats.monthMockChange} this month
+                </div>
               </div>
             </div>
           </div>
@@ -1542,55 +1576,96 @@ export function Readiness() {
             const bestLabel = bestDisplay === 1 ? 'day' : 'days';
 
             return (
-              <div className="bg-secondary/50 dark:bg-secondary/30 rounded-2xl p-6 shadow-sm dark:shadow-none border border-transparent dark:border-border/50 hover:-translate-y-0.5 hover:shadow-md transition-all duration-200">
-                <div className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground mb-5">
+              <div className="bg-card rounded-2xl p-6 shadow-sm border border-border hover:-translate-y-1 hover:shadow-md transition-all duration-300">
+                <div className="text-xs font-semibold tracking-wide uppercase text-primary mb-4">
                   Momentum
                 </div>
-                <div className="flex items-baseline gap-2 mb-1.5">
-                  <span className="text-5xl font-semibold tracking-tight text-foreground">{streakDisplay}</span>
-                  <span className="text-sm text-muted-foreground">day streak</span>
+                <div className="flex items-baseline gap-2 mb-2">
+                  <span className="text-4xl font-semibold tracking-tight text-foreground leading-none">{streakDisplay}</span>
+                  <span className="text-sm font-medium text-muted-foreground">day streak</span>
                 </div>
-                <div className="text-[13px] text-muted-foreground">
+                <div className="text-xs font-medium text-muted-foreground">
                   Personal best: {bestDisplay} {bestLabel}
                 </div>
               </div>
             );
           })()}
 
-          {/* Quick Wins Card */}
+          {/* AI Targeted Recommendations Card */}
           {quickWins.length > 0 && (
-            <div className="bg-secondary/50 dark:bg-secondary/30 rounded-2xl p-6 shadow-sm dark:shadow-none border border-transparent dark:border-border/50 hover:-translate-y-0.5 hover:shadow-md transition-all duration-200">
-              <div className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground mb-5">
-                Quick Wins
+            <div className="bg-card rounded-2xl p-6 sm:p-7 shadow-sm border border-primary/20 hover:shadow-md transition-all duration-300 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none -mr-32 -mt-32" />
+              
+              <div className="flex items-center gap-2 mb-4">
+                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m3 11 18-5v12L3 14v-3z"></path><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"></path></svg>
+                </div>
+                <div className="text-sm font-bold tracking-wide uppercase text-primary">
+                  Optimal Study Path
+                </div>
               </div>
-              <p className="text-xs text-muted-foreground mb-2">
-                Short practice packs ready for you to complete; they are pulled from your weakest subtopics, so you know these are the gaps still waiting to be filled (not already completed drills).
+              
+              <p className="text-[13px] font-medium leading-relaxed text-foreground mb-6">
+                Based on your exact score trajectory, focusing your effort on these specific subtopics will yield the highest readiness improvements. 
               </p>
-              <p className="text-xs text-muted-foreground mb-4">
-                Time, question count, and marks shown reflect the bundle we selected for you from live readiness data.
-              </p>
-              <div className="space-y-0">
+
+              <div className="space-y-4 relative z-10">
                 {quickWins.map((win, idx) => (
                   <div
                     key={`${win.topic}-${win.name}-${idx}`}
-                    onClick={() => startQuickWinPractice(win)}
-                    className="flex items-center justify-between py-3.5 border-b border-border last:border-b-0 last:pb-0 first:pt-0 cursor-pointer -mx-2 px-2 rounded-lg hover:bg-card dark:hover:bg-secondary/50 transition-colors"
+                    className="flex flex-col gap-4 bg-background rounded-xl p-5 border border-border/60 shadow-sm relative overflow-hidden group hover:border-primary/40 transition-colors"
                   >
-                    <div>
-                      <h4 className="text-sm font-medium text-foreground mb-0.5">{win.name}</h4>
-                      <p className="text-xs text-muted-foreground">
-                        {win.timeMin !== null ? `${win.timeMin} min` : '— min'} · {win.questions} questions · {win.marks !== null ? `${win.marks} marks` : '— marks'}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-sm font-semibold text-foreground">{formatPercent(win.score)}</div>
-                      <div className="text-[11px] text-muted-foreground">
-                        {win.accuracyPercent !== null
-                          ? `${win.accuracyPercent}% accuracy · ${win.attempts} attempts`
-                          : win.attempts > 0
-                            ? `${formatPercentValue(win.progressScore)}% readiness · ${win.attempts} attempts`
-                            : `${formatPercentValue(win.progressScore)}% readiness`}
+                    {/* Header */}
+                    <div className="flex items-start gap-3">
+                      <div className="flex-shrink-0 flex items-center justify-center w-7 h-7 rounded-full bg-primary/10 text-primary font-bold text-[13px] mt-0.5">
+                        {idx + 1}
                       </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-[15px] font-bold text-foreground leading-tight tracking-tight group-hover:text-primary transition-colors truncate whitespace-normal">Master {win.name}</h4>
+                        <h5 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mt-1.5">{win.topic}</h5>
+                      </div>
+                    </div>
+
+                    {/* Explainer */}
+                    <p className="text-[13px] text-muted-foreground leading-relaxed mt-1">
+                      Currently at <span className="font-semibold text-foreground">{formatPercent(win.score)}</span> readiness ({win.attempts} attempts). Correcting this foundational gap will immediately boost your overall band.
+                    </p>
+
+                    {/* Metrics Row */}
+                    <div className="grid grid-cols-3 gap-2 text-[11px] font-semibold">
+                      <div className="flex flex-col items-center justify-center gap-1 bg-secondary/50 rounded-lg py-2 text-muted-foreground">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                        <span>{win.timeMin !== null ? `${win.timeMin} mins` : '—'}</span>
+                      </div>
+                      <div className="flex flex-col items-center justify-center gap-1 bg-secondary/50 rounded-lg py-2 text-muted-foreground">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                        <span>{win.questions} Qs</span>
+                      </div>
+                      <div className="flex flex-col items-center justify-center gap-1 bg-primary/5 rounded-lg py-2 text-primary">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m12 14 4-4"></path><path d="M3.34 19a10 10 0 1 1 17.32 0"></path></svg>
+                        <span>+{win.marks !== null ? win.marks : '-'} mks</span>
+                      </div>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex flex-col gap-2 mt-1">
+                      <button
+                        onClick={() => startQuickWinPractice(win)}
+                        className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-[13px] py-2.5 px-4 rounded-lg shadow-sm transition-all flex items-center justify-center gap-2"
+                      >
+                        Start Targeted Practice <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="opacity-80"><path d="m9 18 6-6-6-6"/></svg>
+                      </button>
+                      <button
+                        onClick={() => {
+                          const topicKey = win.subtopicId.split('|')[0];
+                          const sectionMatch = getTrackSections('11plus').find(s => s.key === topicKey);
+                          const sectionLabel = sectionMatch?.label || win.topic;
+                          navigate(`/notes/${encodeURIComponent(sectionLabel)}/${win.subtopicId.replace('|', '-')}`);
+                        }}
+                        className="w-full bg-transparent hover:bg-secondary text-foreground font-medium text-[13px] py-2.5 px-4 rounded-lg border border-border/80 transition-all flex items-center justify-center gap-2"
+                      >
+                        <BookOpen className="h-4 w-4 text-muted-foreground" /> Review Concept
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -1612,96 +1687,6 @@ export function Readiness() {
       `}</style>
       </div>
 
-      {/* Parent Print Report Component (Hidden on web, shows on print) */}
-      <div className="hidden print:block w-full max-w-[21cm] mx-auto bg-white print:p-8 text-black min-h-screen font-sans" style={{ WebkitPrintColorAdjust: 'exact', colorAdjust: 'exact', printColorAdjust: 'exact' }}>
-        {/* Header */}
-        <div className="flex items-end justify-between border-b-[3px] border-black pb-5 mb-8">
-          <div>
-            <div className="text-[10px] uppercase font-bold tracking-[0.2em] text-warning-foreground mb-1">Gradlify 11+ Analytics</div>
-            <h1 className="text-4xl font-black tracking-tighter text-black leading-none mb-1">Executive Report</h1>
-            <p className="text-gray-500 text-[10px] font-bold uppercase tracking-widest">{profile?.full_name || 'Student'} • {new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
-          </div>
-          <div className="text-right">
-            <div className="text-5xl font-black text-black leading-none">{formatPercent(overall)}</div>
-            <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-2">Overall Readiness</div>
-          </div>
-        </div>
-
-        {/* The Bottom Line */}
-        <div className="mb-8 bg-gray-50 p-6 rounded-2xl border border-gray-200">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-2.5 h-2.5 rounded-full bg-warning" />
-            <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-gray-800">The Bottom Line</h2>
-          </div>
-          <p className="text-[14px] leading-relaxed text-gray-700 font-medium tracking-tight">
-            Based on the latest analytics, the student is currently performing in the <span className="font-bold text-black border-b border-warning">{elevenPlusReadinessBand}</span> band, moving towards the <span className="font-bold text-black border-b border-warning">{elevenPlusNextBand}</span> target level. To achieve a strong standing for top selective schools, we recommend an aggressive, focused correction on the weakest topics identified below. Consistent daily practice on these exact topics using focused 10-minute sprints will mathematically close the <span className="font-black text-warning-foreground bg-warning/10 px-1 rounded">{marksGap ? formatNumber(marksGap) : 'remaining'} marks</span> remaining gap.
-          </p>
-        </div>
-
-        {/* AI Action Plan */}
-        <div className="mb-10 page-break-inside-avoid">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-2.5 h-2.5 rounded-full bg-black" />
-            <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-gray-800">10-Minute Prescription</h2>
-          </div>
-          {recommendation ? (
-            <div className="bg-white border-[3px] border-black rounded-2xl p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
-              <div className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500 mb-2">Mandatory Focus Subject</div>
-              <div className="font-black text-2xl mb-2 text-black leading-none tracking-tight">
-                {recommendation.title.split(': ')[1] || recommendation.title}
-              </div>
-              <p className="text-[13px] text-gray-600 mb-6 font-medium leading-relaxed max-w-lg">{recommendationReason}</p>
-              
-              <div className="flex gap-16 pt-5 border-t border-gray-100">
-                <div>
-                  <div className="text-[10px] text-gray-400 uppercase font-bold tracking-[0.2em] mb-1">Current Score</div>
-                  <div className="text-3xl font-black text-black leading-none">{formatPercent(recommendationSubtopicScore)}</div>
-                </div>
-                <div>
-                  <div className="text-[10px] text-gray-400 uppercase font-bold tracking-[0.2em] mb-1">Estimated Time</div>
-                  <div className="text-3xl font-black text-black leading-none">
-                    {recommendationMetrics?.totalTimeMin !== null && recommendationMetrics?.totalTimeMin !== undefined ? `${recommendationMetrics.totalTimeMin} min` : '—'}
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="bg-gray-50 border-2 border-gray-200 rounded-2xl p-6 text-gray-500 font-medium text-center border-dashed">
-              No sufficient data available yet to generate a prescriptive action plan. Please ensure the student completes a Baseline Assessment.
-            </div>
-          )}
-        </div>
-
-        {/* Weakness Matrix */}
-        <div className="mb-4 page-break-inside-avoid">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-2.5 h-2.5 rounded-full bg-gray-300" />
-            <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-gray-800">Priority Matrix</h2>
-          </div>
-          
-          <div className="grid grid-cols-2 gap-4">
-            {displayTopics.map((topic) => {
-              const priority = getPriority(topic.readiness);
-              const isHigh = priority.label === 'High';
-              return (
-                <div key={topic.topic} className={`p-4 rounded-xl border-2 ${isHigh ? 'border-warning/40 bg-warning/5' : 'border-gray-100 bg-white'}`}>
-                  <div className="flex justify-between items-start mb-3">
-                    <span className={`text-[9px] uppercase font-bold tracking-widest px-2 py-1 rounded ${isHigh ? 'bg-warning text-warning-foreground' : 'bg-gray-100 text-gray-500'}`}>
-                      {priority.label} Priority
-                    </span>
-                    <span className="font-black text-lg leading-none">{Math.round(topic.readiness)}%</span>
-                  </div>
-                  <div className={`font-bold text-sm tracking-tight ${isHigh ? 'text-black' : 'text-gray-600'}`}>{topic.topic}</div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        <div className="text-center text-[10px] text-gray-400 mt-16 pt-6 border-t border-gray-100 uppercase tracking-widest font-bold">
-          Generated automatically by Gradlify 11+ • STRICTLY CONFIDENTIAL
-        </div>
-      </div>
     </>
   );
 }

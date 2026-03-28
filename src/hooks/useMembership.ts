@@ -125,8 +125,8 @@ export function useMembership() {
     plan: data?.plan || 'free',
     founderTrack: data?.founderTrack ?? null,
     isFounder: data?.founderTrack === 'founder',
-    isPremium: data ? data.tier === 'premium' : false,
+    isPremium: data?.hasPremiumSubscription ?? false,
     isUltra: data?.isUltra ?? false,
-    statusLabel: data?.founderTrack === 'founder' ? 'Founder' : data?.isUltra ? 'Ultra' : data?.tier === 'premium' ? 'Premium' : 'Free'
+    statusLabel: data?.founderTrack === 'founder' ? 'Founder' : data?.isUltra ? 'Ultra' : data?.hasPremiumSubscription ? 'Premium' : 'Free'
   };
 }

@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { DemoQuestion, elevenPlusDemoQuestions, mobileDemoQuestions } from "@/components/DemoQuestion";
 
-import { FoundersSprintLabel } from "@/components/FoundersSprintLabel";
+
 import { LogoMark } from "@/components/LogoMark";
 import { DiscordFooterEntry } from "@/components/DiscordFooterEntry";
 import { supabase } from "@/integrations/supabase/client";
@@ -225,8 +225,8 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
   const primaryText = isDark ? "text-white" : "text-slate-900";
   const mutedText = isDark ? "text-slate-200/90" : "text-slate-600";
   const subtleText = isDark ? "text-slate-300/75" : "text-slate-500";
-  const accentText = isElevenPlus ? (isDark ? "text-rose-200" : "text-rose-600") : isDark ? "text-orange-300" : "text-orange-600";
-  const sectionSurface = isDark ? "bg-[linear-gradient(180deg,#020617_0%,#050b1a_100%)]" : "bg-slate-50";
+  const accentText = isElevenPlus ? (isDark ? "text-rose-200" : "text-rose-600") : isDark ? "text-indigo-300" : "text-indigo-600";
+  const sectionSurface = isDark ? "bg-transparent" : "bg-slate-50";
   const guidePromoSurface = isDark
     ? (isElevenPlus ? "border-white/15 bg-[radial-gradient(120%_120%_at_0%_0%,rgba(251,191,36,0.18),transparent_55%),radial-gradient(120%_120%_at_100%_100%,rgba(239,68,68,0.15),transparent_60%)]" : "border-white/15 bg-[radial-gradient(120%_120%_at_0%_0%,rgba(129,140,248,0.18),transparent_55%),radial-gradient(120%_120%_at_100%_100%,rgba(14,165,233,0.15),transparent_60%)]")
     : (isElevenPlus ? "border-slate-200/80 bg-[radial-gradient(120%_120%_at_0%_0%,rgba(245,158,11,0.16),transparent_58%),radial-gradient(120%_120%_at_100%_100%,rgba(239,68,68,0.12),transparent_62%)]" : "border-slate-200/80 bg-[radial-gradient(120%_120%_at_0%_0%,rgba(99,102,241,0.16),transparent_58%),radial-gradient(120%_120%_at_100%_100%,rgba(14,165,233,0.12),transparent_62%)]");
@@ -234,7 +234,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
     ? (isElevenPlus ? "shadow-[0_30px_80px_-40px_rgba(245,158,11,0.55)]" : (isElevenPlus ? "shadow-[0_30px_80px_-40px_rgba(245,158,11,0.55)]" : "shadow-[0_30px_80px_-40px_rgba(99,102,241,0.55)]"))
     : (isElevenPlus ? "shadow-[0_30px_80px_-45px_rgba(217,119,6,0.35)]" : (isElevenPlus ? "shadow-[0_30px_80px_-45px_rgba(217,119,6,0.35)]" : "shadow-[0_30px_80px_-45px_rgba(79,70,229,0.35)]"));
   const guidePromoBadge = isDark
-    ? "border-white/15 bg-white/10 text-slate-100"
+    ? "border-white/10 bg-white/10 text-white"
     : "border-white/70 bg-white text-slate-800";
   const guidePromoMuted = isDark ? "text-slate-300/90" : "text-slate-700/80";
   const guidePromoMeta = isDark ? "text-slate-200" : "text-slate-800";
@@ -242,18 +242,24 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
     ? "border-white/10 bg-white/5 text-slate-200"
     : "border-slate-200/80 bg-white text-slate-700";
   const cardSurface = isDark
-    ? "border-white/15 bg-[linear-gradient(160deg,rgba(15,23,42,0.90),rgba(15,23,42,0.72))] backdrop-blur-sm"
+    ? "border-white/10 bg-black/20 backdrop-blur-xl"
     : "border-slate-200/80 bg-white";
   const panelSurface = isDark
-    ? "border-white/15 bg-[linear-gradient(160deg,rgba(2,6,23,0.85),rgba(2,6,23,0.68))]"
+    ? "border-white/10 bg-white/5 backdrop-blur-md"
     : "border-slate-200/80 bg-slate-50";
   const heatGradient = {
     tailwind: "from-red-600 via-orange-400 to-amber-300",
     inline: "linear-gradient(135deg, #991B1B, #F97316, #FCD34D)",
+    from: "from-red-600",
+    via: "via-orange-400",
+    to: "to-amber-300"
   };
   const indigoGradient = {
     tailwind: "from-orange-500 via-blue-500 to-red-500",
     inline: "linear-gradient(90deg, #f97316 0%, #2563eb 50%, #7c3aed 100%)",
+    from: "from-orange-500",
+    via: "via-blue-500",
+    to: "to-red-500"
   };
   const accentGradient = isElevenPlus ? heatGradient : indigoGradient;
   const heroGradient = isElevenPlus
@@ -345,11 +351,11 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
       className={`min-h-screen overflow-x-hidden ${
         isElevenPlus
           ? isDark
-            ? "bg-[radial-gradient(1200px_460px_at_20%_-5%,rgba(185,28,28,0.25),transparent_62%),radial-gradient(900px_420px_at_82%_8%,rgba(234,88,12,0.2),transparent_68%),#100404] text-white"
+            ? "bg-[radial-gradient(1200px_460px_at_20%_-5%,rgba(185,28,28,0.25),transparent_62%),radial-gradient(900px_420px_at_82%_8%,rgba(234,88,12,0.2),transparent_68%),#04050a] text-white"
             : "bg-[radial-gradient(1200px_460px_at_20%_-5%,rgba(239,68,68,0.18),transparent_62%),radial-gradient(900px_420px_at_82%_8%,rgba(251,146,60,0.2),transparent_68%),#fff7ed] text-slate-900"
           : isDark
-            ? (isElevenPlus ? "bg-[radial-gradient(1200px_460px_at_20%_-5%,rgba(245,158,11,0.20),transparent_62%),radial-gradient(900px_420px_at_82%_8%,rgba(239,68,68,0.12),transparent_68%),#020617] text-white" : "bg-[radial-gradient(1200px_460px_at_20%_-5%,rgba(99,102,241,0.20),transparent_62%),radial-gradient(900px_420px_at_82%_8%,rgba(14,165,233,0.12),transparent_68%),#020617] text-white")
-            : "bg-slate-50 text-slate-900"
+            ? "bg-[radial-gradient(1200px_460px_at_20%_-5%,rgba(124,58,237,0.20),transparent_62%),radial-gradient(900px_420px_at_82%_8%,rgba(56,189,248,0.15),transparent_68%),#04050a] text-white"
+            : "bg-[radial-gradient(1200px_460px_at_20%_-5%,rgba(99,102,241,0.15),transparent_62%),radial-gradient(900px_420px_at_82%_8%,rgba(14,165,233,0.12),transparent_68%),#f8fafc] text-slate-900"
       }`}
     >
       {/* Nav */}
@@ -358,11 +364,11 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
           "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
           isScrolled
             ? isDark
-              ? "bg-slate-950/95 backdrop-blur border-b border-white/10 text-white shadow-lg shadow-black/25"
-              : "bg-white text-slate-900 shadow-sm"
+              ? "bg-[#04050a]/80 backdrop-blur-lg border-b border-white/5 text-white shadow-lg shadow-black/25"
+              : "bg-white/95 backdrop-blur border-b border-black/5 text-slate-900 shadow-sm"
             : isDark
-              ? "bg-slate-950/90 backdrop-blur border-b border-white/10 text-white shadow-sm shadow-black/20"
-              : "bg-white text-slate-900 shadow-sm",
+              ? "bg-[#04050a]/40 backdrop-blur-md border-b border-transparent text-white"
+              : "bg-white/80 backdrop-blur-sm border-b border-transparent text-slate-900",
         ].join(" ")}
       >
 
@@ -371,7 +377,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
             <a href="#" className="flex items-center gap-3">
               <div
                 className={`rounded-full p-1 sm:p-1.5 shadow-lg ${
-                  isDark ? "bg-slate-900/80 border border-white/10" : "bg-white border border-slate-200"
+                  isDark ? "bg-white/10 backdrop-blur-md border border-white/10" : "bg-white border border-slate-200"
                 }`}
               >
                 <LogoMark className="w-8 h-8 sm:w-9 sm:h-9" variant={isDark ? "dark" : "light"} />
@@ -605,8 +611,8 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
             <div
               className={`absolute inset-0 pointer-events-none ${
                 isDark
-                  ? (isElevenPlus ? "bg-[radial-gradient(600px_360px_at_85%_20%,rgba(245,158,11,0.12),transparent_62%)]" : "bg-[radial-gradient(600px_360px_at_85%_20%,rgba(99,102,241,0.12),transparent_62%)]")
-                  : (isElevenPlus ? "bg-[radial-gradient(600px_360px_at_85%_20%,rgba(245,158,11,0.08),transparent_62%)]" : "bg-[radial-gradient(600px_360px_at_85%_20%,rgba(99,102,241,0.08),transparent_62%)]")
+                  ? "bg-[radial-gradient(600px_360px_at_85%_20%,rgba(124,58,237,0.12),transparent_62%)]"
+                  : "bg-[radial-gradient(600px_360px_at_85%_20%,rgba(99,102,241,0.08),transparent_62%)]"
               }`}
             />
           )}
@@ -643,8 +649,8 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
             <div
               className={`absolute inset-0 pointer-events-none ${
                 isDark
-                  ? (isElevenPlus ? "bg-[radial-gradient(620px_360px_at_15%_25%,rgba(248,113,113,0.10),transparent_65%)]" : "bg-[radial-gradient(620px_360px_at_15%_25%,rgba(56,189,248,0.10),transparent_65%)]")
-                  : (isElevenPlus ? "bg-[radial-gradient(620px_360px_at_15%_25%,rgba(248,113,113,0.08),transparent_65%)]" : "bg-[radial-gradient(620px_360px_at_15%_25%,rgba(56,189,248,0.08),transparent_65%)]")
+                  ? "bg-[radial-gradient(620px_360px_at_15%_25%,rgba(124,58,237,0.10),transparent_65%)]"
+                  : "bg-[radial-gradient(620px_360px_at_15%_25%,rgba(99,102,241,0.08),transparent_65%)]"
               }`}
             />
           )}
@@ -682,14 +688,12 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
               <div className="w-full flex justify-start">
                   <div
                     className={`w-full max-w-3xl mx-auto rounded-2xl border border-transparent sm:border p-4 sm:p-6 ${
-                      isDark ? "border-white/10 bg-slate-950/60" : "border-slate-200 bg-white"
+                      isDark ? "border-white/10 bg-black/40 backdrop-blur-xl" : "border-slate-200 bg-white"
                     }`}
                   >
                   <DemoQuestion
                     embedded
-                    tone={theme}
                     onStartPracticeClick={handleSignup}
-                    accentGradient={isElevenPlus ? heatGradient : undefined}
                     questions={isElevenPlus ? elevenPlusDemoQuestions : undefined}
                   />
                 </div>
@@ -727,10 +731,10 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
 
               <div className="mt-8 sm:mt-10 grid lg:grid-cols-3 md:grid-cols-2 gap-4 sm:gap-5 max-w-6xl mx-auto flex-col-reverse md:flex-row">
                 {/* Ultra Tier */}
-                <motion.div variants={motionCfg.fadeUp} className={`font-sans rounded-[20px] sm:rounded-[22px] ${isDark ? 'bg-gradient-to-br from-amber-300 via-orange-500 to-red-600 shadow-[0_0_60px_-10px_rgba(245,158,11,0.55)]' : 'bg-gradient-to-br from-[#1a1c29] via-[#241e16] to-[#1a1c29] border border-amber-500/30 shadow-2xl'} p-[2px] scale-100 lg:scale-110 z-30 flex flex-col order-3 md:order-1 relative overflow-hidden group`}>
-                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(251,191,36,0.35),transparent_60%)] rounded-[20px]"></div>
-                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(239,68,68,0.35),transparent_60%)] rounded-[20px]"></div>
-                  <div className={`h-full rounded-[18px] sm:rounded-[20px] ${isDark ? 'bg-[linear-gradient(160deg,rgba(64,25,5,0.95),rgba(10,4,2,0.95))]' : 'bg-[linear-gradient(160deg,rgba(15,23,42,0.8),rgba(3,7,18,0.9))]'} backdrop-blur-xl p-5 sm:p-7 flex flex-col relative z-10`}>
+                <motion.div variants={motionCfg.fadeUp} className={`font-sans rounded-[20px] sm:rounded-[22px] ${isDark ? 'bg-gradient-to-br from-indigo-300 via-purple-500 to-indigo-600 shadow-[0_0_60px_-10px_rgba(124,58,237,0.55)]' : 'bg-gradient-to-br from-[#1a1c29] via-[#241e16] to-[#1a1c29] border border-amber-500/30 shadow-2xl'} p-[2px] scale-100 lg:scale-110 z-30 flex flex-col order-3 md:order-1 relative overflow-hidden group`}>
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(124,58,237,0.35),transparent_60%)] rounded-[20px]"></div>
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(99,102,241,0.35),transparent_60%)] rounded-[20px]"></div>
+                  <div className={`h-full rounded-[18px] sm:rounded-[20px] bg-black/60 backdrop-blur-xl p-5 sm:p-7 flex flex-col relative z-10`}>
                     <div>
                       <div className="flex items-center justify-between gap-3">
                         <div className="text-sm font-semibold bg-clip-text text-transparent bg-gradient-to-r from-amber-200 via-amber-400 to-amber-200 tracking-widest uppercase">ULTRA</div>
@@ -867,7 +871,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
             <div
               className={`absolute inset-0 pointer-events-none ${
                 isDark
-                  ? "bg-[radial-gradient(640px_320px_at_10%_30%,rgba(59,130,246,0.10),transparent_65%)]"
+                  ? "bg-[radial-gradient(640px_320px_at_10%_30%,rgba(245,158,11,0.10),transparent_65%)]"
                   : (isElevenPlus ? "bg-[radial-gradient(640px_320px_at_10%_30%,rgba(245,158,11,0.08),transparent_65%)]" : "bg-[radial-gradient(640px_320px_at_10%_30%,rgba(99,102,241,0.08),transparent_65%)]")
               }`}
             />
@@ -1189,7 +1193,7 @@ function HoverVideo({
   playOnHover?: boolean;
   hint?: string;
   tone?: "dark" | "light";
-  accentGradient?: { from: string; via: string; to: string };
+  accentGradient?: { tailwind: string; inline: string; from: string; via: string; to: string };
 }) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const prefersReducedMotion = useReducedMotion();
@@ -1360,7 +1364,7 @@ function ShowcaseRow({
     frameClassName?: string;
     reverse?: boolean;
   };
-  variants: Record<string, unknown>;
+  variants: any;
   tone: "dark" | "light";
 }) {
   const isDark = tone === "dark";
@@ -1579,7 +1583,7 @@ function LeaderboardPreview({ tone }: { tone: "dark" | "light" }) {
     >
       <div className="flex items-center justify-between">
         <div>
-          <FoundersSprintLabel className="mb-2" />
+
           <div className={`text-[13px] sm:text-sm font-semibold ${isDark ? "text-white" : "text-slate-900"}`}>Leaderboard</div>
           <div className={`text-[11px] sm:text-xs ${isDark ? "text-slate-400" : "text-slate-500"}`}>Ranked by correct answers</div>
         </div>

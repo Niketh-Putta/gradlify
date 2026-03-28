@@ -86,7 +86,7 @@ export function AppPreview3D({ screenshots = [] }: AppPreview3DProps) {
 
   return (
     <section className="light py-8 sm:py-16 md:py-24 relative overflow-hidden bg-gradient-to-b from-gray-50 via-gray-50/95 to-white">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.1)_0%,transparent_70%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(245,158,11,0.1)_0%,transparent_70%)]" />
       
       <div className="container mx-auto px-3 sm:px-4 relative z-10">
         <div className="text-center mb-8 sm:mb-12 md:mb-16">

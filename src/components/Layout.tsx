@@ -255,7 +255,7 @@ export function Layout({ user, onSettings, onSignOut }: LayoutProps) {
 
   useEffect(() => {
     if (isFreeToolsRoute) return;
-    document.title = 'Gradlify - Maths practised properly';
+    document.title = '11+ Practised Properly';
   }, [isFreeToolsRoute, location.pathname]);
 
   useEffect(() => {

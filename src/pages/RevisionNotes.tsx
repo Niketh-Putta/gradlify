@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Search, ChevronRight, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import notesData from "@/data/edexcel_gcse_notes.json";
+import elevenPlusNotesData from "@/data/eleven_plus_notes.json";
 import { supabase } from "@/integrations/supabase/client";
 import { useAppContext } from "@/hooks/useAppContext";
 import { getExamBoardBadge, getExamBoardSubtitle, replaceExamBoardReferences } from "@/lib/examBoard";
@@ -22,6 +23,7 @@ type NotesData = {
 };
 
 const typedNotesData = notesData as NotesData;
+const typedElevenPlusNotesData = elevenPlusNotesData as NotesData;
 
 // Section config with purple accent theme
 const sectionConfig: Record<string, {
@@ -134,13 +136,17 @@ export default function RevisionNotes() {
   const allTopics = useMemo(() => {
     if (isElevenPlus) {
       return elevenPlusSections.flatMap((section) =>
-        section.subtopics.map((topic) => ({
-          slug: `${section.key}-${topic.key}`,
-          title: topic.name,
-          level: "11+",
-          md: "",
-          section: section.label,
-        }))
+        section.subtopics.map((topic) => {
+          const expectedSlug = `${section.key}-${topic.key}`;
+          const authoredTopic = typedElevenPlusNotesData[section.label]?.find(t => t.slug === expectedSlug);
+          return {
+            slug: expectedSlug,
+            title: topic.name,
+            level: "11+",
+            md: authoredTopic?.md || "",
+            section: section.label,
+          };
+        })
       );
     }
 
@@ -227,21 +233,21 @@ export default function RevisionNotes() {
           
           <p className="text-lg text-muted-foreground leading-relaxed max-w-[600px] mx-auto">
             {isElevenPlus
-              ? "11+ notes are being rolled out by section. You can browse the full structure now, with content placeholders visible."
+              ? "Comprehensive 11+ lessons with interactive diagrams, worked examples, and practice questions."
               : "Comprehensive lessons with interactive diagrams, worked examples, and practice questions. Everything you need to achieve your best grade."}
           </p>
 
           {/* Stats Row */}
-          <div className="flex justify-center gap-12 mt-12 pt-12 border-t border-border/40">
-            <div className="text-center">
+          <div className="flex flex-wrap justify-center gap-6 sm:gap-12 mt-12 pt-12 border-t border-border/40">
+            <div className="text-center px-4 sm:px-0">
               <div className="notes-stat-value">{totalTopics}</div>
               <div className="text-sm text-muted-foreground mt-1">Topics</div>
             </div>
-            <div className="text-center">
+            <div className="text-center px-4 sm:px-0">
               <div className="notes-stat-value">{sections.length}</div>
               <div className="text-sm text-muted-foreground mt-1">Units</div>
             </div>
-            <div className="text-center">
+            <div className="text-center px-4 sm:px-0">
               <div className="notes-stat-value">{completedTopics}</div>
               <div className="text-sm text-muted-foreground mt-1">Completed</div>
             </div>

@@ -23,6 +23,8 @@ import {
   TrendingDown,
   TrendingUp,
   Triangle,
+  Repeat,
+  Target,
 } from "lucide-react";
 
 // Pythagoras Interactive Diagram
@@ -466,10 +468,16 @@ export function getInteractiveDiagram(topicSlug: string): React.ReactNode | null
   if (slugLower.includes('area') || slugLower.includes('perimeter')) {
     return <AreaPerimeterInteractive />;
   }
+  if (slugLower.includes('probability')) {
+    return <ProbabilityScaleInteractive />;
+  }
+  if (slugLower.includes('decimals') && slugLower.includes('percentages')) {
+    return <FDPInteractive />;
+  }
   if (slugLower.includes('tree') || slugLower.includes('probability-trees')) {
     return <ProbabilityTreeInteractive />;
   }
-  if (slugLower.includes('fraction') && (slugLower.includes('operation') || slugLower.includes('mixed'))) {
+  if (slugLower.includes('fraction')) {
     return <FractionsInteractive />;
   }
   if (slugLower.includes('negative') || slugLower.includes('number-line')) {
@@ -502,10 +510,8 @@ export function getInteractiveDiagram(topicSlug: string): React.ReactNode | null
   if (slugLower.includes('sine') || slugLower.includes('cosine')) {
     return <TrigInteractive />;
   }
-  // Ratio topics already include dedicated static diagrams in the notes.
-  // Showing the fractions interactive here is confusing (e.g., “Adding Fractions” under “Sharing in a Ratio”).
-  if (slugLower.includes('ratio') && slugLower.includes('proportion')) {
-    return null;
+  if (slugLower.includes('ratio') || slugLower.includes('proportion')) {
+    return <RatioInteractive />;
   }
   if (slugLower.includes('volume') || slugLower.includes('surface')) {
     return <AreaPerimeterInteractive />;
@@ -1124,6 +1130,189 @@ export function StatisticsDiagrams({ topicSlug }: { topicSlug?: string }) {
           </div>
         );
       })()}
+    </div>
+  );
+}
+
+
+// ==========================================
+// NEW 11+ PREMIUM INTERACTIVES
+// ==========================================
+
+export function FDPInteractive() {
+  const [percent, setPercent] = useState(25);
+  
+  const decimal = (percent / 100).toFixed(2);
+  const gcd = (a, b) => b === 0 ? a : gcd(b, a % b);
+  const divisor = gcd(percent, 100);
+  const num = percent / divisor;
+  const den = 100 / divisor;
+
+  return (
+    <div className="notes-interactive-diagram mb-8">
+      <h4 className="font-semibold text-foreground mb-6 flex items-center gap-2">
+        <span className="notes-diagram-icon"><Repeat className="h-4 w-4" /></span>
+        Interactive FDP Converter
+      </h4>
+      <div className="grid md:grid-cols-2 gap-8 items-center">
+        <div className="bg-gradient-to-br from-indigo-50/50 to-purple-50/50 dark:from-indigo-950/20 dark:to-purple-950/20 rounded-2xl p-6 flex flex-col items-center justify-center border border-indigo-500/10 shadow-inner">
+          <div className="flex w-full items-center justify-between text-center mt-2 mb-6 gap-2">
+             <div className="flex-1">
+                <div className="text-[10px] font-black uppercase text-indigo-400 mb-2 tracking-widest">Fraction</div>
+                {percent === 0 ? (
+                  <div className="text-3xl font-black text-indigo-600">0</div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center text-3xl font-black text-indigo-600">
+                    <div>{num}</div>
+                    <div className="w-8 border-t-[3px] border-indigo-600 my-0.5" />
+                    <div>{den}</div>
+                  </div>
+                )}
+             </div>
+             <div className="text-muted-foreground/30"><ArrowRight className="w-6 h-6"/></div>
+             <div className="flex-1">
+                <div className="text-[10px] font-black uppercase text-purple-400 mb-2 tracking-widest">Decimal</div>
+                <div className="text-4xl font-black text-purple-600">{decimal}</div>
+             </div>
+             <div className="text-muted-foreground/30"><ArrowRight className="w-6 h-6"/></div>
+             <div className="flex-1">
+                <div className="text-[10px] font-black uppercase text-pink-400 mb-2 tracking-widest">Percentage</div>
+                <div className="text-4xl font-black text-pink-600">{percent}%</div>
+             </div>
+          </div>
+          <div className="w-full relative h-4 bg-muted/60 rounded-full overflow-hidden shadow-inner border border-border/50">
+             <div className="absolute top-0 left-0 h-full bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-500 transition-all duration-300" style={{ width: `${percent}%` }} />
+          </div>
+        </div>
+        
+        <div className="space-y-6">
+          <div>
+            <label className="text-sm font-bold text-muted-foreground mb-4 block uppercase tracking-wider">Slide to Convert</label>
+            <Slider value={[percent]} onValueChange={([v]) => setPercent(v)} min={0} max={100} step={5} className="w-full" />
+          </div>
+          <div className="space-y-3">
+             <div className="p-4 rounded-xl bg-purple-500/5 border border-purple-500/10">
+                <p className="text-sm text-foreground/80 leading-relaxed font-medium">To turn a <strong className="text-purple-500">Decimal</strong> into a <strong className="text-pink-500">Percentage</strong>, aggressively multiply by 100 (move the decimal point two spaces right).</p>
+             </div>
+             <div className="p-4 rounded-xl bg-indigo-500/5 border border-indigo-500/10">
+                <p className="text-sm text-foreground/80 leading-relaxed font-medium">To extract the <strong className="text-indigo-500">Fraction</strong>, place the percentage over 100 and simplify structurally until it cannot be broken down further.</p>
+             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function RatioInteractive() {
+  const [total, setTotal] = useState(25);
+  const ratioA = 3;
+  const ratioB = 2;
+  const parts = ratioA + ratioB;
+  const partValue = total / parts;
+  
+  const shareA = partValue * ratioA;
+  const shareB = partValue * ratioB;
+
+  return (
+    <div className="notes-interactive-diagram mb-8">
+      <h4 className="font-semibold text-foreground mb-6 flex items-center gap-2">
+        <span className="notes-diagram-icon"><Box className="h-4 w-4" /></span>
+        Interactive Ratio (3:2)
+      </h4>
+      <div className="grid md:grid-cols-2 gap-8 items-center">
+        <div className="bg-gradient-to-br from-emerald-50/50 to-teal-50/50 dark:from-emerald-950/20 dark:to-teal-950/20 rounded-2xl p-6 flex flex-col items-center justify-center border border-emerald-500/10 shadow-inner">
+          <div className="flex w-full items-end justify-center gap-8 h-32 mb-6">
+             <div className="flex flex-col items-center gap-2 w-1/3">
+                <div className="text-[10px] font-black uppercase tracking-widest text-emerald-600 mb-1">Share A (3)</div>
+                <div className="w-full bg-emerald-500 rounded-t-lg transition-all duration-300 shadow-md flex items-end justify-center pb-2" style={{ height: `${(shareA / total) * 100}%`, minHeight: '20px' }}>
+                   <span className="text-white font-black text-xl">{Math.round(shareA)}</span>
+                </div>
+             </div>
+             <div className="flex flex-col items-center gap-2 w-1/3">
+                <div className="text-[10px] font-black uppercase tracking-widest text-teal-600 mb-1">Share B (2)</div>
+                <div className="w-full bg-teal-500 rounded-t-lg transition-all duration-300 shadow-md flex items-end justify-center pb-2" style={{ height: `${(shareB / total) * 100}%`, minHeight: '20px' }}>
+                   <span className="text-white font-black text-xl">{Math.round(shareB)}</span>
+                </div>
+             </div>
+          </div>
+          <div className="flex w-full overflow-hidden rounded-full h-3 border border-border/50 shadow-inner">
+             <div className="bg-emerald-400 h-full transition-all duration-300" style={{ width: '60%' }} />
+             <div className="bg-teal-400 h-full transition-all duration-300" style={{ width: '40%' }} />
+          </div>
+        </div>
+        
+        <div className="space-y-6">
+          <div>
+            <label className="text-sm font-bold text-muted-foreground mb-4 block uppercase tracking-wider">Total Amount: {total}</label>
+            <Slider value={[total]} onValueChange={([v]) => setTotal(v)} min={5} max={100} step={5} className="w-full" />
+          </div>
+          <div className="space-y-3">
+             <div className="p-4 rounded-xl bg-muted/30 border border-border/40">
+                <p className="text-[11px] font-black uppercase tracking-widest text-muted-foreground mb-2">The ADM Method</p>
+                <ul className="space-y-2 text-sm font-medium text-foreground/80">
+                  <li><strong className="text-foreground">Add:</strong> 3 + 2 = {parts} Total Parts</li>
+                  <li><strong className="text-foreground">Divide:</strong> {total} ÷ {parts} = {partValue} per single part</li>
+                  <li><strong className="text-foreground">Multiply:</strong> {partValue} × 3 = <span className="text-emerald-500">{shareA}</span>, {partValue} × 2 = <span className="text-teal-500">{shareB}</span></li>
+                </ul>
+             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function ProbabilityScaleInteractive() {
+  const [prob, setProb] = useState(0.5);
+  
+  let descriptor = "Evens (1/2)";
+  let color = "text-amber-500";
+  let bg = "bg-amber-500";
+  
+  if (prob === 0) { descriptor = "Impossible (0)"; color = "text-slate-500"; bg = "bg-slate-500"; }
+  else if (prob > 0 && prob < 0.5) { descriptor = "Unlikely"; color = "text-rose-500"; bg = "bg-rose-500"; }
+  else if (prob > 0.5 && prob < 1) { descriptor = "Likely"; color = "text-emerald-500"; bg = "bg-emerald-500"; }
+  else if (prob === 1) { descriptor = "Certain (1)"; color = "text-blue-500"; bg = "bg-blue-500"; }
+
+  return (
+    <div className="notes-interactive-diagram mb-8">
+      <h4 className="font-semibold text-foreground mb-6 flex items-center gap-2">
+        <span className="notes-diagram-icon"><Target className="h-4 w-4" /></span>
+        The Probability Scale
+      </h4>
+      <div className="grid md:grid-cols-2 gap-8 items-center">
+        <div className="bg-muted/20 rounded-2xl p-8 flex flex-col items-center justify-center border border-border/30">
+           <div className="w-full relative py-6">
+              <div className="w-full h-2 bg-gradient-to-r from-slate-300 via-amber-300 to-blue-300 dark:from-slate-700 dark:via-amber-800 dark:to-blue-800 rounded-full shadow-inner" />
+              <div className="flex justify-between w-full mt-4 text-[10px] font-black uppercase tracking-widest text-muted-foreground">
+                 <span>0 (Impossible)</span>
+                 <span>0.5 (Evens)</span>
+                 <span>1 (Certain)</span>
+              </div>
+              
+              <div 
+                className={cn("absolute top-3 w-6 h-6 -ml-3 rounded-full border-[3px] border-white dark:border-background shadow-lg transition-all duration-300", bg)}
+                style={{ left: `${prob * 100}%` }}
+              />
+           </div>
+           <div className="mt-8 text-center p-4 rounded-xl bg-background shadow-sm border border-border/50 min-w-[150px]">
+              <div className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-1">State</div>
+              <div className={cn("text-2xl font-black", color)}>{descriptor}</div>
+           </div>
+        </div>
+        
+        <div className="space-y-6">
+          <div>
+            <label className="text-sm font-bold text-muted-foreground mb-4 block uppercase tracking-wider">Adjust Probability: {prob.toFixed(2)}</label>
+            <Slider value={[prob]} onValueChange={([v]) => setProb(v)} min={0} max={1} step={0.1} className="w-full" />
+          </div>
+          <div className="p-4 rounded-xl bg-blue-500/5 border border-blue-500/10">
+             <p className="text-sm text-foreground/80 leading-relaxed font-medium">Mathematical probability is strictly locked between <strong className="text-slate-500">0 (Impossible)</strong> and <strong className="text-blue-500">1 (Unconditionally Certain)</strong>.</p>
+             <p className="text-sm text-foreground/80 leading-relaxed font-medium mt-3">You may write answers as fractions or decimals, but <strong>never</strong> as odds (e.g. 1 in 5).</p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

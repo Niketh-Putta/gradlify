@@ -455,7 +455,7 @@ export default function PracticeSessionNew() {
         }
 
         const { data, error } = await supabase
-          .from("extreme_results")
+          .from("extreme_results" as any)
           .select("question_id")
           .eq("user_id", sessionUser.id);
 
@@ -465,7 +465,7 @@ export default function PracticeSessionNew() {
           return;
         }
 
-        data?.forEach((row) => {
+        data?.forEach((row: any) => {
           if (row?.question_id) {
             extremeAttemptedIdsRef.current.add(row.question_id);
           }
@@ -1266,7 +1266,7 @@ export default function PracticeSessionNew() {
 
         try {
           if (!recordedExtremeQuestionIdsRef.current.has(currentQuestion.id)) {
-          const { error: insertError } = await supabase.from('extreme_results').insert({
+          const { error: insertError } = await supabase.from('extreme_results' as any).insert({
             user_id: sessionUser.id,
             question_id: currentQuestion.id,
             attempts: 1,
@@ -1413,7 +1413,7 @@ export default function PracticeSessionNew() {
 
       try {
         if (!recordedExtremeQuestionIdsRef.current.has(currentQuestion.id)) {
-          const { error: insertError } = await supabase.from('extreme_results').insert({
+          const { error: insertError } = await supabase.from('extreme_results' as any).insert({
             user_id: sessionUser.id,
             question_id: currentQuestion.id,
             attempts: 1,
@@ -1786,6 +1786,16 @@ export default function PracticeSessionNew() {
               {questionDifficultyLabel && (
                 <span className={`${tagBaseClass} ${tagStyles.difficulty} whitespace-nowrap`}>
                   {questionDifficultyLabel}
+                </span>
+              )}
+              {currentQuestion?.marks && (
+                <span className={`${tagBaseClass} bg-primary/10 text-primary border-primary/20 whitespace-nowrap`}>
+                  {currentQuestion.marks} Mark{currentQuestion.marks !== 1 ? 's' : ''}
+                </span>
+              )}
+              {currentQuestion?.estimated_time_sec && (
+                <span className={`${tagBaseClass} bg-slate-500/10 text-slate-700 border-slate-500/20 whitespace-nowrap`}>
+                   Target: {Math.floor(currentQuestion.estimated_time_sec / 60)}m {currentQuestion.estimated_time_sec % 60 > 0 ? `${currentQuestion.estimated_time_sec % 60}s` : ''}
                 </span>
               )}
               {currentQuestion?.wasWrongBefore && (

@@ -14,6 +14,7 @@ import rehypeRaw from "rehype-raw";
 import rehypeSanitize, { defaultSchema } from "rehype-sanitize";
 import "katex/dist/katex.min.css";
 import { cn } from "@/lib/utils";
+import { BlockVisual, hasBlockVisual } from "@/components/exam/BlockVisual";
 import { getInteractiveDiagram } from "@/components/revision-diagrams/InteractiveDiagrams";
 import MathText from "@/components/MathText";
 import { statisticsPracticeQuestions } from "@/data/statisticsPracticeQuestions";
@@ -64,652 +65,7 @@ const notesSanitizeSchema = {
 } as const;
 
 
-const BlockVisual = ({ title }: { title: string }) => {
-  const normTitle = title.toLowerCase();
 
-
-  if (normTitle.includes("hcf and lcm")) {
-    return (
-      <div className="my-4 p-6 rounded-3xl border border-indigo-500/20 bg-indigo-50/50 shadow-xl overflow-hidden relative group">
-        <h3 className="text-[11px] font-black mb-4 flex items-center justify-center gap-2 text-indigo-700 uppercase tracking-widest">
-          <Target className="h-4 w-4 text-indigo-500" />
-          The Venn Method (LCM & HCF)
-        </h3>
-        <div className="relative flex justify-center py-6">
-          <div className="absolute top-1/2 left-1/2 -translate-x-[70%] -translate-y-1/2 w-32 h-32 md:w-40 md:h-40 rounded-full border-[3px] border-blue-500 bg-blue-500/10 mix-blend-multiply flex items-center justify-start pl-6 md:pl-8">
-            <div className="flex flex-col gap-2">
-               <span className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-background border border-blue-200 shadow-sm flex items-center justify-center font-bold text-blue-700 text-xs text-center leading-none">2</span>
-               <span className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-background border border-blue-200 shadow-sm flex items-center justify-center font-bold text-blue-700 text-xs text-center leading-none">2</span>
-            </div>
-          </div>
-          <div className="absolute top-1/2 left-1/2 -translate-x-[30%] -translate-y-1/2 w-32 h-32 md:w-40 md:h-40 rounded-full border-[3px] border-emerald-500 bg-emerald-500/10 mix-blend-multiply flex items-center justify-end pr-6 md:pr-8">
-            <span className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-background border border-emerald-200 shadow-sm flex items-center justify-center font-bold text-emerald-700 text-xs text-center leading-none">5</span>
-          </div>
-          <div className="relative z-10 w-32 h-32 md:w-40 md:h-40 flex items-center justify-center">
-            <span className="w-6 h-6 md:w-8 md:h-8 rounded-full shadow-lg border-2 border-indigo-400 bg-white flex items-center justify-center font-black text-indigo-600 z-20">3</span>
-          </div>
-        </div>
-        <div className="mt-4 grid grid-cols-2 gap-4 text-center relative z-20">
-          <div className="p-3 bg-white/80 backdrop-blur rounded-2xl border border-indigo-100 shadow-sm">
-            <div className="text-[9px] md:text-[10px] uppercase font-black tracking-widest text-indigo-400 mb-1">HCF (Middle)</div>
-            <div className="text-lg md:text-xl font-black text-indigo-600">3</div>
-          </div>
-          <div className="p-3 bg-white/80 backdrop-blur rounded-2xl border border-indigo-100 shadow-sm">
-            <div className="text-[9px] md:text-[10px] uppercase font-black tracking-widest text-indigo-400 mb-1">LCM (All)</div>
-            <div className="text-lg md:text-xl font-black text-indigo-600"><span className="text-xs font-bold text-indigo-400 block md:inline md:mr-1">2×2×3×5 = </span>60</div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (normTitle.includes("fdp connection")) {
-    return (
-      <div className="my-4 p-6 rounded-3xl border border-rose-500/20 bg-rose-50/50 shadow-xl overflow-hidden relative group text-center">
-        <h3 className="text-[11px] font-black mb-6 flex items-center justify-center gap-2 text-rose-700 uppercase tracking-widest">
-          <Zap className="h-4 w-4 text-rose-500" />
-          The F.D.P Connection
-        </h3>
-        <div className="flex items-center justify-center gap-2 md:gap-4 max-w-lg mx-auto">
-          <div className="flex flex-col items-center">
-             <div className="w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-white border border-rose-200 shadow flex items-center justify-center font-black text-base md:text-xl text-rose-600 flex-col leading-none">
-                <span className="border-b-2 border-rose-600 w-6 md:w-8 text-center pb-0.5">1</span>
-                <span className="pt-0.5">4</span>
-             </div>
-             <div className="mt-3 text-[8px] md:text-[10px] uppercase font-black text-rose-400">Fraction</div>
-          </div>
-          <div className="flex-1 flex flex-col items-center justify-center text-rose-400 gap-1 pb-6">
-             <ArrowRight className="h-4 w-4" />
-             <span className="text-[8px] md:text-[9px] font-black uppercase text-center bg-rose-100 px-1 md:px-2 py-0.5 rounded shadow-sm">÷ top by bottom</span>
-          </div>
-          <div className="flex flex-col items-center">
-             <div className="w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-rose-500 shadow flex items-center justify-center font-black text-base md:text-xl text-white">
-                0.25
-             </div>
-             <div className="mt-3 text-[8px] md:text-[10px] uppercase font-black text-rose-500">Decimal</div>
-          </div>
-          <div className="flex-1 flex flex-col items-center justify-center text-rose-400 gap-1 pb-6">
-             <ArrowRight className="h-4 w-4" />
-             <span className="text-[8px] md:text-[9px] font-black uppercase text-center bg-rose-100 px-1 md:px-2 py-0.5 rounded shadow-sm">× 100</span>
-          </div>
-          <div className="flex flex-col items-center">
-             <div className="w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-rose-900 shadow flex items-center justify-center font-black text-base md:text-xl text-white">
-                25<span className="text-[10px] md:text-sm ml-0.5">%</span>
-             </div>
-             <div className="mt-3 text-[8px] md:text-[10px] uppercase font-black text-rose-800">Percentage</div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (normTitle.includes("function machine")) {
-    return (
-      <div className="my-4 p-6 rounded-3xl border border-teal-500/20 bg-gradient-to-br from-teal-50 to-emerald-50 shadow-xl relative overflow-hidden text-center">
-        <h3 className="text-[11px] font-black mb-6 flex items-center justify-center gap-2 text-teal-800 uppercase tracking-widest">
-          <BookOpen className="h-4 w-4 text-teal-500" />
-          The Function Machine
-        </h3>
-        <div className="flex flex-col items-center justify-center gap-3">
-           <div className="flex items-center justify-center w-14 h-14 md:w-20 md:h-20 rounded-full border-4 border-dashed border-teal-300 bg-white shadow font-black text-2xl text-teal-600">
-             x
-           </div>
-           <ArrowRight className="h-6 w-6 text-teal-300 rotate-90" />
-           <div className="flex gap-2 p-2 md:p-3 rounded-2xl bg-white border border-teal-200 shadow-md">
-              <div className="px-4 py-3 md:px-6 md:py-4 rounded-xl bg-teal-500 text-white font-black text-lg md:text-xl shadow-inner uppercase tracking-wider">
-                × 4
-              </div>
-              <div className="px-4 py-3 md:px-6 md:py-4 rounded-xl bg-rose-400 text-white font-black text-lg md:text-xl shadow-inner uppercase tracking-wider">
-                - 7
-              </div>
-           </div>
-           <ArrowRight className="h-6 w-6 text-teal-300 rotate-90" />
-           <div className="flex items-center justify-center px-4 md:px-6 h-14 md:h-20 rounded-2xl border-4 border-teal-500 bg-white shadow-lg font-black text-xl md:text-2xl text-teal-800 tracking-wider">
-             4x - 7
-           </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (normTitle.includes("balance method")) {
-    return (
-      <div className="my-4 p-6 rounded-3xl border border-sky-500/30 bg-sky-50 shadow-xl overflow-hidden relative group">
-        <h3 className="text-[11px] font-black mb-6 flex items-center justify-center gap-2 text-sky-800 uppercase tracking-widest">
-          <Target className="h-4 w-4 text-sky-500" />
-          The Balance Method
-        </h3>
-        <div className="flex justify-center items-end px-2 pt-4 pb-4 h-32 md:h-40">
-           <div className="relative w-full max-w-md border-b-[6px] border-sky-400 flex justify-between rounded-full">
-              <div className="absolute left-1/2 -bottom-1 -translate-x-1/2 w-0 h-0 border-l-[16px] border-r-[16px] border-b-[24px] border-l-transparent border-r-transparent border-b-sky-400" />
-              <div className="absolute left-1/2 bottom-5 -translate-x-1/2 text-xl md:text-2xl font-black text-sky-500 bg-sky-50 px-2">=</div>
-              
-              <div className="flex gap-2 items-end pb-1.5 pl-2 md:pl-8">
-                 <div className="w-10 h-14 md:w-12 md:h-16 bg-sky-500 rounded flex items-center justify-center shadow-md font-black text-white text-lg">3y</div>
-                 <div className="w-8 h-8 md:w-10 md:h-10 bg-emerald-400 rounded-full flex items-center justify-center shadow-md font-black text-white text-xs md:text-sm">+5</div>
-              </div>
-              
-              <div className="flex gap-2 items-end pb-1.5 pr-2 md:pr-8">
-                 <div className="w-14 h-16 md:w-16 md:h-20 bg-sky-700/80 rounded flex items-center justify-center shadow-md font-black text-white text-xl md:text-2xl">26</div>
-              </div>
-           </div>
-        </div>
-        <p className="text-center text-[9px] font-black uppercase text-sky-400 tracking-[0.1em] mt-6">Whatever you do to one side, you must do to the other</p>
-      </div>
-    );
-  }
-
-  if (normTitle.includes("nth term rule")) {
-    return (
-      <div className="my-4 p-6 rounded-3xl border border-fuchsia-500/20 bg-fuchsia-50/50 shadow-xl overflow-hidden">
-        <h3 className="text-[11px] font-black mb-6 flex items-center justify-center gap-2 text-fuchsia-800 uppercase tracking-widest">
-          <Zap className="h-4 w-4 text-fuchsia-500" />
-          Nth Term Stepping Stones
-        </h3>
-        <div className="flex justify-center items-center gap-2 md:gap-4 pb-4">
-           {[5, 8, 11, 14].map((num, i, arr) => (
-             <Fragment key={i}>
-               <div className="flex flex-col items-center">
-                 <div className="w-10 h-10 md:w-14 md:h-14 rounded-2xl bg-white border-2 border-fuchsia-200 shadow-md flex items-center justify-center font-black text-lg md:text-2xl text-fuchsia-600 transition-transform hover:scale-105">
-                   {num}
-                 </div>
-                 <span className="mt-2 text-[8px] md:text-[9px] font-black uppercase text-fuchsia-400 bg-white px-2 py-0.5 rounded-full border border-fuchsia-100">
-                   n={i+1}
-                 </span>
-               </div>
-               {i < arr.length - 1 && (
-                 <div className="flex flex-col items-center justify-center -mt-6">
-                    <div className="text-[9px] md:text-[10px] font-black text-white bg-fuchsia-400 px-1.5 md:px-2 py-0.5 rounded-full shadow-sm mb-1">
-                      +3
-                    </div>
-                    <ArrowRight className="h-4 w-4 md:h-5 md:w-5 text-fuchsia-300" />
-                 </div>
-               )}
-             </Fragment>
-           ))}
-        </div>
-      </div>
-    );
-  }
-
-  if (normTitle.includes("perimeter and area")) {
-    return (
-      <div className="my-4 p-6 rounded-3xl border border-emerald-500/20 bg-emerald-50/50 shadow-xl overflow-hidden">
-        <h3 className="text-[11px] font-black mb-6 flex items-center justify-center gap-2 text-emerald-800 uppercase tracking-widest">
-          <BookOpen className="h-4 w-4 text-emerald-500" />
-          The Dimensions
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-           <div className="flex flex-col items-center p-4 bg-white rounded-2xl shadow-sm border border-emerald-100 text-center">
-             <div className="w-20 h-20 border-4 border-dashed border-emerald-500 rounded-lg mb-4 flex items-center justify-center text-emerald-600/30 font-black text-xs">Path</div>
-             <h4 className="font-black text-emerald-700 uppercase tracking-widest">Perimeter</h4>
-             <span className="text-[10px] text-muted-foreground font-bold mt-1">1D (cm) : Outside</span>
-           </div>
-           <div className="flex flex-col items-center p-4 bg-white rounded-2xl shadow-sm border border-emerald-100 text-center">
-             <div className="w-20 h-20 border-4 border-emerald-400 bg-emerald-400/20 rounded-lg mb-4 flex items-center justify-center text-emerald-600 font-black text-xs">Surface</div>
-             <h4 className="font-black text-emerald-700 uppercase tracking-widest">Area</h4>
-             <span className="text-[10px] text-muted-foreground font-bold mt-1">2D (cm²) : Inside</span>
-           </div>
-           <div className="flex flex-col items-center p-4 bg-white rounded-2xl shadow-sm border border-emerald-100 text-center">
-             <div className="relative w-24 h-20 mb-4 flex items-center justify-center">
-                <div className="absolute w-16 h-16 bg-emerald-500/40 border-2 border-emerald-500 rounded right-2 top-0" />
-                <div className="absolute w-16 h-16 bg-emerald-400/80 border-2 border-emerald-600 rounded left-2 bottom-0 flex items-center justify-center text-white font-black text-[10px]">Space</div>
-                <svg className="absolute w-full h-full" style={{ pointerEvents: 'none' }}>
-                  <line x1="26" y1="16" x2="42" y2="0" stroke="currentColor" className="text-emerald-700" strokeWidth="2" />
-                  <line x1="90" y1="16" x2="106" y2="0" stroke="currentColor" className="text-emerald-700" strokeWidth="2" />
-                  <line x1="90" y1="80" x2="106" y2="64" stroke="currentColor" className="text-emerald-700" strokeWidth="2" />
-                </svg>
-             </div>
-             <h4 className="font-black text-emerald-700 uppercase tracking-widest">Volume</h4>
-             <span className="text-[10px] text-muted-foreground font-bold mt-1">3D (cm³) : Space</span>
-           </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (normTitle.includes("speed, distance, time")) {
-    return (
-      <div className="my-4 p-6 rounded-3xl border border-orange-500/20 bg-orange-50/50 shadow-xl overflow-hidden text-center">
-        <h3 className="text-[11px] font-black mb-6 flex items-center justify-center gap-2 text-orange-800 uppercase tracking-widest">
-          <Clock className="h-4 w-4 text-orange-500" />
-          The Formula Triangle
-        </h3>
-        <div className="relative flex justify-center py-4">
-           <svg width="140" height="120" viewBox="0 0 200 173" className="drop-shadow-xl text-orange-500">
-             <path d="M 100 0 L 200 173 L 0 173 Z" fill="currentColor" fillOpacity="0.1" stroke="currentColor" strokeWidth="5" strokeLinejoin="round" />
-             <line x1="28" y1="115" x2="172" y2="115" stroke="currentColor" strokeWidth="5" />
-             <line x1="100" y1="115" x2="100" y2="173" stroke="currentColor" strokeWidth="5" />
-             <text x="100" y="80" textAnchor="middle" fill="currentColor" fontSize="40" fontWeight="900">D</text>
-             <text x="50" y="160" textAnchor="middle" fill="currentColor" fontSize="40" fontWeight="900">S</text>
-             <text x="150" y="160" textAnchor="middle" fill="currentColor" fontSize="40" fontWeight="900">T</text>
-           </svg>
-        </div>
-        <p className="mt-2 text-[9px] font-black justify-center items-center flex gap-4 uppercase text-orange-400 tracking-widest">
-           <span className="flex items-center gap-1"><ArrowRight className="h-3 w-3" /> Multiply</span>
-           <span className="flex items-center gap-1 flex-col justify-center h-4 w-4">÷<br/></span> Divide
-        </p>
-      </div>
-    );
-  }
-
-  if (normTitle.includes("coordinates (the grid)")) {
-    return (
-      <div className="my-4 p-6 rounded-3xl border border-cyan-500/20 bg-cyan-50/50 shadow-xl overflow-hidden flex flex-col items-center">
-        <h3 className="text-[11px] font-black mb-6 flex items-center justify-center gap-2 text-cyan-800 uppercase tracking-widest">
-          <Target className="h-4 w-4 text-cyan-500" />
-          The 4 Quadrants
-        </h3>
-        <div className="relative w-48 h-48 bg-white border-2 border-cyan-200 rounded-xl shadow-inner grid grid-cols-2 grid-rows-2 p-4 gap-1">
-          <div className="absolute top-1/2 left-0 w-full h-[2px] bg-cyan-500" />
-          <div className="absolute top-0 left-1/2 w-[2px] h-full bg-cyan-500" />
-          
-          <div className="flex items-center justify-center text-cyan-600/50 font-black text-lg z-10">(-x, y)</div>
-          <div className="flex items-center justify-center text-cyan-600/50 font-black text-lg z-10">(x, y)</div>
-          <div className="flex items-center justify-center text-cyan-600/50 font-black text-lg z-10">(-x, -y)</div>
-          <div className="flex items-center justify-center text-cyan-600/50 font-black text-lg z-10">(x, -y)</div>
-          
-          <div className="absolute top-1/2 -mt-4 -right-4 text-[10px] font-black text-cyan-700">x</div>
-          <div className="absolute left-1/2 -ml-1 -top-4 text-[10px] font-black text-cyan-700">y</div>
-          <div className="absolute top-1/2 left-1/2 w-2 h-2 bg-cyan-600 rounded-full -ml-1 -mt-1 shadow" />
-        </div>
-      </div>
-    );
-  }
-
-  if (normTitle.includes("probability scale")) {
-    return (
-      <div className="my-4 p-6 rounded-3xl border border-amber-500/20 bg-amber-50/50 shadow-xl overflow-hidden">
-        <h3 className="text-[11px] font-black mb-6 flex items-center justify-center gap-2 text-amber-800 uppercase tracking-widest">
-          <CheckCircle className="h-4 w-4 text-amber-500" />
-          The Probability Scale
-        </h3>
-        <div className="relative px-2 pt-4 pb-8">
-           <div className="h-3 md:h-4 w-full rounded-full bg-gradient-to-r from-rose-500 via-amber-400 to-emerald-500 shadow-inner" />
-           <div className="absolute top-0 left-2 bottom-0 w-1 bg-white/50" />
-           <div className="absolute top-0 left-1/2 -translate-x-1/2 bottom-0 w-1 bg-white/50" />
-           <div className="absolute top-0 right-2 bottom-0 w-1 bg-white/50" />
-           <div className="flex justify-between mt-3 px-0 text-center relative -ml-4 -mr-4">
-             <div className="flex flex-col flex-1 items-start pl-2">
-                <span className="font-black text-rose-600">0</span>
-                <span className="text-[8px] md:text-[9px] font-bold uppercase text-muted-foreground mt-1">Impossible</span>
-             </div>
-             <div className="flex flex-col flex-1 items-center">
-                <span className="font-black text-amber-600">0.5 (1/2)</span>
-                <span className="text-[8px] md:text-[9px] font-bold uppercase text-muted-foreground mt-1">Evens</span>
-             </div>
-             <div className="flex flex-col flex-1 items-end pr-2">
-                <span className="font-black text-emerald-600">1</span>
-                <span className="text-[8px] md:text-[9px] font-bold uppercase text-muted-foreground mt-1">Certain</span>
-             </div>
-           </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (normTitle.includes("sharing in a ratio")) {
-    return (
-      <div className="my-4 p-6 rounded-3xl border border-indigo-500/20 bg-indigo-50/50 overflow-hidden shadow-xl group">
-        <h3 className="text-[11px] font-black mb-4 flex items-center gap-2 text-indigo-700 uppercase tracking-[0.1em]">
-          <span className="p-1 rounded-lg bg-indigo-500/20 text-indigo-600 shadow-sm"><PenLine className="h-3 w-3" /></span>
-          Ratio Bar Model
-        </h3>
-        <div className="space-y-4">
-          <div className="flex items-center gap-2 md:gap-3">
-            <div className="text-[9px] md:text-[10px] font-bold w-12 md:w-16 text-muted-foreground uppercase leading-tight">Friend A<br/>(2)</div>
-            <div className="flex-1 flex gap-1 h-8 md:h-10">
-              <div className="flex-1 bg-indigo-500 rounded-lg flex items-center justify-center text-white font-bold text-xs shadow-md">£10</div>
-              <div className="flex-1 bg-indigo-500 rounded-lg flex items-center justify-center text-white font-bold text-xs shadow-md">£10</div>
-            </div>
-            <div className="text-sm font-black text-indigo-600">£20</div>
-          </div>
-          <div className="flex items-center gap-2 md:gap-3">
-            <div className="text-[9px] md:text-[10px] font-bold w-12 md:w-16 text-muted-foreground uppercase leading-tight">Friend B<br/>(3)</div>
-            <div className="flex-1 flex gap-1 h-8 md:h-10">
-              <div className="flex-1 bg-blue-500 rounded-lg flex items-center justify-center text-white font-bold text-xs shadow-md">£10</div>
-              <div className="flex-1 bg-blue-500 rounded-lg flex items-center justify-center text-white font-bold text-xs shadow-md">£10</div>
-              <div className="flex-1 bg-blue-500 rounded-lg flex items-center justify-center text-white font-bold text-xs shadow-md">£10</div>
-            </div>
-            <div className="text-sm font-black text-blue-600">£30</div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (normTitle.includes("equivalent fraction") || normTitle.includes("anatomy of a fraction")) {
-    return (
-      <div className="my-4 p-6 rounded-3xl border border-blue-500/20 bg-blue-50/50 shadow-xl overflow-hidden relative">
-        <h3 className="text-[11px] font-black mb-4 flex items-center justify-center gap-2 text-blue-700 uppercase tracking-widest">
-          Equivalent Fraction Wall
-        </h3>
-        <div className="space-y-1 md:space-y-2">
-          <div className="h-8 md:h-10 w-full bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-xs shadow-sm">1 WHOLE</div>
-          <div className="grid grid-cols-2 gap-1 h-8 md:h-10">
-            {[1, 2].map(i => <div key={i} className="bg-blue-500/90 rounded flex items-center justify-center text-white text-xs font-bold border border-white/10">1/2</div>)}
-          </div>
-          <div className="grid grid-cols-3 gap-1 h-8 md:h-10">
-            {[1, 2, 3].map(i => <div key={i} className="bg-blue-400 rounded flex items-center justify-center text-white text-[10px] font-bold border border-white/10">1/3</div>)}
-          </div>
-          <div className="grid grid-cols-4 gap-1 h-8 md:h-10">
-            {[1, 2, 3, 4].map(i => <div key={i} className="bg-blue-300 rounded flex items-center justify-center text-blue-900 text-[10px] font-bold border border-blue-900/10">1/4</div>)}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (normTitle.includes("2d shapes") || normTitle.includes("properties of shapes")) {
-    return (
-      <div className="my-4 grid grid-cols-2 gap-3">
-        {[
-          { name: 'Triangle', sides: 3, d: "M 20 80 L 50 20 L 80 80 Z", color: 'text-orange-500' },
-          { name: 'Square', sides: 4, d: "M 25 25 H 75 V 75 H 25 Z", color: 'text-blue-500' },
-          { name: 'Pentagon', sides: 5, d: "M 50 15 L 85 41 L 71 83 L 29 83 L 15 41 Z", color: 'text-emerald-500' },
-          { name: 'Hexagon', sides: 6, d: "M 50 10 L 85 30 V 70 L 50 90 L 15 70 V 30 Z", color: 'text-violet-500' }
-        ].map(s => (
-          <div key={s.name} className="p-4 rounded-2xl border border-border/40 bg-card flex flex-col items-center shadow-sm">
-            <svg width="40" height="40" viewBox="0 0 100 100" className={cn(s.color, "opacity-90")}>
-              <path d={s.d} fill="currentColor" fillOpacity="0.1" stroke="currentColor" strokeWidth="4" />
-            </svg>
-            <span className="mt-2 text-[9px] font-black uppercase text-foreground/80">{s.name}</span>
-          </div>
-        ))}
-      </div>
-    );
-  }
-
-  if (normTitle.includes("the 3 m's") || normTitle.includes("averages")) {
-    return (
-      <div className="my-4 p-6 rounded-3xl border border-emerald-500/20 bg-emerald-50/50 shadow-xl overflow-hidden text-center">
-        <h3 className="text-[11px] font-black mb-4 flex items-center justify-center gap-2 text-emerald-800 uppercase tracking-widest">
-          Data Toolkit (Averages)
-        </h3>
-        <div className="grid grid-cols-2 gap-3">
-          {[
-            { label: 'MEAN', sub: 'The Fair Share', icon: 'Σ' },
-            { label: 'MEDIAN', sub: 'The Middle', icon: '↔' },
-            { label: 'MODE', sub: 'The Most', icon: '★' },
-            { label: 'RANGE', sub: 'The Spread', icon: '±' }
-          ].map(tool => (
-            <div key={tool.label} className="p-3 bg-white rounded-xl border border-emerald-100 shadow-sm flex flex-col items-center">
-              <span className="text-emerald-300 text-lg font-black leading-none mb-1">{tool.icon}</span>
-              <span className="text-[10px] font-black text-emerald-700 uppercase">{tool.label}</span>
-              <span className="text-[8px] text-muted-foreground uppercase">{tool.sub}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  if (normTitle.includes("decoding word problems") || normTitle.includes("rucsac")) {
-    return (
-      <div className="my-4 flex flex-col gap-2">
-        {"RUCSAC".split("").map((letter, i) => (
-          <div key={letter} className="p-3 rounded-2xl border border-border/40 bg-white flex items-center gap-4 shadow-sm">
-            <div className={cn(
-              "h-8 w-8 shrink-0 rounded-lg flex items-center justify-center text-sm font-black text-white shadow-sm",
-              ['bg-blue-500', 'bg-indigo-500', 'bg-violet-500', 'bg-purple-500', 'bg-fuchsia-500', 'bg-pink-500'][i]
-            )}>
-              {letter}
-            </div>
-            <div className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/80">
-              {['Read', 'Understand', 'Choose', 'Solve', 'Answer', 'Check'][i]}
-            </div>
-          </div>
-        ))}
-      </div>
-    );
-  }
-
-  if (normTitle.includes("parallel lines") || normTitle.includes("z, f, c")) {
-    return (
-      <div className="my-4 p-6 rounded-3xl border border-blue-500/20 bg-blue-50/40 shadow-xl overflow-hidden">
-        <h3 className="text-[11px] font-black mb-6 flex items-center justify-center gap-2 text-blue-800 uppercase tracking-widest">
-          <BookOpen className="h-4 w-4 text-blue-500" />
-          Parallel Line Angle Rules
-        </h3>
-        <div className="grid grid-cols-1 gap-6">
-          <div className="flex flex-col items-center bg-white p-4 rounded-2xl shadow-sm border border-blue-100">
-            <span className="text-[10px] font-black uppercase text-blue-600 mb-2 tracking-widest bg-blue-50 px-2 py-0.5 rounded-full">Alternate (Z)</span>
-            <svg width="150" height="105" viewBox="0 0 200 140" className="text-blue-500 overflow-visible">
-              {/* Parallel lines */}
-              <line x1="20" y1="40" x2="180" y2="40" stroke="currentColor" strokeWidth="4" />
-              <line x1="20" y1="100" x2="180" y2="100" stroke="currentColor" strokeWidth="4" />
-              {/* Arrows */}
-              <path d="M 170 35 L 180 40 L 170 45 M 170 95 L 180 100 L 170 105" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
-              {/* Transversal (140,10) to (60,130) */}
-              <line x1="140" y1="10" x2="60" y2="130" stroke="currentColor" strokeWidth="4" />
-              
-              {/* Z shape highlight (60,40) -> (120,40) -> (80,100) -> (140,100) */}
-              <path d="M 60 40 L 120 40 L 80 100 L 140 100" fill="none" stroke="currentColor" strokeWidth="10" className="opacity-20" strokeLinejoin="round" />
-              
-              {/* Perfect Angle Arcs */}
-              {/* Top angle inside Z: V=(120,40). P0=(100,40). P1=(108.9, 56.6). */}
-              <path d="M 100 40 Q 120 40 108.9 56.6" fill="none" stroke="currentColor" strokeWidth="3" className="text-amber-500" />
-              {/* Bottom angle inside Z: V=(80,100). P0=(100,100). P1=(91.1, 83.4). */}
-              <path d="M 100 100 Q 80 100 91.1 83.4" fill="none" stroke="currentColor" strokeWidth="3" className="text-amber-500" />
-            </svg>
-            <span className="text-[9px] font-black text-amber-600 mt-2 uppercase">Always Equal</span>
-          </div>
-
-          <div className="flex flex-col items-center bg-white p-4 rounded-2xl shadow-sm border border-blue-100">
-            <span className="text-[10px] font-black uppercase text-blue-600 mb-2 tracking-widest bg-blue-50 px-2 py-0.5 rounded-full">Corresponding (F)</span>
-            <svg width="150" height="105" viewBox="0 0 200 140" className="text-blue-500 overflow-visible">
-              <line x1="20" y1="40" x2="180" y2="40" stroke="currentColor" strokeWidth="4" />
-              <line x1="20" y1="100" x2="180" y2="100" stroke="currentColor" strokeWidth="4" />
-              <path d="M 170 35 L 180 40 L 170 45 M 170 95 L 180 100 L 170 105" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
-              {/* Transversal (60,10) to (140,130) */}
-              <line x1="60" y1="10" x2="140" y2="130" stroke="currentColor" strokeWidth="4" />
-
-              {/* F shape highlight (70,25) -> (120,100), branch 1: (80,40)->(140,40), branch 2: (120,100)->(180,100) */}
-              <path d="M 70 25 L 120 100 M 80 40 L 140 40 M 120 100 L 180 100" fill="none" stroke="currentColor" strokeWidth="10" className="opacity-20" strokeLinejoin="round" strokeLinecap="round" />
-
-              {/* Top angle: V=(80,40), P0=(100,40), P1=(91.1,56.6) */}
-              <path d="M 100 40 Q 80 40 91.1 56.6" fill="none" stroke="currentColor" strokeWidth="3" className="text-emerald-500" />
-              {/* Bottom angle: V=(120,100), P0=(140,100), P1=(131.1,116.6) */}
-              <path d="M 140 100 Q 120 100 131.1 116.6" fill="none" stroke="currentColor" strokeWidth="3" className="text-emerald-500" />
-            </svg>
-            <span className="text-[9px] font-black text-emerald-600 mt-2 uppercase">Always Equal</span>
-          </div>
-
-          <div className="flex flex-col items-center bg-white p-4 rounded-2xl shadow-sm border border-blue-100">
-            <span className="text-[10px] font-black uppercase text-blue-600 mb-2 tracking-widest bg-blue-50 px-2 py-0.5 rounded-full">Co-interior (C)</span>
-            <svg width="150" height="105" viewBox="0 0 200 140" className="text-blue-500 overflow-visible">
-              <line x1="20" y1="40" x2="180" y2="40" stroke="currentColor" strokeWidth="4" />
-              <line x1="20" y1="100" x2="180" y2="100" stroke="currentColor" strokeWidth="4" />
-              <path d="M 170 35 L 180 40 L 170 45 M 170 95 L 180 100 L 170 105" fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
-              <line x1="60" y1="10" x2="140" y2="130" stroke="currentColor" strokeWidth="4" />
-              
-              {/* C shape highlight (130,40) -> (80,40) -> (120,100) -> (170,100) */}
-              <path d="M 130 40 L 80 40 L 120 100 L 170 100" fill="none" stroke="currentColor" strokeWidth="10" className="opacity-20" strokeLinejoin="round" />
-              
-              {/* Top angle: V=(80,40), P0=(100,40), P1=(91.1,56.6) */}
-              <path d="M 100 40 Q 80 40 91.1 56.6" fill="none" stroke="currentColor" strokeWidth="3" className="text-rose-500" />
-              {/* Bottom angle inside C: V=(120,100), P0=(140,100), P1=(108.9,83.4) */}
-              <path d="M 140 100 Q 120 100 108.9 83.4" fill="none" stroke="currentColor" strokeWidth="3" className="text-rose-500" />
-              
-              <text x="135" y="75" className="fill-rose-500 text-[14px] font-black">Sum=180°</text>
-            </svg>
-            <span className="text-[9px] font-black text-rose-600 mt-2 uppercase">Add up to 180°</span>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (normTitle.includes("architecture of numbers")) {
-    return (
-      <div className="my-10 p-6 rounded-3xl border-2 border-primary/10 bg-gradient-to-br from-background to-primary/5">
-        <h4 className="text-sm font-black mb-6 uppercase tracking-widest text-primary/80">Visualizing Magnitude</h4>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="flex flex-col items-center p-4 bg-background rounded-2xl border border-border shadow-sm">
-            <div className="w-16 h-16 bg-blue-600 rounded-lg shadow-lg rotate-12 mb-4" />
-            <span className="font-black text-xs uppercase tracking-tighter">1 Unit</span>
-            <p className="text-[10px] text-muted-foreground mt-1 text-center font-medium leading-relaxed italic">"The building block of all numbers."</p>
-          </div>
-          <div className="flex flex-col items-center p-4 bg-primary text-primary-foreground rounded-2xl shadow-xl transform scale-105 border-4 border-background">
-            <div className="w-24 h-16 border-2 border-primary-foreground/30 rounded flex items-center justify-center overflow-hidden mb-4 bg-primary-foreground/20">
-               {Array.from({length: 10}).map((_, i) => <div key={i} className="w-1.5 h-12 bg-primary-foreground/40 mx-0.5 rounded-full" />)}
-            </div>
-            <span className="font-black text-xs uppercase tracking-tighter">10 (TEN)</span>
-            <p className="text-[10px] text-primary-foreground/80 mt-1 text-center font-medium leading-relaxed italic">"10 units bound together in a single group."</p>
-          </div>
-          <div className="flex flex-col items-center p-4 bg-background rounded-2xl border border-border shadow-sm">
-            <div className="w-20 h-20 border-border border-2 rounded-lg bg-muted flex items-center justify-center mb-4 relative overflow-hidden">
-               <div className="grid grid-cols-10 grid-rows-10 w-full h-full p-0.5 gap-0.5">
-                  {Array.from({length: 100}).map((_, i) => <div key={i} className="bg-primary/20 rounded-[0.5px]" />)}
-               </div>
-            </div>
-            <span className="font-black text-xs uppercase tracking-tighter">100 (HUNDRED)</span>
-            <p className="text-[10px] text-muted-foreground mt-1 text-center font-medium leading-relaxed italic">"A flat plate containing 10 rods."</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (normTitle.includes("stack and fill")) {
-    return (
-      <div className="my-8 flex justify-center">
-        <div className="relative p-6 rounded-2xl border border-primary/20 bg-muted/30 shadow-xl overflow-hidden group">
-          <div className="absolute top-0 left-0 w-1 h-full bg-primary group-hover:w-2 transition-all" />
-          <div className="space-y-2 font-mono text-sm">
-            <div className="flex justify-between gap-12 tabular-nums">
-              <span>0.4<span className="text-primary font-black">00</span></span>
-              <span className="text-[9px] text-muted-foreground uppercase font-sans font-bold">Filled to 3dp</span>
-            </div>
-            <div className="flex justify-between gap-12 tabular-nums">
-              <span>0.404</span>
-              <span className="text-[9px] text-muted-foreground uppercase font-sans font-bold">Original Max</span>
-            </div>
-            <div className="flex justify-between gap-12 tabular-nums">
-              <span>0.04<span className="text-primary font-black">0</span></span>
-              <span className="text-[9px] text-muted-foreground uppercase font-sans font-bold">Filled to 3dp</span>
-            </div>
-          </div>
-          <div className="mt-5 pt-4 border-t border-border flex items-center gap-2 text-primary text-[10px] font-black italic">
-            <div className="p-1 rounded bg-primary/20"><CheckCircle className="h-3 w-3" /></div>
-            ALL NUMBERS NOW HAVE THE SAME LENGTH
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (normTitle.includes("formal written methods")) {
-    return (
-      <div className="my-8 p-6 rounded-3xl border border-border bg-card shadow-lg flex flex-col md:flex-row gap-8 items-center justify-center">
-        <div className="text-center">
-          <p className="text-[9px] font-bold text-muted-foreground uppercase mb-3 tracking-widest leading-none">The Stack</p>
-          <div className="font-mono text-xl text-foreground bg-muted p-4 rounded-xl border border-border/50">
-            {"  12.50\n+  7.25\n"}
-            <div className="h-0.5 bg-foreground/20 my-1" />
-            {"  19.75"}
-          </div>
-        </div>
-        <div className="hidden md:block text-muted-foreground/30">
-          <ArrowRight className="h-6 w-6" />
-        </div>
-        <div className="text-center">
-          <p className="text-[9px] font-bold text-blue-600 uppercase mb-3 tracking-widest leading-none">The Alignment</p>
-          <div className="relative">
-             <div className="absolute left-[2.4rem] top-0 bottom-0 w-px bg-blue-500/40 border-l border-dashed border-blue-400" />
-             <div className="font-mono text-sm leading-8 opacity-40">
-               Units . 1/10 1/100
-             </div>
-             <div className="font-mono text-xl tracking-widest">
-                12 . 50<br/>
-                07 . 25
-             </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (normTitle.includes("bidmas") || normTitle.includes("order of operations")) {
-    return (
-      <div className="my-8 flex justify-center">
-        <div className="p-1 rounded-3xl bg-gradient-to-b from-violet-500 via-purple-500 to-indigo-600 shadow-xl">
-          <div className="bg-background/95 backdrop-blur-sm rounded-[22px] p-6 text-center">
-            <h4 className="text-sm font-black text-purple-600 uppercase tracking-[0.2em] mb-6">The Hierarchy of Operations</h4>
-            <div className="space-y-3">
-              {[
-                { l: 'B', n: 'Brackets', c: 'bg-violet-500' },
-                { l: 'I', n: 'Indices', c: 'bg-indigo-500' },
-                { l: 'DM', n: 'Division / Mult', c: 'bg-blue-500' },
-                { l: 'AS', n: 'Addition / Sub', c: 'bg-sky-400' }
-              ].map((step, i) => (
-                <div key={step.l} className="flex items-center gap-3 group">
-                  <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center text-white font-black shadow-lg shadow-black/5 group-hover:scale-110 transition-transform", step.c)}>
-                    {step.l}
-                  </div>
-                  <div className="flex-1 text-left py-2 px-4 rounded-xl border border-border/50 bg-muted/30 font-bold text-xs group-hover:bg-muted/50 transition-colors">
-                    {step.n}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (normTitle.includes("prime") || normTitle.includes("factor tree")) {
-    return (
-      <div className="my-8 p-6 rounded-3xl border border-border bg-card shadow-lg flex flex-col items-center">
-        <p className="text-[10px] font-bold text-muted-foreground uppercase mb-6 tracking-widest">Visual Factorization (Prime Tree)</p>
-        <div className="relative flex flex-col items-center">
-          <div className="w-12 h-12 rounded-2xl bg-muted border-2 border-border flex items-center justify-center font-black text-lg">24</div>
-          <div className="h-6 w-24 border-x-2 border-t-2 border-border rounded-t-lg mt-0.5" />
-          <div className="flex gap-16 -mt-0.5">
-             <div className="flex flex-col items-center">
-                <div className="w-10 h-10 rounded-full bg-emerald-500/10 border-2 border-emerald-500 text-emerald-700 flex items-center justify-center font-black">2</div>
-                <span className="text-[8px] font-black text-emerald-600 uppercase mt-1">Prime</span>
-             </div>
-             <div className="flex flex-col items-center">
-                <div className="w-10 h-10 rounded-2xl bg-muted border-2 border-border flex items-center justify-center font-black">12</div>
-                <div className="h-4 w-12 border-x border-t border-border mt-0.5" />
-                <div className="flex gap-6">
-                   <div className="w-8 h-8 rounded-full bg-emerald-500/10 border-2 border-emerald-500 text-emerald-700 flex items-center justify-center font-black text-xs">2</div>
-                   <div className="w-8 h-8 rounded-2xl bg-muted border-2 border-border flex items-center justify-center font-black text-xs">6</div>
-                </div>
-             </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (normTitle.includes("rounding")) {
-    return (
-      <div className="my-8 p-6 rounded-2xl border border-amber-500/30 bg-amber-500/5">
-        <h4 className="text-xs font-black text-amber-700 uppercase mb-4 flex items-center gap-2">
-          <AlertTriangle className="h-4 w-4" />
-          The Rounding Rule
-        </h4>
-        <div className="grid grid-cols-2 gap-4">
-          <div className="p-4 rounded-xl bg-background border border-amber-200/50 shadow-sm">
-             <div className="text-2xl font-black text-amber-600 mb-1">0 - 4</div>
-             <p className="text-xs font-bold text-muted-foreground">Keep it the same.</p>
-             <p className="text-[10px] italic mt-2">Example: 42 rounds to 40</p>
-          </div>
-          <div className="p-4 rounded-xl bg-background border border-amber-200/50 shadow-sm">
-             <div className="text-2xl font-black text-amber-600 mb-1">5 - 9</div>
-             <p className="text-xs font-bold text-muted-foreground">Round UP.</p>
-             <p className="text-[10px] italic mt-2">Example: 45 rounds to 50</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  return null;
-};
 
 interface Topic {
   slug: string;
@@ -1103,22 +459,22 @@ function NotesMarkdown({ children }: { children: string }) {
       rehypePlugins={[rehypeRaw, [rehypeSanitize, notesSanitizeSchema], rehypeKatex]}
       components={{
         p: ({ children }) => (
-          <p className="mb-4 text-foreground/90 leading-relaxed text-[15px]">{renderTextWithMath(children)}</p>
+          <p className="mb-6 text-foreground/90 leading-relaxed text-[15px] sm:text-[17px]">{renderTextWithMath(children)}</p>
         ),
         strong: ({ children }) => (
-          <strong className="font-semibold text-foreground">{renderTextWithMath(children)}</strong>
+          <strong className="font-bold text-foreground">{renderTextWithMath(children)}</strong>
         ),
         em: ({ children }) => (
           <em className="italic text-foreground/80 not-italic font-medium">{renderTextWithMath(children)}</em>
         ),
         ul: ({ children }) => (
-          <ul className="space-y-3 mb-5 ml-1">{children}</ul>
+          <ul className="space-y-4 mb-6 ml-2">{children}</ul>
         ),
         ol: ({ children }) => (
-          <ol className="space-y-3 mb-5 list-decimal list-outside ml-5">{children}</ol>
+          <ol className="space-y-4 mb-6 list-decimal list-outside ml-6 font-bold">{children}</ol>
         ),
         li: ({ children }) => (
-          <li className="leading-relaxed text-foreground/85 relative pl-4 before:absolute before:left-0 before:top-2.5 before:w-1.5 before:h-1.5 before:rounded-full before:bg-current before:opacity-50">
+          <li className="leading-relaxed text-[15px] sm:text-[17px] text-foreground/90 font-medium relative pl-5 before:absolute before:left-0 before:top-2.5 before:w-1.5 before:h-1.5 before:rounded-full before:bg-primary/50 before:opacity-100">
             {renderTextWithMath(children)}
           </li>
         ),
@@ -1133,13 +489,13 @@ function NotesMarkdown({ children }: { children: string }) {
           );
         },
         h3: ({ children }) => (
-          <h3 className="text-base font-bold text-foreground mt-5 mb-3 flex items-center gap-2">
-            <span className="w-1 h-4 bg-primary/60 rounded-full"></span>
+          <h3 className="text-xl sm:text-2xl font-black text-foreground mt-8 mb-4 flex items-center gap-3">
+            <span className="w-1.5 h-6 bg-primary/60 rounded-full"></span>
             {renderTextWithMath(children)}
           </h3>
         ),
         blockquote: ({ children }) => (
-          <blockquote className="border-l-4 border-primary/40 pl-4 py-2 my-4 bg-primary/5 rounded-r-lg italic text-foreground/80">
+          <blockquote className="border-l-[4px] border-primary/50 pl-6 py-4 my-8 bg-gradient-to-r from-primary/10 to-transparent rounded-r-2xl text-foreground/90 text-[15px] sm:text-[17px] font-medium leading-relaxed">
             {renderTextWithMath(children)}
           </blockquote>
         ),
@@ -1204,34 +560,7 @@ function NotesMarkdown({ children }: { children: string }) {
 }
 
 
-const blockVisualKeys = [
-  "architecture of numbers",
-  "stack and fill",
-  "formal written methods",
-  "bidmas", "order of operations",
-  "factor tree", "prime factor",
-  "rounding rule", "rounding",
-  "anatomy of a fraction",
-  "sharing in a ratio",
-  "2d shapes", "properties of shapes",
-  "averages", "the 3 m's",
-  "rucsac", "decoding word problems",
-  "parallel lines", "z, f, c",
-  "hcf and lcm",
-  "fdp connection",
-  "function machine",
-  "balance method",
-  "nth term rule",
-  "perimeter and area",
-  "speed, distance, time",
-  "coordinates (the grid)",
-  "probability scale"
-];
 
-const hasBlockVisual = (title: string) => {
-  const norm = title.toLowerCase();
-  return blockVisualKeys.some(k => norm.includes(k));
-};
 
 export default function RevisionNotesTopic() {
 
@@ -1450,20 +779,21 @@ export default function RevisionNotesTopic() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-[800px] mx-auto px-4 sm:px-6 py-8 sm:py-12">
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-8 flex-wrap">
-          <Link to="/notes" className="hover:text-foreground transition-colors flex items-center gap-1">
-            <BookOpen className="h-4 w-4" />
-            Notes
-          </Link>
-          <ChevronRight className="h-4 w-4" />
-          <Link to={`/notes/${encodeURIComponent(decodedSection)}`} className="hover:text-foreground transition-colors">
-            {sectionTitle}
-          </Link>
-          <ChevronRight className="h-4 w-4" />
-          <span className="text-foreground font-medium truncate max-w-[200px]">{currentTopic.title}</span>
-        </div>
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 py-8 sm:py-12 flex flex-col xl:flex-row items-start gap-8 xl:gap-16">
+        <div className="flex-1 w-full max-w-[800px] mx-auto xl:mx-0 shrink-0">
+          {/* Breadcrumb */}
+          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-8 flex-wrap">
+            <Link to="/notes" className="hover:text-foreground transition-colors flex items-center gap-1">
+              <BookOpen className="h-4 w-4" />
+              Notes
+            </Link>
+            <ChevronRight className="h-4 w-4" />
+            <Link to={`/notes/${encodeURIComponent(decodedSection)}`} className="hover:text-foreground transition-colors">
+              {sectionTitle}
+            </Link>
+            <ChevronRight className="h-4 w-4" />
+            <span className="text-foreground font-medium truncate max-w-[200px]">{currentTopic.title}</span>
+          </div>
 
         {/* Header */}
         <div className="mb-10">
@@ -1536,52 +866,41 @@ export default function RevisionNotesTopic() {
             return (
               <div 
                 key={index}
+                id={`block-${index}`}
                 className={cn(
-                  "notes-block-card rounded-2xl overflow-hidden transition-all duration-300",
+                  "notes-block-card rounded-2xl overflow-hidden mb-8 scroll-mt-24",
                   blockStyle.bgClass,
                   blockStyle.borderClass,
-                  isHighPriority && "shadow-lg"
+                  isHighPriority && "shadow-[0_8px_30px_rgb(0,0,0,0.04),0_20px_50px_rgb(0,0,0,0.02)]"
                 )}
               >
-                <button
-                  onClick={() => toggleBlock(index)}
+                <div
                   className={cn(
-                    "w-full flex items-center justify-between p-5 text-left transition-colors",
-                    blockStyle.headerClass,
-                    "hover:bg-white/5 cursor-pointer"
+                    "w-full flex items-center justify-between p-6 text-left border-b border-black/5 dark:border-white/5",
+                    blockStyle.headerClass
                   )}
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-4">
                     <div className={cn(
-                      "p-2.5 rounded-xl",
+                      "p-3 rounded-xl shadow-lg ring-1 ring-black/5 dark:ring-white/5",
                       blockStyle.color,
-                      isHighPriority ? "bg-background/80 shadow-sm" : "bg-background/50"
+                      isHighPriority ? "bg-background/90 shadow-black/10" : "bg-background/70 shadow-black/5"
                     )}>
                       {blockStyle.icon}
                     </div>
                     <h2 className={cn(
-                      "font-semibold text-foreground",
+                      "font-black text-foreground tracking-widest uppercase",
                       isHighPriority ? "text-lg sm:text-xl" : "text-base sm:text-lg"
                     )}>
                       {block.title}
                     </h2>
                   </div>
-                  <ChevronDown 
-                    className={cn(
-                      "h-5 w-5 text-muted-foreground transition-transform duration-300 shrink-0",
-                      expandedBlocks.has(index) && "rotate-180"
-                    )}
-                  />
-                </button>
+                </div>
 
-                <div className={cn(
-                  "overflow-hidden transition-all duration-300",
-                  // Some topics are long (multiple images + practice prompts). A low max-height here clips content.
-                  expandedBlocks.has(index) ? "max-h-[20000px] opacity-100" : "max-h-0 opacity-0"
-                )}>
+                <div className="overflow-hidden">
                   <div className={cn(
-                    "px-5 pb-5 prose-container",
-                    isHighPriority && "pt-2"
+                    "px-8 pb-8 break-words prose-container leading-loose text-foreground/90 font-medium text-lg",
+                    isHighPriority && "pt-4"
                   )}>
                     {currentTopic.level === "11+" && hasBlockVisual(block.title) ? (
                        <div className="flex flex-col lg:flex-row gap-8 items-start">
@@ -1611,7 +930,7 @@ export default function RevisionNotesTopic() {
 
         {/* Practice Questions Section */}
         {practiceQuestions.length > 0 && (
-          <div className="mb-10">
+          <div id="practice-questions" className="mb-10 scroll-mt-24">
             <div className="flex items-center gap-3 mb-6">
               <div className="p-2.5 rounded-xl bg-violet-500/10">
                 <PenLine className="h-5 w-5 text-violet-400" />
@@ -1696,6 +1015,55 @@ export default function RevisionNotesTopic() {
               <ArrowRight className="h-4 w-4 shrink-0" />
             </Button>
           )}
+        </div>
+      </div>
+
+      {/* Sticky Table of Contents Sidebar */}
+        <div className="hidden xl:block w-[300px] shrink-0 sticky top-24">
+          <div className="p-6 rounded-2xl border border-border bg-card/50 backdrop-blur-sm shadow-sm ring-1 ring-black/5 dark:ring-white/5">
+            <h3 className="text-xs font-black uppercase tracking-widest text-muted-foreground mb-6">Table of Contents</h3>
+            <ul className="space-y-4 relative before:absolute before:left-2 before:top-2 before:bottom-2 before:w-px before:bg-border/60">
+              {contentBlocks.map((block, idx) => {
+                const isHighPriority = blockConfig[block.type]?.priority === 'high';
+                return (
+                  <li key={idx} className="relative z-10 transition-transform hover:translate-x-1">
+                    <a 
+                      href={`#block-${idx}`} 
+                      onClick={(e) => {
+                        e.preventDefault();
+                        document.getElementById(`block-${idx}`)?.scrollIntoView({ behavior: 'smooth' });
+                      }}
+                      className={cn(
+                        "flex items-center gap-4 font-medium transition-colors group",
+                        isHighPriority ? "text-[15px] text-foreground" : "text-sm text-foreground/60 hover:text-foreground"
+                      )}
+                    >
+                      <div className={cn(
+                        "w-4 h-4 rounded-full bg-background border-[3px] transition-colors shrink-0",
+                        isHighPriority ? "border-primary shadow-[0_0_10px_rgba(var(--primary),0.3)]" : "border-muted-foreground/30 group-hover:border-primary/50"
+                      )} />
+                      <span className="truncate">{block.title}</span>
+                    </a>
+                  </li>
+                );
+              })}
+              {practiceQuestions.length > 0 && (
+                <li className="relative z-10 pt-4 mt-2 border-t border-border/50 transition-transform hover:translate-x-1">
+                  <a 
+                    href="#practice-questions" 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      document.getElementById('practice-questions')?.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                    className="flex items-center gap-4 text-[15px] font-bold text-violet-600 dark:text-violet-400 group hover:text-violet-500"
+                  >
+                    <div className="w-4 h-4 rounded-full bg-background border-[3px] border-violet-500/30 group-hover:border-violet-500 transition-colors shrink-0" />
+                    <span className="truncate">Practice Questions</span>
+                  </a>
+                </li>
+              )}
+            </ul>
+          </div>
         </div>
       </div>
     </div>

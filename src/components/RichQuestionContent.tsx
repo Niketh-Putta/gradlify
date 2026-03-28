@@ -1,5 +1,6 @@
 import MathText from "@/components/MathText";
 import { cn } from "@/lib/utils";
+import { BlockVisual } from "@/components/exam/BlockVisual";
 
 type RichContentBlock =
   | { type: "text"; lines: string[] }
@@ -249,6 +250,15 @@ export default function RichQuestionContent({ text, className }: { text: string;
               const centerLine = isCenteredMathLine(line);
               const stepLabel = isStepLabel(line);
               const displayMath = centerLine || isLikelyStandaloneMath(line);
+
+              const visualMatch = line.match(/^\[VISUAL:\s*(.+)\]$/i);
+              if (visualMatch) {
+                return (
+                  <div key={`line-${blockIndex}-${lineIndex}`} className="my-6">
+                    <BlockVisual title={visualMatch[1]} />
+                  </div>
+                );
+              }
 
               return (
                 <div

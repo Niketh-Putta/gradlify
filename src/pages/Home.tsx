@@ -36,9 +36,7 @@ import { LeaderboardSnapshot } from "@/components/LeaderboardSnapshot";
 import { PremiumUpgradeButton } from "@/components/PremiumUpgradeButton";
 import { useReadinessStore } from "@/lib/stores/useReadinessStore";
 
-import { FoundersSprintModal } from "@/components/FoundersSprintModal";
 import { DiscordFooterEntry } from "@/components/DiscordFooterEntry";
-import { getFoundersSprintInfo } from "@/lib/foundersSprint";
 import { AI_FEATURE_ENABLED } from "@/lib/featureFlags";
 import { getTrackCopy } from "@/lib/trackContent";
 import { resolveUserTrack, UserTrack } from "@/lib/track";
@@ -66,14 +64,13 @@ export function Home() {
   const trackCopy = getTrackCopy(userTrack);
   const trackLabel = getTrackLabel(userTrack);
   const { remainingUses, isPremium, dailyLimit, fetchUsageData } = usePremium();
+  const isFounder = profile?.founder_track === 'founder' || profile?.founder_track === 'competitor';
   const navigate = useNavigate();
   const [visibleElements, setVisibleElements] = useState<Set<string>>(new Set());
   const [isFirstVisit, setIsFirstVisit] = useState<boolean>(false);
   const [practiceCount, setPracticeCount] = useState<number | null>(null);
   const [trackSwitching, setTrackSwitching] = useState(false);
-  const [showFoundersSprintModal, setShowFoundersSprintModal] = useState(false);
-  const isFounder = profile?.founder_track === 'founder';
-
+    
   const premiumBannerTitle = "Gradlify Premium\nStart Your 3 Day Free Trial";
   const premiumBannerSubtitle = AI_FEATURE_ENABLED
     ? "Get unlimited AI questions, full mock exams, and personalised revision plans."
@@ -117,16 +114,7 @@ export function Home() {
     return () => observer.disconnect();
   }, []);
 
-  useEffect(() => {
-    if (!user?.id) return;
-    if (typeof window === "undefined") return;
-    const { isActive, sprintId } = getFoundersSprintInfo();
-    if (!isActive) return;
-    const storageKey = `founders-sprint-modal:${user.id}:${sprintId}`;
-    if (localStorage.getItem(storageKey)) return;
-    localStorage.setItem(storageKey, "true");
-    setShowFoundersSprintModal(true);
-  }, [user?.id]);
+
 
   // Check if this is the user's first visit
   useEffect(() => {
@@ -378,7 +366,6 @@ export function Home() {
 
   return (
     <div className="min-h-screen bg-background">
-      <FoundersSprintModal open={showFoundersSprintModal} onOpenChange={setShowFoundersSprintModal} />
       <div className="pt-6 pb-10 sm:pt-8 sm:pb-14 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
 
         <div className="mb-4">

@@ -484,6 +484,35 @@ export default function PracticePage() {
         </p>
       </div>
 
+      {isElevenPlus && (
+        <div className="mb-8 rounded-2xl border-2 border-amber-500/30 bg-gradient-to-br from-amber-500/10 to-amber-600/5 p-6 shadow-md relative overflow-hidden group">
+          <div className="absolute top-0 right-0 p-4 opacity-10 transform translate-x-4 -translate-y-4 group-hover:scale-110 transition-transform duration-500">
+            <svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+          </div>
+          <div className="relative z-10">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-500 text-white text-[10px] font-black uppercase tracking-widest mb-3 shadow-sm">
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg> Premium
+            </div>
+            <h3 className="text-xl font-bold text-foreground tracking-tight mb-2">11+ Scholarship Challenge</h3>
+            <p className="text-sm text-muted-foreground leading-relaxed max-w-[85%] mb-5">
+              Take on the hardest independent school entrance questions. This mode tests your advanced reasoning skills with complex, multi-step word problems.
+            </p>
+            <Button 
+              onClick={() => {
+                if (!isPremium && challengeDisplayUses >= challengeLimitForDisplay) {
+                   setShowPracticeLimitModal(true);
+                   return;
+                }
+                navigate(`/practice-page?mode=extreme&track=11plus`);
+              }}
+              className="bg-amber-500 hover:bg-amber-600 text-white shadow-sm border-0 font-bold"
+            >
+              Start Scholarship Challenge
+            </Button>
+          </div>
+        </div>
+      )}
+
       <section className="space-y-6">
         <div>
           <div className="text-xs font-medium text-muted-foreground mb-2">Calculator</div>

@@ -3,7 +3,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { UsageMeter } from "./UsageMeter";
-import { StudyBuddyChat } from "./StudyBuddyChat";
 import { ReadinessMeter } from "./ReadinessMeter";
 import { PremiumUpgradeCard } from './PremiumUpgradeCard';
 import { AIUsageCard } from './AIUsageCard';
@@ -182,17 +181,6 @@ export function Dashboard({
           {/* Left Column - Usage & Study Buddy */}
           <div className="lg:col-span-2 space-y-6">
             {AI_FEATURE_ENABLED ? (
-              <StudyBuddyChat
-                canAskQuestion={true}
-                onQuestionAsked={() => {}}
-                usesLeft={0}
-                userId={user.id}
-                dailyUses={0}
-                dailyLimit={10}
-                isUnlimited={false}
-                examBoard={examBoard}
-                canSpendUsage={() => true}
-              />
             ) : null}
 
             {/* Quick Actions */}

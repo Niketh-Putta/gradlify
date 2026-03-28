@@ -49,7 +49,7 @@ export function PremiumUpgradeButton({
     );
   }
 
-  const handleUpgrade = async (plan: 'monthly' | 'annual') => {
+  const handleUpgrade = async (plan: 'monthly' | 'annual' | 'ultra' | 'ultra_annual') => {
     try {
       setIsLoading(true);
       await startPremiumCheckout(plan);
@@ -100,14 +100,26 @@ export function PremiumUpgradeButton({
       <DropdownMenuContent align="start" className="w-56">
         <DropdownMenuItem onClick={() => handleUpgrade('monthly')}>
           <div className="flex flex-col">
-            <span className="font-medium">Monthly Plan</span>
+            <span className="font-medium">Premium (Monthly)</span>
             <span className="text-sm text-muted-foreground">3 Day Free Trial, then £19.99/month</span>
           </div>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => handleUpgrade('annual')}>
           <div className="flex flex-col">
-            <span className="font-medium">Annual Plan</span>
+            <span className="font-medium">Premium (Annual)</span>
             <span className="text-sm text-muted-foreground">3 Day Free Trial, then £149.99/year</span>
+          </div>
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => handleUpgrade('ultra')}>
+          <div className="flex flex-col">
+            <span className="font-medium text-indigo-600">Ultra (Monthly)</span>
+            <span className="text-sm text-muted-foreground">Elite preparation, £99.99/mo</span>
+          </div>
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => handleUpgrade('ultra_annual')}>
+          <div className="flex flex-col">
+            <span className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-amber-700">Ultra (Annual) - Save £200</span>
+            <span className="text-sm font-medium text-amber-700/80">The ultimate mastery timeline</span>
           </div>
         </DropdownMenuItem>
       </DropdownMenuContent>

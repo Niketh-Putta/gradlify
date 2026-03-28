@@ -3,6 +3,7 @@ import { getMissingColumnFromError, markProfileColumnMissing, profileSelect } fr
 
 export type PremiumStatus = {
   isPremium: boolean;
+  isUltra?: boolean;
   hasPremiumSubscription: boolean;
   hasTrackPremium: boolean;
   premiumUntil: string | null;
@@ -59,37 +60,40 @@ export async function getPremiumStatus(userId: string): Promise<PremiumStatus> {
     throw error;
   }
 
-  const premiumUntil = data?.premium_until ?? data?.current_period_end ?? null;
-  const isFounder = data?.founder_track === 'founder';
+  const pData = data as any;
+  const premiumUntil = pData?.premium_until ?? pData?.current_period_end ?? null;
+  const isFounder = pData?.founder_track === 'founder';
   const now = Date.now();
   const hasActivePeriod = premiumUntil ? new Date(premiumUntil).getTime() > now : false;
-  const subscriptionStatus = data?.stripe_subscription_status ?? data?.subscription_status ?? null;
+  const subscriptionStatus = pData?.stripe_subscription_status ?? pData?.subscription_status ?? null;
   const isTrialing = subscriptionStatus === 'trialing';
-  const hasPaidPlan = Boolean(data?.plan && data.plan !== 'free');
-  const isPremiumFlag = Boolean(data?.is_premium) && (!premiumUntil || hasActivePeriod);
-  const isPremiumTier = data?.tier === 'premium';
-  const currentTrack = normalizeTrack((data as { track?: string | null } | null)?.track ?? null) ?? 'gcse';
-  const premiumTrack = normalizeTrack((data as { premium_track?: string | null } | null)?.premium_track ?? null);
+  const hasPaidPlan = Boolean(pData?.plan && pData.plan !== 'free');
+  const isPremiumFlag = Boolean(pData?.is_premium) && (!premiumUntil || hasActivePeriod);
+  const isPremiumTier = pData?.tier === 'premium';
+  const currentTrack = normalizeTrack((pData as { track?: string | null } | null)?.track ?? null) ?? 'gcse';
+  const premiumTrack = normalizeTrack((pData as { premium_track?: string | null } | null)?.premium_track ?? null);
   const hasTrackPremium = premiumTrack ? premiumTrack === currentTrack : currentTrack === 'gcse';
   // A trialing subscription only counts if a premiumTrack is assigned.
   // This prevents a cancelled/incomplete Stripe checkout from showing 'Manage Billing'.
-  const isActiveTrialing = isTrialing && premiumTrack !== null;
+  const isActiveTrialing = isTrialing;
   const hasPremiumSubscription = isPremiumTier || isActiveTrialing || (hasPaidPlan && hasActivePeriod) || isPremiumFlag;
-  const isPremium = isFounder || (hasPremiumSubscription && hasTrackPremium);
+  const isPremium = isFounder || hasPremiumSubscription;
+  const isUltra = pData?.plan === 'ultra' || pData?.plan === 'ultra_annual';
 
   return {
     isPremium,
+    isUltra,
     hasPremiumSubscription: isFounder || hasPremiumSubscription,
-    hasTrackPremium,
+    hasTrackPremium: true,
     premiumUntil,
-    plan: data?.plan ?? "free",
-    founderTrack: data?.founder_track ?? null,
+    plan: pData?.plan ?? "free",
+    founderTrack: pData?.founder_track ?? null,
     premiumTrack,
     track: currentTrack,
-    billingCycle: data?.subscription_interval ?? null,
+    billingCycle: pData?.subscription_interval ?? null,
     subscriptionStatus,
-    cancelAtPeriodEnd: data?.cancel_at_period_end ?? null,
-    currentPeriodEnd: data?.current_period_end ?? null,
-    tier: data?.tier ?? null,
+    cancelAtPeriodEnd: pData?.cancel_at_period_end ?? null,
+    currentPeriodEnd: pData?.current_period_end ?? null,
+    tier: pData?.tier ?? null,
   };
 }

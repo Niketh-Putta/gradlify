@@ -36,39 +36,23 @@ export default function ExamReadinessDashboard() {
   const [topicHistoryLoading, setTopicHistoryLoading] = useState(false);
   const onboardingAnswers = profile?.onboarding as OnboardingAnswers | undefined;
   const userTrack = resolveUserTrack(profile?.track ?? null);
-  const trackLabel = userTrack === '11plus' ? '11+ Maths' : 'GCSE Maths';
+  const trackLabel = '11+ Maths';
   const targetMessage = useMemo(() => {
-    const defaultMessage =
-      userTrack === '11plus'
-        ? 'Define your goal level in the 11+ starter answers.'
-        : 'Set a target grade in your starter answers.';
+    const defaultMessage = 'Define your goal level in the 11+ starter answers.';
     if (!onboardingAnswers) return defaultMessage;
 
-    if (userTrack === '11plus') {
-      if (onboardingAnswers.goalLevel) return `Goal level: ${onboardingAnswers.goalLevel}`;
-      if (Array.isArray(onboardingAnswers.targetSchools) && onboardingAnswers.targetSchools.length > 0) {
-        const primary = onboardingAnswers.targetSchools.slice(0, 2).join(', ');
-        const extra =
-          onboardingAnswers.targetSchools.length > 2
-            ? ` +${onboardingAnswers.targetSchools.length - 2} more`
-            : '';
-        return `Target schools: ${primary}${extra}`;
-      }
-      return defaultMessage;
-    }
-
-    if (userTrack === 'gcse') {
-      if (onboardingAnswers.targetGrade && onboardingAnswers.targetGrade !== 'Unsure') {
-        return `Target grade ${onboardingAnswers.targetGrade}`;
-      }
-      if (onboardingAnswers.examBoard) {
-        return `Exam board: ${onboardingAnswers.examBoard}`;
-      }
-      return defaultMessage;
+    if (onboardingAnswers.goalLevel) return `Goal level: ${onboardingAnswers.goalLevel}`;
+    if (Array.isArray(onboardingAnswers.targetSchools) && onboardingAnswers.targetSchools.length > 0) {
+      const primary = onboardingAnswers.targetSchools.slice(0, 2).join(', ');
+      const extra =
+        onboardingAnswers.targetSchools.length > 2
+          ? ` +${onboardingAnswers.targetSchools.length - 2} more`
+          : '';
+      return `Target schools: ${primary}${extra}`;
     }
 
     return defaultMessage;
-  }, [onboardingAnswers, userTrack]);
+  }, [onboardingAnswers]);
 
 const loadData = async () => {
   try {

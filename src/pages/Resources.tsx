@@ -308,11 +308,6 @@ const Resources = () => {
           tag: "Official"
         },
         {
-          label: "Atom free 11+ familiarisation papers (downloadable)",
-          url: "https://www.atomlearning.com/free-11-plus-familiarisation",
-          tag: "Free"
-        },
-        {
           label: "11 Plus Guide free maths papers library",
           url: "https://www.11plusguide.com/11-plus-papers-books/free-11-plus-papers/free-sample-11-plus-maths-papers/",
           tag: "Free"
@@ -341,11 +336,6 @@ const Resources = () => {
           tag: "11+ focused"
         },
         {
-          label: "Atom Learning YouTube",
-          url: "https://www.youtube.com/@AtomLearning",
-          tag: "11+ focused"
-        },
-        {
           label: "Corbettmaths (core KS2/KS3 fluency support)",
           url: "https://www.youtube.com/@Corbettmaths",
           tag: "Core maths"
@@ -358,16 +348,6 @@ const Resources = () => {
       sectionClass: "from-emerald-50/50 to-teal-50/40 dark:from-emerald-950/10 dark:to-teal-950/10 border-emerald-100/70 dark:border-emerald-900/40",
       accentClass: "bg-emerald-500",
       items: [
-        {
-          label: "Atom 11+ parent guide (updated for current cycle)",
-          url: "https://www.atomlearning.com/blog/11-plus-guide",
-          tag: "Updated"
-        },
-        {
-          label: "Atom 11+ school-by-school guides (rolling updates)",
-          url: "https://www.atomlearning.com/blog",
-          tag: "Updated"
-        },
         {
           label: "11 Plus Guide blog (frequent 11+ updates)",
           url: "https://www.11plusguide.com/blog/",
@@ -395,98 +375,98 @@ const Resources = () => {
 
   if (isElevenPlus) {
     return (
-      <div className="space-y-8">
-        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-8 md:p-12">
-          <div className="relative z-10">
-            <div className="mb-6">
-              <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-2">11+ Study Resources</h1>
-              <p className="text-lg text-muted-foreground">
-                High-quality paper sources, strong channels, and live article feeds for 11+ families.
-              </p>
-            </div>
-            <div className="mt-8">
-              <p className="text-sm text-muted-foreground">Focused tiles below deliver the same trusted links with stronger visuals.</p>
-            </div>
-          </div>
-          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-0 left-0 w-48 h-48 bg-secondary/5 rounded-full blur-2xl"></div>
-        </div>
+      <div className="max-w-5xl mx-auto px-4 py-8 md:py-16 space-y-24">
+        {/* Editorial Hero */}
+        <header className="space-y-6 max-w-2xl">
+          <Badge variant="outline" className="px-3 py-1 font-serif text-xs tracking-widest uppercase bg-transparent border-foreground/20 text-foreground/80">
+            Study Resources
+          </Badge>
+          <h1 className="text-4xl md:text-5xl font-serif text-foreground leading-[1.1] tracking-tight">
+            Curated 11+ Library
+          </h1>
+          <p className="text-lg md:text-xl text-muted-foreground font-light leading-relaxed tracking-wide">
+            High-fidelity practice papers, expert channels, and live strategy feeds—expertly selected for intentional 11+ preparation.
+          </p>
+        </header>
 
-        {elevenPlusSections.map((section) => (
-          <Card key={section.title} className={`group hover:shadow-xl transition-all duration-300 border bg-gradient-to-br ${section.sectionClass}`}>
-            <CardHeader>
-              <div className="flex items-start gap-3">
-                <span className={`mt-1 h-10 w-1.5 rounded-full ${section.accentClass}`} />
-                <div>
-                  <CardTitle className="text-2xl font-bold text-foreground">{section.title}</CardTitle>
-                  <CardDescription className="text-base">{section.description}</CardDescription>
-                </div>
+        {/* Resources Layout */}
+        <div className="space-y-20">
+          {elevenPlusSections.map((section) => (
+            <section key={section.title} className="grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-8 md:gap-16 items-start">
+              <div className="md:sticky md:top-24 pt-2">
+                <h2 className="text-2xl font-serif text-foreground tracking-tight leading-snug">
+                  {section.title}
+                </h2>
+                <p className="text-sm text-muted-foreground mt-4 leading-relaxed font-light">
+                  {section.description}
+                </p>
               </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
+
+              <div className="flex flex-col gap-3">
                 {section.items.map((item) => (
                   <button
                     key={item.label}
-                    type="button"
                     onClick={() => openResource(item.url)}
-                    className="w-full text-left p-3 bg-white/80 dark:bg-gray-900/60 rounded-xl border border-white/30 hover:border-primary/40 hover:shadow-md transition-all duration-200 flex items-center justify-between gap-3"
+                    className="group flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-xl bg-card border border-border/40 transition-all duration-300 hover:-translate-y-0.5"
+                    style={{
+                      boxShadow: '0 2px 8px -2px rgba(0,0,0,0.05), 0 4px 16px -4px rgba(0,0,0,0.02)'
+                    }}
                   >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <img
-                        src={getResourceImage(item.url)}
-                        alt={item.label}
-                        className="h-12 w-20 rounded-md object-cover border border-border/40 shrink-0"
-                        loading="lazy"
-                        onError={(e) => {
-                          const fallback = getFavicon(item.url);
-                          if (fallback) {
-                            (e.currentTarget as HTMLImageElement).src = fallback;
-                            (e.currentTarget as HTMLImageElement).className = "h-10 w-10 rounded-md object-contain bg-white p-1 border border-border/40 shrink-0";
-                          }
-                        }}
-                      />
-                      <div className="min-w-0">
-                        <p className="font-semibold text-foreground truncate">{item.label}</p>
-                        <Badge variant="outline" className="text-[10px] mt-1">{item.tag}</Badge>
-                      </div>
+                    <div className="flex items-center gap-5">
+                       <div className={`w-12 h-12 rounded bg-gradient-to-br ${section.sectionClass} flex items-center justify-center shrink-0 border border-border/50 shadow-inner overflow-hidden flex-none relative p-3`}>
+                          <div className="absolute inset-0 bg-background/50 dark:bg-background/80 backdrop-blur-[2px]"></div>
+                          <img
+                            src={getFavicon(item.url)}
+                            alt={item.label}
+                            className="w-full h-full object-contain relative z-10 transition-transform duration-500 group-hover:scale-110 drop-shadow-sm hover:drop-shadow-md"
+                            loading="lazy"
+                            onError={(e) => {
+                              (e.currentTarget as HTMLImageElement).style.display = "none";
+                            }}
+                          />
+                       </div>
+                       <div className="flex flex-col items-start gap-1.5 text-left">
+                         <span className="text-[14px] font-medium text-foreground tracking-wide group-hover:text-primary transition-colors">
+                           {item.label}
+                         </span>
+                         <span className="text-[10px] font-medium tracking-widest uppercase text-muted-foreground px-2 py-0.5 rounded-full border border-border/50">
+                           {item.tag}
+                         </span>
+                       </div>
                     </div>
-                    <ExternalLink className="h-4 w-4 text-muted-foreground" />
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 bg-secondary/50 text-muted-foreground group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300">
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </div>
                   </button>
                 ))}
               </div>
-            </CardContent>
-          </Card>
-        ))}
+            </section>
+          ))}
+        </div>
 
-        <Card className="border-0 bg-gradient-to-br from-red-50/40 to-pink-50/40 dark:from-red-950/10 dark:to-pink-950/10">
-          <CardHeader>
-            <CardTitle className="text-xl font-semibold">Gradlify sprint content</CardTitle>
-            <CardDescription>Jump straight into our 11+ practice, revision notes, and mock packs.</CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-4 md:grid-cols-3">
-            <Link
-              to="/mocks?track=11plus"
-              className="flex flex-col gap-3 items-start rounded-xl border border-border p-4 hover:border-primary/40 transition bg-white text-current"
-            >
-              <div className="text-sm text-muted-foreground">Practice</div>
-              <div className="text-lg font-semibold text-foreground">11+ Daily Drills</div>
-            </Link>
-            <Link to="/notes?track=11plus" className="flex flex-col gap-3 items-start rounded-xl border border-border p-4 hover:border-primary/40 transition">
-              <div className="text-sm text-muted-foreground">Notes</div>
-              <div className="text-lg font-semibold text-foreground">Topic-by-topic guide</div>
-              <p className="text-xs text-muted-foreground">Examples, diagrams, and worked solutions.</p>
-            </Link>
-            <Link
-              to="/mocks?track=11plus"
-              className="flex flex-col gap-3 items-start rounded-xl border border-border p-4 hover:border-primary/40 transition bg-white text-current"
-            >
-              <div className="text-sm text-muted-foreground">Mock Exams</div>
-              <div className="text-lg font-semibold text-foreground">Timed checkpoint</div>
-              <p className="text-xs text-muted-foreground">GL-styled, 60-minute checks.</p>
-            </Link>
-          </CardContent>
-        </Card>
+        {/* Sprint Premium Banner - Editorial format */}
+        <section className="mt-24 pt-16 border-t border-border/30">
+          <div className="max-w-3xl mx-auto text-center space-y-8">
+             <h3 className="text-3xl font-serif text-foreground">Gradlify Sprint Access</h3>
+             <p className="text-base text-muted-foreground font-light leading-relaxed">
+               Transcend standard revision. Encounter our proprietary daily drills, topic-driven structural guides, and precision-timed mock examinations within an undisturbed environment.
+             </p>
+             <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
+                 <Link
+                   to="/mocks?track=11plus"
+                   className="inline-flex items-center justify-center h-12 px-8 rounded-full bg-foreground text-background font-medium text-sm transition-all duration-300 hover:opacity-90 tracking-wide shadow-sm hover:shadow-md"
+                 >
+                    Start a Mock
+                 </Link>
+                 <Link
+                   to="/notes?track=11plus"
+                   className="inline-flex items-center justify-center h-12 px-8 rounded-full bg-secondary text-foreground font-medium text-sm transition-all duration-300 hover:bg-muted tracking-wide border border-border/50"
+                 >
+                    Read Topic Notes
+                 </Link>
+             </div>
+          </div>
+        </section>
       </div>
     );
   }

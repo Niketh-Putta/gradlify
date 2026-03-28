@@ -11,7 +11,7 @@ const sanitizeReturnPath = (value: string) => {
 };
 
 export async function startPremiumCheckout(
-  plan: "monthly" | "annual" | "ultra" = "monthly",
+  plan: "monthly" | "annual" | "ultra" | "ultra_annual" = "monthly",
   premiumTrack?: PremiumTrack,
 ) {
   if (typeof window === "undefined") {
@@ -51,25 +51,39 @@ export async function startPremiumCheckout(
   }
 
   try {
+    console.log("Starting checkout function call for plan:", plan);
+    const payload = {
+      plan,
+      returnTo: sanitizeReturnPath(returnTo),
+      premiumTrack: requestedTrack,
+      baseUrl: window.location.origin,
+    };
+    console.log("Supabase edge function payload:", payload);
+
     const { data, error } = await supabase.functions.invoke("create-checkout-11plus", {
-      body: {
-        plan,
-        returnTo: sanitizeReturnPath(returnTo),
-        premiumTrack: requestedTrack,
-        baseUrl: window.location.origin,
-      },
+      body: payload,
     });
 
+    console.log("Edge function response:", { data, error });
+
     if (error) {
+      console.error("Supabase function invocation error:", error);
       throw error;
+    }
+    if (data?.error) {
+      console.error("Function returned explicit error:", data.error);
+      throw new Error(data.error);
     }
 
     if (!data?.url) {
+      console.error("No checkout URL in the response payload data");
       throw new Error("Checkout URL was not returned");
     }
 
+    console.log("Redirecting to:", data.url);
     window.location.href = data.url;
   } catch (error) {
+    console.error("Checkout process completely failed:", error);
     const message = error instanceof Error ? error.message : "Failed to start checkout";
     throw new Error(message);
   }

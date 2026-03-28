@@ -16,7 +16,7 @@ interface PaywallProps {
   secondaryLabel?: string;
   onComeBack?: () => void;
   primaryLabel?: string;
-  upgradePlan?: 'monthly' | 'annual';
+  upgradePlan?: 'monthly' | 'annual' | 'ultra' | 'ultra_annual';
   children?: React.ReactNode;
 }
 

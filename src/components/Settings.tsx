@@ -16,6 +16,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { 
   Settings2, 
   RefreshCw,
@@ -26,7 +33,8 @@ import {
   Sun,
   Key,
   Eye,
-  EyeOff
+  EyeOff,
+  Sparkles
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -47,7 +55,7 @@ const EditOnboardingDetailsModal = React.lazy(() =>
     default: mod.EditOnboardingDetailsModal,
   }))
 );
-import { getSprintUpgradeCopy } from '@/lib/foundersSprint';
+
 import { startPremiumCheckout } from "@/lib/checkout";
 import { AI_FEATURE_ENABLED } from "@/lib/featureFlags";
 import { UserTrack } from "@/lib/track";
@@ -122,7 +130,8 @@ export function Settings({ user, onBackToChat, onSignOut }: SettingsProps) {
     loading: membershipLoading,
     error: membershipError,
     isPremium: membershipIsPremium,
-    isFounder: membershipIsFounder
+    isFounder: membershipIsFounder,
+    statusLabel
   } = useMembership();
   const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
@@ -136,6 +145,8 @@ export function Settings({ user, onBackToChat, onSignOut }: SettingsProps) {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [isCreatingCheckout, setIsCreatingCheckout] = useState(false);
+  const [showPremiumOptions, setShowPremiumOptions] = useState(false);
+  const [showUltraOptions, setShowUltraOptions] = useState(false);
   const [supportRequests, setSupportRequests] = useState<SupportRequest[]>([]);
   const [supportLoading, setSupportLoading] = useState(false);
   const [selectedTrack, setSelectedTrack] = useState<UserTrack>('gcse');
@@ -159,8 +170,8 @@ export function Settings({ user, onBackToChat, onSignOut }: SettingsProps) {
     membership?.premiumTrack === 'eleven_plus'
   );
   const hasPremiumOnCurrentTrack = membershipIsFounder || Boolean(membership?.hasTrackPremium || membershipIsPremium);
-  const accessIsPremium = hasPremiumOnCurrentTrack;
-  const accessLabel = membershipIsFounder ? 'Founder' : accessIsPremium ? 'Premium' : 'Free';
+  const accessIsPremium = hasPremiumOnCurrentTrack || membership?.isUltra;
+  const accessLabel = statusLabel || 'Free';
   const isSupportAdmin = user?.email?.toLowerCase() === 'team@gradlify.com';
   const premiumSettingsTitle = "Upgrade to Gradlify Premium";
   const premiumSettingsDescription =
@@ -185,7 +196,7 @@ export function Settings({ user, onBackToChat, onSignOut }: SettingsProps) {
       const { data, error } = await runWithAbortRetry(async () =>
         supabase
           .from('profiles')
-          .select('id, user_id, tier, plan, subscription_interval, subscription_status, cancel_at_period_end, current_period_end, onboarding, track, premium_track')
+          .select('id, user_id, tier, plan, subscription_interval, subscription_status, cancel_at_period_end, current_period_end, track, premium_track')
           .eq('user_id', user.id)
           .single()
       , 4);
@@ -210,7 +221,7 @@ export function Settings({ user, onBackToChat, onSignOut }: SettingsProps) {
     try {
       // Restore stable path: server RPC first, direct table write fallback.
       const rpcResult = await runWithAbortRetry(async () =>
-        supabase.rpc('update_user_track', {
+        supabase.rpc('update_user_track' as any, {
           p_user_id: user.id,
           p_track: selectedTrack,
         })
@@ -229,7 +240,7 @@ export function Settings({ user, onBackToChat, onSignOut }: SettingsProps) {
         if (fallback.data?.track !== selectedTrack) throw new Error('Track update did not persist');
       }
 
-      toast('Track updated', { icon: null, variant: 'default' });
+      toast('Track updated', { icon: undefined });
       // Track switch must reset readiness state
       useReadinessStore.getState().reset();
       window.dispatchEvent(new CustomEvent('track-switched'));
@@ -273,7 +284,7 @@ export function Settings({ user, onBackToChat, onSignOut }: SettingsProps) {
           setShowTrackSwitcher(false);
           window.dispatchEvent(new CustomEvent('track-switched'));
           window.dispatchEvent(new CustomEvent('gradlify:profile-updated'));
-          toast('Track updated', { icon: null, variant: 'default' });
+          toast('Track updated', { icon: undefined });
           onBackToChat();
           navigate('/dashboard', { replace: true });
           return;
@@ -575,7 +586,7 @@ export function Settings({ user, onBackToChat, onSignOut }: SettingsProps) {
     );
   };
 
-  const handleUpgradeToPremium = async (plan: 'monthly' | 'annual') => {
+  const handleUpgradeToPremium = async (plan: 'monthly' | 'annual' | 'ultra' | 'ultra_annual') => {
     setIsCreatingCheckout(true);
     try {
       await startPremiumCheckout(plan);
@@ -658,83 +669,396 @@ export function Settings({ user, onBackToChat, onSignOut }: SettingsProps) {
   }
 
   return (
-    <div className="w-full min-h-screen bg-primary/5 dark:bg-gradient-to-b dark:from-primary/16 dark:to-primary/10">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 space-y-6">
-        {(() => {
-          const cardClassName = "border-border/80 dark:border-border/50 bg-card shadow-sm dark:shadow-none";
-          const surfaceClassName = "rounded-2xl border border-border/70 bg-primary/5 dark:bg-primary/10 shadow-sm dark:shadow-none";
+    <div className="w-full min-h-screen bg-background pb-20">
+      <div className="max-w-6xl mx-auto px-4 sm:px-8 py-10 sm:py-16">
+        
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-12">
+          <div className="flex items-center gap-4">
+            <div className="h-12 w-12 rounded-xl bg-card border flex items-center justify-center shadow-sm">
+              <Settings2 className="h-6 w-6 text-foreground" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight text-foreground">Settings</h1>
+              <p className="text-sm text-muted-foreground mt-1">
+                Manage your profile, active track configuration, and billing preferences.
+              </p>
+            </div>
+          </div>
+          <Button variant="outline" onClick={onBackToChat} className="shrink-0 rounded-full px-6 bg-card">
+            Back to Dashboard
+          </Button>
+        </div>
 
-          return (
-            <>
-              <div className="flex items-start justify-between gap-4">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-xl border bg-card flex items-center justify-center">
-                      <Settings2 className="h-5 w-5 text-muted-foreground" />
-                    </div>
-                    <div>
-                      <h1 className="text-2xl font-bold tracking-tight">Settings</h1>
-                      <p className="text-sm text-muted-foreground">
-                        Manage your account, membership, and appearance.
-                      </p>
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-8">
+          
+          {/* Left Column */}
+          <div className="space-y-10">
+            
+            {/* Account & Profile */}
+            <section className="space-y-4">
+              <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground ml-1">Account & Profile</h2>
+              <div className="bg-card rounded-2xl p-6 border shadow-sm">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                  <div className="space-y-2">
+                    <Label className="text-xs uppercase text-muted-foreground font-semibold">Email Address</Label>
+                    <Input 
+                      value={user.email || ''} 
+                      disabled 
+                      className="bg-muted/30 border-none rounded-xl h-11"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-xs uppercase text-muted-foreground font-semibold">Access Tier</Label>
+                    <div className="h-11 flex items-center bg-muted/30 rounded-xl px-4 inline-flex w-full">
+                      <Badge variant={accessIsPremium ? "default" : "secondary"} className="bg-primary/20 text-primary hover:bg-primary/20 border-none">
+                        {accessLabel} Member
+                      </Badge>
                     </div>
                   </div>
                 </div>
-                <Button variant="outline" onClick={onBackToChat} className="shrink-0">
-                  Back to Chat
-                </Button>
+
+                <div className="h-px w-full bg-border my-6" />
+
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div>
+                    <h3 className="text-sm font-semibold text-foreground">Study Profile</h3>
+                    <p className="text-sm text-muted-foreground">Refine your exam board, target grades, and timeline.</p>
+                  </div>
+                  <Button onClick={() => setIsEditingStudyProfile(true)} className="rounded-xl bg-foreground text-background hover:bg-foreground/90 shrink-0">
+                    Update Profile
+                  </Button>
+                </div>
+              </div>
+            </section>
+
+            {/* Security */}
+            <section className="space-y-4">
+              <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground ml-1">Security</h2>
+              <div className="bg-card rounded-2xl p-6 border shadow-sm">
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <Label className="text-xs uppercase text-muted-foreground font-semibold">Current Password</Label>
+                    <div className="relative">
+                      <Input 
+                        type={showCurrentPassword ? "text" : "password"}
+                        value={currentPassword}
+                        onChange={(e) => setCurrentPassword(e.target.value)}
+                        placeholder="Enter current password"
+                        className="bg-muted/30 border-none rounded-xl h-11 pr-10"
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-1 top-1.5 h-8 w-8 p-0"
+                        onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                      >
+                        {showCurrentPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label className="text-xs uppercase text-muted-foreground font-semibold">New Password</Label>
+                      <div className="relative">
+                        <Input 
+                          type={showNewPassword ? "text" : "password"}
+                          value={newPassword}
+                          onChange={(e) => setNewPassword(e.target.value)}
+                          placeholder="Enter new password"
+                          className="bg-muted/30 border-none rounded-xl h-11 pr-10"
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-1 top-1.5 h-8 w-8 p-0"
+                          onClick={() => setShowNewPassword(!showNewPassword)}
+                        >
+                          {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-xs uppercase text-muted-foreground font-semibold">Confirm Password</Label>
+                      <div className="relative">
+                        <Input 
+                          type={showConfirmPassword ? "text" : "password"}
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          placeholder="Verify new password"
+                          className="bg-muted/30 border-none rounded-xl h-11 pr-10"
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-1 top-1.5 h-8 w-8 p-0"
+                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        >
+                          {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end pt-2">
+                    <Button 
+                      onClick={handleChangePassword} 
+                      disabled={isChangingPassword}
+                      className="rounded-xl px-6 bg-muted/80 text-foreground hover:bg-muted"
+                    >
+                      {isChangingPassword ? "Updating..." : "Update Password"}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* Appearance */}
+            <section className="space-y-4">
+              <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground ml-1">Appearance</h2>
+              <div className="bg-card rounded-2xl p-6 border shadow-sm flex items-center justify-between gap-4">
+                <div className="space-y-0.5">
+                  <h3 className="font-medium text-sm text-foreground">Dark Mode</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Toggle between light and dark themes
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  {theme === 'light' ? (
+                    <Sun className="h-4 w-4 text-muted-foreground" />
+                  ) : (
+                    <Moon className="h-4 w-4 text-muted-foreground" />
+                  )}
+                  <Switch
+                    id="theme-mode"
+                    checked={theme === 'dark'}
+                    onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
+                  />
+                </div>
+              </div>
+            </section>
+          </div>
+
+          {/* Right Column */}
+          <div className="space-y-6 lg:mt-[3.5rem]">
+            
+            {/* Subscription Options */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between px-1">
+                <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Subscription</h2>
+                <Badge variant={accessIsPremium ? "default" : "secondary"} className="bg-primary/20 text-primary border-none text-[10px] h-5 px-2">
+                  {accessLabel}
+                </Badge>
               </div>
 
-              <div className={`${surfaceClassName} p-4 sm:p-6 space-y-6`}>
+              {!hasPremiumSubscription ? (
+                <div className="space-y-4">
+                  {/* Premium Plan Box */}
+                  <div className="bg-slate-900 rounded-2xl p-5 border border-slate-800 shadow-xl text-white relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 blur-3xl rounded-full translate-x-8 -translate-y-8 pointer-events-none" />
+                    <div className="relative z-10">
+                      <div className="flex items-start justify-between mb-4">
+                        <div>
+                          <h3 className="font-bold text-lg text-white flex items-center gap-2">
+                            <Crown className="h-4 w-4 text-primary" /> Premium 
+                          </h3>
+                          <p className="text-xs text-slate-400 mt-1">Foundational mastery and readiness tools.</p>
+                        </div>
+                        <div className="text-right">
+                          <span className="text-lg font-bold">£19.99</span>
+                          <span className="text-[10px] text-slate-400 block">/month</span>
+                        </div>
+                      </div>
+                      
+                      <ul className="space-y-2 mb-6 text-xs text-slate-300 whitespace-normal">
+                        <li className="flex gap-2 items-start"><Shield className="h-3.5 w-3.5 text-primary shrink-0 mt-[2px]" /> <span>Unlimited mock exams and challenge questions</span></li>
+                        <li className="flex gap-2 items-start"><Shield className="h-3.5 w-3.5 text-primary shrink-0 mt-[2px]" /> <span>Unlimited mock exam size</span></li>
+                        <li className="flex gap-2 items-start"><Shield className="h-3.5 w-3.5 text-primary shrink-0 mt-[2px]" /> <span>Weekly content handwritten by tutor and founder team</span></li>
+                      </ul>
 
-      {/* Account Information */}
-      <Card className={cardClassName}>
-        <CardHeader>
-          <CardTitle>Account</CardTitle>
-          <CardDescription>Your sign-in details and access level.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input 
-              id="email"
-              type="email" 
-              value={user.email || ''} 
-              disabled 
-              className="bg-muted/40"
-            />
-          </div>
-          
-          <div className="flex items-center justify-between gap-3 rounded-lg border border-border/70 bg-primary/5 dark:bg-primary/10 px-3 py-2">
-            <div className="space-y-0.5">
-              <Label>Access level</Label>
-              <p className="text-xs text-muted-foreground">
-                Your current plan access in the app.
-              </p>
+                      <Button 
+                        onClick={() => setShowPremiumOptions(true)}
+                        disabled={isCreatingCheckout}
+                        className="w-full bg-white text-slate-900 hover:bg-slate-100 rounded-xl h-10 text-sm font-semibold transition-all"
+                      >
+                        {isCreatingCheckout ? "Loading..." : "Get Premium"}
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Ultra Plan Box */}
+                  <div className="bg-gradient-to-br from-indigo-950/90 to-slate-900 rounded-2xl p-5 border border-indigo-500/30 shadow-xl text-white relative overflow-hidden">
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(99,102,241,0.15),transparent_50%)] pointer-events-none" />
+                    <div className="relative z-10">
+                      <div className="flex items-start justify-between mb-4">
+                        <div>
+                          <h3 className="font-bold text-xl text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 to-indigo-100 flex items-center gap-2 drop-shadow-sm">
+                            <Sparkles className="h-5 w-5 text-indigo-400 drop-shadow-[0_0_8px_rgba(129,140,248,0.8)]" fill="currentColor" /> Ultra
+                          </h3>
+                          <p className="text-xs text-slate-300 mt-1">Ultimate preparation and insight.</p>
+                        </div>
+                        <div className="text-right mt-1">
+                          <span className="text-xl font-bold text-indigo-200 drop-shadow-sm">£99.99</span>
+                          <span className="text-[10px] text-indigo-300/60 block mt-0.5 font-medium tracking-wide">/month</span>
+                        </div>
+                      </div>
+                      
+                      <ul className="space-y-3 mb-6 text-xs text-slate-200/90 font-medium whitespace-normal">
+                        <li className="flex gap-2.5 items-start"><Crown className="h-3.5 w-3.5 text-indigo-400 shrink-0 mt-[2px]" /> <span>Everything in Premium</span></li>
+                        <li className="flex gap-2.5 items-start font-bold text-indigo-100"><Crown className="h-4 w-4 text-indigo-300 shrink-0 mt-[2px] drop-shadow-sm" /> <span>1 to 1 weekly sessions with tutor team and founders</span></li>
+                        <li className="flex gap-2.5 items-start text-indigo-200"><Crown className="h-3.5 w-3.5 text-indigo-400 shrink-0 mt-[2px]" /> <span>Handwritten mocks from tutor team specialised for your child</span></li>
+                      </ul>
+
+                      <Button 
+                        onClick={() => setShowUltraOptions(true)}
+                        disabled={isCreatingCheckout}
+                        className="w-full bg-indigo-600 text-white hover:bg-indigo-500 rounded-xl h-10 text-sm font-semibold transition-all shadow-[0_0_20px_rgba(79,70,229,0.3)] hover:shadow-[0_0_25px_rgba(79,70,229,0.5)] border-none"
+                      >
+                        {isCreatingCheckout ? "Loading..." : "Get Ultra"}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="bg-slate-900 rounded-2xl p-6 border border-slate-800 shadow-xl text-white relative overflow-hidden">
+                   <div className="absolute top-0 right-0 p-32 bg-primary/10 blur-3xl rounded-full translate-x-12 -translate-y-12 pointer-events-none" />
+                   <div className="relative z-10 space-y-4">
+                     <div>
+                       <h3 className="font-bold mb-1">Active Subscription</h3>
+                       <p className="text-sm text-slate-400">You are currently on the {accessLabel} tier.</p>
+                     </div>
+                     <Button 
+                       onClick={handleManageSubscription}
+                       className="w-full bg-slate-800 text-white hover:bg-slate-700 rounded-xl h-11 font-medium border border-slate-700 mt-4"
+                     >
+                       Manage Billing
+                     </Button>
+                   </div>
+                </div>
+              )}
             </div>
-            <Badge variant={accessIsPremium ? "default" : "secondary"} className="w-fit">
-              {accessLabel}
-            </Badge>
-          </div>
-        </CardContent>
-      </Card>
 
-      {/* Study Profile */}
-      <Card className={cardClassName}>
-        <CardHeader>
-          <CardTitle>Study Profile</CardTitle>
-          <CardDescription>Update your starter setup answers.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="text-sm text-muted-foreground">
-            These details personalise your recommendations (exam board, year group, grades, and more).
-          </div>
-          <Button onClick={() => setIsEditingStudyProfile(true)} className="w-full" variant="outline">
-            Edit starter setup answers
-          </Button>
-        </CardContent>
-      </Card>
+            {/* Danger Zone */}
+            <div className="space-y-4">
+              <h2 className="text-xs font-semibold uppercase tracking-widest text-red-500/80 mb-2 ml-1">Danger Zone</h2>
+              <div className="rounded-2xl border border-red-500/20 bg-transparent p-4 space-y-3">
+                <Button
+                  variant="outline"
+                  onClick={handleRefreshData}
+                  disabled={isDeleting}
+                  className="w-full justify-between h-11 border-red-500/20 text-red-500 hover:bg-red-500/10 hover:text-red-600 rounded-xl bg-transparent"
+                >
+                  <span className="font-medium">{isDeleting ? 'Resetting...' : 'Factory Reset Data'}</span>
+                  <RefreshCw className={`h-4 w-4 ${isDeleting ? 'animate-spin' : ''}`} />
+                </Button>
+                
+                <div className="h-px bg-red-500/10 w-full" />
+                
+                <Button
+                  variant="ghost"
+                  onClick={handleSignOut}
+                  className="w-full h-11 text-muted-foreground hover:text-foreground rounded-xl font-medium"
+                >
+                  Log out of session
+                </Button>
+              </div>
+            </div>
 
+          </div>
+        </div>
+
+      </div>
+
+      <Dialog open={showPremiumOptions} onOpenChange={setShowPremiumOptions}>
+        <DialogContent className="sm:max-w-[425px] rounded-2xl">
+          <DialogHeader>
+            <DialogTitle>Choose Your Premium Plan</DialogTitle>
+            <DialogDescription>
+              Select the billing cycle that works best for you. Save 35% with the annual plan!
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4 mt-2">
+            <div 
+              onClick={() => { setShowPremiumOptions(false); handleUpgradeToPremium('annual'); }}
+              className="group cursor-pointer rounded-2xl border-2 border-primary/20 hover:border-primary p-4 transition-all relative overflow-hidden"
+            >
+              <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-[10px] font-bold px-2 py-1 rounded-bl-xl z-10">
+                SAVE 35%
+              </div>
+              <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="relative z-10">
+                <h4 className="font-bold text-lg mb-1">Annual Billing</h4>
+                <div className="flex items-baseline gap-2 mb-1">
+                  <span className="text-2xl font-bold text-foreground">£149.99</span>
+                  <span className="text-sm text-muted-foreground">/year</span>
+                </div>
+                <p className="text-xs font-medium text-primary">Equals just £12.49 per month!</p>
+              </div>
+            </div>
+
+            <div 
+              onClick={() => { setShowPremiumOptions(false); handleUpgradeToPremium('monthly'); }}
+              className="cursor-pointer rounded-2xl border bg-card hover:bg-muted/50 p-4 transition-all"
+            >
+              <h4 className="font-semibold text-base mb-1">Monthly Billing</h4>
+              <div className="flex items-baseline gap-2">
+                <span className="text-xl font-bold text-foreground">£19.99</span>
+                <span className="text-sm text-muted-foreground">/month</span>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">Pay as you go, cancel anytime.</p>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showUltraOptions} onOpenChange={setShowUltraOptions}>
+        <DialogContent className="sm:max-w-[425px] rounded-2xl bg-gradient-to-br from-indigo-950/90 to-slate-900 border-indigo-500/30 text-white shadow-xl overflow-hidden">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(99,102,241,0.15),transparent_50%)] pointer-events-none" />
+          <DialogHeader className="relative z-10">
+            <DialogTitle className="text-xl font-bold flex items-center gap-2 text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 to-indigo-100">
+              <Sparkles className="h-5 w-5 text-indigo-400 drop-shadow-[0_0_8px_rgba(129,140,248,0.8)]" fill="currentColor" /> Ultra Status
+            </DialogTitle>
+            <DialogDescription className="text-slate-300">
+              Select your mastery timeline. Save £200 with the annual commitment!
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4 mt-2 relative z-10 text-slate-900">
+            <div 
+              onClick={() => { setShowUltraOptions(false); handleUpgradeToPremium('ultra_annual'); }}
+              className="group cursor-pointer rounded-2xl border-2 border-indigo-400/50 hover:border-indigo-400 p-4 transition-all relative overflow-hidden bg-white/95"
+            >
+              <div className="absolute top-0 right-0 bg-indigo-500 text-white text-[10px] font-bold px-3 py-1 pb-1.5 rounded-bl-[14px] z-10 shadow-sm flex items-center gap-1 uppercase tracking-widest">
+                <Crown className="w-3 h-3" /> Save £200
+              </div>
+              <div className="absolute inset-0 bg-indigo-50/50 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="relative z-10">
+                <h4 className="font-bold text-lg mb-1 text-slate-800">The Mastery Timeline (Annual)</h4>
+                <div className="flex items-baseline gap-2 mb-1">
+                  <span className="text-2xl font-bold text-indigo-600">£999.00</span>
+                  <span className="text-sm font-medium text-slate-500">/year</span>
+                </div>
+                <p className="text-xs font-semibold text-indigo-500 bg-indigo-50 inline-flex px-2 py-0.5 rounded-md mt-1 border border-indigo-100">Guarantees consistent 1-on-1 progress</p>
+              </div>
+            </div>
+
+            <div 
+              onClick={() => { setShowUltraOptions(false); handleUpgradeToPremium('ultra'); }}
+              className="cursor-pointer rounded-2xl border bg-slate-50 hover:bg-white p-4 transition-all hover:border-slate-300 hover:shadow-sm"
+            >
+              <h4 className="font-semibold text-base mb-1 text-slate-700">Flexible Access (Monthly)</h4>
+              <div className="flex items-baseline gap-2">
+                <span className="text-xl font-bold text-slate-800">£99.99</span>
+                <span className="text-sm text-slate-500">/month</span>
+              </div>
+              <p className="text-xs font-medium text-slate-500 mt-1">Pay as you go, cancel anytime.</p>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {isEditingStudyProfile && (
         <Suspense fallback={null}>
@@ -749,498 +1073,26 @@ export function Settings({ user, onBackToChat, onSignOut }: SettingsProps) {
         </Suspense>
       )}
 
-      {/* Admin Panel - Only visible to admins */}
-      {isAdmin && (
-        <Card className="border-primary/40 bg-primary/5">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Shield className="h-5 w-5 text-primary" />
-              Admin Panel
-            </CardTitle>
-            <CardDescription>Access admin-only features</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button 
-              onClick={() => navigate('/admin/questions')}
-              className="w-full"
-            >
-              <Shield className="mr-2 h-4 w-4" />
-              Question Generator
-            </Button>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Change Password */}
-      <Card className={cardClassName}>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Key className="h-5 w-5" />
-            Change Password
-          </CardTitle>
-          <CardDescription>Update your account password</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-5">
-          <div className="space-y-2">
-            <Label htmlFor="current-password">Current Password</Label>
-            <div className="relative">
-              <Input 
-                id="current-password"
-                type={showCurrentPassword ? "text" : "password"}
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
-                placeholder="Enter current password"
-              />
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-              >
-                {showCurrentPassword ? (
-                  <EyeOff className="h-4 w-4 text-muted-foreground" />
-                ) : (
-                  <Eye className="h-4 w-4 text-muted-foreground" />
-                )}
-              </Button>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="new-password">New Password</Label>
-            <div className="relative">
-              <Input 
-                id="new-password"
-                type={showNewPassword ? "text" : "password"}
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="Enter new password"
-              />
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                onClick={() => setShowNewPassword(!showNewPassword)}
-              >
-                {showNewPassword ? (
-                  <EyeOff className="h-4 w-4 text-muted-foreground" />
-                ) : (
-                  <Eye className="h-4 w-4 text-muted-foreground" />
-                )}
-              </Button>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="confirm-password">Confirm New Password</Label>
-            <div className="relative">
-              <Input 
-                id="confirm-password"
-                type={showConfirmPassword ? "text" : "password"}
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Confirm new password"
-              />
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              >
-                {showConfirmPassword ? (
-                  <EyeOff className="h-4 w-4 text-muted-foreground" />
-                ) : (
-                  <Eye className="h-4 w-4 text-muted-foreground" />
-                )}
-              </Button>
-            </div>
-          </div>
-
-          <Button 
-            onClick={handleChangePassword} 
-            disabled={isChangingPassword || !currentPassword || !newPassword || !confirmPassword}
-            className="w-full"
-          >
-            {isChangingPassword ? "Updating Password..." : "Update Password"}
-          </Button>
-        </CardContent>
-      </Card>
-
-      {/* Membership Information */}
-      <Card className={cardClassName}>
-        <CardHeader>
-          <CardTitle>Membership</CardTitle>
-          <CardDescription>Your plan status and renewal details.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {membershipLoading ? (
-            <div className="space-y-3">
-              <div className="h-8 bg-muted rounded animate-pulse"></div>
-              <div className="h-8 bg-muted rounded animate-pulse"></div>
-              <div className="h-8 bg-muted rounded animate-pulse"></div>
-            </div>
-          ) : membershipError ? (
-            <p className="text-xs text-muted-foreground">Failed to load membership details</p>
-          ) : membership ? (
-            <div className="grid grid-cols-1 sm:grid-cols-5 gap-4">
-              {/* Plan */}
-              <div className="rounded-lg border border-border/80 dark:border-border/50 bg-primary/5 dark:bg-primary/10 p-3">
-                <p className="text-xs text-muted-foreground mb-1.5">Plan</p>
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-sm font-medium">
-                    {(() => {
-                      if (membership.founderTrack === 'founder') return 'Founder';
-                      if (membership.subscription_status === 'trialing') return 'Premium (Trial)';
-                      if (hasPremiumSubscription) return 'Premium';
-                      const plan = membership.plan || 'free';
-                      if (plan === 'free') return 'Free';
-                      return plan.charAt(0).toUpperCase() + plan.slice(1);
-                    })()}
-                  </span>
-                  {membership.founderTrack !== 'founder' && membership.cancel_at_period_end && (
-                    <Badge variant="destructive" className="text-xs whitespace-nowrap">
-                      Canceling
-                    </Badge>
-                  )}
-                </div>
-              </div>
-
-              {/* Billing cycle */}
-              <div className="rounded-lg border border-border/80 dark:border-border/50 bg-primary/5 dark:bg-primary/10 p-3">
-                <p className="text-xs text-muted-foreground mb-1.5">Billing cycle</p>
-                <p className="text-sm font-medium">
-                  {membership.founderTrack === 'founder'
-                    ? '—'
-                    : membership.subscription === 'annual' || membership.subscription === 'year'
-                    ? 'Annual'
-                    : membership.subscription === 'monthly' || membership.subscription === 'month'
-                    ? 'Monthly'
-                    : '—'}
-                </p>
-              </div>
-
-              {/* Status */}
-              <div className="rounded-lg border border-border/80 dark:border-border/50 bg-primary/5 dark:bg-primary/10 p-3">
-                <p className="text-xs text-muted-foreground mb-1.5">Status</p>
-                {membership.founderTrack === 'founder' ? (
-                  <Badge variant="default" className="text-xs whitespace-nowrap">
-                    Founder
-                  </Badge>
-                ) : membership.subscription_status ? (
-                  <div className="space-y-1">
-                    <Badge 
-                      variant={
-                        membership.subscription_status === 'active' 
-                          ? 'default' 
-                          : membership.subscription_status === 'trialing' 
-                          ? 'secondary' 
-                          : 'outline'
-                      }
-                      className="text-xs whitespace-nowrap"
-                    >
-                      {(() => {
-                        const status = membership.subscription_status;
-                        if (status === 'trialing') return 'Trialing';
-                        if (status === 'incomplete_expired') return 'Payment expired';
-                        if (status === 'incomplete') return 'Payment incomplete';
-                        if (status === 'past_due') return 'Past due';
-                        return status.charAt(0).toUpperCase() + status.slice(1);
-                      })()}
-                    </Badge>
-                    {membership.subscription_status === 'trialing' && membership.current_period_end ? (
-                      <p className="text-xs text-muted-foreground">
-                        Billing starts on {formatDate(membership.current_period_end)}
-                      </p>
-                    ) : null}
-                  </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground">
-                    {hasPremiumSubscription ? 'Premium' : 'Free'}
-                  </p>
-                )}
-              </div>
-
-              {/* Premium track */}
-              <div className="rounded-lg border border-border/80 dark:border-border/50 bg-primary/5 dark:bg-primary/10 p-3">
-                <p className="text-xs text-muted-foreground mb-1.5">Premium track</p>
-                <p className="text-sm font-medium">
-                  {membership.founderTrack === 'founder'
-                    ? 'All tracks'
-                    : hasPremiumSubscription
-                      ? `${formatTrackLabel(membership.premiumTrack)} only`
-                      : 'None'}
-                </p>
-              </div>
-
-              {/* Current track access */}
-              <div className="rounded-lg border border-border/80 dark:border-border/50 bg-primary/5 dark:bg-primary/10 p-3">
-                <p className="text-xs text-muted-foreground mb-1.5">Current track access</p>
-                <p className="text-sm font-medium">
-                  {accessIsPremium ? 'Premium' : 'Free'}
-                </p>
-              </div>
-
-              {/* Renewal/End */}
-              {(() => {
-                const status = membership.subscription_status;
-                const cancelAtPeriodEnd = membership.cancel_at_period_end;
-                const currentPeriodEnd = membership.current_period_end;
-                
-                console.debug('[Membership:date]', status, cancelAtPeriodEnd, currentPeriodEnd);
-                
-                let label = '—';
-                if (membership.founderTrack === 'founder') {
-                  label = '—';
-                } else if (cancelAtPeriodEnd) {
-                  label = 'Ends on';
-                } else if (status === 'canceled') {
-                  label = 'Ended on';
-                } else if (status === 'trialing' && currentPeriodEnd) {
-                  label = 'Trial ends on';
-                } else if (status === 'active' && currentPeriodEnd) {
-                  label = 'Renews on';
-                }
-                
-                const autoRenewLabel = (() => {
-                  if (!currentPeriodEnd) return '—';
-                  if (membership.founderTrack === 'founder') return '—';
-                  if (cancelAtPeriodEnd) return 'Off';
-                  if (status === 'active') return 'On';
-                  if (status === 'trialing') return 'On';
-                  return '—';
-                })();
-
-                return (
-                  <div className="rounded-lg border border-border/80 dark:border-border/50 bg-primary/5 dark:bg-primary/10 p-3">
-                    <p className="text-xs text-muted-foreground mb-1.5">{label}</p>
-                    {currentPeriodEnd && label !== '—' ? (
-                      <div className="space-y-1">
-                        <p className="text-sm font-medium">
-                          {formatDate(currentPeriodEnd)}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {status === 'trialing' ? 'Trial auto-renew:' : 'Auto-renew:'} {autoRenewLabel}
-                        </p>
-                      </div>
-                    ) : (
-                      <p className="text-sm text-muted-foreground">—</p>
-                    )}
-                  </div>
-                );
-              })()}
-            </div>
-          ) : null}
-        </CardContent>
-      </Card>
-
-      {/* Appearance Settings */}
-      <Card className={cardClassName}>
-        <CardHeader>
-          <CardTitle>Appearance</CardTitle>
-          <CardDescription>Customize how the app looks</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between gap-4 rounded-lg border border-border/70 bg-primary/5 dark:bg-primary/10 px-3 py-2">
-            <div className="space-y-0.5">
-              <Label htmlFor="theme-mode">Dark Mode</Label>
-              <p className="text-sm text-muted-foreground">
-                Toggle between light and dark themes
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              {theme === 'light' ? (
-                <Sun className="h-4 w-4 text-muted-foreground" />
-              ) : (
-                <Moon className="h-4 w-4 text-muted-foreground" />
-              )}
-              <Switch
-                id="theme-mode"
-                checked={theme === 'dark'}
-                onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')}
-              />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Premium Card - Show manage billing for premium users, otherwise show upgrade */}
-      {!membershipIsFounder && (
-        <Card className="card-hero relative overflow-hidden">
-          <CardContent className="card-mobile-padding relative">
-            <div className="absolute -top-16 -left-16 h-40 w-40 rounded-full bg-primary-foreground/10 blur-2xl" />
-            <div className="absolute -bottom-20 -right-20 h-56 w-56 rounded-full bg-primary-foreground/10 blur-3xl" />
-
-            <div className="relative text-center text-primary-foreground">
-              <div className="p-4 bg-primary-foreground/10 rounded-2xl mx-auto mb-6 w-fit border border-primary-foreground/15">
-                <Crown className="h-6 w-6 sm:h-8 sm:w-8" />
-              </div>
-              <h3 className="text-responsive-xl font-bold mb-3 whitespace-pre-line leading-snug">
-                {hasPremiumSubscription ? 'Manage Billing' : premiumSettingsTitle}
-              </h3>
-              <p className="text-responsive-sm text-primary-foreground/80 mb-6 leading-relaxed max-w-2xl mx-auto">
-                {hasPremiumSubscription
-                  ? accessIsPremium
-                    ? 'Your active track currently has Premium access. You can manage billing anytime.'
-                    : `You have Premium on ${formatTrackLabel(membership?.premiumTrack)} only. Switch track to use it, or manage billing below.`
-                  : premiumSettingsDescription}
-              </p>
-              <div className="w-full">
-                {hasPremiumSubscription ? (
-                  <Button
-                    variant="outline"
-                    onClick={handleManageSubscription}
-                    className="w-full h-12 rounded-xl bg-primary-foreground text-primary border-primary-foreground/20 hover:bg-primary-foreground/90"
-                    disabled={isManagingSubscription}
-                    size="lg"
-                  >
-                    <CreditCard className="h-4 w-4 mr-2" />
-                    {isManagingSubscription ? 'Opening Portal...' : 'Manage Billing'}
-                  </Button>
-                ) : (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className="w-full h-12 rounded-xl bg-primary-foreground text-primary border-primary-foreground/20 hover:bg-primary-foreground/90"
-                        disabled={isCreatingCheckout}
-                        size="lg"
-                      >
-                        <Crown className="h-4 w-4 mr-2" />
-                        {isCreatingCheckout ? 'Starting Checkout...' : premiumSettingsCta}
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="center" className="w-64 bg-popover">
-                      <DropdownMenuItem onClick={() => handleUpgradeToPremium('monthly')}>
-                        <div className="flex flex-col py-2">
-                          <span className="font-semibold text-base">Monthly Plan</span>
-                          <span className="text-sm text-muted-foreground">£19.99 per month</span>
-                        </div>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleUpgradeToPremium('annual')}>
-                        <div className="flex flex-col py-2">
-                          <span className="font-semibold text-base">Annual Plan</span>
-                          <span className="text-sm text-muted-foreground">£149.99 per year</span>
-                        </div>
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                )}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {isSupportAdmin && (
-        <Card className={cardClassName}>
-          <CardHeader>
-            <CardTitle>Support Inbox</CardTitle>
-            <CardDescription>Latest messages from the landing page form.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">
-                Showing the 50 most recent submissions.
-              </p>
-              <Button variant="outline" size="sm" onClick={fetchSupportRequests} disabled={supportLoading}>
-                {supportLoading ? 'Refreshing...' : 'Refresh'}
-              </Button>
-            </div>
-            {supportLoading ? (
-              <div className="space-y-3">
-                <div className="h-16 bg-muted rounded animate-pulse"></div>
-                <div className="h-16 bg-muted rounded animate-pulse"></div>
-              </div>
-            ) : supportRequests.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No support messages yet.</p>
-            ) : (
-              <div className="space-y-4">
-                {supportRequests.map((request) => (
-                  <div key={request.id} className="rounded-lg border border-border/70 bg-muted/30 p-4 space-y-2">
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-                        <span className="uppercase text-xs font-semibold text-primary">
-                          {request.kind}
-                        </span>
-                        <span>{formatSupportDate(request.created_at)}</span>
-                        <span>•</span>
-                        <span>{request.email || 'No email provided'}</span>
-                      </div>
-                      {request.user_id && (
-                        <span className="text-xs text-muted-foreground">
-                          User ID: {request.user_id}
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-sm text-foreground whitespace-pre-wrap">{request.message}</p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Actions */}
-      <Card className={cardClassName}>
-        <CardHeader>
-          <CardTitle>Account Actions</CardTitle>
-          <CardDescription>Refresh your data or sign out.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          <Button
-            variant="outline"
-            onClick={handleRefreshData}
-            className="w-full justify-start"
-            disabled={isDeleting}
-          >
-            <RefreshCw className={`h-4 w-4 mr-2 ${isDeleting ? 'animate-spin' : ''}`} />
-            {isDeleting ? 'Resetting Data...' : 'Refresh Data'}
-          </Button>
-          <Button
-            variant="outline"
-            onClick={handleSignOut}
-            className="w-full justify-start"
-          >
-            Sign Out
-          </Button>
-        </CardContent>
-      </Card>
-
-      {/* Confirmation Dialog */}
       <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
-        <AlertDialogContent>
+        <AlertDialogContent className="rounded-2xl">
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>Destructive Action</AlertDialogTitle>
             <AlertDialogDescription>
-              This action will permanently delete all your data including:
-              <br />• All timetables and study sessions
-              {AI_FEATURE_ENABLED ? <><br />• AI chat histories</> : null}
-              <br />• Exam readiness percentages (reset to 0%)
-              <br />• Notes progress and personal notes (reset to 0%)
-              <br /><br />
-              Your account access level (Founder/Premium/Free) will be preserved. This action cannot be undone.
+              This action will permanently delete all your data including timetables, exam readiness scores, and notes.
+              Your account access level will be preserved. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
             <AlertDialogAction 
               onClick={handleConfirmDataReset}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="bg-red-500 text-white hover:bg-red-600 rounded-xl"
             >
               Yes, delete all data
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-              </div>
-            </>
-          );
-        })()}
-      </div>
     </div>
   );
 }

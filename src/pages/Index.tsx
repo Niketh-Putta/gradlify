@@ -8,7 +8,6 @@ import { LandingPage } from "@/components/LandingPage";
 import { ElevenPlusLanding } from "@/pages/ElevenPlusLanding";
 import { ForceTheme } from "@/components/ForceTheme";
 import { Home } from "@/pages/Home";
-import { Chat } from "@/pages/Chat";
 import { AIUnavailableRedirect } from "@/components/AIUnavailableRedirect";
 import { Readiness } from "@/pages/Readiness";
 import ExamReadiness from "@/pages/ExamReadiness";
@@ -44,7 +43,7 @@ const protectedRoutes = [
   '/home',
   '/dashboard/11plus',
   '/dashboard/gcse',
-  ...(AI_FEATURE_ENABLED ? ['/chat'] : []),
+
   '/readiness',
   '/mocks',
   '/mock-exam',
@@ -60,7 +59,9 @@ const Index = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [appState, setAppState] = useState<AppState>('app');
+  const [appState, setAppState] = useState<AppState>(() => {
+    return window.location.hash === '#settings' ? 'settings' : 'app';
+  });
   const [user, setUser] = useState<User | null>(null);
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -111,8 +112,13 @@ const Index = () => {
     return () => subscription.unsubscribe();
   }, [location.pathname, navigate]);
 
-
-
+  useEffect(() => {
+    if (location.hash === '#settings') {
+      setAppState('settings');
+    } else {
+      setAppState('app');
+    }
+  }, [location.hash]);
   useEffect(() => {
     if (user) return;
     if (!["/", "/11-plus"].includes(location.pathname)) return;
@@ -214,7 +220,10 @@ const Index = () => {
     return (
       <Settings
         user={user}
-        onBackToChat={() => setAppState('app')}
+        onBackToChat={() => {
+          window.history.replaceState(null, '', window.location.pathname + window.location.search);
+          setAppState('app');
+        }}
         onSignOut={handleSignOut}
       />
     );
@@ -252,7 +261,10 @@ const Index = () => {
             element={
               <Layout 
                 user={user}
-                onSettings={() => setAppState('settings')}
+                onSettings={() => {
+                  window.location.hash = 'settings';
+                  setAppState('settings');
+                }}
                 onSignOut={handleSignOut}
               />
             }
@@ -261,7 +273,7 @@ const Index = () => {
             <Route path="dashboard" element={<Home />} />
             <Route path="dashboard/gcse" element={<Navigate to="/dashboard" replace />} />
             <Route path="dashboard/11plus" element={<Navigate to="/dashboard" replace />} />
-            <Route path="chat" element={AI_FEATURE_ENABLED ? <Chat /> : <AIUnavailableRedirect to="/home" />} />
+
             <Route path="readiness" element={<Readiness />} />
             <Route path="exam-readiness" element={<ExamReadiness />} />
             <Route path="connect" element={<Connect />} />

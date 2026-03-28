@@ -193,40 +193,53 @@ export function Navigation({ user, profile, onSettings, onSignOut }: NavigationP
     return 'outline';
   };
 
-  const NavItem = ({ item, isMobile = false, isCollapsed = false, inGrid = false }: { 
+  const NavItem = ({ item, isMobile = false, inGrid = false }: { 
     item: typeof primaryNavigationItems[0], 
     isMobile?: boolean,
-    isCollapsed?: boolean,
     inGrid?: boolean
   }) => (
     <NavLink
       to={item.path}
       className={({ isActive }) =>
         cn(
-          "flex items-center gap-2 px-2.5 py-1.5 2xl:py-2 rounded-lg transition-colors duration-150 ease-out relative group/nav-item",
+          "flex items-center rounded-xl transition-all duration-300 ease-in-out relative overflow-hidden",
           isActive
-            ? 'bg-primary text-primary-foreground shadow-primary'
+            ? 'bg-primary/10 text-primary font-semibold'
             : 'text-muted-foreground hover:text-foreground hover:bg-muted/70',
-          isMobile && 'justify-center flex-col gap-1 min-h-[56px]',
-          isCollapsed && !isMobile && 'justify-center w-full px-0 py-1.5 2xl:py-2',
-          inGrid && 'py-2.5'
+          isMobile 
+            ? 'justify-center flex-col gap-1 min-h-[56px] py-2 px-1 w-full' 
+            : inGrid 
+              ? 'py-2.5 px-3 gap-3 min-h-[56px] w-full'
+              : cn('h-11', sidebarHovered ? 'w-full' : 'w-11')
         )
       }
       onClick={() => handleNavSelection({ isMobile })}
     >
-      <item.icon className={cn(
-        "transition-all duration-200 shrink-0",
-        isMobile ? 'h-4 w-4' : 'h-4 w-4 2xl:h-[18px] 2xl:w-[18px]',
-        isCollapsed && !isMobile && 'h-4 w-4 2xl:h-[18px] 2xl:w-[18px]'
-      )} />
-      <span className={cn(
-        "font-medium transition-all duration-200 whitespace-nowrap overflow-hidden text-ellipsis",
-        isMobile && 'text-xs',
-        !isMobile && 'text-sm',
-        isCollapsed && !isMobile && 'opacity-0 w-0'
+      <div className={cn(
+        "flex items-center justify-center shrink-0",
+        isMobile ? "h-6 w-full" : inGrid ? "w-6 h-6" : "w-11 h-11"
       )}>
-        {item.label}
-      </span>
+        <item.icon className={cn(
+          "shrink-0 transition-transform duration-300",
+          isMobile ? 'h-5 w-5' : 'h-[18px] w-[18px]',
+          !isMobile && !inGrid && sidebarHovered && 'scale-105'
+        )} />
+      </div>
+      {!isMobile && !inGrid ? (
+        <span className={cn(
+          "font-medium whitespace-nowrap text-sm absolute left-11 transition-all duration-300",
+          sidebarHovered ? "opacity-100 translate-x-1" : "opacity-0 -translate-x-4 pointer-events-none"
+        )}>
+          {item.label}
+        </span>
+      ) : (
+        <span className={cn(
+           "font-medium whitespace-nowrap overflow-hidden pr-2",
+           inGrid ? 'text-sm' : 'text-xs'
+        )}>
+          {item.label}
+        </span>
+      )}
     </NavLink>
   );
 
@@ -235,162 +248,119 @@ export function Navigation({ user, profile, onSettings, onSignOut }: NavigationP
       {/* Desktop Sidebar */}
       <aside 
         className={cn(
-          "hidden lg:flex lg:flex-col lg:fixed lg:inset-y-0 bg-gradient-card border-r shadow-card transition-all duration-200 ease-in-out z-50 overflow-hidden",
-          sidebarHovered ? "lg:w-64" : "lg:w-16"
+          "hidden lg:block lg:fixed lg:inset-y-0 bg-gradient-card border-r shadow-card transition-all duration-300 ease-in-out z-50 overflow-hidden whitespace-nowrap",
+          sidebarHovered ? "w-64" : "w-16"
         )}
         onMouseEnter={() => setSidebarHovered(true)}
         onMouseLeave={() => setSidebarHovered(false)}
       >
-        {/* Logo */}
+        <div className="flex flex-col h-full pt-3 pb-3 px-[10px] w-64">
+          {/* Logo */}
           <NavLink
             to={homePath}
             onClick={() => handleNavSelection({ isMobile: false })}
-            className="flex items-center gap-2 py-2 2xl:py-3 pr-3 pl-2 hover:bg-muted/50 transition-colors cursor-pointer rounded-2xl ml-0 mr-2 mb-1 shrink-0"
+            className={cn(
+              "flex items-center hover:bg-muted/50 transition-all duration-300 cursor-pointer rounded-xl shrink-0 h-12 overflow-hidden mb-4 relative",
+              sidebarHovered ? "w-[236px]" : "w-11"
+            )}
           >
-            <LogoMark
-              className="shrink-0"
-              size={36}
-            />
+            <div className="w-11 h-11 flex items-center justify-center shrink-0">
+               <LogoMark size={28} className="shrink-0" />
+            </div>
             <div className={cn(
-              "transition-all duration-200 overflow-hidden leading-tight",
-              sidebarHovered ? "opacity-100 w-auto" : "opacity-0 w-0"
+              "flex flex-col justify-center whitespace-nowrap absolute left-11 transition-all duration-300 pl-1",
+              sidebarHovered ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-4 pointer-events-none"
             )}>
-              <h1 className="text-sm 2xl:text-base font-bold font-gradlify bg-gradient-gradlify bg-clip-text text-transparent">
+              <h1 className="text-sm font-bold font-gradlify bg-gradient-gradlify bg-clip-text text-transparent truncate">
                 Gradlify
               </h1>
-              <p className="text-[10px] 2xl:text-xs text-muted-foreground max-w-[120px]">
+              <p className="text-[10px] text-muted-foreground truncate w-40 tracking-wide">
                 {topBarTrackLabel}
               </p>
             </div>
           </NavLink>
 
-        {/* User Info */}
-        <div className="px-2 py-1.5 2xl:py-2 mb-1 flex items-center shrink-0">
-          <div className="flex items-center gap-2 w-full">
-            <div className="w-6 h-6 2xl:w-7 2xl:h-7 bg-primary/10 rounded-full flex items-center justify-center shrink-0">
-              <span className="text-[10px] 2xl:text-xs font-semibold text-primary">
-                {userName.charAt(0).toUpperCase()}
-              </span>
+          {/* User Info */}
+          <div className={cn(
+             "flex items-center shrink-0 h-11 overflow-hidden mb-2 relative rounded-xl transition-all duration-300",
+             sidebarHovered ? "w-[236px] bg-muted/40" : "w-11 bg-transparent"
+          )}>
+            <div className="w-11 h-11 flex items-center justify-center shrink-0">
+              <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center shrink-0 border border-primary/20 shadow-sm">
+                <span className="text-[10px] font-bold text-primary">
+                  {userName.charAt(0).toUpperCase()}
+                </span>
+              </div>
             </div>
             <div className={cn(
-              "transition-all duration-200 overflow-hidden min-w-0 flex-1",
-              sidebarHovered ? "opacity-100 w-auto" : "opacity-0 w-0"
+              "flex flex-col justify-center min-w-0 flex-1 whitespace-nowrap absolute left-11 transition-all duration-300 pl-1",
+              sidebarHovered ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-4 pointer-events-none"
             )}>
-              <p className="font-medium text-xs whitespace-nowrap overflow-hidden text-ellipsis">
-                {userName}
+              <p className="font-semibold text-xs truncate pr-4 text-foreground">
+                {userName.split(' ')[0]}
               </p>
-              <Badge 
-                variant={getTierVariant()}
-                className={cn(
-                  "text-[10px] mt-0.5 whitespace-nowrap h-4 px-1.5",
-                  isUltra && "bg-gradient-to-r from-amber-200 to-amber-400 text-slate-900 border-0 font-bold shadow-[0_0_10px_rgba(245,158,11,0.2)]"
-                )}
-              >
-                {getTierDisplay()}
-              </Badge>
-              <Badge variant="outline" className="text-[10px] mt-1 whitespace-nowrap h-4 px-1.5">
-                {trackLabel}
-              </Badge>
+              <div className="flex items-center gap-1 mt-0.5">
+                <Badge 
+                  variant={getTierVariant()}
+                  className={cn(
+                    "text-[8px] h-3.5 px-1 whitespace-nowrap uppercase tracking-widest",
+                    isUltra && "bg-gradient-to-r from-amber-200 to-amber-400 text-slate-900 border-0 shadow-sm"
+                  )}
+                >
+                  {getTierDisplay()}
+                </Badge>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Navigation - Scrollable */}
-        <nav className={cn(
-          "flex-1 overflow-y-auto overflow-x-hidden transition-all duration-200 min-h-0",
-          sidebarHovered ? "px-2 py-2" : "px-2 py-2"
-        )}>
-          {/* Primary Navigation */}
-          <div className="space-y-0.5 2xl:space-y-1">
-            {primaryNavigationItems.map((item) => (
-              <NavItem key={item.path} item={item} isCollapsed={!sidebarHovered} />
-            ))}
-          </div>
-          
-          <div className="my-2 2xl:my-3" />
-          
-          {/* More Section */}
-          <div className="space-y-0.5 2xl:space-y-1">
+          {/* Navigation - Scrollable */}
+          <nav className="flex-1 overflow-y-auto overflow-x-hidden min-h-0 py-2">
+            <div className="space-y-1">
+              {[...primaryNavigationItems, ...moreNavigationItems].map((item) => (
+                <NavItem key={item.path} item={item} />
+              ))}
+            </div>
+          </nav>
+
+          {/* Settings & Logout */}
+          <div className="space-y-1 shrink-0 border-t border-border/50 pt-3 mt-2">
             <button
-              onClick={() => setMoreExpanded(!moreExpanded)}
               className={cn(
-                "flex items-center rounded-lg transition-all duration-200 ease-in-out",
-                "text-muted-foreground hover:text-foreground hover:bg-muted/70",
-                sidebarHovered ? 'gap-2 px-2.5 py-1.5 2xl:py-2 w-full' : 'justify-center py-1.5 2xl:py-2 w-full pl-2.5'
+                "flex items-center rounded-xl transition-all duration-300 ease-in-out text-muted-foreground hover:text-foreground hover:bg-muted/70 h-11 overflow-hidden relative",
+                sidebarHovered ? "w-[236px]" : "w-11"
               )}
+              onClick={() => {
+                handleNavSelection({ isMobile: false });
+                onSettings();
+              }}
             >
-              <MoreHorizontal className={cn(
-                "h-4 w-4 2xl:h-[18px] 2xl:w-[18px] shrink-0 transition-all duration-200"
-              )} />
-              <span className={cn(
-                "font-medium text-sm transition-all duration-200 whitespace-nowrap overflow-hidden text-ellipsis flex-1 text-left",
-                !sidebarHovered && 'opacity-0 w-0'
-              )}>
-                More
-              </span>
-              {sidebarHovered && (
-                moreExpanded ? 
-                  <ChevronDown className="h-3.5 w-3.5 shrink-0" /> : 
-                  <ChevronRight className="h-3.5 w-3.5 shrink-0" />
-              )}
-            </button>
-            
-            {/* More Items - Expandable */}
-            {moreExpanded && (
-              <div className="space-y-0.5 2xl:space-y-1 mt-0.5">
-                {moreNavigationItems.map((item) => (
-                  <NavItem key={item.path} item={item} isCollapsed={!sidebarHovered} />
-                ))}
+              <div className="w-11 h-11 flex items-center justify-center shrink-0">
+                <Settings className="h-5 w-5 shrink-0" />
               </div>
-            )}
+              <span className={cn(
+                "text-sm font-medium whitespace-nowrap absolute left-11 transition-all duration-300",
+                sidebarHovered ? "opacity-100 translate-x-1" : "opacity-0 -translate-x-4 pointer-events-none"
+              )}>Settings</span>
+            </button>
+            <button
+              className={cn(
+                "flex items-center rounded-xl transition-all duration-300 ease-in-out text-destructive hover:text-destructive hover:bg-destructive/10 h-11 overflow-hidden relative",
+                sidebarHovered ? "w-[236px]" : "w-11"
+              )}
+              onClick={() => {
+                handleNavSelection({ isMobile: false });
+                onSignOut();
+              }}
+            >
+              <div className="w-11 h-11 flex items-center justify-center shrink-0">
+                <LogOut className="h-5 w-5 shrink-0" />
+              </div>
+              <span className={cn(
+                "text-sm font-medium whitespace-nowrap absolute left-11 transition-all duration-300",
+                sidebarHovered ? "opacity-100 translate-x-1" : "opacity-0 -translate-x-4 pointer-events-none"
+              )}>Sign Out</span>
+            </button>
           </div>
-        </nav>
-
-        {/* Settings & Logout */}
-        <div className={cn(
-          "space-y-0.5 2xl:space-y-1 rounded-2xl transition-all duration-200 shrink-0 border-t border-border/50 mt-1",
-          sidebarHovered ? "p-2 mx-2" : "px-2 py-2 mx-0"
-        )}>
-          <Button
-            variant="ghost"
-            size="sm"
-            className={cn(
-              "transition-colors duration-150",
-              sidebarHovered ? "w-full justify-start h-8 2xl:h-9" : "w-full h-8 2xl:h-9 p-0 justify-center"
-            )}
-            onClick={() => {
-              handleNavSelection({ isMobile: false });
-              onSettings();
-            }}
-          >
-            <Settings className="h-4 w-4 2xl:h-[18px] 2xl:w-[18px] shrink-0" />
-            <span className={cn(
-              "ml-2 transition-all duration-200 whitespace-nowrap overflow-hidden text-ellipsis text-sm",
-              sidebarHovered ? "opacity-100 w-auto" : "opacity-0 w-0 ml-0"
-            )}>
-              Settings
-            </span>
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className={cn(
-              "text-destructive hover:text-destructive transition-colors duration-150",
-              sidebarHovered ? "w-full justify-start h-8 2xl:h-9" : "w-full h-8 2xl:h-9 p-0 justify-center"
-            )}
-            onClick={() => {
-              handleNavSelection({ isMobile: false });
-              onSignOut();
-            }}
-          >
-            <LogOut className="h-4 w-4 2xl:h-[18px] 2xl:w-[18px] shrink-0" />
-            <span className={cn(
-              "ml-2 transition-all duration-200 whitespace-nowrap overflow-hidden text-ellipsis text-sm",
-              sidebarHovered ? "opacity-100 w-auto" : "opacity-0 w-0 ml-0"
-            )}>
-              Sign Out
-            </span>
-          </Button>
         </div>
       </aside>
 
@@ -439,38 +409,9 @@ export function Navigation({ user, profile, onSettings, onSignOut }: NavigationP
             </div>
             <nav className="p-2">
               <div className="grid grid-cols-2 gap-1.5">
-                {primaryNavigationItems.map((item) => (
+                {[...primaryNavigationItems, ...moreNavigationItems].map((item) => (
                   <NavItem key={item.path} item={item} inGrid />
                 ))}
-              </div>
-              
-              {/* More Section */}
-              <div className="mt-2 pt-2 border-t border-border/50">
-                <button
-                  onClick={() => setMoreExpanded(!moreExpanded)}
-                  className={cn(
-                    "flex items-center justify-between w-full px-2.5 py-2 rounded-lg transition-all duration-200",
-                    "text-muted-foreground hover:text-foreground hover:bg-muted/70",
-                    moreExpanded && "bg-muted/50"
-                  )}
-                >
-                  <div className="flex items-center gap-2">
-                    <MoreHorizontal className="h-4 w-4" />
-                    <span className="font-medium text-sm">More</span>
-                  </div>
-                  {moreExpanded ? 
-                    <ChevronDown className="h-4 w-4" /> : 
-                    <ChevronRight className="h-4 w-4" />
-                  }
-                </button>
-                
-                {moreExpanded && (
-                  <div className="grid grid-cols-2 gap-1.5 mt-1.5 pl-2">
-                    {moreNavigationItems.map((item) => (
-                      <NavItem key={item.path} item={item} inGrid />
-                    ))}
-                  </div>
-                )}
               </div>
               
               <div className="mt-2 pt-2 space-y-1 border-t border-border/50">
@@ -502,9 +443,9 @@ export function Navigation({ user, profile, onSettings, onSignOut }: NavigationP
         )}
       </header>
 
-      {/* Mobile Bottom Navigation - Tablet Only (hidden on phone) */}
+      {/* Mobile Bottom Navigation - Phone and Tablet */}
       <nav className={cn(
-        "hidden sm:block lg:hidden fixed bottom-0 left-0 right-0 bg-gradient-card shadow-card pb-safe z-50 transition-transform duration-300 ease-in-out rounded-t-3xl",
+        "block lg:hidden fixed bottom-0 left-0 right-0 bg-gradient-card shadow-card pb-safe z-50 transition-transform duration-300 ease-in-out rounded-t-3xl",
         bottomNavHidden ? "translate-y-full" : "translate-y-0"
       )}>
         {/* More Menu Popup */}

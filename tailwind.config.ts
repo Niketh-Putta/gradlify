@@ -23,8 +23,9 @@ export default {
 				'xs': '475px',
 			},
 		fontFamily: {
-			'sans': ['DM Sans', 'system-ui', 'sans-serif'],
-			'gradlify': ['DM Sans', 'system-ui', 'sans-serif'],
+			'sans': ['Inter', 'DM Sans', 'system-ui', 'sans-serif'],
+			'serif': ['"Playfair Display"', 'Georgia', 'serif'],
+			'gradlify': ['Inter', 'DM Sans', 'system-ui', 'sans-serif'],
 		},
 			colors: {
 				border: 'hsl(var(--border))',

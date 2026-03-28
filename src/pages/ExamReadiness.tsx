@@ -29,9 +29,7 @@ export default function ExamReadiness() {
           </span>
           <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight">Exam Readiness</h1>
           <p className="text-xs sm:text-sm text-muted-foreground mt-1 sm:mt-2">
-            {userTrack === '11plus'
-              ? 'Track your preparation progress across all 11+ maths sections'
-              : 'Track your preparation progress across all GCSE Maths topics'}
+            Track your preparation progress across all 11+ maths sections
           </p>
         </div>
 
