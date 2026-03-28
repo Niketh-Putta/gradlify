@@ -107,7 +107,7 @@ Deno.serve(async (req: Request) => {
     }
 
     let imageUrls: string[] = [];
-    let inlineImages: Array<{ mimeType: string, data: string }> = [];
+    const inlineImages: Array<{ mimeType: string, data: string }> = [];
 
     if (images.length > 0) {
       const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
@@ -135,7 +135,7 @@ Deno.serve(async (req: Request) => {
 
     if (messages) {
       for (const m of messages) {
-        let role = m.role.toLowerCase() === "assistant" || m.role.toLowerCase() === "ai" ? "model" : "user";
+        const role = m.role.toLowerCase() === "assistant" || m.role.toLowerCase() === "ai" ? "model" : "user";
         if (role === "system") continue; // system prompt goes elsewhere in Gemini
         contents.push({ role, parts: [{ text: m.content }] });
       }
@@ -179,7 +179,7 @@ Deno.serve(async (req: Request) => {
 
     const raw = await (res as any).text();
     let data: any = { raw };
-    try { data = JSON.parse(raw); } catch {}
+    try { data = JSON.parse(raw); } catch { /* ignore parse error */ }
 
     if (!(res as any).ok) {
       console.error("Gemini API error", { status: (res as any).status, response: raw.slice(0, 1000) });

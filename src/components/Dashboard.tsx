@@ -180,8 +180,7 @@ export function Dashboard({
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column - Usage & Study Buddy */}
           <div className="lg:col-span-2 space-y-6">
-            {AI_FEATURE_ENABLED ? (
-            ) : null}
+
 
             {/* Quick Actions */}
             <Card className="bg-gradient-card border-0 shadow-card">
