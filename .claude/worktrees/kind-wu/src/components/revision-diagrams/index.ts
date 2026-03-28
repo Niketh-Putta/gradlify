@@ -1,0 +1,9 @@
+export { NumberLine } from './NumberLine';
+export { RightTriangle } from './RightTriangle';
+export { BoxPlot } from './BoxPlot';
+export { CumulativeFrequencyCurve } from './CumulativeFrequencyCurve';
+export { Histogram } from './Histogram';
+export { TreeDiagram } from './TreeDiagram';
+export { VennDiagram } from './VennDiagram';
+export { getInteractiveDiagram } from './InteractiveDiagrams';
+export { StatisticsDiagrams } from './InteractiveDiagrams';

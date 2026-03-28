@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="500" viewBox="0 0 900 500" role="img" aria-label="Cosine rule diagram" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <style>
+      .t{font:700 28px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#0f172a}
+      .s{font:500 18px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#334155}
+      .k{font:700 18px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#0f172a}
+      .m{font:800 18px ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;fill:#0f172a}
+      .box{fill:#f8fafc;stroke:#cbd5e1;stroke-width:2}
+      .tri{stroke:#0f172a;stroke-width:5;fill:none;stroke-linejoin:round;stroke-linecap:round}
+      .pill{fill:#ffffff;stroke:#e2e8f0;stroke-width:2}
+      .lab{font:800 18px ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;fill:#7c3aed}
+      .v{font:700 18px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#0f172a}
+    </style>
+  </defs>
+
+  <rect width="900" height="500" fill="#ffffff"/>
+  <text x="40" y="62" class="t">Cosine rule</text>
+  <text x="40" y="96" class="s">Use for SAS (two sides + included angle) or SSS.</text>
+
+  <g transform="translate(70,110)">
+    <!-- Triangle points: A(90,330), B(440,340), C(300,90) -->
+    <path d="M90 330 L440 340 L300 90 Z" class="tri"/>
+
+    <!-- labels only (no curved marks) -->
+
+    <!-- Vertex labels -->
+    <text x="72" y="360" class="v">A</text>
+    <text x="454" y="370" class="v">B</text>
+    <text x="296" y="80" class="v">C</text>
+
+    <!-- Side labels (off the lines) -->
+    <circle cx="260" cy="384" r="18" class="pill"/>
+    <text x="260" y="390" class="lab" text-anchor="middle">c</text>
+
+    <circle cx="478" cy="215" r="18" class="pill"/>
+    <text x="478" y="221" class="lab" text-anchor="middle">a</text>
+
+    <circle cx="98" cy="215" r="18" class="pill"/>
+    <text x="98" y="221" class="lab" text-anchor="middle">b</text>
+
+    <!-- Angle label -->
+    <circle cx="176" cy="272" r="18" class="pill"/>
+    <text x="176" y="278" class="lab" text-anchor="middle">A</text>
+  </g>
+
+  <g transform="translate(540,150)">
+    <rect x="0" y="0" width="320" height="250" rx="18" class="box"/>
+    <text x="20" y="46" class="k">Formula</text>
+    <text x="20" y="84" class="m">
+      <tspan x="20" dy="0">a² = b² + c²</tspan>
+      <tspan x="20" dy="28">− 2bc cos(A)</tspan>
+    </text>
+
+    <text x="20" y="156" class="k">Tip</text>
+    <text x="20" y="188" class="s">
+      <tspan x="20" dy="0">Angle A is between b and c.</tspan>
+      <tspan x="20" dy="22">Opposite side is a.</tspan>
+    </text>
+  </g>
+</svg>

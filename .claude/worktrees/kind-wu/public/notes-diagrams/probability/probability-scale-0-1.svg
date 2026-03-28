@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="360" viewBox="0 0 920 360" role="img" aria-label="Probability scale from 0 to 1">
+  <rect width="920" height="360" fill="#ffffff"/>
+  <text x="40" y="56" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="28" font-weight="700" fill="#111827">Probability scale</text>
+  <text x="40" y="86" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="16" fill="#4b5563">All probabilities lie between 0 and 1.</text>
+
+  <rect x="40" y="120" width="840" height="200" rx="16" fill="#f3f4f6" stroke="#e5e7eb"/>
+
+  <line x1="120" y1="240" x2="800" y2="240" stroke="#111827" stroke-width="4"/>
+
+  <!-- ticks -->
+  <g stroke="#111827" stroke-width="3">
+    <line x1="120" y1="232" x2="120" y2="252"/>
+    <line x1="290" y1="232" x2="290" y2="252"/>
+    <line x1="460" y1="232" x2="460" y2="252"/>
+    <line x1="630" y1="232" x2="630" y2="252"/>
+    <line x1="800" y1="232" x2="800" y2="252"/>
+  </g>
+
+  <g font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="14" fill="#111827">
+    <text x="112" y="278">0</text>
+    <text x="278" y="278">0.25</text>
+    <text x="448" y="278">0.5</text>
+    <text x="618" y="278">0.75</text>
+    <text x="792" y="278">1</text>
+  </g>
+
+  <!-- labels -->
+  <g font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="14" fill="#111827">
+    <text x="95" y="202" font-weight="700" fill="#ef4444">Impossible</text>
+    <text x="415" y="202" font-weight="700" fill="#6366f1">Even chance</text>
+    <text x="742" y="202" font-weight="700" fill="#10b981">Certain</text>
+  </g>
+
+  <!-- example marker -->
+  <circle cx="596" cy="240" r="8" fill="#f59e0b" stroke="#111827" stroke-width="2"/>
+
+  <!-- callout (kept away from the axis line) -->
+  <path d="M596 232 C610 214 628 206 650 196" fill="none" stroke="#f59e0b" stroke-width="3" stroke-linecap="round"/>
+  <rect x="650" y="160" width="210" height="64" rx="14" fill="#eef2ff" stroke="#c7d2fe"/>
+  <text x="666" y="186" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="13" font-weight="700" fill="#111827">Example</text>
+  <text x="666" y="206" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="13" fill="#111827">P(rain) = 0.7</text>
+</svg>

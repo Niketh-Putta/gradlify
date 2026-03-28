@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="480" viewBox="0 0 900 480" role="img" aria-label="Quadratic formula and discriminant" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <style>
+      .t{font:700 26px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#0f172a}
+      .s{font:500 18px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#334155}
+      .k{font:700 18px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#0f172a}
+      .eq{font:700 20px ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;fill:#0f172a}
+      .bx{fill:#ffffff;stroke:#0f172a;stroke-width:2;rx:14}
+      .p{fill:#ede9fe;stroke:#7c3aed;stroke-width:2;rx:14}
+    </style>
+  </defs>
+
+  <rect width="900" height="480" fill="#ffffff"/>
+  <text x="40" y="60" class="t">Quadratic formula + discriminant</text>
+  <text x="40" y="92" class="s">For ax² + bx + c = 0, the formula always works.</text>
+
+  <g transform="translate(70,135)">
+    <rect x="0" y="0" width="760" height="90" class="p"/>
+    <text x="28" y="55" class="eq">x = (−b ± √(b² − 4ac)) / (2a)</text>
+
+    <text x="0" y="145" class="k">Discriminant:</text>
+    <text x="160" y="145" class="eq">Δ = b² − 4ac</text>
+
+    <rect x="0" y="175" width="760" height="180" class="bx"/>
+    <text x="28" y="215" class="eq">Δ > 0  → two real roots (graph crosses x-axis twice)</text>
+    <text x="28" y="255" class="eq">Δ = 0  → one real root (touches x-axis once)</text>
+    <text x="28" y="295" class="eq">Δ < 0  → no real roots (no x-intercepts)</text>
+
+    <text x="28" y="340" class="s">Tip: try factorising first; use the formula if it doesn’t factorise.</text>
+  </g>
+</svg>

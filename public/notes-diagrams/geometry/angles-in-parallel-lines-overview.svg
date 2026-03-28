@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="520" viewBox="0 0 1200 520" role="img" aria-label="Angles in parallel lines overview" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <style>
+      .t{font:800 40px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#0f172a}
+      .s{font:600 22px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#334155}
+      .h{font:800 28px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#0f172a}
+      .ln{stroke:#0f172a;stroke-width:6;stroke-linecap:round}
+      .mk{fill:#0f172a}
+      .tr{stroke:#0f172a;stroke-width:6;stroke-linecap:round}
+      .pill{fill:#ffffff;stroke:#e2e8f0;stroke-width:3}
+      .deg{font:900 26px ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;fill:#7c3aed}
+    </style>
+  </defs>
+
+  <rect width="1200" height="520" fill="#ffffff"/>
+
+  <text x="600" y="64" class="t" text-anchor="middle">Angles in Parallel Lines</text>
+  <text x="70" y="112" class="s">Three key patterns: corresponding, alternate, and co-interior.</text>
+
+  <!-- Column widths: 360 each, with gutters -->
+
+  <!-- Corresponding -->
+  <g transform="translate(70,150)">
+    <text x="180" y="0" class="h" text-anchor="middle">Corresponding</text>
+
+    <g transform="translate(0,40)">
+      <line x1="20" y1="90" x2="340" y2="90" class="ln"/>
+      <line x1="20" y1="270" x2="340" y2="270" class="ln"/>
+
+      <!-- parallel markers -->
+      <polygon points="160,78 190,90 160,102" class="mk"/>
+      <polygon points="205,78 235,90 205,102" class="mk"/>
+      <polygon points="160,258 190,270 160,282" class="mk"/>
+      <polygon points="205,258 235,270 205,282" class="mk"/>
+
+      <!-- transversal -->
+      <line x1="105" y1="330" x2="285" y2="20" class="tr"/>
+
+      <!-- labels only -->
+      <circle cx="260" cy="135" r="28" class="pill"/>
+      <text x="260" y="144" class="deg" text-anchor="middle">110°</text>
+
+      <circle cx="195" cy="315" r="28" class="pill"/>
+      <text x="195" y="324" class="deg" text-anchor="middle">110°</text>
+    </g>
+  </g>
+
+  <!-- Alternate -->
+  <g transform="translate(420,150)">
+    <text x="180" y="0" class="h" text-anchor="middle">Alternate</text>
+
+    <g transform="translate(0,40)">
+      <line x1="20" y1="90" x2="340" y2="90" class="ln"/>
+      <line x1="20" y1="270" x2="340" y2="270" class="ln"/>
+
+      <polygon points="160,78 190,90 160,102" class="mk"/>
+      <polygon points="205,78 235,90 205,102" class="mk"/>
+      <polygon points="160,258 190,270 160,282" class="mk"/>
+      <polygon points="205,258 235,270 205,282" class="mk"/>
+
+      <line x1="70" y1="320" x2="315" y2="40" class="tr"/>
+
+      <!-- alternate interior angles (opposite sides of transversal, inside lines) -->
+      <circle cx="150" cy="150" r="28" class="pill"/>
+      <text x="150" y="159" class="deg" text-anchor="middle">75°</text>
+
+      <circle cx="250" cy="235" r="28" class="pill"/>
+      <text x="250" y="244" class="deg" text-anchor="middle">75°</text>
+    </g>
+  </g>
+
+  <!-- Co-interior -->
+  <g transform="translate(770,150)">
+    <text x="180" y="0" class="h" text-anchor="middle">Co-interior</text>
+
+    <g transform="translate(0,40)">
+      <line x1="20" y1="90" x2="340" y2="90" class="ln"/>
+      <line x1="20" y1="270" x2="340" y2="270" class="ln"/>
+
+      <polygon points="160,78 190,90 160,102" class="mk"/>
+      <polygon points="205,78 235,90 205,102" class="mk"/>
+      <polygon points="160,258 190,270 160,282" class="mk"/>
+      <polygon points="205,258 235,270 205,282" class="mk"/>
+
+      <line x1="70" y1="320" x2="315" y2="40" class="tr"/>
+
+      <!-- co-interior (same side of transversal, inside) -->
+      <circle cx="250" cy="150" r="28" class="pill"/>
+      <text x="250" y="159" class="deg" text-anchor="middle">105°</text>
+
+      <circle cx="235" cy="235" r="28" class="pill"/>
+      <text x="235" y="244" class="deg" text-anchor="middle">75°</text>
+    </g>
+  </g>
+</svg>

@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="480" viewBox="0 0 900 480" role="img" aria-label="Quadratic graph features: roots, turning point, axis of symmetry" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <style>
+      .t{font:700 26px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#0f172a}
+      .s{font:500 18px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#334155}
+      .k{font:700 18px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#0f172a}
+      .eq{font:700 18px ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;fill:#0f172a}
+      .axis{stroke:#0f172a;stroke-width:3}
+      .grid{stroke:#e2e8f0;stroke-width:1}
+      .par{stroke:#7c3aed;stroke-width:4;fill:none}
+      .dash{stroke:#334155;stroke-width:2;stroke-dasharray:6 6}
+    </style>
+  </defs>
+
+  <rect width="900" height="480" fill="#ffffff"/>
+  <text x="40" y="60" class="t">Quadratic graphs: key features</text>
+  <text x="40" y="92" class="s">Roots (x-intercepts), turning point, and axis of symmetry.</text>
+
+  <g transform="translate(80,125)">
+    <!-- grid -->
+    <g>
+      <line x1="0" y1="0" x2="360" y2="0" class="grid"/>
+      <line x1="0" y1="60" x2="360" y2="60" class="grid"/>
+      <line x1="0" y1="120" x2="360" y2="120" class="grid"/>
+      <line x1="0" y1="180" x2="360" y2="180" class="grid"/>
+      <line x1="0" y1="240" x2="360" y2="240" class="grid"/>
+      <line x1="0" y1="300" x2="360" y2="300" class="grid"/>
+
+      <line x1="0" y1="0" x2="0" y2="300" class="grid"/>
+      <line x1="60" y1="0" x2="60" y2="300" class="grid"/>
+      <line x1="120" y1="0" x2="120" y2="300" class="grid"/>
+      <line x1="180" y1="0" x2="180" y2="300" class="grid"/>
+      <line x1="240" y1="0" x2="240" y2="300" class="grid"/>
+      <line x1="300" y1="0" x2="300" y2="300" class="grid"/>
+      <line x1="360" y1="0" x2="360" y2="300" class="grid"/>
+    </g>
+
+    <!-- axes -->
+    <line x1="0" y1="240" x2="360" y2="240" class="axis"/>
+    <line x1="60" y1="0" x2="60" y2="300" class="axis"/>
+
+    <!-- parabola roughly for y=(x-2)^2-1 in scaled coords -->
+    <path d="M0 60 C60 150 120 225 180 240 C240 225 300 150 360 60" class="par"/>
+
+    <!-- axis of symmetry x=2 (scaled ~ 180) -->
+    <line x1="180" y1="0" x2="180" y2="300" class="dash"/>
+
+    <!-- turning point -->
+    <circle cx="180" cy="240" r="7" fill="#0f172a"/>
+    <text x="190" y="230" class="eq">turning point</text>
+
+    <!-- roots (approx) -->
+    <circle cx="120" cy="240" r="7" fill="#0f172a"/>
+    <circle cx="240" cy="240" r="7" fill="#0f172a"/>
+    <text x="95" y="270" class="eq">root</text>
+    <text x="245" y="270" class="eq">root</text>
+
+    <text x="410" y="70" class="k">Axis of symmetry:</text>
+    <text x="410" y="105" class="eq">x = −b/(2a)</text>
+
+    <text x="410" y="165" class="k">Roots:</text>
+    <text x="410" y="200" class="eq">solve y=0</text>
+
+    <text x="410" y="260" class="k">Turning point:</text>
+    <text x="410" y="295" class="eq">(x, f(x))</text>
+  </g>
+</svg>

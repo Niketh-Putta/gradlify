@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="480" viewBox="0 0 900 480" role="img" aria-label="Similar triangles: linear scale factor from corresponding sides" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <style>
+      .t{font:700 26px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#0f172a}
+      .s{font:500 18px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#334155}
+      .k{font:700 18px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#0f172a}
+      .m{font:700 20px ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;fill:#0f172a}
+      .a{fill:#a78bfa;opacity:.25;stroke:#7c3aed;stroke-width:3}
+      .b{fill:#86efac;opacity:.22;stroke:#16a34a;stroke-width:3}
+    </style>
+  </defs>
+  <rect width="900" height="420" fill="#ffffff"/>
+  <text x="40" y="60" class="t">Similar shapes: find k from matching lengths</text>
+  <text x="40" y="92" class="s">Always compare corresponding sides in the same order.</text>
+
+  <g transform="translate(120,130)">
+    <polygon points="0,240 200,240 70,60" class="a"/>
+    <polygon points="320,240 620,240 430,0" class="b"/>
+    <text x="70" y="275" class="k">small</text>
+    <text x="440" y="275" class="k">large</text>
+
+    <text x="80" y="215" class="k">6 cm</text>
+    <text x="465" y="215" class="k">15 cm</text>
+
+    <text x="640" y="90" class="m">k = 15/6 = 2.5</text>
+  </g>
+</svg>

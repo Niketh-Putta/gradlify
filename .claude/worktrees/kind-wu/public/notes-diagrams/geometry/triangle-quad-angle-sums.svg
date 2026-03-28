@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="480" viewBox="0 0 900 480" role="img" aria-label="Angle sums: triangle 180 and quadrilateral 360" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <style>
+      .t{font:700 26px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#0f172a}
+      .s{font:500 18px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#334155}
+      .k{font:700 18px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#0f172a}
+      .m{font:700 20px ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;fill:#0f172a}
+      .shape{fill:#f8fafc;stroke:#0f172a;stroke-width:3}
+    </style>
+  </defs>
+  <rect width="900" height="420" fill="#ffffff"/>
+  <text x="40" y="60" class="t">Angle sums: triangle vs quadrilateral</text>
+  <text x="40" y="92" class="s">Triangle = 180°. Quadrilateral = 360° (or split into 2 triangles).</text>
+
+  <g transform="translate(120,140)">
+    <polygon points="0,220 260,220 120,40" class="shape"/>
+    <text x="120" y="260" class="m" text-anchor="middle">A + B + C = 180°</text>
+  </g>
+
+  <g transform="translate(520,140)">
+    <polygon points="0,220 260,220 240,60 50,40" class="shape"/>
+    <line x1="50" y1="40" x2="240" y2="60" stroke="#7c3aed" stroke-width="3"/>
+    <text x="130" y="260" class="m" text-anchor="middle">Sum = 360°</text>
+  </g>
+</svg>

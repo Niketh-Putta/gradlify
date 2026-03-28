@@ -1,0 +1,75 @@
+-- Create chat sessions table to store chat histories
+CREATE TABLE public.chat_sessions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  title TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- Create chat messages table to store individual messages
+CREATE TABLE public.chat_messages (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  chat_session_id UUID NOT NULL REFERENCES public.chat_sessions(id) ON DELETE CASCADE,
+  content TEXT NOT NULL,
+  sender TEXT NOT NULL CHECK (sender IN ('user', 'ai')),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- Enable Row Level Security
+ALTER TABLE public.chat_sessions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.chat_messages ENABLE ROW LEVEL SECURITY;
+
+-- Create policies for chat sessions
+CREATE POLICY "Users can view their own chat sessions" 
+ON public.chat_sessions 
+FOR SELECT 
+USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can create their own chat sessions" 
+ON public.chat_sessions 
+FOR INSERT 
+WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update their own chat sessions" 
+ON public.chat_sessions 
+FOR UPDATE 
+USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete their own chat sessions" 
+ON public.chat_sessions 
+FOR DELETE 
+USING (auth.uid() = user_id);
+
+-- Create policies for chat messages
+CREATE POLICY "Users can view messages from their own chat sessions" 
+ON public.chat_messages 
+FOR SELECT 
+USING (
+  EXISTS (
+    SELECT 1 FROM public.chat_sessions 
+    WHERE id = chat_session_id AND user_id = auth.uid()
+  )
+);
+
+CREATE POLICY "Users can create messages in their own chat sessions" 
+ON public.chat_messages 
+FOR INSERT 
+WITH CHECK (
+  EXISTS (
+    SELECT 1 FROM public.chat_sessions 
+    WHERE id = chat_session_id AND user_id = auth.uid()
+  )
+);
+
+-- Create trigger for automatic timestamp updates
+CREATE TRIGGER update_chat_sessions_updated_at
+BEFORE UPDATE ON public.chat_sessions
+FOR EACH ROW
+EXECUTE FUNCTION public.update_updated_at_column();
+
+-- Create indexes for better performance
+CREATE INDEX idx_chat_sessions_user_id ON public.chat_sessions(user_id);
+CREATE INDEX idx_chat_sessions_updated_at ON public.chat_sessions(updated_at DESC);
+CREATE INDEX idx_chat_messages_session_id ON public.chat_messages(chat_session_id);
+CREATE INDEX idx_chat_messages_created_at ON public.chat_messages(created_at);

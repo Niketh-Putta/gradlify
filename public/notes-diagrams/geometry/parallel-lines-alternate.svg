@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="480" viewBox="0 0 900 480" role="img" aria-label="Parallel lines: alternate angles are equal" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <style>
+      .t{font:700 26px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#0f172a}
+      .s{font:500 18px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#334155}
+      .k{font:700 18px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#0f172a}
+      .eq{font:700 18px ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;fill:#0f172a}
+      .ln{stroke:#0f172a;stroke-width:3}
+      .tr{stroke:#7c3aed;stroke-width:4}
+      .pill{fill:#ffffff;stroke:#e2e8f0;stroke-width:2}
+      .lab{font:800 18px ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;fill:#7c3aed}
+    </style>
+  </defs>
+
+  <rect width="900" height="420" fill="#ffffff"/>
+  <text x="40" y="60" class="t">Alternate angles</text>
+  <text x="40" y="92" class="s">In parallel lines, alternate angles are equal.</text>
+
+  <g transform="translate(110,120)">
+    <!-- parallel lines -->
+    <line x1="0" y1="60" x2="540" y2="60" class="ln"/>
+    <line x1="0" y1="240" x2="540" y2="240" class="ln"/>
+
+    <!-- parallel markers -->
+    <polygon points="255,50 270,60 255,70" fill="#0f172a"/>
+    <polygon points="295,50 310,60 295,70" fill="#0f172a"/>
+    <polygon points="255,230 270,240 255,250" fill="#0f172a"/>
+    <polygon points="295,230 310,240 295,250" fill="#0f172a"/>
+
+    <!-- transversal -->
+    <line x1="90" y1="280" x2="460" y2="0" class="tr"/>
+
+    <!-- labels only (no curved marks) -->
+    <circle cx="500" cy="40" r="18" class="pill"/>
+    <text x="500" y="46" class="lab" text-anchor="middle">x</text>
+    <circle cx="220" cy="210" r="18" class="pill"/>
+    <text x="220" y="216" class="lab" text-anchor="middle">x</text>
+
+    <text x="585" y="120" class="k">Rule:</text>
+    <text x="585" y="155" class="eq">alternate angles are equal</text>
+  </g>
+</svg>

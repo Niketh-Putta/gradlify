@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="360" viewBox="0 0 920 360" role="img" aria-label="Pie chart angles must sum to 360 degrees">
+  <rect width="920" height="360" fill="#ffffff"/>
+  <text x="40" y="52" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="26" font-weight="700" fill="#111827">Pie charts: always check the total is 360°</text>
+  <text x="40" y="80" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="16" fill="#4b5563">If angles don’t add to 360°, something is wrong.</text>
+
+  <g transform="translate(270 210)">
+    <circle r="120" fill="#f3f4f6" stroke="#111827" stroke-width="3"/>
+    <!-- sectors: 90, 120, 150 -->
+    <path d="M0,0 L120,0 A120,120 0 0,1 0,120 Z" fill="#10b981" opacity="0.9"/>
+    <path d="M0,0 L0,120 A120,120 0 0,1 -103.923,60 Z" fill="#6366f1" opacity="0.9"/>
+    <path d="M0,0 L-103.923,60 A120,120 0 1,1 120,0 Z" fill="#f59e0b" opacity="0.9"/>
+  </g>
+
+  <rect x="440" y="120" width="440" height="210" rx="16" fill="#f3f4f6" stroke="#e5e7eb"/>
+  <text x="465" y="152" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="14" font-weight="700" fill="#111827">Example check</text>
+
+  <g font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="16" fill="#111827">
+    <text x="465" y="190">Angles: 90° , 120° , 150°</text>
+    <text x="465" y="225">Total = 90 + 120 + 150</text>
+    <text x="465" y="260">Total = 360° ✅</text>
+  </g>
+
+  <rect x="465" y="280" width="390" height="34" rx="12" fill="#ecfeff" stroke="#a5f3fc"/>
+  <text x="485" y="303" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="14" fill="#111827">If the total is 359° or 361°, it’s rounding.</text>
+</svg>

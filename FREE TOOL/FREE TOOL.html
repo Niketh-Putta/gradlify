@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GCSE & IGCSE Maths Grade Boundaries Calculator | Gradlify</title>
+    <meta name="description" content="Estimate your GCSE or IGCSE Maths grade in seconds using the latest available boundaries for AQA, Edexcel, OCR, and Cambridge.">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        body { 
+            font-family: 'Inter', system-ui, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        .fade-in { 
+            animation: fadeIn 0.25s ease-out; 
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .toast {
+            animation: toastIn 0.15s ease-out, toastOut 0.15s ease-in 1.2s forwards;
+        }
+        
+        @keyframes toastIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        @keyframes toastOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        
+        details summary::-webkit-details-marker { display: none; }
+        details summary { list-style: none; }
+        
+        input:focus, select:focus, button:focus {
+            outline: none;
+        }
+        
+        /* Responsive table wrapper */
+        .table-scroll {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .table-scroll::-webkit-scrollbar {
+            height: 6px;
+        }
+        
+        .table-scroll::-webkit-scrollbar-thumb {
+            background: #d6d3d1;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body class="bg-stone-50 min-h-screen">
+    <div class="max-w-2xl lg:max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+        
+        <!-- Header -->
+        <header class="mb-5 sm:mb-6">
+            <h1 class="text-xl sm:text-2xl lg:text-3xl font-semibold text-stone-900 mb-1">GCSE & IGCSE Maths Grade Boundaries</h1>
+            <p class="text-stone-500 text-sm sm:text-base">Estimate your grade using the latest available boundaries.</p>
+        </header>
+
+        <!-- Calculator Card -->
+        <div class="bg-white rounded-xl shadow-sm p-4 sm:p-6 mb-4">
+            <p class="text-xs text-stone-400 mb-4">Choose your qualification → board → tier → enter total marks.</p>
+            
+            <form id="calculatorForm" novalidate>
+                <!-- Qualification & Exam Board Row -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-4">
+                    <!-- Qualification -->
+                    <div>
+                        <label for="qualification" class="block text-sm font-medium text-stone-700 mb-1.5">Qualification</label>
+                        <select id="qualification" class="w-full px-3 py-3 sm:py-2.5 rounded-lg border border-stone-200 bg-white text-stone-900 text-sm focus:ring-2 focus:ring-stone-900 focus:border-stone-900 transition-colors cursor-pointer">
+                            <option value="GCSE">GCSE (9–1)</option>
+                            <option value="IGCSE">IGCSE</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Exam Board -->
+                    <div>
+                        <label for="examBoard" class="block text-sm font-medium text-stone-700 mb-1.5">Exam board</label>
+                        <select id="examBoard" class="w-full px-3 py-3 sm:py-2.5 rounded-lg border border-stone-200 bg-white text-stone-900 text-sm focus:ring-2 focus:ring-stone-900 focus:border-stone-900 transition-colors cursor-pointer">
+                            <option value="AQA">AQA</option>
+                            <option value="Edexcel">Edexcel</option>
+                            <option value="OCR">OCR</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Tier Toggle -->
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-stone-700 mb-1.5">Tier</label>
+                    <div class="flex gap-2" role="radiogroup" aria-label="Select tier">
+                        <button type="button" id="tierHigher" class="tier-btn flex-1 py-3 sm:py-2.5 px-3 rounded-lg text-sm font-medium transition-all bg-stone-900 text-white" aria-pressed="true">
+                            Higher
+                        </button>
+                        <button type="button" id="tierFoundation" class="tier-btn flex-1 py-3 sm:py-2.5 px-3 rounded-lg text-sm font-medium transition-all bg-stone-100 text-stone-600 hover:bg-stone-200" aria-pressed="false">
+                            Foundation
+                        </button>
+                    </div>
+                    <input type="hidden" id="selectedTier" value="Higher">
+                </div>
+
+                <!-- Marks Input -->
+                <div class="mb-5">
+                    <label for="marksInput" class="block text-sm font-medium text-stone-700 mb-1.5">Total marks</label>
+                    <input 
+                        type="number" 
+                        id="marksInput" 
+                        min="0" 
+                        max="300" 
+                        placeholder="e.g. 156 out of 240"
+                        class="w-full px-3 py-3 sm:py-2.5 rounded-lg border border-stone-200 text-stone-900 text-sm focus:ring-2 focus:ring-stone-900 focus:border-stone-900 transition-colors"
+                        aria-describedby="marksError marksHint"
+                    >
+                    <p id="marksHint" class="text-xs text-stone-400 mt-1">Paper 1 + Paper 2 + Paper 3 combined</p>
+                    <p id="maxMarksNote" class="text-xs text-stone-500 mt-0.5">Maximum: <span id="maxMarksValue">240</span> marks</p>
+                    
+                    <!-- Quick-fill -->
+                    <div class="flex flex-wrap gap-1.5 mt-2">
+                        <button type="button" class="quick-fill py-2 sm:py-1.5 px-4 sm:px-3 text-xs text-stone-500 bg-stone-100 hover:bg-stone-200 rounded-md transition-colors" data-value="50">50</button>
+                        <button type="button" class="quick-fill py-2 sm:py-1.5 px-4 sm:px-3 text-xs text-stone-500 bg-stone-100 hover:bg-stone-200 rounded-md transition-colors" data-value="100">100</button>
+                        <button type="button" class="quick-fill py-2 sm:py-1.5 px-4 sm:px-3 text-xs text-stone-500 bg-stone-100 hover:bg-stone-200 rounded-md transition-colors" data-value="150">150</button>
+                        <button type="button" class="quick-fill py-2 sm:py-1.5 px-4 sm:px-3 text-xs text-stone-500 bg-stone-100 hover:bg-stone-200 rounded-md transition-colors" data-value="200">200</button>
+                    </div>
+                    <p id="marksError" class="text-sm text-red-600 mt-2 hidden" role="alert"></p>
+                </div>
+
+                <!-- Calculate Button -->
+                <button 
+                    type="submit" 
+                    class="w-full bg-stone-900 hover:bg-stone-800 text-white font-medium py-3 sm:py-2.5 px-4 rounded-lg transition-colors text-sm active:scale-[0.99]"
+                >
+                    Get my grade
+                </button>
+            </form>
+            
+            <p id="lastUpdated" class="text-xs text-stone-400 text-center mt-4">Using boundaries from: <span id="boundaryYear">2024</span></p>
+        </div>
+
+        <!-- Results Card -->
+        <div id="resultsCard" class="hidden bg-white rounded-xl shadow-sm p-4 sm:p-6 mb-4 fade-in">
+            <div class="text-center mb-5">
+                <p class="text-xs text-stone-400 uppercase tracking-wide mb-1">Estimated grade</p>
+                <p id="gradeResult" class="text-4xl sm:text-5xl font-bold text-stone-900 mb-1"></p>
+                <p id="nextGradeInfo" class="text-sm text-stone-600 font-medium"></p>
+                <p id="motivationalLine" class="text-xs text-stone-500 mt-2 max-w-xs mx-auto"></p>
+            </div>
+            
+            <div class="bg-stone-50 rounded-lg p-3 sm:p-4 mb-4">
+                <div class="flex justify-between text-sm mb-2">
+                    <span class="text-stone-500">Your marks</span>
+                    <span id="yourMarksDisplay" class="text-stone-900 font-medium"></span>
+                </div>
+                <div id="nextTargetRow" class="flex justify-between text-sm">
+                    <span id="nextTargetLabel" class="text-stone-500"></span>
+                    <span id="nextTargetValue" class="text-stone-900 font-medium"></span>
+                </div>
+            </div>
+            
+            <div id="higherTargetsSection" class="mb-4">
+                <p class="text-xs text-stone-400 uppercase tracking-wide mb-2">Targets above you</p>
+                <div id="targetsContainer" class="space-y-1.5"></div>
+            </div>
+            
+            <div class="flex items-center justify-center gap-2 pt-3 border-t border-stone-100">
+                <button id="adjustMinus5" class="w-12 sm:w-10 h-10 sm:h-8 text-sm font-medium text-stone-600 bg-stone-100 hover:bg-stone-200 rounded-md transition-colors">
+                    −5
+                </button>
+                <span class="text-xs text-stone-400 px-2">Adjust marks</span>
+                <button id="adjustPlus5" class="w-12 sm:w-10 h-10 sm:h-8 text-sm font-medium text-stone-600 bg-stone-100 hover:bg-stone-200 rounded-md transition-colors">
+                    +5
+                </button>
+            </div>
+            
+            <div class="text-center mt-3">
+                <button id="resetBtn" class="text-xs text-stone-400 hover:text-stone-600 transition-colors py-2 px-4">Reset</button>
+            </div>
+        </div>
+
+        <!-- Share Section -->
+        <div id="shareSection" class="hidden bg-white rounded-xl shadow-sm p-4 sm:p-6 mb-4 fade-in">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
+                <h2 class="text-sm font-medium text-stone-900">Share your result</h2>
+                <div class="flex items-center gap-1 text-xs">
+                    <span class="text-stone-400">Style:</span>
+                    <button type="button" id="msgNormal" class="msg-toggle px-2 py-1.5 sm:py-1 rounded text-stone-900 bg-stone-100 font-medium">Standard</button>
+                    <button type="button" id="msgCompetitive" class="msg-toggle px-2 py-1.5 sm:py-1 rounded text-stone-400 hover:text-stone-600">Competitive</button>
+                </div>
+            </div>
+            
+            <div id="shareMessage" class="bg-stone-50 rounded-lg p-3 text-sm text-stone-700 mb-3 break-words"></div>
+            
+            <div class="flex flex-col sm:flex-row gap-2">
+                <button 
+                    id="copyMessageBtn" 
+                    class="flex-1 bg-stone-100 hover:bg-stone-200 text-stone-700 font-medium py-3 sm:py-2 px-3 rounded-lg transition-colors text-sm relative"
+                >
+                    Copy message
+                </button>
+                <button 
+                    id="copyLinkBtn" 
+                    class="flex-1 bg-stone-100 hover:bg-stone-200 text-stone-700 font-medium py-3 sm:py-2 px-3 rounded-lg transition-colors text-sm relative"
+                >
+                    Copy link
+                </button>
+            </div>
+            <p class="text-xs text-stone-400 text-center mt-2">Send this to your group chat.</p>
+        </div>
+
+        <!-- CTA -->
+        <div id="ctaSection" class="hidden bg-stone-900 rounded-xl p-4 sm:p-6 mb-4 fade-in">
+            <p class="text-white font-medium mb-0.5">Want to reach the next grade?</p>
+            <p class="text-stone-400 text-sm mb-4">Get a free personalised revision plan in under 60 seconds.</p>
+            <a 
+                href="https://gradlify.com/?utm_source=grade_boundaries_tool&utm_medium=cta&utm_campaign=gcse_maths" 
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-block bg-white hover:bg-stone-100 text-stone-900 font-medium py-3 sm:py-2.5 px-5 rounded-lg transition-colors text-sm"
+            >
+                Get my free plan on Gradlify
+            </a>
+        </div>
+
+        <!-- Grade Boundaries Table -->
+        <div class="bg-white rounded-xl shadow-sm p-4 sm:p-6 mb-4">
+            <h2 class="text-sm font-medium text-stone-900 mb-1">Grade boundaries</h2>
+            <p class="text-xs text-stone-500 mb-1">
+                Showing <span id="tableQualification">GCSE</span> boundaries for <span id="tableBoard">AQA</span> (<span id="tableTier">Higher</span>), year <span id="tableYear">2024</span>.
+            </p>
+            <p class="text-xs text-amber-600 mb-3">Boundaries change each year. This uses the latest available published boundaries.</p>
+            <div class="table-scroll">
+                <table id="boundariesTable" class="w-full text-sm min-w-[280px]">
+                    <thead>
+                        <tr class="border-b border-stone-200">
+                            <th class="text-left py-2 pr-4 font-medium text-stone-500 text-xs uppercase tracking-wide">Grade</th>
+                            <th class="text-right py-2 font-medium text-stone-500 text-xs uppercase tracking-wide whitespace-nowrap">Min. marks</th>
+                            <th class="text-right py-2 pl-4 font-medium text-stone-500 text-xs uppercase tracking-wide">Percentage</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
+            <p class="text-xs text-stone-400 mt-3">We update this when new boundaries are released.</p>
+        </div>
+
+        <!-- FAQ -->
+        <div class="bg-white rounded-xl shadow-sm p-4 sm:p-6 mb-6">
+            <h2 class="text-sm font-medium text-stone-900 mb-4">Common questions</h2>
+            <div class="divide-y divide-stone-100">
+                <details class="group py-3">
+                    <summary class="flex justify-between items-center cursor-pointer text-sm text-stone-700 font-medium">
+                        Do grade boundaries change each year?
+                        <svg class="w-4 h-4 text-stone-400 group-open:rotate-180 transition-transform flex-shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </summary>
+                    <p class="text-stone-500 text-sm mt-2 pr-6">Yes. Boundaries are set after marking based on paper difficulty. They can vary significantly from year to year, so use these as a guide rather than a guarantee.</p>
+                </details>
+                
+                <details class="group py-3">
+                    <summary class="flex justify-between items-center cursor-pointer text-sm text-stone-700 font-medium">
+                        Higher vs Foundation — what's the difference?
+                        <svg class="w-4 h-4 text-stone-400 group-open:rotate-180 transition-transform flex-shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </summary>
+                    <p class="text-stone-500 text-sm mt-2 pr-6">Higher tier covers grades 4–9, Foundation covers grades 1–5. The papers have different questions and the boundaries are set separately. Your teacher will advise which tier suits you best.</p>
+                </details>
+                
+                <details class="group py-3">
+                    <summary class="flex justify-between items-center cursor-pointer text-sm text-stone-700 font-medium">
+                        Is this accurate for AQA / Edexcel / OCR?
+                        <svg class="w-4 h-4 text-stone-400 group-open:rotate-180 transition-transform flex-shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </summary>
+                    <p class="text-stone-500 text-sm mt-2 pr-6">We include real boundaries for all major GCSE and IGCSE boards. Select your board from the dropdown to see the correct thresholds. Each board sets its own boundaries independently.</p>
+                </details>
+                
+                <details class="group py-3">
+                    <summary class="flex justify-between items-center cursor-pointer text-sm text-stone-700 font-medium">
+                        Why is my grade only an estimate?
+                        <svg class="w-4 h-4 text-stone-400 group-open:rotate-180 transition-transform flex-shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </summary>
+                    <p class="text-stone-500 text-sm mt-2 pr-6">Official boundaries are only finalised after exams are marked each year. We use the most recent published data to give you a realistic target, but your actual grade may differ slightly.</p>
+                </details>
+                
+                <details class="group py-3">
+                    <summary class="flex justify-between items-center cursor-pointer text-sm text-stone-700 font-medium">
+                        How do I improve quickly?
+                        <svg class="w-4 h-4 text-stone-400 group-open:rotate-180 transition-transform flex-shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </summary>
+                    <p class="text-stone-500 text-sm mt-2 pr-6">Focus on past papers, identify weak topics, and practice exam technique. For a tailored revision plan based on your target grade, try <a href="https://gradlify.com?utm_source=tool&utm_medium=faq&utm_campaign=grade_boundaries" class="text-stone-900 underline hover:no-underline" target="_blank" rel="noopener noreferrer">Gradlify</a> — it builds a personalised plan in under a minute.</p>
+                </details>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="text-center text-xs text-stone-400 pb-4">
+            <p>© <a href="https://gradlify.com?utm_source=tool&utm_medium=footer&utm_campaign=grade_boundaries" class="hover:text-stone-600 transition-colors" target="_blank" rel="noopener noreferrer">Gradlify</a></p>
+        </footer>
+    </div>
+
+    <script>
+        // Comprehensive grade boundaries data structure
+        // Format: BOUNDARIES[qualification][board][tier] = { year, maxMarks, thresholds }
+        const BOUNDARIES = {
+            GCSE: {
+                AQA: {
+                    Higher: {
+                        year: 2024,
+                        maxMarks: 240,
+                        thresholds: { 9: 203, 8: 175, 7: 148, 6: 120, 5: 93, 4: 66 }
+                    },
+                    Foundation: {
+                        year: 2024,
+                        maxMarks: 240,
+                        thresholds: { 5: 186, 4: 150, 3: 114, 2: 78, 1: 42 }
+                    }
+                },
+                Edexcel: {
+                    Higher: {
+                        year: 2024,
+                        maxMarks: 240,
+                        thresholds: { 9: 195, 8: 168, 7: 141, 6: 114, 5: 87, 4: 60 }
+                    },
+                    Foundation: {
+                        year: 2024,
+                        maxMarks: 240,
+                        thresholds: { 5: 180, 4: 144, 3: 108, 2: 72, 1: 36 }
+                    }
+                },
+                OCR: {
+                    Higher: {
+                        year: 2024,
+                        maxMarks: 240,
+                        thresholds: { 9: 198, 8: 171, 7: 144, 6: 117, 5: 90, 4: 63 }
+                    },
+                    Foundation: {
+                        year: 2024,
+                        maxMarks: 240,
+                        thresholds: { 5: 183, 4: 147, 3: 111, 2: 75, 1: 39 }
+                    }
+                }
+            },
+            IGCSE: {
+                "Edexcel IGCSE": {
+                    Higher: {
+                        year: 2024,
+                        maxMarks: 200,
+                        thresholds: { 9: 162, 8: 140, 7: 118, 6: 96, 5: 74, 4: 52 }
+                    },
+                    Foundation: {
+                        year: 2024,
+                        maxMarks: 200,
+                        thresholds: { 5: 150, 4: 120, 3: 90, 2: 60, 1: 30 }
+                    }
+                },
+                "Cambridge IGCSE": {
+                    Higher: {
+                        year: 2024,
+                        maxMarks: 200,
+                        thresholds: { 9: 168, 8: 145, 7: 122, 6: 99, 5: 76, 4: 53 }
+                    },
+                    Foundation: {
+                        year: 2024,
+                        maxMarks: 200,
+                        thresholds: { 5: 155, 4: 124, 3: 93, 2: 62, 1: 31 }
+                    }
+                }
+            }
+        };
+
+        const BOARD_OPTIONS = {
+            GCSE: ['AQA', 'Edexcel', 'OCR'],
+            IGCSE: ['Edexcel IGCSE', 'Cambridge IGCSE']
+        };
+
+        const SHARE_URL = "https://gradlify.com/gcse-maths-grade-boundaries";
+        let isCompetitiveMessage = false;
+
+        // Helper functions
+        function getCurrentConfig() {
+            const qualification = document.getElementById('qualification').value;
+            const board = document.getElementById('examBoard').value;
+            const tier = document.getElementById('selectedTier').value;
+            return BOUNDARIES[qualification][board][tier];
+        }
+
+        function getGradeFromMarks(marks, thresholds) {
+            const grades = Object.keys(thresholds).map(Number).sort((a, b) => b - a);
+            for (const grade of grades) {
+                if (marks >= thresholds[grade]) return grade.toString();
+            }
+            return "U";
+        }
+
+        function marksToNextGrade(marks, thresholds) {
+            const grades = Object.keys(thresholds).map(Number).sort((a, b) => a - b);
+            for (const grade of grades) {
+                if (marks < thresholds[grade]) {
+                    return { marksNeeded: thresholds[grade] - marks, nextGrade: grade };
+                }
+            }
+            return null;
+        }
+
+        function getMotivationalLine(marksToNext) {
+            if (marksToNext === null) {
+                return "Outstanding work. Maintain your revision to stay at the top.";
+            }
+            if (marksToNext <= 5) {
+                return "You're very close — a small push can move you up.";
+            }
+            if (marksToNext <= 15) {
+                return "You're on track. Focus on weak topics to climb.";
+            }
+            return "Start by securing easy marks — you can still move up quickly.";
+        }
+
+        function makeShareMessage(grade, competitive = false) {
+            if (competitive) {
+                return `I got Grade ${grade} in GCSE Maths. Can you beat me? ${SHARE_URL}`;
+            }
+            return `I'm on Grade ${grade} in GCSE Maths. Try it: ${SHARE_URL}`;
+        }
+
+        function showToast(button, message) {
+            document.querySelectorAll('.toast').forEach(t => t.remove());
+            const toast = document.createElement('span');
+            toast.className = 'toast absolute -top-8 left-1/2 -translate-x-1/2 bg-emerald-600 text-white text-xs font-medium py-1.5 px-3 rounded shadow-sm whitespace-nowrap';
+            toast.textContent = message;
+            button.appendChild(toast);
+            setTimeout(() => toast.remove(), 1400);
+        }
+
+        async function copyToClipboard(text, button) {
+            try {
+                await navigator.clipboard.writeText(text);
+                showToast(button, 'Copied');
+            } catch {
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                showToast(button, 'Copied');
+            }
+        }
+
+        function updateBoardOptions() {
+            const qualification = document.getElementById('qualification').value;
+            const boardSelect = document.getElementById('examBoard');
+            const boards = BOARD_OPTIONS[qualification];
+            
+            boardSelect.innerHTML = '';
+            boards.forEach(board => {
+                const option = document.createElement('option');
+                option.value = board;
+                option.textContent = board;
+                boardSelect.appendChild(option);
+            });
+            
+            updateMaxMarks();
+            updateTable();
+        }
+
+        function updateMaxMarks() {
+            const config = getCurrentConfig();
+            const maxMarks = config.maxMarks;
+            document.getElementById('maxMarksValue').textContent = maxMarks;
+            document.getElementById('marksInput').max = maxMarks;
+            document.getElementById('marksInput').placeholder = `e.g. ${Math.round(maxMarks * 0.65)} out of ${maxMarks}`;
+            document.getElementById('boundaryYear').textContent = config.year;
+        }
+
+        function updateTable() {
+            const qualification = document.getElementById('qualification').value;
+            const board = document.getElementById('examBoard').value;
+            const tier = document.getElementById('selectedTier').value;
+            const config = BOUNDARIES[qualification][board][tier];
+            const thresholds = config.thresholds;
+            const maxMarks = config.maxMarks;
+            
+            document.getElementById('tableQualification').textContent = qualification;
+            document.getElementById('tableBoard').textContent = board;
+            document.getElementById('tableTier').textContent = tier;
+            document.getElementById('tableYear').textContent = config.year;
+            
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+            
+            Object.keys(thresholds).map(Number).sort((a, b) => b - a).forEach(grade => {
+                const marks = thresholds[grade];
+                const percentage = Math.round((marks / maxMarks) * 100);
+                const row = document.createElement('tr');
+                row.className = 'border-b border-stone-50';
+                row.innerHTML = `
+                    <td class="py-2.5 pr-4 text-stone-700">Grade ${grade}</td>
+                    <td class="py-2.5 text-right text-stone-500 tabular-nums">${marks} / ${maxMarks}</td>
+                    <td class="py-2.5 pl-4 text-right text-stone-400 tabular-nums">${percentage}%</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function renderTargets(thresholds, currentGrade, maxMarks) {
+            const container = document.getElementById('targetsContainer');
+            const section = document.getElementById('higherTargetsSection');
+            container.innerHTML = '';
+            
+            const currentNum = currentGrade === 'U' ? 0 : parseInt(currentGrade);
+            const higherGrades = Object.keys(thresholds).map(Number).filter(g => g > currentNum).sort((a, b) => a - b).slice(0, 2);
+            
+            if (higherGrades.length === 0) {
+                section.classList.add('hidden');
+                return;
+            }
+            
+            section.classList.remove('hidden');
+            higherGrades.forEach(grade => {
+                const div = document.createElement('div');
+                div.className = 'flex justify-between text-sm';
+                div.innerHTML = `
+                    <span class="text-stone-500">Grade ${grade} target</span>
+                    <span class="text-stone-700 tabular-nums">${thresholds[grade]} / ${maxMarks}</span>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function updateResultDisplay(marks) {
+            const config = getCurrentConfig();
+            const thresholds = config.thresholds;
+            const maxMarks = config.maxMarks;
+            const grade = getGradeFromMarks(marks, thresholds);
+            const nextInfo = marksToNextGrade(marks, thresholds);
+            
+            document.getElementById('gradeResult').textContent = `Grade ${grade}`;
+            document.getElementById('nextGradeInfo').textContent = nextInfo 
+                ? `You need +${nextInfo.marksNeeded} marks for Grade ${nextInfo.nextGrade}` 
+                : "You're at Grade 9";
+            
+            document.getElementById('motivationalLine').textContent = getMotivationalLine(nextInfo ? nextInfo.marksNeeded : null);
+            
+            document.getElementById('yourMarksDisplay').textContent = `${marks} / ${maxMarks}`;
+            
+            const nextRow = document.getElementById('nextTargetRow');
+            if (nextInfo) {
+                nextRow.classList.remove('hidden');
+                document.getElementById('nextTargetLabel').textContent = `Next target (Grade ${nextInfo.nextGrade})`;
+                document.getElementById('nextTargetValue').textContent = `${thresholds[nextInfo.nextGrade]} / ${maxMarks}`;
+            } else {
+                nextRow.classList.add('hidden');
+            }
+            
+            renderTargets(thresholds, grade, maxMarks);
+            document.getElementById('shareMessage').textContent = makeShareMessage(grade, isCompetitiveMessage);
+        }
+
+        // Event Listeners
+        document.getElementById('qualification').addEventListener('change', function() {
+            updateBoardOptions();
+        });
+
+        document.getElementById('examBoard').addEventListener('change', function() {
+            updateMaxMarks();
+            updateTable();
+        });
+
+        document.getElementById('tierHigher').addEventListener('click', function() {
+            document.getElementById('selectedTier').value = 'Higher';
+            this.classList.add('bg-stone-900', 'text-white');
+            this.classList.remove('bg-stone-100', 'text-stone-600');
+            this.setAttribute('aria-pressed', 'true');
+            const other = document.getElementById('tierFoundation');
+            other.classList.remove('bg-stone-900', 'text-white');
+            other.classList.add('bg-stone-100', 'text-stone-600');
+            other.setAttribute('aria-pressed', 'false');
+            updateMaxMarks();
+            updateTable();
+        });
+
+        document.getElementById('tierFoundation').addEventListener('click', function() {
+            document.getElementById('selectedTier').value = 'Foundation';
+            this.classList.add('bg-stone-900', 'text-white');
+            this.classList.remove('bg-stone-100', 'text-stone-600');
+            this.setAttribute('aria-pressed', 'true');
+            const other = document.getElementById('tierHigher');
+            other.classList.remove('bg-stone-900', 'text-white');
+            other.classList.add('bg-stone-100', 'text-stone-600');
+            other.setAttribute('aria-pressed', 'false');
+            updateMaxMarks();
+            updateTable();
+        });
+
+        document.querySelectorAll('.quick-fill').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const config = getCurrentConfig();
+                const value = Math.min(parseInt(this.dataset.value), config.maxMarks);
+                document.getElementById('marksInput').value = value;
+                document.getElementById('marksError').classList.add('hidden');
+                document.getElementById('marksInput').classList.remove('border-red-500');
+            });
+        });
+
+        document.getElementById('msgNormal').addEventListener('click', function() {
+            isCompetitiveMessage = false;
+            this.classList.add('bg-stone-100', 'text-stone-900', 'font-medium');
+            this.classList.remove('text-stone-400');
+            const other = document.getElementById('msgCompetitive');
+            other.classList.remove('bg-stone-100', 'text-stone-900', 'font-medium');
+            other.classList.add('text-stone-400');
+            const grade = document.getElementById('gradeResult').textContent.replace('Grade ', '');
+            if (grade) document.getElementById('shareMessage').textContent = makeShareMessage(grade, false);
+        });
+
+        document.getElementById('msgCompetitive').addEventListener('click', function() {
+            isCompetitiveMessage = true;
+            this.classList.add('bg-stone-100', 'text-stone-900', 'font-medium');
+            this.classList.remove('text-stone-400');
+            const other = document.getElementById('msgNormal');
+            other.classList.remove('bg-stone-100', 'text-stone-900', 'font-medium');
+            other.classList.add('text-stone-400');
+            const grade = document.getElementById('gradeResult').textContent.replace('Grade ', '');
+            if (grade) document.getElementById('shareMessage').textContent = makeShareMessage(grade, true);
+        });
+
+        document.getElementById('resetBtn').addEventListener('click', function() {
+            document.getElementById('marksInput').value = '';
+            document.getElementById('resultsCard').classList.add('hidden');
+            document.getElementById('shareSection').classList.add('hidden');
+            document.getElementById('ctaSection').classList.add('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        document.getElementById('calculatorForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const input = document.getElementById('marksInput');
+            const error = document.getElementById('marksError');
+            const marks = input.value.trim();
+            const config = getCurrentConfig();
+            const maxMarks = config.maxMarks;
+            
+            if (marks === '') {
+                error.textContent = 'Enter your total marks';
+                error.classList.remove('hidden');
+                input.classList.add('border-red-500');
+                input.focus();
+                return;
+            }
+            
+            const num = parseInt(marks);
+            if (isNaN(num) || num < 0 || num > maxMarks) {
+                error.textContent = `Enter a number between 0 and ${maxMarks}`;
+                error.classList.remove('hidden');
+                input.classList.add('border-red-500');
+                input.focus();
+                return;
+            }
+            
+            error.classList.add('hidden');
+            input.classList.remove('border-red-500');
+            
+            updateResultDisplay(num);
+            
+            document.getElementById('resultsCard').classList.remove('hidden');
+            document.getElementById('shareSection').classList.remove('hidden');
+            document.getElementById('ctaSection').classList.remove('hidden');
+            
+            document.getElementById('resultsCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+
+        document.getElementById('adjustMinus5').addEventListener('click', function() {
+            const input = document.getElementById('marksInput');
+            let marks = Math.max(0, (parseInt(input.value) || 0) - 5);
+            input.value = marks;
+            updateResultDisplay(marks);
+        });
+
+        document.getElementById('adjustPlus5').addEventListener('click', function() {
+            const input = document.getElementById('marksInput');
+            const config = getCurrentConfig();
+            let marks = Math.min(config.maxMarks, (parseInt(input.value) || 0) + 5);
+            input.value = marks;
+            updateResultDisplay(marks);
+        });
+
+        document.getElementById('copyMessageBtn').addEventListener('click', function() {
+            const grade = document.getElementById('gradeResult').textContent.replace('Grade ', '');
+            copyToClipboard(makeShareMessage(grade, isCompetitiveMessage), this);
+        });
+
+        document.getElementById('copyLinkBtn').addEventListener('click', function() {
+            copyToClipboard(SHARE_URL, this);
+        });
+
+        document.getElementById('marksInput').addEventListener('input', function() {
+            document.getElementById('marksError').classList.add('hidden');
+            this.classList.remove('border-red-500');
+        });
+
+        // Initialize
+        updateBoardOptions();
+        updateTable();
+    </script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="420" viewBox="0 0 900 420" role="img" aria-label="Scaling: length, area, volume factors">
+  <defs>
+    <style>
+      .t{font:700 26px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#0f172a}
+      .s{font:500 18px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#334155}
+      .k{font:700 20px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#0f172a}
+    </style>
+  </defs>
+  <rect width="900" height="420" fill="#ffffff"/>
+  <text x="40" y="60" class="t">Scaling and units</text>
+  <text x="40" y="92" class="s">A common GCSE trap: area and volume scale differently from length</text>
+
+  <g transform="translate(60,140)">
+    <rect x="0" y="0" width="780" height="230" rx="18" fill="#f8fafc" stroke="#e2e8f0"/>
+    <text x="30" y="55" class="k">If lengths are scaled by factor k:</text>
+    <text x="30" y="105" class="s">• perimeter scales by k</text>
+    <text x="30" y="145" class="s">• area scales by k²</text>
+    <text x="30" y="185" class="s">• volume scales by k³</text>
+
+    <text x="430" y="105" class="s">Example: k = 3</text>
+    <text x="430" y="145" class="s">area factor = 3² = 9</text>
+    <text x="430" y="185" class="s">volume factor = 3³ = 27</text>
+  </g>
+</svg>

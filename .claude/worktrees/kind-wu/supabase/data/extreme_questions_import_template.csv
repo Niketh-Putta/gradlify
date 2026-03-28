@@ -1,0 +1,4 @@
+id,track,question,correct_answer,wrong_answers,all_answers,explanation,explain_on,image_url,image_alt
+,11plus,"A number is multiplied by 6 and then 9 is added. The result is 45. What is the original number?","6","{""5"",""7"",""9"",""4""}","{""6"",""5"",""7"",""9"",""4""}","Step 1: Let the original number be x. Then 6x + 9 = 45.\nStep 2: Subtract 9 to get 6x = 36, then divide by 6.\nFinal answer: 6",always,,
+,11plus,"Which value of x makes the statement true: 3(x - 2) = 21?","9","{""7"",""8"",""10"",""11""}","{""9"",""7"",""8"",""10"",""11""}","Step 1: Expand gives 3x - 6 = 21.\nStep 2: Add 6 then divide by 3.\nFinal answer: 9",always,,
+,gcse,"Simplify: (2x + 5)(x - 3)","2x^2 - x - 15","{""2x^2 + x - 15"",""2x^2 - 6x - 15"",""2x^2 + 6x - 15"",""x^2 - x - 15""}","{""2x^2 - x - 15"",""2x^2 + x - 15"",""2x^2 - 6x - 15"",""2x^2 + 6x - 15"",""x^2 - x - 15""}","Step 1: Expand each term carefully.\nStep 2: Collect like terms.\nFinal answer: 2x^2 - x - 15",always,,

@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="480" viewBox="0 0 900 480" role="img" aria-label="3D Pythagoras on a cuboid: base diagonal then space diagonal" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <style>
+      .t{font:700 22px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#0f172a}
+      .s{font:500 16px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#334155}
+      .k{font:700 16px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#0f172a}
+      .m{font:700 16px ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;fill:#0f172a}
+      .edge{stroke:#0f172a;stroke-width:3;fill:none}
+      .d1{stroke:#7c3aed;stroke-width:4}
+      .d2{stroke:#16a34a;stroke-width:4}
+    </style>
+  </defs>
+  <rect width="900" height="420" fill="#ffffff"/>
+  <text x="40" y="60" class="t">3D Pythagoras: do it in two right triangles</text>
+  <text x="40" y="92" class="s">First find the base diagonal, then use it with the height.</text>
+
+  <g transform="translate(165,135) scale(0.82)">
+    <!-- simple cuboid wireframe -->
+    <rect x="60" y="140" width="280" height="180" class="edge"/>
+    <polygon points="60,140 140,80 420,80 340,140" class="edge"/>
+    <line x1="340" y1="140" x2="420" y2="80" class="edge"/>
+    <line x1="340" y1="320" x2="420" y2="260" class="edge"/>
+    <line x1="420" y1="80" x2="420" y2="260" class="edge"/>
+    <line x1="60" y1="320" x2="140" y2="260" class="edge"/>
+    <line x1="140" y1="80" x2="140" y2="260" class="edge"/>
+
+    <!-- base diagonal -->
+    <line x1="60" y1="320" x2="340" y2="140" class="d1"/>
+    <text x="160" y="330" class="k">base diagonal</text>
+
+    <!-- space diagonal -->
+    <line x1="60" y1="320" x2="420" y2="80" class="d2"/>
+    <text x="300" y="110" class="k">space diagonal</text>
+  </g>
+
+  <g transform="translate(620,165)">
+    <text x="0" y="0" class="m">d_base = √(l² + w²)</text>
+    <text x="0" y="40" class="m">d_space = √(d_base² + h²)</text>
+  </g>
+</svg>

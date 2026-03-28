@@ -1,0 +1,1908 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Gradlify - Clean Professional Design System */
+
+@layer base {
+  :root {
+    /* Light Mode - Clean & Professional */
+    --background: 0 0% 99%;
+    --foreground: 224 71% 4%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 224 71% 4%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 224 71% 4%;
+
+    /* Professional Blue Primary */
+    --primary: 221 83% 53%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 221 83% 63%;
+
+    /* Neutral Secondary */
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 220 9% 46%;
+
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 9% 46%;
+
+    /* Success Green */
+    --accent: 160 84% 39%;
+    --accent-foreground: 0 0% 100%;
+    --accent-glow: 160 84% 49%;
+
+    /* Warning Amber */
+    --warning: 43 96% 56%;
+    --warning-foreground: 0 0% 100%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 221 83% 53%;
+
+    --radius: 0.625rem;
+
+    /* Clean Subtle Gradients */
+    --gradient-hero: linear-gradient(135deg, hsl(221 83% 53%) 0%, hsl(250 83% 58%) 100%);
+    --gradient-hero-banner: linear-gradient(135deg, hsl(221 83% 53%) 0%, hsl(250 83% 58%) 100%);
+    --gradient-primary: linear-gradient(135deg, hsl(221 83% 53%) 0%, hsl(221 83% 63%) 100%);
+    --gradient-success: linear-gradient(135deg, hsl(160 84% 39%) 0%, hsl(160 84% 45%) 100%);
+    --gradient-warning: linear-gradient(135deg, hsl(43 96% 56%) 0%, hsl(43 96% 62%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(220 14% 98%) 100%);
+    --gradient-premium: linear-gradient(135deg, hsl(250 83% 58%) 0%, hsl(280 80% 60%) 100%);
+    --gradient-readiness: linear-gradient(90deg, hsl(221 83% 53%) 0%, hsl(160 84% 39%) 100%);
+    --gradient-needs-work: linear-gradient(90deg, hsl(0 72% 51%) 0%, hsl(15 80% 55%) 100%);
+    --gradient-developing: linear-gradient(90deg, hsl(43 96% 56%) 0%, hsl(43 96% 62%) 100%);
+    --gradient-gradlify: linear-gradient(90deg, hsl(221 83% 53%) 0%, hsl(250 83% 58%) 100%);
+    
+    /* Subtle Accent Backgrounds */
+    --gradient-accent-subtle: linear-gradient(135deg, hsl(221 60% 98%) 0%, hsl(250 50% 98%) 100%);
+    --gradient-surface: linear-gradient(180deg, hsl(0 0% 99%) 0%, hsl(220 14% 98%) 100%);
+
+    /* Section Background Tints */
+    --bg-readiness: 221 60% 98%;
+    --bg-topics: 250 40% 98%;
+    --bg-actions: 221 50% 98%;
+    --bg-chat-sidebar: 220 20% 97%;
+    --bg-quick-start: 221 60% 98%;
+    
+    /* Chat UI Colors */
+    --chat-bg-primary: 0 0% 98%;
+    --chat-bg-secondary: 0 0% 100%;
+    --chat-bg-tertiary: 240 5% 96%;
+    --chat-text-primary: 240 10% 15%;
+    --chat-text-secondary: 240 5% 50%;
+    --chat-text-tertiary: 240 5% 65%;
+    --chat-accent: 239 84% 67%;
+    --chat-accent-soft: 239 84% 67% / 0.08;
+    --chat-ai-bubble: 0 0% 100%;
+    --bg-usage-card: 250 40% 98%;
+
+    /* Diagram image tinting per theme */
+    --question-image-filter: none;
+
+    /* Professional Shadows - Subtle */
+    --shadow-card: 0 1px 3px 0 hsl(220 13% 91% / 0.5), 0 1px 2px -1px hsl(220 13% 91% / 0.5);
+    --shadow-lg: 0 4px 6px -1px hsl(220 13% 91% / 0.6), 0 2px 4px -2px hsl(220 13% 91% / 0.6);
+    --shadow-glow: 0 0 0 1px hsl(221 83% 53% / 0.1), 0 4px 12px -2px hsl(221 83% 53% / 0.15);
+    --shadow-success: 0 0 0 1px hsl(160 84% 39% / 0.1), 0 4px 12px -2px hsl(160 84% 39% / 0.15);
+
+    /* Smooth Transitions */
+    --transition-smooth: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+    /* Connect/Leaderboard Colors */
+    --connect-gold: 43 74% 49%;
+    --connect-silver: 0 0% 56%;
+    --connect-bronze: 30 44% 50%;
+  }
+
+  .chat-input-padding {
+    padding-bottom: calc(6rem + env(safe-area-inset-bottom));
+  }
+
+  @media (orientation: portrait) and (max-width: 1024px) {
+  .chat-input-padding {
+      padding-bottom: calc(7.5rem + env(safe-area-inset-bottom));
+    }
+  }
+
+  .top-ten-highlight {
+    position: relative;
+    overflow: hidden;
+    background: radial-gradient(circle at top right, rgba(221, 83, 53, 0.16), rgba(255, 255, 255, 0.85))
+      rgba(255, 255, 255, 0.92);
+    box-shadow: 0 15px 35px -20px hsla(221, 83%, 53%, 0.8);
+  }
+
+  .dark .top-ten-highlight {
+    background: rgba(30, 41, 59, 0.95);
+    box-shadow: 0 10px 24px -18px rgba(99, 102, 241, 0.45);
+    border: 1px solid rgba(129, 140, 248, 0.45);
+    color: rgba(248, 250, 252, 0.98);
+  }
+
+  .top-ten-highlight::after {
+    content: '';
+    position: absolute;
+    inset: -50% -35% 0;
+    background: radial-gradient(circle, hsla(250, 83%, 58%, 0.55), transparent 70%);
+    animation: pulse-highlight 3s ease-in-out infinite;
+    pointer-events: none;
+    opacity: 0.35;
+  }
+
+  .dark .top-ten-highlight::after {
+    display: none;
+  }
+
+  .dark .top-ten-highlight .text-muted-foreground {
+    color: rgba(226, 232, 240, 0.8);
+  }
+
+  .dark .top-ten-highlight .text-primary {
+    color: rgba(167, 139, 250, 0.95);
+  }
+
+  .dark .top-ten-highlight .bg-muted {
+    background-color: rgba(30, 41, 59, 0.85);
+    color: rgba(248, 250, 252, 0.9);
+  }
+
+  @keyframes pulse-highlight {
+    0% {
+      transform: scale(0.8);
+      opacity: 0.35;
+    }
+    50% {
+      transform: scale(1.1);
+      opacity: 0.45;
+    }
+    100% {
+      transform: scale(0.8);
+      opacity: 0.35;
+    }
+  }
+
+  body {
+    caret-color: transparent;
+  }
+
+  input,
+  textarea,
+  [contenteditable="true"] {
+    caret-color: currentColor;
+  }
+
+  /* Global mobile-first sizing */
+  @media (max-width: 640px) {
+    html, body {
+      overflow-x: hidden;
+      max-width: 100vw;
+    }
+    
+    * {
+      font-size: 95%; /* Make everything slightly smaller on mobile */
+    }
+    
+    body {
+      font-size: 14px;
+    }
+    
+    h1 {
+      font-size: 1.5rem !important;
+    }
+    
+    h2 {
+      font-size: 1.25rem !important;
+    }
+    
+    h3 {
+      font-size: 1.1rem !important;
+    }
+    
+    button {
+      font-size: 0.75rem !important;
+      padding: 0.375rem 0.75rem !important;
+      min-height: 32px !important;
+    }
+    
+    input, textarea, select {
+      font-size: 0.75rem !important;
+      padding: 0.375rem 0.5rem !important;
+      min-height: 32px !important;
+    }
+    
+    .card, [class*="card"] {
+      padding: 0.75rem !important;
+    }
+    
+    /* Prevent horizontal overflow on modals/dialogs */
+    [role="dialog"], [role="alertdialog"] {
+      max-width: calc(100vw - 1.5rem) !important;
+    }
+  }
+
+  .dark {
+    /* Dark Mode - Clean & Professional */
+    --background: 224 71% 4%;
+    --foreground: 0 0% 98%;
+
+    --card: 224 71% 8%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 224 71% 8%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 221 83% 58%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 221 83% 68%;
+
+    --secondary: 215 28% 17%;
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 215 28% 17%;
+    --muted-foreground: 220 9% 65%;
+
+    /* Success Green - Dark */
+    --accent: 160 84% 45%;
+    --accent-foreground: 0 0% 100%;
+    --accent-glow: 160 84% 55%;
+
+    /* Warning Amber - Dark */
+    --warning: 43 96% 56%;
+    --warning-foreground: 0 0% 100%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 215 28% 20%;
+    --input: 215 28% 17%;
+    --ring: 221 83% 58%;
+    
+    /* Border Gradient for Dark Mode */
+    --border-gradient: linear-gradient(135deg, hsl(221 83% 53%) 0%, hsl(250 83% 58%) 100%);
+
+    /* Dark Mode Gradients */
+    --gradient-hero: linear-gradient(135deg, hsl(221 83% 58%) 0%, hsl(250 83% 63%) 100%);
+    --gradient-hero-banner: linear-gradient(135deg, hsl(221 83% 58%) 0%, hsl(250 83% 63%) 100%);
+    --gradient-primary: linear-gradient(135deg, hsl(221 83% 58%) 0%, hsl(221 83% 68%) 100%);
+    --gradient-success: linear-gradient(135deg, hsl(160 84% 45%) 0%, hsl(160 84% 50%) 100%);
+    --gradient-warning: linear-gradient(135deg, hsl(43 96% 56%) 0%, hsl(43 96% 62%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(224 71% 8%) 0%, hsl(224 71% 10%) 100%);
+    --gradient-premium: linear-gradient(135deg, hsl(250 83% 63%) 0%, hsl(280 80% 65%) 100%);
+
+    /* Section Background Tints - Dark Mode */
+    --bg-readiness: 224 60% 10%;
+    --bg-topics: 250 30% 10%;
+    --bg-actions: 221 40% 10%;
+    --bg-chat-sidebar: 224 50% 8%;
+    --bg-quick-start: 221 50% 10%;
+    --bg-usage-card: 250 30% 10%;
+    
+    /* Chat UI Colors - Dark Mode */
+    --chat-bg-primary: 240 6% 7%;
+    --chat-bg-secondary: 240 6% 9%;
+    --chat-bg-tertiary: 240 5% 13%;
+    --chat-text-primary: 0 0% 96%;
+    --chat-text-secondary: 240 5% 55%;
+    --chat-text-tertiary: 240 5% 40%;
+    --chat-accent: 239 84% 73%;
+    --chat-accent-soft: 239 84% 73% / 0.1;
+    --chat-ai-bubble: 240 5% 13%;
+
+    /* Diagram image tinting per theme */
+    --question-image-filter: invert(1) hue-rotate(180deg);
+
+    /* Dark Mode Shadows */
+    --shadow-card: 0 1px 3px 0 hsl(0 0% 0% / 0.3), 0 1px 2px -1px hsl(0 0% 0% / 0.3);
+    --shadow-lg: 0 4px 6px -1px hsl(0 0% 0% / 0.4), 0 2px 4px -2px hsl(0 0% 0% / 0.4);
+    --shadow-glow: 0 0 0 1px hsl(221 83% 58% / 0.2), 0 4px 12px -1px hsl(221 83% 58% / 0.25);
+    --shadow-success: 0 0 0 1px hsl(160 84% 45% / 0.2), 0 4px 12px -1px hsl(160 84% 45% / 0.25);
+
+    /* Connect/Leaderboard Colors - Dark Mode */
+    --connect-gold: 45 80% 56%;
+    --connect-silver: 0 0% 61%;
+    --connect-bronze: 30 50% 55%;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Notes Interactive Diagram */
+.notes-interactive-diagram {
+  @apply p-6 rounded-2xl border border-border/40 mb-6;
+  background: linear-gradient(135deg, hsl(var(--notes-accent) / 0.04) 0%, hsl(var(--notes-accent) / 0.01) 100%);
+}
+
+/* Notes: coloured panels (avoid grey boxes) */
+.notes-diagram-surface {
+  @apply rounded-xl border border-border/40;
+  background: linear-gradient(135deg, hsl(var(--notes-accent) / 0.10) 0%, hsl(var(--notes-accent) / 0.03) 100%);
+}
+
+.dark .notes-diagram-surface {
+  background: linear-gradient(135deg, hsl(var(--notes-accent) / 0.14) 0%, hsl(var(--notes-accent) / 0.04) 100%);
+}
+
+.notes-diagram-panel {
+  @apply rounded-lg border border-border/30;
+  background: linear-gradient(135deg, hsl(var(--notes-accent) / 0.08) 0%, hsl(var(--notes-accent) / 0.025) 100%);
+}
+
+.dark .notes-diagram-panel {
+  background: linear-gradient(135deg, hsl(var(--notes-accent) / 0.12) 0%, hsl(var(--notes-accent) / 0.03) 100%);
+}
+
+/* Notes: markdown dropdowns (details/summary) */
+.notes-details {
+  @apply my-4 rounded-xl border border-border/40 overflow-hidden;
+  background: linear-gradient(135deg, hsl(var(--notes-accent) / 0.08) 0%, hsl(var(--notes-accent) / 0.02) 100%);
+}
+
+.dark .notes-details {
+  background: linear-gradient(135deg, hsl(var(--notes-accent) / 0.12) 0%, hsl(var(--notes-accent) / 0.03) 100%);
+}
+
+.notes-summary {
+  @apply px-4 py-3 cursor-pointer select-none font-semibold text-foreground;
+  background: linear-gradient(135deg, hsl(var(--notes-accent) / 0.14) 0%, hsl(var(--notes-accent) / 0.05) 100%);
+}
+
+.dark .notes-summary {
+  background: linear-gradient(135deg, hsl(var(--notes-accent) / 0.18) 0%, hsl(var(--notes-accent) / 0.06) 100%);
+}
+
+/* Padding for details content (keep <summary> as direct child) */
+.notes-details > :not(summary) {
+  @apply px-4 pb-4 pt-3;
+}
+
+.notes-diagram-icon {
+  @apply text-lg;
+}
+
+.dark .notes-interactive-diagram {
+  background: linear-gradient(135deg, hsl(var(--notes-accent) / 0.08) 0%, hsl(var(--notes-accent) / 0.02) 100%);
+}
+
+
+/* Mobile improvements & Text Overflow Utilities */
+@layer utilities {
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  .pt-safe {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  /* Text Overflow Prevention */
+  .text-overflow-ellipsis {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Mobile-First Button Text Utilities */
+  .btn-text-responsive {
+    @apply text-sm sm:text-sm md:text-base;
+  }
+
+  /* Interactive Elements */
+  .hover-scale {
+    @apply transition-all duration-200 hover:scale-[1.02] hover:shadow-lg;
+  }
+
+  .btn-text-nowrap {
+    @apply whitespace-nowrap overflow-hidden text-ellipsis max-w-full;
+  }
+
+  /* Enhanced hover effects for buttons */
+  .hover-pop {
+    @apply transition-all duration-200 hover:scale-[1.02] hover:-translate-y-0.5 hover:shadow-lg;
+  }
+
+  /* Mobile-friendly touch targets - Reduced for mobile to fit more */
+  .touch-target {
+    @apply min-h-[36px] min-w-[36px] sm:min-h-[44px] sm:min-w-[44px];
+  }
+
+  /* Responsive button heights - Much smaller on mobile */
+  .btn-height-responsive {
+    @apply h-8 sm:h-10 md:h-11;
+  }
+
+  .btn-height-lg {
+    @apply h-9 sm:h-11 md:h-12;
+  }
+
+  /* Responsive button padding - Tighter on mobile */
+  .btn-padding-responsive {
+    @apply px-2 py-1.5 sm:px-4 sm:py-2.5 md:px-6 md:py-3;
+  }
+
+  /* Mobile-optimized card padding - Much tighter */
+  .card-mobile-padding {
+    @apply p-2 sm:p-4 lg:p-6;
+  }
+
+  /* Responsive text sizes - Smaller on mobile for better fit */
+  .text-responsive-xs {
+    @apply text-[10px] sm:text-xs md:text-sm;
+  }
+  
+  .text-responsive-sm {
+    @apply text-xs sm:text-sm md:text-base;
+  }
+  
+  .text-responsive-base {
+    @apply text-sm sm:text-base md:text-lg;
+  }
+  
+  .text-responsive-lg {
+    @apply text-base sm:text-lg md:text-xl lg:text-2xl;
+  }
+  
+  .text-responsive-xl {
+    @apply text-lg sm:text-xl md:text-2xl lg:text-3xl;
+  }
+  
+  .text-responsive-2xl {
+    @apply text-xl sm:text-2xl md:text-3xl lg:text-4xl;
+  }
+
+  /* Hero title responsiveness - More compact on mobile */
+  .hero-title-responsive {
+    @apply text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl;
+  }
+
+  /* Card title responsiveness - Smaller on mobile */
+  .card-title-responsive {
+    @apply text-sm sm:text-base md:text-lg lg:text-xl;
+  }
+
+  /* Button text responsiveness - Smaller on mobile */
+  .button-text-responsive {
+    @apply text-[10px] sm:text-xs md:text-sm;
+  }
+
+  /* Navigation text responsiveness - Smaller on mobile */
+  .nav-text-responsive {
+    @apply text-[10px] sm:text-xs md:text-sm;
+  }
+
+  /* Ultra-mobile safe text (for very small screens) */
+  .text-ultra-mobile {
+    @apply text-[10px] leading-tight;
+  }
+
+  /* Mobile-safe containers - Tighter padding */
+  .container-mobile-safe {
+    @apply max-w-full overflow-hidden px-1.5 sm:px-4;
+  }
+
+  /* Prevent all text overflow on mobile */
+  .mobile-text-safe {
+    @apply overflow-hidden text-ellipsis whitespace-nowrap max-w-full;
+  }
+
+  /* Mobile pricing card adjustments - More compact */
+  .pricing-card-mobile {
+    @apply w-full max-w-full min-w-0 overflow-hidden;
+  }
+
+  .pricing-text-mobile {
+    @apply text-[10px] sm:text-xs md:text-sm leading-tight;
+  }
+
+  .pricing-title-mobile {
+    @apply text-xs sm:text-sm md:text-base font-bold;
+  }
+
+  /* Clean Card Styles */
+  .card-clean {
+    @apply bg-card rounded-2xl shadow-card border-0;
+  }
+
+  .card-hero {
+    @apply bg-gradient-hero rounded-2xl shadow-lg border-0;
+  }
+
+  /* Dark mode gradient border enhancement */
+  .dark .border {
+    border-color: hsl(210 80% 45%);
+  }
+
+  .dark .card-clean,
+  .dark [class*="border"] {
+    border-color: hsl(210 80% 45%);
+  }
+
+  /* Gradient border for cards in dark mode */
+  .dark .gradient-border-card {
+    position: relative;
+    border: 1px solid transparent;
+    background: linear-gradient(hsl(var(--card)), hsl(var(--card))) padding-box,
+                linear-gradient(135deg, hsl(210 80% 50%), hsl(197 71% 60%)) border-box;
+  }
+
+  /* Light mode enhancements - Gradlify Brand */
+  .card-clean {
+    @apply border border-border/50;
+  }
+
+  /* Subtle gradient backgrounds for sections in light mode */
+  .light-accent-bg {
+    background: var(--gradient-accent-subtle);
+  }
+
+  .light-surface-bg {
+    background: var(--gradient-surface);
+  }
+
+  /* Gradient border for featured cards in light mode */
+  .gradient-border-light {
+    position: relative;
+    border: 2px solid transparent;
+    background: linear-gradient(hsl(var(--card)), hsl(var(--card))) padding-box,
+                var(--gradient-primary) border-box;
+  }
+
+  /* Premium gradient enhancements */
+  .animate-pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite alternate;
+  }
+
+  @keyframes pulse-glow {
+    from {
+      box-shadow: 0 0 20px hsl(var(--primary) / 0.3);
+    }
+    to {
+      box-shadow: 0 0 30px hsl(var(--primary) / 0.5), 0 0 40px hsl(var(--primary) / 0.3);
+    }
+  }
+
+  /* Modern Pill/Badge Utilities - Smaller on mobile */
+  .pill-centered {
+    @apply inline-flex items-center justify-center rounded-full px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2 text-[10px] sm:text-xs md:text-sm font-medium text-white whitespace-nowrap max-w-[120px] sm:max-w-[140px] md:max-w-[160px] overflow-hidden text-ellipsis min-h-[28px] sm:min-h-[32px] md:min-h-[36px] shadow-sm;
+  }
+
+  .pill-mobile-friendly {
+    @apply min-h-[36px] sm:min-h-[32px] px-3 sm:px-3;
+  }
+
+  /* Readiness Badge Pills */
+  .pill-needs-work {
+    @apply pill-centered;
+    background: var(--gradient-needs-work);
+  }
+
+  .pill-developing {
+    @apply pill-centered;
+    background: var(--gradient-developing);
+  }
+
+  .pill-strong {
+    @apply pill-centered;
+    background: var(--gradient-success);
+  }
+
+  /* Progress Bar Enhancements */
+  .progress-modern {
+    @apply bg-secondary rounded-full overflow-hidden;
+  }
+
+  .progress-fill {
+    @apply rounded-full transition-all duration-700 ease-out;
+  }
+
+  .progress-gradient {
+    @apply h-full w-full flex-1 rounded-full transition-all duration-500 ease-out;
+    background: var(--gradient-readiness);
+  }
+
+  .progress-topic {
+    @apply h-full w-full flex-1 rounded-full transition-all duration-500 ease-out;
+  }
+
+  /* RAG Status Colors */
+  .rag-strong {
+    @apply bg-[#10b981] text-white;
+  }
+
+  .rag-developing {
+    @apply bg-[#f59e0b] text-white;
+  }
+
+  .rag-needs-work {
+    @apply bg-[#ef4444] text-white;
+  }
+
+  /* Sync Status Animations */
+  .sync-pulse {
+    animation: sync-pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes sync-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
+
+  .animate-pulse-glow {
+    animation: pulse-glow 3s ease-in-out infinite;
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% { 
+      transform: scale(1);
+      box-shadow: var(--shadow-glow);
+    }
+    50% { 
+      transform: scale(1.02);
+      box-shadow: 0 0 60px hsl(217 91% 70% / 0.4);
+    }
+  }
+
+  /* Add subtle hover lift animation */
+  .hover-pop:hover {
+    transform: translateY(-0.5px);
+    box-shadow: var(--shadow-md);
+    transition: all 0.15s ease-out;
+  }
+
+  /* Ensure pill badges are properly centered */
+  .btn-text-nowrap {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+
+  /* Hide scrollbar for mobile day selector */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Hover Effects */
+  .hover-scale {
+    @apply transition-transform duration-300 ease-smooth hover:scale-[1.02];
+  }
+
+  /* Subtle Highlight Effects */
+  .card-highlight {
+    @apply transition-all duration-300 hover:shadow-xl hover:-translate-y-1;
+  }
+
+  .card-glow {
+    @apply relative;
+  }
+
+  .card-glow::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    padding: 2px;
+    background: linear-gradient(135deg, hsl(var(--primary) / 0.3), hsl(var(--accent) / 0.3));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .card-glow:hover::before {
+    opacity: 1;
+  }
+
+  /* Icon Animation */
+  .icon-float {
+    @apply animate-float;
+  }
+
+  /* Button Glow Effect */
+  .button-glow {
+    @apply shadow-md hover:shadow-glow transition-all duration-300;
+  }
+  
+  /* Exam-style math rendering */
+  .math-display-container {
+    display: block;
+    margin: 0.75rem 0;
+    padding: 0.5rem 0;
+  }
+
+  .math-inline-container {
+    display: inline-block;
+    vertical-align: middle;
+  }
+
+  .exam-math {
+    font-size: 1.125rem;
+    line-height: 1.8;
+    letter-spacing: 0.01em;
+  }
+
+  .exam-math :global(.katex) {
+    font-size: 1.15em !important;
+    line-height: 1.8;
+  }
+
+  .exam-math :global(.katex-display) {
+    margin: 0.75rem 0;
+    text-align: center;
+  }
+
+  .exam-math :global(.katex-display > .katex) {
+    text-align: center;
+    white-space: normal;
+  }
+
+  /* Improve fraction rendering */
+  .exam-math :global(.frac) {
+    vertical-align: middle;
+    display: inline-block;
+    margin: 0 0.125em;
+  }
+
+  .exam-math :global(.frac-line) {
+    width: 100%;
+    border-bottom-width: 0.06em;
+  }
+
+  /* Improve sqrt rendering */
+  .exam-math :global(.sqrt) {
+    vertical-align: middle;
+    padding: 0.1em 0.3em 0.1em 0;
+  }
+
+  /* Trig functions and operators */
+  .exam-math :global(.mop),
+  .exam-math :global(.mbin),
+  .exam-math :global(.mrel) {
+    padding: 0 0.22222em;
+  }
+
+  /* Superscripts and degree symbols */
+  .exam-math :global(.msupsub) {
+    vertical-align: baseline;
+  }
+
+  .exam-math sup {
+    font-size: 0.75em;
+    vertical-align: super;
+  }
+
+  /* Inline math styling */
+  .exam-math-inline {
+    font-size: 1rem;
+    line-height: 1.6;
+    vertical-align: middle;
+  }
+
+  .exam-math-inline :global(.katex) {
+    font-size: 1.05em !important;
+    vertical-align: baseline;
+  }
+
+  /* Answer option math */
+  :global(.exam-answer-option) .exam-math-inline {
+    font-size: 1.125rem;
+    line-height: 1.8;
+  }
+
+  /* Dark mode adjustments */
+  .dark .exam-math,
+  .dark .exam-math-inline {
+    color: hsl(var(--foreground));
+  }
+
+  .dark .exam-math :global(.katex),
+  .dark .exam-math-inline :global(.katex) {
+    color: hsl(var(--foreground));
+  }
+
+  /* Spacing between question elements */
+  .mock-question-spacing {
+    margin-bottom: 1.5rem;
+  }
+
+  .mock-answer-spacing {
+    margin-top: 1rem;
+    margin-bottom: 0.75rem;
+  }
+}
+
+/* Chat Typing Animation */
+@keyframes typing {
+  0%, 60%, 100% { 
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  30% { 
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}
+
+.animate-typing-1 {
+  animation: typing 1.4s ease-in-out infinite;
+}
+
+.animate-typing-2 {
+  animation: typing 1.4s ease-in-out infinite 0.15s;
+}
+
+.animate-typing-3 {
+  animation: typing 1.4s ease-in-out infinite 0.3s;
+}
+
+/* Chat Fade Up Animation */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-up {
+  animation: fadeUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Slide in from left animation */
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-in-left {
+  animation: slideInLeft 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Leaderboard scroll styles */
+.leaderboard-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+.leaderboard-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.leaderboard-scroll::-webkit-scrollbar-thumb {
+  background: hsl(var(--border));
+  border-radius: 2px;
+}
+
+.leaderboard-row:hover {
+  background-color: hsl(var(--primary) / 0.04);
+}
+
+/* ============================================
+   EXAM/PRACTICE SESSION STYLES (Gradlify Premium)
+   ============================================ */
+
+/* Exam/Practice Card with Purple Gradient Border (Dark Mode Only) */
+.dark .exam-card-border {
+  border: 1px solid transparent;
+  background: 
+    linear-gradient(hsl(224 71% 8%), hsl(224 71% 8%)) padding-box,
+    linear-gradient(135deg, hsl(270 60% 45% / 0.6) 0%, hsl(290 50% 40% / 0.4) 50%, hsl(270 60% 45% / 0.6) 100%) border-box;
+}
+
+.exam-card-border {
+  @apply border border-border;
+}
+
+/* Option Cards */
+.option-card-exam {
+  @apply w-full text-left p-3 sm:p-4 rounded-xl transition-all duration-200 ease-out cursor-pointer;
+  @apply bg-card border border-border;
+}
+
+.option-card-exam:hover:not(.selected):not(.correct):not(.incorrect) {
+  border-color: hsl(270 70% 60% / 0.5);
+  background: linear-gradient(135deg, hsl(265 80% 55% / 0.05) 0%, hsl(285 75% 50% / 0.05) 100%);
+  transform: translateX(4px);
+}
+
+.option-card-exam.selected {
+  border-color: hsl(270 70% 55%);
+  background: linear-gradient(135deg, hsl(265 80% 55% / 0.12) 0%, hsl(285 75% 50% / 0.12) 100%);
+  box-shadow: 0 0 0 3px hsl(270 70% 55% / 0.15);
+}
+
+.option-card-exam.correct {
+  @apply border-green-500;
+  background: rgba(16, 185, 129, 0.08);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.option-card-exam.incorrect {
+  @apply border-red-500;
+  background: rgba(239, 68, 68, 0.08);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.option-card-exam:active:not(:disabled) {
+  transform: scale(0.985);
+}
+
+/* Option Letter Badge */
+.option-letter-exam {
+  @apply flex-shrink-0 w-8 h-8 sm:w-9 sm:h-9 rounded-lg border-2 flex items-center justify-center text-xs sm:text-sm font-semibold transition-all duration-200;
+  @apply border-border text-muted-foreground;
+}
+
+.option-letter-exam.selected {
+  background: linear-gradient(135deg, hsl(265 80% 55%) 0%, hsl(285 75% 50%) 100%);
+  @apply text-white border-transparent;
+}
+
+.option-letter-exam.correct {
+  @apply bg-green-500 text-white border-transparent;
+}
+
+.option-letter-exam.incorrect {
+  @apply bg-red-500 text-white border-transparent;
+}
+
+/* Primary Gradient Button */
+.btn-exam-primary {
+  @apply px-4 py-3 rounded-xl font-semibold text-sm text-white;
+  background: linear-gradient(135deg, hsl(260 85% 58%) 0%, hsl(280 80% 55%) 40%, hsl(300 75% 50%) 100%);
+  box-shadow: 0 4px 15px hsl(280 80% 55% / 0.4), 0 0 20px hsl(280 80% 55% / 0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-exam-primary::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent 50%, rgba(255,255,255,0.1));
+  opacity: 1;
+}
+
+.btn-exam-primary::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+  transform: translateX(-100%);
+  transition: transform 0.6s ease;
+}
+
+.btn-exam-primary:hover:not(:disabled)::after {
+  transform: translateX(100%);
+}
+
+.btn-exam-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px hsl(280 80% 55% / 0.5), 0 0 30px hsl(280 80% 55% / 0.3);
+}
+
+.btn-exam-primary:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Secondary Button */
+.btn-exam-secondary {
+  @apply px-4 py-3 rounded-xl font-medium text-sm bg-card border border-border text-muted-foreground;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-exam-secondary:hover {
+  border-color: hsl(270 70% 60% / 0.5);
+  color: hsl(270 70% 55%);
+  background: linear-gradient(135deg, hsl(265 80% 55% / 0.06) 0%, hsl(285 75% 50% / 0.06) 100%);
+  transform: translateY(-1px);
+}
+
+/* Progress Bar with Shimmer */
+.progress-exam-track {
+  @apply rounded-full overflow-hidden;
+  background: hsl(var(--border));
+}
+
+.progress-exam-fill {
+  @apply h-full rounded-full transition-all duration-500 ease-out;
+  background: linear-gradient(90deg, hsl(265 80% 55%) 0%, hsl(275 75% 52%) 50%, hsl(285 75% 50%) 100%);
+  position: relative;
+}
+
+.progress-exam-fill::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  animation: shimmer 2.5s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* Scale-in animation for selection indicators */
+@keyframes scale-in {
+  0% { transform: scale(0); opacity: 0; }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.animate-scale-in {
+  animation: scale-in 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Question Image Container */
+.question-image-shell,
+.question-image-container,
+.question-image-container-exam {
+  @apply border border-border rounded-2xl p-4 sm:p-5 flex items-center justify-center bg-white;
+  background: linear-gradient(180deg, #ffffff 0%, #f7f7f7 100%);
+  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.12);
+}
+
+.dark .question-image-shell,
+.dark .question-image-container,
+.dark .question-image-container-exam {
+  @apply border-border;
+  background: linear-gradient(180deg, #ffffff 0%, #f7f7f7 100%);
+  box-shadow: 0 12px 25px rgba(2, 6, 23, 0.25);
+}
+
+.question-image-media {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  max-height: 70vh;
+  object-fit: contain;
+  border-radius: 12px;
+  background-color: #fff;
+  image-rendering: -webkit-optimize-contrast;
+}
+
+@media (min-width: 640px) {
+  .question-image-media {
+    max-height: 420px;
+  }
+}
+
+/* Timer States */
+.timer-exam-normal {
+  @apply bg-muted border-border;
+}
+
+.timer-exam-warning {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(234, 88, 12, 0.1) 100%);
+  @apply border-amber-400/40;
+}
+
+.timer-exam-critical {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.1) 100%);
+  @apply border-red-400/40;
+  animation: pulse-subtle 1s ease-in-out infinite;
+}
+
+@keyframes pulse-subtle {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+/* Question Navigation Button */
+.q-nav-btn-exam {
+  @apply w-7 h-7 sm:w-8 sm:h-8 rounded-lg text-xs font-semibold transition-all duration-200;
+}
+
+.q-nav-btn-exam:hover {
+  transform: scale(1.1);
+}
+
+.q-nav-btn-exam.current {
+  background: linear-gradient(135deg, hsl(265 80% 55%) 0%, hsl(285 75% 50%) 100%);
+  @apply text-white;
+  box-shadow: 0 2px 8px hsl(270 70% 55% / 0.4);
+}
+
+.q-nav-btn-exam.answered {
+  background: linear-gradient(135deg, hsl(265 80% 55% / 0.18) 0%, hsl(285 75% 50% / 0.18) 100%);
+  color: hsl(270 70% 55%);
+}
+
+.q-nav-btn-exam.flagged {
+  background: rgba(251, 191, 36, 0.15);
+  @apply text-amber-500 border border-amber-400/40;
+}
+
+.q-nav-btn-exam.unanswered {
+  @apply bg-muted text-muted-foreground;
+}
+
+/* Feedback Card Styles */
+.feedback-header-correct {
+  background: rgba(16, 185, 129, 0.06);
+  @apply border-green-500/15;
+}
+
+.feedback-header-incorrect {
+  background: rgba(239, 68, 68, 0.06);
+  @apply border-red-500/15;
+}
+
+.feedback-icon-correct {
+  background: rgba(16, 185, 129, 0.12);
+}
+
+.feedback-icon-incorrect {
+  background: rgba(239, 68, 68, 0.12);
+}
+
+/* Expandable Section */
+.expand-trigger-exam {
+  @apply w-full flex items-center justify-between px-4 sm:px-5 py-3 sm:py-3.5 rounded-none transition-all duration-200;
+}
+
+.expand-trigger-exam:hover {
+  background: hsl(var(--primary) / 0.04);
+}
+
+.expandable-content {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease, padding 0.4s ease;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.expandable-content.open {
+  max-height: none;
+  opacity: 1;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+/* Prevent KaTeX from overflowing solution cards (especially long inline expressions). */
+.inline-math {
+  display: inline-block;
+  vertical-align: baseline;
+  max-width: 100%;
+}
+
+.inline-math :global(.katex) {
+  font-size: 1em;
+  display: inline-block;
+  vertical-align: baseline;
+  line-height: 1.2;
+}
+
+.inline-math :global(.katex .frac-line) {
+  vertical-align: baseline;
+}
+
+.expandable-content :global(.katex-display) {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 0.25rem;
+}
+
+/* Confidence Buttons */
+.confidence-btn-exam {
+  @apply py-2 sm:py-2.5 text-xs sm:text-sm font-medium bg-card border border-border rounded-xl text-muted-foreground;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.confidence-btn-exam:hover {
+  @apply border-primary/40;
+  background: hsl(var(--primary) / 0.04);
+}
+
+.confidence-btn-exam.selected {
+  background: linear-gradient(135deg, hsl(265 80% 55%) 0%, hsl(285 75% 50%) 100%);
+  @apply text-white border-transparent;
+  transform: scale(1.02);
+}
+
+/* Card with subtle glow */
+.card-exam-glow {
+  @apply bg-card rounded-2xl border border-border overflow-hidden;
+  box-shadow: 0 0 20px hsl(270 70% 55% / 0.06);
+}
+
+.dark .card-exam-glow {
+  border: 1px solid transparent;
+  background: 
+    linear-gradient(hsl(224 71% 8%), hsl(224 71% 8%)) padding-box,
+    linear-gradient(135deg, hsl(270 60% 45% / 0.6) 0%, hsl(290 50% 40% / 0.4) 50%, hsl(270 60% 45% / 0.6) 100%) border-box;
+  box-shadow: 0 0 40px hsl(270 70% 55% / 0.15);
+}
+
+/* Gradient text */
+.gradient-text-exam {
+  background: linear-gradient(135deg, hsl(265 80% 55%) 0%, hsl(275 75% 52%) 50%, hsl(285 75% 50%) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Gradient subtle background */
+.gradient-bg-subtle-exam {
+  background: linear-gradient(135deg, hsl(265 80% 55% / 0.1) 0%, hsl(275 75% 52% / 0.1) 50%, hsl(285 75% 50% / 0.1) 100%);
+}
+
+.dark .gradient-bg-subtle-exam {
+  background: linear-gradient(135deg, hsl(265 80% 55% / 0.18) 0%, hsl(275 75% 52% / 0.18) 50%, hsl(285 75% 50% / 0.18) 100%);
+}
+
+/* Badge exam */
+.badge-exam {
+  @apply px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase tracking-wide;
+}
+
+.practice-tag-pill {
+  gap: 0.3rem;
+  text-transform: uppercase;
+  flex-shrink: 0;
+  font-size: clamp(0.65rem, 1vw, 0.85rem);
+}
+
+.practice-header-tags {
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.practice-question-card .practice-header-tags span {
+  font-size: 0.85rem;
+}
+
+@media (max-width: 640px) {
+  .practice-tag-pill {
+    font-size: 0.6rem;
+    padding-left: 0.35rem;
+    padding-right: 0.35rem;
+  }
+
+  .practice-question-card .practice-header-tags span {
+    font-size: 0.6rem;
+  }
+
+  .practice-question-card .text-sm {
+    font-size: 0.85rem;
+  }
+
+  .practice-header-tags {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 0.25rem;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .practice-header-tags::-webkit-scrollbar {
+    height: 4px;
+  }
+
+  .practice-header-tags::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 999px;
+  }
+}
+
+/* Live dot indicator */
+.live-dot-exam {
+  @apply w-1.5 h-1.5 bg-green-500 rounded-full;
+  animation: pulse-subtle 2s ease-in-out infinite;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+}
+
+/* Slide up animation */
+.animate-slide-up-exam {
+  animation: slideUpExam 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes slideUpExam {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Scale in animation */
+.animate-scale-in-exam {
+  animation: scaleInExam 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes scaleInExam {
+  from { opacity: 0; transform: scale(0.92); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Fade up staggered */
+.fade-up-exam { 
+  animation: fadeUpExam 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards; 
+  opacity: 0;
+}
+.fade-up-exam-1 { animation-delay: 0.05s; }
+.fade-up-exam-2 { animation-delay: 0.1s; }
+.fade-up-exam-3 { animation-delay: 0.15s; }
+.fade-up-exam-4 { animation-delay: 0.2s; }
+
+@keyframes fadeUpExam {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Timer states - matching HTML */
+.timer-normal {
+  @apply bg-muted border-border;
+}
+
+.timer-warning {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(234, 88, 12, 0.1) 100%);
+  @apply border-amber-400/40;
+}
+
+.timer-critical {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(220, 38, 38, 0.1) 100%);
+  @apply border-red-400/40;
+  animation: pulse-subtle 1s ease-in-out infinite;
+}
+
+/* Glow subtle effect */
+.glow-subtle {
+  box-shadow: 0 0 20px hsl(250 83% 58% / 0.06);
+}
+.dark .glow-subtle {
+  box-shadow: 0 0 40px hsl(250 83% 58% / 0.12);
+}
+
+/* Ripple effect */
+.ripple {
+  position: relative;
+  overflow: hidden;
+}
+.ripple::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at var(--x, 50%) var(--y, 50%), rgba(255,255,255,0.2) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.ripple:active::after {
+  opacity: 1;
+}
+
+/* Fade animations */
+.fade-up {
+  animation: fadeUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  opacity: 0;
+}
+.fade-up-1 { animation-delay: 0.05s; }
+.fade-up-2 { animation-delay: 0.1s; }
+.fade-up-3 { animation-delay: 0.15s; }
+.fade-up-4 { animation-delay: 0.2s; }
+.fade-up-5 { animation-delay: 0.25s; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Fade in animation */
+.fade-in {
+  animation: fadeIn 0.25s ease forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Scale in animation */
+.scale-in {
+  animation: scaleIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.92); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Slide up animation */
+.slide-up {
+  animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Question nav button */
+.q-nav-btn {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.q-nav-btn:hover {
+  transform: scale(1.1);
+}
+.q-nav-btn:active {
+  transform: scale(0.95);
+}
+
+/* Review item hover */
+.review-item {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.review-item:hover {
+  background: hsl(var(--primary) / 0.04);
+}
+
+/* Badge styling */
+.badge {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+/* Card styling */
+.card {
+  @apply bg-card;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Option card - match HTML exactly */
+.option-card {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  @apply bg-card;
+  cursor: pointer;
+}
+
+.option-card:active:not(:disabled) {
+  transform: scale(0.985);
+}
+
+/* ============================================
+   REVISION NOTES STYLES (Gradlify Purple Accent)
+   ============================================ */
+
+/* Notes-specific purple accent variables */
+:root {
+  --notes-accent: 262 83% 58%;
+  --notes-accent-light: 262 83% 68%;
+  --notes-accent-dark: 262 83% 50%;
+  --notes-gradient: linear-gradient(135deg, hsl(262 83% 58%) 0%, hsl(262 83% 68%) 50%, hsl(280 70% 75%) 100%);
+  --notes-gradient-hover: linear-gradient(135deg, hsl(262 83% 50%) 0%, hsl(262 83% 58%) 50%, hsl(262 83% 68%) 100%);
+  --notes-shadow-sm: 0 1px 3px hsl(262 83% 58% / 0.08);
+  --notes-shadow-md: 0 4px 16px hsl(262 83% 58% / 0.12);
+  --notes-shadow-lg: 0 12px 40px hsl(262 83% 58% / 0.16);
+  --notes-shadow-glow: 0 0 30px hsl(262 83% 58% / 0.2);
+}
+
+.dark {
+  --notes-shadow-glow: 0 0 40px hsl(262 83% 58% / 0.3);
+}
+
+/* Notes Progress Ring */
+.notes-progress-ring {
+  transition: stroke-dashoffset 0.8s ease;
+}
+
+/* Notes Topic Card */
+.notes-topic-card {
+  @apply bg-card border border-border/40 rounded-2xl p-6 cursor-pointer transition-all duration-300 relative overflow-hidden;
+}
+
+.notes-topic-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--notes-gradient);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.notes-topic-card:hover {
+  border-color: hsl(var(--notes-accent));
+  box-shadow: var(--notes-shadow-lg), var(--notes-shadow-glow);
+  transform: translateY(-4px);
+}
+
+.notes-topic-card:hover::before {
+  opacity: 1;
+}
+
+/* Notes Spec Item */
+.notes-spec-item {
+  @apply flex items-center p-5 border-b border-border/40 cursor-pointer transition-all duration-200;
+}
+
+.notes-spec-item:last-child {
+  @apply border-b-0;
+}
+
+.notes-spec-item:hover {
+  background: hsl(var(--notes-accent) / 0.04);
+}
+
+.notes-spec-item.completed {
+  background: hsl(160 84% 39% / 0.06);
+}
+
+/* Notes Spec Code Badge */
+.notes-spec-code {
+  @apply w-12 h-12 rounded-xl flex items-center justify-center text-sm font-bold text-white shrink-0;
+  background: var(--notes-gradient);
+}
+
+.notes-spec-item.completed .notes-spec-code {
+  @apply bg-green-500;
+  background: hsl(160 84% 39%);
+}
+
+/* Notes Content Block */
+.notes-content-block {
+  @apply mb-10;
+}
+
+.notes-content-block-header {
+  @apply flex items-center gap-3 mb-5;
+}
+
+.notes-content-block-icon {
+  @apply w-10 h-10 rounded-xl flex items-center justify-center;
+  background: hsl(var(--notes-accent) / 0.1);
+}
+
+.notes-content-block-icon svg {
+  @apply w-5 h-5;
+  color: hsl(var(--notes-accent));
+}
+
+.notes-content-block-title {
+  @apply text-xl font-bold text-foreground;
+}
+
+/* Notes Content Card */
+.notes-content-card {
+  @apply bg-card border border-border/40 rounded-2xl p-6;
+}
+
+/* Notes Key Concepts */
+.notes-key-concepts {
+  border-left: 4px solid hsl(var(--notes-accent));
+  background: linear-gradient(135deg, hsl(var(--notes-accent) / 0.06) 0%, hsl(var(--notes-accent) / 0.02) 100%);
+}
+
+/* Notes Example Card */
+.notes-example-card {
+  border-left: 4px solid hsl(43 96% 56%);
+  background: linear-gradient(135deg, hsl(43 96% 56% / 0.06) 0%, hsl(43 96% 56% / 0.02) 100%);
+}
+
+/* Notes Formula Card */
+.notes-formula-card {
+  @apply bg-muted/50;
+}
+
+.notes-formula-name {
+  @apply text-xs font-semibold uppercase tracking-wide mb-1;
+  color: hsl(var(--notes-accent));
+}
+
+.notes-formula-expr {
+  @apply text-xl font-semibold text-foreground;
+  font-family: 'Times New Roman', serif;
+}
+
+/* Notes Practice Question */
+.notes-practice-question {
+  @apply bg-card border border-border/40 rounded-xl p-5 mb-4;
+}
+
+.notes-practice-reveal {
+  @apply text-sm font-semibold cursor-pointer transition-colors;
+  color: hsl(var(--notes-accent));
+}
+
+.notes-practice-reveal:hover {
+  opacity: 0.8;
+}
+
+.notes-practice-answer {
+  @apply mt-4 p-4 rounded-xl border;
+  background: hsl(160 84% 39% / 0.06);
+  border-color: hsl(160 84% 39% / 0.15);
+}
+
+/* Notes Completion Block */
+.notes-completion-block {
+  @apply text-center p-10 rounded-2xl border border-border/40;
+  background: linear-gradient(135deg, hsl(var(--notes-accent) / 0.06) 0%, hsl(var(--notes-accent) / 0.02) 100%);
+}
+
+/* Notes Completion Button */
+.notes-completion-btn {
+  @apply inline-flex items-center gap-2 px-8 py-3.5 rounded-xl text-base font-semibold text-white transition-all duration-300;
+  background: var(--notes-gradient);
+  box-shadow: 0 4px 16px hsl(var(--notes-accent) / 0.35);
+}
+
+.notes-completion-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px hsl(var(--notes-accent) / 0.45);
+}
+
+.notes-completion-btn.complete {
+  @apply bg-green-500;
+  box-shadow: 0 4px 16px hsl(160 84% 39% / 0.35);
+}
+
+/* Notes Badge */
+.notes-badge {
+  @apply px-3 py-1 rounded-lg text-xs font-semibold uppercase tracking-wide;
+}
+
+.notes-badge-higher {
+  background: hsl(43 96% 56% / 0.12);
+  color: hsl(43 96% 56%);
+}
+
+.notes-badge-complete {
+  background: hsl(160 84% 39% / 0.12);
+  color: hsl(160 84% 39%);
+}
+
+/* Notes Gradient Text */
+.notes-gradient-text {
+  background: var(--notes-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Notes Hero Badge */
+.notes-hero-badge {
+  @apply inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold text-white uppercase tracking-wider;
+  background: var(--notes-gradient);
+}
+
+/* Notes Stat Value */
+.notes-stat-value {
+  @apply text-3xl font-extrabold;
+  background: var(--notes-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Notes Progress Bar */
+.notes-progress-bar {
+  @apply h-1.5 rounded-full overflow-hidden;
+  background: hsl(var(--muted));
+}
+
+.notes-progress-fill {
+  @apply h-full rounded-full transition-all duration-500;
+  background: var(--notes-gradient);
+}
+
+/* Notes Accordion */
+.notes-accordion {
+  @apply flex flex-col gap-3;
+}
+
+.notes-accordion-header {
+  @apply p-4 rounded-xl cursor-pointer transition-all duration-200;
+  background: hsl(var(--notes-accent) / 0.06);
+}
+
+.notes-accordion-header:hover {
+  background: hsl(var(--notes-accent) / 0.1);
+}
+
+.notes-accordion-header.open {
+  background: hsl(var(--notes-accent) / 0.12);
+}
+
+.notes-accordion-body {
+  @apply p-4 text-muted-foreground leading-relaxed;
+}
+
+/* Interactive Diagram Controls */
+.notes-diagram-slider-label {
+  @apply flex justify-between text-sm mb-2;
+}
+
+.notes-diagram-slider-label span:first-child {
+  @apply text-muted-foreground;
+}
+
+.notes-diagram-slider-label span:last-child {
+  @apply font-bold;
+  color: hsl(var(--notes-accent));
+}
+
+.notes-diagram-equation {
+  @apply text-center text-xl font-semibold mt-5 p-4 rounded-xl bg-card border border-border/40;
+  font-family: 'Times New Roman', serif;
+  color: hsl(var(--notes-accent));
+}
+
+/* Concept Item */
+.notes-concept-item {
+  @apply flex items-start gap-4 py-3 border-b border-border/40;
+}
+
+.notes-concept-item:last-child {
+  @apply border-b-0 pb-0;
+}
+
+.notes-concept-item:first-child {
+  @apply pt-0;
+}
+
+.notes-concept-bullet {
+  @apply w-6 h-6 rounded-lg flex items-center justify-center shrink-0 mt-0.5;
+  background: var(--notes-gradient);
+}
+
+.notes-concept-bullet svg {
+  @apply w-3 h-3 text-white;
+}
+
+/* Example Steps */
+.notes-example-step {
+  @apply flex gap-4 mb-4;
+}
+
+.notes-example-step:last-child {
+  @apply mb-0;
+}
+
+.notes-step-num {
+  @apply w-7 h-7 rounded-lg flex items-center justify-center text-sm font-bold text-white shrink-0;
+  background: linear-gradient(135deg, hsl(43 96% 56%) 0%, hsl(43 80% 52%) 100%);
+}
+
+.notes-step-text {
+  @apply text-sm leading-relaxed text-muted-foreground pt-1;
+}
+
+/* Answer Box */
+.notes-answer-box {
+  @apply flex items-center gap-4 p-5 rounded-xl border;
+  background: hsl(160 84% 39% / 0.08);
+  border-color: hsl(160 84% 39% / 0.2);
+}
+
+.notes-answer-label {
+  @apply text-xs font-bold uppercase tracking-wide;
+  color: hsl(160 84% 39%);
+}
+
+.notes-answer-value {
+  @apply text-lg font-bold text-foreground;
+}
+
+/* Scrollbar for notes */
+.notes-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.notes-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.notes-scrollbar::-webkit-scrollbar-thumb {
+  background: hsl(var(--notes-accent-light));
+  border-radius: 4px;
+}
+
+/* Dark mode specific */
+.dark .notes-spec-item:hover {
+  background: hsl(var(--notes-accent) / 0.08);
+}
+
+.dark .notes-spec-item.completed {
+  background: hsl(160 84% 39% / 0.1);
+}
+
+/* Practice Questions - Clean Modern Style */
+.notes-practice-container {
+  @apply space-y-4 p-6 rounded-2xl;
+  background: linear-gradient(135deg, hsl(var(--muted)) 0%, hsl(var(--background)) 100%);
+  border: 1px solid hsl(var(--border) / 0.5);
+}
+
+.notes-practice-card {
+  @apply p-6 rounded-2xl bg-card border border-border/40 transition-all duration-300;
+  box-shadow: 0 2px 8px hsl(var(--foreground) / 0.03);
+}
+
+.notes-practice-card:hover {
+  box-shadow: 0 4px 16px hsl(var(--foreground) / 0.06);
+}
+
+.notes-question-badge {
+  @apply px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wide;
+  background: linear-gradient(135deg, hsl(262 83% 58%) 0%, hsl(280 70% 55%) 100%);
+  color: white;
+}
+
+.notes-show-answer-btn {
+  @apply inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200;
+  color: hsl(262 83% 58%);
+  background: hsl(262 83% 58% / 0.1);
+}
+
+.notes-show-answer-btn:hover {
+  background: hsl(262 83% 58% / 0.15);
+}
+
+.notes-answer-reveal {
+  @apply mt-4 p-4 rounded-xl border;
+  background: linear-gradient(135deg, hsl(160 84% 39% / 0.08) 0%, hsl(160 84% 39% / 0.03) 100%);
+  border-color: hsl(160 84% 39% / 0.2);
+  animation: fadeSlideIn 0.3s ease-out;
+}
+
+@keyframes fadeSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Notes Block Card Enhanced */
+.notes-block-card {
+  backdrop-filter: blur(8px);
+}
+
+/* Badge for Foundation & Higher */
+.notes-badge-both {
+  background: linear-gradient(135deg, hsl(221 83% 53% / 0.12) 0%, hsl(160 84% 39% / 0.12) 100%);
+  color: hsl(221 83% 53%);
+}

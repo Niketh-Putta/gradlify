@@ -1,0 +1,58 @@
+project_id = "gknnfbalijxykqycopic"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+
+[studio]
+enabled = true
+port = 54323
+
+[inbucket]
+enabled = true
+port = 54324
+
+[storage]
+enabled = true
+
+[auth]
+enabled = true
+
+[analytics]
+enabled = false
+
+[functions.upsert-subtopic-progress]
+verify_jwt = true
+
+[functions.stripe-webhook-11plus]
+verify_jwt = false
+
+[functions.stripe-price]
+verify_jwt = false
+
+[functions.ai-feedback]
+verify_jwt = true
+
+[functions.ai-inference]
+verify_jwt = true
+
+[functions.generate-mindprint-summary]
+verify_jwt = true
+
+[functions.create-portal-session]
+verify_jwt = true
+
+[functions.generate-questions]
+verify_jwt = true
+
+[functions.admin-analytics]
+verify_jwt = false
+
+[functions.record-visit]
+verify_jwt = false

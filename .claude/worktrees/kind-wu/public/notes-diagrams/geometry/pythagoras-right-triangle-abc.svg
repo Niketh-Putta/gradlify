@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="520" viewBox="0 0 900 520" role="img" aria-label="Pythagoras right triangle with sides a, b and hypotenuse c" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <style>
+      .t{font:700 26px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#0f172a}
+      .s{font:500 18px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#334155}
+      .k{font:700 18px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#0f172a}
+      .m{font:700 20px ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;fill:#0f172a}
+      .tri{fill:#f8fafc;stroke:#0f172a;stroke-width:3}
+    </style>
+  </defs>
+
+  <rect width="900" height="520" fill="#ffffff"/>
+  <text x="40" y="60" class="t">Pythagoras: identify the hypotenuse (opposite 90°)</text>
+  <text x="40" y="92" class="s">Use a² + b² = c² where c is the longest side.</text>
+
+  <g transform="translate(160,130)">
+    <!-- Right triangle: right angle at bottom-left -->
+    <polygon points="0,280 460,280 0,60" class="tri"/>
+
+    <!-- right-angle marker -->
+    <rect x="0" y="260" width="22" height="22" fill="none" stroke="#0f172a" stroke-width="2"/>
+
+    <!-- side labels -->
+    <text x="230" y="315" class="k" text-anchor="middle">a</text>
+    <text x="-28" y="170" class="k" text-anchor="middle" transform="rotate(-90 -28 170)">b</text>
+    <text x="270" y="110" class="k" transform="rotate(-26 270 110)">c (hypotenuse)</text>
+
+    <!-- simple callout (kept well inside the canvas to avoid clipping) -->
+    <text x="480" y="120" class="m">a² + b² = c²</text>
+    <text x="480" y="170" class="s">
+      <tspan x="480" dy="0">c is opposite the 90° angle.</tspan>
+    </text>
+  </g>
+</svg>

@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="320" viewBox="0 0 920 320" role="img" aria-label="Median as the middle value">
+  <rect x="0" y="0" width="920" height="320" fill="#ffffff"/>
+
+  <text x="40" y="55" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="26" font-weight="700" fill="#111827">Median = middle value (after ordering)</text>
+  <text x="40" y="85" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="16" fill="#4b5563">Step 1: sort the data. Step 2: pick the middle (or average the two middles).</text>
+
+  <!-- Number line -->
+  <line x1="90" y1="210" x2="830" y2="210" stroke="#111827" stroke-width="4"/>
+  <line x1="90" y1="200" x2="90" y2="220" stroke="#111827" stroke-width="4"/>
+  <line x1="830" y1="200" x2="830" y2="220" stroke="#111827" stroke-width="4"/>
+
+  <!-- Ordered points: 3, 5, 7, 9, 11 -->
+  <g font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="16" font-weight="700">
+    <circle cx="190" cy="210" r="10" fill="#e5e7eb" stroke="#111827" stroke-width="2"/>
+    <text x="190" y="245" text-anchor="middle" fill="#111827">3</text>
+
+    <circle cx="310" cy="210" r="10" fill="#e5e7eb" stroke="#111827" stroke-width="2"/>
+    <text x="310" y="245" text-anchor="middle" fill="#111827">5</text>
+
+    <!-- Median highlighted -->
+    <circle cx="460" cy="210" r="13" fill="#6366f1"/>
+    <circle cx="460" cy="210" r="13" fill="none" stroke="#111827" stroke-width="2"/>
+    <text x="460" y="245" text-anchor="middle" fill="#111827">7</text>
+
+    <circle cx="610" cy="210" r="10" fill="#e5e7eb" stroke="#111827" stroke-width="2"/>
+    <text x="610" y="245" text-anchor="middle" fill="#111827">9</text>
+
+    <circle cx="730" cy="210" r="10" fill="#e5e7eb" stroke="#111827" stroke-width="2"/>
+    <text x="730" y="245" text-anchor="middle" fill="#111827">11</text>
+  </g>
+
+  <!-- Label -->
+  <path d="M460 165 C460 175 460 185 460 195" stroke="#6366f1" stroke-width="4" fill="none"/>
+  <text x="460" y="155" text-anchor="middle" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="14" font-weight="700" fill="#6366f1">median</text>
+
+  <!-- Reminder box -->
+  <rect x="40" y="120" width="350" height="70" rx="14" fill="#f3f4f6" stroke="#e5e7eb"/>
+  <text x="62" y="150" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="16" fill="#111827">
+    Order first: 3, 5, 7, 9, 11
+  </text>
+  <text x="62" y="174" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="16" fill="#111827">
+    Middle value is 7
+  </text>
+</svg>

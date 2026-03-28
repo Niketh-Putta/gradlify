@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="520" viewBox="0 0 900 520" role="img" aria-label="Right-angled triangle labeled with opposite, adjacent, and hypotenuse" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <style>
+      .t{font:700 26px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#0f172a}
+      .s{font:500 18px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#334155}
+      .k{font:700 18px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#0f172a}
+      .lab{font:700 18px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#7c3aed}
+    </style>
+  </defs>
+  <rect width="900" height="520" fill="#ffffff"/>
+  <text x="40" y="60" class="t">Right-angled triangle: label sides relative to θ</text>
+  <text x="40" y="92" class="s">Hypotenuse is always opposite the 90° angle.</text>
+
+  <g transform="translate(160,120)">
+    <polygon points="0,260 420,260 0,40" fill="#f8fafc" stroke="#0f172a" stroke-width="3"/>
+    <rect x="0" y="240" width="20" height="20" fill="none" stroke="#0f172a" stroke-width="2"/>
+
+    <path d="M 40 260 A 40 40 0 0 1 0 220" fill="none" stroke="#7c3aed" stroke-width="3"/>
+    <text x="52" y="248" class="lab">θ</text>
+
+    <text x="210" y="292" class="k" text-anchor="middle">Adjacent</text>
+    <text x="-24" y="150" class="k" text-anchor="middle" transform="rotate(-90 -24 150)">Opposite</text>
+    <text x="265" y="95" class="k" transform="rotate(-28 265 95)">Hypotenuse</text>
+  </g>
+
+  <g transform="translate(620,150)">
+    <text x="0" y="0" class="k">Quick checks</text>
+    <text x="0" y="45" class="s">- Opposite is across from θ</text>
+    <text x="0" y="85" class="s">- Adjacent touches θ (not hypotenuse)</text>
+    <text x="0" y="125" class="s">- Hypotenuse is the longest side</text>
+  </g>
+</svg>

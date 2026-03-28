@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="480" viewBox="0 0 900 480" role="img" aria-label="Iteration: use the newest value each time" preserveAspectRatio="xMidYMid meet" overflow="hidden">
+  <defs>
+    <style>
+      .t{font:700 26px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#0f172a}
+      .s{font:500 16px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#475569}
+      .k{font:700 18px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#0f172a}
+      .eq{font:700 18px ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;fill:#0f172a}
+      .eqs{font:700 16px ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;fill:#0f172a}
+      .g{stroke:#0f172a;stroke-width:2}
+      .h{fill:#ede9fe}
+      .note{fill:#ffffff;stroke:#e2e8f0;stroke-width:1.5;rx:12}
+      .arr{stroke:#7c3aed;stroke-width:4;stroke-linecap:round;marker-end:url(#m)}
+    </style>
+    <marker id="m" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#7c3aed"/>
+    </marker>
+  </defs>
+
+  <rect width="900" height="480" fill="#ffffff"/>
+  <text x="40" y="56" class="t">Iteration (repeated substitution)</text>
+  <text x="40" y="84" class="s">Key idea: each new value becomes the next input.</text>
+
+  <g transform="translate(60,120)">
+    <text x="0" y="0" class="eq">Rule: xₙ₊₁ = g(xₙ)</text>
+    <text x="0" y="34" class="eq">Example: xₙ₊₁ = √(5 + xₙ),  x₀ = 2</text>
+
+    <!-- Table -->
+    <rect x="0" y="60" width="560" height="290" fill="#ffffff" stroke="#0f172a" stroke-width="2"/>
+    <rect x="0" y="60" width="560" height="52" class="h"/>
+
+    <line x1="90" y1="60" x2="90" y2="350" class="g"/>
+    <line x1="250" y1="60" x2="250" y2="350" class="g"/>
+    <line x1="410" y1="60" x2="410" y2="350" class="g"/>
+
+    <text x="22" y="94" class="eq">n</text>
+    <text x="120" y="94" class="eq">xₙ</text>
+    <text x="280" y="94" class="eq">g(xₙ)</text>
+    <text x="430" y="94" class="eq">xₙ₊₁</text>
+
+    <!-- row 0 -->
+    <text x="22" y="150" class="eq">0</text>
+    <text x="120" y="150" class="eq">2.000</text>
+    <text x="280" y="150" class="eqs">√(5+2.000)</text>
+    <text x="430" y="150" class="eq">2.646</text>
+
+    <!-- row 1 -->
+    <text x="22" y="206" class="eq">1</text>
+    <text x="120" y="206" class="eq">2.646</text>
+    <text x="280" y="206" class="eqs">√(5+2.646)</text>
+    <text x="430" y="206" class="eq">2.765</text>
+
+    <!-- row 2 -->
+    <text x="22" y="262" class="eq">2</text>
+    <text x="120" y="262" class="eq">2.765</text>
+    <text x="280" y="262" class="eqs">√(5+2.765)</text>
+    <text x="430" y="262" class="eq">2.787</text>
+
+    <!-- row 3 -->
+    <text x="22" y="318" class="eq">3</text>
+    <text x="120" y="318" class="eq">2.787</text>
+    <text x="280" y="318" class="eqs">√(5+2.787)</text>
+    <text x="430" y="318" class="eq">2.792</text>
+
+    <!-- Arrow: newest value becomes next x_n -->
+    <line x1="500" y1="150" x2="540" y2="190" class="arr"/>
+    <text x="560" y="175" class="s">next xₙ uses the newest value</text>
+
+    <!-- Notes card -->
+    <g transform="translate(590,60)">
+      <rect x="0" y="0" width="250" height="220" class="note"/>
+      <text x="16" y="38" class="k">Stopping rule</text>
+      <text x="16" y="72" class="s">Stop when consecutive values</text>
+      <text x="16" y="96" class="s">match to the required accuracy.</text>
+      <text x="16" y="140" class="eq">e.g. 2 d.p.</text>
+      <text x="16" y="170" class="eq">2.79, 2.79</text>
+    </g>
+
+    <text x="0" y="392" class="s">Tip: keep full calculator accuracy during the steps; round only at the end (unless told otherwise).</text>
+  </g>
+</svg>

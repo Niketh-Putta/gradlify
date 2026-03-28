@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="360" viewBox="0 0 920 360" role="img" aria-label="Sampling bias examples">
+  <rect width="920" height="360" fill="#ffffff"/>
+  <text x="40" y="52" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="26" font-weight="700" fill="#111827">Sampling bias: quick examples</text>
+  <text x="40" y="80" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="16" fill="#4b5563">Bias happens when your method misses part of the population.</text>
+
+  <rect x="40" y="110" width="840" height="220" rx="16" fill="#f3f4f6" stroke="#e5e7eb"/>
+
+  <rect x="70" y="140" width="240" height="160" rx="16" fill="#fee2e2" stroke="#fecaca"/>
+  <text x="90" y="170" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="14" font-weight="700" fill="#111827">Convenience sample</text>
+  <text x="90" y="198" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="13" fill="#111827">Ask only people leaving a gym.</text>
+  <text x="90" y="222" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="13" fill="#4b5563">Misses non-gym users.</text>
+
+  <rect x="340" y="140" width="240" height="160" rx="16" fill="#fef3c7" stroke="#fde68a"/>
+  <text x="360" y="170" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="14" font-weight="700" fill="#111827">Time bias</text>
+  <text x="360" y="198" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="13" fill="#111827">Survey at 6pm only.</text>
+  <text x="360" y="222" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="13" fill="#4b5563">Misses other times.</text>
+
+  <rect x="610" y="140" width="240" height="160" rx="16" fill="#ecfeff" stroke="#a5f3fc"/>
+  <text x="630" y="170" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="14" font-weight="700" fill="#111827">Non-response bias</text>
+  <text x="630" y="198" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="13" fill="#111827">Some groups don’t reply.</text>
+  <text x="630" y="222" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="13" fill="#4b5563">Results can skew.</text>
+
+  <rect x="70" y="305" width="780" height="32" rx="12" fill="#eef2ff" stroke="#c7d2fe"/>
+  <text x="90" y="327" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="14" fill="#111827">Fix bias by using random/stratified methods and covering the whole population.</text>
+</svg>

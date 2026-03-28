@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="480" viewBox="0 0 900 480" role="img" aria-label="Clearing fractions using the LCM" preserveAspectRatio="xMidYMid meet" overflow="hidden">
+  <defs>
+    <style>
+      .t{font:700 26px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#0f172a}
+      .s{font:500 16px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#475569}
+      .k{font:700 18px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#0f172a}
+      .eq{font:700 18px ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;fill:#0f172a}
+      .eqs{font:700 16px ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;fill:#0f172a}
+      .arr{stroke:#7c3aed;stroke-width:4;stroke-linecap:round;marker-end:url(#m)}
+      .bx{fill:#ffffff;stroke:#0f172a;stroke-width:2;rx:14}
+      .note{fill:#ffffff;stroke:#e2e8f0;stroke-width:1.5;rx:12}
+    </style>
+    <marker id="m" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#7c3aed"/>
+    </marker>
+  </defs>
+
+  <rect width="900" height="480" fill="#ffffff"/>
+
+  <text x="40" y="60" class="t">Equations with fractions: clear denominators</text>
+  <text x="40" y="88" class="s">Multiply every term by the LCM so the fractions disappear.</text>
+
+  <!-- Left: original equation + method card -->
+  <g transform="translate(60,125)">
+    <rect x="0" y="0" width="360" height="84" class="bx"/>
+    <text x="24" y="52" class="eq">x/3 + x/4 = 7</text>
+
+    <rect x="0" y="104" width="360" height="220" class="note"/>
+    <text x="18" y="140" class="k">LCM(3,4) = 12</text>
+    <text x="18" y="176" class="k">Multiply every term by 12:</text>
+    <text x="18" y="210" class="eq">12(x/3) + 12(x/4) = 12·7</text>
+    <text x="18" y="252" class="s">Breakdown:</text>
+    <text x="18" y="282" class="eqs">12(x/3)=4x, 12(x/4)=3x, 12·7=84</text>
+  </g>
+
+  <!-- Arrow (centered vertically within the main content area) -->
+  <line x1="440" y1="190" x2="520" y2="190" class="arr"/>
+
+  <!-- Right: cleared equation + solve card -->
+  <g transform="translate(540,125)">
+    <rect x="0" y="0" width="300" height="84" class="bx"/>
+    <text x="18" y="52" class="eq">4x + 3x = 84</text>
+
+    <rect x="0" y="104" width="300" height="220" class="note"/>
+    <text x="18" y="144" class="k">Then solve:</text>
+    <text x="18" y="180" class="eq">7x = 84</text>
+    <text x="18" y="216" class="eq">x = 12</text>
+    <text x="18" y="268" class="s">(Now its a normal equation.)</text>
+  </g>
+</svg>

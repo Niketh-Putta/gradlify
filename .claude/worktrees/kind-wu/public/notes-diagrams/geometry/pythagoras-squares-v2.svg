@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="520" viewBox="0 0 900 520" role="img" aria-label="Pythagoras: squares on the sides of a right triangle" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <style>
+      .t{font:700 26px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#0f172a}
+      .s{font:500 18px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#334155}
+      .k{font:700 18px ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;fill:#0f172a}
+      .a{fill:#a78bfa;opacity:.25;stroke:#7c3aed;stroke-width:3}
+      .b{fill:#86efac;opacity:.22;stroke:#16a34a;stroke-width:3}
+      .c{fill:#fde68a;opacity:.25;stroke:#f59e0b;stroke-width:3}
+    </style>
+  </defs>
+  <rect width="900" height="520" fill="#ffffff"/>
+  <text x="40" y="60" class="t">Pythagoras: area(square on hypotenuse) = sum of the other two</text>
+  <text x="40" y="92" class="s">Use only for right-angled triangles.</text>
+
+  <g transform="translate(260,130)">
+    <polygon points="0,240 320,240 0,40" fill="#f8fafc" stroke="#0f172a" stroke-width="3"/>
+    <rect x="0" y="220" width="20" height="20" fill="none" stroke="#0f172a" stroke-width="2"/>
+
+    <rect x="0" y="240" width="200" height="200" class="a" transform="translate(0,-200)"/>
+    <rect x="-200" y="40" width="200" height="200" class="b"/>
+
+    <g transform="translate(0,40) rotate(-32)">
+      <rect x="160" y="0" width="256" height="256" class="c"/>
+    </g>
+
+    <text x="420" y="260" class="k">a² + b² = c²</text>
+  </g>
+</svg>

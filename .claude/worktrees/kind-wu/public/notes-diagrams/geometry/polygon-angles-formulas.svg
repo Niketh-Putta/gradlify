@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="520" viewBox="0 0 900 520" role="img" aria-label="Polygon angle formulas: interior and exterior" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <style>
+      .t{font:700 26px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#0f172a}
+      .s{font:500 18px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#334155}
+      .k{font:700 18px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#0f172a}
+      .m{font:700 18px ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;fill:#0f172a}
+      .box{fill:#f8fafc;stroke:#cbd5e1;stroke-width:2}
+    </style>
+  </defs>
+  <rect width="900" height="420" fill="#ffffff"/>
+  <text x="40" y="60" class="t">Angles in polygons: the two must-know facts</text>
+  <text x="40" y="92" class="s">Interior sum uses triangles; exterior sum is always 360°.</text>
+
+  <g transform="translate(60,130)">
+    <rect x="0" y="0" width="380" height="230" class="box" rx="16"/>
+    <text x="28" y="44" class="k">Interior angles</text>
+    <text x="28" y="84" class="m">Sum = (n − 2) × 180°</text>
+    <text x="28" y="124" class="m">Regular: each = [(n − 2) × 180°] ÷ n</text>
+    <text x="28" y="170" class="s">
+      <tspan x="28" dy="0">Idea: split into (n−2) triangles</tspan>
+      <tspan x="28" dy="22">from one vertex.</tspan>
+    </text>
+  </g>
+
+  <g transform="translate(460,130)">
+    <rect x="0" y="0" width="380" height="230" class="box" rx="16"/>
+    <text x="28" y="44" class="k">Exterior angles</text>
+    <text x="28" y="84" class="m">Sum = 360° (always)</text>
+    <text x="28" y="124" class="m">Regular: each = 360° ÷ n</text>
+    <text x="28" y="170" class="s">Walk around the shape: a full turn is 360°.</text>
+  </g>
+</svg>

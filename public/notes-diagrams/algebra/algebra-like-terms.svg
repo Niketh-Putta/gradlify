@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="480" viewBox="0 0 900 480" role="img" aria-label="Like terms: group and combine" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <style>
+      .t{font:700 26px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#0f172a}
+      .s{font:500 18px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#334155}
+      .k{font:700 18px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#0f172a}
+      .eq{font:700 18px ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;fill:#0f172a}
+      .bx{fill:#ffffff;stroke:#0f172a;stroke-width:2}
+      .x{fill:#ede9fe;stroke:#7c3aed;stroke-width:2}
+      .y{fill:#dcfce7;stroke:#16a34a;stroke-width:2}
+      .n{fill:#e2e8f0;stroke:#334155;stroke-width:2}
+    </style>
+  </defs>
+
+  <rect width="900" height="480" fill="#ffffff"/>
+  <text x="40" y="60" class="t">Like terms</text>
+  <text x="40" y="92" class="s">You can only add/subtract terms with the same variable part.</text>
+
+  <g transform="translate(60,125)">
+    <rect x="0" y="0" width="240" height="70" rx="12" class="x"/>
+    <text x="20" y="44" class="eq">3x</text>
+    <rect x="260" y="0" width="240" height="70" rx="12" class="x"/>
+    <text x="280" y="44" class="eq">+ 5x</text>
+    <rect x="520" y="0" width="240" height="70" rx="12" class="y"/>
+    <text x="540" y="44" class="eq">+ 2y</text>
+
+    <rect x="0" y="95" width="240" height="70" rx="12" class="y"/>
+    <text x="20" y="139" class="eq">− y</text>
+    <rect x="260" y="95" width="240" height="70" rx="12" class="bx"/>
+    <text x="280" y="139" class="eq">+ x²</text>
+    <rect x="520" y="95" width="240" height="70" rx="12" class="n"/>
+    <text x="540" y="139" class="eq">+ 7</text>
+
+    <text x="0" y="205" class="k">Combine:</text>
+    <text x="0" y="245" class="eq">(3x + 5x) = 8x</text>
+    <text x="0" y="280" class="eq">(2y − y) = y</text>
+    <text x="0" y="315" class="eq">x² stays separate, 7 stays separate</text>
+
+    <text x="0" y="360" class="k">Result:</text>
+    <text x="120" y="360" class="eq">8x + y + x² + 7</text>
+  </g>
+</svg>
