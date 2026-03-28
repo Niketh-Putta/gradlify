@@ -1,0 +1,1 @@
+import{S as t}from"./main-DBvNuF3y.js";function r(o){const n=encodeURIComponent(`${window.location.origin}/auth/callback`);return`${t}/auth/v1/authorize?provider=${encodeURIComponent(o)}&redirect_to=${n}`}function i(o){const n=r(o);window.open(n,"_blank")}export{r as buildManualOAuthUrl,i as openManualOAuth};

@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="480" viewBox="0 0 900 480" role="img" aria-label="Solving a linear equation using a balance model" preserveAspectRatio="xMidYMid meet" overflow="hidden">
+  <defs>
+    <style>
+      .t{font:700 26px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#0f172a}
+      .s{font:500 16px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#475569}
+      .k{font:700 18px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#0f172a}
+      .eq{font:700 18px ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;fill:#0f172a}
+      .beam{stroke:#0f172a;stroke-width:4;stroke-linecap:round}
+      .thin{stroke:#334155;stroke-width:2;stroke-linecap:round}
+      .pan{fill:#ffffff;stroke:#0f172a;stroke-width:2}
+      .xblk{fill:#eef2ff;stroke:#7c3aed;stroke-width:2}
+      .num{fill:#f1f5f9;stroke:#334155;stroke-width:2}
+      .note{fill:#ffffff;stroke:#e2e8f0;stroke-width:1.5;rx:12}
+    </style>
+  </defs>
+
+  <rect width="900" height="480" fill="#ffffff"/>
+
+  <text x="40" y="56" class="t">Solving equations = keeping the balance</text>
+  <text x="40" y="84" class="s">Do the same operation to both sides so they stay equal.</text>
+
+  <text x="40" y="132" class="eq">3x + 5 = 14</text>
+
+  <!-- Balance (compact: everything stays well within the canvas) -->
+  <g transform="translate(60,140)">
+    <!-- stand -->
+    <line x1="300" y1="210" x2="300" y2="285" class="beam"/>
+    <line x1="230" y1="285" x2="370" y2="285" class="beam"/>
+
+    <!-- beam -->
+    <line x1="90" y1="210" x2="510" y2="210" class="beam"/>
+
+    <!-- hangers -->
+    <line x1="170" y1="210" x2="170" y2="242" class="thin"/>
+    <line x1="430" y1="210" x2="430" y2="242" class="thin"/>
+
+    <!-- pans -->
+    <path d="M105 242 L235 242 L218 272 L122 272 Z" class="pan"/>
+    <path d="M365 242 L495 242 L478 272 L382 272 Z" class="pan"/>
+
+    <!-- left pan: x x x and 5 -->
+    <rect x="118" y="162" width="44" height="44" rx="10" class="xblk"/>
+    <text x="140" y="191" class="eq" text-anchor="middle">x</text>
+
+    <rect x="168" y="162" width="44" height="44" rx="10" class="xblk"/>
+    <text x="190" y="191" class="eq" text-anchor="middle">x</text>
+
+    <rect x="218" y="162" width="44" height="44" rx="10" class="xblk"/>
+    <text x="240" y="191" class="eq" text-anchor="middle">x</text>
+
+    <rect x="150" y="286" width="80" height="44" rx="12" class="num"/>
+    <text x="190" y="315" class="eq" text-anchor="middle">5</text>
+
+    <!-- right pan: 14 -->
+    <rect x="402" y="178" width="86" height="54" rx="12" class="num"/>
+    <text x="445" y="212" class="eq" text-anchor="middle">14</text>
+  </g>
+
+  <!-- Steps (kept inside with generous margins) -->
+  <g transform="translate(560,150)">
+    <rect x="0" y="0" width="300" height="210" class="note"/>
+
+    <text x="18" y="40" class="k">Step 1: subtract 5</text>
+    <text x="18" y="72" class="eq">3x = 9</text>
+
+    <text x="18" y="118" class="k">Step 2: divide by 3</text>
+    <text x="18" y="150" class="eq">x = 3</text>
+
+    <text x="18" y="188" class="s">(Both sides stay equal.)</text>
+  </g>
+</svg>

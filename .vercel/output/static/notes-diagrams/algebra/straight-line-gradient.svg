@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="480" viewBox="0 0 900 480" role="img" aria-label="Straight line graphs: y=mx+c and gradient rise over run" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <style>
+      .t{font:700 26px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#0f172a}
+      .s{font:500 18px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#334155}
+      .k{font:700 18px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#0f172a}
+      .eq{font:700 20px ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;fill:#0f172a}
+      .axis{stroke:#0f172a;stroke-width:3}
+      .grid{stroke:#e2e8f0;stroke-width:1}
+      .ln{stroke:#7c3aed;stroke-width:4}
+    </style>
+  </defs>
+
+  <rect width="900" height="480" fill="#ffffff"/>
+  <text x="40" y="60" class="t">Straight line graphs</text>
+  <text x="40" y="92" class="s">y = mx + c where m is gradient and c is y-intercept.</text>
+
+  <g transform="translate(80,125)">
+    <!-- grid -->
+    <g>
+      <line x1="0" y1="0" x2="360" y2="0" class="grid"/>
+      <line x1="0" y1="60" x2="360" y2="60" class="grid"/>
+      <line x1="0" y1="120" x2="360" y2="120" class="grid"/>
+      <line x1="0" y1="180" x2="360" y2="180" class="grid"/>
+      <line x1="0" y1="240" x2="360" y2="240" class="grid"/>
+      <line x1="0" y1="300" x2="360" y2="300" class="grid"/>
+
+      <line x1="0" y1="0" x2="0" y2="300" class="grid"/>
+      <line x1="60" y1="0" x2="60" y2="300" class="grid"/>
+      <line x1="120" y1="0" x2="120" y2="300" class="grid"/>
+      <line x1="180" y1="0" x2="180" y2="300" class="grid"/>
+      <line x1="240" y1="0" x2="240" y2="300" class="grid"/>
+      <line x1="300" y1="0" x2="300" y2="300" class="grid"/>
+      <line x1="360" y1="0" x2="360" y2="300" class="grid"/>
+    </g>
+
+    <!-- axes -->
+    <line x1="0" y1="240" x2="360" y2="240" class="axis"/>
+    <line x1="60" y1="0" x2="60" y2="300" class="axis"/>
+
+    <!-- line y = 2x + 1 (scaled) -->
+    <line x1="0" y1="255" x2="300" y2="15" class="ln"/>
+
+    <!-- rise/run triangle -->
+    <line x1="120" y1="195" x2="180" y2="195" stroke="#0f172a" stroke-width="3"/>
+    <line x1="180" y1="195" x2="180" y2="135" stroke="#0f172a" stroke-width="3"/>
+    <text x="128" y="185" class="eq">run</text>
+    <text x="188" y="160" class="eq">rise</text>
+
+    <text x="410" y="70" class="k">Gradient:</text>
+    <text x="410" y="105" class="eq">m = rise / run</text>
+
+    <text x="410" y="160" class="k">Intercept:</text>
+    <text x="410" y="195" class="eq">c = y when x=0</text>
+
+    <text x="410" y="260" class="eq">Example: y = 2x + 1</text>
+  </g>
+</svg>

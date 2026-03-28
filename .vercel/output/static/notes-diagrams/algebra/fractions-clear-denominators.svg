@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="480" viewBox="0 0 900 480" role="img" aria-label="Clearing fractions using the LCM" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <style>
+      .t{font:700 26px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#0f172a}
+      .s{font:500 18px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#334155}
+      .k{font:700 18px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#0f172a}
+      .eq{font:700 20px ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;fill:#0f172a}
+      .arr{stroke:#7c3aed;stroke-width:4;marker-end:url(#m)}
+      .bx{fill:#ffffff;stroke:#0f172a;stroke-width:2;rx:14}
+    </style>
+    <marker id="m" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#7c3aed"/>
+    </marker>
+  </defs>
+
+  <rect width="900" height="480" fill="#ffffff"/>
+  <text x="40" y="60" class="t">Equations with fractions: clear denominators</text>
+  <text x="40" y="92" class="s">Multiply every term by the LCM of the denominators.</text>
+
+  <g transform="translate(70,145)">
+    <rect x="0" y="0" width="360" height="90" class="bx"/>
+    <text x="24" y="55" class="eq">x/3 + x/4 = 7</text>
+
+    <text x="0" y="135" class="k">LCM(3,4) = 12</text>
+
+    <line x1="380" y1="45" x2="520" y2="45" class="arr"/>
+
+    <rect x="540" y="0" width="300" height="90" class="bx"/>
+    <text x="560" y="55" class="eq">4x + 3x = 84</text>
+
+    <text x="540" y="135" class="k">Then solve:</text>
+    <text x="540" y="170" class="eq">7x = 84</text>
+    <text x="540" y="205" class="eq">x = 12</text>
+
+    <text x="0" y="210" class="k">Show the multiplication:</text>
+    <text x="0" y="245" class="eq">12·(x/3) = 4x</text>
+    <text x="0" y="280" class="eq">12·(x/4) = 3x</text>
+    <text x="0" y="315" class="eq">12·7 = 84</text>
+  </g>
+</svg>

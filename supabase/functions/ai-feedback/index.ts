@@ -43,7 +43,7 @@ serve(async (req) => {
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const openaiApiKey = Deno.env.get('OPENAI_API_KEY');
+    const openaiApiKey = Deno.env.get('GEMINI_API_KEY') || Deno.env.get('OPENAI_API_KEY');
 
     if (!openaiApiKey) {
       return new Response(
@@ -187,27 +187,27 @@ Provide detailed feedback in the following JSON structure:
 
 Keep explanations clear and concise. Focus on the weakest topics.`;
 
-    console.log('Calling OpenAI API...');
-    const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+    console.log('Calling Gemini API...');
+    const openaiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${openaiApiKey}`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${openaiApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt }
+        systemInstruction: { parts: [{ text: systemPrompt }] },
+        contents: [
+          { role: 'user', parts: [{ text: userPrompt }] }
         ],
-        response_format: { type: "json_object" },
-        temperature: 0.7,
+        generationConfig: {
+          responseMimeType: "application/json",
+          temperature: 0.7,
+        },
       }),
     });
 
     if (!openaiResponse.ok) {
       const errorText = await openaiResponse.text();
-      console.error('OpenAI API error:', openaiResponse.status, errorText);
+      console.error('Gemini API error:', openaiResponse.status, errorText);
       return new Response(
         JSON.stringify({ error: 'Failed to generate AI feedback', details: errorText }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -215,7 +215,8 @@ Keep explanations clear and concise. Focus on the weakest topics.`;
     }
 
     const openaiData = await openaiResponse.json();
-    const feedbackJson = JSON.parse(openaiData.choices[0].message.content);
+    const feedbackText = openaiData.candidates?.[0]?.content?.parts?.[0]?.text;
+    const feedbackJson = JSON.parse(feedbackText || '{}');
 
     console.log('Generated feedback successfully');
 

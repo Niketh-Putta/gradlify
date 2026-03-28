@@ -128,22 +128,18 @@ serve(async (req) => {
 
       if (question.user_answer && question.user_answer.trim()) {
         try {
-          const gradeResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+          const apiKey = Deno.env.get('GEMINI_API_KEY') || Deno.env.get('OPENAI_API_KEY');
+          const gradeResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
             method: 'POST',
             headers: {
-              'Authorization': `Bearer ${Deno.env.get('OPENAI_API_KEY')}`,
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              model: 'gpt-4o-mini',
-              messages: [
-                {
-                  role: 'system',
-                  content: `You are a GCSE ${boardLabel}Maths marker. Mark strictly to the scheme, award partial marks where appropriate. Return only JSON.`
-                },
+              systemInstruction: { parts: [{ text: `You are a GCSE ${boardLabel}Maths marker. Mark strictly to the scheme, award partial marks where appropriate. Return only JSON.` }] },
+              contents: [
                 {
                   role: 'user',
-                  content: `Question:
+                  parts: [{ text: `Question:
 ${question.prompt}
 
 Mark scheme (bullets):
@@ -154,11 +150,14 @@ Student answer:
 ${question.user_answer}
 
 Return JSON:
-{ "awarded": number (0..marks), "rationale": "short feedback" }`
+{ "awarded": number (0..marks), "rationale": "short feedback" }` }]
                 }
               ],
-              max_tokens: 500,
-              temperature: 0.2
+              generationConfig: {
+                maxOutputTokens: 500,
+                temperature: 0.2,
+                responseMimeType: "application/json"
+              }
             }),
           });
 
@@ -166,7 +165,8 @@ Return JSON:
           let grading;
           
           try {
-            grading = JSON.parse(gradeData.choices[0].message.content);
+            const feedbackText = gradeData.candidates?.[0]?.content?.parts?.[0]?.text;
+            grading = JSON.parse(feedbackText || '{}');
           } catch (e) {
             // Fallback if parsing fails
             grading = { awarded: 0, rationale: "Unable to grade automatically" };

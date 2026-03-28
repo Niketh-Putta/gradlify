@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="480" viewBox="0 0 900 480" role="img" aria-label="Parallel lines: corresponding angles are equal" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <style>
+      .t{font:700 28px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#0f172a}
+      .s{font:500 18px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#334155}
+      .k{font:700 18px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#0f172a}
+      .m{font:700 17px ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;fill:#0f172a}
+      .box{fill:#f8fafc;stroke:#cbd5e1;stroke-width:2}
+      .ln{stroke:#0f172a;stroke-width:4}
+      .tr{stroke:#7c3aed;stroke-width:6;stroke-linecap:round}
+      .pill{fill:#ffffff;stroke:#e2e8f0;stroke-width:2}
+      .lab{font:800 18px ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;fill:#7c3aed}
+    </style>
+  </defs>
+
+  <rect width="900" height="480" fill="#ffffff"/>
+  <text x="40" y="62" class="t">Corresponding angles</text>
+  <text x="40" y="96" class="s">Angles in matching positions are equal.</text>
+
+  <!-- Diagram area -->
+  <g transform="translate(70,120)">
+    <!-- parallel lines -->
+    <line x1="0" y1="70" x2="540" y2="70" class="ln"/>
+    <line x1="0" y1="250" x2="540" y2="250" class="ln"/>
+
+    <!-- arrow markers -->
+    <polygon points="250,60 272,70 250,80" fill="#0f172a"/>
+    <polygon points="292,60 314,70 292,80" fill="#0f172a"/>
+    <polygon points="250,240 272,250 250,260" fill="#0f172a"/>
+    <polygon points="292,240 314,250 292,260" fill="#0f172a"/>
+
+    <!-- transversal -->
+    <line x1="80" y1="330" x2="460" y2="0" class="tr"/>
+
+    <!-- labels only (no curved marks) -->
+    <circle cx="490" cy="40" r="18" class="pill"/>
+    <text x="490" y="46" class="lab" text-anchor="middle">x</text>
+
+    <circle cx="250" cy="210" r="18" class="pill"/>
+    <text x="250" y="216" class="lab" text-anchor="middle">x</text>
+  </g>
+
+  <!-- Rule box (wrapped so it never clips) -->
+  <g transform="translate(640,170)">
+    <rect x="0" y="0" width="240" height="140" rx="16" class="box"/>
+    <text x="18" y="44" class="k">Rule</text>
+    <text x="18" y="76" class="m">
+      <tspan x="18" dy="0">corresponding angles</tspan>
+      <tspan x="18" dy="24">are equal</tspan>
+    </text>
+  </g>
+</svg>

@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="340" viewBox="0 0 920 340" role="img" aria-label="Mean as a balancing point">
+  <rect x="0" y="0" width="920" height="340" fill="#ffffff"/>
+
+  <!-- Title -->
+  <text x="40" y="55" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="26" font-weight="700" fill="#111827">Mean = “balance point”</text>
+  <text x="40" y="85" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="16" fill="#4b5563">The mean is where the total is shared equally.</text>
+
+  <!-- Fulcrum -->
+  <polygon points="460,250 520,250 490,180" fill="#111827" opacity="0.9"/>
+  <rect x="170" y="250" width="580" height="14" rx="7" fill="#111827" opacity="0.9"/>
+
+  <!-- Beam (slightly tilted) -->
+  <g transform="translate(0,0) rotate(-6 460 190)">
+    <rect x="150" y="185" width="640" height="16" rx="8" fill="#111827"/>
+
+    <!-- Blocks on beam -->
+    <g font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial" font-weight="700" font-size="18" fill="#111827">
+      <rect x="195" y="142" width="60" height="44" rx="10" fill="#e5e7eb" stroke="#111827"/>
+      <text x="225" y="170" text-anchor="middle">2</text>
+
+      <rect x="285" y="132" width="60" height="54" rx="10" fill="#e5e7eb" stroke="#111827"/>
+      <text x="315" y="165" text-anchor="middle">4</text>
+
+      <rect x="575" y="132" width="60" height="54" rx="10" fill="#e5e7eb" stroke="#111827"/>
+      <text x="605" y="165" text-anchor="middle">6</text>
+
+      <rect x="665" y="142" width="60" height="44" rx="10" fill="#e5e7eb" stroke="#111827"/>
+      <text x="695" y="170" text-anchor="middle">8</text>
+    </g>
+
+    <!-- Mean marker -->
+    <line x1="490" y1="120" x2="490" y2="215" stroke="#6366f1" stroke-width="6"/>
+    <circle cx="490" cy="118" r="9" fill="#6366f1"/>
+    <text x="490" y="105" text-anchor="middle" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="14" font-weight="700" fill="#6366f1">mean</text>
+  </g>
+
+  <!-- Calculation box -->
+  <rect x="40" y="230" width="360" height="85" rx="14" fill="#f3f4f6" stroke="#e5e7eb"/>
+  <text x="62" y="260" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="16" fill="#111827">2 + 4 + 6 + 8 = 20</text>
+  <text x="62" y="286" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="16" fill="#111827">n = 4</text>
+  <text x="62" y="312" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="16" fill="#111827">mean = 20 ÷ 4 = </text>
+  <text x="252" y="312" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="16" font-weight="700" fill="#6366f1">5</text>
+</svg>

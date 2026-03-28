@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="360" viewBox="0 0 920 360" role="img" aria-label="Tree diagram rules: multiply along branches, add between paths">
+  <rect width="920" height="360" fill="#ffffff"/>
+  <text x="40" y="56" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="28" font-weight="700" fill="#111827">Probability trees: multiply then add</text>
+  <text x="40" y="86" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="16" fill="#4b5563">Multiply along a path for AND. Add paths for OR.</text>
+
+  <rect x="40" y="120" width="840" height="200" rx="16" fill="#f3f4f6" stroke="#e5e7eb"/>
+
+  <!-- tree -->
+  <circle cx="130" cy="220" r="6" fill="#111827"/>
+  <line x1="136" y1="220" x2="270" y2="170" stroke="#111827" stroke-width="3"/>
+  <line x1="136" y1="220" x2="270" y2="270" stroke="#111827" stroke-width="3"/>
+
+  <circle cx="270" cy="170" r="5" fill="#111827"/>
+  <circle cx="270" cy="270" r="5" fill="#111827"/>
+
+  <line x1="276" y1="170" x2="420" y2="145" stroke="#111827" stroke-width="3"/>
+  <line x1="276" y1="170" x2="420" y2="195" stroke="#111827" stroke-width="3"/>
+  <line x1="276" y1="270" x2="420" y2="245" stroke="#111827" stroke-width="3"/>
+  <line x1="276" y1="270" x2="420" y2="295" stroke="#111827" stroke-width="3"/>
+
+  <g font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="14" fill="#111827">
+    <text x="150" y="196" font-weight="700">A</text>
+    <text x="150" y="258" font-weight="700">A'</text>
+    <text x="430" y="149" font-weight="700">B</text>
+    <text x="430" y="199" font-weight="700">B'</text>
+    <text x="430" y="249" font-weight="700">B</text>
+    <text x="430" y="299" font-weight="700">B'</text>
+  </g>
+
+  <g font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="13" fill="#4b5563">
+    <text x="168" y="214">0.4</text>
+    <text x="168" y="278">0.6</text>
+    <text x="300" y="162">0.5</text>
+    <text x="300" y="206">0.5</text>
+    <text x="300" y="262">0.5</text>
+    <text x="300" y="306">0.5</text>
+  </g>
+
+  <!-- rule cards -->
+  <rect x="520" y="145" width="340" height="70" rx="16" fill="#ecfeff" stroke="#a5f3fc"/>
+  <text x="540" y="175" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="14" font-weight="700" fill="#111827">Along a path (AND)</text>
+  <text x="540" y="197" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="13" fill="#111827">Multiply: P(A and B) = 0.4 × 0.5</text>
+
+  <rect x="520" y="235" width="340" height="70" rx="16" fill="#eef2ff" stroke="#c7d2fe"/>
+  <text x="540" y="265" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="14" font-weight="700" fill="#111827">Between paths (OR)</text>
+  <text x="540" y="287" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="13" fill="#111827">Add: P(B) = P(A and B) + P(A' and B)</text>
+</svg>

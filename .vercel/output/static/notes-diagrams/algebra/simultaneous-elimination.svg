@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="480" viewBox="0 0 900 480" role="img" aria-label="Simultaneous equations: clear elimination example" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <style>
+      .title{font:700 26px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#0f172a}
+      .subtitle{font:500 15px ui-sans-serif;fill:#475569}
+      .label{font:700 16px ui-monospace,Menlo,Consolas;fill:#0f172a}
+      .eq{font:700 18px ui-monospace,Menlo,Consolas;fill:#0f172a}
+      .box{fill:#fff;stroke:#e6e7ee;stroke-width:1.5;rx:10}
+      .accent{fill:#eef2ff;stroke:#7c3aed;stroke-width:2;rx:8}
+      .muted{fill:#f8fafc}
+      .arrow{stroke:#7c3aed;stroke-width:2;fill:none;marker-end:url(#arr)}
+    </style>
+    <marker id="arr" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+      <path d="M0,0 L9,5 L0,10 Z" fill="#7c3aed"/>
+    </marker>
+  </defs>
+
+  <rect width="900" height="480" fill="#ffffff"/>
+  <text x="40" y="50" class="title">Simultaneous equations — elimination (clean example)</text>
+  <text x="40" y="78" class="subtitle">Make one variable cancel; show steps with clear reasons.</text>
+
+  <!-- equations area -->
+  <g transform="translate(60,110)">
+    <g transform="translate(0,0)">
+      <rect x="0" y="0" width="340" height="120" class="box"/>
+      <text x="20" y="38" class="eq">2x + y = 7</text>
+      <text x="20" y="78" class="eq">x + 2y = 8</text>
+    </g>
+
+    <!-- align to eliminate x by multiplying first equation by -1 -->
+    <g transform="translate(380,0)">
+      <rect x="0" y="0" width="420" height="120" class="accent"/>
+      <text x="18" y="36" class="label">Multiply 1st equation by −1, then add:</text>
+      <text x="18" y="70" class="eq">(−2x − y) + (x + 2y) = −7 + 8</text>
+      <text x="18" y="98" class="eq">−x + y = 1</text>
+    </g>
+
+    <!-- result area -->
+    <g transform="translate(0,150)">
+      <rect x="0" y="0" width="800" height="200" class="box"/>
+      <text x="20" y="36" class="label">Now solve the simpler pair:</text>
+      <text x="20" y="74" class="eq">−x + y = 1</text>
+      <text x="220" y="74" class="eq">and</text>
+      <text x="300" y="74" class="eq">x + 2y = 8</text>
+      <text x="20" y="112" class="label">Add the two: (−x + y) + (x + 2y) = 1 + 8</text>
+      <text x="20" y="148" class="eq">3y = 9  →  y = 3</text>
+      <text x="20" y="180" class="eq">Substitute back: x + 2·3 = 8 ⇒ x = 2</text>
+      <text x="20" y="210" class="label">Solution: (x, y) = (2, 3)</text>
+    </g>
+  </g>
+</svg>

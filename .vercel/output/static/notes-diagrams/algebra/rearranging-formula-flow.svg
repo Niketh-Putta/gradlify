@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="480" viewBox="0 0 900 480" role="img" aria-label="Rearranging a formula: inverse operations flow" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <style>
+      .t{font:700 26px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#0f172a}
+      .s{font:500 18px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#334155}
+      .k{font:700 18px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#0f172a}
+      .eq{font:700 20px ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;fill:#0f172a}
+      .bx{fill:#ffffff;stroke:#0f172a;stroke-width:2;rx:14}
+      .arr{stroke:#7c3aed;stroke-width:4;marker-end:url(#m)}
+    </style>
+    <marker id="m" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#7c3aed"/>
+    </marker>
+  </defs>
+
+  <rect width="900" height="480" fill="#ffffff"/>
+  <text x="40" y="60" class="t">Rearranging formulae (inverse operations)</text>
+  <text x="40" y="92" class="s">Undo operations step-by-step to isolate the subject.</text>
+
+  <g transform="translate(70,150)">
+    <rect x="0" y="0" width="260" height="80" class="bx"/>
+    <text x="24" y="52" class="eq">A = πr²</text>
+
+    <line x1="280" y1="40" x2="420" y2="40" class="arr"/>
+    <rect x="440" y="0" width="260" height="80" class="bx"/>
+    <text x="464" y="52" class="eq">A/π = r²</text>
+
+    <line x1="720" y1="40" x2="840" y2="40" class="arr"/>
+    <rect x="660" y="0" width="220" height="80" class="bx"/>
+    <text x="684" y="52" class="eq">r = √(A/π)</text>
+
+    <text x="0" y="135" class="k">Final step:</text>
+    <text x="165" y="135" class="eq">square root both sides</text>
+
+    <text x="0" y="200" class="k">Rule of thumb:</text>
+    <text x="0" y="235" class="eq">If something is divided → multiply first.</text>
+    <text x="0" y="270" class="eq">If something is squared → square root last.</text>
+  </g>
+</svg>

@@ -23,7 +23,7 @@ serve(async (req: Request) => {
     // Step 1: Load environment variables
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY");
-    const openAIKey = Deno.env.get("OPENAI_API_KEY");
+    const openAIKey = Deno.env.get("GEMINI_API_KEY") || Deno.env.get("OPENAI_API_KEY");
 
     if (!supabaseUrl || !supabaseAnonKey) {
       throw new Error("Missing Supabase environment variables");
@@ -206,29 +206,30 @@ ${Object.entries(stats.accuracy_by_topic).map(([topic, data]) =>
 Provide personalized insight in 2-3 sentences.`;
 
       try {
-        const openAIResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+        const openAIResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${openAIKey}`, {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${openAIKey}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            model: 'gpt-4o-mini',
-            messages: [
-              { role: 'system', content: systemPrompt },
-              { role: 'user', content: userPrompt }
+            systemInstruction: { parts: [{ text: systemPrompt }] },
+            contents: [
+              { role: 'user', parts: [{ text: userPrompt }] }
             ],
-            max_tokens: 150,
-            temperature: 0.7,
+            generationConfig: {
+              maxOutputTokens: 150,
+              temperature: 0.7,
+            },
           }),
         });
 
         if (!openAIResponse.ok) {
           const errorText = await openAIResponse.text();
-          console.error('[MINDPRINT] OpenAI error:', openAIResponse.status, errorText);
+          console.error('[MINDPRINT] Gemini error:', openAIResponse.status, errorText);
         } else {
           const aiData = await openAIResponse.json();
-          aiSummary = aiData.choices[0].message.content.trim();
+          const text = aiData.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (text) aiSummary = text.trim();
           console.log('[MINDPRINT] Generated AI summary');
         }
       } catch (aiError) {

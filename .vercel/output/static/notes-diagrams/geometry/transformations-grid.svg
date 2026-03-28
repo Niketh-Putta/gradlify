@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="520" viewBox="0 0 900 520" role="img" aria-label="Transformations on a coordinate grid" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <style>
+      .t{font:700 26px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#0f172a}
+      .s{font:500 18px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#334155}
+      .k{font:700 18px ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;fill:#0f172a}
+      .g{stroke:#e2e8f0;stroke-width:2}
+      .axis{stroke:#0f172a;stroke-width:3}
+      .a{fill:#a78bfa;opacity:.25;stroke:#7c3aed;stroke-width:3}
+      .b{fill:#86efac;opacity:.22;stroke:#16a34a;stroke-width:3}
+    </style>
+  </defs>
+  <rect width="900" height="420" fill="#ffffff"/>
+  <text x="40" y="60" class="t">Transformations: full descriptions</text>
+  <text x="40" y="92" class="s">Translation (vector), rotation (centre+angle+direction), reflection (mirror line), enlargement (centre+scale factor).</text>
+
+  <g transform="translate(90,120)">
+    <!-- grid -->
+    <g>
+      <line x1="0" y1="0" x2="360" y2="0" class="g"/>
+      <line x1="0" y1="60" x2="360" y2="60" class="g"/>
+      <line x1="0" y1="120" x2="360" y2="120" class="g"/>
+      <line x1="0" y1="180" x2="360" y2="180" class="g"/>
+      <line x1="0" y1="240" x2="360" y2="240" class="g"/>
+      <line x1="0" y1="0" x2="0" y2="240" class="g"/>
+      <line x1="60" y1="0" x2="60" y2="240" class="g"/>
+      <line x1="120" y1="0" x2="120" y2="240" class="g"/>
+      <line x1="180" y1="0" x2="180" y2="240" class="g"/>
+      <line x1="240" y1="0" x2="240" y2="240" class="g"/>
+      <line x1="300" y1="0" x2="300" y2="240" class="g"/>
+      <line x1="360" y1="0" x2="360" y2="240" class="g"/>
+    </g>
+
+    <!-- axes (rough) -->
+    <line x1="0" y1="240" x2="360" y2="240" class="axis"/>
+    <line x1="0" y1="0" x2="0" y2="240" class="axis"/>
+
+    <!-- original shape -->
+    <polygon points="60,180 120,180 120,120 60,120" class="a"/>
+    <text x="60" y="110" class="k">original</text>
+
+    <!-- translated shape -->
+    <polygon points="180,120 240,120 240,60 180,60" class="b"/>
+    <text x="180" y="50" class="k">after translation</text>
+
+    <!-- vector arrow -->
+    <line x1="90" y1="150" x2="210" y2="90" stroke="#0f172a" stroke-width="3" marker-end="url(#arrow)"/>
+  </g>
+
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 10 3, 0 6" fill="#0f172a" />
+    </marker>
+  </defs>
+
+  <g transform="translate(520,150)">
+    <text x="0" y="0" class="k">Translation example</text>
+    <text x="0" y="35" class="s">Vector \(\begin{pmatrix} +2 \\ +1 \end{pmatrix}\) means</text>
+    <text x="0" y="65" class="s">2 right and 1 up.</text>
+  </g>
+</svg>
