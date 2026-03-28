@@ -853,6 +853,7 @@ export default function PracticeSessionNew() {
       if (error) throw error;
 
       if (!data || data.length === 0) {
+        console.log("[DEBUG] fetchQuestion: data is empty", data);
         // If we've exhausted unseen questions for this exact filter, retry INCLUDING seen
         // questions (same filter), so we can recycle and prioritize previously wrong ones.
         if (!opts?.includeSeenRetryDone && shownQuestionIds.length > 0) {
@@ -868,14 +869,21 @@ export default function PracticeSessionNew() {
         return false;
       }
 
+      console.log("[DEBUG] fetched data length:", data.length);
+
       // Hard reject: never serve questions with <3 wrong answers (i.e., <4 total options).
       // This protects users from legacy/invalid bank rows.
       const validData = (data || []).filter((q: any) => {
         const multipartCandidate = parseMultipartQuestion(String(q?.question || ""));
         if (multipartCandidate) return true;
         const options = buildAnswerOptions(q);
+        if (options.options.length < 4) {
+             console.log("[DEBUG] validData drop:", q.id, "options:", options.options);
+        }
         return options.options.length >= 4;
       });
+
+      console.log("[DEBUG] validData length:", validData.length);
 
       if (validData.length === 0) {
         if (!opts?.includeSeenRetryDone && shownQuestionIds.length > 0) {
@@ -886,10 +894,11 @@ export default function PracticeSessionNew() {
           return fetchQuestion({ ...opts, silentNoResults: true, ignoreFixed: true });
         }
         if (!opts?.silentNoResults) {
-          toast.error("No more questions available");
+          toast.error("No valid questions available that meet quality standards.");
         }
         return false;
       }
+
 
       const priorWrongQuestionIds = new Set<string>();
       if (mode !== "extreme") {
