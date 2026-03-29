@@ -429,7 +429,7 @@ export function EnglishSplitViewDemo() {
 
   const [practiceFocus, setPracticeFocus] = useState<string>(
     selectedTopics.includes('vocabulary') ? 'vocab' : 
-    (selectedTopics.includes('spag') ? 'spelling' : 'comprehension')
+    (selectedTopics.includes('spag') ? 'spag' : 'comprehension')
   );
 
   const [isFinished, setIsFinished] = useState<boolean>(false);
@@ -449,9 +449,16 @@ export function EnglishSplitViewDemo() {
 
   // 1. FILTERING LOGIC
   const activeSections = useMemo(() => {
+    // In a Mock exam, we present the FULL paper (Comprehension + SPaG natively defined in TEST_DATA).
     let sections = examMode === 'mock' 
-      ? TEST_DATA.filter(sec => mockConfig[sec.sectionId])
-      : (practiceFocus === 'vocab' ? [VOCAB_PRACTICE] : TEST_DATA.filter(sec => sec.sectionId === practiceFocus));
+      ? TEST_DATA 
+      : (practiceFocus === 'vocab' 
+          ? [VOCAB_PRACTICE] 
+          : (practiceFocus === 'spag' 
+              ? TEST_DATA.filter(sec => ['spelling', 'punctuation', 'grammar'].includes(sec.sectionId)) 
+              : TEST_DATA.filter(sec => sec.sectionId === practiceFocus)
+            )
+        );
 
     // If Practice & Free Tier: Hard clamp to 1 question to enforce paywall
     if (examMode === 'practice' && !isPremium && sections.length > 0) {
@@ -520,7 +527,7 @@ export function EnglishSplitViewDemo() {
       }
     }, {
       root: rightPaneRef.current,
-      rootMargin: "-45% 0px -45% 0px",
+      rootMargin: "-40% 0px -40% 0px",
       threshold: 0
     });
 
@@ -838,9 +845,8 @@ export function EnglishSplitViewDemo() {
                           key={q.id}
                           data-qid={q.id}
                           ref={(el) => { questionRefs.current[q.id] = el; }}
-                          onClick={() => setActiveQuestionId(q.id)}
                           className={cn(
-                            "p-6 rounded-2xl border transition-all duration-500 cursor-pointer scroll-m-24 relative",
+                            "p-6 rounded-2xl border transition-all duration-500 cursor-default scroll-m-24 relative",
                             isSelected 
                               ? (examMode === 'mock' ? "border-foreground/20 bg-card shadow-[0_10px_40px_-15px_rgba(0,0,0,0.3)] ring-1 ring-foreground/10 scale-[1.02]" : "border-amber-500/50 bg-card shadow-[0_10px_40px_-15px_rgba(245,158,11,0.2)] ring-4 ring-amber-500/10 scale-[1.02]")
                               : "border-border/60 bg-card/40 hover:bg-card/80 opacity-60 hover:opacity-100"
@@ -880,7 +886,6 @@ export function EnglishSplitViewDemo() {
                                     onClick={(e) => {
                                       e.stopPropagation();
                                       handleSelectAnswer(q.id, opt.id, opt.trap);
-                                      setActiveQuestionId(q.id);
                                     }}
                                     className={cn(
                                       "w-full text-left p-4 rounded-xl border transition-all duration-200 flex items-center gap-4 group",
