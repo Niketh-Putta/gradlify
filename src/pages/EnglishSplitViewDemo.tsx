@@ -451,9 +451,9 @@ export function EnglishSplitViewDemo() {
 
   // 1. FILTERING LOGIC
   const activeSections = useMemo(() => {
-    // In a Mock exam, we present the FULL paper (Comprehension + SPaG natively defined in TEST_DATA).
+    // In a Mock exam, we present the FULL paper (Comprehension + SPaG natively defined in TEST_DATA + Vocab).
     let sections = examMode === 'mock' 
-      ? TEST_DATA 
+      ? [...TEST_DATA, VOCAB_PRACTICE] 
       : (practiceFocus === 'vocab' 
           ? [VOCAB_PRACTICE] 
           : (practiceFocus === 'spag' 
