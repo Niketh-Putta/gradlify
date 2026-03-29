@@ -53,7 +53,7 @@ export default function SubjectSelection() {
           {/* Maths Professional Card */}
           <button
             onClick={() => handleSelect('maths')}
-            className="group relative flex flex-col justify-between text-left p-8 sm:p-10 rounded-2xl bg-card border border-border border-t-4 border-t-blue-500/70 shadow-sm hover:shadow-md hover:border-blue-200 transition-all duration-300"
+            className="group relative flex flex-col justify-between text-left p-8 sm:p-10 rounded-2xl bg-card border border-border dark:border-blue-500/30 border-t-4 border-t-blue-500/70 shadow-sm hover:shadow-md hover:border-blue-300 dark:hover:border-blue-400 transition-all duration-300"
           >
             <div>
               <div className="w-14 h-14 rounded-lg bg-blue-100 dark:bg-blue-500/20 border border-blue-200 dark:border-blue-500/30 flex items-center justify-center mb-8 shadow-sm group-hover:bg-blue-600 group-hover:border-blue-600 transition-all duration-300">
@@ -77,7 +77,7 @@ export default function SubjectSelection() {
           {/* English Professional Card */}
           <button
             onClick={() => handleSelect('english')}
-            className="group relative flex flex-col justify-between text-left p-8 sm:p-10 rounded-2xl bg-card border border-border border-t-4 border-t-amber-500/70 shadow-sm hover:shadow-md hover:border-amber-200 transition-all duration-300"
+            className="group relative flex flex-col justify-between text-left p-8 sm:p-10 rounded-2xl bg-card border border-border dark:border-amber-500/30 border-t-4 border-t-amber-500/70 shadow-sm hover:shadow-md hover:border-amber-300 dark:hover:border-amber-400 transition-all duration-300"
           >
             <div>
               <div className="w-14 h-14 rounded-lg bg-amber-100 dark:bg-amber-500/20 border border-amber-200 dark:border-amber-500/30 flex items-center justify-center mb-8 shadow-sm group-hover:bg-amber-500 group-hover:border-amber-500 transition-all duration-300">

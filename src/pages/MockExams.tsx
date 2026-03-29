@@ -211,7 +211,11 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
       if (min) params.set('difficultyMin', min.toString());
       if (max) params.set('difficultyMax', max.toString());
     }
-    navigate(`/practice/${currentSubject}?${params.toString()}`);
+    if (currentSubject === 'english') {
+      navigate(`/english-demo?${params.toString()}`);
+    } else {
+      navigate(`/practice/${currentSubject}?${params.toString()}`);
+    }
   };
 
   const startChallengeSession = () => {
@@ -225,7 +229,11 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
       ...(isElevenPlus ? { track: '11plus' } : {}),
       subject: currentSubject
     });
-    navigate(`/practice/${currentSubject}?${params.toString()}`);
+    if (currentSubject === 'english') {
+      navigate(`/english-demo?${params.toString()}`);
+    } else {
+      navigate(`/practice/${currentSubject}?${params.toString()}`);
+    }
   };
 
   const startMockExam = () => {
@@ -255,7 +263,12 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
       if (min) params.set('difficultyMin', min.toString());
       if (max) params.set('difficultyMax', max.toString());
     }
-    navigate(`/mock-exam?${params.toString()}`);
+    if (currentSubject === 'english') {
+      params.set('mode', 'mock-exam'); // EnglishSplitViewDemo expects mock-exam
+      navigate(`/english-demo?${params.toString()}`);
+    } else {
+      navigate(`/mock-exam?${params.toString()}`);
+    }
     setShowMockDialog(false);
     toast.success('Mock exam started!');
   };

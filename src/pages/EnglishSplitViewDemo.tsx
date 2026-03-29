@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { BookOpen, AlertTriangle, Lock, Search, Highlighter, MapPin, Sparkles, ChevronRight, Flag, Timer, Zap, Trophy, ShieldAlert, Check, Type, SpellCheck, TextCursorInput, ListChecks, Languages } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -158,15 +159,30 @@ const VOCAB_PRACTICE = {
 };
 
 export function EnglishSplitViewDemo() {
-  const [isPremium, setIsPremium] = useState<boolean>(false);
-  const [examMode, setExamMode] = useState<'practice' | 'mock'>('practice');
-  const [practiceFocus, setPracticeFocus] = useState<string>('comprehension');
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const [isPremium, setIsPremium] = useState<boolean>(true); // Assume true for now or read from hook later
   
-  // In Mock Mode, user can configure which sections to include!
-  const [mockConfig, setMockConfig] = useState<Record<string, boolean>>({
-    comprehension: true, spelling: true, punctuation: true, grammar: true
-  });
+  const modeParam = searchParams.get('mode') || 'practice';
+  // Topics usually arrives comma separated from MockExams, e.g., "Comprehension,SPaG"
+  const rawTopics = searchParams.get('topics') || 'Comprehension';
+  const selectedTopics = rawTopics.toLowerCase();
   
+  const examMode = modeParam === 'mock-exam' ? 'mock' : 'practice';
+  
+  const mockConfig: Record<string, boolean> = {
+    comprehension: selectedTopics.includes('comprehension'),
+    spelling: selectedTopics.includes('spag'),
+    punctuation: selectedTopics.includes('spag'),
+    grammar: selectedTopics.includes('spag'),
+    vocab: selectedTopics.includes('vocabulary')
+  };
+
+  const [practiceFocus, setPracticeFocus] = useState<string>(
+    selectedTopics.includes('vocabulary') ? 'vocab' : 
+    (selectedTopics.includes('spag') ? 'spelling' : 'comprehension')
+  );
+
   const [isFinished, setIsFinished] = useState<boolean>(false);
 
   const [activeQuestionId, setActiveQuestionId] = useState<string>("q1");
@@ -362,59 +378,7 @@ export function EnglishSplitViewDemo() {
   return (
     <div className="flex flex-col h-[calc(100vh-80px)] overflow-hidden bg-background font-sans" style={{ '--primary': '43 96% 56%', '--primary-glow': '43 96% 66%' } as React.CSSProperties}>
       
-      {/* ---------------- DEMO CONTROL PANEL ---------------- */}
-      <div className="bg-slate-950 border-b border-white/5 p-3 shrink-0 flex items-center justify-between text-white z-50">
-        <div className="flex items-center gap-4">
-          <div className="text-[10px] font-mono text-amber-500/80 font-bold tracking-widest uppercase ml-2 flex items-center gap-2">
-            <Sparkles className="w-3.5 h-3.5" /> Core Architecture Demo
-          </div>
-          <div className="h-4 w-px bg-white/10" />
-          <button 
-            onClick={() => setIsPremium(!isPremium)}
-            className={cn("px-4 py-1.5 rounded-full text-xs font-bold transition-all border", isPremium ? "bg-amber-500/20 text-amber-400 border-amber-500/50" : "bg-slate-800 text-slate-300 border-slate-700")}
-          >
-            {isPremium ? "Premium Engine Actrive" : "Free Engine Active"}
-          </button>
-          <button 
-            onClick={() => { setExamMode(examMode === 'practice' ? 'mock' : 'practice'); setShowTrap(null); }}
-            className={cn("px-4 py-1.5 rounded-full text-xs font-bold transition-all border", examMode === 'mock' ? "bg-rose-500/20 text-rose-400 border-rose-500/50" : "bg-emerald-500/20 text-emerald-400 border-emerald-500/50")}
-          >
-            Mode: {examMode.toUpperCase()}
-          </button>
-        </div>
-
-        {examMode === 'practice' && (
-          <div className="flex items-center gap-1 bg-slate-900 border border-slate-800 p-1 rounded-full px-2">
-            <span className="text-[10px] uppercase font-bold text-slate-500 mr-2 tracking-wider">Practice Focus:</span>
-            {['comprehension', 'spelling', 'punctuation', 'grammar', 'vocab'].map(s => (
-              <button 
-                key={s}
-                onClick={() => setPracticeFocus(s)}
-                className={cn("px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all", practiceFocus === s ? "bg-slate-700 text-white" : "text-slate-400 hover:text-white")}
-              >
-                {s}
-              </button>
-            ))}
-          </div>
-        )}
-
-        {examMode === 'mock' && (
-          <div className="flex items-center gap-3 bg-slate-900 border border-slate-800 py-1.5 px-4 rounded-full">
-            <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Mock Config:</span>
-            {['comprehension', 'spelling', 'punctuation', 'grammar'].map(s => (
-              <label key={s} className="flex items-center gap-1.5 cursor-pointer text-xs font-bold uppercase text-slate-300">
-                <input 
-                  type="checkbox" 
-                  checked={mockConfig[s]}
-                  onChange={e => setMockConfig(prev => ({...prev, [s]: e.target.checked}))}
-                  className="accent-amber-500 w-3 h-3 rounded-sm"
-                />
-                {s}
-              </label>
-            ))}
-          </div>
-        )}
-      </div>
+      {/* Production UI start (Demo controls removed) */}
 
       <div className="flex flex-1 overflow-hidden relative">
         

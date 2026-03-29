@@ -12,6 +12,7 @@ import { getTrackSections, TrackSection } from '@/lib/trackCurriculum';
 import { expandQuestionTypesForDb, expandSubtopicIdsForDb } from '@/lib/subtopicIdUtils';
 import PracticeSessionNew from '@/components/exam/PracticeSessionNew';
 import MultipartPracticePanel from "@/components/experimental/MultipartPracticePanel";
+import { EnglishSplitViewDemo } from "@/pages/EnglishSplitViewDemo";
 import { PracticeLimitModal } from '@/components/PracticeLimitModal';
 
 type CalcSelection = 'calculator' | 'non-calculator' | 'both';
@@ -152,7 +153,10 @@ export default function PracticePage({ forcedSubject }: PracticePageProps) {
   }, [selectedTopics, tierSelection, calcSelection, activeTrack, isElevenPlus, availableSections]);
 
   const hasParams = !!(searchParams.get('topics') || searchParams.get('questionIds') || searchParams.get('mode'));
-  if (hasParams) return <PracticeSessionNew />;
+  if (hasParams) {
+    if (currentSubject === 'english') return <EnglishSplitViewDemo />;
+    return <PracticeSessionNew />;
+  }
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 bg-slate-50/30 min-h-screen">
