@@ -14,7 +14,7 @@ export default function SubjectSelection() {
 
   const handleSelect = (subject: 'maths' | 'english') => {
     setSubject(subject);
-    navigate("/practice-page");
+    navigate("/home");
   };
 
   return (

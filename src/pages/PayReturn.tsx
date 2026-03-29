@@ -16,7 +16,7 @@ const PayReturn = () => {
       localStorage.removeItem(STORAGE_KEY);
     }
 
-    const fallback = '/practice-page';
+    const fallback = '/home';
     const sanitizePath = (value: string | null) => {
       if (!value) return null;
       if (!value.startsWith('/')) return null;

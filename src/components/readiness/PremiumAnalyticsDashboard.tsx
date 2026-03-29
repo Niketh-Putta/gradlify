@@ -6,6 +6,7 @@ import {
 import { Target, AlertCircle, Info, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
+import { useNavigate } from 'react-router-dom';
 
 interface TopicData {
   topic: string;
@@ -21,6 +22,7 @@ interface PremiumAnalyticsProps {
 }
 
 export function PremiumAnalyticsDashboard({ displayTopics, accuracyPct, speedPct, profileName, subject = 'maths' }: PremiumAnalyticsProps) {
+  const navigate = useNavigate();
   const firstName = profileName ? profileName.split(' ')[0] : 'The student';
 
   const { radarData, targetScore } = useMemo(() => {
@@ -80,6 +82,7 @@ export function PremiumAnalyticsDashboard({ displayTopics, accuracyPct, speedPct
     return {
       best: bestTopic,
       worst: worstTopic,
+      worstRaw: sorted[sorted.length - 1].topic,
       recommendation: `Initiate timed, targeted 10-minute Sprint practice sessions in ${worstTopic}.`
     };
   }, [displayTopics]);
@@ -287,16 +290,22 @@ export function PremiumAnalyticsDashboard({ displayTopics, accuracyPct, speedPct
             )}>
                Recommended Protocol
             </h3>
-            <ul className="space-y-4">
-               <li className="flex items-center justify-between pb-4 border-b border-border/50">
-                 <span className="text-[14px] sm:text-[15px] font-medium text-foreground hover:text-primary transition-colors cursor-pointer capitalize">{insights.worst} Module</span>
-               <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+             <ul className="space-y-4">
+               <li 
+                 className="flex items-center justify-between pb-4 border-b border-border/50 group cursor-pointer"
+                 onClick={() => navigate(`/practice/${subject}?topics=${encodeURIComponent(insights.worstRaw)}&mode=practice`)}
+               >
+                 <span className="text-[14px] sm:text-[15px] font-medium text-foreground group-hover:text-primary transition-colors capitalize">{insights.worst} Module</span>
+               <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-primary transition-transform group-hover:translate-x-1">
                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="m9 18 6-6-6-6"/></svg>
                </div>
              </li>
-             <li className="flex items-center justify-between pb-4 border-b border-border/50">
-               <span className="text-[15px] font-medium text-foreground hover:text-primary transition-colors cursor-pointer">Time-Management Module</span>
-               <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+             <li 
+               className="flex items-center justify-between pb-4 border-b border-border/50 group cursor-pointer"
+               onClick={() => navigate(`/mocks`)}
+             >
+               <span className="text-[15px] font-medium text-foreground group-hover:text-primary transition-colors">Time-Management Module</span>
+               <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-primary transition-transform group-hover:translate-x-1">
                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="m9 18 6-6-6-6"/></svg>
                </div>
              </li>
