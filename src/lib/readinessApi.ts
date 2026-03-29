@@ -222,7 +222,7 @@ export async function getReadinessHistory(topic?: string): Promise<ReadinessHist
     .from('readiness_history')
     .select('*')
     .eq('user_id', userId)
-    // TRACK ISOLATION — Prevents GCSE activity affecting 11+ readiness
+    // TRACK ISOLATION - Prevents GCSE activity affecting 11+ readiness
     .filter('track', 'eq', track)
     .order('created_at', { ascending: false })
     .limit(50);

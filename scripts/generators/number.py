@@ -133,7 +133,8 @@ def generate_number_questions():
             else:
                 q, ans = "Is 15 a prime number?", "No"
                 exp = "15 is divisible by 3 and 5."
-        questions.append(get_base("number|factors-multiples-primes", q, str(ans), exp, diff=2, marks=2))
+        w_ans = json.dumps(["Yes", "Cannot tell", "Not enough info"]) if ans == "No" else None
+        questions.append(get_base("number|factors-multiples-primes", q, str(ans), exp, diff=2, marks=2, wrong_answers=w_ans))
 
     # decimals-percentages
     for i in range(60):

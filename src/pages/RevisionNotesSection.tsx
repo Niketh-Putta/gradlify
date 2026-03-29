@@ -269,7 +269,7 @@ export default function RevisionNotesSection() {
 
         {/* Spec List */}
         <div className="bg-card border border-border/40 rounded-2xl overflow-hidden">
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:grid-rows-2 max-w-[950px] mx-auto p-5">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 max-w-[950px] mx-auto p-5">
             {filteredTopics.map((topic, index) => {
               const isDone = progress[topic.slug];
               const readMinutes = estimateReadMinutes(topic.md);
@@ -278,11 +278,11 @@ export default function RevisionNotesSection() {
                 <Link
                   key={topic.slug}
                   to={`/notes/${encodeURIComponent(decodedSection)}/${topic.slug}`}
-                  className="w-full"
+                  className="block h-full"
                 >
                   <div
                     className={cn(
-                      "notes-spec-item group bg-card rounded-xl p-5 border border-border shadow-sm hover:shadow-md transition-all",
+                      "notes-spec-item group h-full bg-card rounded-xl p-5 border border-border shadow-sm hover:shadow-md transition-all",
                       isDone && "completed"
                     )}
                     style={{ animationDelay: `${index * 0.03}s` }}

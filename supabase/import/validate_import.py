@@ -91,7 +91,7 @@ _RE_SOLVE_EQUATION_PREFIX = re.compile(r"^Solve\s+the\s+equation\s+(.+?)\s*$", r
 def _normalize_equation_text(s: str) -> str:
     s = (s or "").strip()
     # Normalize common minus variants.
-    s = s.replace("−", "-").replace("–", "-").replace("—", "-")
+    s = s.replace("−", "-").replace("–", "-").replace(" - ", "-")
     # Strip trailing punctuation.
     while s and s[-1] in ".;":
         s = s[:-1].rstrip()
@@ -517,7 +517,7 @@ def main(path):
     if errs:
         print(f"Validation failed: {errs} row(s) with errors")
         sys.exit(1)
-    print("Validation passed — CSV looks good.")
+    print("Validation passed  - CSV looks good.")
 
 
 if __name__ == "__main__":

@@ -411,7 +411,7 @@ export default function RevisionNotes() {
                 <Link 
                   key={section} 
                   to={`/notes/${encodeURIComponent(section)}`}
-                  className="fade-up block"
+                  className="fade-up block h-full"
                   style={{ animationDelay: `${index * 0.04}s` }}
                 >
                   <div className={cn(

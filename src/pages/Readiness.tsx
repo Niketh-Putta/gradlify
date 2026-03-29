@@ -23,14 +23,14 @@ import { elevenPlusReadinessLabel, nextElevenPlusBand } from '@/lib/readinessHel
 import { AI_FEATURE_ENABLED } from '@/lib/featureFlags';
 
 function formatPercentValue(value: number | null): string {
-  if (value === null || Number.isNaN(value)) return '—';
+  if (value === null || Number.isNaN(value)) return ' - ';
   const rounded = Math.round(value * 10) / 10;
   return Number.isInteger(rounded) ? `${rounded}` : `${rounded.toFixed(1)}`;
 }
 
 function formatPercent(value: number | null): string {
   const formatted = formatPercentValue(value);
-  return formatted === '—' ? formatted : `${formatted}%`;
+  return formatted === ' - ' ? formatted : `${formatted}%`;
 }
 
 function formatNumber(value: number): string {
@@ -1264,12 +1264,19 @@ export function SubjectReadinessView({ subject }: { subject: 'english' | 'maths'
       <div className="max-w-6xl mx-auto px-4 sm:px-10 py-6 sm:py-14">
       <header className="mb-10 sm:mb-14 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 print-header">
         <div>
-          <h1 className="text-3xl sm:text-[40px] font-bold tracking-tight text-foreground mb-3 leading-tight">
-            {subject === 'english' ? 'English' : 'Mathematics'} Exam Readiness
+          <h1 className="text-3xl sm:text-[40px] font-bold tracking-tight mb-3 leading-tight">
+            <span className={cn(
+               "bg-clip-text text-transparent transform-gpu",
+               subject === 'english'
+                 ? "bg-gradient-to-br from-slate-900 via-slate-800 to-amber-700 dark:from-white dark:via-slate-200 dark:to-amber-500"
+                 : "bg-gradient-to-br from-slate-900 via-slate-800 to-blue-700 dark:from-white dark:via-slate-200 dark:to-blue-500"
+            )}>
+              {subject === 'english' ? 'English' : 'Mathematics'} Exam Readiness
+            </span>
           </h1>
           <div className={cn(
              "inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-semibold tracking-wide uppercase",
-             subject === 'english' ? "bg-amber-500/10 border-amber-500/20 text-amber-500" : "bg-primary/10 border-primary/20 text-primary"
+             subject === 'english' ? "bg-amber-500/10 border-amber-500/20 text-amber-500" : "bg-blue-500/10 border-blue-500/20 text-blue-500"
           )}>
             <Sparkles className="w-3.5 h-3.5 animate-pulse" />
             11+ {subject === 'english' ? 'English' : 'Mathematics'}
@@ -1290,53 +1297,55 @@ export function SubjectReadinessView({ subject }: { subject: 'english' | 'maths'
 
         <div className="py-4 sm:py-5 grid grid-cols-1 gap-8 md:grid-cols-[1fr_auto_1fr] md:items-center">
           {/* Current Level Box */}
-          <div className={cn(
-            "bg-card rounded-[32px] px-6 sm:px-10 py-10 sm:py-12 text-center transition-all duration-500 hover:-translate-y-2 hover:shadow-lg relative overflow-hidden group shadow-sm ring-1 ring-inset",
-            subject === 'english' ? "ring-amber-500/20" : "ring-blue-500/20"
-          )}>
+          <div className="group/box relative">
             <div className={cn(
-               "absolute top-0 right-0 w-32 h-32 blur-[40px] rounded-full pointer-events-none opacity-20 transition-opacity group-hover:opacity-40",
-               subject === 'english' ? "bg-amber-400" : "bg-blue-400"
-            )} />
-            <div className="relative z-10">
+              "bg-card rounded-[32px] px-6 sm:px-10 py-10 sm:py-12 text-center transition-all duration-500 group-hover/box:-translate-y-2 group-hover/box:shadow-lg relative overflow-hidden shadow-sm ring-1 ring-inset",
+              subject === 'english' ? "ring-amber-500/20" : "ring-blue-500/20"
+            )}>
               <div className={cn(
-                 "inline-flex items-center justify-center gap-2 text-[11px] font-bold tracking-[0.2em] uppercase px-4 py-1.5 rounded-full mb-6 border shadow-sm backdrop-blur-sm transition-colors",
-                 subject === 'english' 
-                   ? "bg-amber-500/10 text-amber-600 border-amber-500/20" 
-                   : "bg-blue-500/10 text-blue-600 border-blue-500/20"
-              )}>
+                 "absolute top-0 right-0 w-32 h-32 blur-[40px] rounded-full pointer-events-none opacity-20 transition-opacity group-hover/box:opacity-40",
+                 subject === 'english' ? "bg-amber-400" : "bg-blue-400"
+              )} />
+              <div className="relative z-10">
                 <div className={cn(
-                  "w-1.5 h-1.5 rounded-full",
-                  subject === 'english' ? "bg-amber-500" : "bg-blue-500"
-                )} />
-                {isElevenPlusTrack ? 'Current Level' : 'Current Grade'}
-              </div>
-              <div className={`font-black tracking-tighter text-foreground leading-tight pb-2 mb-2 ${isElevenPlusTrack ? 'text-5xl sm:text-[56px]' : 'text-6xl sm:text-[80px]'}`}>
-                {isElevenPlusTrack ? elevenPlusReadinessBand : displayCurrentGrade}
-              </div>
-              <div className="text-[14px] sm:text-[15px] text-muted-foreground tracking-tight font-medium max-w-[260px] mx-auto">
-                {isElevenPlusTrack ? 'Synthesized from your accuracy, speed & syllabus coverage.' : 'Based on your recent module assessments.'}
-              </div>
-              
-              {isElevenPlusTrack && (
-                <div className="mt-8 pt-6 border-t border-border/80 flex flex-wrap justify-center gap-6 sm:gap-8">
-                  <div className="flex flex-col items-center group/stat">
-                    <span className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground mb-1.5 transition-colors group-hover/stat:text-foreground">Accuracy</span>
-                    <div className="flex items-baseline gap-0.5">
-                      <span className="text-xl font-black text-foreground">{accuracyPct}</span>
-                      <span className={cn("text-xs font-bold", subject === 'english' ? "text-amber-600" : "text-blue-600")}>%</span>
-                    </div>
-                  </div>
-                  <div className="w-px h-10 bg-border" />
-                  <div className="flex flex-col items-center group/stat">
-                    <span className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground mb-1.5 transition-colors group-hover/stat:text-foreground">Speed Index</span>
-                    <div className="flex items-baseline gap-0.5">
-                      <span className="text-xl font-black text-foreground">{speedPct}</span>
-                      <span className={cn("text-xs font-bold", subject === 'english' ? "text-amber-600" : "text-blue-600")}>%</span>
-                    </div>
-                  </div>
+                   "inline-flex items-center justify-center gap-2 text-[11px] font-bold tracking-[0.2em] uppercase px-4 py-1.5 rounded-full mb-6 border shadow-sm backdrop-blur-sm transition-colors",
+                   subject === 'english' 
+                     ? "bg-amber-500/10 text-amber-600 border-amber-500/20" 
+                     : "bg-blue-500/10 text-blue-600 border-blue-500/20"
+                )}>
+                  <div className={cn(
+                    "w-1.5 h-1.5 rounded-full",
+                    subject === 'english' ? "bg-amber-500" : "bg-blue-500"
+                  )} />
+                  {isElevenPlusTrack ? 'Current Level' : 'Current Grade'}
                 </div>
-              )}
+                <div className={`font-black tracking-tighter text-foreground leading-tight pb-2 mb-2 ${isElevenPlusTrack ? 'text-5xl sm:text-[56px]' : 'text-6xl sm:text-[80px]'}`}>
+                  {isElevenPlusTrack ? elevenPlusReadinessBand : displayCurrentGrade}
+                </div>
+                <div className="text-[14px] sm:text-[15px] text-muted-foreground tracking-tight font-medium max-w-[260px] mx-auto">
+                  {isElevenPlusTrack ? 'Synthesized from your accuracy, speed & syllabus coverage.' : 'Based on your recent module assessments.'}
+                </div>
+                
+                {isElevenPlusTrack && (
+                  <div className="mt-8 pt-6 border-t border-border/80 flex flex-wrap justify-center gap-6 sm:gap-8">
+                    <div className="flex flex-col items-center group/stat">
+                      <span className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground mb-1.5 transition-colors group-hover/stat:text-foreground">Accuracy</span>
+                      <div className="flex items-baseline gap-0.5">
+                        <span className="text-xl font-black text-foreground">{accuracyPct}</span>
+                        <span className={cn("text-xs font-bold", subject === 'english' ? "text-amber-600" : "text-blue-600")}>%</span>
+                      </div>
+                    </div>
+                    <div className="w-px h-10 bg-border" />
+                    <div className="flex flex-col items-center group/stat">
+                      <span className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground mb-1.5 transition-colors group-hover/stat:text-foreground">Speed Index</span>
+                      <div className="flex items-baseline gap-0.5">
+                        <span className="text-xl font-black text-foreground">{speedPct}</span>
+                        <span className={cn("text-xs font-bold", subject === 'english' ? "text-amber-600" : "text-blue-600")}>%</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
@@ -1359,35 +1368,37 @@ export function SubjectReadinessView({ subject }: { subject: 'english' | 'maths'
           </div>
 
           {/* Target Level Box */}
-          <div className={cn(
-             "bg-card rounded-[32px] px-6 sm:px-10 py-10 sm:py-12 text-center transition-all duration-500 hover:-translate-y-2 hover:shadow-lg relative overflow-hidden group shadow-md ring-1 ring-inset",
-             subject === 'english' ? "ring-amber-500/40" : "ring-blue-500/40"
-          )}>
+          <div className="group/box relative">
             <div className={cn(
-               "absolute inset-0 bg-gradient-to-tr opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none",
-               subject === 'english' ? "from-transparent to-amber-500/5" : "from-transparent to-blue-500/5"
-            )} />
-            <div className={cn(
-               "absolute top-0 right-0 -mr-16 -mt-16 w-32 h-32 rounded-full blur-[60px] pointer-events-none opacity-40 transition-opacity group-hover:opacity-60",
-               subject === 'english' ? "bg-amber-400/40" : "bg-blue-400/40"
-            )} />
-            
-            <div className="relative z-10">
+               "bg-card rounded-[32px] px-6 sm:px-10 py-10 sm:py-12 text-center transition-all duration-500 group-hover/box:-translate-y-2 group-hover/box:shadow-lg relative overflow-hidden shadow-md ring-1 ring-inset",
+               subject === 'english' ? "ring-amber-500/40" : "ring-blue-500/40"
+            )}>
               <div className={cn(
-                "inline-flex items-center justify-center gap-2 text-[11px] font-bold tracking-[0.2em] uppercase px-4 py-1.5 rounded-full mb-6 border shadow-sm backdrop-blur-md",
-                subject === 'english' ? "bg-amber-500/10 text-amber-500 border-amber-500/20" : "bg-blue-500/10 text-blue-500 border-blue-500/20"
-              )}>
-                <span className={cn(
-                   "w-1.5 h-1.5 rounded-full animate-pulse",
-                   subject === 'english' ? "bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.8)]" : "bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.8)]"
-                )} />
-                {isElevenPlusTrack ? 'Target Level' : 'Maximum Potential'}
-              </div>
-              <div className={`font-black tracking-tighter text-foreground leading-tight pb-3 -mb-2 px-4 -mx-4 drop-shadow-sm ${isElevenPlusTrack ? 'text-5xl sm:text-[60px]' : 'text-6xl sm:text-[80px]'}`}>
-                {isElevenPlusTrack && elevenPlusNextBand ? elevenPlusNextBand : displayPotentialGrade}
-              </div>
-              <div className="text-[14px] sm:text-[15px] text-muted-foreground tracking-tight font-medium max-w-[260px] mx-auto">
-                {isElevenPlusTrack ? 'The standard commonly required for grammar & independent schools.' : 'Your peak achievement assuming consistent progress.'}
+                 "absolute inset-0 bg-gradient-to-tr opacity-0 group-hover/box:opacity-100 transition-opacity duration-700 pointer-events-none",
+                 subject === 'english' ? "from-transparent to-amber-500/5" : "from-transparent to-blue-500/5"
+              )} />
+              <div className={cn(
+                 "absolute top-0 right-0 -mr-16 -mt-16 w-32 h-32 rounded-full blur-[60px] pointer-events-none opacity-40 transition-opacity group-hover/box:opacity-60",
+                 subject === 'english' ? "bg-amber-400/40" : "bg-blue-400/40"
+              )} />
+              
+              <div className="relative z-10">
+                <div className={cn(
+                  "inline-flex items-center justify-center gap-2 text-[11px] font-bold tracking-[0.2em] uppercase px-4 py-1.5 rounded-full mb-6 border shadow-sm backdrop-blur-md",
+                  subject === 'english' ? "bg-amber-500/10 text-amber-500 border-amber-500/20" : "bg-blue-500/10 text-blue-500 border-blue-500/20"
+                )}>
+                  <span className={cn(
+                     "w-1.5 h-1.5 rounded-full animate-pulse",
+                     subject === 'english' ? "bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.8)]" : "bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.8)]"
+                  )} />
+                  {isElevenPlusTrack ? 'Target Level' : 'Maximum Potential'}
+                </div>
+                <div className={`font-black tracking-tighter text-foreground leading-tight pb-3 -mb-2 px-4 -mx-4 drop-shadow-sm ${isElevenPlusTrack ? 'text-5xl sm:text-[60px]' : 'text-6xl sm:text-[80px]'}`}>
+                  {isElevenPlusTrack && elevenPlusNextBand ? elevenPlusNextBand : displayPotentialGrade}
+                </div>
+                <div className="text-[14px] sm:text-[15px] text-muted-foreground tracking-tight font-medium max-w-[260px] mx-auto">
+                  {isElevenPlusTrack ? 'The standard commonly required for grammar & independent schools.' : 'Your peak achievement assuming consistent progress.'}
+                </div>
               </div>
             </div>
           </div>
@@ -1405,9 +1416,9 @@ export function SubjectReadinessView({ subject }: { subject: 'english' | 'maths'
                 const pillClass = [
                   'px-3 py-1 text-xs font-semibold rounded-full transition-all border',
                   isCurrentBand
-                    ? (subject === 'english' ? 'bg-amber-500 text-white border-amber-500' : 'bg-primary text-white border-primary')
+                    ? (subject === 'english' ? 'bg-amber-500 text-white border-amber-500' : 'bg-blue-500 text-white border-blue-500')
                     : isTargetBand
-                      ? (subject === 'english' ? 'bg-amber-500/10 text-amber-500 border-amber-500/30' : 'bg-primary/10 text-primary border-primary/30')
+                      ? (subject === 'english' ? 'bg-amber-500/10 text-amber-500 border-amber-500/30' : 'bg-blue-500/10 text-blue-500 border-blue-500/30')
                       : 'bg-card text-muted-foreground border-border/60',
                 ].join(' ');
                 return (
@@ -1443,11 +1454,11 @@ export function SubjectReadinessView({ subject }: { subject: 'english' | 'maths'
             {/* Premium Background Glow Effect */}
             <div className={cn(
                "absolute top-0 right-0 -mt-20 -mr-20 w-64 sm:w-96 h-64 sm:h-96 rounded-full blur-[80px] sm:blur-[120px] pointer-events-none",
-               subject === 'english' ? "bg-amber-500/30 sm:bg-amber-500/40" : "bg-primary/30 sm:bg-primary/40"
+               subject === 'english' ? "bg-amber-500/30 sm:bg-amber-500/40" : "bg-blue-500/30 sm:bg-blue-500/40"
             )} />
             <div className={cn(
                "absolute bottom-0 left-0 -mb-20 -ml-20 w-64 sm:w-96 h-64 sm:h-96 rounded-full blur-[80px] sm:blur-[120px] pointer-events-none",
-               subject === 'english' ? "bg-yellow-500/20 sm:bg-yellow-500/30" : "bg-accent/20 sm:bg-accent/30"
+               subject === 'english' ? "bg-yellow-500/20 sm:bg-yellow-500/30" : "bg-cyan-500/20 sm:bg-cyan-500/30"
             )} />
             
             <div className="relative z-10 w-full lg:w-4/5 xl:w-3/4">
@@ -1455,7 +1466,7 @@ export function SubjectReadinessView({ subject }: { subject: 'english' | 'maths'
                 <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-background/10 border border-background/20 text-[11px] sm:text-xs font-semibold tracking-wide text-background uppercase backdrop-blur-md self-start">
                   <span className={cn(
                      "w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full animate-[pulse_2s_ease-in-out_infinite]",
-                     subject === 'english' ? "bg-amber-400" : "bg-primary"
+                     subject === 'english' ? "bg-amber-400" : "bg-blue-500"
                   )} />
                   Your AI Tutor's Focus Plan
                 </div>
@@ -1472,7 +1483,7 @@ export function SubjectReadinessView({ subject }: { subject: 'english' | 'maths'
                     <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-background mb-4 sm:mb-6 leading-[1.1] text-balance">
                       Focus on <span className={cn(
                         "text-transparent bg-clip-text",
-                        subject === 'english' ? "bg-gradient-to-r from-amber-400 to-amber-200" : "bg-gradient-to-r from-primary-foreground to-primary-foreground/70"
+                        subject === 'english' ? "bg-gradient-to-r from-amber-400 to-amber-200" : "bg-gradient-to-r from-blue-400 to-blue-200"
                       )}>{recommendation.title.split(': ')[1] || recommendation.title}</span>
                     </h2>
                     <p className="text-[17px] sm:text-xl text-background/80 mb-8 sm:mb-10 max-w-2xl leading-relaxed font-medium">
@@ -1498,29 +1509,29 @@ export function SubjectReadinessView({ subject }: { subject: 'english' | 'maths'
                       <div className="text-xl sm:text-[28px] font-semibold text-background leading-none">
                         {recommendationMetrics?.totalTimeMin !== null && recommendationMetrics?.totalTimeMin !== undefined
                           ? `${recommendationMetrics.totalTimeMin} min`
-                          : '—'}
+                          : ' - '}
                       </div>
                     </div>
                     <div className={cn(
                        "backdrop-blur-md rounded-2xl p-4 sm:p-5 border relative overflow-hidden group text-left",
-                       subject === 'english' ? "bg-amber-500/20 border-amber-500/30" : "bg-primary/20 border-primary/30"
+                       subject === 'english' ? "bg-amber-500/20 border-amber-500/30" : "bg-blue-500/20 border-blue-500/30"
                     )}>
                       <div className={cn(
                          "absolute inset-0 transition-colors",
-                         subject === 'english' ? "bg-amber-500/10 group-hover:bg-amber-500/20" : "bg-primary/10 group-hover:bg-primary/20"
+                         subject === 'english' ? "bg-amber-500/10 group-hover:bg-amber-500/20" : "bg-blue-500/10 group-hover:bg-blue-500/20"
                       )} />
                       <div className="relative z-10">
                         <div className={cn(
                            "text-[10px] sm:text-sm font-medium mb-1 lg:whitespace-nowrap",
-                           subject === 'english' ? "text-amber-100/80" : "text-primary-foreground/80"
+                           subject === 'english' ? "text-amber-100/80" : "text-blue-100/80"
                         )}>Score Boost</div>
                         <div className={cn(
                            "text-xl sm:text-[28px] font-semibold leading-none",
-                           subject === 'english' ? "text-amber-100" : "text-primary-foreground"
+                           subject === 'english' ? "text-amber-100" : "text-blue-100"
                         )}>
                           {recommendationMetrics?.maxReadinessGain !== null && recommendationMetrics?.maxReadinessGain !== undefined
                             ? `+${formatPercentValue(recommendationMetrics.maxReadinessGain)}%`
-                            : '—'}
+                            : ' - '}
                         </div>
                       </div>
                     </div>
@@ -1534,7 +1545,7 @@ export function SubjectReadinessView({ subject }: { subject: 'english' | 'maths'
                        "w-full sm:w-auto h-[56px] sm:h-[60px] px-8 sm:px-12 text-[15px] sm:text-[17px] font-semibold rounded-xl transition-all hover:scale-[1.02] ring-1",
                        subject === 'english'
                          ? "bg-amber-500 text-amber-950 hover:bg-amber-400 shadow-[0_0_40px_-10px_rgba(245,158,11,0.3)] hover:shadow-[0_0_60px_-15px_rgba(245,158,11,0.5)] ring-amber-500/20"
-                         : "bg-primary text-primary-foreground hover:bg-primary/90 shadow-[0_0_40px_-10px_rgba(59,130,246,0.3)] hover:shadow-[0_0_60px_-15px_rgba(59,130,246,0.5)] ring-primary-foreground/20"
+                         : "bg-blue-500 text-white hover:bg-blue-600 shadow-[0_0_40px_-10px_rgba(59,130,246,0.3)] hover:shadow-[0_0_60px_-15px_rgba(59,130,246,0.5)] ring-blue-500/20"
                     )}
                   >
                     Start 10-Minute Sprint
@@ -1547,7 +1558,7 @@ export function SubjectReadinessView({ subject }: { subject: 'english' | 'maths'
                     <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-background mb-4 sm:mb-6 leading-[1.1] text-balance">
                       Establish Your <span className={cn(
                         "text-transparent bg-clip-text",
-                        subject === 'english' ? "bg-gradient-to-r from-amber-400 to-amber-200" : "bg-gradient-to-r from-primary to-primary/70"
+                        subject === 'english' ? "bg-gradient-to-r from-amber-400 to-amber-200" : "bg-gradient-to-r from-blue-400 to-blue-200"
                       )}>Baseline</span>
                     </h2>
                     <p className="text-[17px] sm:text-xl text-background/80 mb-8 sm:mb-10 max-w-2xl leading-relaxed font-medium">
@@ -1561,7 +1572,7 @@ export function SubjectReadinessView({ subject }: { subject: 'english' | 'maths'
                        "w-full sm:w-auto h-[56px] sm:h-[60px] px-8 sm:px-12 text-[15px] sm:text-[17px] font-semibold rounded-xl transition-all hover:scale-[1.02] ring-1",
                        subject === 'english'
                          ? "bg-amber-500 text-amber-950 hover:bg-amber-400 shadow-[0_0_40px_-10px_rgba(245,158,11,0.3)] hover:shadow-[0_0_60px_-15px_rgba(245,158,11,0.5)] ring-amber-500/20"
-                         : "bg-primary text-primary-foreground hover:bg-primary/90 shadow-[0_0_40px_-10px_rgba(59,130,246,0.3)] hover:shadow-[0_0_60px_-15px_rgba(59,130,246,0.5)] ring-primary-foreground/20"
+                         : "bg-blue-500 text-white hover:bg-blue-600 shadow-[0_0_40px_-10px_rgba(59,130,246,0.3)] hover:shadow-[0_0_60px_-15px_rgba(59,130,246,0.5)] ring-blue-500/20"
                     )}
                   >
                     Start Baseline Assessment

@@ -225,12 +225,12 @@ export default function MultipartPracticePanel({ userEmail }: MultipartPracticeP
                   </div>
                   {part.partId !== 'a' && partsState.a.submitted && (
                     <p className="mt-2 text-xs text-slate-500">
-                      Your answer to part (a): <MathText text={partsState.a.answer || '—'} />
+                      Your answer to part (a): <MathText text={partsState.a.answer || ' - '} />
                     </p>
                   )}
                   {part.partId === 'c' && partsState.b.submitted && (
                     <p className="mt-2 text-xs text-slate-500">
-                      Your answer to part (b): <MathText text={partsState.b.answer || '—'} />
+                      Your answer to part (b): <MathText text={partsState.b.answer || ' - '} />
                     </p>
                   )}
                   <div className="mt-3 flex flex-wrap items-center gap-3">
@@ -262,7 +262,7 @@ export default function MultipartPracticePanel({ userEmail }: MultipartPracticeP
                       <p className="font-medium">
                         {state.isCorrect ? 'Correct answer.' : 'Not quite.'}
                       </p>
-                      <p className="mt-1">Your answer: {state.answer || '—'}</p>
+                      <p className="mt-1">Your answer: {state.answer || ' - '}</p>
                       <p>Correct answer: {part.expectedAnswer}</p>
                       <div className="mt-2">
                         <p className="font-medium">Explanation</p>

@@ -49,11 +49,11 @@ export const powerQuotes: Quote[] = [
     author: "Plutarch"
   },
   {
-    text: "Intelligence plus character—that is the goal of true education.",
+    text: "Intelligence plus character - that is the goal of true education.",
     author: "Martin Luther King Jr."
   },
   {
-    text: "Your limitation—it's only your imagination.",
+    text: "Your limitation - it's only your imagination.",
     author: "Unknown"
   },
   {

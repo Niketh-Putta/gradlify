@@ -404,7 +404,7 @@ def main() -> None:
     if errs:
         raise SystemExit(f"Validation failed: {errs} row(s) with errors")
 
-    print("\nValidation passed — CSV looks good.")
+    print("\nValidation passed  - CSV looks good.")
 
     if not args.push:
         print("\nNot pushing (use --push to insert into Supabase)")

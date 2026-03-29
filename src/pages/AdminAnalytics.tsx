@@ -280,7 +280,7 @@ export default function AdminAnalytics() {
       label: "Practice accuracy (14d)",
       value: snapshot.kpis.engagement.practiceAttempts14d
         ? formatPercent(snapshot.kpis.engagement.practiceAccuracy14d, 1)
-        : "—",
+        : " - ",
       tone: snapshot.kpis.engagement.practiceAttempts14d
         ? snapshot.kpis.engagement.practiceAccuracy14d >= 70
           ? "good"
@@ -399,7 +399,7 @@ export default function AdminAnalytics() {
 
   const latestUpdateLabel = updatedAt
     ? new Date(updatedAt).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })
-    : "—"
+    : " - "
 
   return (
     <div className="min-h-screen bg-black text-white">

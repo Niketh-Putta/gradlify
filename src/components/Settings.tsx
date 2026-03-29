@@ -850,12 +850,22 @@ export function Settings({ user, onBackToChat, onSignOut }: SettingsProps) {
             <div className="space-y-4">
               <div className="flex items-center justify-between px-1">
                 <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Subscription</h2>
-                <Badge variant={accessIsPremium ? "default" : "secondary"} className="bg-primary/20 text-primary border-none text-[10px] h-5 px-2">
-                  {accessLabel}
-                </Badge>
+                {membershipLoading ? (
+                  <div className="h-5 w-16 bg-muted rounded-full animate-pulse"></div>
+                ) : (
+                  <Badge variant={accessIsPremium ? "default" : "secondary"} className="bg-primary/20 text-primary border-none text-[10px] h-5 px-2">
+                    {accessLabel}
+                  </Badge>
+                )}
               </div>
 
-              {!hasPremiumSubscription ? (
+              {membershipLoading ? (
+                <div className="bg-card rounded-2xl p-6 border border-primary/10 shadow-sm animate-pulse flex flex-col justify-center gap-4 h-[200px]">
+                  <div className="h-5 w-1/3 bg-muted rounded"></div>
+                  <div className="h-4 w-2/3 bg-muted rounded"></div>
+                  <div className="h-11 w-full bg-muted rounded-xl mt-4"></div>
+                </div>
+              ) : !hasPremiumSubscription ? (
                 <div className="space-y-4">
                   {/* Premium Plan Box */}
                   <div className="bg-slate-900 rounded-2xl p-5 border border-slate-800 shadow-xl text-white relative overflow-hidden">

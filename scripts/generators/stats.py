@@ -32,7 +32,8 @@ def generate_stats_questions():
             q = "What kind of data representation should you use to map changes over time, such as temperature variations throughout the month?"
             ans = "Line Graph"
             exp = "[VISUAL: Chart Selection]\nStep 1: Line graphs are created by plotting lines joining separate data points.\nStep 2: Time spans (days, months, years) map perfectly to line graphs to show upward or downward continuous trends.\nStep 3: Bar charts are for distinct categories, whereas Line graphs are for continuous intervals.\nFinal answer: Line Graph"
-        questions.append(get_base("stats|charts-graphs", q, ans, exp, diff=2, marks=2))
+        w_ans = json.dumps(["Pie Chart", "Bar Chart", "Scatter Graph"]) if ans == "Line Graph" else None
+        questions.append(get_base("stats|charts-graphs", q, ans, exp, diff=2, marks=2, wrong_answers=w_ans))
 
     # 2. stats|data-handling
     for i in range(60):

@@ -85,7 +85,7 @@ def _read_rows(p: Path) -> tuple[list[dict[str, str]], list[str]]:
 
 def _normalize_equation_text(s: str) -> str:
     s = (s or "").strip()
-    s = s.replace("−", "-").replace("–", "-").replace("—", "-")
+    s = s.replace("−", "-").replace("–", "-").replace(" - ", "-")
     while s and s[-1] in ".;":
         s = s[:-1].rstrip()
     return s

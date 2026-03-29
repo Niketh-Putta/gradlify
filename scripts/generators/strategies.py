@@ -34,7 +34,18 @@ def generate_strategies_questions():
             q = f"{p1} is taller than {p2}. {p3} is shorter than {p2}. Who is the tallest?"
             ans = p1
             exp = f"[VISUAL: Ordinal Logic]\nStep 1: Write down relative information like a list.\nStep 2: '{p1} > {p2}'. So {p1} sits above {p2} on our height scale.\nStep 3: '{p3} < {p2}'. So {p3} sits absolutely below {p2}.\nStep 4: Putting it entirely together, we have {p1} > {p2} > {p3}. Clearly, {p1} is at the top.\nFinal answer: {p1}"
-        questions.append(get_base("strategies|logic", q, ans, exp, diff=3, marks=2))
+        
+        w_ans = None
+        if t == 2:
+            w_ans = json.dumps(["The first is greater", "The second is greater", "Cannot be determined"])
+        elif t == 3:
+            d_all = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+            d_all.remove(ans)
+            w_ans = json.dumps(random.sample(d_all, 3))
+        elif t == 4:
+            w_ans = json.dumps([p2, p3, "Cannot be determined"])
+            
+        questions.append(get_base("strategies|logic", q, ans, exp, diff=3, marks=2, wrong_answers=w_ans))
 
     # 2. strategies|word-problems
     for i in range(60):

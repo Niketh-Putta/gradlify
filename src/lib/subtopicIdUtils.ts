@@ -173,6 +173,70 @@ export function expandSubtopicIdsForDb(rawId: string): string[] {
     }
   }
 
+  // Direct 11+ UI Key Mappings to Generated Question Subtopics
+  if (canonicalInput === 'number_arithmetic|place_value_rounding') {
+    addSubtopicVariants('number|place-value', candidates);
+  }
+  if (canonicalInput === 'number_arithmetic|four_operations') {
+    addSubtopicVariants('number|addition-subtraction', candidates);
+    addSubtopicVariants('number|multiplication-division', candidates);
+    addSubtopicVariants('number|bidmas', candidates);
+  }
+  if (canonicalInput === 'number_arithmetic|number_properties') {
+    addSubtopicVariants('number|factors-multiples-primes', candidates);
+    addSubtopicVariants('number|powers', candidates);
+  }
+  if (canonicalInput === 'number_arithmetic|fractions') {
+    addSubtopicVariants('number|fractions', candidates);
+  }
+  if (canonicalInput === 'number_arithmetic|decimals_percentages') {
+    addSubtopicVariants('number|decimals-percentages', candidates);
+  }
+  if (canonicalInput === 'algebra_ratio|ratio_proportion') {
+    addSubtopicVariants('algebra|ratio', candidates);
+    addSubtopicVariants('algebra|proportion', candidates);
+  }
+  if (canonicalInput === 'algebra_ratio|algebra_basics') {
+    addSubtopicVariants('algebra|basics', candidates);
+    addSubtopicVariants('algebra|substitution', candidates);
+  }
+  if (canonicalInput === 'algebra_ratio|solving_equations') {
+    addSubtopicVariants('algebra|equations', candidates);
+  }
+  if (canonicalInput === 'algebra_ratio|sequences') {
+    addSubtopicVariants('algebra|sequences', candidates);
+  }
+  if (canonicalInput === 'geometry_measures|shape_properties_2d_3d') {
+    addSubtopicVariants('geometry|2d-3d-shapes', candidates);
+  }
+  if (canonicalInput === 'geometry_measures|angles') {
+    addSubtopicVariants('geometry|angles', candidates);
+  }
+  if (canonicalInput === 'geometry_measures|perimeter_area_volume') {
+    addSubtopicVariants('geometry|perimeter-area', candidates);
+    addSubtopicVariants('geometry|volume-surface-area', candidates);
+    addSubtopicVariants('geometry|volume-cuboids-prisms', candidates);
+    addSubtopicVariants('geometry|volume', candidates);
+  }
+  if (canonicalInput === 'geometry_measures|measures_time') {
+    addSubtopicVariants('geometry|measures', candidates);
+  }
+  if (canonicalInput === 'geometry_measures|coordinates_transformations') {
+    addSubtopicVariants('geometry|coordinates', candidates);
+  }
+  if (canonicalInput === 'statistics_data|data_handling') {
+    addSubtopicVariants('stats|data-handling', candidates);
+    addSubtopicVariants('stats|charts-graphs', candidates);
+  }
+  if (canonicalInput === 'statistics_data|probability') {
+    addSubtopicVariants('stats|probability', candidates);
+  }
+  if (canonicalInput === 'exam_prep|general_skills') {
+    addSubtopicVariants('strategies|word-problems', candidates);
+    addSubtopicVariants('strategies|logic', candidates);
+    addSubtopicVariants('strategies|estimation', candidates);
+  }
+
   // geometry|volume-surface-area should match both legacy volume and surface-area variants.
   if (canonicalInput === 'geometry|volume-surface-area') {
     addSubtopicVariants('geometry|volume', candidates);

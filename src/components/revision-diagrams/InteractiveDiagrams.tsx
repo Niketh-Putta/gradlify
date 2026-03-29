@@ -444,90 +444,66 @@ export function ProbabilityTreeInteractive() {
 // Map topic slugs to interactive diagrams
 export function getInteractiveDiagram(topicSlug: string): React.ReactNode | null {
   const slugLower = topicSlug.toLowerCase();
+  
+  // Extract the topic-specific part of the slug (after the dash if present)
+  // to avoid matching against the section name (e.g., "algebra_ratio-solving_equations")
+  const topicPart = slugLower.includes('-') ? slugLower.split('-').slice(1).join('-') : slugLower;
 
   // Compound measures (Ratio section) use their own static diagrams; avoid incorrect Geometry interactives.
-  if (slugLower.includes('density') || slugLower.includes('pressure')) {
+  if (topicPart.includes('density') || topicPart.includes('pressure')) {
     return null;
   }
   
-  if (slugLower.includes('pythagoras')) {
+  if (topicPart.includes('pythagoras')) {
     return <PythagorasInteractive />;
   }
-  if (slugLower.includes('trigonometry') || slugLower.includes('sohcahtoa')) {
+  if (topicPart.includes('trigonometry') || topicPart.includes('sohcahtoa')) {
     return <TrigInteractive />;
   }
-  if (slugLower.includes('parallel') && slugLower.includes('line')) {
+  if (topicPart.includes('parallel') && topicPart.includes('line')) {
     return <ParallelLinesInteractive />;
   }
-  if (slugLower.includes('polygon')) {
+  if (topicPart.includes('polygon')) {
     return <PolygonAnglesInteractive />;
   }
-  if (slugLower.includes('circle') && slugLower.includes('theorem')) {
+  if (topicPart.includes('circle') && topicPart.includes('theorem')) {
     return <CircleTheoremsInteractive />;
   }
-  if (slugLower.includes('area') || slugLower.includes('perimeter')) {
+  if (topicPart.includes('area') || topicPart.includes('perimeter')) {
     return <AreaPerimeterInteractive />;
   }
-  if (slugLower.includes('probability')) {
+  if (topicPart.includes('probability') && !topicPart.includes('tree')) {
     return <ProbabilityScaleInteractive />;
   }
-  if (slugLower.includes('decimals') && slugLower.includes('percentages')) {
+  if (topicPart.includes('decimals') && topicPart.includes('percentages')) {
     return <FDPInteractive />;
   }
-  if (slugLower.includes('tree') || slugLower.includes('probability-trees')) {
+  if (topicPart.includes('tree') || topicPart.includes('probability-trees')) {
     return <ProbabilityTreeInteractive />;
   }
-  if (slugLower.includes('fraction')) {
+  if (topicPart.includes('fraction')) {
     return <FractionsInteractive />;
   }
-  if (slugLower.includes('negative') || slugLower.includes('number-line')) {
-    return <NumberLineInteractive />;
-  }
-  if (slugLower.includes('quadratic') && slugLower.includes('graph')) {
+  if (topicPart.includes('quadratic') && topicPart.includes('graph')) {
     return <QuadraticGraphInteractive />;
   }
-  if (slugLower.includes('sequence')) {
+  if (topicPart.includes('sequence')) {
     return <SequenceInteractive />;
   }
-  if (slugLower.includes('straight') && slugLower.includes('line')) {
+  if (topicPart.includes('straight') && topicPart.includes('line')) {
     return <StraightLineInteractive />;
   }
-  if (slugLower.includes('box') && slugLower.includes('plot')) {
-    return <BoxPlotInteractive />;
-  }
-  if (slugLower.includes('venn')) {
+  if (topicPart.includes('venn')) {
     return <VennDiagramInteractive />;
   }
-  if (slugLower.includes('vector')) {
-    return <VectorInteractive />;
-  }
-  if (slugLower.includes('standard') && slugLower.includes('form')) {
+  if (topicPart.includes('standard') && topicPart.includes('form')) {
     return <StandardFormInteractive />;
   }
-  if (slugLower.includes('bounds') || slugLower.includes('error-interval')) {
+  if (topicPart.includes('bounds') || topicPart.includes('error-interval')) {
     return <BoundsInteractive />;
   }
-  if (slugLower.includes('sine') || slugLower.includes('cosine')) {
-    return <TrigInteractive />;
-  }
-  if (slugLower.includes('ratio') || slugLower.includes('proportion')) {
+  if (topicPart.includes('ratio') || topicPart.includes('proportion')) {
     return <RatioInteractive />;
-  }
-  if (slugLower.includes('volume') || slugLower.includes('surface')) {
-    return <AreaPerimeterInteractive />;
-  }
-  if (slugLower.includes('histogram') || slugLower.includes('frequency')) {
-    return <BoxPlotInteractive />;
-  }
-  // Do not show the Standard Form widget on other Number topics.
-  if (slugLower.includes('similar') || slugLower.includes('congruent')) {
-    return <PythagorasInteractive />;
-  }
-  if (slugLower.includes('bearing')) {
-    return <ParallelLinesInteractive />;
-  }
-  if (slugLower.includes('arc') || slugLower.includes('sector')) {
-    return <CircleTheoremsInteractive />;
   }
   
   return null;
@@ -1093,7 +1069,7 @@ export function StatisticsDiagrams({ topicSlug }: { topicSlug?: string }) {
               <div className="bg-muted/30 rounded-xl p-4">
                 <h4 className="font-semibold mb-2">Box Plot</h4>
                 <BoxPlot data={{ min: 12, q1: 18, median: 25, q3: 32, max: 45 }} width={320} height={140} />
-                <p className="text-xs text-muted-foreground mt-2">Box plots summarise median, quartiles and range — useful for comparing distributions.</p>
+                <p className="text-xs text-muted-foreground mt-2">Box plots summarise median, quartiles and range - useful for comparing distributions.</p>
               </div>
             )}
 

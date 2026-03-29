@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useSubject } from "@/contexts/SubjectContext";
+import { cn } from "@/lib/utils";
 import ExamReadinessDashboard from '@/components/ExamReadinessDashboard';
 import TrackingModeSettings from '@/components/TrackingModeSettings';
 import { useAppContext } from '@/hooks/useAppContext';
@@ -26,11 +27,25 @@ export default function ExamReadiness() {
       <div className="space-y-3 sm:space-y-4 md:space-y-6">
         {/* Header */}
         <div>
-          <span className="inline-flex items-center rounded-full border border-primary/25 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary mb-3">
+          <span className={cn(
+            "inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold mb-3",
+            currentSubject === 'english' 
+              ? "border-amber-500/25 bg-amber-500/10 text-amber-600" 
+              : "border-primary/25 bg-primary/10 text-primary"
+          )}>
             {getTrackLabel(userTrack, currentSubject)}
           </span>
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight">{currentSubject === 'english' ? 'English ' : 'Maths '}Exam Readiness</h1>
-          <p className="text-xs sm:text-sm text-muted-foreground mt-1 sm:mt-2">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight">
+            <span className={cn(
+              "bg-clip-text text-transparent transform-gpu",
+              currentSubject === "english" 
+                ? "bg-gradient-to-br from-slate-900 via-slate-800 to-amber-700 dark:from-white dark:via-slate-200 dark:to-amber-500" 
+                : "bg-gradient-to-br from-slate-900 via-slate-800 to-blue-700 dark:from-white dark:via-slate-200 dark:to-blue-500"
+            )}>
+              {currentSubject === 'english' ? 'English ' : 'Maths '}Exam Readiness
+            </span>
+          </h1>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1 sm:mt-2 max-w-2xl">
             Track your preparation progress across all 11+ {currentSubject === 'english' ? 'English' : 'maths'} sections
           </p>
         </div>

@@ -65,7 +65,7 @@ def generate_geometry_questions():
             ans = "Equal"
             exp = "[VISUAL: Vertically Opposite]\nStep 1: When two straight lines intersect, they form four angles.\nStep 2: The angles opposite each other at the intersection (the 'X' shape) are called vertically opposite angles.\nStep 3: A fundamental rule of geometry states that vertically opposite angles are always exactly equal to each other.\nFinal answer: Equal"
         img = "/images/geometry/triangle.svg" if t in [1, 3] else ""
-        questions.append(get_base("geometry|angles", q, ans, exp, diff=2, marks=1, image_url=img))
+        questions.append(get_base("geometry|angles", q, ans, exp, diff=2, marks=1, image_url=img, wrong_answers=json.dumps(["Supplementary", "Complementary", "Parallel"]) if ans == "Equal" else None))
 
     # 3. geometry|coordinates
     for i in range(60):
@@ -75,11 +75,13 @@ def generate_geometry_questions():
             q = f"A point is located at ({x}, {y}). It is translated 3 units right and 4 units down. What are its new coordinates?"
             ans = f"({x+3}, {y-4})"
             exp = f"[VISUAL: Translation]\nStep 1: The first number in a coordinate represents the horizontal (x-axis) position.\nStep 2: Moving right means adding to the x-coordinate: {x} + 3 = {x+3}.\nStep 3: The second number represents the vertical (y-axis) position.\nStep 4: Moving down means subtracting from the y-coordinate: {y} - 4 = {y-4}.\nFinal answer: {ans}"
+            w_ans = json.dumps([f"({x-3}, {y-4})", f"({x+3}, {y+4})", f"({y-4}, {x+3})", f"({x+4}, {y-3})"])
         elif t == 2:
             x, y = random.randint(-5, 5), random.randint(1, 5)
             q = f"What happens to the coordinate ({x}, {y}) when it is reflected in the x-axis?"
             ans = f"({x}, {-y})"
             exp = f"[VISUAL: Reflection]\nStep 1: The x-axis is the horizontal line across the middle of the graph.\nStep 2: When you reflect across the x-axis, the horizontal position (x-coordinate) stays exactly the same.\nStep 3: The vertical position (y-coordinate) flips below the line, so its sign changes from {y} to {-y}.\nFinal answer: {ans}"
+            w_ans = json.dumps([f"({-x}, {y})", f"({-x}, {-y})", f"({y}, {x})", f"({-y}, {x})"])
         elif t == 3:
             x1, y1 = random.randint(1, 4), random.randint(1, 4)
             x2, y2 = x1 + random.randint(2, 6), y1 + random.randint(2, 6)
@@ -89,20 +91,28 @@ def generate_geometry_questions():
             q = f"Find the midpoint between ({x1}, {y1}) and ({x2}, {y2})."
             ans = f"({mid_x_str}, {mid_y_str})"
             exp = f"[VISUAL: Midpoint Formula]\nStep 1: The midpoint is literally the average of the x-coordinates and the average of the y-coordinates.\nStep 2: Find the middle x: ({x1} + {x2}) ÷ 2 = {mid_x_str}.\nStep 3: Find the middle y: ({y1} + {y2}) ÷ 2 = {mid_y_str}.\nFinal answer: {ans}"
+            w_ans = json.dumps([
+                f"({int(mid_x+1) if (mid_x+1).is_integer() else mid_x+1}, {mid_y_str})", 
+                f"({int(mid_x-1) if (mid_x-1).is_integer() else mid_x-1}, {mid_y_str})", 
+                f"({mid_x_str}, {int(mid_y+1) if (mid_y+1).is_integer() else mid_y+1})", 
+                f"({int(mid_y) if mid_y.is_integer() else mid_y}, {int(mid_x) if mid_x.is_integer() else mid_x})"
+            ])
         else:
             x, y = random.randint(1, 5), random.randint(1, 5)
             q = f"Which quadrant does the point ({-x}, {-y}) lie in?"
-            ans = "Bottom Left (Quadrants III)"
-            exp = f"[VISUAL: The 4 Quadrants]\nStep 1: Top Right (Quadrant I) has positive x and positive y.\nStep 2: Top Left (Quadrant II) has negative x and positive y.\nStep 3: Bottom Left (Quadrant III) has both negative x and negative y.\nStep 4: Bottom Right (Quadrant IV) has positive x and negative y.\nFinal answer: Bottom Left (Quadrants III)"
-        questions.append(get_base("geometry|coordinates", q, ans, exp, diff=2, marks=2))
+            ans = "Bottom Left (Quadrant III)"
+            exp = f"[VISUAL: The 4 Quadrants]\nStep 1: Top Right (Quadrant I) has positive x and positive y.\nStep 2: Top Left (Quadrant II) has negative x and positive y.\nStep 3: Bottom Left (Quadrant III) has both negative x and negative y.\nStep 4: Bottom Right (Quadrant IV) has positive x and negative y.\nFinal answer: Bottom Left (Quadrant III)"
+            w_ans = json.dumps(["Top Right (Quadrant I)", "Top Left (Quadrant II)", "Bottom Right (Quadrant IV)"])
+            
+        questions.append(get_base("geometry|coordinates", q, ans, exp, diff=2, marks=2, wrong_answers=w_ans))
 
     # 4. geometry|measures
     for i in range(60):
         t = random.randint(1, 3)
         if t == 1:
-            dist = random.randint(60, 240)
             speed = random.choice([30, 40, 50, 60])
-            time = dist / speed
+            time = random.choice([1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0])
+            dist = int(speed * time)
             time_str = f"{int(time)} hours" if time.is_integer() else f"{time} hours"
             q = f"A car travels at an average speed of {speed} mph. How long will it take to travel {dist} miles?"
             ans = time_str

@@ -69,7 +69,7 @@ export function getSprintEndLabel(referenceDate: Date = new Date()) {
     return `Sprint ends ${formatted}`;
   }
   if (referenceDate < startDate) {
-    return `Sprint starts ${formatSprintStart(startDate)} — ends ${formatted}`;
+    return `Sprint starts ${formatSprintStart(startDate)} - ends ${formatted}`;
   }
   return `Previous sprint ended ${formatted}`;
 }
@@ -92,7 +92,7 @@ function getDaysToGo(referenceDate: Date, startDate: Date) {
 
 function formatTrackSprintLabel(startDate: Date, daysToGo: number) {
   const dayLabel = daysToGo === 1 ? 'day' : 'days';
-  return `Next sprint starts ${formatSprintStart(startDate)} — ${daysToGo} ${dayLabel} to go`;
+  return `Next sprint starts ${formatSprintStart(startDate)} - ${daysToGo} ${dayLabel} to go`;
 }
 
 export function getNextSprintInfo(referenceDate: Date = new Date()) {
@@ -113,11 +113,11 @@ export function getNextSprintLabel(referenceDate: Date = new Date()) {
   const { isActive, daysLeft } = getFoundersSprintInfo(referenceDate);
   if (isActive) {
     const dayLabel = daysLeft === 1 ? "day" : "days";
-    return `Sprint live — ${daysLeft} ${dayLabel} left`;
+    return `Sprint live - ${daysLeft} ${dayLabel} left`;
   }
   const { startDate, daysToGo } = getNextSprintInfo(referenceDate);
   const dayLabel = daysToGo === 1 ? "day" : "days";
-  return `Next sprint starts ${formatSprintStart(startDate)} — ${daysToGo} ${dayLabel} to go`;
+  return `Next sprint starts ${formatSprintStart(startDate)} - ${daysToGo} ${dayLabel} to go`;
 }
 
 export function getTrackNextSprintLabel(track: UserTrack | undefined, referenceDate: Date = new Date()) {
@@ -135,7 +135,7 @@ export const getSprintUpgradeCopy = () => {
 
   return {
     isActive,
-    bannerTitle: isActive ? `Sprint live — ${countdown}` : "Gradlify Premium\nStart Your 3 Day Free Trial",
+    bannerTitle: isActive ? `Sprint live - ${countdown}` : "Gradlify Premium\nStart Your 3 Day Free Trial",
     bannerSubtitle: isActive
       ? "Mocks + Challenge only. Every correct answer counts. Climb the leaderboard now."
       : AI_FEATURE_ENABLED
@@ -147,11 +147,11 @@ export const getSprintUpgradeCopy = () => {
     listTitle: isActive ? "Sprint upgrade perks:" : "Start Your 3 Day Free Trial for:",
     settingsTitle: isActive ? "Sprint live: unlock more attempts" : "Gradlify Premium\nStart Your 3 Day Free Trial",
     settingsDescription: isActive
-      ? `Sprint is live — ${countdown}. Unlock unlimited mock and challenge attempts.`
+      ? `Sprint is live - ${countdown}. Unlock unlimited mock and challenge attempts.`
       : AI_FEATURE_ENABLED
         ? "Get unlimited access to AI-powered study assistance, advanced mock exams, personalised study plans, and premium resources."
         : "Get unlimited access to personalised study assistance, advanced mock exams, personalised study plans, and premium resources.",
     limitTitle: isActive ? "Sprint limit reached" : "Daily limit reached",
-    limitHint: isActive ? "Sprint is live — unlock more attempts" : "Resets tomorrow or start your 3 Day Free Trial",
+    limitHint: isActive ? "Sprint is live - unlock more attempts" : "Resets tomorrow or start your 3 Day Free Trial",
   };
 };

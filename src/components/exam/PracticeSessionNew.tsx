@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect, useMemo } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, ChevronLeft, ChevronRight, ChevronDown, Calculator, Check, X } from "lucide-react";
+import { ArrowLeft, ChevronLeft, ChevronRight, ChevronDown, Calculator, Check, X, BookOpen, Layers, TrendingUp, Award, AlertCircle, RotateCcw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAppContext } from "@/hooks/useAppContext";
@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import { areMathEquivalent, uniqueMathAnswers } from "@/lib/areMathEquivalent";
 import { sanitizeAnswerSet } from "@/lib/answerSanitizer";
 import { resolveQuestionImageUrl } from "@/lib/resolveQuestionImageUrl";
+import { formatExplanation } from "@/lib/formatExplanation";
 import { expandQuestionTypesForDb, expandSubtopicIdsForDb } from "@/lib/subtopicIdUtils";
 import { getTopicAndSubtopicLabels } from "@/lib/subtopicDisplay";
 import { parseMultipartQuestion, MultipartQuestion } from "@/lib/multipart";
@@ -164,7 +165,8 @@ function normalizeChallengeLine(line: string): string {
 
 function formatChallengeExplanation(text?: string): { lines: ChallengeExplanationLine[]; finalAnswer: string | null } {
   if (!text) return { lines: [], finalAnswer: null };
-  const normalized = normalizeNewlines(text);
+  const cleanedText = text.replace(/\[([A-Z\s]+:[^\]]+|[A-Za-z\s]+)\]\s*/g, "");
+  const normalized = normalizeNewlines(cleanedText);
   const rawLines = normalized.split(/\n+/).map(normalizeChallengeLine).filter(Boolean);
   const scaffoldLines = new Set([
     "identify what is known and what must be found.",
@@ -191,7 +193,7 @@ function formatChallengeExplanation(text?: string): { lines: ChallengeExplanatio
   };
 
   for (const raw of rawLines) {
-    const finalMatch = raw.match(/^(Final answer|Answer)\s*[:).–—-]?\s*(.*)$/i);
+    const finalMatch = raw.match(/^(Final answer|Answer)\s*[:).– - -]?\s*(.*)$/i);
     if (finalMatch) {
       const remainder = String(finalMatch[2] ?? "").trim();
       if (remainder) {
@@ -209,7 +211,7 @@ function formatChallengeExplanation(text?: string): { lines: ChallengeExplanatio
       continue;
     }
 
-    const stepMatch = raw.match(/^Step\s*\d+\s*(?:\([^)]*\))?\s*[:).–—-]?\s*(.*)$/i);
+    const stepMatch = raw.match(/^Step\s*\d+\s*(?:\([^)]*\))?\s*[:).– - -]?\s*(.*)$/i);
     if (stepMatch) {
       const stepText = String(stepMatch[1] ?? "").trim();
       lines.push({ kind: "step", text: stepText });
@@ -260,6 +262,8 @@ export default function PracticeSessionNew() {
   const paperTypeParam = searchParams.get("paperType") || "calculator";
   const topics = searchParams.get("topics") || "Number";
   const mode = searchParams.get("mode") || "practice";
+  const subjectParam = searchParams.get("subject");
+  const isEnglish = subjectParam === "english";
   const subtopicParam = searchParams.get("subtopic") || "";
   const difficultyMinParam = searchParams.get("difficultyMin") || "";
   const difficultyMaxParam = searchParams.get("difficultyMax") || "";
@@ -316,7 +320,6 @@ export default function PracticeSessionNew() {
   const [sessionId] = useState(() => crypto.randomUUID());
   const [questionNumber, setQuestionNumber] = useState(1);
   const [showSolution, setShowSolution] = useState(false);
-  const [confidence, setConfidence] = useState<string | null>(null);
   const recordedExtremeQuestionIdsRef = useRef<Set<string>>(new Set());
   const extremeAttemptedIdsRef = useRef<Set<string>>(new Set());
   const extremeAttemptedLoadedRef = useRef(false);
@@ -328,8 +331,7 @@ export default function PracticeSessionNew() {
   const [partResults, setPartResults] = useState<boolean[]>([]);
 
   const explanationForDisplay = useMemo(() => {
-    if (!currentQuestion?.explanation) return "";
-    return currentQuestion.explanation;
+    return formatExplanation(currentQuestion?.explanation);
   }, [currentQuestion?.explanation, mode]);
 
   const challengeExplanation = useMemo(
@@ -1146,7 +1148,7 @@ export default function PracticeSessionNew() {
         difficulty: typeof randomQuestion.difficulty === "number" ? randomQuestion.difficulty : undefined,
         marks: typeof randomQuestion.marks === "number" ? randomQuestion.marks : undefined,
         estimated_time_sec: typeof randomQuestion.estimated_time_sec === "number" ? randomQuestion.estimated_time_sec : undefined,
-        image_url: resolveQuestionImageUrl(randomQuestion.image_url),
+        image_url: resolveQuestionImageUrl(randomQuestion.image_url, randomQuestion.question),
         image_alt: randomQuestion.image_alt || undefined,
         explanation: randomQuestion.explanation || "",
         multipart,
@@ -1191,7 +1193,6 @@ export default function PracticeSessionNew() {
       setSelectedAnswer(null);
       setIsCorrect(null);
       setShowSolution(false);
-      setConfidence(null);
       setPartIndex(0);
       setPartAnswers([]);
       setPartResults([]);
@@ -1385,7 +1386,6 @@ export default function PracticeSessionNew() {
             correct: overallCorrect,
             mode: mode,
             question_id: currentQuestion.id,
-            confidence: confidence || null,
           });
         } catch (error) {
           console.error("Error saving result:", error);
@@ -1532,7 +1532,6 @@ export default function PracticeSessionNew() {
           correct,
           mode: mode,
           question_id: currentQuestion.id,
-          confidence: confidence || null,
         });
       } catch (error) {
         console.error("Error saving result:", error);
@@ -1673,34 +1672,46 @@ export default function PracticeSessionNew() {
 
   const questionCalculatorLabel = (() => {
     const raw = String(currentQuestion?.calculator ?? '').trim();
-    if (!raw) return null;
-    if (raw.toLowerCase().includes('non')) return 'Non-calc';
-    if (raw.toLowerCase().includes('calc')) return 'Calc';
+    if (!raw) return 'Non-calculator'; // Default to non-calculator if missing
+    if (raw.toLowerCase().includes('non')) return 'Non-calculator';
+    if (raw.toLowerCase().includes('calc')) return 'Calculator';
     return raw;
   })();
-  const questionDifficultyLabel = (() => {
+  const questionDifficultyValue = (() => {
     const value = Number(currentQuestion?.difficulty);
     if (!Number.isFinite(value)) return null;
-    const normalized = Math.round(value);
-    if (userTrack === "11plus") {
-      return ELEVEN_PLUS_DIFFICULTY_LABELS[normalized] || `Level ${normalized}`;
-    }
-    return `Difficulty ${normalized}`;
+    return Math.round(value);
   })();
 
+  const questionDifficultyLabel = (() => {
+    if (questionDifficultyValue === null) return null;
+    if (userTrack === "11plus") {
+      return ELEVEN_PLUS_DIFFICULTY_LABELS[questionDifficultyValue] || `Level ${questionDifficultyValue}`;
+    }
+    return `Difficulty ${questionDifficultyValue}`;
+  })();
+
+  const getDifficultyTint = (level: number | null) => {
+    if (level === 1) return 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20';
+    if (level === 2) return 'bg-amber-500/10 text-amber-600 border-amber-500/20';
+    if (level >= 3) return 'bg-rose-500/10 text-rose-600 border-rose-500/20';
+    return 'bg-muted/40 text-muted-foreground border-border/50';
+  };
+
   const tagBaseClass =
-    'inline-flex items-center rounded-md px-1.5 py-0 text-[8px] sm:text-[11px] leading-none font-semibold border practice-tag-pill';
+    'inline-flex items-center gap-1.5 justify-center rounded-md px-2 py-0.5 text-[9.5px] font-semibold tracking-wide uppercase transition-colors border';
   const tagStyles = {
-    subtopic: 'bg-sky-500/15 text-sky-700 border-sky-500/20 dark:text-sky-200',
-    calculator: 'bg-emerald-500/15 text-emerald-700 border-emerald-500/20 dark:text-emerald-200',
-    tier: 'bg-violet-500/15 text-violet-700 border-violet-500/20 dark:text-violet-200',
-    difficulty: 'bg-amber-500/15 text-amber-700 border-amber-500/20 dark:text-amber-200',
-    retry: 'bg-rose-500/15 text-rose-700 border-rose-500/20 dark:text-rose-200',
+    subtopic: 'bg-primary/5 text-primary/80 border-primary/20',
+    calculator: 'bg-primary/5 text-primary/80 border-primary/20',
+    tier: 'bg-primary/5 text-primary/80 border-primary/20',
+    difficulty: getDifficultyTint(questionDifficultyValue),
+    retry: 'bg-rose-500/10 text-rose-600 border-rose-500/20',
+    marks: 'bg-primary/5 text-primary/80 border-primary/20',
   };
 
   if (loading && !currentQuestion) {
     return (
-      <div className="flex items-center justify-center min-h-[50vh]">
+      <div className="flex items-center justify-center min-h-[50vh]" style={isEnglish ? { '--primary': '43 96% 56%' } as React.CSSProperties : undefined}>
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
       </div>
     );
@@ -1720,7 +1731,7 @@ export default function PracticeSessionNew() {
     }
 
     return (
-      <div className="max-w-2xl mx-auto px-4 py-10">
+      <div className="max-w-2xl mx-auto px-4 py-10" style={isEnglish ? { '--primary': '43 96% 56%', '--primary-glow': '43 96% 66%' } as React.CSSProperties : undefined}>
         <div className="card-exam-glow">
           <div className="p-5 sm:p-6">
             <div className="text-lg font-semibold text-foreground mb-1">No questions found</div>
@@ -1747,7 +1758,7 @@ export default function PracticeSessionNew() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-3 sm:px-4 pb-8 pt-2">
+    <div className="max-w-2xl mx-auto px-3 sm:px-4 pb-8 pt-2" style={isEnglish ? { '--primary': '43 96% 56%', '--primary-glow': '43 96% 66%' } as React.CSSProperties : undefined}>
       {/* Header */}
       <div className="flex items-center justify-between py-3 sm:py-4 fade-up-exam fade-up-exam-1">
         <div className="flex items-center gap-2">
@@ -1774,46 +1785,49 @@ export default function PracticeSessionNew() {
       {/* Question Card */}
       <div className="card-exam-glow mb-4 fade-up-exam fade-up-exam-2 practice-question-card">
         <div className="p-4 sm:p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <span className="text-sm font-semibold text-foreground">
+          {/* Top Info Bar */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5 pb-4 border-b border-border/60">
+            <div className="flex items-center gap-2.5">
+              <span className="text-base font-semibold tracking-tight text-foreground">
                 <span className="sm:hidden">Q{questionNumber}</span>
                 <span className="hidden sm:inline">Question {questionNumber}</span>
               </span>
             </div>
-            <div className="flex items-center gap-1 flex-wrap">
+            
+            <div className="flex items-center gap-2 flex-wrap justify-start sm:justify-end">
               {subtopicLabel && (
-                <span className={`${tagBaseClass} ${tagStyles.subtopic} max-w-[140px] sm:max-w-[200px] truncate`}>
-                  {subtopicLabel}
+                <span className={`${tagBaseClass} ${tagStyles.subtopic} max-w-[200px] truncate`}>
+                  <BookOpen className="w-3 h-3" />
+                  <span className="truncate">{subtopicLabel}</span>
                 </span>
               )}
-              {questionCalculatorLabel && questionCalculatorLabel !== 'Non-calc' && (
-                <span className={`${tagBaseClass} ${tagStyles.calculator} whitespace-nowrap`}>
+              {questionCalculatorLabel && (
+                <span className={`${tagBaseClass} ${tagStyles.calculator}`}>
+                  <Calculator className="w-3 h-3" />
                   {questionCalculatorLabel}
                 </span>
               )}
               {questionTierLabel && questionTierLabel !== '11+ Standard' && (
-                <span className={`${tagBaseClass} ${tagStyles.tier} whitespace-nowrap`}>
+                <span className={`${tagBaseClass} ${tagStyles.tier}`}>
+                  <Layers className="w-3 h-3" />
                   {questionTierLabel}
                 </span>
               )}
               {questionDifficultyLabel && (
-                <span className={`${tagBaseClass} ${tagStyles.difficulty} whitespace-nowrap`}>
+                <span className={`${tagBaseClass} ${tagStyles.difficulty}`}>
+                  <TrendingUp className="w-3 h-3" />
                   {questionDifficultyLabel}
                 </span>
               )}
               {currentQuestion?.marks && (
-                <span className={`${tagBaseClass} bg-primary/10 text-primary border-primary/20 whitespace-nowrap`}>
+                <span className={`${tagBaseClass} ${tagStyles.marks}`}>
+                  <Award className="w-3 h-3" />
                   {currentQuestion.marks} Mark{currentQuestion.marks !== 1 ? 's' : ''}
                 </span>
               )}
-              {currentQuestion?.estimated_time_sec && (
-                <span className={`${tagBaseClass} bg-slate-500/10 text-slate-700 border-slate-500/20 whitespace-nowrap`}>
-                   Target: {Math.floor(currentQuestion.estimated_time_sec / 60)}m {currentQuestion.estimated_time_sec % 60 > 0 ? `${currentQuestion.estimated_time_sec % 60}s` : ''}
-                </span>
-              )}
               {currentQuestion?.wasWrongBefore && (
-                <span className={`${tagBaseClass} ${tagStyles.retry} whitespace-nowrap`}>
+                <span className={`${tagBaseClass} ${tagStyles.retry}`}>
+                  <RotateCcw className="w-3 h-3" />
                   Wrong before
                 </span>
               )}
@@ -1982,35 +1996,6 @@ export default function PracticeSessionNew() {
               </div>
             )}
           </div>
-
-          {/* Confidence Check */}
-          {isQuestionComplete && !confidence && (
-            <div className="card-exam-glow p-4 sm:p-5">
-              <p className="text-sm font-medium mb-3 text-foreground">How confident were you?</p>
-              <div className="grid grid-cols-3 gap-2">
-                {["Guessed", "Unsure", "Confident"].map((level) => (
-                  <button
-                    key={level}
-                    onClick={() => setConfidence(level.toLowerCase())}
-                    className={cn("confidence-btn-exam", confidence === level.toLowerCase() && "selected")}
-                  >
-                    {level}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {isQuestionComplete && confidence && (
-            <div className="card-exam-glow p-4 sm:p-5">
-              <div className="flex items-center justify-center gap-2 py-2">
-                <Check className="w-5 h-5 text-primary" />
-                <span className="text-sm font-medium text-muted-foreground">
-                  Confidence recorded: <span className="text-primary font-semibold capitalize">{confidence}</span>
-                </span>
-              </div>
-            </div>
-          )}
 
           {/* Action Buttons */}
           <div className="flex flex-col items-center gap-2">

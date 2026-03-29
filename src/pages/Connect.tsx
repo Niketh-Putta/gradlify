@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { Link } from "react-router-dom";
+import { useSubject } from "@/contexts/SubjectContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -56,6 +57,7 @@ const getMonthRange = () => {
 const padTime = (value: number) => String(value).padStart(2, "0");
 
 export default function Connect() {
+  const { currentSubject } = useSubject();
   const { profile } = useAppContext();
   const userTrack = resolveUserTrack(profile?.track ?? null);
   const [period, setPeriod] = useState<Period>('month');
@@ -351,7 +353,16 @@ export default function Connect() {
 
         <div className="flex items-end justify-between gap-2">
           <div className="min-w-0">
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Leaderboard</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+              <span className={cn(
+                "bg-clip-text text-transparent transform-gpu",
+                currentSubject === "english" 
+                  ? "bg-gradient-to-br from-slate-900 via-slate-800 to-amber-700 dark:from-white dark:via-slate-200 dark:to-amber-500" 
+                  : "bg-gradient-to-br from-slate-900 via-slate-800 to-blue-700 dark:from-white dark:via-slate-200 dark:to-blue-500"
+              )}>
+                Leaderboard
+              </span>
+            </h1>
             <p className="text-muted-foreground text-[10px] sm:text-xs font-light mt-0.5 truncate">Ranked by correct answers</p>
             <p className="text-muted-foreground text-[10px] sm:text-xs font-light truncate">{periodDescriptor}</p>
           </div>
@@ -362,7 +373,7 @@ export default function Connect() {
               <div className="flex items-baseline gap-0.5 justify-end">
                 <span className="text-[10px] text-muted-foreground">#</span>
                 <span className="text-lg sm:text-xl font-semibold bg-gradient-to-r from-primary to-indigo-500 bg-clip-text text-transparent">
-                  {globalOptIn && myEntry ? myEntry.rank : '—'}
+                  {globalOptIn && myEntry ? myEntry.rank : ' - '}
                 </span>
               </div>
               <div className="text-[9px] sm:text-[10px] text-muted-foreground">{periodLabels[period]}</div>

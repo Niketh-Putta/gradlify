@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { PremiumLoader } from '@/components/PremiumLoader';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Timer, BookOpen, Play, ArrowLeft, ArrowRight, History, Calculator, Check, Lock, Crown, X, Languages, SpellCheck, PenTool } from "lucide-react";
+import { Timer, BookOpen, Play, ArrowLeft, ArrowRight, History, Calculator, Check, Lock, Crown, X, Languages, SpellCheck, PenTool, Sparkles } from "lucide-react";
 import { supabase } from '@/integrations/supabase/client';
 import { useAppContext } from '@/hooks/useAppContext';
 import { toast } from "sonner";
@@ -105,6 +105,12 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
       setSelectedTopics([availableSections[0].id]);
     }
   }, [availableSections]);
+
+  useEffect(() => {
+    if (currentSubject === 'english' && examMode === 'challenge') {
+      setExamMode('practice');
+    }
+  }, [currentSubject, examMode]);
 
   useEffect(() => {
     if (isElevenPlus) setCalcSelection('non-calculator');
@@ -275,13 +281,25 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-[680px] mx-auto px-4 sm:px-6 py-6 sm:py-10 pb-40">
+      <div className="max-w-[680px] mx-auto px-4 sm:px-6 py-6 sm:py-10 pb-6">
         <header className="flex items-center justify-between mb-10 sm:mb-14">
           <div>
-            <span className="inline-flex items-center rounded-full border border-primary/25 bg-primary/10 px-2.5 py-1 text-[11px] font-semibold text-primary mb-2">
+            <span className={cn(
+              "inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold mb-2",
+              currentSubject === 'english' ? "border-amber-500/30 bg-amber-500/10 text-amber-600" : "border-primary/25 bg-primary/10 text-primary"
+            )}>
               {getTrackLabel(userTrack, currentSubject)}
             </span>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">{currentSubject === 'english' ? 'English ' : 'Maths '}Mock Exams & Practice</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+              <span className={cn(
+                "bg-clip-text text-transparent transform-gpu",
+                currentSubject === "english" 
+                  ? "bg-gradient-to-br from-slate-900 via-slate-800 to-amber-700 dark:from-white dark:via-slate-200 dark:to-amber-500" 
+                  : "bg-gradient-to-br from-slate-900 via-slate-800 to-blue-700 dark:from-white dark:via-slate-200 dark:to-blue-500"
+              )}>
+                {currentSubject === 'english' ? 'English ' : 'Maths '}Mock Exams & Practice
+              </span>
+            </h1>
             <span className="text-xs sm:text-sm text-muted-foreground">Configure your perfect session</span>
           </div>
           {user && (
@@ -313,7 +331,7 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
               </div>
               <div className="w-full bg-secondary/30 rounded-full h-1.5 overflow-hidden">
                 <div 
-                  className={cn("h-full transition-all duration-500 rounded-full", (examMode === 'challenge' ? dailyChallengeUses/challengeLimitForDisplay : dailyMockUses/dailyMockLimit) > 0.8 ? "bg-warning" : "bg-primary")} 
+                  className={cn("h-full transition-all duration-500 rounded-full", (examMode === 'challenge' ? dailyChallengeUses/challengeLimitForDisplay : dailyMockUses/dailyMockLimit) > 0.8 ? "bg-warning" : (currentSubject === 'english' ? "bg-amber-500" : "bg-primary"))} 
                   style={{ width: `${isPremium ? 0 : (examMode === 'challenge' ? (dailyChallengeUses/challengeLimitForDisplay) : (dailyMockUses/dailyMockLimit)) * 100}%` }}
                 />
               </div>
@@ -322,7 +340,7 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
           {!isPremium && <PremiumUpgradeButton className="w-full h-9 text-xs" />}
         </div>
 
-        <div className="space-y-10 sm:space-y-12 pb-32">
+        <div className="space-y-8 sm:space-y-10 pb-16">
           <section>
             <h2 className="text-sm font-semibold text-foreground uppercase tracking-widest flex items-center gap-2 mb-4"><Play className="h-3.5 w-3.5" />Session Mode</h2>
             <RadioGroup value={examMode} onValueChange={(val) => setExamMode(val as ExamMode)} className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -330,12 +348,12 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
                 { id: 'practice', label: 'Practice Mode', sub: 'Learn at your own pace', icon: BookOpen },
                 { id: 'mock-exam', label: 'Mock Exam', sub: 'Timed session, exam format', icon: Timer },
                 { id: 'challenge', label: 'Challenge Session', sub: 'Hardest questions only', icon: Crown }
-              ].map((m) => (
-                <Label key={m.id} htmlFor={m.id} className={cn("flex flex-col gap-1 p-4 rounded-2xl border transition-all cursor-pointer relative", examMode === m.id ? "border-primary bg-primary/5 shadow-sm" : "border-border/60 bg-card hover:bg-muted/30")}>
+              ].filter(m => !(currentSubject === 'english' && m.id === 'challenge')).map((m) => (
+                <Label key={m.id} htmlFor={m.id} className={cn("flex flex-col gap-1 p-4 rounded-2xl border transition-all cursor-pointer relative", examMode === m.id ? (currentSubject === 'english' ? "border-amber-500 bg-amber-500/5 shadow-sm" : "border-primary bg-primary/5 shadow-sm") : "border-border/60 bg-card hover:bg-muted/30")}>
                   <div className="flex items-center justify-between mb-1">
                     <span className="font-semibold text-sm">{m.label}</span>
                     <RadioGroupItem value={m.id} id={m.id} className="sr-only" />
-                    <div className={cn("h-4 w-4 rounded-full border-2 flex items-center justify-center", examMode === m.id ? "border-primary bg-primary text-white" : "border-muted")}>
+                    <div className={cn("h-4 w-4 rounded-full border-2 flex items-center justify-center", examMode === m.id ? (currentSubject === 'english' ? "border-amber-500 bg-amber-500 text-white" : "border-primary bg-primary text-white") : "border-muted")}>
                       {examMode === m.id && <Check className="h-2.5 w-2.5" />}
                     </div>
                   </div>
@@ -351,7 +369,7 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
                 <h2 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Difficulty</h2>
                 <div className="grid grid-cols-2 gap-2">
                   {ELEVEN_PLUS_DIFFICULTY_OPTIONS.map((opt) => (
-                    <button key={opt.value} onClick={() => setElevenPlusDifficulty(opt.value)} className={cn("px-3 py-2.5 rounded-xl border text-xs font-semibold transition-all", elevenPlusDifficulty === opt.value ? "border-primary bg-primary/5 text-primary" : "border-border/60 bg-card text-muted-foreground hover:bg-muted/30")}>
+                    <button key={opt.value} onClick={() => setElevenPlusDifficulty(opt.value)} className={cn("px-3 py-2.5 rounded-xl border text-xs font-semibold transition-all", elevenPlusDifficulty === opt.value ? (currentSubject === 'english' ? "border-amber-500 bg-amber-500/5 text-amber-600" : "border-primary bg-primary/5 text-primary") : "border-border/60 bg-card text-muted-foreground hover:bg-muted/30")}>
                       {opt.label}
                     </button>
                   ))}
@@ -386,7 +404,7 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
           <section>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Topics</h2>
-              <button onClick={toggleAllTopics} className="text-[10px] font-bold text-primary hover:underline">{selectedTopics.length === availableSections.length ? 'Deselect all' : 'Select all'}</button>
+              <button onClick={toggleAllTopics} className={cn("text-[10px] font-bold hover:underline", currentSubject === 'english' ? "text-amber-600" : "text-primary")}>{selectedTopics.length === availableSections.length ? 'Deselect all' : 'Select all'}</button>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {availableSections.map((section) => {
@@ -401,7 +419,7 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
                     onClick={() => toggleTopic(section.id)}
                     className={cn(
                       "flex items-center justify-between p-4 rounded-2xl border transition-all text-left group",
-                      isSelected ? "border-primary bg-primary/5 shadow-sm" : "border-border/60 bg-card hover:bg-muted/30 opacity-60"
+                      isSelected ? "shadow-sm" : "border-border/60 bg-card hover:bg-muted/30 opacity-60"
                     )}
                     style={{ borderColor: isSelected ? color : undefined, backgroundColor: isSelected ? `${color}10` : undefined }}
                   >
@@ -414,7 +432,7 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
                         {isSelected && <span className="text-[10px] font-bold" style={{ color: color }}>{count} Questions</span>}
                       </div>
                     </div>
-                    <div className={cn("h-5 w-5 rounded-full border-2 flex items-center justify-center transition-all", isSelected ? "bg-primary border-primary text-white" : "border-muted")}>
+                    <div className={cn("h-5 w-5 rounded-full border-2 flex items-center justify-center transition-all", isSelected ? (currentSubject === 'english' ? "bg-amber-500 border-amber-500 text-white" : "bg-primary border-primary text-white") : "border-muted")}>
                       {isSelected && <Check className="h-3 w-3" />}
                     </div>
                   </button>
@@ -423,7 +441,7 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
             </div>
           </section>
 
-          {selectedTopics.length > 0 && examMode !== 'challenge' && (
+          {selectedTopics.length > 0 && examMode !== 'challenge' && currentSubject !== 'english' && (
             <section className="bg-muted/20 rounded-2xl p-5 border border-dashed border-border/60">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Advanced Filter (Subtopics)</h3>
@@ -445,11 +463,11 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
                           <button
                             key={subtopicId}
                             onClick={() => setSelectedSubtopics(p => isSelected ? p.filter(id => id !== subtopicId) : [...p, subtopicId])}
-                            className={cn("group flex items-center gap-2 px-3 py-1.5 rounded-lg border text-[11px] font-medium transition-all", isSelected ? "text-white" : "bg-card text-muted-foreground hover:border-primary/50")}
+                            className={cn("group flex items-center gap-2 px-3 py-1.5 rounded-lg border text-[11px] font-medium transition-all", isSelected ? "text-white" : (currentSubject === 'english' ? "bg-card text-muted-foreground hover:border-amber-500/50" : "bg-card text-muted-foreground hover:border-primary/50"))}
                             style={{ backgroundColor: isSelected ? section.color : undefined, borderColor: isSelected ? section.color : undefined }}
                           >
                             {st.name}
-                            <span className={cn("text-[9px] font-bold px-1.5 py-0.5 rounded-full", isSelected ? "bg-black/10 text-white" : "bg-muted text-muted-foreground")}>{count}</span>
+                            <span className={cn("text-[9px] font-bold px-1.5 py-0.5 rounded-full", isSelected ? "bg-black/20 text-white" : "bg-black/5 dark:bg-white/10 text-foreground/70 dark:text-white/80")}>{count}</span>
                           </button>
                         );
                       })}
@@ -457,7 +475,7 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
                   </div>
                 ))}
               </div>
-              {selectedSubtopics.length > 0 && <button onClick={() => setSelectedSubtopics([])} className="mt-6 text-[10px] font-bold text-muted-foreground hover:text-primary flex items-center gap-1.5"><X className="h-3 w-3" />Reset filters</button>}
+              {selectedSubtopics.length > 0 && <button onClick={() => setSelectedSubtopics([])} className={cn("mt-6 text-[10px] font-bold text-muted-foreground flex items-center gap-1.5", currentSubject === 'english' ? "hover:text-amber-500" : "hover:text-primary")}><X className="h-3 w-3" />Reset filters</button>}
             </section>
           )}
 
@@ -471,19 +489,21 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
               <div
                 className="relative flex items-center gap-4 px-4 py-3 rounded-[1.25rem]"
                 style={{
-                  background: 'rgba(255,255,255,0.45)', // Slightly more transparent
-                  backdropFilter: 'blur(30px) saturate(160%)',
-                  WebkitBackdropFilter: 'blur(30px) saturate(160%)',
-                  border: '1px solid rgba(255,255,255,0.5)',
-                  boxShadow: '0 4px 24px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.05), inset 0 1px 0 rgba(255,255,255,0.6)',
+                  background: 'rgba(255,255,255,0.25)', // More opaque
+                  backdropFilter: 'blur(20px) saturate(180%)',
+                  WebkitBackdropFilter: 'blur(20px) saturate(180%)',
+                  border: currentSubject === 'english' ? '1.5px solid rgba(245,158,11,0.5)' : '1.5px solid rgba(59,130,246,0.5)',
+                  boxShadow: currentSubject === 'english' 
+                    ? '0 10px 30px -5px rgba(245,158,11,0.25), 0 4px 12px rgba(0,0,0,0.1)' 
+                    : '0 10px 30px -5px rgba(59,130,246,0.25), 0 4px 12px rgba(0,0,0,0.1)',
                 }}
               >
-                {/* Icon box — tinted with primary color */}
+                {/* Icon box - tinted with primary color */}
                 <div
                   className="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center"
-                  style={{ background: 'hsl(var(--primary) / 0.1)' }}
+                  style={{ background: currentSubject === 'english' ? 'rgba(245,158,11,0.1)' : 'hsl(var(--primary) / 0.1)' }}
                 >
-                  <Play className="h-4 w-4" style={{ color: 'hsl(var(--primary))' }} />
+                  <Play className="h-4 w-4" style={{ color: currentSubject === 'english' ? '#d97706' : 'hsl(var(--primary))' }} />
                 </div>
 
                 {/* Text */}
@@ -496,7 +516,7 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
                   </p>
                 </div>
 
-                {/* Glowing CTA — the hero element */}
+                {/* Glowing CTA - the hero element */}
                 <Button
                   onClick={examMode === 'practice' ? startPractice : (examMode === 'challenge' ? startChallengeSession : startMockExam)}
                   disabled={selectedTopics.length === 0 || loading}
@@ -505,6 +525,9 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
                     background: 'linear-gradient(135deg, #f59e0b, #fbbf24)',
                     boxShadow: '0 0 0 1px rgba(245,158,11,0.3), 0 4px 16px rgba(245,158,11,0.45), 0 8px 32px rgba(245,158,11,0.25)',
                     color: '#451a03',
+                  } : currentSubject === 'english' ? {
+                    background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                    boxShadow: '0 0 0 1px rgba(245,158,11,0.3), 0 4px 16px rgba(245,158,11,0.4), 0 8px 32px rgba(245,158,11,0.2)',
                   } : {
                     background: 'linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary) / 0.8))',
                     boxShadow: '0 0 0 1px hsl(var(--primary) / 0.3), 0 4px 16px hsl(var(--primary) / 0.4), 0 8px 32px hsl(var(--primary) / 0.2)',
@@ -520,23 +543,105 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
         </div>
 
         <Dialog open={showMockDialog} onOpenChange={setShowMockDialog}>
-          <DialogContent className="max-w-sm sm:max-w-md rounded-3xl">
-            <DialogHeader><DialogTitle>Mock Exam Settings</DialogTitle><DialogDescription>Choose session length</DialogDescription></DialogHeader>
-            <div className="py-6 space-y-4">
-              {[
-                { count: 10, label: 'Standard', sub: '10 Qs', allowed: canUse10Questions },
-                { count: 20, label: 'Extended', sub: '20 Qs', allowed: canUse20Questions },
-                { count: 30, label: 'Intensive', sub: '30 Qs', allowed: canUse30Questions },
-                { count: 50, label: 'Full Paper', sub: '50 Qs', allowed: canUseFullPaper }
-              ].map((pkg) => (
-                <button key={pkg.count} onClick={() => pkg.allowed && setSelectedQuestionCount(pkg.count as any)} className={cn("w-full flex items-center justify-between p-4 rounded-xl border-2 transition-all", selectedQuestionCount === pkg.count ? "border-primary bg-primary/5" : pkg.allowed ? "border-border bg-card hover:border-primary/30" : "opacity-40 cursor-not-allowed")}>
-                  <div className="text-left"><p className="font-bold text-sm">{pkg.label}</p><p className="text-xs text-muted-foreground">{pkg.sub}</p></div>
-                  {!pkg.allowed && <Lock className="h-4 w-4 text-muted-foreground" />}{selectedQuestionCount === pkg.count && <Check className="h-4 w-4 text-primary" />}
-                </button>
-              ))}
-              {!isPremium && selectedQuestionCount > 10 && <div className="p-4 rounded-xl bg-primary/5 border border-primary/20"><p className="text-xs font-bold text-primary mb-1">Premium Feature</p><p className="text-[10px] text-muted-foreground mb-3">Upgrade to access full papers.</p><PremiumUpgradeButton className="h-7 text-[10px]" /></div>}
+          <DialogContent className="max-w-md rounded-[2.5rem] p-10 border-white/20 bg-[#F2F2F7] dark:bg-slate-900 backdrop-blur-2xl shadow-2xl overflow-hidden ring-1 ring-black/5">
+            <div className="space-y-8">
+              <div>
+                <DialogTitle className="text-2xl font-black tracking-tight text-foreground">Mock Exam Settings</DialogTitle>
+                <DialogDescription className="text-sm text-foreground/50 mt-1 font-medium">Select your preferred session length.</DialogDescription>
+              </div>
+
+              <div className="space-y-3">
+                {[
+                  { count: 10, label: 'Standard', sub: '10 Questions', desc: 'Quick focused session', allowed: canUse10Questions },
+                  { count: 20, label: 'Extended', sub: '20 Questions', desc: 'Comprehensive practice', allowed: canUse20Questions },
+                  { count: 30, label: 'Intensive', sub: '30 Questions', desc: 'Deep-dive revision', allowed: canUse30Questions },
+                  { count: 50, label: 'Full Paper', sub: '50 Questions', desc: 'Complete exam simulation', allowed: canUseFullPaper }
+                ].map((pkg) => {
+                  const isSelected = selectedQuestionCount === pkg.count;
+                  const isEnglish = currentSubject === 'english';
+                  
+                  return (
+                    <button 
+                      key={pkg.count} 
+                      disabled={!pkg.allowed}
+                      onClick={() => pkg.allowed && setSelectedQuestionCount(pkg.count as any)} 
+                      className={cn(
+                        "w-full flex items-center justify-between p-5 rounded-2xl border-2 transition-all duration-300 relative overflow-hidden",
+                        isSelected 
+                          ? (isEnglish ? "border-amber-500 bg-white shadow-xl shadow-amber-500/10 scale-[1.02]" : "border-primary bg-white shadow-xl shadow-primary/10 scale-[1.02]")
+                          : pkg.allowed 
+                            ? "border-transparent bg-white hover:bg-white/80" 
+                            : "opacity-40 cursor-not-allowed grayscale"
+                      )}
+                    >
+                      <div className="text-left relative z-10">
+                        <p className={cn("font-bold text-base transition-colors", isSelected ? (isEnglish ? "text-amber-600" : "text-primary") : "text-foreground")}>
+                          {pkg.label}
+                        </p>
+                        <p className="text-[11px] text-muted-foreground font-medium">{pkg.sub} &nbsp;·&nbsp; {pkg.desc}</p>
+                      </div>
+                      
+                      <div className="relative z-10">
+                        {isSelected ? (
+                          <div className={cn(
+                            "h-6 w-6 rounded-full flex items-center justify-center text-white shadow-md animate-in zoom-in-50",
+                            isEnglish ? "bg-amber-500" : "bg-primary"
+                          )}>
+                            <Check className="h-4 w-4 stroke-[3px]" />
+                          </div>
+                        ) : (
+                          <div className="h-6 w-6 rounded-full border-2 border-slate-200 bg-white" />
+                        )}
+                      </div>
+
+                      {/* Subtle gradient overlay for selected */}
+                      {isSelected && (
+                        <div className={cn(
+                          "absolute inset-0 opacity-[0.03] pointer-events-none",
+                          isEnglish ? "bg-amber-500" : "bg-primary"
+                        )} />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {!isPremium && selectedQuestionCount > 10 && (
+                <div className={cn(
+                  "p-5 rounded-2xl border animate-in fade-in slide-in-from-bottom-2 duration-300",
+                  currentSubject === 'english' ? "bg-amber-500/5 border-amber-500/10" : "bg-primary/5 border-primary/10"
+                )}>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Crown className={cn("h-4 w-4", currentSubject === 'english' ? "text-amber-600" : "text-primary")} />
+                    <p className={cn("text-[10px] font-black uppercase tracking-widest", currentSubject === 'english' ? "text-amber-600" : "text-primary")}>Ultra Feature</p>
+                  </div>
+                  <p className="text-[11px] text-foreground/60 leading-relaxed font-bold mb-4">Upgrade for full 50-question paper sessions.</p>
+                  <PremiumUpgradeButton className="w-full h-10 rounded-xl text-xs font-black shadow-none" />
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 gap-4 pt-2">
+                <Button 
+                  variant="secondary" 
+                  onClick={() => setShowMockDialog(false)}
+                  className="h-14 rounded-2xl text-[15px] font-bold text-slate-500 bg-white hover:bg-slate-50 border-0 transition-all active:scale-[0.98]"
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={confirmMockExam} 
+                  disabled={!isPremium && selectedQuestionCount > 10}
+                  className={cn(
+                    "h-14 rounded-2xl text-[15px] font-bold text-white shadow-2xl transition-all active:scale-[0.98] border-0",
+                    currentSubject === 'english' 
+                      ? "bg-amber-500 hover:bg-amber-600 shadow-amber-500/30" 
+                      : "bg-primary hover:bg-blue-600 shadow-primary/30"
+                  )}
+                >
+                  Confirm & Start
+                </Button>
+              </div>
             </div>
-            <div className="flex flex-col gap-2"><Button onClick={confirmMockExam} className="h-12 rounded-xl font-bold" disabled={!isPremium && selectedQuestionCount > 10}>Confirm & Start</Button><Button variant="ghost" onClick={() => setShowMockDialog(false)}>Cancel</Button></div>
           </DialogContent>
         </Dialog>
 

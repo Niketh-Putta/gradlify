@@ -1,4 +1,7 @@
 import { useState, useEffect } from 'react';
+import { useSubject } from "@/contexts/SubjectContext";
+import { cn } from "@/lib/utils";
+import { Loader2 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -7,6 +10,7 @@ import { toast } from 'sonner';
 import { PremiumLoader } from './PremiumLoader';
 
 export default function TrackingModeSettings() {
+  const { currentSubject } = useSubject();
   const [mode, setMode] = useState<TrackingMode>('auto');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -67,13 +71,16 @@ export default function TrackingModeSettings() {
         <div className="space-y-2 sm:space-y-3">
           <Label className="text-xs sm:text-sm font-medium">Tracking Mode</Label>
           
-          <div className="inline-flex rounded-lg border border-border p-1 bg-muted/50">
+          <div className="inline-flex rounded-[14px] border border-border p-1 bg-muted/40 backdrop-blur-sm">
             <Button
               variant={mode === 'auto' ? 'default' : 'ghost'}
               size="sm"
               onClick={() => handleModeChange('auto')}
               disabled={saving}
-              className="relative text-xs sm:text-sm h-7 sm:h-8"
+              className={cn(
+                "relative text-xs sm:text-sm h-8 sm:h-9 px-4 rounded-[10px] transition-all duration-300",
+                mode === 'auto' && currentSubject === 'english' && "bg-amber-500 hover:bg-amber-600 text-white shadow-lg shadow-amber-500/20 border-0"
+              )}
             >
               {saving && mode === 'auto' && (
                 <Loader2 className="mr-1 sm:mr-2 h-3 w-3 animate-spin" />
@@ -85,7 +92,10 @@ export default function TrackingModeSettings() {
               size="sm"
               onClick={() => handleModeChange('manual')}
               disabled={saving}
-              className="relative text-xs sm:text-sm h-7 sm:h-8"
+              className={cn(
+                "relative text-xs sm:text-sm h-8 sm:h-9 px-4 rounded-[10px] transition-all duration-300",
+                mode === 'manual' && currentSubject === 'english' && "bg-amber-500 hover:bg-amber-600 text-white shadow-lg shadow-amber-500/20 border-0"
+              )}
             >
               {saving && mode === 'manual' && (
                 <Loader2 className="mr-1 sm:mr-2 h-3 w-3 animate-spin" />

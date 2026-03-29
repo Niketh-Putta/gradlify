@@ -248,7 +248,7 @@ export default function PracticePage({ forcedSubject }: PracticePageProps) {
             })}
           </div>
 
-          {selectedTopics.length > 0 && (
+          {selectedTopics.length > 0 && currentSubject !== 'english' && (
             <div className="space-y-12 pt-6">
               {availableSections.filter(s => selectedTopics.includes(s.id)).map(section => (
                 <div key={section.key} className="space-y-4">

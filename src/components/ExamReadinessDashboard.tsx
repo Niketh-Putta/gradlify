@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
+import { cn } from '@/lib/utils';
 import { 
   getReadinessOverview, 
   manualSetReadiness, 
@@ -175,10 +176,15 @@ const loadTopicHistory = async (topic: string) => {
   };
 
   const getReadinessLevel = (score: number): { label: string; color: string } => {
-    if (score >= 80) return { label: 'Strong', color: 'text-green-600 dark:text-green-400' };
-    if (score >= 60) return { label: 'Proficient', color: 'text-blue-600 dark:text-blue-400' };
-    if (score >= 40) return { label: 'Developing', color: 'text-yellow-600 dark:text-yellow-400' };
-    return { label: 'Needs Work', color: 'text-red-600 dark:text-red-400' };
+    if (score >= 80) return { label: 'Strong', color: 'text-emerald-600 dark:text-emerald-400' };
+    if (score >= 60) {
+      return { 
+        label: 'Proficient', 
+        color: currentSubject === 'english' ? 'text-amber-600 dark:text-amber-500' : 'text-blue-600 dark:text-blue-400' 
+      };
+    }
+    if (score >= 40) return { label: 'Developing', color: 'text-orange-500 dark:text-orange-400' };
+    return { label: 'Needs Work', color: 'text-rose-600 dark:text-rose-500' };
   };
 
   const formatInsight = (hist: ReadinessHistory) => {
@@ -254,12 +260,13 @@ const loadTopicHistory = async (topic: string) => {
                       strokeWidth="8"
                       strokeDasharray={`${2 * Math.PI * 52}`}
                       strokeDashoffset={`${2 * Math.PI * 52 * (1 - overall / 100)}`}
-                      className={`transition-all duration-500 ${
-                        overall >= 80 ? 'text-green-500' :
-                        overall >= 60 ? 'text-blue-500' :
-                        overall >= 40 ? 'text-amber-500' :
-                        'text-red-500'
-                      }`}
+                      className={cn(
+                        "transition-all duration-500",
+                        overall >= 80 ? 'text-emerald-500' :
+                        overall >= 60 ? (currentSubject === 'english' ? 'text-amber-500' : 'text-blue-500') :
+                        overall >= 40 ? 'text-orange-400' :
+                        'text-rose-500'
+                      )}
                       strokeLinecap="round"
                     />
                   </svg>
@@ -390,7 +397,7 @@ const loadTopicHistory = async (topic: string) => {
               <CardContent className="py-8 sm:py-10 md:py-12 text-center p-3 sm:p-4 md:p-6">
                 <div className="max-w-md mx-auto space-y-2">
                   <p className="text-xs sm:text-sm text-muted-foreground">
-                    No readiness data yet — complete a practice to generate analytics.
+                    No readiness data yet - complete a practice to generate analytics.
                   </p>
                   <p className="text-xs text-muted-foreground">
                     Your exam readiness will be calculated automatically as you complete practice sessions.

@@ -14,6 +14,7 @@ import confetti from 'canvas-confetti';
 import { areMathEquivalent, uniqueMathAnswers } from '@/lib/areMathEquivalent';
 import { sanitizeAnswerSet } from '@/lib/answerSanitizer';
 import { resolveQuestionImageUrl } from '@/lib/resolveQuestionImageUrl';
+import { formatExplanation } from '@/lib/formatExplanation';
 import { expandQuestionTypesForDb, expandSubtopicIdsForDb } from '@/lib/subtopicIdUtils';
 import { getTopicAndSubtopicLabels, getTrackTopicLabel } from '@/lib/subtopicDisplay';
 import { buildBalancedMix } from '@/lib/questionMix';
@@ -406,7 +407,7 @@ export default function MockExamPage() {
 
           if (difficultyMin != null) query = query.gte('difficulty', difficultyMin);
           if (difficultyMax != null) query = query.lte('difficulty', difficultyMax);
-          // TRACK FILTER — Ensures separation between GCSE and 11+
+          // TRACK FILTER - Ensures separation between GCSE and 11+
           query = query.eq('track', userTrack);
 
           if (excludeIds.length > 0) {
@@ -744,7 +745,7 @@ export default function MockExamPage() {
               correct_answer: sanitized.correct,
               all_answers: shuffledAnswers,
               index: index + 1,
-              image_url: resolveQuestionImageUrl(q.image_url),
+              image_url: resolveQuestionImageUrl(q.image_url, q.question),
               marks: computedMarks,
               multipart
             };
@@ -1184,7 +1185,7 @@ const questionCalculatorLabel = (() => {
                         <div className="mb-4">
                           <div className="question-image-shell">
                             <ImageWithFallback
-                              src={resolveQuestionImageUrl(q.image_url)}
+                              src={resolveQuestionImageUrl(q.image_url, q.question)}
                               alt={q.image_alt || "Question diagram"}
                               className="question-image-media"
                             />
@@ -1322,14 +1323,8 @@ const questionCalculatorLabel = (() => {
                         <p className="text-xs uppercase tracking-wide text-muted-foreground font-semibold mb-2">Explanation</p>
                         <div className="text-sm text-foreground leading-relaxed bg-muted/30 border border-border rounded-lg p-3">
                           {q.explanation ? (
-                            <div className="space-y-2 whitespace-pre-wrap break-words">
-                              {normalizeNewlines(String(q.explanation))
-                                .split(/\n+/)
-                                .map((line, idx) => (
-                                  <div key={`explain-${q.id}-${idx}`}>
-                                    <MathText text={line || " "} />
-                                  </div>
-                                ))}
+                            <div className="space-y-2 break-words">
+                              <RichQuestionContent text={formatExplanation(q.explanation)} className="space-y-2" />
                             </div>
                           ) : (
                             <span className="text-muted-foreground">No explanation available for this question yet.</span>

@@ -292,12 +292,14 @@ export function Navigation({ user, profile, onSettings, onSignOut }: NavigationP
           )}>
             <div className="w-11 h-11 flex items-center justify-center shrink-0">
               <div className={cn(
-                 "w-8 h-8 rounded-full flex items-center justify-center shrink-0 border shadow-sm",
-                 currentSubject === 'english' ? "bg-amber-500/10 border-amber-500/20" : "bg-primary/10 border-primary/20"
+                 "w-8 h-8 rounded-xl flex items-center justify-center shrink-0 border shadow-md transition-all duration-500 ease-in-out",
+                 currentSubject === 'english' 
+                   ? "bg-amber-500/10 border-amber-500/30 shadow-amber-500/5 dark:border-amber-500/20" 
+                   : "bg-primary/10 border-primary/30 shadow-primary/5 dark:border-primary/20"
               )}>
                 <span className={cn(
-                   "text-[10px] font-bold",
-                   currentSubject === 'english' ? "text-amber-500" : "text-primary"
+                   "text-[11px] font-black tracking-tight",
+                   currentSubject === 'english' ? "text-amber-600" : "text-primary"
                 )}>
                   {userName.charAt(0).toUpperCase()}
                 </span>

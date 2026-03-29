@@ -38,9 +38,9 @@ You cannot just memorize a word class; you must analyze the word's *job* in the 
 
 ### The Swap Technique
 Look at the word "fast".
-*   "The *fast* runner..." (Adjective — it describes the noun 'runner')
-*   "He ran *fast*..." (Adverb — it describes the verb 'ran')
-*   "I will *fast* for a day..." (Verb — the physical action of not eating)
+*   "The *fast* runner..." (Adjective  - it describes the noun 'runner')
+*   "He ran *fast*..." (Adverb  - it describes the verb 'ran')
+*   "I will *fast* for a day..." (Verb  - the physical action of not eating)
 
 Always ask yourself: "What is this word doing to its neighbor?" 
 

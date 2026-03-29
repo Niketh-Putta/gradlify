@@ -88,6 +88,33 @@ const buildRatioWrongOption = (correct: string, existing: string[]): string | nu
   return null;
 };
 
+const generateSensibleWrongOption = (correct: string, existing: string[]): string | null => {
+  const match = correct.match(/^(-?[\d\.,]+)(.*)$/);
+  if (match) {
+    const val = parseFloat(match[1].replace(/,/g, ''));
+    const unit = match[2];
+    if (Number.isFinite(val)) {
+      const offsets = [-10, -5, -2, -1, 1, 2, 5, 10, val * 0.5, val * 2];
+      for (let i = 0; i < offsets.length; i++) {
+        const offset = offsets[i];
+        const wrongNum = val + offset;
+        if (wrongNum === val || (wrongNum <= 0 && val > 0)) continue;
+        
+        let wrongStr = Number.isInteger(wrongNum) 
+          ? wrongNum.toString() 
+          : wrongNum.toFixed(2).replace(/\.?0+$/, '');
+        
+        wrongStr += unit;
+        if (!isOptionTaken(wrongStr, existing, correct)) {
+          existing.push(wrongStr);
+          return wrongStr;
+        }
+      }
+    }
+  }
+  return null;
+};
+
 export const sanitizeAnswerSet = ({
   options,
   correct,
@@ -97,14 +124,31 @@ export const sanitizeAnswerSet = ({
   const ratioContext = isRatioContext(questionType, subtopic, options, correct);
 
   const formattedCorrect = formatNumericText(correct);
+  const activeExisting = [formattedCorrect];
+
   const cleaned = options.map((option) => {
     const formatted = formatNumericText(option);
-    if (PLACEHOLDER_RE.test(formatted) || NOT_PREFIX_RE.test(formatted)) {
+    
+    // Check if this is a corrupted fallback wrong answer from the generator (e.g. '294cm²a')
+    const isCorruptedSuffix = /^[a-e]$/i.test(formatted.replace(formattedCorrect, ''));
+    const isCorrupted = formatted.startsWith(formattedCorrect) && isCorruptedSuffix;
+
+    if (PLACEHOLDER_RE.test(formatted) || NOT_PREFIX_RE.test(formatted) || isCorrupted) {
+      if (isCorrupted) {
+         const sensible = generateSensibleWrongOption(formattedCorrect, activeExisting);
+         if (sensible) return sensible;
+      }
+      
       const fallback = ratioContext
-        ? buildRatioWrongOption(formattedCorrect, options)
-        : 'None of the above';
-      return fallback ?? (ratioContext ? 'Cannot tell' : 'None of the above');
+        ? buildRatioWrongOption(formattedCorrect, activeExisting)
+        : generateSensibleWrongOption(formattedCorrect, activeExisting);
+      
+      const toReturn = fallback ?? (ratioContext ? 'Cannot tell' : 'None of the above');
+      activeExisting.push(toReturn);
+      return toReturn;
     }
+    
+    activeExisting.push(formatted);
     return formatted;
   });
 

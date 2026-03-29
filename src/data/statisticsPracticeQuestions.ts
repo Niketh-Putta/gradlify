@@ -134,7 +134,7 @@ export const statisticsPracticeQuestions: Record<string, PracticeQA[]> = {
       question:
         "Does correlation prove causation? Give a one-sentence explanation.",
       answer:
-        "No — it shows a relationship, but a **third factor** could affect both variables.",
+        "No - it shows a relationship, but a **third factor** could affect both variables.",
     },
     {
       question:

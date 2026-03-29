@@ -161,7 +161,7 @@ If you know the word 'believe', you intuitively know the antonym is 'disbelieve'
 Always scan the answer list for common negative prefixes like **un-**, **in-**, **im-**, **ir-**, **dis-**, and **non-**. If you are totally stuck on a difficult question, check to see if an option simply adds a reverser prefix to the target word!
 
 ## 2. Exam Tips
-Always read the question brief carefully! When a question dictates "Choose the word most opposite in meaning", examiners notoriously put an exact synonym as Option A. If you scan the test too quickly, your brain will see Option A matches the target word, and you will circle it—entirely forgetting that you were hunting for an antonym!
+Always read the question brief carefully! When a question dictates "Choose the word most opposite in meaning", examiners notoriously put an exact synonym as Option A. If you scan the test too quickly, your brain will see Option A matches the target word, and you will circle it - entirely forgetting that you were hunting for an antonym!
 
 ## 3. Practice Questions
 
@@ -656,7 +656,7 @@ The root verb **ject** absolutely means 'to throw'. Which word perfectly means '
 [QUIZ_OPTION: E] Eject [CORRECT]
 
 **Explanation:**
-The prefix 'e-' originates from 'ex', denoting out. Combining 'Ex' (out) + 'Ject' (throw) perfectly creates Eject—throwing out!
+The prefix 'e-' originates from 'ex', denoting out. Combining 'Ex' (out) + 'Ject' (throw) perfectly creates Eject - throwing out!
 
 ---
 
@@ -932,7 +932,7 @@ Think of basic emotions like stepping onto the very bottom rank of a huge escala
 If you can accurately map exactly how strong a character's emotion currently is, you can crush the hardest vocabulary questions rapidly.
 
 ## 2. Exam Tips
-Watch tightly for the heavily descriptive verbs and physical cues a character exhibits. If they are aggressively "slamming doors" and have rigidly "clenched fists", they aren't mildly irritated—they are violently incensed (enraged). Use physical descriptions to deduce the emotional vocabulary.
+Watch tightly for the heavily descriptive verbs and physical cues a character exhibits. If they are aggressively "slamming doors" and have rigidly "clenched fists", they aren't mildly irritated - they are violently incensed (enraged). Use physical descriptions to deduce the emotional vocabulary.
 
 ## 3. Practice Questions
 

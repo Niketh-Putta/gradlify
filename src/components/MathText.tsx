@@ -169,7 +169,11 @@ function sanitizeMathForPlainText(text: string): string {
     .replace(/\\text\{([^}]+)\}/g, '$1')
     .replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, '$1/$2')
     .replace(/\\sqrt\{([^}]+)\}/g, '√$1')
-    .replace(/\\([a-zA-Z]+)\b/g, '$1');
+    .replace(/\\([a-zA-Z]+)\b/g, '$1')
+    // Ensure proper spacing after colons and semicolons in labels/examples, but avoid breaking ratios or time (e.g. 10:30)
+    .replace(/(?<!\d):(?!\d\s|\d$)/g, ': ')
+    .replace(/(?<!\d);(?!\d\s|\d$)/g, '; ')
+    .replace(/(?<!\d),(?!\d)/g, ', ');
 }
 
 function wrapTextInMath(token: string): string {
@@ -280,9 +284,17 @@ function repairBrokenLatex(text: string): string {
   
   // Fix common broken patterns where backslash was eaten
   result = result.replace(/(?<![\\a-zA-Z])rac\{/g, '\\frac{');
-  result = result.replace(/(?<![\\a-zA-Z])imes(?![a-zA-Z])/g, '\\times');
+  // Handle 'imes' and 'times' missing backslashes more robustly
+  // Using explicit word boundaries to catch (imes 10) etc.
+  result = result.replace(/(?<!\\)\bi?mes\b/gi, '\\times');
+  
   result = result.replace(/(?<![\\a-zA-Z])qrt\{/g, '\\sqrt{');
   result = result.replace(/(?<![\\a-zA-Z])qrt(\d)/g, '\\sqrt{$1}');
+  
+  // Handle cases where \t (tab) was intended as \times (JSON escaping issue)
+  // or other common escaped sequences that might have been swallowed.
+  // We replace lone tabs with \times as that's the most common failure mode.
+  result = result.replace(/\t/g, ' \\times ');
   
   return result;
 }

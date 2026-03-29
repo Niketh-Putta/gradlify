@@ -51,7 +51,7 @@ Punctuation isn't just about stops; it's about controlling the speed and flow of
 4.  **Full Stop (.):** A complete halt.
 
 #### Advanced Punctuation: The 11+ Differentiators
-*   **Dash (—):** Used to add sudden emphasis or an "extra" thought at the end of a sentence.
+*   **Dash ( - ):** Used to add sudden emphasis or an "extra" thought at the end of a sentence.
 *   **Parentheses ( ):** Used for non-essential information (extra detail).
 *   **Hyphen (-):** Used to join words together (e.g., *mother-in-law*, *ice-cold*). Do not confuse this with a dash!
 

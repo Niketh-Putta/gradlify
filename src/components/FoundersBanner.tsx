@@ -21,7 +21,7 @@ export function FoundersBanner({ className, track }: FoundersBannerProps) {
       <div className="border-b border-border/60 bg-muted/60 text-muted-foreground">
         <div className="mx-auto flex flex-wrap items-center justify-center gap-x-2 gap-y-1 px-4 py-2 text-xs sm:text-sm">
           <span className="text-foreground/80">
-            Gradlify Founders&apos; Circle — {nextSprintLabel}.
+            Gradlify Founders&apos; Circle - {nextSprintLabel}.
           </span>
           <Link
             to={sprintLink}

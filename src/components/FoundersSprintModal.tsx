@@ -19,7 +19,7 @@ export function FoundersSprintModal({ open, onOpenChange }: FoundersSprintModalP
           <DialogTitle className="text-xl font-semibold">{isActive ? "Sprint is live" : "Next Sprint Incoming"}</DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground mt-2">
             {isActive
-              ? `Sprint ends in ${daysLeft} ${dayLabel}. Mocks + Challenge only — climb the leaderboard now.`
+              ? `Sprint ends in ${daysLeft} ${dayLabel}. Mocks + Challenge only - climb the leaderboard now.`
               : getNextSprintLabel()}
           </DialogDescription>
         </DialogHeader>

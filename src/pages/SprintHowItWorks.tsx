@@ -119,7 +119,7 @@ export function SprintHowItWorks() {
                     <div className="space-y-4">
                       <div>
                         <p className="inline-flex items-center rounded-full border border-indigo-200 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-indigo-600">
-                          Limited event — Final Week of February
+                          Limited event - Final Week of February
                         </p>
                       </div>
                       <div>
@@ -140,7 +140,7 @@ export function SprintHowItWorks() {
                         </p>
                         <p className="text-base">
                           <span className="font-semibold text-slate-900">Sprint ends:</span>{" "}
-                          <span className="text-indigo-600">{EVENT_END_LABEL}</span> — No points are counted after the deadline.
+                          <span className="text-indigo-600">{EVENT_END_LABEL}</span> - No points are counted after the deadline.
                         </p>
                       </div>
                       <div className="mt-4 flex justify-center lg:justify-start">
@@ -235,15 +235,15 @@ export function SprintHowItWorks() {
                       <div className="mt-3 space-y-2 text-sm text-slate-600">
                         <div className="flex items-center gap-2">
                           <span className="text-lg">🥇</span>
-                          <span className="font-semibold text-slate-800">1st place — £50</span>
+                          <span className="font-semibold text-slate-800">1st place - £50</span>
                         </div>
                         <div className="flex items-center gap-2">
                           <span className="text-lg">🥈</span>
-                          <span className="font-semibold text-slate-800">2nd place — £30</span>
+                          <span className="font-semibold text-slate-800">2nd place - £30</span>
                         </div>
                         <div className="flex items-center gap-2">
                           <span className="text-lg">🥉</span>
-                          <span className="font-semibold text-slate-800">3rd place — £20</span>
+                          <span className="font-semibold text-slate-800">3rd place - £20</span>
                         </div>
                       </div>
                       <p className="mt-4 text-xs text-slate-500">Digital vouchers distributed within 24 hours of sprint end.</p>
@@ -301,7 +301,7 @@ export function SprintHowItWorks() {
 
                     <div>
                       <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl">
-                        The Gradlify Sprint — GCSE
+                        The Gradlify Sprint - GCSE
                       </h1>
                       <p className="mt-4 max-w-[52ch] text-base text-slate-600 sm:text-lg">
                         {isActive

@@ -1119,7 +1119,7 @@ Once you compute the correct answer, you MUST commit to it.
 - Do NOT recompute or change the answer later in the explanation
 - Do NOT change the answer when generating options
 - The correct_answer field MUST be set to EXACTLY what you calculated
-- If you calculated "8x + 4", then correct_answer: "8x + 4" — NOT "5x + 10" or any other value
+- If you calculated "8x + 4", then correct_answer: "8x + 4"  - NOT "5x + 10" or any other value
 
 ### PRINCIPLE 3: MCQ GENERATION RULES
 When creating multiple choice questions:
@@ -1139,7 +1139,7 @@ When creating multiple choice questions:
 
 ### PRINCIPLE 4: EXPLANATION MUST MATCH THE ANSWER
 When producing the explanation:
-- Use the SAME answer computed at the start — no changes allowed
+- Use the SAME answer computed at the start  - no changes allowed
 - Show reasoning steps appropriate to the level (GCSE Foundation/Higher/MATS)
 - Avoid shortcuts that skip necessary method
 - The explanation must justify why the labelled correct option is correct
@@ -1268,7 +1268,7 @@ function shuffleArray<T>(array: T[]): T[] {
 type Linear = { a: number; b: number };
 
 function normalizeMinus(s: string): string {
-  return (s || '').replace(/[−–—]/g, '-');
+  return (s || '').replace(/[−– - ]/g, '-');
 }
 
 function stripTrailingPunctuation(s: string): string {
@@ -1984,13 +1984,13 @@ Your job is to:
 5. **GENERATE REALISTIC WRONG ANSWERS** - Create 3 wrong answers based on common student mistakes
    6. **SUPPORT VARIABLE ANSWER COUNT** - Most questions need 4 options, but some may need 5 or 6 if the mark scheme shows multiple acceptable answers
    7. **WRITE SIMPLE EXPLANATIONS** - Use the SIMPLEST method a GCSE student would use:
-      - Break large calculations into small mental math steps
-      - E.g. "2,652,130 ÷ 13: First, 2,600,000 ÷ 13 = 200,000. Then 52,000 ÷ 13 = 4,000. Then 130 ÷ 13 = 10. Total = 204,010"
-      - Use the mark scheme method if shown
-      - Avoid complex formulas
-      - Keep the language direct and step-by-step; avoid rhetorical questions, self-talk, or asking-and-answering to yourself
-      - Use the × symbol for multiplication so it never looks like the variable $x$, and keep variable letters (e.g. $x$, $n$) clearly separate from operations
-      - When the question is about discrete items (eggs, people, parcels, etc.), note that you cannot use a fraction of that item, explain why you round up/down, then give the final whole-number answer
+     - Break large calculations into small mental math steps
+     - E.g. "2,652,130 ÷ 13: First, 2,600,000 ÷ 13 = 200,000. Then 52,000 ÷ 13 = 4,000. Then 130 ÷ 13 = 10. Total = 204,010"
+     - Use the mark scheme method if shown
+     - Avoid complex formulas
+     - Keep the language direct and step-by-step; avoid rhetorical questions, self-talk, or asking-and-answering to yourself
+     - Use the × symbol for multiplication so it never looks like the variable $x$, and keep variable letters (e.g. $x$, $n$) clearly separate from operations
+     - When the question is about discrete items (eggs, people, parcels, etc.), note that you cannot use a fraction of that item, explain why you round up/down, then give the final whole-number answer
    8. **CATEGORIZE CORRECTLY**: Number, Algebra, Ratio & Proportion, Geometry, Probability, or Statistics
 
 Return a JSON object:
@@ -2020,14 +2020,14 @@ Analyze this image and extract ALL questions you can see. Your job is to:
 5. **GENERATE REALISTIC WRONG ANSWERS** - Based on common GCSE student mistakes
    6. **SUPPORT VARIABLE ANSWER COUNT** - If the original question has 5 or 6 options, generate that many in wrong_answers (so total = original count)
    7. **Write a SIMPLE explanation** - Use the EASIEST method:
-      - Break large numbers into manageable chunks
-      - E.g. for remainders: "2652134 ÷ 13: We need the remainder. 13 × 204010 = 2652130. So 2652134 - 2652130 = 4. Remainder is 4"
-      - For mental math: "2600000 - 52000 = 2548000, then - 130 = 2547870"
-      - ONE simple calculation per step
-      - Avoid formulas not on GCSE spec
-      - Keep the language direct and step-by-step; avoid rhetorical questions, self-talk, or asking-and-answering to yourself
-      - Use the × symbol for multiplication so it never looks like the variable $x$, and keep variable letters (e.g. $x$, $n$) clearly separate from operations
-      - When the question is about discrete items (eggs, people, parcels, etc.), note that you cannot use a fraction of that item, explain why you round up/down, then give the final whole-number answer
+     - Break large numbers into manageable chunks
+     - E.g. for remainders: "2652134 ÷ 13: We need the remainder. 13 × 204010 = 2652130. So 2652134 - 2652130 = 4. Remainder is 4"
+     - For mental math: "2600000 - 52000 = 2548000, then - 130 = 2547870"
+     - ONE simple calculation per step
+     - Avoid formulas not on GCSE spec
+     - Keep the language direct and step-by-step; avoid rhetorical questions, self-talk, or asking-and-answering to yourself
+     - Use the × symbol for multiplication so it never looks like the variable $x$, and keep variable letters (e.g. $x$, $n$) clearly separate from operations
+     - When the question is about discrete items (eggs, people, parcels, etc.), note that you cannot use a fraction of that item, explain why you round up/down, then give the final whole-number answer
    8. **Categorize correctly**: Number, Algebra, Ratio & Proportion, Geometry, Probability, or Statistics
 9. **Calculator type**: Mark as "calculator" or "non-calculator" based on the paper
 

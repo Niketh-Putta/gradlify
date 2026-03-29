@@ -172,7 +172,7 @@ export function MotivationSection() {
               <blockquote className="text-foreground/80 dark:text-foreground/90 italic text-base leading-relaxed mb-3">
                 "{quote.text}"
               </blockquote>
-              <p className="text-primary dark:text-sky-300 text-sm font-semibold">— {quote.author}</p>
+              <p className="text-primary dark:text-sky-300 text-sm font-semibold"> - {quote.author}</p>
             </Card>
           </motion.div>
 

@@ -72,7 +72,6 @@ export const BlockVisual = ({ title }: { title: string }) => {
     return (
       <div className="my-8 p-6 rounded-3xl border border-amber-500/20 bg-gradient-to-br from-amber-50 to-white dark:from-amber-950/20 dark:to-transparent shadow-[0_8px_30px_rgb(0,0,0,0.04),0_20px_50px_rgb(0,0,0,0.02)] overflow-hidden text-center">
         <h3 className="text-[11px] font-black mb-6 flex items-center justify-center gap-2 text-amber-700 uppercase tracking-widest">
-          <Target className="h-4 w-4 text-amber-500" />
           The Gauge Method
         </h3>
         <div className="relative pt-6 pb-2">
@@ -146,7 +145,6 @@ export const BlockVisual = ({ title }: { title: string }) => {
     return (
       <div className="my-4 p-6 rounded-3xl border border-indigo-500/20 bg-indigo-50/50 shadow-xl overflow-hidden relative group">
         <h3 className="text-[11px] font-black mb-4 flex items-center justify-center gap-2 text-indigo-700 uppercase tracking-widest">
-          <Target className="h-4 w-4 text-indigo-500" />
           The Venn Method (LCM & HCF)
         </h3>
         <div className="relative flex justify-center py-6">
@@ -234,7 +232,7 @@ export const BlockVisual = ({ title }: { title: string }) => {
                 × 4
               </div>
               <div className="px-4 py-3 md:px-6 md:py-4 rounded-xl bg-rose-400 text-white font-black text-lg md:text-xl shadow-inner uppercase tracking-wider">
-                - 7
+              - 7
               </div>
            </div>
            <ArrowRight className="h-6 w-6 text-teal-300 rotate-90" />
@@ -250,7 +248,6 @@ export const BlockVisual = ({ title }: { title: string }) => {
     return (
       <div className="my-4 p-6 rounded-3xl border border-sky-500/30 bg-sky-50 shadow-xl overflow-hidden relative group">
         <h3 className="text-[11px] font-black mb-6 flex items-center justify-center gap-2 text-sky-800 uppercase tracking-widest">
-          <Target className="h-4 w-4 text-sky-500" />
           The Balance Method
         </h3>
         <div className="flex justify-center items-end px-2 pt-4 pb-4 h-32 md:h-40">
@@ -371,7 +368,6 @@ export const BlockVisual = ({ title }: { title: string }) => {
     return (
       <div className="my-4 p-6 rounded-3xl border border-cyan-500/20 bg-cyan-50/50 shadow-xl overflow-hidden flex flex-col items-center">
         <h3 className="text-[11px] font-black mb-6 flex items-center justify-center gap-2 text-cyan-800 uppercase tracking-widest">
-          <Target className="h-4 w-4 text-cyan-500" />
           The 4 Quadrants
         </h3>
         <div className="relative w-48 h-48 bg-white border-2 border-cyan-200 rounded-xl shadow-inner grid grid-cols-2 grid-rows-2 p-4 gap-1">
@@ -675,28 +671,44 @@ export const BlockVisual = ({ title }: { title: string }) => {
 
   if (normTitle.includes("formal written methods")) {
     return (
-      <div className="my-8 p-6 rounded-3xl border border-border bg-card shadow-lg flex flex-col md:flex-row gap-8 items-center justify-center">
-        <div className="text-center">
-          <p className="text-[9px] font-bold text-muted-foreground uppercase mb-3 tracking-widest leading-none">The Stack</p>
-          <div className="font-mono text-xl text-foreground bg-muted p-4 rounded-xl border border-border/50">
-            {"  12.50\n+  7.25\n"}
-            <div className="h-0.5 bg-foreground/20 my-1" />
-            {"  19.75"}
+      <div className="my-8 p-6 lg:p-10 rounded-3xl border border-border bg-gradient-to-br from-card to-muted/20 shadow-[0_8px_30px_rgb(0,0,0,0.06)] flex flex-col md:flex-row gap-10 md:gap-14 items-center justify-center">
+        {/* The Stack */}
+        <div className="text-center group">
+          <p className="text-[10px] font-black text-muted-foreground uppercase mb-4 tracking-widest leading-none">The Stack</p>
+          <div className="font-mono text-xl text-foreground bg-muted p-5 rounded-2xl border border-border/50 shadow-inner text-right min-w-[140px] transition-transform group-hover:scale-105">
+            <div className="tracking-widest pr-1">12.50</div>
+            <div className="tracking-widest pr-1 flex justify-between"><span className="text-muted-foreground/60">+</span><span>07.25</span></div>
+            <div className="h-0.5 bg-foreground/20 my-2 w-full rounded-full" />
+            <div className="tracking-widest font-bold pr-1">19.75</div>
           </div>
         </div>
+        
         <div className="hidden md:block text-muted-foreground/30">
-          <ArrowRight className="h-6 w-6" />
+          <ArrowRight className="h-8 w-8 text-blue-500/30" />
         </div>
+        
+        {/* The Alignment */}
         <div className="text-center">
-          <p className="text-[9px] font-bold text-blue-600 uppercase mb-3 tracking-widest leading-none">The Alignment</p>
-          <div className="relative">
-             <div className="absolute left-[2.4rem] top-0 bottom-0 w-px bg-blue-500/40 border-l border-dashed border-blue-400" />
-             <div className="font-mono text-sm leading-8 opacity-40">
-               Units . 1/10 1/100
-             </div>
-             <div className="font-mono text-xl tracking-widest">
-                12 . 50<br/>
-                07 . 25
+          <p className="text-[10px] font-black text-blue-600 uppercase mb-4 tracking-widest leading-none">The Alignment</p>
+          <div className="relative border border-blue-500/10 bg-blue-50/50 dark:bg-blue-950/20 p-5 rounded-2xl shadow-sm">
+             {/* Centered decimal column alignment */}
+             <div className="grid grid-cols-[1fr_auto_1fr] gap-x-3 items-center">
+                {/* Labels */}
+                <div className="text-[11px] font-sans font-black text-muted-foreground uppercase text-right opacity-60">Units</div>
+                <div className="w-1"></div>
+                <div className="text-[11px] font-sans font-black text-muted-foreground uppercase text-left opacity-60">Tenths <span className="hidden sm:inline">Hundredths</span></div>
+                
+                {/* Number 1 */}
+                <div className="font-mono text-xl md:text-2xl tracking-[0.2em] text-right">12</div>
+                <div className="font-mono text-xl md:text-2xl font-black text-blue-500 py-1 relative">
+                  .<div className="absolute left-1/2 -ml-px top-[-20px] bottom-[-20px] w-[2px] bg-blue-500 border-l-2 border-dashed border-blue-400 opacity-60 pointer-events-none" />
+                </div>
+                <div className="font-mono text-xl md:text-2xl tracking-[0.2em] text-left">50</div>
+                
+                {/* Number 2 */}
+                <div className="font-mono text-xl md:text-2xl tracking-[0.2em] text-right">07</div>
+                <div className="font-mono text-xl md:text-2xl font-black text-blue-500 py-1 relative text-transparent">.</div>
+                <div className="font-mono text-xl md:text-2xl tracking-[0.2em] text-left">25</div>
              </div>
           </div>
         </div>

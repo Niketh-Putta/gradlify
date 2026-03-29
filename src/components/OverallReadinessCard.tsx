@@ -272,7 +272,7 @@ export function OverallReadinessCard({
 
           {!latestChange && (
             <div className="text-xs sm:text-sm text-muted-foreground">
-              No recent updates — complete practice to see changes
+              No recent updates - complete practice to see changes
             </div>
           )}
         </div>

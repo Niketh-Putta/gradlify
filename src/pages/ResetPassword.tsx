@@ -53,7 +53,7 @@ export default function ResetPassword() {
         if (exists === false) {
           setNoAccount(true);
           setEmail(normalizedEmail);
-          toast.error("No account found for this email. You're a new user — create an account.");
+          toast.error("No account found for this email. You're a new user - create an account.");
           return;
         }
       } catch {
@@ -119,7 +119,7 @@ export default function ResetPassword() {
                   <p className="text-sm text-amber-900">
                     No account found for <strong>{email}</strong>.
                   </p>
-                  <p className="text-xs text-amber-800 mt-2">You’re a new user — create an account to get started.</p>
+                  <p className="text-xs text-amber-800 mt-2">You’re a new user - create an account to get started.</p>
                 </div>
                 <Button
                   onClick={() => navigate(`/auth?mode=signup&email=${encodeURIComponent(email)}`)}

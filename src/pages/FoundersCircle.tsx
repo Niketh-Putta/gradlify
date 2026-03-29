@@ -21,8 +21,8 @@ export default function FoundersCircle() {
   const daysToGoLabel = `${daysToGo} ${daysToGo === 1 ? "day" : "days"} to go`;
   const daysLeftLabel = `${daysLeft} ${daysLeft === 1 ? "day" : "days"} left`;
   const sprintStatusLabel = isActive
-    ? `Sprint live — ${daysLeftLabel}`
-    : `Next sprint starts ${nextSprintStart} — ${daysToGoLabel}`;
+    ? `Sprint live - ${daysLeftLabel}`
+    : `Next sprint starts ${nextSprintStart} - ${daysToGoLabel}`;
   const sprintCtaLabel = isActive ? "Enter the Sprint" : "Register for Next Sprint";
 
   useEffect(() => {
@@ -85,7 +85,7 @@ export default function FoundersCircle() {
               <p className="max-w-xl text-base text-slate-600 sm:text-lg">
                 {isActive
                   ? `${getSprintEndLabel()}. ${daysLeftLabel}.`
-                  : `${getSprintEndLabel()}. Next sprint starts ${nextSprintStart} — ${daysToGoLabel}.`}
+                  : `${getSprintEndLabel()}. Next sprint starts ${nextSprintStart} - ${daysToGoLabel}.`}
               </p>
               <div className="flex flex-wrap items-center gap-3 text-sm text-slate-500">
                 <Button asChild className="rounded-full border border-slate-900/80 bg-slate-900 px-6 py-3 text-white shadow-[0_20px_45px_-24px_rgba(15,23,42,0.75)] hover:bg-slate-800">
@@ -94,7 +94,7 @@ export default function FoundersCircle() {
                 <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">
                   {isActive ? "Sprint Live" : "Next Sprint"}
                 </span>
-                <span className="text-sm text-slate-600 font-semibold">Merit based — No payment.</span>
+                <span className="text-sm text-slate-600 font-semibold">Merit based - No payment.</span>
               </div>
             </div>
 
@@ -134,8 +134,8 @@ export default function FoundersCircle() {
               </p>
               <div className="mt-4 rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3 text-xs text-slate-500">
                 {AI_FEATURE_ENABLED
-                  ? "“Being a founding member is a strong signal for internships and US college applications—especially for students interested in AI and EdTech.”"
-                  : "“Being a founding member is a strong signal for internships and US college applications—especially for students interested in EdTech.”"}
+                  ? "“Being a founding member is a strong signal for internships and US college applications - especially for students interested in AI and EdTech.”"
+                  : "“Being a founding member is a strong signal for internships and US college applications - especially for students interested in EdTech.”"}
               </div>
             </div>
 
@@ -163,12 +163,12 @@ export default function FoundersCircle() {
             <p className="text-[10px] font-semibold uppercase tracking-[0.35em] text-indigo-500">The roadmap</p>
             <h2 className="mt-2 text-2xl font-semibold text-slate-900">How It Works</h2>
             <p className="mt-2 text-sm text-slate-500">
-              We value consistency over intensity. {isActive ? `Sprint ends in ${daysLeftLabel}.` : `Next sprint starts ${nextSprintStart} — ${daysToGoLabel}.`}
+              We value consistency over intensity. {isActive ? `Sprint ends in ${daysLeftLabel}.` : `Next sprint starts ${nextSprintStart} - ${daysToGoLabel}.`}
             </p>
             <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {[
                 { title: "Practice", text: "Engage with Gradlify naturally to master your topics." },
-                { title: "Sprint", text: isActive ? `Sprint live — ends in ${daysLeftLabel}.` : `Next sprint starts ${nextSprintStart} — ${daysToGoLabel}.` },
+                { title: "Sprint", text: isActive ? `Sprint live - ends in ${daysLeftLabel}.` : `Next sprint starts ${nextSprintStart} - ${daysToGoLabel}.` },
                 { title: "Qualify", text: "Top 10 users on the leaderboard get a strong chance at qualifying." },
                 { title: "Access", text: "Join private group chats and bi-weekly Zoom sessions." },
               ].map((step, index) => (
@@ -223,7 +223,7 @@ export default function FoundersCircle() {
             <div className="rounded-[32px] bg-gradient-to-br from-indigo-600 via-indigo-700 to-blue-700 p-8 text-white shadow-[0_35px_90px_-55px_rgba(30,64,175,0.85)] ring-1 ring-indigo-300/40">
               <h3 className="text-2xl font-semibold">Ready to shape what comes next?</h3>
               <p className="mt-2 text-sm text-indigo-100">
-                {isActive ? `Sprint ends in ${daysLeftLabel}.` : `Next sprint starts ${nextSprintStart} — ${daysToGoLabel}.`}
+                {isActive ? `Sprint ends in ${daysLeftLabel}.` : `Next sprint starts ${nextSprintStart} - ${daysToGoLabel}.`}
               </p>
               <div className="mt-5 flex flex-wrap items-center gap-3 text-xs text-indigo-100">
                 <Button asChild className="rounded-full bg-white px-6 text-indigo-700 shadow-[0_16px_30px_-18px_rgba(15,23,42,0.5)] hover:bg-indigo-50">
@@ -237,7 +237,7 @@ export default function FoundersCircle() {
               <p className="text-sm font-semibold text-slate-900">Partnerships</p>
               <div className="mt-2 space-y-3 text-xs text-slate-500">
                 <p>
-                  We’re open to working with teachers, schools, EdTech or SaaS builders — or anyone interested in helping build
+                  We’re open to working with teachers, schools, EdTech or SaaS builders - or anyone interested in helping build
                   an early-stage education startup focused on GCSE Maths practice.
                 </p>
                 <p>
@@ -246,7 +246,7 @@ export default function FoundersCircle() {
                 </p>
                 <p>
                   If you’re already teaching, building in this space, or interested in collaborating more directly, feel free to reach
-                  out — there’s no need to go through the sprint process.
+                  out - there’s no need to go through the sprint process.
                 </p>
               </div>
               <div className="mt-4 flex flex-wrap items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">

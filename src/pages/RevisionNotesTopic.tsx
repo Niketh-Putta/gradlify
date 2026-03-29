@@ -16,7 +16,7 @@ import rehypeRaw from "rehype-raw";
 import rehypeSanitize, { defaultSchema } from "rehype-sanitize";
 import "katex/dist/katex.min.css";
 import { cn } from "@/lib/utils";
-import { BlockVisual, hasBlockVisual } from "@/components/exam/BlockVisual";
+import { BlockVisual, hasBlockVisual, blockVisualKeys } from "@/components/exam/BlockVisual";
 import { getInteractiveDiagram } from "@/components/revision-diagrams/InteractiveDiagrams";
 import MathText from "@/components/MathText";
 import { statisticsPracticeQuestions } from "@/data/statisticsPracticeQuestions";
@@ -26,7 +26,11 @@ import { replaceExamBoardReferences } from "@/lib/examBoard";
 import { resolveUserTrack } from "@/lib/track";
 import { getTrackSections } from "@/lib/trackCurriculum";
 
-const statisticsExtraInlineImages: Record<string, string> = {
+const extraDiagramsBySlug: Record<string, string> = {
+  // 11+ Maths - Specific Systematic Slugs (High-Fidelity SVGs ONLY)
+  "geometry_measures-coords_trans": "![Reflections and coordinate transformations.](/notes-diagrams/general/coordinates-grid.svg)",
+
+  // GCSE Statistics (Restored Premium SVGs)
   "frequency-tables": "![Finding the median class using cumulative frequency](/notes-diagrams/statistics/frequency-cf-median-class.svg)",
   "box-plots-cumulative-frequency": "![Interquartile range (IQR) highlighted on a box plot](/notes-diagrams/statistics/boxplot-iqr-highlight.svg)",
   "histograms": "![Histogram: area equals frequency](/notes-diagrams/statistics/histogram-area-frequency.svg)",
@@ -36,9 +40,10 @@ const statisticsExtraInlineImages: Record<string, string> = {
   "sampling": "![Sampling bias: quick examples](/notes-diagrams/statistics/sampling-bias-examples.svg)",
 };
 
-function injectStatisticsExtraInlineImage(md: string, slug?: string) {
+function injectTopicDiagrams(md: string, slug?: string) {
   if (!slug) return md;
-  const extra = statisticsExtraInlineImages[slug];
+  // Check for exact slug match or inclusion (e.g. for generic 'rucsac' diagrams)
+  const extra = extraDiagramsBySlug[slug] || (slug.includes('rucsac') ? extraDiagramsBySlug['rucsac'] : null);
   if (!extra) return md;
 
   const firstImage = md.match(/!\[[^\]]*\]\([^)]+\)/);
@@ -46,20 +51,28 @@ function injectStatisticsExtraInlineImage(md: string, slug?: string) {
     return md.replace(firstImage[0], `${firstImage[0]}\n\n${extra}`);
   }
 
-  return `${md}\n\n${extra}`;
+  // If no image exists, inject after the first header
+  if (md.startsWith('#')) {
+    const firstHeaderEnd = md.indexOf('\n');
+    if (firstHeaderEnd !== -1) {
+      return md.slice(0, firstHeaderEnd) + `\n\n${extra}` + md.slice(firstHeaderEnd);
+    }
+  }
+
+  return `${extra}\n\n${md}`;
 }
 
 // Allow a small, safe subset of HTML in notes markdown.
 // This primarily enables <details>/<summary> for inline learning-point dropdowns.
 const notesSanitizeSchema = {
   ...defaultSchema,
-  tagNames: [...(defaultSchema.tagNames || []), "details", "summary", "u", "div", "span", "table", "thead", "tbody", "tr", "th", "td", "b", "i", "strong", "em"],
+  tagNames: [...(defaultSchema.tagNames || []), "details", "summary", "u", "div", "span", "table", "thead", "tbody", "tr", "th", "td", "b", "i", "strong", "em", "math", "mi", "mn", "mo", "mfrac", "msqrt", "mroot", "msup", "msub", "msubsup", "munder", "mover", "munderover", "mrow", "semantics", "annotation"],
   attributes: {
     ...defaultSchema.attributes,
-    "*": [...(defaultSchema.attributes?.["*"] || []), "className", "style"],
+    "*": [...(defaultSchema.attributes?.["*"] || []), "className", "style", "aria-hidden"],
     details: [...((defaultSchema.attributes as any)?.details || []), "open"],
     div: ["className", "style"],
-    span: ["className", "style"],
+    span: ["className", "style", "aria-hidden"],
     table: ["className", "style"],
     td: ["className", "style", "rowspan", "colspan"],
     th: ["className", "style", "rowspan", "colspan"],
@@ -482,13 +495,20 @@ function renderTextWithMath(children: ReactNode) {
 }
 
 function NotesMarkdown({ children, blockType }: { children: string, blockType?: string }) {
+  // Pre-process markdown to handle [!NOTE] etc before it gets parsed into complex React structures
+  const processedMd = children
+    .replace(/^> \[!NOTE\]/gim, '> @@NOTE-ALERT@@')
+    .replace(/^> \[!TIP\]/gim, '> @@TIP-ALERT@@')
+    .replace(/^> \[!IMPORTANT\]/gim, '> @@IMPORTANT-ALERT@@');
+
   return (
     <ReactMarkdown
       remarkPlugins={[remarkMath]}
       rehypePlugins={[rehypeRaw, [rehypeSanitize, notesSanitizeSchema], rehypeKatex]}
+      children={processedMd}
       components={{
         p: ({ children }) => (
-          <p className="mb-6 text-foreground/90 leading-relaxed text-[15px] sm:text-[17px]">{renderTextWithMath(children)}</p>
+          <p className="mb-8 text-foreground/90 leading-relaxed text-[16px] sm:text-[18px] tracking-tight">{renderTextWithMath(children)}</p>
         ),
         strong: ({ children }) => (
           <strong className="font-serif italic font-medium text-foreground tracking-tight underline decoration-amber-400/60 underline-offset-[3px] decoration-2">{renderTextWithMath(children)}</strong>
@@ -497,14 +517,14 @@ function NotesMarkdown({ children, blockType }: { children: string, blockType?: 
           <em className="italic text-foreground/80 not-italic font-medium">{renderTextWithMath(children)}</em>
         ),
         ul: ({ children }) => (
-          <ul className="space-y-4 mb-6 ml-2">{children}</ul>
+          <ul className="space-y-5 mb-8 ml-6">{children}</ul>
         ),
         ol: ({ children }) => (
-          <ol className="space-y-4 mb-6 list-decimal list-outside ml-6 font-serif italic font-medium">{children}</ol>
+          <ol className="space-y-5 mb-8 list-decimal list-outside ml-10 font-serif italic">{children}</ol>
         ),
         li: ({ children }) => (
           <li className={cn(
-            "leading-relaxed text-[15px] sm:text-[17px] text-foreground/90 font-medium relative pl-5 before:absolute before:left-0 before:top-2.5 before:w-1.5 before:h-1.5 before:rounded-full before:opacity-100",
+            "leading-relaxed text-[16px] sm:text-[18px] text-foreground/90 tracking-tight font-medium relative pl-5 before:absolute before:left-0 before:top-3 before:w-1.5 before:h-1.5 before:rounded-full before:opacity-100",
             (blockType === 'passage' || blockType === 'vocab_list') ? "before:bg-amber-500/50" : "before:bg-primary/50"
           )}>
             {renderTextWithMath(children)}
@@ -532,11 +552,73 @@ function NotesMarkdown({ children, blockType }: { children: string, blockType?: 
             {renderTextWithMath(children)}
           </h3>
         ),
-        blockquote: ({ children }) => (
-          <blockquote className="border-l-[4px] border-primary/50 pl-6 py-4 my-8 bg-gradient-to-r from-primary/10 to-transparent rounded-r-2xl text-foreground/90 text-[15px] sm:text-[17px] font-medium leading-relaxed">
-            {renderTextWithMath(children)}
-          </blockquote>
-        ),
+        blockquote: ({ children }) => {
+          let alertType: 'note' | 'tip' | 'important' | null = null;
+          
+          // Non-mutative detection and cleaning of alert tags
+          const processChildren = (nodes: React.ReactNode): React.ReactNode => {
+            return React.Children.map(nodes, (child, index) => {
+              if (index === 0 && React.isValidElement(child) && child.props.children) {
+                const innerChildren = React.Children.toArray(child.props.children);
+                const firstChild = innerChildren[0];
+                
+                if (typeof firstChild === 'string') {
+                  const trimmed = firstChild.trim();
+                  
+                  if (trimmed.includes('@@NOTE-ALERT@@')) {
+                    alertType = 'note';
+                  } else if (trimmed.includes('@@TIP-ALERT@@')) {
+                    alertType = 'tip';
+                  } else if (trimmed.includes('@@IMPORTANT-ALERT@@')) {
+                    alertType = 'important';
+                  }
+                  
+                  if (alertType) {
+                    // Remove the marker and fix colon spacing for the header if needed
+                    const newText = firstChild
+                      .replace(/@@[A-Z-]+-ALERT@@\s?/g, '')
+                      .replace(/:(\S)/g, ': $1');
+                    const newInner = [newText, ...innerChildren.slice(1)];
+                    return React.cloneElement(child as any, {}, ...newInner);
+                  }
+                }
+              }
+              return child;
+            });
+          };
+
+          const cleanedChildren = processChildren(children);
+
+          if (alertType) {
+            const config = {
+              note: { icon: <Zap className="h-5 w-5" />, label: 'Note', border: 'border-blue-500/50', bg: 'from-blue-500/10', color: 'text-blue-600 dark:text-blue-400' },
+              tip: { icon: <Lightbulb className="h-5 w-5" />, label: 'Tip', border: 'border-emerald-500/50', bg: 'from-emerald-500/10', color: 'text-emerald-600 dark:text-emerald-400' },
+              important: { icon: <AlertTriangle className="h-5 w-5" />, label: 'Important', border: 'border-amber-500/50', bg: 'from-amber-500/10', color: 'text-amber-600 dark:text-amber-400' }
+            }[alertType];
+
+            return (
+              <div className={cn(
+                "border-l-4 pl-6 py-5 my-10 bg-gradient-to-r to-transparent rounded-r-2xl relative group transition-all duration-300 hover:shadow-sm",
+                config.border,
+                config.bg
+              )}>
+                <div className={cn("flex items-center gap-2 mb-3 font-black uppercase tracking-widest text-[11px]", config.color)}>
+                  {config.icon}
+                  {config.label}
+                </div>
+                <div className="text-foreground/90 text-[16px] sm:text-[18px] font-medium leading-relaxed tracking-tight">
+                  {renderTextWithMath(cleanedChildren)}
+                </div>
+              </div>
+            );
+          }
+
+          return (
+            <blockquote className="border-l-[4px] border-primary/50 pl-6 py-4 my-8 bg-gradient-to-r from-primary/10 to-transparent rounded-r-2xl text-foreground/90 text-[16px] sm:text-[18px] font-medium leading-relaxed tracking-tight">
+              {renderTextWithMath(children)}
+            </blockquote>
+          );
+        },
         details: ({ children, open }) => (
           <details open={Boolean(open)} className="notes-details">
             {children}
@@ -591,9 +673,7 @@ function NotesMarkdown({ children, blockType }: { children: string, blockType?: 
           );
         },
       }}
-    >
-      {children}
-    </ReactMarkdown>
+    />
   );
 }
 
@@ -693,9 +773,7 @@ export default function RevisionNotesTopic() {
           )
         : currentTopic.md;
 
-    if (decodedSection === "Statistics") {
-      cleanedMd = injectStatisticsExtraInlineImage(cleanedMd, currentTopic.slug);
-    }
+    cleanedMd = injectTopicDiagrams(cleanedMd, currentTopic.slug);
 
     const blocks = parseMarkdownToBlocks(cleanedMd);
     
@@ -733,9 +811,39 @@ export default function RevisionNotesTopic() {
 
   // Keep each accordion independent; start all open for a new topic.
   const [expandedBlocks, setExpandedBlocks] = useState<Set<number>>(new Set());
+  const [activeBlockId, setActiveBlockId] = useState<string | null>(null);
+
   useEffect(() => {
     setExpandedBlocks(new Set(contentBlocks.map((_, idx) => idx)));
   }, [topicSlug, contentBlocks]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        // Find the block that's most visible or the first one that's intersecting
+        const visibleEntry = entries.find(entry => entry.isIntersecting);
+        if (visibleEntry) {
+          setActiveBlockId(visibleEntry.target.id);
+        }
+      },
+      {
+        rootMargin: '-10% 0px -70% 0px', // Adjust so the active block is roughly in the top third
+        threshold: 0
+      }
+    );
+
+    // Observe all content blocks
+    contentBlocks.forEach((_, idx) => {
+      const el = document.getElementById(`block-${idx}`);
+      if (el) observer.observe(el);
+    });
+
+    // Also observe practice questions if they exist
+    const practiceEl = document.getElementById('practice-questions');
+    if (practiceEl) observer.observe(practiceEl);
+
+    return () => observer.disconnect();
+  }, [contentBlocks, practiceQuestions]);
 
   const { prevTopic, nextTopic } = useMemo(() => {
     const prev = currentIndex > 0 ? topics[currentIndex - 1] : null;
@@ -873,7 +981,7 @@ export default function RevisionNotesTopic() {
       </span>
     </div>
 
-    <h1 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight mb-4 leading-tight">
+    <h1 className="text-3xl sm:text-4xl font-black text-foreground tracking-tight mb-4 leading-tight font-serif italic">
       {currentTopic.title}
     </h1>
 
@@ -912,10 +1020,19 @@ export default function RevisionNotesTopic() {
   </div>
   );
 
+  const renderedVisualKeywords = new Set<string>();
+
   const renderBlocks = (blocks: any[]) => (
     blocks.map((block, index) => {
       const blockStyle = blockConfig[block.type] || blockConfig.info;
       const isHighPriority = blockStyle.priority === 'high';
+      
+      const visualKey = blockVisualKeys.find(k => block.title.toLowerCase().includes(k));
+      let shouldShowVisual = false;
+      if (visualKey && !renderedVisualKeywords.has(visualKey)) {
+        shouldShowVisual = true;
+        renderedVisualKeywords.add(visualKey);
+      }
       
       return (
         <div 
@@ -952,6 +1069,11 @@ export default function RevisionNotesTopic() {
                 {block.title}
               </h2>
             </div>
+            {shouldShowVisual && (
+              <div className="px-4 py-1.5 rounded-full bg-background/50 border border-black/5 dark:border-white/5 text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-1.5 shadow-sm">
+                <Eye className="h-3 w-3 text-primary/60" /> Visual Step
+              </div>
+            )}
             {block.type !== 'passage' && (
               <ChevronDown className={cn(
                 "h-5 w-5 text-muted-foreground transition-transform duration-300",
@@ -965,13 +1087,19 @@ export default function RevisionNotesTopic() {
               (expandedBlocks.has(index) || block.type === 'passage' || block.type === 'vocab_list') ? "max-h-[5000px] opacity-100" : "max-h-0 opacity-0"
             )}
           >
-            <div className={cn(
-              "p-6 sm:p-8 notes-content-wrapper", 
-              block.type === 'passage' && 'font-serif text-[1.1rem] leading-relaxed text-amber-950/90 overflow-y-auto max-h-[calc(100vh-16rem)] custom-scrollbar',
-              block.type === 'vocab_list' && 'text-[1.05rem] leading-relaxed text-amber-950/90 overflow-y-auto max-h-[calc(100vh-16rem)] custom-scrollbar'
-            )}>
-              <NotesMarkdown blockType={block.type}>{block.content}</NotesMarkdown>
-            </div>
+            {/* Call specialized block visual diagrams if available */}
+            {shouldShowVisual && (
+              <div className="px-6 pt-6 -mb-2">
+                <BlockVisual title={block.title} />
+              </div>
+            )}
+              <div className={cn(
+                "p-8 sm:p-10 notes-content-wrapper", 
+                block.type === 'passage' && 'font-serif text-[1.15rem] leading-[1.8] text-amber-950/90 tracking-normal overflow-y-auto max-h-[calc(100vh-16rem)] custom-scrollbar',
+                block.type === 'vocab_list' && 'text-[1.1rem] leading-[1.7] text-amber-950/90 tracking-tight overflow-y-auto max-h-[calc(100vh-16rem)] custom-scrollbar'
+              )}>
+                <NotesMarkdown blockType={block.type}>{block.content}</NotesMarkdown>
+              </div>
           </div>
         </div>
       );
@@ -1005,7 +1133,7 @@ export default function RevisionNotesTopic() {
             </div>
 
             {/* Right Column - Lesson Notes & Practice */}
-            <div className="flex-1 w-full xl:w-[55%] space-y-6">
+            <div className="flex-1 w-full xl:w-[55%] space-y-8">
               {/* Lesson notes */}
               {renderBlocks(utilityBlocks)}
 
@@ -1076,24 +1204,11 @@ export default function RevisionNotesTopic() {
         <div className="flex-1 w-full max-w-[800px] mx-auto xl:mx-0 shrink-0">
           {renderBreadcrumb()}
           {renderHeader()}
-        {/* Interactive Diagram Section for GCSE */}
-        {currentTopic.level !== "11+" && getInteractiveDiagram(topicSlug || "") && (
-          <div className="mb-10 group transition-all duration-500">
-            {getInteractiveDiagram(topicSlug || "")}
-          </div>
-        )}
-
+        
         {/* Content Blocks */}
         <div className="space-y-5 mb-10">
           {renderBlocks(contentBlocks)}
         </div>
-
-        {/* Interactive Diagram Section */}
-        {decodedSection !== "Statistics" && getInteractiveDiagram(topicSlug || "") && (
-          <div className="mb-10">
-            {getInteractiveDiagram(topicSlug || "")}
-          </div>
-        )}
 
         {/* Practice Questions Section */}
         {practiceQuestions.length > 0 && (
@@ -1186,12 +1301,12 @@ export default function RevisionNotesTopic() {
       </div>
 
       {/* Sticky Table of Contents Sidebar */}
-        <div className="hidden xl:block w-[300px] shrink-0 sticky top-24">
+        <div className="hidden xl:block w-[300px] shrink-0 sticky top-24 self-start">
           <div className="p-6 rounded-2xl border border-border bg-card/50 backdrop-blur-sm shadow-sm ring-1 ring-black/5 dark:ring-white/5">
             <h3 className="text-xs font-black uppercase tracking-widest text-muted-foreground mb-6">Table of Contents</h3>
             <ul className="space-y-4 relative before:absolute before:left-2 before:top-2 before:bottom-2 before:w-px before:bg-border/60">
               {contentBlocks.map((block, idx) => {
-                const isHighPriority = blockConfig[block.type]?.priority === 'high';
+                const isActive = activeBlockId === `block-${idx}`;
                 return (
                   <li key={idx} className="relative z-10 transition-transform hover:translate-x-1">
                     <a 
@@ -1201,15 +1316,20 @@ export default function RevisionNotesTopic() {
                         document.getElementById(`block-${idx}`)?.scrollIntoView({ behavior: 'smooth' });
                       }}
                       className={cn(
-                        "flex items-center gap-4 font-medium transition-colors group",
-                        isHighPriority ? "text-[15px] text-foreground" : "text-sm text-foreground/60 hover:text-foreground"
+                        "flex items-center gap-4 font-medium transition-all group",
+                        isActive ? "text-[15px] text-foreground translate-x-1" : "text-sm text-foreground/60 hover:text-foreground"
                       )}
                     >
                       <div className={cn(
-                        "w-4 h-4 rounded-full bg-background border-[3px] transition-colors shrink-0",
-                        isHighPriority ? "border-primary shadow-[0_0_10px_rgba(var(--primary),0.3)]" : "border-muted-foreground/30 group-hover:border-primary/50"
+                        "w-4 h-4 rounded-full bg-background border-[3px] transition-all shrink-0",
+                        isActive 
+                          ? ((currentSubject as string) === 'english' ? "border-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.4)]" : "border-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.4)]")
+                          : "border-muted-foreground/30 group-hover:border-primary/50"
                       )} />
-                      <span className="truncate">{block.title}</span>
+                      <span className={cn(
+                        "truncate",
+                        isActive && "font-black"
+                      )}>{block.title}</span>
                     </a>
                   </li>
                 );
@@ -1222,10 +1342,23 @@ export default function RevisionNotesTopic() {
                       e.preventDefault();
                       document.getElementById('practice-questions')?.scrollIntoView({ behavior: 'smooth' });
                     }}
-                    className="flex items-center gap-4 text-[15px] font-bold text-violet-600 dark:text-violet-400 group hover:text-violet-500"
+                    className={cn(
+                      "flex items-center gap-4 text-[15px] font-bold transition-all group",
+                      activeBlockId === 'practice-questions' 
+                        ? "text-violet-600 translate-x-1" 
+                        : "text-violet-600/60 hover:text-violet-500"
+                    )}
                   >
-                    <div className="w-4 h-4 rounded-full bg-background border-[3px] border-violet-500/30 group-hover:border-violet-500 transition-colors shrink-0" />
-                    <span className="truncate">Practice Questions</span>
+                    <div className={cn(
+                      "w-4 h-4 rounded-full bg-background border-[3px] transition-all shrink-0",
+                      activeBlockId === 'practice-questions'
+                        ? "border-violet-600 shadow-[0_0_10px_rgba(124,58,237,0.4)]"
+                        : "border-violet-500/30 group-hover:border-violet-500"
+                    )} />
+                    <span className={cn(
+                      "truncate",
+                      activeBlockId === 'practice-questions' && "font-black"
+                    )}>Practice Questions</span>
                   </a>
                 </li>
               )}

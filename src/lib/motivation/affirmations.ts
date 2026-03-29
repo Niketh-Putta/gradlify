@@ -16,7 +16,7 @@ export const mindsetAffirmations: string[] = [
   "I am building a foundation of knowledge that will serve me for life.",
   "My hard work is paying off, and I celebrate every small victory.",
   "I am worthy of success and prepared to claim it.",
-  "Challenges don't define me—my response to them does.",
+  "Challenges don't define me - my response to them does.",
   "I am focused, energized, and ready to excel.",
   "Every question I answer correctly is proof of my growing mastery."
 ];

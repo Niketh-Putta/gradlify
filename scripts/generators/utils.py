@@ -40,7 +40,7 @@ def generate_fraction_wrong(n, d, count):
 
 def generate_wrong(correct, count=4):
     try:
-        val_str = str(correct).replace("£", "").replace("%", "").replace("°", "").replace("m²", "").replace("cm²", "").replace("cm³", "").replace("cm", "").replace("m", "").replace(",", "").replace("$", "").replace("g", "").strip()
+        val_str = str(correct).replace("£", "").replace("%", "").replace("°", "").replace("cm³", "").replace("cm²", "").replace("m²", "").replace("cm", "").replace("m", "").replace(",", "").replace("$", "").replace("kg", "").replace("g", "").replace("ml", "").replace("l", "").strip()
         
         # Check if fraction
         num_parts = val_str.split("/")
@@ -50,12 +50,7 @@ def generate_wrong(correct, count=4):
         val = float(val_str)
         is_int = (val == int(val))
     except (ValueError, TypeError):
-        # Fallback for strings
-        fallback = set()
-        for suffix in ["a", "b", "c", "d", "e"]:
-            if len(fallback) < count:
-                fallback.add(str(correct) + suffix)
-        return json.dumps(list(fallback)[:count])
+        raise ValueError(f"Cannot auto-generate distractors for non-numerical/non-fraction answer: '{correct}'. You must provide explicit wrong_answers list in the script.")
 
     distractors = set()
     attempts = 0
@@ -80,7 +75,7 @@ def generate_wrong(correct, count=4):
 
 subtopic_diff_tracker = {}
 
-def get_base(subtopic, q, ans, exp, diff=2, marks=1, image_url=""):
+def get_base(subtopic, q, ans, exp, diff=2, marks=1, image_url="", wrong_answers=None):
     subtopic_map = {
         "number": "Number & Arithmetic",
         "algebra": "Algebra & Ratio",
@@ -107,7 +102,7 @@ def get_base(subtopic, q, ans, exp, diff=2, marks=1, image_url=""):
         "calculator": "Non-Calculator", 
         "question": q, 
         "correct_answer": str(ans),
-        "wrong_answers": generate_wrong(ans), 
+        "wrong_answers": generate_wrong(ans) if wrong_answers is None else wrong_answers, 
         "marks": marks, 
         "difficulty": assigned_diff,
         "estimated_time_sec": 45, 

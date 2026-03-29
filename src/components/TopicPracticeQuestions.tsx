@@ -142,7 +142,7 @@ export function TopicPracticeQuestions({ topicSlug, topicTitle, userId }: TopicP
             .from('exam_questions')
             .select('*')
             .or(`question_type.ilike.%${keyword}%,question.ilike.%${keyword}%`)
-            // TRACK FILTER — Ensures separation between GCSE and 11+
+            // TRACK FILTER - Ensures separation between GCSE and 11+
             .eq('track', userTrack)
             .limit(8);
           
@@ -170,7 +170,7 @@ export function TopicPracticeQuestions({ topicSlug, topicTitle, userId }: TopicP
           .from('exam_questions')
           .select('*')
           .ilike('question_type', `%${mappedSection}%`)
-          // TRACK FILTER — Ensures separation between GCSE and 11+
+          // TRACK FILTER - Ensures separation between GCSE and 11+
           .eq('track', userTrack)
           .limit(8);
         
@@ -188,7 +188,7 @@ export function TopicPracticeQuestions({ topicSlug, topicTitle, userId }: TopicP
             .from('exam_questions')
             .select('*')
             .ilike('question_type', `%${keyword}%`)
-            // TRACK FILTER — Ensures separation between GCSE and 11+
+            // TRACK FILTER - Ensures separation between GCSE and 11+
             .eq('track', userTrack)
             .limit(8);
           
@@ -204,7 +204,7 @@ export function TopicPracticeQuestions({ topicSlug, topicTitle, userId }: TopicP
         const { data: anyData, error } = await supabase
           .from('exam_questions')
           .select('*')
-          // TRACK FILTER — Ensures separation between GCSE and 11+
+          // TRACK FILTER - Ensures separation between GCSE and 11+
           .eq('track', userTrack)
           .limit(8);
         
@@ -390,7 +390,7 @@ export function TopicPracticeQuestions({ topicSlug, topicTitle, userId }: TopicP
     return "text-orange-600";
   };
 
-  const resolveImageUrl = resolveQuestionImageUrl;
+  const resolveImageUrl = (q: any) => resolveQuestionImageUrl(q.image_url, q.question);
 
   const getAnswerColor = (answer: string) => {
     if (!hasSubmitted || !currentQuestion) return '';
@@ -425,7 +425,7 @@ export function TopicPracticeQuestions({ topicSlug, topicTitle, userId }: TopicP
   }
 
   const isLastQuestion = currentQuestionIndex === questions.length - 1;
-  const imageUrl = currentQuestion ? resolveImageUrl(currentQuestion.image_url) : undefined;
+  const imageUrl = currentQuestion ? resolveImageUrl(currentQuestion) : undefined;
   const isCorrect = hasSubmitted && selectedAnswer === currentQuestion?.correct_answer;
 
   return (

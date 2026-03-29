@@ -238,9 +238,9 @@
     --popover: 240 40% 6%;
     --popover-foreground: 220 20% 97%;
 
-    --primary: 250 83% 65%; /* Star glow / Nebula blue */
+    --primary: 221 83% 58%; /* Blue primary for dark mode */
     --primary-foreground: 0 0% 100%;
-    --primary-glow: 250 83% 75%;
+    --primary-glow: 221 83% 68%;
 
     --secondary: 240 30% 12%; /* Nebula dust */
     --secondary-foreground: 220 20% 95%;
@@ -262,19 +262,19 @@
 
     --border: 240 40% 12%; /* Deep space border */
     --input: 240 30% 10%;
-    --ring: 250 83% 65%;
+    --ring: 221 83% 58%;
 
     /* Border Gradient for Galaxy Mode */
-    --border-gradient: linear-gradient(135deg, hsl(250 83% 60%) 0%, hsl(280 83% 65%) 100%);
+    --border-gradient: linear-gradient(135deg, hsl(221 83% 58%) 0%, hsl(221 83% 68%) 100%);
 
     /* Dark Mode Gradients */
-    --gradient-hero: linear-gradient(135deg, hsl(221 83% 58%) 0%, hsl(250 83% 63%) 100%);
-    --gradient-hero-banner: linear-gradient(135deg, hsl(221 83% 58%) 0%, hsl(250 83% 63%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(221 83% 58%) 0%, hsl(221 83% 68%) 100%);
+    --gradient-hero-banner: linear-gradient(135deg, hsl(221 83% 58%) 0%, hsl(221 83% 68%) 100%);
     --gradient-primary: linear-gradient(135deg, hsl(221 83% 58%) 0%, hsl(221 83% 68%) 100%);
     --gradient-success: linear-gradient(135deg, hsl(160 84% 45%) 0%, hsl(160 84% 50%) 100%);
     --gradient-warning: linear-gradient(135deg, hsl(43 96% 56%) 0%, hsl(43 96% 62%) 100%);
     --gradient-card: linear-gradient(180deg, hsl(224 71% 8%) 0%, hsl(224 71% 10%) 100%);
-    --gradient-premium: linear-gradient(135deg, hsl(250 83% 63%) 0%, hsl(280 80% 65%) 100%);
+    --gradient-premium: linear-gradient(135deg, hsl(221 83% 63%) 0%, hsl(221 80% 68%) 100%);
 
     /* Section Background Tints - Galaxy Mode */
     --bg-readiness: 240 50% 6%;
@@ -935,19 +935,18 @@
 
 /* Option Cards */
 .option-card-exam {
-  @apply w-full text-left p-3 sm:p-4 rounded-xl transition-all duration-200 ease-out cursor-pointer;
-  @apply bg-card border border-border/60;
+  @apply w-full text-left p-3.5 sm:p-4 rounded-xl transition-all duration-200 ease-out cursor-pointer;
+  @apply bg-card border border-border/80 shadow-[0_1px_2px_rgba(0,0,0,0.02)];
 }
 
 .option-card-exam:hover:not(.selected):not(.correct):not(.incorrect) {
-  border-color: hsl(var(--primary) / 0.4);
-  background: hsl(var(--primary) / 0.04);
+  @apply border-primary/30 bg-primary/[0.02];
 }
 
 .option-card-exam.selected {
   border-color: hsl(var(--primary));
-  background: hsl(var(--primary) / 0.07);
-  box-shadow: 0 0 0 3px hsl(var(--primary) / 0.12);
+  background: hsl(var(--primary) / 0.04);
+  box-shadow: 0 0 0 1px hsl(var(--primary) / 0.3);
 }
 
 .option-card-exam.correct {
@@ -969,7 +968,7 @@
 /* Option Letter Badge */
 .option-letter-exam {
   @apply flex-shrink-0 w-8 h-8 sm:w-9 sm:h-9 rounded-lg border flex items-center justify-center text-xs sm:text-sm font-semibold transition-all duration-200;
-  @apply border-border/60 text-muted-foreground bg-muted/40;
+  @apply border-border/70 text-muted-foreground bg-muted/20 shadow-[0_1px_2px_rgba(0,0,0,0.02)];
 }
 
 .option-letter-exam.selected {
@@ -1185,6 +1184,7 @@
   display: inline-block;
   vertical-align: baseline;
   max-width: 100%;
+  padding: 0 0.125em;
 }
 
 .inline-math :global(.katex) {

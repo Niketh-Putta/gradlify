@@ -122,19 +122,19 @@ const Resources = () => {
       calculator: [
         {
           board: "AQA",
-          title: "AQA Foundation (Calculator) — Browse official papers",
+          title: "AQA Foundation (Calculator) - Browse official papers",
           questionUrl: "https://www.aqa.org.uk/subjects/mathematics/gcse/mathematics-8300/assessment-resources",
           answerUrl: "https://www.aqa.org.uk/subjects/mathematics/gcse/mathematics-8300/assessment-resources",
         },
         {
           board: "OCR",
-          title: "OCR Foundation (Calculator) — Browse official papers",
+          title: "OCR Foundation (Calculator) - Browse official papers",
           questionUrl: "https://www.ocr.org.uk/qualifications/gcse/mathematics-j560-from-2015/assessment/",
           answerUrl: "https://www.ocr.org.uk/qualifications/gcse/mathematics-j560-from-2015/assessment/",
         },
         {
           board: "Edexcel",
-          title: "Edexcel Foundation (Calculator) — Browse official papers",
+          title: "Edexcel Foundation (Calculator) - Browse official papers",
           questionUrl: "https://qualifications.pearson.com/en/qualifications/edexcel-gcses/mathematics-2015.coursematerials.html",
           answerUrl: "https://qualifications.pearson.com/en/qualifications/edexcel-gcses/mathematics-2015.coursematerials.html",
         },
@@ -160,13 +160,13 @@ const Resources = () => {
         },
         {
           board: "OCR",
-          title: "OCR Foundation (Non-Calculator) — Browse official papers",
+          title: "OCR Foundation (Non-Calculator) - Browse official papers",
           questionUrl: "https://www.ocr.org.uk/qualifications/gcse/mathematics-j560-from-2015/assessment/",
           answerUrl: "https://www.ocr.org.uk/qualifications/gcse/mathematics-j560-from-2015/assessment/",
         },
         {
           board: "Edexcel",
-          title: "Edexcel Foundation (Non-Calculator) — Browse official papers",
+          title: "Edexcel Foundation (Non-Calculator) - Browse official papers",
           questionUrl: "https://qualifications.pearson.com/en/qualifications/edexcel-gcses/mathematics-2015.coursematerials.html",
           answerUrl: "https://qualifications.pearson.com/en/qualifications/edexcel-gcses/mathematics-2015.coursematerials.html",
         },
@@ -188,25 +188,25 @@ const Resources = () => {
         },
         {
           board: "Edexcel",
-          title: "Edexcel Higher (Calculator) — Mark scheme example (Nov 2023)",
+          title: "Edexcel Higher (Calculator) - Mark scheme example (Nov 2023)",
           questionUrl: null,
           answerUrl: "/past-papers/Edexcel-Higher-Paper3-Calculator-MarkScheme-Nov2023.pdf"
         },
         {
           board: "Edexcel",
-          title: "Edexcel Higher (Calculator) — Browse official papers",
+          title: "Edexcel Higher (Calculator) - Browse official papers",
           questionUrl: "https://qualifications.pearson.com/en/qualifications/edexcel-gcses/mathematics-2015.coursematerials.html",
           answerUrl: "https://qualifications.pearson.com/en/qualifications/edexcel-gcses/mathematics-2015.coursematerials.html",
         },
         {
           board: "OCR",
-          title: "OCR Higher (Calculator) — Browse official papers",
+          title: "OCR Higher (Calculator) - Browse official papers",
           questionUrl: "https://www.ocr.org.uk/qualifications/gcse/mathematics-j560-from-2015/assessment/",
           answerUrl: "https://www.ocr.org.uk/qualifications/gcse/mathematics-j560-from-2015/assessment/",
         },
         {
           board: "IGCSE",
-          title: "Edexcel International GCSE (Calculator) — Browse official papers",
+          title: "Edexcel International GCSE (Calculator) - Browse official papers",
           questionUrl: "https://qualifications.pearson.com/en/qualifications/edexcel-international-gcses/international-gcse-mathematics-a-2016.coursematerials.html",
           answerUrl: "https://qualifications.pearson.com/en/qualifications/edexcel-international-gcses/international-gcse-mathematics-a-2016.coursematerials.html",
         },
@@ -226,25 +226,25 @@ const Resources = () => {
         },
         {
           board: "IGCSE",
-          title: "Edexcel International GCSE — Mark scheme example (Summer 2023)",
+          title: "Edexcel International GCSE - Mark scheme example (Summer 2023)",
           questionUrl: null,
           answerUrl: "/past-papers/Edexcel-International-Paper1HR-MarkScheme-Summer2023.pdf"
         },
         {
           board: "IGCSE",
-          title: "Edexcel International GCSE — Browse official papers",
+          title: "Edexcel International GCSE - Browse official papers",
           questionUrl: "https://qualifications.pearson.com/en/qualifications/edexcel-international-gcses/international-gcse-mathematics-a-2016.coursematerials.html",
           answerUrl: "https://qualifications.pearson.com/en/qualifications/edexcel-international-gcses/international-gcse-mathematics-a-2016.coursematerials.html",
         },
         {
           board: "OCR",
-          title: "OCR Higher (Non-Calculator) — Browse official papers",
+          title: "OCR Higher (Non-Calculator) - Browse official papers",
           questionUrl: "https://www.ocr.org.uk/qualifications/gcse/mathematics-j560-from-2015/assessment/",
           answerUrl: "https://www.ocr.org.uk/qualifications/gcse/mathematics-j560-from-2015/assessment/",
         },
         {
           board: "Edexcel",
-          title: "Edexcel Higher (Non-Calculator) — Browse official papers",
+          title: "Edexcel Higher (Non-Calculator) - Browse official papers",
           questionUrl: "https://qualifications.pearson.com/en/qualifications/edexcel-gcses/mathematics-2015.coursematerials.html",
           answerUrl: "https://qualifications.pearson.com/en/qualifications/edexcel-gcses/mathematics-2015.coursematerials.html",
         },
@@ -449,7 +449,7 @@ const Resources = () => {
             {currentSubject === 'english' ? '11+ English Resources' : '11+ Maths Resources'}
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground font-light leading-relaxed tracking-wide">
-            High-fidelity practice papers, expert channels, and live strategy feeds—expertly selected for intentional 11+ {currentSubject === 'english' ? 'English' : 'Mathematics'} preparation.
+            High-fidelity practice papers, expert channels, and live strategy feeds - expertly selected for intentional 11+ {currentSubject === 'english' ? 'English' : 'Mathematics'} preparation.
           </p>
         </header>
 

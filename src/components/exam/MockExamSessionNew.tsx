@@ -8,6 +8,7 @@ import { usePremium } from "@/hooks/usePremium";
 import MathText from "@/components/MathText";
 import RichQuestionContent, { normalizeNewlines } from "@/components/RichQuestionContent";
 import { ImageWithFallback } from "@/components/ImageWithFallback";
+import { formatExplanation } from "@/lib/formatExplanation";
 import { cn } from "@/lib/utils";
 import { getTopicAndSubtopicLabels, getTrackTopicLabel } from "@/lib/subtopicDisplay";
 import { parseMultipartQuestion, MultipartQuestion } from "@/lib/multipart";
@@ -824,14 +825,8 @@ export default function MockExamSessionNew({ onBack, settings }: MockExamSession
                         <p className="text-xs uppercase tracking-wide text-muted-foreground font-semibold mb-2">Explanation</p>
                         <div className="text-sm text-foreground leading-relaxed bg-muted/30 border border-border rounded-lg p-3">
                           {q.explanation ? (
-                            <div className="space-y-2 whitespace-pre-wrap break-words">
-                              {normalizeNewlines(String(q.explanation))
-                                .split(/\n+/)
-                                .map((line, idx) => (
-                                  <div key={`explain-${q.id}-${idx}`}>
-                                    <MathText text={line || " "} />
-                                  </div>
-                                ))}
+                            <div className="space-y-2 break-words">
+                              <RichQuestionContent text={formatExplanation(q.explanation)} className="space-y-2" />
                             </div>
                           ) : (
                             <span className="text-muted-foreground">No explanation available for this question yet.</span>

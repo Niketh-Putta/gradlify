@@ -359,7 +359,7 @@ serve(async (req) => {
         .from('exam_questions')
         .select('id, question, correct_answer, wrong_answers, question_type, subtopic, tier, calculator')
         .eq('difficulty_level', 'extreme')
-        // TRACK FILTER — Ensures separation between GCSE and 11+
+        // TRACK FILTER  - Ensures separation between GCSE and 11+
         .eq('track', userTrack)
         .limit(questionCount * 3); // Fetch extra for randomization
       

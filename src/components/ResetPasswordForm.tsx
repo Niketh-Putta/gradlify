@@ -96,7 +96,7 @@ export function ResetPasswordForm({
       if (exists === false) {
         setEmail(normalizedEmail);
         setNoAccountEmail(normalizedEmail);
-        toast.error("No account found for this email. You're a new user — create an account.");
+        toast.error("No account found for this email. You're a new user - create an account.");
         return;
       }
 
@@ -138,7 +138,7 @@ export function ResetPasswordForm({
             No account found for <strong>{noAccountEmail}</strong>.
           </p>
           <p className={cn("text-xs mt-2", noticeSubClass)}>
-            You’re a new user — create an account to get started.
+            You’re a new user - create an account to get started.
           </p>
         </div>
 

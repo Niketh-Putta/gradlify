@@ -36,3 +36,8 @@ supabase/.temp/
 .vercel
 .claude
 .codex
+
+# Local scratch / accidental assets
+tmp/
+src/assets/notes section.mov
+public/sprint-mock.png

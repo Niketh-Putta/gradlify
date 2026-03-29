@@ -51,7 +51,7 @@ export function ImageWithFallback({
           </div>
         )}
       </div>
-      {alt && (
+      {alt && !['diagram', 'question diagram'].includes(alt.trim().toLowerCase()) && (
         <p className="text-xs font-medium text-foreground/70 text-center px-4">
           {alt}
         </p>

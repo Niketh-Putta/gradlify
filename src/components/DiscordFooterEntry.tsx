@@ -56,7 +56,7 @@ export function DiscordFooterEntry({
 
               {/* Description */}
               <p className="text-sm leading-relaxed mb-5 text-slate-500 max-w-sm">
-                Free daily 11+ practice materials, curated tips and exam strategies — delivered straight to your phone.
+                Free daily 11+ practice materials, curated tips and exam strategies - delivered straight to your phone.
               </p>
 
               {/* Stats row */}
@@ -115,7 +115,7 @@ export function DiscordFooterEntry({
     );
   }
 
-  // Footer variant — compact
+  // Footer variant - compact
   return (
     <div className={clsx("border-t border-border/50 pt-5", className)}>
       <div className="flex items-center justify-between gap-4 flex-wrap">

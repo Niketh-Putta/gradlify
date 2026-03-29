@@ -24,6 +24,7 @@ import Auth from "@/pages/Auth";
 import { AuthCallback } from "@/pages/AuthCallback";
 import { User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import EnglishSplitViewDemo from '@/pages/EnglishSplitViewDemo';
 import UpdatePassword from '@/pages/UpdatePassword';
 import FoundersCircle from '@/pages/FoundersCircle';
 import { SprintHowItWorks } from '@/pages/SprintHowItWorks';
@@ -285,6 +286,7 @@ const Index = () => {
             <Route path="mocks/maths" element={<MockExams forcedSubject="maths" />} />
             <Route path="mocks/english" element={<MockExams forcedSubject="english" />} />
             <Route path="mock-exam" element={<MockExamPage />} />
+            <Route path="english-demo" element={<EnglishSplitViewDemo />} />
             <Route path="practice-page" element={<PracticePage />} />
             <Route path="practice/maths" element={<PracticePage forcedSubject="maths" />} />
             <Route path="practice/english" element={<PracticePage forcedSubject="english" />} />

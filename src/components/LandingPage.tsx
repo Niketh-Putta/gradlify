@@ -158,7 +158,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
         q: isElevenPlus ? "Which 11+ formats does Gradlify support?" : "Which exam boards does Gradlify support?",
         a: isElevenPlus
           ? "11+ maths preparation with exam-style question formats and readiness tracking for GL, CEM, and ISEB."
-          : "All GCSE boards — the content is aligned to the standard GCSE Maths curriculum.",
+          : "All GCSE boards - the content is aligned to the standard GCSE Maths curriculum.",
       },
       {
         q: isElevenPlus ? "Can I practise mixed 11+ question styles?" : "Does Gradlify support Foundation and Higher tier?",
@@ -177,8 +177,8 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
       {
         q: "Is there a free plan?",
         a: AI_FEATURE_ENABLED
-          ? "Yes — start for free, then upgrade when you want deeper analytics and higher AI limits."
-          : "Yes — start for free, then upgrade when you want deeper analytics and higher limits.",
+          ? "Yes - start for free, then upgrade when you want deeper analytics and higher AI limits."
+          : "Yes - start for free, then upgrade when you want deeper analytics and higher limits.",
       },
     ],
     [isElevenPlus]
@@ -288,9 +288,9 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
         title: "Exam-style questions that feel like real 11+",
         body: isElevenPlus
           ? "Structured by 11+ skills and difficulty so practice translates directly into exam confidence."
-          : "Structured by calculator/non-calculator, Foundation/Higher, and difficulty — practice translates directly into exam performance.",
+          : "Structured by calculator/non-calculator, Foundation/Higher, and difficulty - practice translates directly into exam performance.",
         badge: "Exam-style practice",
-        hoverFact: "Hover the preview — it mirrors the real exam flow.",
+        hoverFact: "Hover the preview - it mirrors the real exam flow.",
         media: (
           <HoverVideo
             src={practiceVideo}
@@ -474,7 +474,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                 </p>
                 {showInternationalTagline && (
                   <p className={`mt-2 text-[13px] sm:text-base ${mutedText} max-w-2xl`}>
-                    Learn UK maths and practise properly from anywhere—our exam-style questions, step-by-step feedback, and readiness tracking are trusted by learners worldwide.
+                    Learn UK maths and practise properly from anywhere - our exam-style questions, step-by-step feedback, and readiness tracking are trusted by learners worldwide.
                   </p>
                 )}
 
@@ -897,7 +897,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                   Answers, clearly.
                 </h2>
                 <p className={`mt-4 ${mutedText} leading-relaxed`}>
-                  The essentials — so you can decide quickly.
+                  The essentials - so you can decide quickly.
                 </p>
               </div>
               <div className="lg:col-span-8">
@@ -946,7 +946,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                   Talk to us.
                 </h2>
                 <p className={`mt-4 ${mutedText} leading-relaxed`}>
-                  Found something confusing or want to suggest an improvement? Send a message — we read every one.
+                  Found something confusing or want to suggest an improvement? Send a message - we read every one.
                 </p>
               </motion.div>
 

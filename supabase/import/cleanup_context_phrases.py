@@ -53,8 +53,8 @@ def clean_question(text: str) -> str:
     lines = text.splitlines()
     cleaned_lines: List[str] = []
     for line in lines:
-        stripped = re.sub(r"^\s*context\s*[:\-–—]\s*", "", line, flags=re.IGNORECASE)
-        stripped = re.sub(r"(?i)\bcontext\s*[:\-–—]\s*", "", stripped)
+        stripped = re.sub(r"^\s*context\s*[:\-– - ]\s*", "", line, flags=re.IGNORECASE)
+        stripped = re.sub(r"(?i)\bcontext\s*[:\-– - ]\s*", "", stripped)
         stripped = strip_trailing_context(stripped)
         if stripped.strip():
             cleaned_lines.append(stripped.strip())

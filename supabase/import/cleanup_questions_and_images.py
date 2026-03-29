@@ -134,9 +134,9 @@ def normalize_storage_key_from_image_url(*, raw: str, bucket: str) -> str | None
     """Convert DB image_url values into Storage object keys.
 
     Supports:
-    - raw object key (e.g. generated/<batch>/<id>.svg)
-    - full public URL (e.g. https://..../storage/v1/object/public/questions/<key>)
-    - full object URL (e.g. https://..../storage/v1/object/questions/<key>)
+   - raw object key (e.g. generated/<batch>/<id>.svg)
+   - full public URL (e.g. https://..../storage/v1/object/public/questions/<key>)
+   - full object URL (e.g. https://..../storage/v1/object/questions/<key>)
     """
     raw = (raw or "").strip()
     if not raw:

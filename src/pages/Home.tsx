@@ -445,8 +445,14 @@ export function Home() {
                   </p>
                 )}
                 <h1 className="text-2xl sm:text-3xl lg:text-4xl font-semibold mb-3 tracking-tight">
-                  <span className="text-foreground">{isNewUser ? 'Welcome,' : 'Welcome back,'}</span>{' '}
-                  <span className={cn(currentSubject === 'english' ? "text-amber-500" : "text-primary")}>{userName}!</span>
+                  <span className={cn(
+                    "bg-clip-text text-transparent transform-gpu",
+                    currentSubject === "english" 
+                      ? "bg-gradient-to-br from-slate-900 via-slate-800 to-amber-700 dark:from-white dark:via-slate-200 dark:to-amber-500" 
+                      : "bg-gradient-to-br from-slate-900 via-slate-800 to-blue-700 dark:from-white dark:via-slate-200 dark:to-blue-500"
+                  )}>
+                    {isNewUser ? 'Welcome,' : 'Welcome back,'} {userName}!
+                  </span>
                 </h1>
                 <p className="text-muted-foreground text-base sm:text-lg max-w-xl">
                   {isNewUser 
