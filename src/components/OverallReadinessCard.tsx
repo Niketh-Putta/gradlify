@@ -133,8 +133,8 @@ export function OverallReadinessCard({
         <CardTitle className="text-base sm:text-lg md:text-xl">Overall Exam Readiness</CardTitle>
         <CardDescription className="text-xs sm:text-sm">
           {isElevenPlusTrack
-            ? 'Your average selective readiness across all 11+ Maths sections'
-            : 'Your average readiness across all GCSE Maths topics'}
+            ? `Your average selective readiness across all 11+ ${currentSubject === 'english' ? 'English' : 'Maths'} sections`
+            : `Your average readiness across all GCSE ${currentSubject === 'english' ? 'English' : 'Maths'} topics`}
         </CardDescription>
       </CardHeader>
       <CardContent className="p-3 sm:p-4 md:p-6 pt-2 sm:pt-3">

@@ -231,6 +231,27 @@ export function Home() {
       icon: 'text-teal-700 dark:text-teal-300',
       score: 'text-teal-700 dark:text-teal-300',
     },
+    comprehension: {
+      hoverBorder: 'hover:border-amber-500/30 dark:hover:border-amber-400/50',
+      cardBg: 'bg-amber-50/70 dark:bg-amber-950/35',
+      iconWrap: 'bg-amber-500/12 dark:bg-amber-400/15',
+      icon: 'text-amber-700 dark:text-amber-300',
+      score: 'text-amber-700 dark:text-amber-300',
+    },
+    spag: {
+      hoverBorder: 'hover:border-amber-500/30 dark:hover:border-amber-400/50',
+      cardBg: 'bg-amber-50/70 dark:bg-amber-950/35',
+      iconWrap: 'bg-amber-500/12 dark:bg-amber-400/15',
+      icon: 'text-amber-700 dark:text-amber-300',
+      score: 'text-amber-700 dark:text-amber-300',
+    },
+    vocabulary: {
+      hoverBorder: 'hover:border-amber-500/30 dark:hover:border-amber-400/50',
+      cardBg: 'bg-amber-50/70 dark:bg-amber-950/35',
+      iconWrap: 'bg-amber-500/12 dark:bg-amber-400/15',
+      icon: 'text-amber-700 dark:text-amber-300',
+      score: 'text-amber-700 dark:text-amber-300',
+    },
   };
 
   const activeReadinessRows = useMemo(
@@ -325,7 +346,7 @@ export function Home() {
     if (!user?.id || trackSwitching) return;
     setTrackSwitching(true);
     try {
-      const rpcResult = await supabase.rpc("update_user_track", {
+      const rpcResult = await supabase.rpc("update_user_track" as any, {
         p_user_id: user.id,
         p_track: targetTrack,
       });
@@ -344,7 +365,7 @@ export function Home() {
       window.dispatchEvent(new CustomEvent("track-switched"));
       window.dispatchEvent(new CustomEvent("gradlify:profile-updated"));
       onProfileUpdate?.();
-      toast.success(`Switched to ${targetTrackLabel}`, { icon: null, variant: "default" });
+      toast.success(`Switched to ${targetTrackLabel}`, { icon: null });
     } catch (error) {
       const errorMessage = isAbortLikeError(error)
         ? "Track update timed out. Please try again."
@@ -416,7 +437,10 @@ export function Home() {
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
               <div>
                 {isNewUser && (
-                  <p className="text-xs sm:text-sm font-semibold text-primary mb-2">
+                  <p className={cn(
+                     "text-xs sm:text-sm font-semibold mb-2",
+                     currentSubject === 'english' ? "text-amber-500" : "text-primary"
+                  )}>
                     New here? Start with exam-style practice to build confidence.
                   </p>
                 )}
@@ -547,6 +571,7 @@ export function Home() {
                   
                   <Progress 
                     value={usagePercentage} 
+                    indicatorClassName={currentSubject === 'english' ? "bg-amber-500" : undefined}
                     className="h-2 mb-4"
                   />
                   
@@ -634,6 +659,7 @@ export function Home() {
 
                   <Progress 
                     value={lowestReadinessTopic ? Math.round(lowestReadinessTopic.readiness) : 0} 
+                    indicatorClassName={currentSubject === 'english' ? "bg-amber-500" : undefined}
                     className="h-2 mb-4 mt-4"
                   />
 
@@ -671,7 +697,7 @@ export function Home() {
               : 'translate-y-8 opacity-0'
           }`}
         >
-          <Card className="dark:border-white/10 dark:bg-slate-950/70">
+          <Card>
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
                 <div>
@@ -683,7 +709,7 @@ export function Home() {
                 <Button 
                   variant="ghost" 
                   onClick={() => navigate('/readiness')}
-                  className="text-primary hover:text-primary/80"
+                  className={currentSubject === 'english' ? "text-amber-500 hover:text-amber-500/80" : "text-primary hover:text-primary/80"}
                 >
                   View Details
                   <ArrowRight className="h-4 w-4 ml-1" />
@@ -708,38 +734,44 @@ export function Home() {
                 </div>
               ) : (
                 <div className={`grid sm:grid-cols-2 ${currentSubject === 'english' ? 'lg:grid-cols-3' : isElevenPlus ? 'lg:grid-cols-2' : 'lg:grid-cols-3'} gap-4`}>
-                  {topicData.map((topic) => (
-                    (() => {
+                  {topicData.map((topic) => {
                       const tone = topicTone[topic.key] || topicTone.number;
+                      const isEnglish = currentSubject === 'english';
                       return (
                     <div 
                       key={topic.key} 
-                      className={`group p-4 rounded-xl border border-border/60 bg-card hover:shadow-md cursor-pointer transition-all duration-300 hover:-translate-y-0.5 ${tone.hoverBorder}`}
+                      className={cn(
+                        "group p-4 rounded-xl border border-border/60 bg-card hover:shadow-md cursor-pointer transition-all duration-300 hover:-translate-y-0.5",
+                        isEnglish ? "hover:border-amber-500/30" : tone.hoverBorder
+                      )}
                       onClick={() => navigate('/readiness')}
                     >
                     <div className="flex items-center gap-3 mb-3">
                         <div 
                           className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-black text-base shadow-sm"
-                          style={{ backgroundColor: topic.color }}
+                          style={{ backgroundColor: isEnglish ? '#f59e0b' : topic.color }}
                         >
                           {topic.name.charAt(0).toUpperCase()}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h4 className="font-medium text-foreground text-sm dark:text-slate-100">{topic.name}</h4>
-                          <p className="text-xs text-muted-foreground dark:text-slate-300/80">{topic.score}% ready</p>
+                          <h4 className="font-medium text-foreground text-sm">{topic.name}</h4>
+                          <p className="text-xs text-muted-foreground">{topic.score}% ready</p>
                         </div>
-                        <span className={`text-lg font-semibold ${tone.score}`}>
+                        <span className={cn(
+                          "text-lg font-semibold",
+                          isEnglish ? "text-amber-600 dark:text-amber-400" : tone.score
+                        )}>
                           {topic.score}%
                         </span>
                       </div>
                       <Progress 
                         value={topic.score} 
+                        indicatorClassName={isEnglish ? "bg-amber-500" : undefined}
                         className="h-2"
                       />
                     </div>
                       );
-                    })()
-                  ))}
+                  })}
                 </div>
               )}
             </CardContent>
@@ -761,8 +793,8 @@ export function Home() {
             <button
               onClick={() => navigate('/mocks')}
               className={cn(
-                 "group p-5 rounded-xl bg-card border transition-all duration-200 text-left dark:bg-slate-950/70 dark:border-white/10 hover:shadow-sm",
-                 currentSubject === 'english' ? "border-border hover:border-amber-500/30 dark:hover:border-amber-500/40" : "border-border hover:border-primary/30 dark:hover:border-primary/40"
+                 "group p-5 rounded-xl bg-card border transition-all duration-200 text-left hover:shadow-sm",
+                 currentSubject === 'english' ? "border-border hover:border-amber-500/30" : "border-border hover:border-primary/30"
               )}
             >
               <div className={cn(
@@ -772,26 +804,32 @@ export function Home() {
                 <BookOpen className={cn("h-5 w-5", currentSubject === 'english' ? "text-amber-500" : "text-primary")} />
               </div>
               <h3 className="font-medium text-foreground mb-1">Practice Questions</h3>
-              <p className="text-sm text-muted-foreground dark:text-slate-300">Test your knowledge with exam-style questions</p>
+              <p className="text-sm text-muted-foreground">Test your knowledge with exam-style questions</p>
             </button>
 
             <button
               onClick={() => navigate('/readiness')}
-              className="group p-5 rounded-xl bg-card border border-border hover:border-accent/30 hover:shadow-sm transition-all duration-200 text-left dark:bg-slate-950/70 dark:border-white/10 dark:hover:border-accent/40"
+              className={cn(
+                 "group p-5 rounded-xl bg-card border transition-all duration-200 text-left hover:shadow-sm",
+                 currentSubject === 'english' ? "border-border hover:border-amber-500/30" : "border-border hover:border-primary/30"
+              )}
             >
-              <div className="p-3 rounded-xl bg-accent/10 w-fit mb-3 group-hover:scale-105 transition-transform duration-200">
-                <Gauge className="h-5 w-5 text-accent" />
+              <div className={cn(
+                 "p-3 rounded-xl w-fit mb-3 group-hover:scale-105 transition-transform duration-200",
+                 currentSubject === 'english' ? "bg-amber-500/10" : "bg-primary/10"
+              )}>
+                <Gauge className={cn("h-5 w-5", currentSubject === 'english' ? "text-amber-500" : "text-primary")} />
               </div>
               <h3 className="font-medium text-foreground mb-1">Exam Readiness</h3>
-              <p className="text-sm text-muted-foreground dark:text-slate-300">Track your progress across all topics</p>
+              <p className="text-sm text-muted-foreground">Track your progress across all topics</p>
             </button>
 
             {AI_FEATURE_ENABLED && (
               <button
                 onClick={() => navigate('/chat')}
                 className={cn(
-                   "group p-5 rounded-xl bg-card border transition-all duration-200 text-left dark:bg-slate-950/70 dark:border-white/10 hover:shadow-sm",
-                   currentSubject === 'english' ? "border-border hover:border-amber-500/30 dark:hover:border-amber-500/40" : "border-border hover:border-primary/30 dark:hover:border-primary/40"
+                   "group p-5 rounded-xl bg-card border transition-all duration-200 text-left hover:shadow-sm",
+                   currentSubject === 'english' ? "border-border hover:border-amber-500/30" : "border-border hover:border-primary/30"
                 )}
               >
                 <div className={cn(
@@ -801,32 +839,44 @@ export function Home() {
                   <MessageSquare className={cn("h-5 w-5", currentSubject === 'english' ? "text-amber-500" : "text-primary")} />
                 </div>
                 <h3 className="font-medium text-foreground mb-1">AI Study Helper</h3>
-                <p className="text-sm text-muted-foreground dark:text-slate-300">Get instant help with any question</p>
+                <p className="text-sm text-muted-foreground">Get instant help with any question</p>
               </button>
             )}
 
             {!AI_FEATURE_ENABLED && (
               <button
                 onClick={() => navigate('/connect')}
-                className="group p-5 rounded-xl bg-card border border-border hover:border-emerald-500/30 hover:shadow-sm transition-all duration-200 text-left dark:bg-slate-950/70 dark:border-white/10 dark:hover:border-emerald-400/40"
+                className={cn(
+                   "group p-5 rounded-xl bg-card border transition-all duration-200 text-left hover:shadow-sm",
+                   currentSubject === 'english' ? "border-border hover:border-amber-500/30" : "border-border hover:border-primary/30"
+                )}
               >
-                <div className="p-3 rounded-xl bg-emerald-500/10 w-fit mb-3 group-hover:scale-105 transition-transform duration-200">
-                  <Trophy className="h-5 w-5 text-emerald-600" />
+                <div className={cn(
+                   "p-3 rounded-xl w-fit mb-3 group-hover:scale-105 transition-transform duration-200",
+                   currentSubject === 'english' ? "bg-amber-500/10" : "bg-primary/10"
+                )}>
+                  <Trophy className={cn("h-5 w-5", currentSubject === 'english' ? "text-amber-500" : "text-primary")} />
                 </div>
                 <h3 className="font-medium text-foreground mb-1">Leaderboard</h3>
-                <p className="text-sm text-muted-foreground dark:text-slate-300">See top learners and your monthly rank</p>
+                <p className="text-sm text-muted-foreground">See top learners and your monthly rank</p>
               </button>
             )}
 
             <button
               onClick={() => navigate('/notes')}
-              className="group p-5 rounded-xl bg-card border border-border hover:border-warning/30 hover:shadow-sm transition-all duration-200 text-left dark:bg-slate-950/70 dark:border-white/10 dark:hover:border-amber-400/40"
+              className={cn(
+                 "group p-5 rounded-xl bg-card border transition-all duration-200 text-left hover:shadow-sm",
+                 currentSubject === 'english' ? "border-border hover:border-amber-500/30" : "border-border hover:border-primary/30"
+              )}
             >
-              <div className="p-3 rounded-xl bg-warning/10 w-fit mb-3 group-hover:scale-105 transition-transform duration-200">
-                <BookOpen className="h-5 w-5 text-warning" />
+              <div className={cn(
+                 "p-3 rounded-xl w-fit mb-3 group-hover:scale-105 transition-transform duration-200",
+                 currentSubject === 'english' ? "bg-amber-500/10" : "bg-primary/10"
+              )}>
+                <BookOpen className={cn("h-5 w-5", currentSubject === 'english' ? "text-amber-500" : "text-primary")} />
               </div>
               <h3 className="font-medium text-foreground mb-1">Revision Notes</h3>
-              <p className="text-sm text-muted-foreground dark:text-slate-300">Review key concepts and formulas</p>
+              <p className="text-sm text-muted-foreground">Review key concepts and formulas</p>
             </button>
           </div>
         </div>
@@ -856,7 +906,10 @@ export function Home() {
             }`}
           >
             <div className="rounded-2xl overflow-hidden border border-border/40">
-              <div className="relative overflow-hidden bg-gradient-hero p-6 sm:p-8">
+              <div className={cn(
+                 "relative overflow-hidden p-6 sm:p-8",
+                 currentSubject === 'english' ? "bg-gradient-to-r from-amber-400 to-amber-600 text-white" : "bg-gradient-hero"
+              )}>
                 <div className="absolute inset-0 bg-gradient-to-br from-white/15 via-white/5 to-transparent" aria-hidden="true" />
                 <div
                   className="absolute inset-0 opacity-30 pointer-events-none"
@@ -905,7 +958,7 @@ export function Home() {
               <div className="bg-background/70 p-4 sm:p-5">
                 <div className="rounded-xl bg-gradient-card border border-border/40 p-4 sm:p-5">
                   <div className="flex items-center gap-3 text-sm text-foreground">
-                    <CheckCircle2 className="h-5 w-5 text-primary" />
+                    <CheckCircle2 className={cn("h-5 w-5", currentSubject === 'english' ? "text-amber-500" : "text-primary")} />
                     <span>
                       {AI_FEATURE_ENABLED
                         ? 'Unlimited AI practice tailored to your exam board'
@@ -913,11 +966,11 @@ export function Home() {
                     </span>
                   </div>
                   <div className="mt-3 flex items-center gap-3 text-sm text-foreground">
-                    <CheckCircle2 className="h-5 w-5 text-primary" />
+                    <CheckCircle2 className={cn("h-5 w-5", currentSubject === 'english' ? "text-amber-500" : "text-primary")} />
                     <span>Real exam-style mock tests with timed conditions</span>
                   </div>
                   <div className="mt-3 flex items-center gap-3 text-sm text-foreground">
-                    <CheckCircle2 className="h-5 w-5 text-primary" />
+                    <CheckCircle2 className={cn("h-5 w-5", currentSubject === 'english' ? "text-amber-500" : "text-primary")} />
                     <span>A daily revision plan built from your weak areas</span>
                   </div>
                 </div>

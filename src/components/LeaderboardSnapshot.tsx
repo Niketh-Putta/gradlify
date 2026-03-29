@@ -13,6 +13,8 @@ import { resolveUserTrack } from "@/lib/track";
 import { isAbortLikeError } from "@/lib/errors";
 import { ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useSubject } from "@/contexts/SubjectContext";
+import { cn } from "@/lib/utils";
 
 export function LeaderboardSnapshot() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
@@ -20,6 +22,7 @@ export function LeaderboardSnapshot() {
   const navigate = useNavigate();
   const { isFounder } = useMembership();
   const { profile } = useAppContext();
+  const { currentSubject } = useSubject();
   const userTrack = resolveUserTrack(profile?.track ?? null);
 
   useEffect(() => {
@@ -121,7 +124,7 @@ export function LeaderboardSnapshot() {
                     <div className="text-sm font-bold text-muted-foreground w-6">
                       #{entry.rank}
                     </div>
-                    <Avatar className="h-10 w-10 border-2 border-primary/20">
+                    <Avatar className={cn("h-10 w-10 border-2", currentSubject === 'english' ? "border-amber-500/20" : "border-primary/20")}>
                       <AvatarImage src={entry.avatar_url || undefined} />
                       <AvatarFallback>
                         {entry.name.substring(0, 2).toUpperCase()}
@@ -131,11 +134,12 @@ export function LeaderboardSnapshot() {
                       <div className="text-sm font-medium truncate">
                         {entry.name}
                         {showSelf && (
-                          <span className="ml-1 text-xs text-primary">(You)</span>
+                           <span className={cn("ml-1 text-xs", currentSubject === 'english' ? "text-amber-500" : "text-primary")}>(You)</span>
                         )}
                       </div>
                       <Progress
                         value={(entry.correct_count / maxQuestions) * 100}
+                        indicatorClassName={currentSubject === 'english' ? "bg-amber-500" : undefined}
                         className="h-1 mt-1"
                       />
                     </div>
@@ -149,11 +153,11 @@ export function LeaderboardSnapshot() {
 
             {currentUser && currentUser.rank > 3 && (
               <div className="pt-3 border-t">
-                <div className="flex items-center gap-3 bg-primary/10 p-2 rounded-lg">
-                  <div className="text-sm font-bold text-primary w-6">
+                <div className={cn("flex items-center gap-3 p-2 rounded-lg", currentSubject === 'english' ? "bg-amber-500/10" : "bg-primary/10")}>
+                  <div className={cn("text-sm font-bold w-6", currentSubject === 'english' ? "text-amber-500" : "text-primary")}>
                     #{currentUser.rank}
                   </div>
-                  <Avatar className="h-8 w-8 border-2 border-primary">
+                  <Avatar className={cn("h-8 w-8 border-2", currentSubject === 'english' ? "border-amber-500" : "border-primary")}>
                     <AvatarImage src={currentUser.avatar_url || undefined} />
                     <AvatarFallback>
                       {currentUser.name.substring(0, 2).toUpperCase()}
@@ -162,7 +166,7 @@ export function LeaderboardSnapshot() {
                   <div className="flex-1 min-w-0">
                     <div className="text-sm font-medium">Your rank</div>
                   </div>
-                  <div className="text-xs font-semibold text-primary">
+                  <div className={cn("text-xs font-semibold", currentSubject === 'english' ? "text-amber-500" : "text-primary")}>
                     {currentUser.correct_count} correct
                   </div>
                 </div>
