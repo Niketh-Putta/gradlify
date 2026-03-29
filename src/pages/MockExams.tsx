@@ -241,7 +241,7 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
       setShowMockLimitModal(true);
       return;
     }
-    setShowMockDialog(true);
+    confirmMockExam();
   };
 
   const confirmMockExam = async () => {
@@ -254,7 +254,8 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
       track: isElevenPlus ? '11plus' : userTrack,
       topics: selectedTopics.join(','),
       mode: 'mock',
-      questions: selectedQuestionCount.toString(),
+      questions: '50', // Bypassing modal and explicitly allocating a Full Paper by default
+
       subject: currentSubject
     });
     if (selectedSubtopics.length > 0) params.set('subtopic', selectedSubtopics.join(','));
