@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Target, TrendingUp, Brain } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useSubject } from '@/contexts/SubjectContext';
 import { AI_FEATURE_ENABLED } from '@/lib/featureFlags';
 
 interface Topic {
@@ -16,6 +17,7 @@ interface NextStepsPanelProps {
 
 export function NextStepsPanel({ topics, loading }: NextStepsPanelProps) {
   const navigate = useNavigate();
+  const { currentSubject } = useSubject();
   
   if (loading) {
     return null;
@@ -39,7 +41,7 @@ export function NextStepsPanel({ topics, loading }: NextStepsPanelProps) {
       paperType: 'both',
       mode: 'practice'
     });
-    navigate(`/practice-page?${params.toString()}`);
+    navigate(`/practice/${currentSubject}?${params.toString()}`);
   };
 
   return (

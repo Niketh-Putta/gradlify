@@ -924,16 +924,18 @@ export function Settings({ user, onBackToChat, onSignOut }: SettingsProps) {
                   </div>
                 </div>
               ) : (
-                <div className="bg-slate-900 rounded-2xl p-6 border border-slate-800 shadow-xl text-white relative overflow-hidden">
-                   <div className="absolute top-0 right-0 p-32 bg-primary/10 blur-3xl rounded-full translate-x-12 -translate-y-12 pointer-events-none" />
-                   <div className="relative z-10 space-y-4">
+                <div className="bg-card rounded-2xl p-6 border border-primary/20 shadow-sm relative overflow-hidden group hover:border-primary/30 transition-colors">
+                   <div className="absolute top-0 right-0 w-48 h-48 bg-primary/5 blur-[40px] rounded-full translate-x-12 -translate-y-12 pointer-events-none transition-transform group-hover:scale-110 duration-700" />
+                   <div className="relative z-10 space-y-5">
                      <div>
-                       <h3 className="font-bold mb-1">Active Subscription</h3>
-                       <p className="text-sm text-slate-400">You are currently on the {accessLabel} tier.</p>
+                       <h3 className="text-lg font-bold text-foreground mb-1">Active Subscription</h3>
+                       <p className="text-sm text-muted-foreground font-medium">
+                         You are currently on the <strong className="text-primary">{accessLabel}</strong> tier.
+                       </p>
                      </div>
                      <Button 
                        onClick={handleManageSubscription}
-                       className="w-full bg-slate-800 text-white hover:bg-slate-700 rounded-xl h-11 font-medium border border-slate-700 mt-4"
+                       className="w-full h-11 rounded-xl font-semibold shadow-sm transition-all"
                      >
                        Manage Billing
                      </Button>

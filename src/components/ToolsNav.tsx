@@ -45,7 +45,7 @@ export function ToolsNav({ label, lockTheme }: ToolsNavProps) {
           <div className="min-w-0 leading-tight">
             <div className="text-sm font-semibold text-slate-900 dark:text-white">Gradlify</div>
             <div className="max-w-[170px] truncate text-xs text-slate-500 dark:text-slate-400 sm:max-w-none">
-              Maths. Practised properly.
+              11+ practiced properly.
             </div>
           </div>
         </NavLink>

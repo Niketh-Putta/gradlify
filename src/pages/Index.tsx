@@ -34,10 +34,12 @@ import { setPostAuthRedirect } from '@/lib/postAuthRedirect';
 import { AI_FEATURE_ENABLED } from '@/lib/featureFlags';
 import { getDashboardPath, setSignupTrack } from '@/lib/track';
 import { isAbortLikeError } from '@/lib/errors';
+import SubjectSelection from '@/pages/SubjectSelection';
 
 type AppState = 'app' | 'settings';
 
 const protectedRoutes = [
+  '/select-subject',
   '/practice-page',
   '/exam-readiness',
   '/home',
@@ -79,9 +81,9 @@ const Index = () => {
         
         if (session) {
           setUser(session.user);
-          // If on public route and authenticated, redirect to home
+          // If on public route and authenticated, redirect to subject selection
           if (publicRoutes.includes(currentPath)) {
-            redirectTo = getDashboardPath();
+            redirectTo = '/select-subject';
           }
         } else {
           setUser(null);
@@ -249,11 +251,12 @@ const Index = () => {
       <Route path="/pay/success" element={<PayReturn />} />
       <Route path="/pay/cancelled" element={<PayReturn />} />
       
-      {/* Redirect authenticated users from landing page to home */}
+      {/* Redirect authenticated users from landing page to subject selection */}
       {user ? (
         <>
-          <Route path="/" element={<Navigate to={getDashboardPath()} replace />} />
-          <Route path="/11-plus" element={<Navigate to={getDashboardPath()} replace />} />
+          <Route path="/" element={<Navigate to="/select-subject" replace />} />
+          <Route path="/select-subject" element={<SubjectSelection />} />
+          <Route path="/11-plus" element={<Navigate to="/select-subject" replace />} />
           <Route path="/tools" element={<Tools />} />
           <Route path="/free-tools" element={<Tools />} />
           <Route 
@@ -279,8 +282,12 @@ const Index = () => {
             <Route path="connect" element={<Connect />} />
             
             <Route path="mocks" element={<MockExams />} />
+            <Route path="mocks/maths" element={<MockExams forcedSubject="maths" />} />
+            <Route path="mocks/english" element={<MockExams forcedSubject="english" />} />
             <Route path="mock-exam" element={<MockExamPage />} />
             <Route path="practice-page" element={<PracticePage />} />
+            <Route path="practice/maths" element={<PracticePage forcedSubject="maths" />} />
+            <Route path="practice/english" element={<PracticePage forcedSubject="english" />} />
             <Route path="resources" element={<Resources />} />
             <Route path="notes" element={<RevisionNotes />} />
             <Route path="notes/:section" element={<RevisionNotesSection />} />

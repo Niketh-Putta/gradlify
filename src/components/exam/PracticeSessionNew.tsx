@@ -50,6 +50,11 @@ const TOPIC_MAPPING: Record<string, string> = {
   "estimation & checking": "Problem Solving",
   "logic & reasoning (level 3)": "Problem Solving",
   "word problems": "Problem Solving",
+  "comprehension": "Comprehension",
+  "vocabulary": "Vocabulary",
+  "spag": "SPaG",
+  "grammar": "SPaG",
+  "spelling": "SPaG",
 };
 
 const MAX_OPTIONS = 5;
@@ -114,12 +119,12 @@ function parseTierParam(raw: string): DbTier[] {
     parts.includes("adaptive") ||
     (parts.includes("foundation") && parts.includes("higher"));
 
-  if (isBoth) return ["Foundation Tier", "Higher Tier"];
+  if (isBoth) return ["11+ Standard"];
   if (parts.includes("higher") || parts.includes("higher tier")) return ["Higher Tier"];
   if (parts.includes("foundation") || parts.includes("foundation tier")) return ["Foundation Tier"];
 
-  // Fallback: treat unknown values as mixed rather than accidentally narrowing.
-  return ["Foundation Tier", "Higher Tier"];
+  // Fallback: treat unknown values as 11+ Standard for the 11+ App
+  return ["11+ Standard"];
 }
 
 function parseCalculatorParam(raw: string): DbCalculator[] {
@@ -372,7 +377,7 @@ export default function PracticeSessionNew() {
   }, [mode, practiceLimitReached, practiceUsageCounted, incrementUsage]);
 
   const mixedCountsRef = useRef({
-    tier: { "Foundation Tier": 0, "Higher Tier": 0 } satisfies Record<DbTier, number>,
+    tier: { "Foundation Tier": 0, "Higher Tier": 0, "11+ Standard": 0 } satisfies Record<DbTier, number>,
     calculator: { Calculator: 0, "Non-Calculator": 0 } satisfies Record<DbCalculator, number>,
   });
   const difficultyMixCountsRef = useRef<Record<number, number>>({ 1: 0, 2: 0, 3: 0, 4: 0 });
@@ -616,7 +621,7 @@ export default function PracticeSessionNew() {
         topicMixCountsRef.current = {};
         subtopicMixCountsRef.current = {};
         mixedCountsRef.current = {
-          tier: { "Foundation Tier": 0, "Higher Tier": 0 },
+          tier: { "Foundation Tier": 0, "Higher Tier": 0, "11+ Standard": 0 },
           calculator: { Calculator: 0, "Non-Calculator": 0 },
         };
         difficultyMixCountsRef.current = { 1: 0, 2: 0, 3: 0, 4: 0 };
@@ -788,9 +793,9 @@ export default function PracticeSessionNew() {
           data = result.data as any[] | null;
           error = result.error;
 
-          // Safety net: if RPC is missing/misconfigured,
+          // Safety net: if RPC is missing/misconfigured or returns 0 rows due to track mismatches,
           // fall back to a direct query so the user doesn't see a blank session.
-          if (error) {
+          if (error || !data || data.length === 0) {
             error = null;
             let query = supabase
               .from("exam_questions")
@@ -798,7 +803,8 @@ export default function PracticeSessionNew() {
 
             query = dbTier.length === 1 ? query.eq("tier", dbTier[0]) : query.in("tier", dbTier);
             query = dbCalculator.length === 1 ? query.eq("calculator", dbCalculator[0]) : query.in("calculator", dbCalculator);
-
+            if (activeTrack) query = query.eq("track", activeTrack);
+            
             if (topicList && topicList.length === 1) query = query.eq("question_type", topicList[0]);
             else if (topicList && topicList.length > 1) query = query.in("question_type", topicList);
 
@@ -807,7 +813,6 @@ export default function PracticeSessionNew() {
 
             if (difficultyMin != null) query = query.gte("difficulty", difficultyMin);
             if (difficultyMax != null) query = query.lte("difficulty", difficultyMax);
-            query = query.eq("track", activeTrack);
 
             if (excludeIds.length > 0) {
               const quotedIds = excludeIds.map((id) => `"${id}"`).join(',');

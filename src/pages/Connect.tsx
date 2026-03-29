@@ -5,8 +5,6 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { FoundersSprintLabel } from "@/components/FoundersSprintLabel";
-import { getFoundersSprintInfo } from "@/lib/foundersSprint";
 import {
   getLeaderboard,
   getMyGlobalOptIn,
@@ -55,17 +53,6 @@ const getMonthRange = () => {
   return { start, end };
 };
 
-const getSprintCountdown = () => {
-  const now = new Date();
-  const { isActive, endDate } = getFoundersSprintInfo(now);
-  const diffMs = Math.max(0, endDate.getTime() - now.getTime());
-  const totalSeconds = Math.floor(diffMs / 1000);
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = totalSeconds % 60;
-  return { isActive, endDate, hours, minutes, seconds };
-};
-
 const padTime = (value: number) => String(value).padStart(2, "0");
 
 export default function Connect() {
@@ -86,9 +73,7 @@ export default function Connect() {
   const [searching, setSearching] = useState(false);
   const [sendingTo, setSendingTo] = useState<string | null>(null);
   const [respondingTo, setRespondingTo] = useState<number | null>(null);
-  const [sprintCountdown, setSprintCountdown] = useState(getSprintCountdown);
   const { toast } = useToast();
-  const founderHandles = new Set(['abhi.korapati999', 'raghavjanga']);
 
   // Get current user's entry
   const myEntry = leaderboard.find(e => e.is_self);
@@ -145,20 +130,13 @@ export default function Connect() {
     void loadLeaderboard();
   }, [loadLeaderboard]);
 
-  // Poll leaderboard every 60s to keep sprint scores fresh without UI flicker.
+  // Poll leaderboard every 60s to keep scores fresh without UI flicker.
   useEffect(() => {
     const intervalId = setInterval(() => {
       void loadLeaderboard({ silent: true });
     }, 60000);
     return () => clearInterval(intervalId);
   }, [loadLeaderboard]);
-
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      setSprintCountdown(getSprintCountdown());
-    }, 1000);
-    return () => clearInterval(intervalId);
-  }, []);
 
   // Debounced friend search
   useEffect(() => {
@@ -351,21 +329,12 @@ export default function Connect() {
     }
     if (period === "month") {
       const { start, end } = getMonthRange();
-      return `Sprint leaderboard (monthly): ${formatDate(start)} – ${formatDate(end)}`;
+      return `Monthly leaderboard: ${formatDate(start)} – ${formatDate(end)}`;
     }
     return `Daily leaderboard (${formatDate(now)})`;
   }, [period]);
 
-  const sprintInfo = getFoundersSprintInfo();
-  const activeSprint = sprintInfo.isActive;
-  const sprintEndDate = sprintInfo.endDate;
-  const displayLeaderboard = useMemo(() => {
-    if (!activeSprint) return filteredLeaderboard;
-    return filteredLeaderboard.filter((entry) => {
-      const nameKey = entry.name.toLowerCase();
-      return entry.founder_track !== 'founder' && !founderHandles.has(nameKey);
-    });
-  }, [filteredLeaderboard, activeSprint]);
+  const displayLeaderboard = filteredLeaderboard;
 
   return (
     <div className="max-w-2xl mx-auto px-3 sm:px-6 py-3 sm:py-4 h-full flex flex-col overflow-x-hidden">
@@ -378,29 +347,13 @@ export default function Connect() {
             </div>
             <span className="text-[10px] sm:text-xs font-medium bg-gradient-to-r from-primary to-indigo-500 bg-clip-text text-transparent tracking-tight">Connect</span>
           </div>
-          
-          {/* Sprint Status Tag */}
-          <div className={cn(
-            "px-2 sm:px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-medium flex-shrink-0 transition-colors",
-            activeSprint
-              ? "bg-gradient-to-r from-primary/20 to-indigo-500/20 text-primary"
-              : "bg-muted/60 text-muted-foreground"
-          )}>
-            {activeSprint ? "Sprint ON" : "Sprint OFF"}
-          </div>
         </div>
 
         <div className="flex items-end justify-between gap-2">
           <div className="min-w-0">
-            <FoundersSprintLabel className="mb-1" />
             <h1 className="text-xl sm:text-2xl font-semibold tracking-tight">Leaderboard</h1>
             <p className="text-muted-foreground text-[10px] sm:text-xs font-light mt-0.5 truncate">Ranked by correct answers</p>
             <p className="text-muted-foreground text-[10px] sm:text-xs font-light truncate">{periodDescriptor}</p>
-            <p className="text-[10px] sm:text-xs font-medium text-primary/80 mt-1">
-              {sprintCountdown.isActive
-                ? `Sprint ends in ${padTime(sprintCountdown.hours)}:${padTime(sprintCountdown.minutes)}:${padTime(sprintCountdown.seconds)} (8pm UTC)`
-                : `Sprint ended ${new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'UTC' }).format(sprintEndDate)} UTC`}
-            </p>
           </div>
 
           {/* Your Position */}
@@ -617,8 +570,6 @@ export default function Connect() {
             const isYou = entry.is_self;
             const entryIsFriend = isFriend(entry.user_id);
             const canRemoveFriend = scope === 'friends' && entryIsFriend && !isYou;
-            const nameKey = entry.name.toLowerCase();
-            const isFounderTag = entry.founder_track === 'founder' || founderHandles.has(nameKey);
 
             return (
               <div
@@ -678,11 +629,6 @@ export default function Connect() {
                           <span className={cn("text-sm truncate min-w-0", isYou && "font-medium")}>
                             {isYou ? 'You' : entry.name}
                           </span>
-                          {isFounderTag && (
-                            <span className="flex-shrink-0 text-[9px] uppercase tracking-wide font-semibold text-primary border border-primary/40 bg-primary/10 px-1.5 py-0.5 rounded-full">
-                              Founders&apos; circle
-                            </span>
-                          )}
                         </div>
                       </div>
                     </div>
@@ -713,21 +659,6 @@ export default function Connect() {
             );
           })
         )}
-      </section>
-
-      {/* Sprint scoring note */}
-      <section className="mt-4 animate-fade-in">
-        <div className="rounded-2xl border border-dashed border-foreground/20 bg-gradient-to-br from-indigo-50/50 to-purple-50/50 p-5 sm:p-6 shadow-[0_10px_30px_rgba(99,102,241,0.15)] dark:border-white/10 dark:from-slate-900 dark:to-slate-950 dark:shadow-[0_10px_30px_rgba(15,23,42,0.55)]">
-          <div className="flex flex-col gap-2">
-            <p className="text-sm font-semibold text-indigo-600 uppercase tracking-wide dark:text-indigo-200">Sprint scoring</p>
-            <p className="text-base sm:text-lg font-semibold text-foreground dark:text-slate-100">
-              Only correct answers from mock exams and challenge questions count toward the sprint leaderboard.
-            </p>
-            <p className="text-sm text-muted-foreground dark:text-slate-400">
-              Practice questions are for learning — they don’t add sprint points while a sprint window is active.
-            </p>
-          </div>
-        </div>
       </section>
 
       {/* Add Friend Modal */}

@@ -11,7 +11,8 @@ import { MathRenderer } from './MathRenderer';
 import { PremiumUpgradeButton } from './PremiumUpgradeButton';
 
 import { AI_FEATURE_ENABLED } from "@/lib/featureFlags";
-import { usePremium } from '@/hooks/usePremium';
+import { useMembership } from '@/hooks/useMembership';
+import { cn } from "@/lib/utils";
 import { 
   BookOpen, 
   Settings, 
@@ -51,13 +52,17 @@ export function Dashboard({
   const [profile, setProfile] = useState<Profile | null>(null);
   const [lastRefresh, setLastRefresh] = useState(new Date());
   const [loading, setLoading] = useState(true);
-  const { isPremium, isAdmin, isFounder } = usePremium();
+  const membership = useMembership();
+  const { isPremium, isUltra, founderTrack } = membership;
+  const isFounder = founderTrack === 'founder';
+  const isAdmin = user.email === 'team@gradlify.com';
   const onboardingDetails = profile?.onboarding as OnboardingDetails | undefined;
   const examBoard = typeof onboardingDetails?.examBoard === 'string' ? onboardingDetails.examBoard : null;
 
   const getTierDisplay = () => {
     if (isAdmin) return 'Admin';
     if (isFounder) return 'Founder';
+    if (isUltra) return 'Ultra';
     if (isPremium) return 'Premium';
     return 'Free';
   };
@@ -77,7 +82,7 @@ export function Dashboard({
         .single();
 
       if (error) throw error;
-      setProfile(data as Profile);
+      setProfile(data as unknown as Profile);
     } catch (error) {
       console.error('Error fetching profile:', error);
       toast.error('Failed to load profile data');
@@ -140,7 +145,14 @@ export function Dashboard({
               </div>
             </div>
             <div className="flex items-center gap-2 sm:gap-3">
-              <Badge variant={getTierVariant()} className="font-semibold text-xs sm:text-sm">
+              <Badge 
+                variant={getTierVariant()} 
+                className={cn(
+                  "font-semibold text-xs sm:text-sm shadow-sm transition-all",
+                  getTierDisplay() === 'Ultra' && "bg-gradient-to-r from-amber-200 to-amber-500 text-slate-900 border-0 shadow-[0_0_15px_rgba(245,158,11,0.2)]",
+                  getTierDisplay() === 'Premium' && "bg-gradient-to-r from-indigo-500 to-blue-500 text-white border-0 shadow-[0_0_15px_rgba(99,102,241,0.2)]"
+                )}
+              >
                 {getTierDisplay()}
               </Badge>
               <Button variant="ghost" size="icon" onClick={onSettings}>

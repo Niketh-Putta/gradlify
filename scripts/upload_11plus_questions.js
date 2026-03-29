@@ -35,7 +35,7 @@ async function uploadQuestions() {
   console.log('Successfully cleared old 11+ questions.');
 
   // 2. Read huge CSV file
-  const csvFilePath = path.resolve(process.cwd(), 'supabase/data/generated/11plus_premium_question_bank_full.csv');
+  const csvFilePath = path.resolve(process.cwd(), 'supabase/data/generated/11plus_premium_question_bank.csv');
   console.log(`Reading CSV from ${csvFilePath}...`);
   
   const fileContent = fs.readFileSync(csvFilePath, 'utf-8');

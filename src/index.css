@@ -936,30 +936,29 @@
 /* Option Cards */
 .option-card-exam {
   @apply w-full text-left p-3 sm:p-4 rounded-xl transition-all duration-200 ease-out cursor-pointer;
-  @apply bg-card border border-border;
+  @apply bg-card border border-border/60;
 }
 
 .option-card-exam:hover:not(.selected):not(.correct):not(.incorrect) {
-  border-color: hsl(270 70% 60% / 0.5);
-  background: linear-gradient(135deg, hsl(265 80% 55% / 0.05) 0%, hsl(285 75% 50% / 0.05) 100%);
-  transform: translateX(4px);
+  border-color: hsl(var(--primary) / 0.4);
+  background: hsl(var(--primary) / 0.04);
 }
 
 .option-card-exam.selected {
-  border-color: hsl(270 70% 55%);
-  background: linear-gradient(135deg, hsl(265 80% 55% / 0.12) 0%, hsl(285 75% 50% / 0.12) 100%);
-  box-shadow: 0 0 0 3px hsl(270 70% 55% / 0.15);
+  border-color: hsl(var(--primary));
+  background: hsl(var(--primary) / 0.07);
+  box-shadow: 0 0 0 3px hsl(var(--primary) / 0.12);
 }
 
 .option-card-exam.correct {
   @apply border-green-500;
-  background: rgba(16, 185, 129, 0.08);
+  background: rgba(16, 185, 129, 0.07);
   box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
 }
 
 .option-card-exam.incorrect {
   @apply border-red-500;
-  background: rgba(239, 68, 68, 0.08);
+  background: rgba(239, 68, 68, 0.07);
   box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
 }
 
@@ -969,13 +968,13 @@
 
 /* Option Letter Badge */
 .option-letter-exam {
-  @apply flex-shrink-0 w-8 h-8 sm:w-9 sm:h-9 rounded-lg border-2 flex items-center justify-center text-xs sm:text-sm font-semibold transition-all duration-200;
-  @apply border-border text-muted-foreground;
+  @apply flex-shrink-0 w-8 h-8 sm:w-9 sm:h-9 rounded-lg border flex items-center justify-center text-xs sm:text-sm font-semibold transition-all duration-200;
+  @apply border-border/60 text-muted-foreground bg-muted/40;
 }
 
 .option-letter-exam.selected {
-  background: linear-gradient(135deg, hsl(265 80% 55%) 0%, hsl(285 75% 50%) 100%);
-  @apply text-white border-transparent;
+  background: hsl(var(--primary));
+  @apply text-primary-foreground border-transparent;
 }
 
 .option-letter-exam.correct {
@@ -988,38 +987,15 @@
 
 /* Primary Gradient Button */
 .btn-exam-primary {
-  @apply px-4 py-3 rounded-xl font-semibold text-sm text-white;
-  background: linear-gradient(135deg, hsl(260 85% 58%) 0%, hsl(280 80% 55%) 40%, hsl(300 75% 50%) 100%);
-  box-shadow: 0 4px 15px hsl(280 80% 55% / 0.4), 0 0 20px hsl(280 80% 55% / 0.2);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
-}
-
-.btn-exam-primary::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent 50%, rgba(255,255,255,0.1));
-  opacity: 1;
-}
-
-.btn-exam-primary::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
-  transform: translateX(-100%);
-  transition: transform 0.6s ease;
-}
-
-.btn-exam-primary:hover:not(:disabled)::after {
-  transform: translateX(100%);
+  @apply px-4 py-3 rounded-xl font-semibold text-sm text-primary-foreground;
+  background: hsl(var(--primary));
+  box-shadow: 0 0 0 1px hsl(var(--primary) / 0.3), 0 4px 16px hsl(var(--primary) / 0.35), 0 8px 32px hsl(var(--primary) / 0.15);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .btn-exam-primary:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px hsl(280 80% 55% / 0.5), 0 0 30px hsl(280 80% 55% / 0.3);
+  background: hsl(var(--primary) / 0.9);
+  box-shadow: 0 0 0 1px hsl(var(--primary) / 0.4), 0 6px 20px hsl(var(--primary) / 0.45), 0 12px 40px hsl(var(--primary) / 0.2);
 }
 
 .btn-exam-primary:disabled {
@@ -1030,15 +1006,14 @@
 
 /* Secondary Button */
 .btn-exam-secondary {
-  @apply px-4 py-3 rounded-xl font-medium text-sm bg-card border border-border text-muted-foreground;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  @apply px-4 py-3 rounded-xl font-medium text-sm bg-card border border-border/60 text-muted-foreground;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .btn-exam-secondary:hover {
-  border-color: hsl(270 70% 60% / 0.5);
-  color: hsl(270 70% 55%);
-  background: linear-gradient(135deg, hsl(265 80% 55% / 0.06) 0%, hsl(285 75% 50% / 0.06) 100%);
-  transform: translateY(-1px);
+  border-color: hsl(var(--primary) / 0.4);
+  color: hsl(var(--primary));
+  background: hsl(var(--primary) / 0.04);
 }
 
 /* Progress Bar with Shimmer */
@@ -1049,7 +1024,7 @@
 
 .progress-exam-fill {
   @apply h-full rounded-full transition-all duration-500 ease-out;
-  background: linear-gradient(90deg, hsl(265 80% 55%) 0%, hsl(275 75% 52%) 50%, hsl(285 75% 50%) 100%);
+  background: hsl(var(--primary));
   position: relative;
 }
 
@@ -1057,7 +1032,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
   animation: shimmer 2.5s ease-in-out infinite;
 }
 
@@ -1142,14 +1117,14 @@
 }
 
 .q-nav-btn-exam.current {
-  background: linear-gradient(135deg, hsl(265 80% 55%) 0%, hsl(285 75% 50%) 100%);
-  @apply text-white;
-  box-shadow: 0 2px 8px hsl(270 70% 55% / 0.4);
+  background: hsl(var(--primary));
+  @apply text-primary-foreground;
+  box-shadow: 0 2px 8px hsl(var(--primary) / 0.35);
 }
 
 .q-nav-btn-exam.answered {
-  background: linear-gradient(135deg, hsl(265 80% 55% / 0.18) 0%, hsl(285 75% 50% / 0.18) 100%);
-  color: hsl(270 70% 55%);
+  background: hsl(var(--primary) / 0.12);
+  color: hsl(var(--primary));
 }
 
 .q-nav-btn-exam.flagged {
@@ -1242,40 +1217,34 @@
 }
 
 .confidence-btn-exam.selected {
-  background: linear-gradient(135deg, hsl(265 80% 55%) 0%, hsl(285 75% 50%) 100%);
-  @apply text-white border-transparent;
+  background: hsl(var(--primary));
+  @apply text-primary-foreground border-transparent;
   transform: scale(1.02);
 }
 
 /* Card with subtle glow */
 .card-exam-glow {
-  @apply bg-card rounded-2xl border border-border overflow-hidden;
-  box-shadow: 0 0 20px hsl(270 70% 55% / 0.06);
+  @apply bg-card rounded-2xl border border-border/40 overflow-hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.04);
 }
 
 .dark .card-exam-glow {
-  border: 1px solid transparent;
-  background: 
-    linear-gradient(hsl(224 71% 8%), hsl(224 71% 8%)) padding-box,
-    linear-gradient(135deg, hsl(270 60% 45% / 0.6) 0%, hsl(290 50% 40% / 0.4) 50%, hsl(270 60% 45% / 0.6) 100%) border-box;
-  box-shadow: 0 0 40px hsl(270 70% 55% / 0.15);
+  @apply border-border/30;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.04), 0 8px 32px rgba(0,0,0,0.3);
 }
 
 /* Gradient text */
 .gradient-text-exam {
-  background: linear-gradient(135deg, hsl(265 80% 55%) 0%, hsl(275 75% 52%) 50%, hsl(285 75% 50%) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: hsl(var(--primary));
 }
 
-/* Gradient subtle background */
+/* Subtle primary background */
 .gradient-bg-subtle-exam {
-  background: linear-gradient(135deg, hsl(265 80% 55% / 0.1) 0%, hsl(275 75% 52% / 0.1) 50%, hsl(285 75% 50% / 0.1) 100%);
+  background: hsl(var(--primary) / 0.08);
 }
 
 .dark .gradient-bg-subtle-exam {
-  background: linear-gradient(135deg, hsl(265 80% 55% / 0.18) 0%, hsl(275 75% 52% / 0.18) 50%, hsl(285 75% 50% / 0.18) 100%);
+  background: hsl(var(--primary) / 0.14);
 }
 
 /* Badge exam */
@@ -1507,24 +1476,24 @@
 }
 
 /* ============================================
-   REVISION NOTES STYLES (Gradlify Purple Accent)
+   REVISION NOTES STYLES (Fiery Amber Accent)
    ============================================ */
 
-/* Notes-specific purple accent variables */
+/* Notes-specific fiery amber accent variables */
 :root {
-  --notes-accent: 262 83% 58%;
-  --notes-accent-light: 262 83% 68%;
-  --notes-accent-dark: 262 83% 50%;
-  --notes-gradient: linear-gradient(135deg, hsl(262 83% 58%) 0%, hsl(262 83% 68%) 50%, hsl(280 70% 75%) 100%);
-  --notes-gradient-hover: linear-gradient(135deg, hsl(262 83% 50%) 0%, hsl(262 83% 58%) 50%, hsl(262 83% 68%) 100%);
-  --notes-shadow-sm: 0 1px 3px hsl(262 83% 58% / 0.08);
-  --notes-shadow-md: 0 4px 16px hsl(262 83% 58% / 0.12);
-  --notes-shadow-lg: 0 12px 40px hsl(262 83% 58% / 0.16);
-  --notes-shadow-glow: 0 0 30px hsl(262 83% 58% / 0.2);
+  --notes-accent: 38 92% 50%;
+  --notes-accent-light: 43 96% 56%;
+  --notes-accent-dark: 35 92% 33%;
+  --notes-gradient: linear-gradient(135deg, hsl(35 92% 33%) 0%, hsl(38 92% 50%) 50%, hsl(43 96% 56%) 100%);
+  --notes-gradient-hover: linear-gradient(135deg, hsl(27 96% 28%) 0%, hsl(35 92% 33%) 50%, hsl(38 92% 50%) 100%);
+  --notes-shadow-sm: 0 1px 3px hsl(38 92% 50% / 0.08);
+  --notes-shadow-md: 0 4px 16px hsl(38 92% 50% / 0.12);
+  --notes-shadow-lg: 0 12px 40px hsl(38 92% 50% / 0.16);
+  --notes-shadow-glow: 0 0 30px hsl(38 92% 50% / 0.2);
 }
 
 .dark {
-  --notes-shadow-glow: 0 0 40px hsl(262 83% 58% / 0.3);
+  --notes-shadow-glow: 0 0 40px hsl(38 92% 50% / 0.3);
 }
 
 /* Notes Progress Ring */
@@ -1873,18 +1842,18 @@
 
 .notes-question-badge {
   @apply px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wide;
-  background: linear-gradient(135deg, hsl(262 83% 58%) 0%, hsl(280 70% 55%) 100%);
+  background: linear-gradient(135deg, hsl(38 92% 50%) 0%, hsl(43 96% 56%) 100%);
   color: white;
 }
 
 .notes-show-answer-btn {
   @apply inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-200;
-  color: hsl(262 83% 58%);
-  background: hsl(262 83% 58% / 0.1);
+  color: hsl(38 92% 50%);
+  background: hsl(38 92% 50% / 0.1);
 }
 
 .notes-show-answer-btn:hover {
-  background: hsl(262 83% 58% / 0.15);
+  background: hsl(38 92% 50% / 0.15);
 }
 
 .notes-answer-reveal {

@@ -1,7 +1,9 @@
 import { Fragment, useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { useAppContext } from '@/hooks/useAppContext';
+import { useSubject } from "@/contexts/SubjectContext";
 import { useReadiness } from '@/hooks/useReadiness';
 import { supabase } from '@/integrations/supabase/client';
+import { cn } from '@/lib/utils';
 import { expandSubtopicIdsForDb } from '@/lib/subtopicIdUtils';
 import { resolveUserTrack } from '@/lib/track';
 import { buildTrackReadinessRows, getTrackSections } from '@/lib/trackCurriculum';
@@ -9,7 +11,9 @@ import { AIExplainerModal } from '@/components/readiness/AIExplainerModal';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { formatDistanceToNow } from 'date-fns';
-import { TrendingUp, TrendingDown, ChevronRight, BookOpen } from 'lucide-react';
+import { TrendingUp, TrendingDown, ChevronRight, BookOpen, Sparkles } from 'lucide-react';
+import { PremiumAnalyticsDashboard } from '@/components/readiness/PremiumAnalyticsDashboard';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 // Removed getExamBoardSubtitle
@@ -174,34 +178,51 @@ const buildWinKey = (questionIds: string[]) =>
 const ReadinessArrow = ({
   orientation,
   label,
+  subject = 'maths'
 }: {
   orientation: 'horizontal' | 'vertical';
   label: string;
+  subject?: 'maths' | 'english';
 }) => {
   const isVertical = orientation === 'vertical';
   return (
-    <div className="flex flex-col items-center justify-center gap-2">
-      <span className="text-[11px] font-semibold text-primary tracking-tight text-center">{label}</span>
+    <div className="flex flex-col items-center justify-center gap-3 px-2">
+      <span className={cn(
+        "text-[10px] font-bold uppercase tracking-[0.2em] text-center",
+        subject === 'english' ? "text-amber-600/80 dark:text-amber-500/80" : "text-blue-600/80 dark:text-blue-500/80"
+      )}>{label}</span>
       <div
-        className={`relative rounded-full overflow-hidden ${isVertical ? 'w-1 h-16' : 'w-16 h-1'}`}
+        className={`relative rounded-full overflow-visible ${isVertical ? 'w-1 h-20' : 'w-24 sm:w-32 h-1'}`}
       >
         <div
-          className={`absolute inset-0 rounded-full ${isVertical ? 'bg-gradient-to-b from-muted-foreground via-primary to-primary' : 'bg-gradient-to-r from-muted-foreground via-primary to-primary'}`}
+          className={cn(
+            "absolute inset-0 rounded-full dark:opacity-60",
+            isVertical
+              ? (subject === 'english' ? "bg-gradient-to-b from-border via-amber-400 to-amber-500" : "bg-gradient-to-b from-border via-blue-400 to-blue-500")
+              : (subject === 'english' ? "bg-gradient-to-r from-border via-amber-400 to-amber-500" : "bg-gradient-to-r from-border via-blue-400 to-blue-500")
+          )}
         />
         <div
-          className={`absolute ${isVertical ? '-bottom-3 left-1/2 -translate-x-1/2' : '-right-3 top-1/2 -translate-y-1/2'} h-0 w-0 drop-shadow-[0_0_6px_rgba(59,130,246,0.5)]`}
+          className={cn(
+            `absolute ${isVertical ? '-bottom-3.5 left-1/2 -translate-x-1/2' : '-right-3.5 top-1/2 -translate-y-1/2'} h-0 w-0 z-10`,
+            subject === 'english' ? "drop-shadow-[0_0_8px_rgba(245,158,11,0.6)]" : "drop-shadow-[0_0_8px_rgba(59,130,246,0.6)]"
+          )}
           style={
             isVertical
-              ? { borderLeft: '5px solid transparent', borderRight: '5px solid transparent', borderTop: '10px solid #2563eb' }
-              : { borderTop: '6px solid transparent', borderBottom: '6px solid transparent', borderLeft: '10px solid #2563eb' }
+              ? { borderLeft: '6px solid transparent', borderRight: '6px solid transparent', borderTop: subject === 'english' ? '12px solid #f59e0b' : '12px solid #3b82f6' }
+              : { borderTop: '6px solid transparent', borderBottom: '6px solid transparent', borderLeft: subject === 'english' ? '14px solid #f59e0b' : '14px solid #3b82f6' }
           }
           aria-hidden="true"
         />
         <div
-          className={`absolute ${isVertical ? 'left-1/2 -translate-x-1/2 top-0' : '-top-0.5'} bg-gradient-to-r from-transparent via-primary to-transparent rounded animate-pulse`}
+          className={cn(
+            `absolute ${isVertical ? 'left-1/2 -translate-x-1/2 top-0' : '-top-[0.15rem]'} rounded-full`,
+            subject === 'english' ? "bg-gradient-to-r from-transparent via-amber-300 to-transparent" : "bg-gradient-to-r from-transparent via-blue-300 to-transparent"
+          )}
           style={{
             animation: 'travelLight 2.5s ease-in-out infinite',
-            ...(isVertical ? { width: '0.2rem', height: '80%' } : { width: '70%', height: '0.25rem' }),
+            ...(isVertical ? { width: '0.25rem', height: '80%' } : { width: '70%', height: '0.4rem' }),
+            filter: 'blur(1px)'
           }}
         />
       </div>
@@ -305,7 +326,7 @@ const applyTrackFilter = (builder: any, userTrack: string): any => {
   return builder.or('track.eq.gcse,track.is.null');
 };
 
-export function Readiness() {
+export function SubjectReadinessView({ subject }: { subject: 'english' | 'maths' }) {
   const { user, profile } = useAppContext();
   const navigate = useNavigate();
   const userTrack = resolveUserTrack(profile?.track ?? null);
@@ -319,10 +340,10 @@ export function Readiness() {
     latestAIEvent,
     loading,
     clearAIEvent,
-  } = useReadiness(user?.id, userTrack);
+  } = useReadiness(user?.id, userTrack, subject);
   const topicsForUi = useMemo(
-    () => buildTrackReadinessRows(userTrack, topics),
-    [userTrack, topics]
+    () => buildTrackReadinessRows(userTrack, topics, subject),
+    [userTrack, topics, subject]
   );
   const displayTopics = userTrack === '11plus' ? topicsForUi : topics;
 
@@ -406,7 +427,17 @@ export function Readiness() {
         .limit(30);
 
       {
-        const practiceRows = practiceData || [];
+        const allPracticeRows = practiceData || [];
+        
+        const isEnglish = subject === 'english';
+        // Filter practice rows dynamically by current subject so readiness dashboard is perfectly isolated
+        const practiceRows = allPracticeRows.filter((row: any) => {
+          if (!row.topic) return false;
+          const t = String(row.topic).toLowerCase();
+          const isEng = t.includes('english') || t.includes('verbal') || t.includes('comprehension') || t.includes('vocabulary') || t.includes('grammar') || t.includes('spelling') || t.includes('spag');
+          return isEnglish ? isEng : !isEng;
+        });
+
         const mockRows = mockData || [];
         const attemptCreatedAt = new Map<string, Date>();
         mockRows.forEach((attempt: any) => {
@@ -571,8 +602,9 @@ export function Readiness() {
     isElevenPlusTrack && elevenPlusNextBand === 'Maintain Selective-ready'
       ? 'Selective-ready'
       : elevenPlusNextBand;
-  const accuracyPct = isElevenPlusTrack ? clamp(Math.round(overall), 0, 100) : 0;
-  const speedPct = isElevenPlusTrack ? Math.min(100, Math.round((Math.min(history.length, 10) / 10) * 100)) : 0;
+  const accuracyPct = isElevenPlusTrack ? clamp(Math.round(stats.accuracy), 0, 100) : 0;
+  // Calculate a reasonable speed score based on practice streaks or use a default baseline, as true speed metrics require time logs per attempt
+  const speedPct = isElevenPlusTrack ? clamp(Math.round(40 + (stats.bestStreak * 5)), 0, 100) : 0;
   const coveragePct = isElevenPlusTrack && displayTopics.length
     ? Math.round((displayTopics.filter((topic) => topic.readiness >= 50).length / displayTopics.length) * 100)
     : 0;
@@ -1230,68 +1262,95 @@ export function Readiness() {
   return (
     <>
       <div className="max-w-6xl mx-auto px-4 sm:px-10 py-6 sm:py-14">
-        {/* Header */}
       <header className="mb-10 sm:mb-14 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 print-header">
         <div>
-          <h1 className="text-2xl sm:text-4xl font-semibold tracking-tight text-foreground mb-2">
-            Exam Readiness
+          <h1 className="text-3xl sm:text-[40px] font-bold tracking-tight text-foreground mb-3 leading-tight">
+            {subject === 'english' ? 'English' : 'Mathematics'} Exam Readiness
           </h1>
-          <p className="text-sm sm:text-[15px] text-muted-foreground">
-            11+ Mathematics
-          </p>
+          <div className={cn(
+             "inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-semibold tracking-wide uppercase",
+             subject === 'english' ? "bg-amber-500/10 border-amber-500/20 text-amber-500" : "bg-primary/10 border-primary/20 text-primary"
+          )}>
+            <Sparkles className="w-3.5 h-3.5 animate-pulse" />
+            11+ {subject === 'english' ? 'English' : 'Mathematics'}
+          </div>
         </div>
       </header>
 
       {/* Grade Progression Section */}
       <section className="mb-12 sm:mb-16">
         <div className="mb-6 sm:mb-8">
-          <div className="text-[11px] font-medium tracking-widest uppercase text-muted-foreground mb-2">
-            {isElevenPlusTrack ? 'Selective Readiness' : 'Exam Trajectory'}
+          <div className="text-[12px] font-bold tracking-[0.2em] uppercase text-primary/80 mb-2">
+            {isElevenPlusTrack ? 'Selective Progress' : 'Exam Trajectory'}
           </div>
-          <div className="text-lg sm:text-xl font-semibold tracking-tight text-foreground">
-            {isElevenPlusTrack ? 'Your selective readiness progression' : 'Your predicted grade progression'}
+          <div className="text-xl sm:text-2xl font-semibold tracking-tight text-foreground leading-snug max-w-2xl">
+            {isElevenPlusTrack ? `Your trajectory towards elite selective standards in ${subject === 'english' ? 'English' : 'Mathematics'}.` : 'Your predicted grade progression towards the final exam.'}
           </div>
         </div>
 
-        <div className="py-4 sm:py-5 grid grid-cols-1 gap-6 md:grid-cols-[1fr_auto_1fr] md:items-center">
-          <div className="bg-card rounded-2xl px-6 sm:px-10 py-8 sm:py-10 text-center transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] border border-border shadow-sm">
-            <div className="text-xs font-medium tracking-widest uppercase text-muted-foreground mb-4 sm:mb-5">
-              {isElevenPlusTrack ? 'SELECTIVE READINESS' : 'Current'}
-            </div>
-            <div
-              className={`font-semibold tracking-tighter text-foreground leading-none ${
-                isElevenPlusTrack ? 'text-4xl sm:text-5xl lg:text-6xl' : 'text-5xl sm:text-[80px]'
-              }`}
-            >
-              {isElevenPlusTrack ? elevenPlusReadinessBand : displayCurrentGrade}
-            </div>
-            <div className="text-xs sm:text-[13px] text-muted-foreground/80 mt-4 sm:mt-5 tracking-tight font-medium">
-              {isElevenPlusTrack ? 'Based on accuracy, speed and topic coverage.' : 'Based on your progress'}
-            </div>
-            {isElevenPlusTrack && (
-              <div className="mt-6 flex flex-wrap justify-center gap-2 sm:gap-4 text-[11px] sm:text-[13px] font-medium text-muted-foreground/90">
-                <span className="bg-secondary/50 px-3 py-1.5 rounded-full border border-border/50">Accuracy: <span className="text-foreground font-semibold">{accuracyPct}%</span></span>
-                <span className="bg-secondary/50 px-3 py-1.5 rounded-full border border-border/50">Speed: <span className="text-foreground font-semibold">{speedPct}%</span></span>
+        <div className="py-4 sm:py-5 grid grid-cols-1 gap-8 md:grid-cols-[1fr_auto_1fr] md:items-center">
+          {/* Current Level Box */}
+          <div className={cn(
+            "bg-card rounded-[32px] px-6 sm:px-10 py-10 sm:py-12 text-center transition-all duration-500 hover:-translate-y-2 hover:shadow-lg relative overflow-hidden group shadow-sm ring-1 ring-inset",
+            subject === 'english' ? "ring-amber-500/20" : "ring-blue-500/20"
+          )}>
+            <div className={cn(
+               "absolute top-0 right-0 w-32 h-32 blur-[40px] rounded-full pointer-events-none opacity-20 transition-opacity group-hover:opacity-40",
+               subject === 'english' ? "bg-amber-400" : "bg-blue-400"
+            )} />
+            <div className="relative z-10">
+              <div className={cn(
+                 "inline-flex items-center justify-center gap-2 text-[11px] font-bold tracking-[0.2em] uppercase px-4 py-1.5 rounded-full mb-6 border shadow-sm backdrop-blur-sm transition-colors",
+                 subject === 'english' 
+                   ? "bg-amber-500/10 text-amber-600 border-amber-500/20" 
+                   : "bg-blue-500/10 text-blue-600 border-blue-500/20"
+              )}>
+                <div className={cn(
+                  "w-1.5 h-1.5 rounded-full",
+                  subject === 'english' ? "bg-amber-500" : "bg-blue-500"
+                )} />
+                {isElevenPlusTrack ? 'Current Level' : 'Current Grade'}
               </div>
-            )}
+              <div className={`font-black tracking-tighter text-foreground leading-tight pb-2 mb-2 ${isElevenPlusTrack ? 'text-5xl sm:text-[56px]' : 'text-6xl sm:text-[80px]'}`}>
+                {isElevenPlusTrack ? elevenPlusReadinessBand : displayCurrentGrade}
+              </div>
+              <div className="text-[14px] sm:text-[15px] text-muted-foreground tracking-tight font-medium max-w-[260px] mx-auto">
+                {isElevenPlusTrack ? 'Synthesized from your accuracy, speed & syllabus coverage.' : 'Based on your recent module assessments.'}
+              </div>
+              
+              {isElevenPlusTrack && (
+                <div className="mt-8 pt-6 border-t border-border/80 flex flex-wrap justify-center gap-6 sm:gap-8">
+                  <div className="flex flex-col items-center group/stat">
+                    <span className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground mb-1.5 transition-colors group-hover/stat:text-foreground">Accuracy</span>
+                    <div className="flex items-baseline gap-0.5">
+                      <span className="text-xl font-black text-foreground">{accuracyPct}</span>
+                      <span className={cn("text-xs font-bold", subject === 'english' ? "text-amber-600" : "text-blue-600")}>%</span>
+                    </div>
+                  </div>
+                  <div className="w-px h-10 bg-border" />
+                  <div className="flex flex-col items-center group/stat">
+                    <span className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground mb-1.5 transition-colors group-hover/stat:text-foreground">Speed Index</span>
+                    <div className="flex items-baseline gap-0.5">
+                      <span className="text-xl font-black text-foreground">{speedPct}</span>
+                      <span className={cn("text-xs font-bold", subject === 'english' ? "text-amber-600" : "text-blue-600")}>%</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
-          <div className="flex items-center justify-center gap-2">
+          {/* Separation Arrow */}
+          <div className="flex items-center justify-center gap-2 py-4 md:py-0">
             {isElevenPlusTrack ? (
-              <ReadinessArrow orientation="horizontal" label={`Next Level: ${elevenPlusNextBand}`} />
+              <ReadinessArrow orientation="horizontal" label={`Trajectory`} />
             ) : gradeGain > 0 ? (
               <>
                 <div className="hidden md:flex">
-                  <ReadinessArrow
-                    orientation="horizontal"
-                    label={`+${gradeGain} grade${gradeGain > 1 ? 's' : ''} achievable`}
-                  />
+                  <ReadinessArrow orientation="horizontal" label={`+${gradeGain} ${gradeGain > 1 ? 'Grades' : 'Grade'}`} />
                 </div>
                 <div className="flex md:hidden">
-                  <ReadinessArrow
-                    orientation="vertical"
-                    label={`+${gradeGain} grade${gradeGain > 1 ? 's' : ''} achievable`}
-                  />
+                  <ReadinessArrow orientation="vertical" label={`+${gradeGain} ${gradeGain > 1 ? 'Grades' : 'Grade'}`} />
                 </div>
               </>
             ) : (
@@ -1299,22 +1358,36 @@ export function Readiness() {
             )}
           </div>
 
-          <div className="bg-card rounded-2xl px-6 sm:px-10 py-8 sm:py-10 text-center transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] border border-primary/20 shadow-[0_8px_30px_rgba(59,130,246,0.1)] relative overflow-hidden group">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-50 group-hover:opacity-100 transition-opacity duration-500" />
+          {/* Target Level Box */}
+          <div className={cn(
+             "bg-card rounded-[32px] px-6 sm:px-10 py-10 sm:py-12 text-center transition-all duration-500 hover:-translate-y-2 hover:shadow-lg relative overflow-hidden group shadow-md ring-1 ring-inset",
+             subject === 'english' ? "ring-amber-500/40" : "ring-blue-500/40"
+          )}>
+            <div className={cn(
+               "absolute inset-0 bg-gradient-to-tr opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none",
+               subject === 'english' ? "from-transparent to-amber-500/5" : "from-transparent to-blue-500/5"
+            )} />
+            <div className={cn(
+               "absolute top-0 right-0 -mr-16 -mt-16 w-32 h-32 rounded-full blur-[60px] pointer-events-none opacity-40 transition-opacity group-hover:opacity-60",
+               subject === 'english' ? "bg-amber-400/40" : "bg-blue-400/40"
+            )} />
+            
             <div className="relative z-10">
-              <div className="inline-flex items-center justify-center gap-2 text-[11px] font-semibold tracking-widest uppercase px-3 py-1 rounded-full bg-primary/10 text-primary mb-5 border border-primary/20">
-                <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-                {isElevenPlusTrack ? 'TARGET LEVEL' : 'Potential'}
+              <div className={cn(
+                "inline-flex items-center justify-center gap-2 text-[11px] font-bold tracking-[0.2em] uppercase px-4 py-1.5 rounded-full mb-6 border shadow-sm backdrop-blur-md",
+                subject === 'english' ? "bg-amber-500/10 text-amber-500 border-amber-500/20" : "bg-blue-500/10 text-blue-500 border-blue-500/20"
+              )}>
+                <span className={cn(
+                   "w-1.5 h-1.5 rounded-full animate-pulse",
+                   subject === 'english' ? "bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.8)]" : "bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.8)]"
+                )} />
+                {isElevenPlusTrack ? 'Target Level' : 'Maximum Potential'}
               </div>
-              <div
-                className={`font-semibold tracking-tighter text-foreground leading-none ${
-                  isElevenPlusTrack ? 'text-4xl sm:text-5xl lg:text-6xl' : 'text-6xl sm:text-[96px]'
-                }`}
-              >
+              <div className={`font-black tracking-tighter text-foreground leading-tight pb-3 -mb-2 px-4 -mx-4 drop-shadow-sm ${isElevenPlusTrack ? 'text-5xl sm:text-[60px]' : 'text-6xl sm:text-[80px]'}`}>
                 {isElevenPlusTrack && elevenPlusNextBand ? elevenPlusNextBand : displayPotentialGrade}
               </div>
-              <div className="text-xs sm:text-[13px] text-muted-foreground/80 mt-4 sm:mt-5 tracking-tight font-medium">
-                {isElevenPlusTrack ? 'Typically needed for top selective schools.' : 'If you follow the plan'}
+              <div className="text-[14px] sm:text-[15px] text-muted-foreground tracking-tight font-medium max-w-[260px] mx-auto">
+                {isElevenPlusTrack ? 'The standard commonly required for grammar & independent schools.' : 'Your peak achievement assuming consistent progress.'}
               </div>
             </div>
           </div>
@@ -1332,9 +1405,9 @@ export function Readiness() {
                 const pillClass = [
                   'px-3 py-1 text-xs font-semibold rounded-full transition-all border',
                   isCurrentBand
-                    ? 'bg-primary text-white border-primary'
+                    ? (subject === 'english' ? 'bg-amber-500 text-white border-amber-500' : 'bg-primary text-white border-primary')
                     : isTargetBand
-                      ? 'bg-primary/10 text-primary border-primary/30'
+                      ? (subject === 'english' ? 'bg-amber-500/10 text-amber-500 border-amber-500/30' : 'bg-primary/10 text-primary border-primary/30')
                       : 'bg-card text-muted-foreground border-border/60',
                 ].join(' ');
                 return (
@@ -1368,13 +1441,22 @@ export function Readiness() {
         <section className="mb-12 sm:mb-16 print-hidden">
           <div className="relative overflow-hidden bg-foreground rounded-3xl p-6 sm:p-10 lg:p-14 shadow-2xl border border-border/50">
             {/* Premium Background Glow Effect */}
-            <div className="absolute top-0 right-0 -mt-20 -mr-20 w-64 sm:w-96 h-64 sm:h-96 bg-primary/30 sm:bg-primary/40 rounded-full blur-[80px] sm:blur-[120px] pointer-events-none" />
-            <div className="absolute bottom-0 left-0 -mb-20 -ml-20 w-64 sm:w-96 h-64 sm:h-96 bg-accent/20 sm:bg-accent/30 rounded-full blur-[80px] sm:blur-[120px] pointer-events-none" />
+            <div className={cn(
+               "absolute top-0 right-0 -mt-20 -mr-20 w-64 sm:w-96 h-64 sm:h-96 rounded-full blur-[80px] sm:blur-[120px] pointer-events-none",
+               subject === 'english' ? "bg-amber-500/30 sm:bg-amber-500/40" : "bg-primary/30 sm:bg-primary/40"
+            )} />
+            <div className={cn(
+               "absolute bottom-0 left-0 -mb-20 -ml-20 w-64 sm:w-96 h-64 sm:h-96 rounded-full blur-[80px] sm:blur-[120px] pointer-events-none",
+               subject === 'english' ? "bg-yellow-500/20 sm:bg-yellow-500/30" : "bg-accent/20 sm:bg-accent/30"
+            )} />
             
             <div className="relative z-10 w-full lg:w-4/5 xl:w-3/4">
               <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
                 <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-background/10 border border-background/20 text-[11px] sm:text-xs font-semibold tracking-wide text-background uppercase backdrop-blur-md self-start">
-                  <span className="w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-primary animate-[pulse_2s_ease-in-out_infinite]" />
+                  <span className={cn(
+                     "w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full animate-[pulse_2s_ease-in-out_infinite]",
+                     subject === 'english' ? "bg-amber-400" : "bg-primary"
+                  )} />
                   Your AI Tutor's Focus Plan
                 </div>
                 {recommendation?.created_at && (
@@ -1388,7 +1470,10 @@ export function Readiness() {
                 <>
                   <div>
                     <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-background mb-4 sm:mb-6 leading-[1.1] text-balance">
-                      Focus on <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-foreground to-primary-foreground/70">{recommendation.title.split(': ')[1] || recommendation.title}</span>
+                      Focus on <span className={cn(
+                        "text-transparent bg-clip-text",
+                        subject === 'english' ? "bg-gradient-to-r from-amber-400 to-amber-200" : "bg-gradient-to-r from-primary-foreground to-primary-foreground/70"
+                      )}>{recommendation.title.split(': ')[1] || recommendation.title}</span>
                     </h2>
                     <p className="text-[17px] sm:text-xl text-background/80 mb-8 sm:mb-10 max-w-2xl leading-relaxed font-medium">
                       {recommendationReason} This is currently the biggest bottleneck in your readiness progression.
@@ -1416,11 +1501,23 @@ export function Readiness() {
                           : '—'}
                       </div>
                     </div>
-                    <div className="bg-primary/20 backdrop-blur-md rounded-2xl p-4 sm:p-5 border border-primary/30 relative overflow-hidden group text-left">
-                      <div className="absolute inset-0 bg-primary/10 transition-colors group-hover:bg-primary/20" />
+                    <div className={cn(
+                       "backdrop-blur-md rounded-2xl p-4 sm:p-5 border relative overflow-hidden group text-left",
+                       subject === 'english' ? "bg-amber-500/20 border-amber-500/30" : "bg-primary/20 border-primary/30"
+                    )}>
+                      <div className={cn(
+                         "absolute inset-0 transition-colors",
+                         subject === 'english' ? "bg-amber-500/10 group-hover:bg-amber-500/20" : "bg-primary/10 group-hover:bg-primary/20"
+                      )} />
                       <div className="relative z-10">
-                        <div className="text-[10px] sm:text-sm font-medium text-primary-foreground/80 mb-1 lg:whitespace-nowrap">Score Boost</div>
-                        <div className="text-xl sm:text-[28px] font-semibold text-primary-foreground leading-none">
+                        <div className={cn(
+                           "text-[10px] sm:text-sm font-medium mb-1 lg:whitespace-nowrap",
+                           subject === 'english' ? "text-amber-100/80" : "text-primary-foreground/80"
+                        )}>Score Boost</div>
+                        <div className={cn(
+                           "text-xl sm:text-[28px] font-semibold leading-none",
+                           subject === 'english' ? "text-amber-100" : "text-primary-foreground"
+                        )}>
                           {recommendationMetrics?.maxReadinessGain !== null && recommendationMetrics?.maxReadinessGain !== undefined
                             ? `+${formatPercentValue(recommendationMetrics.maxReadinessGain)}%`
                             : '—'}
@@ -1433,7 +1530,12 @@ export function Readiness() {
                     onClick={startRecommendationPractice}
                     disabled={startingRecommendationPractice}
                     size="lg"
-                    className="w-full sm:w-auto bg-primary text-primary-foreground hover:bg-primary/90 h-[56px] sm:h-[60px] px-8 sm:px-12 text-[15px] sm:text-[17px] font-semibold rounded-xl shadow-[0_0_40px_-10px_rgba(59,130,246,0.3)] transition-all hover:scale-[1.02] hover:shadow-[0_0_60px_-15px_rgba(59,130,246,0.5)] ring-1 ring-primary-foreground/20"
+                    className={cn(
+                       "w-full sm:w-auto h-[56px] sm:h-[60px] px-8 sm:px-12 text-[15px] sm:text-[17px] font-semibold rounded-xl transition-all hover:scale-[1.02] ring-1",
+                       subject === 'english'
+                         ? "bg-amber-500 text-amber-950 hover:bg-amber-400 shadow-[0_0_40px_-10px_rgba(245,158,11,0.3)] hover:shadow-[0_0_60px_-15px_rgba(245,158,11,0.5)] ring-amber-500/20"
+                         : "bg-primary text-primary-foreground hover:bg-primary/90 shadow-[0_0_40px_-10px_rgba(59,130,246,0.3)] hover:shadow-[0_0_60px_-15px_rgba(59,130,246,0.5)] ring-primary-foreground/20"
+                    )}
                   >
                     Start 10-Minute Sprint
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-2.5 sm:ml-3 w-4 h-4 sm:w-5 sm:h-5"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
@@ -1443,7 +1545,10 @@ export function Readiness() {
                 <>
                   <div>
                     <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-background mb-4 sm:mb-6 leading-[1.1] text-balance">
-                      Establish Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary/70">Baseline</span>
+                      Establish Your <span className={cn(
+                        "text-transparent bg-clip-text",
+                        subject === 'english' ? "bg-gradient-to-r from-amber-400 to-amber-200" : "bg-gradient-to-r from-primary to-primary/70"
+                      )}>Baseline</span>
                     </h2>
                     <p className="text-[17px] sm:text-xl text-background/80 mb-8 sm:mb-10 max-w-2xl leading-relaxed font-medium">
                       Your AI Tutor needs a bit more data to curate your personalized action plan. Take a quick diagnostic assessment to unlock your first targeted 10-minute fix.
@@ -1452,7 +1557,12 @@ export function Readiness() {
                   <Button 
                     onClick={() => navigate(`/practice-page?mode=exam&tier=${isElevenPlusTrack ? '11plus-standard' : 'both'}&paperType=${isElevenPlusTrack ? 'non-calculator' : 'both'}&topics=${isElevenPlusTrack ? encodeURIComponent('Number & Arithmetic,Algebra & Ratio,Geometry & Measures,Statistics & Data,Problem Solving & Strategies') : 'all'}&title=Baseline+Assessment${isElevenPlusTrack ? '&track=11plus' : ''}`)}
                     size="lg"
-                    className="w-full sm:w-auto bg-primary text-primary-foreground hover:bg-primary/90 h-[56px] sm:h-[60px] px-8 sm:px-12 text-[15px] sm:text-[17px] font-semibold rounded-xl shadow-[0_0_40px_-10px_rgba(245,158,11,0.3)] transition-all hover:scale-[1.02] hover:shadow-[0_0_60px_-15px_rgba(245,158,11,0.5)] ring-1 ring-primary-foreground/20"
+                    className={cn(
+                       "w-full sm:w-auto h-[56px] sm:h-[60px] px-8 sm:px-12 text-[15px] sm:text-[17px] font-semibold rounded-xl transition-all hover:scale-[1.02] ring-1",
+                       subject === 'english'
+                         ? "bg-amber-500 text-amber-950 hover:bg-amber-400 shadow-[0_0_40px_-10px_rgba(245,158,11,0.3)] hover:shadow-[0_0_60px_-15px_rgba(245,158,11,0.5)] ring-amber-500/20"
+                         : "bg-primary text-primary-foreground hover:bg-primary/90 shadow-[0_0_40px_-10px_rgba(59,130,246,0.3)] hover:shadow-[0_0_60px_-15px_rgba(59,130,246,0.5)] ring-primary-foreground/20"
+                    )}
                   >
                     Start Baseline Assessment
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-2.5 sm:ml-3 w-4 h-4 sm:w-5 sm:h-5"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
@@ -1465,214 +1575,14 @@ export function Readiness() {
       )}
 
       {/* Main Content Grid */}
-      <div className="grid gap-8 sm:gap-12 lg:grid-cols-[1fr_340px]">
-        {/* Main Content */}
-        <div className="space-y-8 sm:space-y-12">
-          {/* Topics Table */}
-          {/* Topics Table Container */}
-          <div className="bg-card rounded-2xl p-6 sm:p-8 shadow-sm border border-border">
-            <div className="text-xs font-semibold tracking-wide uppercase text-muted-foreground mb-4 sm:mb-6">
-              Topic Analysis
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-border">
-                    <th className="text-left text-xs font-medium tracking-wide text-muted-foreground pb-4">Topic</th>
-                    <th className="text-left text-xs font-medium tracking-wide text-muted-foreground pb-4">Readiness</th>
-                    <th className="hidden sm:table-cell text-right text-xs font-medium tracking-wide text-muted-foreground pb-4">Priority</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {displayTopics.map((topic) => {
-                    const priority = getPriority(topic.readiness);
-                    const lastChange = lastChanges.get(topic.topic);
-                    
-                    return (
-                      <tr
-                        key={topic.topic}
-                        className="border-b border-border last:border-b-0 hover:bg-secondary/30 transition-colors group"
-                      >
-                        <td className="py-4 sm:py-5">
-                          <div className="font-medium text-foreground text-sm">{topic.topic}</div>
-                        </td>
-                        <td className="py-4 sm:py-5">
-                          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-                            <div className="w-16 sm:w-24 h-1.5 bg-secondary rounded-full overflow-hidden">
-                              <div 
-                                className={`h-full rounded-full transition-all duration-500 ${getBarColor(topic.readiness)}`}
-                                style={{ width: `${topic.readiness}%` }}
-                              />
-                            </div>
-                            <span className="font-medium text-sm tabular-nums min-w-[40px] text-left sm:text-right text-foreground">
-                              {Math.round(topic.readiness)}%
-                            </span>
-                            {lastChange && lastChange.delta !== 0 && (
-                              <span className={`text-xs font-medium flex items-center gap-0.5 ${lastChange.delta > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
-                                {lastChange.delta > 0 ? (
-                                  <TrendingUp className="h-3 w-3" />
-                                ) : (
-                                  <TrendingDown className="h-3 w-3" />
-                                )}
-                                {lastChange.delta > 0 ? '+' : ''}
-                                {formatPercentValue(lastChange.delta)}%
-                              </span>
-                            )}
-                          </div>
-                        </td>
-                        <td className="hidden sm:table-cell py-4 sm:py-5 text-right w-24">
-                          <span className={`text-xs font-medium ${priority.color}`}>
-                            {priority.label}
-                          </span>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          {/* Stats Row */}
-          <div className="bg-card rounded-2xl shadow-sm border border-border overflow-hidden">
-            <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-border">
-              <div className="text-center p-6 border-transparent">
-                <div className="text-3xl sm:text-4xl font-semibold tracking-tight text-foreground mb-1 tabular-nums">
-                  {stats.totalQuestions}
-                </div>
-                <div className="text-xs text-muted-foreground mb-2">Questions</div>
-                <div className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
-                  +{stats.weekQuestions} this week
-                </div>
-              </div>
-              <div className="text-center p-6 border-transparent">
-                <div className="text-3xl sm:text-4xl font-semibold tracking-tight text-foreground mb-1 tabular-nums">
-                  {stats.accuracy}%
-                </div>
-                <div className="text-xs text-muted-foreground mb-2">Accuracy</div>
-                <div className={`text-xs font-medium ${stats.weekAccuracyChange >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
-                  {stats.weekAccuracyChange >= 0 ? '+' : ''}{stats.weekAccuracyChange}% vs last week
-                </div>
-              </div>
-              <div className="text-center p-6 border-transparent">
-                <div className="text-3xl sm:text-4xl font-semibold tracking-tight text-foreground mb-1 tabular-nums">
-                  {stats.mockExams}
-                </div>
-                <div className="text-xs text-muted-foreground mb-2">Mock exams</div>
-                <div className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
-                  +{stats.monthMockChange} this month
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Sidebar */}
-        <div className="space-y-8">
-          {/* Momentum Card */}
-          {(() => {
-            const streakDisplay = Math.max(1, stats.streak || 0);
-            const bestDisplay = Math.max(streakDisplay, stats.bestStreak || 0, 1);
-            const bestLabel = bestDisplay === 1 ? 'day' : 'days';
-
-            return (
-              <div className="bg-card rounded-2xl p-6 shadow-sm border border-border hover:-translate-y-1 hover:shadow-md transition-all duration-300">
-                <div className="text-xs font-semibold tracking-wide uppercase text-primary mb-4">
-                  Momentum
-                </div>
-                <div className="flex items-baseline gap-2 mb-2">
-                  <span className="text-4xl font-semibold tracking-tight text-foreground leading-none">{streakDisplay}</span>
-                  <span className="text-sm font-medium text-muted-foreground">day streak</span>
-                </div>
-                <div className="text-xs font-medium text-muted-foreground">
-                  Personal best: {bestDisplay} {bestLabel}
-                </div>
-              </div>
-            );
-          })()}
-
-          {/* AI Targeted Recommendations Card */}
-          {quickWins.length > 0 && (
-            <div className="bg-card rounded-2xl p-6 sm:p-7 shadow-sm border border-primary/20 hover:shadow-md transition-all duration-300 relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none -mr-32 -mt-32" />
-              
-              <div className="flex items-center gap-2 mb-4">
-                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m3 11 18-5v12L3 14v-3z"></path><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"></path></svg>
-                </div>
-                <div className="text-sm font-bold tracking-wide uppercase text-primary">
-                  Optimal Study Path
-                </div>
-              </div>
-              
-              <p className="text-[13px] font-medium leading-relaxed text-foreground mb-6">
-                Based on your exact score trajectory, focusing your effort on these specific subtopics will yield the highest readiness improvements. 
-              </p>
-
-              <div className="space-y-4 relative z-10">
-                {quickWins.map((win, idx) => (
-                  <div
-                    key={`${win.topic}-${win.name}-${idx}`}
-                    className="flex flex-col gap-4 bg-background rounded-xl p-5 border border-border/60 shadow-sm relative overflow-hidden group hover:border-primary/40 transition-colors"
-                  >
-                    {/* Header */}
-                    <div className="flex items-start gap-3">
-                      <div className="flex-shrink-0 flex items-center justify-center w-7 h-7 rounded-full bg-primary/10 text-primary font-bold text-[13px] mt-0.5">
-                        {idx + 1}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="text-[15px] font-bold text-foreground leading-tight tracking-tight group-hover:text-primary transition-colors truncate whitespace-normal">Master {win.name}</h4>
-                        <h5 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mt-1.5">{win.topic}</h5>
-                      </div>
-                    </div>
-
-                    {/* Explainer */}
-                    <p className="text-[13px] text-muted-foreground leading-relaxed mt-1">
-                      Currently at <span className="font-semibold text-foreground">{formatPercent(win.score)}</span> readiness ({win.attempts} attempts). Correcting this foundational gap will immediately boost your overall band.
-                    </p>
-
-                    {/* Metrics Row */}
-                    <div className="grid grid-cols-3 gap-2 text-[11px] font-semibold">
-                      <div className="flex flex-col items-center justify-center gap-1 bg-secondary/50 rounded-lg py-2 text-muted-foreground">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                        <span>{win.timeMin !== null ? `${win.timeMin} mins` : '—'}</span>
-                      </div>
-                      <div className="flex flex-col items-center justify-center gap-1 bg-secondary/50 rounded-lg py-2 text-muted-foreground">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                        <span>{win.questions} Qs</span>
-                      </div>
-                      <div className="flex flex-col items-center justify-center gap-1 bg-primary/5 rounded-lg py-2 text-primary">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m12 14 4-4"></path><path d="M3.34 19a10 10 0 1 1 17.32 0"></path></svg>
-                        <span>+{win.marks !== null ? win.marks : '-'} mks</span>
-                      </div>
-                    </div>
-
-                    {/* Action Buttons */}
-                    <div className="flex flex-col gap-2 mt-1">
-                      <button
-                        onClick={() => startQuickWinPractice(win)}
-                        className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-[13px] py-2.5 px-4 rounded-lg shadow-sm transition-all flex items-center justify-center gap-2"
-                      >
-                        Start Targeted Practice <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="opacity-80"><path d="m9 18 6-6-6-6"/></svg>
-                      </button>
-                      <button
-                        onClick={() => {
-                          const topicKey = win.subtopicId.split('|')[0];
-                          const sectionMatch = getTrackSections('11plus').find(s => s.key === topicKey);
-                          const sectionLabel = sectionMatch?.label || win.topic;
-                          navigate(`/notes/${encodeURIComponent(sectionLabel)}/${win.subtopicId.replace('|', '-')}`);
-                        }}
-                        className="w-full bg-transparent hover:bg-secondary text-foreground font-medium text-[13px] py-2.5 px-4 rounded-lg border border-border/80 transition-all flex items-center justify-center gap-2"
-                      >
-                        <BookOpen className="h-4 w-4 text-muted-foreground" /> Review Concept
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
+      <div className="w-full mt-4 sm:mt-8 pb-24">
+        <PremiumAnalyticsDashboard 
+          displayTopics={displayTopics}
+          accuracyPct={accuracyPct}
+          speedPct={speedPct}
+          profileName={(profile as any)?.full_name || (profile as any)?.username || 'Student'}
+          subject={subject}
+        />
       </div>
 
       {/* AI Explainer Modal */}
@@ -1688,5 +1598,20 @@ export function Readiness() {
       </div>
 
     </>
+  );
+}
+
+export function Readiness() {
+  const { user } = useAppContext();
+  const { currentSubject } = useSubject();
+
+  if (!user) return null;
+
+  return (
+    <div className="bg-background min-h-screen">
+      <div className="py-4 sm:py-8">
+        <SubjectReadinessView subject={currentSubject as 'english' | 'maths'} />
+      </div>
+    </div>
   );
 }

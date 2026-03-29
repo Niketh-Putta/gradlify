@@ -11,7 +11,6 @@ import { getLeaderboard, getMyGlobalOptIn, setGlobalOptIn, LeaderboardEntry } fr
 import { Globe, Users, Target, Eye, EyeOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { FoundersSprintLabel } from "@/components/FoundersSprintLabel";
 import { useMembership } from "@/hooks/useMembership";
 import { useAppContext } from "@/hooks/useAppContext";
 import { resolveUserTrack } from "@/lib/track";
@@ -27,7 +26,6 @@ export function LeaderboardTab() {
   const { isFounder } = useMembership();
   const { profile } = useAppContext();
   const userTrack = resolveUserTrack(profile?.track ?? null);
-  const founderHandles = new Set(['abhi.korapati999', 'raghavjanga']);
 
   const loadLeaderboard = useCallback(async () => {
     setLoading(true);
@@ -237,7 +235,6 @@ export function LeaderboardTab() {
       <Card>
         <CardHeader>
           <div>
-            <FoundersSprintLabel className="mb-2" />
             <CardTitle className="flex items-center gap-2">
               <Target className="h-5 w-5 text-primary" />
               Correct Answers
@@ -260,8 +257,6 @@ export function LeaderboardTab() {
             <div className="space-y-3">
               {leaderboard.map((entry) => {
                 const showSelf = entry.is_self && !isFounder;
-                const nameKey = entry.name.toLowerCase();
-                const isFounderTag = entry.founder_track === 'founder' || founderHandles.has(nameKey);
                 return (
                 <div
                   key={entry.user_id}
@@ -286,11 +281,6 @@ export function LeaderboardTab() {
                         {entry.name}
                         {showSelf && (
                           <span className="ml-2 text-xs text-primary">(You)</span>
-                        )}
-                        {isFounderTag && (
-                          <span className="ml-2 text-[10px] uppercase tracking-wide text-muted-foreground/80 border border-muted-foreground/30 px-1.5 py-0.5 rounded-full">
-                            Founders&apos; circle
-                          </span>
                         )}
                       </div>
                       <Progress

@@ -5,14 +5,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getLeaderboard, LeaderboardEntry } from "@/lib/connectApi";
-import { FoundersSprintLabel } from "@/components/FoundersSprintLabel";
-import { ArrowRight } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { supabase } from "@/integrations/supabase/client";
 import { useMembership } from "@/hooks/useMembership";
 import { useAppContext } from "@/hooks/useAppContext";
 import { resolveUserTrack } from "@/lib/track";
 import { isAbortLikeError } from "@/lib/errors";
+import { ArrowRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export function LeaderboardSnapshot() {
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
@@ -86,7 +86,6 @@ export function LeaderboardSnapshot() {
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <FoundersSprintLabel className="mb-2" />
             <CardTitle className="flex items-center gap-2">
               Top Learners This Month
             </CardTitle>

@@ -6,8 +6,10 @@ import { Search, ArrowLeft, CheckCircle2, ChevronRight, BookOpen } from "lucide-
 import { Badge } from "@/components/ui/badge";
 import notesData from "@/data/edexcel_gcse_notes.json";
 import elevenPlusNotesData from "@/data/eleven_plus_notes.json";
+import elevenPlusEnglishNotesData from "@/data/eleven_plus_english_notes.json";
 import { supabase } from "@/integrations/supabase/client";
 import { useAppContext } from "@/hooks/useAppContext";
+import { useSubject } from "@/contexts/SubjectContext";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { getExamBoardSpecSubtitle, replaceExamBoardReferences } from "@/lib/examBoard";
@@ -40,6 +42,7 @@ type NotesData = {
 
 const typedNotesData = notesData as NotesData;
 const typedElevenPlusNotesData = elevenPlusNotesData as NotesData;
+const typedElevenPlusEnglishNotesData = elevenPlusEnglishNotesData as NotesData;
 
 const sectionDisplayName: Record<string, string> = {
   "Ratio, Proportion & Rates of Change": "Ratio & Proportion",
@@ -57,14 +60,18 @@ const sectionConfig: Record<string, { abbr: string; gradient: string }> = {
   "Number & Arithmetic": { abbr: "N", gradient: "from-purple-500 to-purple-600" },
   "Algebra & Ratio": { abbr: "A", gradient: "from-pink-500 to-pink-600" },
   "Statistics & Data": { abbr: "S", gradient: "from-teal-500 to-teal-600" },
+  "Comprehension": { abbr: "C", gradient: "from-blue-500 to-blue-600" },
+  "Vocabulary": { abbr: "V", gradient: "from-pink-500 to-pink-600" },
+  "SPaG": { abbr: "S", gradient: "from-amber-500 to-amber-600" },
 };
 
 export default function RevisionNotesSection() {
+  const { currentSubject } = useSubject();
   const { section } = useParams<{ section: string }>();
   const { user, profile } = useAppContext();
   const userTrack = resolveUserTrack(profile?.track ?? null);
   const isElevenPlus = userTrack === "11plus";
-  const trackSections = getTrackSections(userTrack);
+  const trackSections = getTrackSections(userTrack, currentSubject);
   const [searchQuery, setSearchQuery] = useState("");
   const [progress, setProgress] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(true);
@@ -73,8 +80,11 @@ export default function RevisionNotesSection() {
   const decodedSection = section ? decodeURIComponent(section) : "";
   const topics = useMemo(() => {
     if (isElevenPlus) {
+      const isEnglish = currentSubject === 'english';
+      const typedNotes = isEnglish ? typedElevenPlusEnglishNotesData : typedElevenPlusNotesData;
+      
       const sectionMeta = trackSections.find((item) => item.label === decodedSection);
-      const authoredTopics = typedElevenPlusNotesData[decodedSection] || [];
+      const authoredTopics = typedNotes[decodedSection] || [];
       const authoredByTitle = new Map(
         authoredTopics.map((topic) => [topic.title.toLowerCase().trim(), topic])
       );
@@ -102,10 +112,32 @@ export default function RevisionNotesSection() {
       title: replaceExamBoardReferences(topic.title, examBoard),
       md: replaceExamBoardReferences(topic.md, examBoard),
     }));
-  }, [decodedSection, examBoard, isElevenPlus]);
+  }, [decodedSection, examBoard, isElevenPlus, trackSections, currentSubject]);
   const fallbackAbbr = decodedSection.trim().charAt(0).toUpperCase() || "N";
   const config = sectionConfig[decodedSection] || { abbr: fallbackAbbr, gradient: "from-purple-500 to-purple-600" };
   const sectionTitle = sectionDisplayName[decodedSection] || decodedSection;
+  
+  const subjectThemeVariables = useMemo(() => {
+    if (!isElevenPlus) return {};
+    if (currentSubject === 'maths') {
+      return { 
+        '--notes-accent': '221 83% 53%', 
+        '--notes-accent-light': '218 91% 65%',
+        '--notes-accent-dark': '226 71% 40%',
+        '--notes-gradient': 'linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%)' 
+      } as React.CSSProperties;
+    }
+    return { 
+      '--notes-accent': '38 92% 50%', 
+      '--notes-accent-light': '43 96% 56%',
+      '--notes-accent-dark': '35 92% 33%',
+      '--notes-gradient': 'linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)' 
+    } as React.CSSProperties;
+  }, [isElevenPlus, currentSubject]);
+
+  const activeGradient = isElevenPlus 
+    ? (currentSubject === 'maths' ? 'from-blue-500 to-blue-600' : 'from-amber-500 to-amber-600') 
+    : config.gradient;
 
   useEffect(() => {
     const fetchProgress = async () => {
@@ -164,13 +196,13 @@ export default function RevisionNotesSection() {
     );
   }
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background" style={subjectThemeVariables}>
       <div className="max-w-[900px] mx-auto px-4 sm:px-6 py-12">
         {/* Back Button */}
         <Link 
           to="/notes" 
           className="inline-flex items-center gap-2 text-sm font-medium mb-10 transition-all hover:gap-3"
-          style={{ color: 'hsl(262 83% 58%)' }}
+          style={{ color: 'hsl(var(--notes-accent))' }}
         >
           <ArrowLeft className="h-4 w-4" />
           All Topics
@@ -180,7 +212,7 @@ export default function RevisionNotesSection() {
         <div className="mb-12">
           {/* Icon */}
           <div 
-            className={cn("w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-bold text-white mb-6 shadow-lg bg-gradient-to-r", config.gradient)}
+            className={cn("w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-bold text-white mb-6 shadow-lg bg-gradient-to-r", activeGradient)}
           >
             {config.abbr}
           </div>
@@ -203,7 +235,7 @@ export default function RevisionNotesSection() {
                   />
                 </div>
               </div>
-              <span className="text-sm font-semibold whitespace-nowrap" style={{ color: 'hsl(262 83% 58%)' }}>
+              <span className="text-sm font-semibold whitespace-nowrap" style={{ color: 'hsl(var(--notes-accent))' }}>
                 {completedCount}/{topics.length} complete
               </span>
             </div>
@@ -258,7 +290,7 @@ export default function RevisionNotesSection() {
                     {/* Spec Code */}
                     <div className={cn(
                       "w-12 h-12 rounded-xl flex items-center justify-center text-sm font-bold text-white shrink-0 mr-5 bg-gradient-to-r",
-                      isDone ? "from-green-500 to-green-600" : config.gradient
+                      isDone ? "from-green-500 to-green-600" : activeGradient
                     )}>
                       {isDone ? (
                         <CheckCircle2 className="h-5 w-5" />
@@ -269,7 +301,7 @@ export default function RevisionNotesSection() {
 
                     {/* Content */}
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-foreground group-hover:text-[hsl(262_83%_58%)] transition-colors mb-1">
+                      <h3 className="font-semibold text-foreground group-hover:text-[hsl(var(--notes-accent))] transition-colors mb-1">
                         {topic.title}
                       </h3>
                       <p className="text-sm text-muted-foreground truncate">
@@ -285,7 +317,7 @@ export default function RevisionNotesSection() {
                       {isDone && (
                         <span className="notes-badge notes-badge-complete">Complete</span>
                       )}
-                      <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-[hsl(262_83%_58%)] group-hover:translate-x-1 transition-all" />
+                      <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-[hsl(var(--notes-accent))] group-hover:translate-x-1 transition-all" />
                     </div>
                   </div>
                 </Link>

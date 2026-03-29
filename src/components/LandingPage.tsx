@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion, useReducedMotion } from "framer-motion";
-import { ArrowRight, CheckCircle, ShieldCheck, Sparkles, Moon, Sun, MousePointer2 } from "lucide-react";
+import { ArrowRight, CheckCircle, ShieldCheck, Sparkles, Moon, Sun, MousePointer2, Gamepad2, Layers, SlidersHorizontal } from "lucide-react";
 import { toast } from "sonner";
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -385,7 +385,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
               <div className="leading-tight">
                 <div className={`text-[13px] sm:text-sm font-semibold ${primaryText}`}>Gradlify</div>
                 <div className={`text-[11px] sm:text-xs ${subtleText} hidden sm:block`}>
-                  {trackTitle}. Practised properly.
+                  11+ Practised Properly.
                 </div>
               </div>
             </a>
@@ -462,10 +462,10 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                 Real {trackTitle} practice, without the noise.
               </div>
 
-                <h1 className={`mt-5 text-[28px] leading-tight sm:text-4xl lg:text-5xl xl:text-6xl font-semibold tracking-tight ${primaryText}`}>
-                  {trackTitle}.{" "}
-                  <span className={`text-transparent bg-clip-text bg-gradient-to-r ${heroGradient}`}>
-                    Practised properly.
+                <h1 className={`mt-5 leading-tight font-semibold tracking-tight ${primaryText}`}>
+                  <span className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl mr-1 sm:mr-2 align-baseline">11+</span>
+                  <span className={`text-[28px] sm:text-4xl lg:text-5xl xl:text-6xl text-transparent bg-clip-text bg-gradient-to-r ${heroGradient} align-baseline`}>
+                    Practised Properly.
                   </span>
                 </h1>
 
@@ -547,17 +547,29 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                       />
                     </div>
 
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-3 text-[11px] sm:text-xs">
+                    <div className={`flex flex-col sm:flex-row items-stretch rounded-2xl border overflow-hidden backdrop-blur-sm ${isDark ? "bg-black/30 border-white/10 divide-y sm:divide-y-0 sm:divide-x divide-white/10 shadow-inner" : "bg-white/50 border-slate-200 divide-y sm:divide-y-0 sm:divide-x divide-slate-100 shadow-[inset_0_1px_0_rgba(255,255,255,1)]"}`}>
                       {[
-                        { label: "Modes", value: "Practice • Mock • Challenge" },
-                        { label: "Tiers", value: "Foundation • Higher • Mixed" },
-                        { label: "Scope", value: "Topic + subtopic control" },
-                      ].map((item) => (
-                        <div key={item.label} className={`rounded-2xl border px-2.5 py-2 sm:px-4 sm:py-3 ${panelSurface}`}>
-                          <div className={subtleText}>{item.label}</div>
-                          <div className={`mt-1 text-[11px] sm:text-sm font-semibold ${primaryText}`}>{item.value}</div>
-                        </div>
-                      ))}
+                        { label: "Modes", value: "Practice, Mock, Challenge", icon: Gamepad2 },
+                        { label: "Tiers", value: "Foundation, Higher, Mixed", icon: Layers },
+                        { label: "Scope", value: "Topic + subtopic control", icon: SlidersHorizontal },
+                      ].map((item) => {
+                        const Icon = item.icon;
+                        return (
+                          <div key={item.label} className="group flex-1 flex flex-row sm:flex-col gap-3 sm:gap-4 p-3.5 sm:p-5 transition-all duration-300 hover:bg-black/5 dark:hover:bg-white/5 relative overflow-hidden">
+                            <div className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none ${isDark ? (isElevenPlus ? "bg-[radial-gradient(circle_at_top_right,rgba(245,158,11,0.08),transparent_70%)]" : "bg-[radial-gradient(circle_at_top_right,rgba(99,102,241,0.08),transparent_70%)]") : (isElevenPlus ? "bg-[radial-gradient(circle_at_top_right,rgba(245,158,11,0.04),transparent_70%)]" : "bg-[radial-gradient(circle_at_top_right,rgba(99,102,241,0.04),transparent_70%)]")}`} />
+                            
+                            <div className="relative z-10 flex flex-row sm:flex-col gap-3 sm:gap-4 items-center sm:items-start w-full">
+                              <div className={`flex items-center justify-center shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-[10px] ${isDark ? "bg-white/5 ring-1 ring-white/10 shadow-inner" : "bg-white ring-1 ring-slate-200/80 shadow-[0_2px_8px_rgba(0,0,0,0.04)]"} group-hover:scale-105 transition-transform duration-300`}>
+                                <Icon className={`h-4 w-4 sm:h-5 sm:w-5 transition-colors duration-300 ${isElevenPlus ? (isDark ? 'text-amber-500/80 group-hover:text-amber-400' : 'text-orange-500/80 group-hover:text-orange-500') : (isDark ? 'text-indigo-400/80 group-hover:text-indigo-300' : 'text-indigo-600/80 group-hover:text-indigo-600')}`} />
+                              </div>
+                              <div className="flex flex-col min-w-0 flex-1 justify-center sm:justify-start">
+                                <div className={`text-[9px] sm:text-[10px] uppercase font-bold tracking-[0.15em] mb-0.5 sm:mb-1 ${subtleText} group-hover:${primaryText} transition-colors duration-300`}>{item.label}</div>
+                                <div className={`text-[12px] sm:text-[13px] font-semibold leading-snug ${primaryText}`}>{item.value}</div>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 </div>
@@ -693,6 +705,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                   >
                   <DemoQuestion
                     embedded
+                    tone={theme}
                     onStartPracticeClick={handleSignup}
                     questions={isElevenPlus ? elevenPlusDemoQuestions : undefined}
                   />
@@ -1023,7 +1036,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
               <LogoMark className="w-8 h-8 sm:w-9 sm:h-9" variant={isDark ? "dark" : "light"} />
               <div className="leading-tight">
                 <div className={`text-[13px] sm:text-sm font-semibold ${primaryText}`}>Gradlify</div>
-                <div className={`text-[11px] sm:text-xs ${subtleText}`}>{trackTitle}. Practised properly.</div>
+                <div className={`text-[11px] sm:text-xs ${subtleText}`}>11+ Practised Properly.</div>
               </div>
             </div>
             <div className={`flex flex-wrap items-center gap-x-6 gap-y-2 text-sm ${mutedText}`}>
@@ -1379,19 +1392,21 @@ function ShowcaseRow({
         </div>
         <h3 className={`mt-3 text-xl sm:text-2xl font-semibold ${isDark ? "text-white" : "text-slate-900"}`}>{row.title}</h3>
         <p className={`mt-4 text-sm sm:text-base leading-relaxed ${isDark ? "text-slate-300" : "text-slate-600"}`}>{row.body}</p>
-        <div
-          className={`mt-6 inline-flex items-center gap-2 rounded-full border px-2.5 py-1.5 text-[11px] sm:text-xs ${
-            isDark ? "border-white/10 bg-white/5 text-slate-200" : "border-slate-200/80 bg-white text-slate-700"
-          }`}
-        >
-          <Sparkles className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${isDark ? "text-orange-300" : "text-orange-600"}`} />
-          {row.badge}
-        </div>
-        {row.hoverFact && (
-          <div className="mt-4">
-            <HoverFact tone={tone}>{row.hoverFact}</HoverFact>
+        <div className="mt-6 flex flex-col items-start gap-3 relative z-10 transition-transform duration-300">
+          <div
+            className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[11px] sm:text-xs font-medium transition-all duration-300 ${
+              isDark 
+                ? "bg-white/5 text-slate-200 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] ring-1 ring-inset ring-white/10 group-hover:bg-white/10 group-hover:ring-white/20 group-hover:shadow-[0_4px_14px_rgba(0,0,0,0.2)]" 
+                : "bg-white text-slate-700 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.05)] ring-1 ring-inset ring-slate-200/80 group-hover:bg-slate-50 group-hover:ring-slate-300 group-hover:shadow-[0_4px_14px_rgba(0,0,0,0.08)]"
+            }`}
+          >
+            <Sparkles className={`h-3.5 w-3.5 sm:h-4 sm:w-4 transition-transform duration-500 group-hover:scale-110 ${isDark ? "text-amber-300" : "text-amber-600"}`} />
+            {row.badge}
           </div>
-        )}
+          {row.hoverFact && (
+            <HoverFact tone={tone}>{row.hoverFact}</HoverFact>
+          )}
+        </div>
       </div>
 
       <div className={`lg:col-span-7 ${mediaOrder}`}>
@@ -1436,38 +1451,59 @@ function MediaFrame({
 function ExplanationPreview({ tone }: { tone: "dark" | "light" }) {
   const isDark = tone === "dark";
   return (
-    <div className="h-full w-full p-4 sm:p-6 flex flex-col justify-between gap-4">
-      <div
-        className={`rounded-2xl border px-4 py-3 text-[11px] sm:text-xs ${
-          isDark ? "border-white/10 bg-slate-950/60 text-slate-300" : "border-slate-200/80 bg-white text-slate-600"
-        }`}
-      >
-        Solve: 2x + 7 = 19
-      </div>
-      <div className="grid gap-2">
-        {["x = 6", "x = 5", "x = 8"].map((option, index) => (
-          <div
-            key={option}
-            className={`rounded-xl border px-4 py-3 text-[13px] sm:text-sm ${
-              index === 1
-                ? isDark
-                  ? "border-emerald-400/40 bg-emerald-400/10 text-emerald-100"
-                  : "border-emerald-500/40 bg-emerald-500/10 text-emerald-700"
-                : isDark
-                  ? "border-white/10 bg-white/5 text-slate-200"
-                  : "border-slate-200/80 bg-white text-slate-700"
-            }`}
-          >
-            {option}
+    <div className="h-full w-full p-5 sm:p-7 flex flex-col justify-between gap-5 tracking-tight relative z-10">
+      <div className="space-y-4">
+        {/* Question Bubble */}
+        <div
+          className={`relative rounded-2xl rounded-tl-sm px-5 py-4 text-[13px] sm:text-sm font-medium shadow-sm transition-all duration-300 ${
+            isDark 
+              ? "bg-slate-800/80 text-slate-200 border border-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_4px_20px_rgba(0,0,0,0.2)]" 
+              : "bg-white text-slate-800 border border-slate-200/80 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)]"
+          }`}
+        >
+          <div className={`absolute -top-2.5 -left-2.5 flex h-6 w-6 items-center justify-center rounded-full border shadow-sm ${isDark ? "bg-slate-700 border-white/10 text-slate-300" : "bg-white border-slate-200 text-slate-500"}`}>
+            <span className="text-[10px] font-bold">Q</span>
           </div>
-        ))}
+          <span className="opacity-90">Solve:</span> <span className="font-semibold tracking-wide">2x + 7 = 19</span>
+        </div>
+
+        {/* Options */}
+        <div className="grid gap-2.5 pl-4 sm:pl-6 border-l-2 border-dashed border-slate-200/50 dark:border-white/10">
+          {["x = 6", "x = 5", "x = 8"].map((option, index) => (
+            <div
+              key={option}
+              className={`flex items-center justify-between rounded-xl px-4 py-2.5 text-[13px] sm:text-sm font-medium transition-all duration-300 ${
+                index === 1
+                  ? isDark
+                    ? "bg-emerald-500/15 text-emerald-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] ring-1 ring-inset ring-emerald-500/40"
+                    : "bg-emerald-50 text-emerald-700 shadow-[inset_0_1px_0_rgba(255,255,255,0.5)] ring-1 ring-inset ring-emerald-500/30"
+                  : isDark
+                    ? "bg-white/[0.03] text-slate-400 ring-1 ring-inset ring-white/10 hover:bg-white/10 cursor-default"
+                    : "bg-slate-50 text-slate-600 ring-1 ring-inset ring-slate-200/60 hover:bg-white cursor-default"
+              }`}
+            >
+              <span>{option}</span>
+              {index === 1 && (
+                <CheckCircle className={`h-4 w-4 ${isDark ? "text-emerald-400" : "text-emerald-600"} drop-shadow-sm`} />
+              )}
+            </div>
+          ))}
+        </div>
       </div>
+
+      {/* Explanation Bubble */}
       <div
-        className={`rounded-2xl border px-4 py-3 text-[11px] sm:text-xs ${
-          isDark ? "border-white/10 bg-white/5 text-slate-300" : "border-slate-200/80 bg-slate-50 text-slate-600"
+        className={`relative mt-2 rounded-2xl rounded-tr-sm px-5 py-4 text-[12px] sm:text-[13px] leading-relaxed shadow-lg transition-all duration-300 ${
+          isDark 
+            ? "bg-gradient-to-br from-amber-500/20 to-orange-500/10 text-amber-100 ring-1 ring-inset ring-amber-500/30 shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_8px_30px_-6px_rgba(245,158,11,0.2)]" 
+            : "bg-gradient-to-br from-amber-50 to-orange-50/50 text-amber-900 ring-1 ring-inset ring-amber-500/20 shadow-[0_8px_30px_-6px_rgba(245,158,11,0.15)]"
         }`}
       >
-        Subtract 7 from both sides → 2x = 12, then divide by 2.
+        <div className={`absolute -top-3 -right-2 flex h-7 w-7 items-center justify-center rounded-full shadow-md ring-2 ${isDark ? "bg-amber-500 ring-slate-900 text-white" : "bg-amber-500 ring-white text-white"}`}>
+          <Sparkles className="h-3.5 w-3.5" />
+        </div>
+        <div className="font-semibold mb-1 opacity-90 text-[10px] uppercase tracking-wider">Tutor Explain</div>
+        <p className="opacity-90">Subtract 7 from both sides → <span className="font-semibold text-amber-600 dark:text-amber-300">2x = 12</span>, then divide by 2.</p>
       </div>
     </div>
   );
@@ -1477,12 +1513,15 @@ function HoverFact({ tone, children }: { tone: "dark" | "light"; children: React
   const isDark = tone === "dark";
   return (
     <div
-      className={`inline-flex items-center gap-2 rounded-full border px-2.5 py-0.5 sm:px-3 sm:py-1 text-[10px] sm:text-[11px] font-semibold uppercase tracking-[0.22em] transition-all duration-300 ${
-        isDark ? "border-white/10 bg-white/5 text-slate-300" : "border-slate-200/80 bg-white text-slate-600"
-      } opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0`}
+      className={`inline-flex items-center gap-2.5 rounded-full px-3 py-1.5 sm:px-4 sm:py-2 text-[10.5px] sm:text-[11.5px] font-semibold tracking-wide transition-all duration-500 ease-out ${
+        isDark 
+          ? "bg-amber-500/10 text-amber-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_8px_20px_-6px_rgba(245,158,11,0.2)] ring-1 ring-inset ring-amber-500/20 backdrop-blur-md" 
+          : "bg-gradient-to-b from-amber-50/80 to-amber-100/30 text-amber-800 shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_8px_20px_-6px_rgba(245,158,11,0.15)] ring-1 ring-inset ring-amber-500/20 backdrop-blur-md"
+      } opacity-0 translate-y-3 scale-[0.97] filter blur-[2px] group-hover:opacity-100 group-hover:translate-y-0 group-hover:scale-100 group-hover:blur-0`}
+      style={{ transitionTimingFunction: "cubic-bezier(0.175, 0.885, 0.32, 1.25)" }}
     >
-      <MousePointer2 className={`h-3 w-3 sm:h-3.5 sm:w-3.5 ${isDark ? "text-orange-300" : "text-orange-500"}`} />
-      {children}
+      <MousePointer2 className={`h-3 w-3 sm:h-3.5 sm:w-3.5 transition-transform duration-500 delay-100 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 ${isDark ? "text-amber-400" : "text-amber-600"}`} />
+      <span className="opacity-90">{children}</span>
     </div>
   );
 }
@@ -1490,13 +1529,18 @@ function HoverFact({ tone, children }: { tone: "dark" | "light"; children: React
 function MockBuilderPreview({ tone }: { tone: "dark" | "light" }) {
   const isDark = tone === "dark";
   return (
-    <div className={`h-full w-full p-4 sm:p-5 flex flex-col gap-3 text-[11px] sm:text-xs ${isDark ? "text-slate-200" : "text-slate-600"}`}>
-      <div className="space-y-2">
-        <div className={`text-[10px] sm:text-[11px] uppercase tracking-[0.24em] ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-          Step 1
+    <div className={`h-full w-full p-5 sm:p-7 flex flex-col gap-6 text-[12px] sm:text-[13px] relative z-10 ${isDark ? "text-slate-200" : "text-slate-600"}`}>
+      {/* Timeline line */}
+      <div className={`absolute left-7 sm:left-9 top-12 bottom-12 w-px ${isDark ? "bg-white/[0.08]" : "bg-slate-200"}`} />
+
+      {/* Step 1 */}
+      <div className="relative pl-6 sm:pl-8">
+        <div className={`absolute -left-[5px] top-1.5 h-2.5 w-2.5 rounded-full ring-4 ${isDark ? "bg-amber-400 ring-slate-900 shadow-[0_0_10px_rgba(251,191,36,0.5)]" : "bg-amber-500 ring-white shadow-sm"}`} />
+        <div className="flex items-center justify-between mb-3">
+          <div className={`font-semibold tracking-tight text-sm sm:text-base ${isDark ? "text-white" : "text-slate-900"}`}>Session Type</div>
+          <div className={`text-[9px] sm:text-[10px] uppercase font-bold tracking-[0.2em] px-2 py-0.5 rounded-full ${isDark ? "bg-white/10 text-slate-400" : "bg-slate-100 text-slate-500"}`}>Step 1</div>
         </div>
-        <div className={`text-[13px] sm:text-sm font-semibold ${isDark ? "text-white" : "text-slate-900"}`}>Session Type</div>
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-3 gap-2.5">
           {[
             { label: "Practice", active: true },
             { label: "Mock Exam" },
@@ -1504,66 +1548,73 @@ function MockBuilderPreview({ tone }: { tone: "dark" | "light" }) {
           ].map((item) => (
             <div
               key={item.label}
-              className={`rounded-xl border px-2.5 py-2 text-[10px] sm:text-[11px] ${
+              className={`relative flex items-center justify-center rounded-xl px-2 py-2.5 text-[10px] sm:text-[11px] font-medium transition-all duration-300 text-center ${
                 item.active
                   ? isDark
-                    ? "border-orange-400/40 bg-orange-500/15 text-orange-100"
-                    : "border-orange-500/30 bg-orange-500/10 text-orange-700"
+                    ? "bg-amber-500/20 text-amber-200 shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] ring-1 ring-inset ring-amber-500/40"
+                    : "bg-amber-50 text-amber-700 shadow-[0_2px_10px_-2px_rgba(245,158,11,0.2)] ring-1 ring-inset ring-amber-500/30"
                   : isDark
-                    ? "border-white/10 bg-white/5 text-slate-300"
-                    : "border-slate-200/80 bg-white text-slate-600"
+                    ? "bg-white/[0.03] text-slate-400 ring-1 ring-inset ring-white/10 hover:bg-white/10 cursor-default"
+                    : "bg-slate-50/80 text-slate-500 ring-1 ring-inset ring-slate-200/80 hover:bg-white cursor-default"
               }`}
             >
               {item.label}
+              {item.active && <div className={`absolute -top-1 -right-1 h-2 w-2 rounded-full ${isDark ? "bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.8)]" : "bg-amber-500 shadow-sm"}`} />}
             </div>
           ))}
         </div>
       </div>
 
-      <div className="space-y-2">
-        <div className={`text-[10px] sm:text-[11px] uppercase tracking-[0.24em] ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-          Step 2
+      {/* Step 2 */}
+      <div className="relative pl-6 sm:pl-8">
+        <div className={`absolute -left-[5px] top-1.5 h-2.5 w-2.5 rounded-full ring-4 ${isDark ? "bg-cyan-400 ring-slate-900 shadow-[0_0_10px_rgba(34,211,238,0.5)]" : "bg-cyan-500 ring-white shadow-sm"}`} />
+        <div className="flex items-center justify-between mb-3">
+          <div className={`font-semibold tracking-tight text-sm sm:text-base ${isDark ? "text-white" : "text-slate-900"}`}>Constraints</div>
+          <div className={`text-[9px] sm:text-[10px] uppercase font-bold tracking-[0.2em] px-2 py-0.5 rounded-full ${isDark ? "bg-white/10 text-slate-400" : "bg-slate-100 text-slate-500"}`}>Step 2</div>
         </div>
-        <div className={`text-[13px] sm:text-sm font-semibold ${isDark ? "text-white" : "text-slate-900"}`}>Constraints</div>
         <div className="flex flex-wrap gap-2 text-xs">
           {["Adaptive", "Foundation", "Higher", "Mixed"].map((item, index) => (
             <span
               key={item}
-              className={`rounded-full border px-3 py-1 text-[10px] sm:text-[11px] ${
+              className={`rounded-full px-3.5 py-1.5 text-[11px] sm:text-[12px] font-medium transition-all duration-300 ${
                 index === 0
                   ? isDark
-                    ? "border-cyan-400/40 bg-cyan-500/10 text-cyan-100"
-                    : "border-cyan-500/30 bg-cyan-500/10 text-cyan-700"
+                    ? "bg-cyan-500/20 text-cyan-200 shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] ring-1 ring-inset ring-cyan-500/40"
+                    : "bg-cyan-50 text-cyan-700 shadow-[0_2px_8px_-2px_rgba(6,182,212,0.2)] ring-1 ring-inset ring-cyan-500/30"
                   : isDark
-                    ? "border-white/10 bg-white/5 text-slate-300"
-                    : "border-slate-200/80 bg-white text-slate-600"
+                    ? "bg-white/[0.03] text-slate-400 ring-1 ring-inset ring-white/10 hover:bg-white/10 cursor-default"
+                    : "bg-slate-50/80 text-slate-500 ring-1 ring-inset ring-slate-200/80 hover:bg-white cursor-default"
               }`}
             >
+              {item === "Adaptive" && <Sparkles className="inline-block w-3 h-3 mr-1.5 -mt-0.5 opacity-80" />}
               {item}
             </span>
           ))}
         </div>
       </div>
 
-      <div className="space-y-2">
-        <div className={`text-[10px] sm:text-[11px] uppercase tracking-[0.24em] ${isDark ? "text-slate-400" : "text-slate-500"}`}>
-          Step 3
+      {/* Step 3 */}
+      <div className="relative pl-6 sm:pl-8">
+        <div className={`absolute -left-[5px] top-1.5 h-2.5 w-2.5 rounded-full ring-4 ${isDark ? "bg-emerald-400 ring-slate-900 shadow-[0_0_10px_rgba(52,211,153,0.5)]" : "bg-emerald-500 ring-white shadow-sm"}`} />
+        <div className="flex items-center justify-between mb-3">
+          <div className={`font-semibold tracking-tight text-sm sm:text-base ${isDark ? "text-white" : "text-slate-900"}`}>Content Scope</div>
+          <div className={`text-[9px] sm:text-[10px] uppercase font-bold tracking-[0.2em] px-2 py-0.5 rounded-full ${isDark ? "bg-white/10 text-slate-400" : "bg-slate-100 text-slate-500"}`}>Step 3</div>
         </div>
-        <div className={`text-[13px] sm:text-sm font-semibold ${isDark ? "text-white" : "text-slate-900"}`}>Content</div>
         <div className="flex flex-wrap gap-2 text-xs">
           {["Number", "Algebra", "Ratio", "Geometry", "Statistics"].map((item, index) => (
             <span
               key={item}
-              className={`rounded-full border px-3 py-1 text-[10px] sm:text-[11px] ${
+              className={`rounded-full px-3.5 py-1.5 text-[11px] sm:text-[12px] font-medium transition-all duration-300 ${
                 index < 2
                   ? isDark
-                    ? "border-emerald-400/40 bg-emerald-500/10 text-emerald-100"
-                    : "border-emerald-500/30 bg-emerald-500/10 text-emerald-700"
+                    ? "bg-emerald-500/20 text-emerald-200 shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] ring-1 ring-inset ring-emerald-500/40"
+                    : "bg-emerald-50 text-emerald-700 shadow-[0_2px_8px_-2px_rgba(16,185,129,0.2)] ring-1 ring-inset ring-emerald-500/30"
                   : isDark
-                    ? "border-white/10 bg-white/5 text-slate-300"
-                    : "border-slate-200/80 bg-white text-slate-600"
+                    ? "bg-white/[0.03] text-slate-400 ring-1 ring-inset ring-white/10 hover:bg-white/10 cursor-default"
+                    : "bg-slate-50/80 text-slate-500 ring-1 ring-inset ring-slate-200/80 hover:bg-white cursor-default"
               }`}
             >
+              {index < 2 && <CheckCircle className="inline-block w-3 h-3 mr-1.5 -mt-0.5 opacity-80" />}
               {item}
             </span>
           ))}

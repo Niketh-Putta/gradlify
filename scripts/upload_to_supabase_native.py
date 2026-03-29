@@ -47,7 +47,7 @@ request_supabase('DELETE', 'exam_questions?track=eq.11plus')
 
 print("Reading newly generated questions...")
 questions = []
-with open('supabase/data/generated/11plus_premium_question_bank_full.csv', 'r') as f:
+with open('supabase/data/generated/11plus_premium_question_bank.csv', 'r') as f:
     reader = csv.DictReader(f)
     for row in reader:
         # Cast numerical fields properly to avoid Postgres types errors
@@ -58,13 +58,16 @@ with open('supabase/data/generated/11plus_premium_question_bank_full.csv', 'r') 
         # PostgreSQL array comes from string '{"a","b"}'
         # the REST API expects an actual JSON array for text[]
         # so we convert '{"a","b","c"}' back to python list
-        wrong = row['wrong_answers'].strip('{}')
-        # Split by '","' to get the elements securely
-        wrong_list = wrong.split('","')
-        # clean bounding quotes
-        wrong_list[0] = wrong_list[0].lstrip('"')
-        wrong_list[-1] = wrong_list[-1].rstrip('"')
-        row['wrong_answers'] = wrong_list
+        wrong = row['wrong_answers']
+        if wrong.startswith('['):
+            row['wrong_answers'] = json.loads(wrong)
+        else:
+            wrong = wrong.strip('{}')
+            wrong_list = wrong.split('","')
+            wrong_list[0] = wrong_list[0].lstrip('"')
+            if len(wrong_list) > 1:
+                wrong_list[-1] = wrong_list[-1].rstrip('"')
+            row['wrong_answers'] = wrong_list
         questions.append(row)
 
 print("Uploading to Supabase securely...")

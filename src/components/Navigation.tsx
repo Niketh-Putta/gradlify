@@ -25,6 +25,7 @@ import {
 import { User } from '@supabase/supabase-js';
 import { cn } from "@/lib/utils";
 import { useMembership } from '@/hooks/useMembership';
+import { useSubject } from '@/contexts/SubjectContext';
 import { AI_FEATURE_ENABLED } from "@/lib/featureFlags";
 import { resolveUserTrack } from '@/lib/track';
 import { getTrackLabel } from '@/lib/trackCurriculum';
@@ -55,6 +56,7 @@ export function Navigation({ user, profile, onSettings, onSignOut }: NavigationP
   const [headerHidden, setHeaderHidden] = useState(false);
   const [moreExpanded, setMoreExpanded] = useState(false);
   const [bottomMoreOpen, setBottomMoreOpen] = useState(false);
+  const { currentSubject } = useSubject();
   const lastScrollYRef = useRef(0);
   const scrollTickingRef = useRef(false);
   const location = useLocation();
@@ -156,19 +158,19 @@ export function Navigation({ user, profile, onSettings, onSignOut }: NavigationP
 
   const { isPremium, isUltra, founderTrack } = resolveTier();
   const homePath = '/dashboard';
-  const trackLabel = getTrackLabel(userTrack);
-  const trackLabelWithAI = userTrack === '11plus' ? 'AI-Powered 11+ Maths Practice' : 'AI-Powered GCSE Maths Practice';
+  const trackLabel = getTrackLabel(userTrack, currentSubject);
+  const trackLabelWithAI = userTrack === '11plus' ? `AI-Powered 11+ ${currentSubject === 'english' ? 'English' : 'Maths'}` : 'AI-Powered GCSE Maths';
   const hasExplicitTrack = Boolean(profile?.track);
   const topBarTrackLabel = hasExplicitTrack
     ? (AI_FEATURE_ENABLED ? trackLabelWithAI : trackLabel)
-    : 'Maths. Practised properly.';
-  const topBarTrackShortLabel = hasExplicitTrack ? trackLabel : 'Maths. Practised properly.';
+    : '11+ practiced properly.';
+  const topBarTrackShortLabel = hasExplicitTrack ? trackLabel : '11+ practiced properly.';
 
   const primaryNavigationItems = [
     { path: homePath, icon: Home, label: 'Home' },
     { path: '/readiness', icon: BarChart2, label: 'Exam Readiness' },
     { path: '/notes', icon: BookMarked, label: 'Notes' },
-    { path: '/mocks', icon: FileText, label: 'Practice' },
+    { path: `/mocks/${currentSubject}`, icon: FileText, label: 'Practice' },
   ];
 
   const moreNavigationItems = [
@@ -304,7 +306,8 @@ export function Navigation({ user, profile, onSettings, onSignOut }: NavigationP
                   variant={getTierVariant()}
                   className={cn(
                     "text-[8px] h-3.5 px-1 whitespace-nowrap uppercase tracking-widest",
-                    isUltra && "bg-gradient-to-r from-amber-200 to-amber-400 text-slate-900 border-0 shadow-sm"
+                    isUltra && "bg-gradient-to-r from-amber-200 to-amber-400 text-slate-900 border-0 shadow-sm",
+                    isPremium && !isUltra && "bg-gradient-to-r from-indigo-500 to-blue-500 text-white border-0 shadow-sm"
                   )}
                 >
                   {getTierDisplay()}
@@ -382,8 +385,9 @@ export function Navigation({ user, profile, onSettings, onSignOut }: NavigationP
             <Badge 
               variant={getTierVariant()}
               className={cn(
-                "text-xs whitespace-nowrap",
-                isUltra && "bg-gradient-to-r from-amber-200 to-amber-400 text-slate-900 border-0 font-bold shadow-[0_0_10px_rgba(245,158,11,0.2)]"
+                "text-xs whitespace-nowrap transition-all",
+                isUltra && "bg-gradient-to-r from-amber-200 to-amber-400 text-slate-900 border-0 font-bold shadow-[0_0_10px_rgba(245,158,11,0.2)]",
+                isPremium && !isUltra && "bg-gradient-to-r from-indigo-500 to-blue-500 text-white border-0 shadow-[0_0_10px_rgba(99,102,241,0.2)]"
               )}
             >
               {getTierDisplay()}

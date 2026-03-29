@@ -13,7 +13,11 @@ const CANONICAL_TOPICS = [
   'Ratio & Proportion',
   'Geometry',
   'Probability',
-  'Statistics'
+  'Statistics',
+  'Comprehension',
+  'Vocabulary',
+  'Grammar',
+  'Spelling'
 ] as const;
 
 const normalizeTopicName = (topic: string): (typeof CANONICAL_TOPICS)[number] | null => {
@@ -42,6 +46,10 @@ const normalizeTopicName = (topic: string): (typeof CANONICAL_TOPICS)[number] | 
   }
   if (normalized === 'probability') return 'Probability';
   if (normalized === 'statistics') return 'Statistics';
+  if (normalized === 'comprehension' || normalized === 'comprehension masterclass') return 'Comprehension';
+  if (normalized === 'vocabulary' || normalized === 'advanced vocabulary') return 'Vocabulary';
+  if (normalized === 'grammar' || normalized === 'grammar & syntax') return 'Grammar';
+  if (normalized === 'spelling' || normalized === 'spelling & punctuation') return 'Spelling';
   return null;
 };
 
@@ -93,7 +101,7 @@ interface AIReadinessEvent {
   created_at: string;
 }
 
-export function useReadiness(userId?: string, trackKey?: string | null) {
+export function useReadiness(userId?: string, trackKey?: string | null, currentSubject: 'maths' | 'english' = 'maths') {
   const [overall, setOverall] = useState<number>(0);
   const [topics, setTopics] = useState<TopicReadiness[]>([]);
   const [lastChanges, setLastChanges] = useState<Map<string, TopicLastChange>>(new Map());
@@ -103,6 +111,13 @@ export function useReadiness(userId?: string, trackKey?: string | null) {
   const [loading, setLoading] = useState(true);
   const [autoReadiness, setAutoReadiness] = useState<boolean>(false);
   const resolvedTrack = normalizeTrack(trackKey);
+
+  const getSubjectTopics = useCallback((allTopics: TopicReadiness[]) => {
+    return allTopics.filter(t => {
+      const isEnglishTopic = ['Comprehension', 'Vocabulary', 'Grammar', 'Spelling'].includes(t.topic);
+      return currentSubject === 'english' ? isEnglishTopic : !isEnglishTopic;
+    });
+  }, [currentSubject]);
 
   // Merge fetched topics with canonical list
   const mergeTopics = useCallback((fetchedTopics: TopicReadiness[]): TopicReadiness[] => {
@@ -201,15 +216,16 @@ export function useReadiness(userId?: string, trackKey?: string | null) {
       }
 
       const mergedTopics = mergeTopics((topicsResult.data as TopicReadiness[]) || []);
-      setTopics(mergedTopics);
-      setOverall(computeOverallReadinessFromTopics(mergedTopics));
+      const subjectTopics = getSubjectTopics(mergedTopics);
+      setTopics(subjectTopics);
+      setOverall(computeOverallReadinessFromTopics(subjectTopics));
 
       const lastChangeRows = (lastChangesResult.data ?? []) as TopicLastChange[];
-      const changesMap = new Map(
+      const changesMap = new Map<string, TopicLastChange>(
         lastChangeRows
           .map((change) => {
             const normalized = normalizeTopicName(change.topic);
-            return normalized ? [normalized, { ...change, topic: normalized }] as const : null;
+            return normalized ? [normalized, { ...change, topic: normalized }] as [string, TopicLastChange] : null;
           })
           .filter((entry): entry is [string, TopicLastChange] => Boolean(entry))
       );
@@ -271,16 +287,17 @@ export function useReadiness(userId?: string, trackKey?: string | null) {
         ]);
 
         const mergedTopics = mergeTopics((topicsResult.data as TopicReadiness[]) || []);
-        setTopics(mergedTopics);
-        setOverall(computeOverallReadinessFromTopics(mergedTopics));
+        const subjectTopics = getSubjectTopics(mergedTopics);
+        setTopics(subjectTopics);
+        setOverall(computeOverallReadinessFromTopics(subjectTopics));
 
         const lastChangeRows = (lastChangesResult.data ?? []) as TopicLastChange[];
         if (lastChangeRows.length) {
-          const changesMap = new Map(
+          const changesMap = new Map<string, TopicLastChange>(
             lastChangeRows
               .map((change) => {
                 const normalized = normalizeTopicName(change.topic);
-                return normalized ? [normalized, { ...change, topic: normalized }] as const : null;
+                return normalized ? [normalized, { ...change, topic: normalized }] as [string, TopicLastChange] : null;
               })
               .filter((entry): entry is [string, TopicLastChange] => Boolean(entry))
           );

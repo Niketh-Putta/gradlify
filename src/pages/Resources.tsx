@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ExternalLink, Youtube, FileText, Newspaper, BookOpen, Download, Trophy, TrendingUp, Target } from "lucide-react";
 import { useAppContext } from "@/hooks/useAppContext";
+import { useSubject } from "@/contexts/SubjectContext";
 import { normalizeExamBoard } from "@/lib/examBoard";
 import { AI_FEATURE_ENABLED } from "@/lib/featureFlags";
 import { resolveUserTrack } from "@/lib/track";
@@ -20,6 +21,7 @@ type PastPaper = {
 
 const Resources = () => {
   const { profile } = useAppContext();
+  const { currentSubject } = useSubject();
   type OnboardingDetails = { examBoard?: string | null; [key: string]: unknown };
   const onboarding = profile?.onboarding as OnboardingDetails | undefined;
   const examBoard = normalizeExamBoard(typeof onboarding?.examBoard === 'string' ? onboarding.examBoard : undefined);
@@ -362,6 +364,68 @@ const Resources = () => {
     },
   ];
 
+  const elevenPlusEnglishSections = [
+    {
+      title: "Best practice papers",
+      description: "Official and high-quality paper sources that parents consistently use for realistic 11+ English preparation.",
+      sectionClass: "from-blue-50/50 to-cyan-50/40 dark:from-blue-950/10 dark:to-cyan-950/10 border-blue-100/70 dark:border-blue-900/40",
+      accentClass: "bg-blue-500",
+      items: [
+        {
+          label: "GL Assessment official 11+ English papers",
+          url: "https://11plus.gl-assessment.co.uk/english-practice-papers/",
+          tag: "Official"
+        },
+        {
+          label: "11 Plus Guide free English practice papers",
+          url: "https://www.11plusguide.com/11-plus-papers-books/free-11-plus-papers/free-sample-11-plus-english-papers/",
+          tag: "Free"
+        },
+        {
+          label: "ExamBerry curated free 11+ English papers",
+          url: "https://examberrypapers.co.uk/resources/free-11-plus-practice-papers/english/",
+          tag: "Library"
+        },
+      ],
+    },
+    {
+      title: "Vocabulary & Reading",
+      description: "Focused tools that improve reading stamina, inference, and advanced vocabulary for the 11+ English exams.",
+      sectionClass: "from-emerald-50/50 to-teal-50/40 dark:from-emerald-950/10 dark:to-teal-950/10 border-emerald-100/70 dark:border-emerald-900/40",
+      accentClass: "bg-emerald-500",
+      items: [
+        {
+          label: "Vocabulary Ninja (Word of the Day)",
+          url: "https://vocabularyninja.co.uk/",
+          tag: "Vocabulary"
+        },
+        {
+          label: "CGP 11+ English Resources Directory",
+          url: "https://www.cgpbooks.co.uk/11-plus/english",
+          tag: "Workbooks"
+        },
+      ],
+    },
+    {
+      title: "Continuously updated 11+ articles",
+      description: "Live hubs and frequently refreshed guides so parents can track key dates, exam changes, and preparation strategy.",
+      sectionClass: "from-rose-50/50 to-orange-50/40 dark:from-rose-950/10 dark:to-orange-950/10 border-rose-100/70 dark:border-rose-900/40",
+      accentClass: "bg-rose-500",
+      items: [
+        {
+          label: "11 Plus Guide blog (frequent 11+ updates)",
+          url: "https://www.11plusguide.com/blog/",
+          tag: "Live"
+        },
+        {
+          label: "GL Assessment 11+ news and updates",
+          url: "https://11plus.gl-assessment.co.uk/",
+          tag: "Live"
+        },
+      ],
+    },
+  ];
+
   const getResourceImage = (url: string) =>
     `https://image.thum.io/get/width/360/crop/200/noanimate/${encodeURIComponent(url)}`;
   const getFavicon = (url: string) => {
@@ -382,16 +446,16 @@ const Resources = () => {
             Study Resources
           </Badge>
           <h1 className="text-4xl md:text-5xl font-serif text-foreground leading-[1.1] tracking-tight">
-            Curated 11+ Library
+            {currentSubject === 'english' ? '11+ English Resources' : '11+ Maths Resources'}
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground font-light leading-relaxed tracking-wide">
-            High-fidelity practice papers, expert channels, and live strategy feeds—expertly selected for intentional 11+ preparation.
+            High-fidelity practice papers, expert channels, and live strategy feeds—expertly selected for intentional 11+ {currentSubject === 'english' ? 'English' : 'Mathematics'} preparation.
           </p>
         </header>
 
         {/* Resources Layout */}
         <div className="space-y-20">
-          {elevenPlusSections.map((section) => (
+          {(currentSubject === 'english' ? elevenPlusEnglishSections : elevenPlusSections).map((section) => (
             <section key={section.title} className="grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-8 md:gap-16 items-start">
               <div className="md:sticky md:top-24 pt-2">
                 <h2 className="text-2xl font-serif text-foreground tracking-tight leading-snug">

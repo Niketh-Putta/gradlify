@@ -383,7 +383,7 @@ export function Layout({ user, onSettings, onSignOut }: LayoutProps) {
             : "lg:ml-16 pb-16 sm:pb-20 lg:pb-4 transition-all duration-200 ease-in-out"
         }
       >
-        <div className={isChatRoute ? "w-full h-full max-w-full overflow-hidden" : "w-full max-w-full overflow-x-hidden"}>
+        <div className={isChatRoute ? "w-full h-full max-w-full overflow-hidden" : "w-full max-w-full overflow-x-clip"}>
           <Outlet context={{ user, profile, onProfileUpdate: fetchProfile }} />
         </div>
       </main>

@@ -85,6 +85,80 @@ const ELEVEN_PLUS_READINESS_MAP: Record<string, string[]> = {
   "Statistics & Data": ["Statistics", "Probability"],
 };
 
+export const ELEVEN_PLUS_ENGLISH_SECTIONS: TrackSection[] = [
+  {
+    key: "comprehension",
+    id: "Comprehension",
+    label: "Comprehension",
+    color: "#059669",
+    subtopics: [
+      { key: "speed_retrieval", name: "Reading Speed & Precision" },
+      { key: "factual_retrieval", name: "High-Speed Factual Retrieval" },
+      { key: "vocabulary_context", name: "Vocabulary in Context" },
+      { key: "inference", name: "Inference & Deduction" },
+      { key: "figurative_language", name: "Decoding Figurative Language" },
+      { key: "text_structure", name: "Text Structure & Purpose" },
+      { key: "character_analysis", name: "Character Traits & Motivation" },
+      { key: "poetry_decoding", name: "Decoding GL Poetry" },
+      { key: "authorial_voice", name: "Authorial Voice & Perspective" },
+      { key: "distractor_traps", name: "Disarming Distractor Traps" },
+    ],
+  },
+  {
+    key: "spag",
+    id: "SPaG",
+    label: "SPaG",
+    color: "#d97706",
+    subtopics: [
+      { key: "word_classes", name: "Word Classes (Nouns, Verbs, etc.)" },
+      { key: "punctuation_marks", name: "Punctuation Mastery" },
+      { key: "sentence_structure", name: "Complex Sentence Structure" },
+      { key: "spelling_rules", name: "Core Spelling Rules" },
+      { key: "active_passive", name: "Active vs Passive Voice" },
+    ],
+  },
+  {
+    key: "vocabulary",
+    id: "Vocabulary",
+    label: "Vocabulary",
+    color: "#db2777",
+    subtopics: [
+      { key: "synonyms", name: "Mastering Synonyms" },
+      { key: "antonyms", name: "Mastering Antonyms" },
+      { key: "homophones", name: "Tricky Homophones" },
+      { key: "prefixes", name: "Prefix Power" },
+      { key: "suffixes", name: "Suffix Secrets" },
+      { key: "root-words", name: "Root Word Detectives" },
+      { key: "odd-one-out", name: "Spotting the Odd One Out" },
+      { key: "cloze", name: "Cloze Passage Tactics" },
+      { key: "emotion", name: "Words of Emotion & Tone" },
+      { key: "adjectives", name: "Supercharged Adjectives" },
+    ],
+  },
+  {
+    key: "writing",
+    id: "Writing",
+    label: "Writing",
+    color: "#7c3aed",
+    subtopics: [
+      { key: "planning", name: "Planning Your Story" },
+      { key: "openings", name: "Powerful Openings & Endings" },
+      { key: "description", name: "Descriptive Writing Techniques" },
+      { key: "vocabulary", name: "Vocabulary & Word Power" },
+      { key: "figurative", name: "Figurative Language in Writing" },
+      { key: "sentences", name: "Sentence Variety & Rhythm" },
+      { key: "voice", name: "Narrative Voice & Perspective" },
+      { key: "character", name: "Character & Dialogue" },
+    ],
+  }
+];
+
+export const ELEVEN_PLUS_ENGLISH_READINESS_MAP: Record<string, string[]> = {
+  "Comprehension": ["Comprehension"],
+  "SPaG": ["Grammar", "Spelling", "SPaG", "SPaG (Technical Accuracy)"],
+  "Vocabulary": ["Vocabulary", "Vocabulary & Verbal"],
+};
+
 export function getReadinessSourceTopics(track: UserTrack, topic: string): string[] {
   const normalized = topic.trim().toLowerCase();
 
@@ -98,45 +172,66 @@ export function getReadinessSourceTopics(track: UserTrack, topic: string): strin
     return [topic];
   }
 
-  const mapped = ELEVEN_PLUS_READINESS_MAP[topic] ?? [topic];
+  const mapped = ELEVEN_PLUS_READINESS_MAP[topic] ?? ELEVEN_PLUS_ENGLISH_READINESS_MAP[topic] ?? [topic];
   const aliases = new Set<string>(mapped);
   if (normalized === "number & arithmetic") aliases.add("Number & Arithmetic");
   if (normalized === "algebra & ratio") aliases.add("Algebra & Ratio");
   if (normalized === "geometry & measures") aliases.add("Geometry & Measures");
   if (normalized === "statistics & data") aliases.add("Statistics & Data");
+  if (normalized === "spag" || normalized === "spag (technical accuracy)") {
+    aliases.add("Grammar");
+    aliases.add("Spelling");
+    aliases.add("SPaG");
+  }
+  if (normalized === "vocabulary & verbal") aliases.add("Vocabulary");
   return Array.from(aliases);
 }
 
-export function getTrackSections(track: UserTrack): TrackSection[] {
-  return track === "11plus" ? ELEVEN_PLUS_SECTIONS : GCSE_SECTIONS;
+export function getTrackSections(track: UserTrack, subject: 'maths' | 'english' = 'maths'): TrackSection[] {
+  if (track === "11plus") {
+    return subject === 'english' ? ELEVEN_PLUS_ENGLISH_SECTIONS : ELEVEN_PLUS_SECTIONS;
+  }
+  return GCSE_SECTIONS;
 }
 
-export function getTrackReadinessSections(track: UserTrack): TrackSection[] {
+export function getTrackReadinessSections(track: UserTrack, subject: 'maths' | 'english' = 'maths'): TrackSection[] {
   if (track !== "11plus") return GCSE_SECTIONS;
+  if (subject === 'english') {
+    return ELEVEN_PLUS_ENGLISH_SECTIONS.filter(s => s.key !== "writing" && s.key !== "exam_prep");
+  }
   // "Exam Preparation" should not be assessed as a readiness section.
   return ELEVEN_PLUS_SECTIONS.filter((section) => section.key !== "exam_prep");
 }
 
-export function getTrackLabel(track: UserTrack): string {
-  return track === "11plus" ? "11+ Maths Practice" : "GCSE Maths Practice";
+export function getTrackLabel(track: UserTrack, subject: 'maths' | 'english' = 'maths'): string {
+  if (track === "11plus") {
+    return subject === 'english' ? "11+ English" : "11+ Maths";
+  }
+  return "GCSE Maths";
 }
 
-export function getTrackReadinessSummaryLabel(track: UserTrack): string {
-  return track === "11plus"
-    ? "Your confidence across all 4 11+ Mathematics sections"
-    : "Your readiness across all 6 GCSE Mathematics topics";
+export function getTrackReadinessSummaryLabel(track: UserTrack, subject: 'maths' | 'english' = 'maths'): string {
+  if (track === "11plus") {
+    return subject === 'english' 
+      ? "Your confidence across all 3 11+ English sections" 
+      : "Your confidence across all 4 11+ Mathematics sections";
+  }
+  return "Your readiness across all 6 GCSE Mathematics topics";
 }
 
 export function buildTrackReadinessRows(
   track: UserTrack,
-  readinessTopics: Array<{ topic: string; readiness: number }>
+  readinessTopics: Array<{ topic: string; readiness: number }>,
+  subject: 'maths' | 'english' = 'maths'
 ): Array<{ topic: string; readiness: number }> {
   if (track !== "11plus") return readinessTopics;
 
   const byTopic = new Map<string, number>();
   readinessTopics.forEach((item) => byTopic.set(item.topic, Number(item.readiness) || 0));
 
-  return Object.entries(ELEVEN_PLUS_READINESS_MAP).map(([section, sourceTopics]) => {
+  const mapToUse = subject === 'english' ? ELEVEN_PLUS_ENGLISH_READINESS_MAP : ELEVEN_PLUS_READINESS_MAP;
+
+  return Object.entries(mapToUse).map(([section, sourceTopics]) => {
     const values = sourceTopics.map((source) => byTopic.get(source) ?? 0);
     const avg = values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : 0;
     return { topic: section, readiness: Math.round(avg) };

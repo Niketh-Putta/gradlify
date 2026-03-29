@@ -1,11 +1,13 @@
 import React, { Fragment, type ReactNode, useState, useEffect, useMemo } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ArrowRight, Check, BookOpen, Clock, ChevronRight, CheckCircle, ChevronDown, Lightbulb, AlertTriangle, Target, FileText, Zap, HelpCircle, PenLine, Eye, EyeOff } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, BookOpen, Clock, ChevronRight, CheckCircle, ChevronDown, Lightbulb, AlertTriangle, Target, FileText, Zap, HelpCircle, PenLine, Eye, EyeOff, Sparkles } from "lucide-react";
 import notesData from "@/data/edexcel_gcse_notes.json";
 import elevenPlusNotesData from "@/data/eleven_plus_notes.json";
+import elevenPlusEnglishNotesData from "@/data/eleven_plus_english_notes.json";
 import { supabase } from "@/integrations/supabase/client";
 import { useAppContext } from "@/hooks/useAppContext";
+import { useSubject } from "@/contexts/SubjectContext";
 import { toast } from "@/hooks/use-toast";
 import ReactMarkdown from "react-markdown";
 import remarkMath from "remark-math";
@@ -80,6 +82,7 @@ type NotesData = {
 
 const typedNotesData = notesData as NotesData;
 const typedElevenPlusNotesData = elevenPlusNotesData as NotesData;
+const typedElevenPlusEnglishNotesData = elevenPlusEnglishNotesData as NotesData;
 
 const sectionDisplayName: Record<string, string> = {
   "Ratio, Proportion & Rates of Change": "Ratio & Proportion",
@@ -87,7 +90,7 @@ const sectionDisplayName: Record<string, string> = {
 
 // Section config with proper GCSE codes - matching exact JSON keys
 const sectionConfig: Record<string, { abbr: string; color: string; gradient: string }> = {
-  "Number": { abbr: "N", color: "hsl(262 83% 58%)", gradient: "from-purple-500 to-purple-600" },
+  "Number": { abbr: "N", color: "hsl(38 92% 50%)", gradient: "from-amber-500 to-amber-600" },
   "Algebra": { abbr: "A", color: "hsl(221 83% 53%)", gradient: "from-blue-500 to-blue-600" },
   "Ratio, Proportion & Rates of Change": { abbr: "R", color: "hsl(142 76% 36%)", gradient: "from-emerald-500 to-emerald-600" },
   "Geometry & Measures": { abbr: "G", color: "hsl(280 70% 50%)", gradient: "from-violet-500 to-violet-600" },
@@ -97,6 +100,9 @@ const sectionConfig: Record<string, { abbr: string; color: string; gradient: str
   "Algebra & Ratio": { abbr: "A", color: "hsl(330 81% 60%)", gradient: "from-pink-500 to-pink-600" },
   "Statistics & Data": { abbr: "S", color: "hsl(174 72% 42%)", gradient: "from-teal-500 to-cyan-500" },
   "Exam Preparation": { abbr: "E", color: "hsl(199 89% 48%)", gradient: "from-sky-500 to-blue-500" },
+  "Comprehension": { abbr: "C", color: "hsl(221 83% 53%)", gradient: "from-blue-500 to-blue-600" },
+  "Vocabulary": { abbr: "V", color: "hsl(330 81% 60%)", gradient: "from-pink-500 to-pink-600" },
+  "SPaG": { abbr: "S", color: "hsl(43 96% 56%)", gradient: "from-amber-500 to-amber-600" },
 };
 
 // Block type configuration with enhanced visual hierarchy
@@ -109,7 +115,7 @@ const blockConfig: Record<string, {
   priority: 'high' | 'medium' | 'low';
 }> = {
   concepts: { 
-    icon: <Lightbulb className="h-5 w-5" />, 
+    icon: <Sparkles className="h-5 w-5" />, 
     color: "text-purple-400",
     bgClass: "bg-gradient-to-br from-purple-500/15 to-purple-600/5 dark:from-purple-500/20 dark:to-purple-600/10",
     borderClass: "border-purple-500/40 border-l-4 border-l-purple-500",
@@ -117,7 +123,7 @@ const blockConfig: Record<string, {
     priority: 'high'
   },
   example: { 
-    icon: <FileText className="h-5 w-5" />, 
+    icon: <Sparkles className="h-5 w-5" />, 
     color: "text-amber-400",
     bgClass: "bg-gradient-to-br from-amber-500/10 to-amber-600/5 dark:from-amber-500/15 dark:to-amber-600/5",
     borderClass: "border-amber-500/40 border-l-4 border-l-amber-500",
@@ -125,7 +131,7 @@ const blockConfig: Record<string, {
     priority: 'medium'
   },
   mistakes: { 
-    icon: <AlertTriangle className="h-5 w-5" />, 
+    icon: <Sparkles className="h-5 w-5" />, 
     color: "text-rose-400",
     bgClass: "bg-gradient-to-br from-rose-500/15 to-rose-600/10 dark:from-rose-500/20 dark:to-rose-600/10",
     borderClass: "border-rose-500/50 border-l-4 border-l-rose-500 ring-1 ring-rose-500/20",
@@ -133,7 +139,7 @@ const blockConfig: Record<string, {
     priority: 'high'
   },
   tips: { 
-    icon: <Target className="h-5 w-5" />, 
+    icon: <Sparkles className="h-5 w-5" />, 
     color: "text-emerald-400",
     bgClass: "bg-gradient-to-br from-emerald-500/15 to-emerald-600/10 dark:from-emerald-500/20 dark:to-emerald-600/10",
     borderClass: "border-emerald-500/50 border-l-4 border-l-emerald-500 ring-1 ring-emerald-500/20",
@@ -141,7 +147,7 @@ const blockConfig: Record<string, {
     priority: 'high'
   },
   summary: { 
-    icon: <Zap className="h-5 w-5" />, 
+    icon: <Sparkles className="h-5 w-5" />, 
     color: "text-cyan-400",
     bgClass: "bg-gradient-to-br from-cyan-500/10 to-cyan-600/5 dark:from-cyan-500/15 dark:to-cyan-600/5",
     borderClass: "border-cyan-500/30",
@@ -149,7 +155,7 @@ const blockConfig: Record<string, {
     priority: 'medium'
   },
   formula: { 
-    icon: <FileText className="h-5 w-5" />, 
+    icon: <Sparkles className="h-5 w-5" />, 
     color: "text-blue-400",
     bgClass: "bg-gradient-to-br from-blue-500/15 to-blue-600/10 dark:from-blue-500/20 dark:to-blue-600/10",
     borderClass: "border-blue-500/40 border-l-4 border-l-blue-500",
@@ -157,7 +163,7 @@ const blockConfig: Record<string, {
     priority: 'high'
   },
   checks: { 
-    icon: <HelpCircle className="h-5 w-5" />, 
+    icon: <Sparkles className="h-5 w-5" />, 
     color: "text-violet-400",
     bgClass: "bg-gradient-to-br from-violet-500/10 to-violet-600/5 dark:from-violet-500/15 dark:to-violet-600/5",
     borderClass: "border-violet-500/30",
@@ -165,12 +171,28 @@ const blockConfig: Record<string, {
     priority: 'low'
   },
   info: { 
-    icon: <BookOpen className="h-5 w-5" />, 
+    icon: <Sparkles className="h-5 w-5" />, 
     color: "text-primary",
     bgClass: "bg-gradient-to-br from-primary/10 to-primary/5 dark:from-primary/15 dark:to-primary/10",
     borderClass: "border-primary/30 border-l-4 border-l-primary",
     headerClass: "bg-primary/10",
     priority: 'low'
+  },
+  passage: { 
+    icon: <Sparkles className="h-5 w-5" />, 
+    color: "text-amber-500",
+    bgClass: "bg-orange-50/80 dark:bg-orange-950/20",
+    borderClass: "border-amber-400/50 border-l-4 border-l-amber-500 shadow-inner",
+    headerClass: "bg-amber-500/10",
+    priority: 'high'
+  },
+  vocab_list: { 
+    icon: <Sparkles className="h-5 w-5" />, 
+    color: "text-rose-500",
+    bgClass: "bg-rose-50/80 dark:bg-rose-950/20",
+    borderClass: "border-rose-400/50 border-l-4 border-l-rose-500 shadow-inner",
+    headerClass: "bg-rose-500/10",
+    priority: 'high'
   },
 };
 
@@ -208,8 +230,15 @@ function parseMarkdownToBlocks(md: string) {
         type = 'summary';
       else if (title.includes('Formula'))
         type = 'formula';
-      else if (title.includes('Quick Checks') || title.includes('Knowledge Check') || title.includes('Practice Questions'))
+      else if (title.includes('Quick Checks') || title.includes('Knowledge Check') || title.includes('Practice Questions') || title.includes('Official'))
         type = 'checks';
+      else if (title.includes('Passage') || title.includes('Extract') || title.includes('Reference')) {
+        if (title.includes('Vocabulary Reference')) {
+          type = 'vocab_list';
+        } else {
+          type = 'passage';
+        }
+      }
       currentBlock = { type, title, content: '' };
     } else if (currentBlock) {
       currentBlock.content += line + '\n';
@@ -462,7 +491,7 @@ function NotesMarkdown({ children }: { children: string }) {
           <p className="mb-6 text-foreground/90 leading-relaxed text-[15px] sm:text-[17px]">{renderTextWithMath(children)}</p>
         ),
         strong: ({ children }) => (
-          <strong className="font-bold text-foreground">{renderTextWithMath(children)}</strong>
+          <strong className="font-serif italic font-medium text-foreground tracking-tight underline decoration-amber-400/60 underline-offset-[3px] decoration-2">{renderTextWithMath(children)}</strong>
         ),
         em: ({ children }) => (
           <em className="italic text-foreground/80 not-italic font-medium">{renderTextWithMath(children)}</em>
@@ -471,7 +500,7 @@ function NotesMarkdown({ children }: { children: string }) {
           <ul className="space-y-4 mb-6 ml-2">{children}</ul>
         ),
         ol: ({ children }) => (
-          <ol className="space-y-4 mb-6 list-decimal list-outside ml-6 font-bold">{children}</ol>
+          <ol className="space-y-4 mb-6 list-decimal list-outside ml-6 font-serif italic font-medium">{children}</ol>
         ),
         li: ({ children }) => (
           <li className="leading-relaxed text-[15px] sm:text-[17px] text-foreground/90 font-medium relative pl-5 before:absolute before:left-0 before:top-2.5 before:w-1.5 before:h-1.5 before:rounded-full before:bg-primary/50 before:opacity-100">
@@ -563,7 +592,7 @@ function NotesMarkdown({ children }: { children: string }) {
 
 
 export default function RevisionNotesTopic() {
-
+  const { currentSubject } = useSubject();
   const { section, topic: topicSlug } = useParams<{ section: string; topic: string }>();
   const { user, profile } = useAppContext();
   const examBoardValue = (profile?.onboarding as any)?.examBoard;
@@ -574,11 +603,14 @@ export default function RevisionNotesTopic() {
   const decodedSection = section ? decodeURIComponent(section) : "";
   const userTrack = resolveUserTrack(profile?.track ?? null);
   const isElevenPlus = userTrack === "11plus";
-  const trackSections = getTrackSections(userTrack);
+  const trackSections = getTrackSections(userTrack, currentSubject);
   const topics = useMemo(() => {
     if (isElevenPlus) {
+      const isEnglish = currentSubject === 'english';
+      const typedNotes = isEnglish ? typedElevenPlusEnglishNotesData : typedElevenPlusNotesData;
+      
       const sectionMeta = trackSections.find((item) => item.label === decodedSection);
-      const authoredTopics = typedElevenPlusNotesData[decodedSection] || [];
+      const authoredTopics = typedNotes[decodedSection] || [];
       const authoredByTitle = new Map(
         authoredTopics.map((topic) => [topic.title.toLowerCase().trim(), topic])
       );
@@ -608,14 +640,36 @@ export default function RevisionNotesTopic() {
       title: replaceExamBoardReferences(topic.title, examBoardValue),
       md: replaceExamBoardReferences(topic.md, examBoardValue),
     }));
-  }, [decodedSection, examBoardValue, isElevenPlus, trackSections]);
+  }, [decodedSection, examBoardValue, isElevenPlus, trackSections, currentSubject]);
   const currentTopic = topics.find((t) => t.slug === topicSlug);
   const currentIndex = topics.findIndex((t) => t.slug === topicSlug);
   const fallbackAbbr = decodedSection.trim().charAt(0).toUpperCase() || "N";
   const config =
     sectionConfig[decodedSection] ||
-    { abbr: fallbackAbbr, color: "hsl(262 83% 58%)", gradient: "from-purple-500 to-purple-600" };
+    { abbr: fallbackAbbr, color: "hsl(38 92% 50%)", gradient: "from-amber-500 to-amber-600" };
   const sectionTitle = sectionDisplayName[decodedSection] || decodedSection;
+
+  const subjectThemeVariables = useMemo(() => {
+    if (!isElevenPlus) return {};
+    if (currentSubject === 'maths') {
+      return { 
+        '--notes-accent': '221 83% 53%', 
+        '--notes-accent-light': '218 91% 65%',
+        '--notes-accent-dark': '226 71% 40%',
+        '--notes-gradient': 'linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%)' 
+      } as React.CSSProperties;
+    }
+    return { 
+      '--notes-accent': '38 92% 50%', 
+      '--notes-accent-light': '43 96% 56%',
+      '--notes-accent-dark': '35 92% 33%',
+      '--notes-gradient': 'linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)' 
+    } as React.CSSProperties;
+  }, [isElevenPlus, currentSubject]);
+
+  const activeGradient = isElevenPlus 
+    ? (currentSubject === 'maths' ? 'from-blue-500 to-blue-600' : 'from-amber-500 to-amber-600') 
+    : config.gradient;
 
   const { contentBlocks, practiceQuestions } = useMemo(() => {
     if (!currentTopic) return { contentBlocks: [], practiceQuestions: [] };
@@ -762,7 +816,7 @@ export default function RevisionNotesTopic() {
 
   if (!currentTopic) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background" style={subjectThemeVariables}>
         <div className="container mx-auto px-4 py-8 max-w-3xl">
           <Link to="/notes" className="inline-flex items-center gap-2 text-sm hover:underline mb-4 text-purple-400">
             <ArrowLeft className="h-4 w-4" />
@@ -777,79 +831,242 @@ export default function RevisionNotesTopic() {
   const wordCount = currentTopic.md.split(/\s+/).length;
   const readingTime = Math.max(5, Math.ceil(wordCount / 200));
 
+  const useSplitPane = currentSubject === 'english';
+  const practiceTitle = decodedSection === "Comprehension" ? "Comprehension Practice" : 
+                       decodedSection === "Vocabulary" ? "Vocabulary Practice" : "SPaG Practice";
+  const practiceDesc = decodedSection === "Comprehension" 
+    ? "Test your ability to synthesize the analytical methods taught in this masterclass."
+    : "Test your mastery of the advanced vocabulary techniques taught in this module.";
+
+  const renderBreadcrumb = () => (
+    <div className="flex items-center gap-2 text-sm text-muted-foreground mb-8 flex-wrap">
+      <Link to="/notes" className="hover:text-foreground transition-colors flex items-center gap-1">
+        <BookOpen className="h-4 w-4" />
+        Notes
+      </Link>
+      <ChevronRight className="h-4 w-4" />
+      <Link to={`/notes/${encodeURIComponent(decodedSection)}`} className="hover:text-foreground transition-colors">
+        {sectionTitle}
+      </Link>
+      <ChevronRight className="h-4 w-4" />
+      <span className="text-foreground font-medium truncate max-w-[200px]">{currentTopic.title}</span>
+    </div>
+  );
+
+  const renderHeader = () => (
+    <div className="mb-10">
+      <div className="flex items-center gap-3 mb-4">
+      <div className={cn("px-4 py-2 rounded-xl text-sm font-bold text-white bg-gradient-to-r", config.gradient)}>
+        {config.abbr.toUpperCase()}{currentIndex + 1}
+      </div>
+      <span className="text-sm text-muted-foreground">
+        {sectionTitle}
+      </span>
+    </div>
+
+    <h1 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight mb-4 leading-tight">
+      {currentTopic.title}
+    </h1>
+
+    <div className="flex flex-wrap items-center gap-4 mb-6">
+      <span className="text-sm text-muted-foreground flex items-center gap-1">
+        <Clock className="h-4 w-4" />
+        {readingTime} min read
+      </span>
+      <span className="text-sm text-muted-foreground">
+        Topic {currentIndex + 1} of {topics.length}
+      </span>
+    </div>
+
+    {user && (
+      <Button
+        onClick={handleToggleDone}
+        disabled={loading}
+        className={cn(
+          "gap-2 notes-completion-btn",
+          isDone && "complete"
+        )}
+      >
+        {isDone ? (
+          <>
+            <CheckCircle className="h-4 w-4" />
+            Completed
+          </>
+        ) : (
+          <>
+            <Check className="h-4 w-4" />
+            Mark Complete
+          </>
+        )}
+      </Button>
+    )}
+  </div>
+  );
+
+  const renderBlocks = (blocks: any[]) => (
+    blocks.map((block, index) => {
+      const blockStyle = blockConfig[block.type] || blockConfig.info;
+      const isHighPriority = blockStyle.priority === 'high';
+      
+      return (
+        <div 
+          key={index}
+          id={`block-${index}`}
+          className={cn(
+            "notes-block-card rounded-2xl overflow-hidden mb-8 scroll-mt-24",
+            blockStyle.bgClass,
+            blockStyle.borderClass,
+            isHighPriority && "shadow-[0_8px_30px_rgb(0,0,0,0.04),0_20px_50px_rgb(0,0,0,0.02)]",
+            (block.type === 'passage' || block.type === 'vocab_list') && "border shadow-lg border-amber-200/50"
+          )}
+        >
+          <div
+            className={cn(
+              "w-full flex items-center justify-between p-6 text-left border-b border-black/5 dark:border-white/5",
+              blockStyle.headerClass,
+              (block.type === 'passage' || block.type === 'vocab_list') && 'bg-amber-100/50 border-amber-200/50'
+            )}
+          >
+            <div className="flex items-center gap-4">
+              <div className={cn(
+                "p-3 rounded-xl shadow-lg ring-1 ring-black/5 dark:ring-white/5",
+                blockStyle.color,
+                isHighPriority ? "bg-background/90 shadow-black/10" : "bg-background/70 shadow-black/5"
+              )}>
+                {blockStyle.icon}
+              </div>
+              <h2 className={cn(
+                "font-black text-foreground tracking-widest uppercase",
+                isHighPriority ? "text-lg sm:text-xl" : "text-base sm:text-lg",
+                (block.type === 'passage' || block.type === 'vocab_list') && 'font-serif text-amber-900 tracking-normal capitalize'
+              )}>
+                {block.title}
+              </h2>
+            </div>
+            {block.type !== 'passage' && (
+              <ChevronDown className={cn(
+                "h-5 w-5 text-muted-foreground transition-transform duration-300",
+                expandedBlocks.has(index) && "rotate-180"
+              )} />
+            )}
+          </div>
+          <div
+            className={cn(
+              "overflow-hidden transition-all duration-500 ease-in-out",
+              (expandedBlocks.has(index) || block.type === 'passage' || block.type === 'vocab_list') ? "max-h-[5000px] opacity-100" : "max-h-0 opacity-0"
+            )}
+          >
+            <div className={cn(
+              "p-6 sm:p-8 notes-content-wrapper", 
+              block.type === 'passage' && 'font-serif text-[1.1rem] leading-relaxed text-amber-950/90',
+              block.type === 'vocab_list' && 'text-[1.05rem] leading-relaxed text-amber-950/90'
+            )}>
+              <NotesMarkdown>{block.content}</NotesMarkdown>
+            </div>
+          </div>
+        </div>
+      );
+    })
+  );
+
+  if (useSplitPane) {
+    const stickyBlocks = contentBlocks.filter(b => b.type === 'passage' || b.type === 'vocab_list');
+    const utilityBlocks = contentBlocks.filter(b => b.type !== 'passage' && b.type !== 'vocab_list');
+
+    return (
+      <div className="min-h-screen bg-background" style={subjectThemeVariables}>
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 py-8 sm:py-12">
+          <div className="w-full mb-8">
+            {renderBreadcrumb()}
+            {renderHeader()}
+          </div>
+
+          <div className="w-full flex flex-col xl:flex-row items-stretch gap-8 xl:gap-12 relative pb-24">
+            {/* Left Column - Sticky Reference Box */}
+            <div className="w-full xl:w-[45%] shrink-0">
+              <div className="sticky top-24">
+                {stickyBlocks.length > 0 ? (
+                  renderBlocks(stickyBlocks)
+                ) : (
+                  <div className="p-8 bg-amber-50/80 rounded-2xl border border-amber-200/60 text-center text-amber-800/80 shadow-sm font-medium">
+                    No dedicated active reference in this section.
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Right Column - Lesson Notes & Practice */}
+            <div className="flex-1 w-full xl:w-[55%] space-y-6">
+              {/* Lesson notes */}
+              {renderBlocks(utilityBlocks)}
+
+              {/* Practice Questions */}
+              {practiceQuestions.length > 0 && (
+                <div className="mt-12 bg-gradient-to-br from-card to-background border border-border rounded-2xl overflow-hidden shadow-sm">
+                  <div className="p-6 sm:p-8 border-b border-border/50 bg-muted/30">
+                    <h2 className="text-2xl font-bold flex items-center gap-3">
+                      <Zap className="h-6 w-6 text-primary" />
+                      {practiceTitle}
+                    </h2>
+                    <p className="text-muted-foreground mt-2">{practiceDesc}</p>
+                  </div>
+                  <div className="p-6 sm:p-8 space-y-6">
+                    {practiceQuestions.map((pq, idx) => (
+                      <PracticeQuestionCard
+                        key={idx}
+                        question={pq.question}
+                        answer={pq.answer}
+                        number={idx + 1}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Navigation Footer */}
+              <div className="flex items-center justify-between gap-4 mt-8 pt-8 border-t border-border/10">
+                {prevTopic ? (
+                  <Button
+                    variant="ghost"
+                    onClick={() => navigateToTopic(prevTopic)}
+                    className="gap-2 text-muted-foreground hover:text-foreground flex-1 justify-start h-auto py-4"
+                  >
+                    <ArrowLeft className="h-4 w-4 shrink-0" />
+                    <div className="text-left min-w-0">
+                      <span className="text-xs block opacity-70">Previous Section</span>
+                      <span className="font-medium truncate block max-w-[200px]">{prevTopic.title}</span>
+                    </div>
+                  </Button>
+                ) : (
+                  <div className="flex-1" />
+                )}
+
+                {nextTopic && (
+                  <Button
+                    onClick={() => navigateToTopic(nextTopic)}
+                    className="gap-2 flex-1 justify-end h-auto py-4 bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-500 hover:to-violet-500 text-white shadow-lg hover:shadow-xl transition-all border-0 ring-1 ring-white/10"
+                  >
+                    <div className="text-right min-w-0">
+                      <span className="text-xs block font-bold tracking-widest uppercase opacity-90">Next Section</span>
+                      <span className="font-medium truncate block max-w-[200px]">{nextTopic.title}</span>
+                    </div>
+                    <ArrowRight className="h-5 w-5 shrink-0" />
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background" style={subjectThemeVariables}>
       <div className="max-w-[1200px] mx-auto px-4 sm:px-6 py-8 sm:py-12 flex flex-col xl:flex-row items-start gap-8 xl:gap-16">
         <div className="flex-1 w-full max-w-[800px] mx-auto xl:mx-0 shrink-0">
-          {/* Breadcrumb */}
-          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-8 flex-wrap">
-            <Link to="/notes" className="hover:text-foreground transition-colors flex items-center gap-1">
-              <BookOpen className="h-4 w-4" />
-              Notes
-            </Link>
-            <ChevronRight className="h-4 w-4" />
-            <Link to={`/notes/${encodeURIComponent(decodedSection)}`} className="hover:text-foreground transition-colors">
-              {sectionTitle}
-            </Link>
-            <ChevronRight className="h-4 w-4" />
-            <span className="text-foreground font-medium truncate max-w-[200px]">{currentTopic.title}</span>
-          </div>
-
-        {/* Header */}
-        <div className="mb-10">
-            <div className="flex items-center gap-3 mb-4">
-            <div className={cn("px-4 py-2 rounded-xl text-sm font-bold text-white bg-gradient-to-r", config.gradient)}>
-              {config.abbr.toUpperCase()}{currentIndex + 1}
-            </div>
-            <span className="text-sm text-muted-foreground">
-              {sectionTitle}
-            </span>
-          </div>
-
-          <h1 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight mb-4 leading-tight">
-            {currentTopic.title}
-          </h1>
-
-          <div className="flex flex-wrap items-center gap-4 mb-6">
-            {currentTopic.level === "H" && (
-              <span className="notes-badge notes-badge-higher">Higher Tier</span>
-            )}
-            {currentTopic.level === "F/H" && (
-              <span className="notes-badge notes-badge-both">Foundation & Higher</span>
-            )}
-            <span className="text-sm text-muted-foreground flex items-center gap-1">
-              <Clock className="h-4 w-4" />
-              {readingTime} min read
-            </span>
-            <span className="text-sm text-muted-foreground">
-              Topic {currentIndex + 1} of {topics.length}
-            </span>
-          </div>
-
-          {user && (
-            <Button
-              onClick={handleToggleDone}
-              disabled={loading}
-              className={cn(
-                "gap-2 notes-completion-btn",
-                isDone && "complete"
-              )}
-            >
-              {isDone ? (
-                <>
-                  <CheckCircle className="h-4 w-4" />
-                  Completed
-                </>
-              ) : (
-                <>
-                  <Check className="h-4 w-4" />
-                  Mark Complete
-                </>
-              )}
-            </Button>
-          )}
-        </div>
-
+          {renderBreadcrumb()}
+          {renderHeader()}
         {/* Interactive Diagram Section for GCSE */}
         {currentTopic.level !== "11+" && getInteractiveDiagram(topicSlug || "") && (
           <div className="mb-10 group transition-all duration-500">
@@ -859,66 +1076,7 @@ export default function RevisionNotesTopic() {
 
         {/* Content Blocks */}
         <div className="space-y-5 mb-10">
-          {contentBlocks.map((block, index) => {
-            const blockStyle = blockConfig[block.type] || blockConfig.info;
-            const isHighPriority = blockStyle.priority === 'high';
-            
-            return (
-              <div 
-                key={index}
-                id={`block-${index}`}
-                className={cn(
-                  "notes-block-card rounded-2xl overflow-hidden mb-8 scroll-mt-24",
-                  blockStyle.bgClass,
-                  blockStyle.borderClass,
-                  isHighPriority && "shadow-[0_8px_30px_rgb(0,0,0,0.04),0_20px_50px_rgb(0,0,0,0.02)]"
-                )}
-              >
-                <div
-                  className={cn(
-                    "w-full flex items-center justify-between p-6 text-left border-b border-black/5 dark:border-white/5",
-                    blockStyle.headerClass
-                  )}
-                >
-                  <div className="flex items-center gap-4">
-                    <div className={cn(
-                      "p-3 rounded-xl shadow-lg ring-1 ring-black/5 dark:ring-white/5",
-                      blockStyle.color,
-                      isHighPriority ? "bg-background/90 shadow-black/10" : "bg-background/70 shadow-black/5"
-                    )}>
-                      {blockStyle.icon}
-                    </div>
-                    <h2 className={cn(
-                      "font-black text-foreground tracking-widest uppercase",
-                      isHighPriority ? "text-lg sm:text-xl" : "text-base sm:text-lg"
-                    )}>
-                      {block.title}
-                    </h2>
-                  </div>
-                </div>
-
-                <div className="overflow-hidden">
-                  <div className={cn(
-                    "px-8 pb-8 break-words prose-container leading-loose text-foreground/90 font-medium text-lg",
-                    isHighPriority && "pt-4"
-                  )}>
-                    {currentTopic.level === "11+" && hasBlockVisual(block.title) ? (
-                       <div className="flex flex-col lg:flex-row gap-8 items-start">
-                          <div className="flex-1 min-w-[50%] w-full">
-                             <NotesMarkdown>{block.content}</NotesMarkdown>
-                          </div>
-                          <div className="w-full lg:w-[45%] lg:sticky lg:top-24 pb-4 shrink-0 overflow-hidden">
-                             <BlockVisual title={block.title} />
-                          </div>
-                       </div>
-                    ) : (
-                       <NotesMarkdown>{block.content}</NotesMarkdown>
-                    )}
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+          {renderBlocks(contentBlocks)}
         </div>
 
         {/* Interactive Diagram Section */}

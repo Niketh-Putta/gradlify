@@ -45,13 +45,13 @@ export function PythagorasInteractive() {
             <polygon
               points={`40,160 ${40 + a * 30},160 40,${160 - b * 30}`}
               fill="none"
-              stroke="hsl(262 83% 58%)"
+              stroke="hsl(38 92% 50%)"
               strokeWidth="3"
             />
-            <rect x="40" y={160 - 15} width="15" height="15" fill="none" stroke="hsl(262 83% 58%)" strokeWidth="1.5" />
+            <rect x="40" y={160 - 15} width="15" height="15" fill="none" stroke="hsl(38 92% 50%)" strokeWidth="1.5" />
             <text x={40 + (a * 30) / 2} y="180" textAnchor="middle" className="fill-foreground text-sm font-medium">a = {a}</text>
             <text x="20" y={160 - (b * 30) / 2} textAnchor="middle" className="fill-foreground text-sm font-medium">b = {b}</text>
-            <text x={40 + (a * 30) / 2 + 20} y={160 - (b * 30) / 2 - 10} className="fill-purple-400 text-sm font-bold">c = {c.toFixed(2)}</text>
+            <text x={40 + (a * 30) / 2 + 20} y={160 - (b * 30) / 2 - 10} className="fill-amber-500 text-sm font-bold">c = {c.toFixed(2)}</text>
           </svg>
         </div>
         <div className="space-y-6">
@@ -98,7 +98,7 @@ export function TrigInteractive() {
         <div className="bg-muted/30 rounded-xl p-4 flex items-center justify-center">
           <svg width="280" height="200" viewBox="0 0 280 200">
             <line x1="40" y1="160" x2={40 + adj * 1.8} y2="160" stroke="hsl(142 76% 36%)" strokeWidth="3" />
-            <line x1="40" y1="160" x2={40 + adj * 1.8} y2={160 - opp * 1.8} stroke="hsl(262 83% 58%)" strokeWidth="3" />
+            <line x1="40" y1="160" x2={40 + adj * 1.8} y2={160 - opp * 1.8} stroke="hsl(38 92% 50%)" strokeWidth="3" />
             <line x1={40 + adj * 1.8} y1="160" x2={40 + adj * 1.8} y2={160 - opp * 1.8} stroke="hsl(47 96% 53%)" strokeWidth="3" />
             <rect x="40" y={160 - 12} width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1" opacity="0.5" />
             <path d={`M 60,160 A 20,20 0 0,0 ${40 + 20 * Math.cos(angleRad)},${160 - 20 * Math.sin(angleRad)}`} fill="none" stroke="currentColor" strokeWidth="1.5" />
@@ -160,13 +160,13 @@ export function ParallelLinesInteractive() {
               y1={100 + 100 * Math.sin((transversalAngle * Math.PI) / 180)} 
               x2={140 + 100 * Math.cos((transversalAngle * Math.PI) / 180)} 
               y2={100 - 100 * Math.sin((transversalAngle * Math.PI) / 180)} 
-              stroke="hsl(262 83% 58%)" 
+              stroke="hsl(38 92% 50%)" 
               strokeWidth="2" 
             />
             {/* Angle arcs */}
-            <text x="155" y="55" className="fill-purple-400 text-xs font-bold">{transversalAngle}°</text>
+            <text x="155" y="55" className="fill-amber-500 text-xs font-bold">{transversalAngle}°</text>
             <text x="120" y="75" className="fill-yellow-400 text-xs font-bold">{180 - transversalAngle}°</text>
-            <text x="155" y="135" className="fill-purple-400 text-xs font-bold">{transversalAngle}°</text>
+            <text x="155" y="135" className="fill-amber-500 text-xs font-bold">{transversalAngle}°</text>
             <text x="120" y="155" className="fill-yellow-400 text-xs font-bold">{180 - transversalAngle}°</text>
           </svg>
         </div>
@@ -217,7 +217,7 @@ export function PolygonAnglesInteractive() {
       <div className="grid md:grid-cols-2 gap-6 items-center">
         <div className="bg-muted/30 rounded-xl p-4 flex items-center justify-center">
           <svg width="200" height="200" viewBox="0 0 200 200">
-            <polygon points={points} fill="hsl(262 83% 58% / 0.1)" stroke="hsl(262 83% 58%)" strokeWidth="2" />
+            <polygon points={points} fill="hsl(38 92% 50% / 0.1)" stroke="hsl(38 92% 50%)" strokeWidth="2" />
             <text x="100" y="105" textAnchor="middle" className="fill-foreground text-xs font-medium">{sides}-sided</text>
           </svg>
         </div>
@@ -279,22 +279,22 @@ export function CircleTheoremsInteractive() {
             {theorem === 'inscribed' && (
               <>
                 <circle cx="100" cy="100" r="3" fill="currentColor" />
-                <circle cx="100" cy="30" r="4" fill="hsl(262 83% 58%)" />
-                <circle cx="40" cy="120" r="4" fill="hsl(262 83% 58%)" />
-                <circle cx="160" cy="120" r="4" fill="hsl(262 83% 58%)" />
-                <line x1="100" y1="30" x2="40" y2="120" stroke="hsl(262 83% 58%)" strokeWidth="2" />
-                <line x1="100" y1="30" x2="160" y2="120" stroke="hsl(262 83% 58%)" strokeWidth="2" />
+                <circle cx="100" cy="30" r="4" fill="hsl(38 92% 50%)" />
+                <circle cx="40" cy="120" r="4" fill="hsl(38 92% 50%)" />
+                <circle cx="160" cy="120" r="4" fill="hsl(38 92% 50%)" />
+                <line x1="100" y1="30" x2="40" y2="120" stroke="hsl(38 92% 50%)" strokeWidth="2" />
+                <line x1="100" y1="30" x2="160" y2="120" stroke="hsl(38 92% 50%)" strokeWidth="2" />
                 <line x1="40" y1="120" x2="100" y2="100" stroke="hsl(47 96% 53%)" strokeWidth="1.5" strokeDasharray="4" />
                 <line x1="160" y1="120" x2="100" y2="100" stroke="hsl(47 96% 53%)" strokeWidth="1.5" strokeDasharray="4" />
-                <text x="100" y="20" textAnchor="middle" className="fill-purple-400 text-xs font-bold">θ</text>
+                <text x="100" y="20" textAnchor="middle" className="fill-amber-500 text-xs font-bold">θ</text>
                 <text x="100" y="90" textAnchor="middle" className="fill-yellow-400 text-xs font-bold">2θ</text>
               </>
             )}
             {theorem === 'diameter' && (
               <>
-                <line x1="30" y1="100" x2="170" y2="100" stroke="hsl(262 83% 58%)" strokeWidth="2" />
-                <circle cx="30" cy="100" r="4" fill="hsl(262 83% 58%)" />
-                <circle cx="170" cy="100" r="4" fill="hsl(262 83% 58%)" />
+                <line x1="30" y1="100" x2="170" y2="100" stroke="hsl(38 92% 50%)" strokeWidth="2" />
+                <circle cx="30" cy="100" r="4" fill="hsl(38 92% 50%)" />
+                <circle cx="170" cy="100" r="4" fill="hsl(38 92% 50%)" />
                 <circle cx="100" cy="30" r="4" fill="hsl(47 96% 53%)" />
                 <line x1="30" y1="100" x2="100" y2="30" stroke="currentColor" strokeWidth="1.5" />
                 <line x1="170" y1="100" x2="100" y2="30" stroke="currentColor" strokeWidth="1.5" />
@@ -304,7 +304,7 @@ export function CircleTheoremsInteractive() {
             {theorem === 'tangent' && (
               <>
                 <circle cx="100" cy="100" r="3" fill="currentColor" />
-                <line x1="100" y1="100" x2="170" y2="100" stroke="hsl(262 83% 58%)" strokeWidth="2" />
+                <line x1="100" y1="100" x2="170" y2="100" stroke="hsl(38 92% 50%)" strokeWidth="2" />
                 <line x1="170" y1="50" x2="170" y2="150" stroke="hsl(47 96% 53%)" strokeWidth="2" />
                 <circle cx="170" cy="100" r="4" fill="hsl(142 76% 36%)" />
                 <rect x="155" y="85" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.5" />
@@ -357,8 +357,8 @@ export function AreaPerimeterInteractive() {
               y={90 - width * 12} 
               width={length * 24} 
               height={width * 24} 
-              fill="hsl(262 83% 58% / 0.15)" 
-              stroke="hsl(262 83% 58%)" 
+              fill="hsl(38 92% 50% / 0.15)" 
+              stroke="hsl(38 92% 50%)" 
               strokeWidth="2" 
             />
             <text x="120" y={90 + width * 12 + 20} textAnchor="middle" className="fill-foreground text-sm font-medium">{length} cm</text>
@@ -406,10 +406,10 @@ export function ProbabilityTreeInteractive() {
         <div className="bg-muted/30 rounded-xl p-4 flex items-center justify-center">
           <svg width="260" height="180" viewBox="0 0 260 180">
             {/* First branch */}
-            <line x1="40" y1="90" x2="120" y2="40" stroke="hsl(262 83% 58%)" strokeWidth="2" />
+            <line x1="40" y1="90" x2="120" y2="40" stroke="hsl(38 92% 50%)" strokeWidth="2" />
             <line x1="40" y1="90" x2="120" y2="140" stroke="hsl(47 96% 53%)" strokeWidth="2" />
             <circle cx="40" cy="90" r="4" fill="currentColor" />
-            <text x="75" y="55" className="fill-purple-400 text-xs font-bold">{pFirst.toFixed(1)}</text>
+            <text x="75" y="55" className="fill-amber-500 text-xs font-bold">{pFirst.toFixed(1)}</text>
             <text x="75" y="130" className="fill-yellow-400 text-xs font-bold">{(1 - pFirst).toFixed(1)}</text>
             {/* Second branches */}
             <line x1="120" y1="40" x2="200" y2="20" stroke="hsl(142 76% 36%)" strokeWidth="2" />
@@ -555,9 +555,9 @@ export function FractionsInteractive() {
       <div className="grid md:grid-cols-2 gap-6 items-center">
         <div className="bg-muted/30 rounded-xl p-4 flex items-center justify-center">
           <svg width="280" height="120" viewBox="0 0 280 120">
-            <text x="30" y="60" className="fill-purple-400 text-2xl font-bold">{num1}</text>
+            <text x="30" y="60" className="fill-amber-500 text-2xl font-bold">{num1}</text>
             <line x1="20" y1="70" x2="50" y2="70" stroke="currentColor" strokeWidth="2" />
-            <text x="30" y="95" className="fill-purple-400 text-2xl font-bold">{den1}</text>
+            <text x="30" y="95" className="fill-amber-500 text-2xl font-bold">{den1}</text>
             <text x="70" y="70" className="fill-foreground text-2xl">+</text>
             <text x="110" y="60" className="fill-amber-400 text-2xl font-bold">{num2}</text>
             <line x1="100" y1="70" x2="130" y2="70" stroke="currentColor" strokeWidth="2" />
@@ -600,8 +600,8 @@ export function NumberLineInteractive() {
               <text x={150 + n * 24} y="60" textAnchor="middle" className="fill-foreground text-xs">{n}</text>
             </g>
           ))}
-          <circle cx={150 + value * 24} cy="40" r="8" fill="hsl(262 83% 58%)" />
-          <text x={150 + value * 24} y="20" textAnchor="middle" className="fill-purple-400 text-sm font-bold">{value}</text>
+          <circle cx={150 + value * 24} cy="40" r="8" fill="hsl(38 92% 50%)" />
+          <text x={150 + value * 24} y="20" textAnchor="middle" className="fill-amber-500 text-sm font-bold">{value}</text>
         </svg>
         <div className="mt-4">
           <Slider value={[value]} onValueChange={([v]) => setValue(v)} min={-5} max={5} step={1} className="w-full" />
@@ -645,7 +645,7 @@ export function ScatterInteractive() {
           <line x1="30" y1="120" x2="270" y2="120" stroke="currentColor" strokeWidth="1" opacity="0.3" />
           <line x1="30" y1="20" x2="30" y2="120" stroke="currentColor" strokeWidth="1" opacity="0.3" />
           {sample.map((p, i) => (
-            <circle key={i} cx={mapX(p.x)} cy={mapY(p.y)} r={5} fill="hsl(262 83% 58%)" />
+            <circle key={i} cx={mapX(p.x)} cy={mapY(p.y)} r={5} fill="hsl(38 92% 50%)" />
           ))}
           {/* regression line endpoints */}
           <line x1={mapX(0)} y1={mapY(intercept + slope * 0)} x2={mapX(70)} y2={mapY(intercept + slope * 70)} stroke="hsl(47 96% 53%)" strokeWidth="2" strokeDasharray="6 4" />
@@ -673,7 +673,7 @@ export function QuadraticGraphInteractive() {
             <path
               d={`M ${100 - 80} ${100 - a * 64} Q 100 ${100 + (a > 0 ? 0 : -a * 20)} ${100 + 80} ${100 - a * 64}`}
               fill="none"
-              stroke="hsl(262 83% 58%)"
+              stroke="hsl(38 92% 50%)"
               strokeWidth="3"
             />
             <text x="105" y="15" className="fill-foreground text-xs">y</text>
@@ -751,7 +751,7 @@ export function StraightLineInteractive() {
               y1={100 - (m * -5 + c) * 10}
               x2="200"
               y2={100 - (m * 5 + c) * 10}
-              stroke="hsl(262 83% 58%)"
+              stroke="hsl(38 92% 50%)"
               strokeWidth="3"
             />
             <circle cx="100" cy={100 - c * 10} r="5" fill="hsl(47 96% 53%)" />
@@ -792,12 +792,12 @@ export function BoxPlotInteractive() {
               <text x={30 + v * 2.4} y="105" textAnchor="middle" className="fill-foreground text-xs">{v}</text>
             </g>
           ))}
-          <line x1="54" y1="50" x2="54" y2="70" stroke="hsl(262 83% 58%)" strokeWidth="2" />
-          <line x1="54" y1="60" x2="102" y2="60" stroke="hsl(262 83% 58%)" strokeWidth="2" />
-          <rect x="102" y="45" width="96" height="30" fill="hsl(262 83% 58% / 0.2)" stroke="hsl(262 83% 58%)" strokeWidth="2" />
+          <line x1="54" y1="50" x2="54" y2="70" stroke="hsl(38 92% 50%)" strokeWidth="2" />
+          <line x1="54" y1="60" x2="102" y2="60" stroke="hsl(38 92% 50%)" strokeWidth="2" />
+          <rect x="102" y="45" width="96" height="30" fill="hsl(38 92% 50% / 0.2)" stroke="hsl(38 92% 50%)" strokeWidth="2" />
           <line x1="150" y1="45" x2="150" y2="75" stroke="hsl(47 96% 53%)" strokeWidth="3" />
-          <line x1="198" y1="60" x2="246" y2="60" stroke="hsl(262 83% 58%)" strokeWidth="2" />
-          <line x1="246" y1="50" x2="246" y2="70" stroke="hsl(262 83% 58%)" strokeWidth="2" />
+          <line x1="198" y1="60" x2="246" y2="60" stroke="hsl(38 92% 50%)" strokeWidth="2" />
+          <line x1="246" y1="50" x2="246" y2="70" stroke="hsl(38 92% 50%)" strokeWidth="2" />
           <text x="54" y="35" textAnchor="middle" className="fill-muted-foreground text-[10px]">Min</text>
           <text x="102" y="35" textAnchor="middle" className="fill-muted-foreground text-[10px]">Q₁</text>
           <text x="150" y="35" textAnchor="middle" className="fill-yellow-400 text-[10px] font-bold">Median</text>
@@ -823,9 +823,9 @@ export function VennDiagramInteractive() {
       <div className="grid md:grid-cols-2 gap-6 items-center">
         <div className="bg-muted/30 rounded-xl p-4 flex items-center justify-center">
           <svg width="220" height="150" viewBox="0 0 220 150">
-            <circle cx="80" cy="75" r="50" fill="hsl(262 83% 58% / 0.2)" stroke="hsl(262 83% 58%)" strokeWidth="2" />
+            <circle cx="80" cy="75" r="50" fill="hsl(38 92% 50% / 0.2)" stroke="hsl(38 92% 50%)" strokeWidth="2" />
             <circle cx="140" cy="75" r="50" fill="hsl(47 96% 53% / 0.2)" stroke="hsl(47 96% 53%)" strokeWidth="2" />
-            <text x="55" y="80" className="fill-purple-400 text-lg font-bold">{a - both}</text>
+            <text x="55" y="80" className="fill-amber-500 text-lg font-bold">{a - both}</text>
             <text x="110" y="80" className="fill-green-400 text-lg font-bold">{both}</text>
             <text x="160" y="80" className="fill-yellow-400 text-lg font-bold">{b - both}</text>
             <text x="80" y="140" textAnchor="middle" className="fill-muted-foreground text-xs">Set A</text>
@@ -867,10 +867,10 @@ export function VectorInteractive() {
           <svg width="180" height="180" viewBox="0 0 180 180">
             <line x1="20" y1="160" x2="160" y2="160" stroke="currentColor" strokeWidth="1" opacity="0.3" />
             <line x1="20" y1="20" x2="20" y2="160" stroke="currentColor" strokeWidth="1" opacity="0.3" />
-            <line x1="20" y1="160" x2={20 + x * 20} y2={160 - y * 20} stroke="hsl(262 83% 58%)" strokeWidth="3" markerEnd="url(#arrowhead)" />
+            <line x1="20" y1="160" x2={20 + x * 20} y2={160 - y * 20} stroke="hsl(38 92% 50%)" strokeWidth="3" markerEnd="url(#arrowhead)" />
             <defs>
               <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-                <polygon points="0 0, 10 3.5, 0 7" fill="hsl(262 83% 58%)" />
+                <polygon points="0 0, 10 3.5, 0 7" fill="hsl(38 92% 50%)" />
               </marker>
             </defs>
             <line x1="20" y1="160" x2={20 + x * 20} y2="160" stroke="hsl(142 76% 36%)" strokeWidth="2" strokeDasharray="4" />

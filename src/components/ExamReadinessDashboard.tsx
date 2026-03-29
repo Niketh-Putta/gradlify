@@ -21,10 +21,13 @@ import { resolveUserTrack } from '@/lib/track';
 import type { OnboardingAnswers } from '@/components/EditOnboardingDetailsModal';
 import { useAppContext } from '@/hooks/useAppContext';
 import { useOverallReadiness } from '@/hooks/useOverallReadiness';
+import { useSubject } from '@/contexts/SubjectContext';
+import { ELEVEN_PLUS_ENGLISH_READINESS_MAP } from '@/lib/trackCurriculum';
 
 export default function ExamReadinessDashboard() {
   const { user, profile } = useAppContext();
-  const { overall, loading: overallLoading } = useOverallReadiness(user?.id);
+  const { currentSubject } = useSubject();
+  const { overall, loading: overallLoading } = useOverallReadiness(user?.id, profile?.track ?? null, currentSubject);
   const [overview, setOverview] = useState<TopicReadiness[]>([]);
   const [recentHistory, setRecentHistory] = useState<ReadinessHistory[]>([]);
   const [loading, setLoading] = useState(true);
@@ -36,7 +39,7 @@ export default function ExamReadinessDashboard() {
   const [topicHistoryLoading, setTopicHistoryLoading] = useState(false);
   const onboardingAnswers = profile?.onboarding as OnboardingAnswers | undefined;
   const userTrack = resolveUserTrack(profile?.track ?? null);
-  const trackLabel = '11+ Maths';
+  const trackLabel = currentSubject === 'english' ? '11+ English' : '11+ Maths';
   const targetMessage = useMemo(() => {
     const defaultMessage = 'Define your goal level in the 11+ starter answers.';
     if (!onboardingAnswers) return defaultMessage;
@@ -62,8 +65,27 @@ const loadData = async () => {
       getReadinessHistory() // Get all recent history
     ]);
     
-    setOverview(overviewData);
-    setRecentHistory(historyData.slice(0, 5)); // Keep latest 5 for insights
+    // Filter overviewData by subject topics using the definitive curriculum map
+    const isEnglish = currentSubject === 'english';
+    const englishTopicTokens = Object.values(ELEVEN_PLUS_ENGLISH_READINESS_MAP).flat();
+    const englishTopicKeys = Object.keys(ELEVEN_PLUS_ENGLISH_READINESS_MAP);
+    
+    const isEng = (topicName: string) => {
+      // Must be an exact match to an english readiness key or source topic
+      return englishTopicTokens.includes(topicName) || englishTopicKeys.includes(topicName);
+    };
+    
+    // Enforce strict FE isolation between Maths and English
+    const filteredOverview = overviewData.filter(topic => {
+      return isEnglish ? isEng(topic.topic) : !isEng(topic.topic);
+    });
+
+    const filteredHistory = historyData.filter(hist => {
+      return isEnglish ? isEng(hist.topic) : !isEng(hist.topic);
+    });
+    
+    setOverview(filteredOverview);
+    setRecentHistory(filteredHistory.slice(0, 5)); // Keep latest 5 for insights
   } catch (error) {
     console.error('Failed to load readiness data:', error);
   } finally {

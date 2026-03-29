@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Brain, X, TrendingUp, RefreshCw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useMindprintOverview } from '@/lib/mindprint/useMindprintOverview';
+import { useSubject } from "@/contexts/SubjectContext";
 import { useMistakeGenome, MistakeGene } from '@/lib/mindprint/useMistakeGenome';
 import { useEnergyHeatmap } from '@/lib/mindprint/useEnergyHeatmap';
 import { useConfidenceIndex } from '@/lib/mindprint/useConfidenceIndex';
@@ -36,6 +37,7 @@ import { AIUnavailableRedirect } from '@/components/AIUnavailableRedirect';
 
 export default function Mindprint() {
   const aiEnabled = AI_FEATURE_ENABLED;
+  const { currentSubject } = useSubject();
   const navigate = useNavigate();
   const { user } = useAppContext();
   const overview = useMindprintOverview();
@@ -123,7 +125,7 @@ export default function Mindprint() {
                   <div className="p-1.5 sm:p-2 rounded-lg bg-violet-500/20">
                     <Brain className="h-5 w-5 sm:h-6 sm:w-6 text-violet-500" />
                   </div>
-                  <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground">Your Mindprint</h1>
+                  <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground">Your {currentSubject === 'english' ? 'English ' : 'Maths '}Mindprint</h1>
                 </div>
                 <div className="flex items-center gap-2 sm:gap-3 mt-2 sm:mt-3 lg:mt-4">
                   {AI_FEATURE_ENABLED ? (

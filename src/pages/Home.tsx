@@ -1,4 +1,5 @@
 import { computeReadinessGrades } from '@/lib/readinessGrades';
+import { cn } from '@/lib/utils';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -6,6 +7,7 @@ import { NotesProgressCard } from "@/components/NotesProgressCard";
 import { OverallReadinessCard } from "@/components/OverallReadinessCard";
 import { useAppContext } from "@/hooks/useAppContext";
 import { useReadiness } from "@/hooks/useReadiness";
+import { useSubject } from "@/contexts/SubjectContext";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
@@ -59,10 +61,11 @@ const TOPIC_ICONS = {
 
 export function Home() { 
   const { user, profile, onProfileUpdate } = useAppContext();
+  const { currentSubject } = useSubject();
   const userTrack = resolveUserTrack(profile?.track ?? null);
   const isElevenPlus = userTrack === "11plus";
   const trackCopy = getTrackCopy(userTrack);
-  const trackLabel = getTrackLabel(userTrack);
+  const trackLabel = getTrackLabel(userTrack, currentSubject);
   const { remainingUses, isPremium, dailyLimit, fetchUsageData } = usePremium();
   const isFounder = profile?.founder_track === 'founder' || profile?.founder_track === 'competitor';
   const navigate = useNavigate();
@@ -76,7 +79,7 @@ export function Home() {
     ? "Get unlimited AI questions, full mock exams, and personalised revision plans."
     : "Get unlimited questions, full mock exams, and personalised revision plans.";
 
-  const { topics: readinessTopics, loading: readinessLoading, overall: overallReadiness } = useReadiness(user?.id, userTrack);
+  const { topics: readinessTopics, loading: readinessLoading, overall: overallReadiness } = useReadiness(user?.id, userTrack, currentSubject);
   const lowestReadinessTopic = useMemo(() => {
     if (!readinessTopics?.length) return null;
     return readinessTopics.reduce((lowest, topic) => {
@@ -230,21 +233,21 @@ export function Home() {
     },
   };
 
-  const readinessRows = useMemo(
-    () => buildTrackReadinessRows(userTrack, readinessTopics),
-    [userTrack, readinessTopics]
+  const activeReadinessRows = useMemo(
+    () => buildTrackReadinessRows(userTrack, readinessTopics, currentSubject),
+    [userTrack, readinessTopics, currentSubject]
   );
 
   const topicReadinessMap = useMemo(() => {
     const map = new Map<string, number>();
-    readinessRows.forEach((topic) => {
+    activeReadinessRows.forEach((topic) => {
       map.set(topic.topic, topic.readiness);
     });
     return map;
-  }, [readinessRows]);
+  }, [activeReadinessRows]);
 
   const topicData = useMemo(() => {
-    return getTrackReadinessSections(userTrack).map((section) => {
+    return getTrackReadinessSections(userTrack, currentSubject).map((section) => {
       const rawScore = topicReadinessMap.get(section.label) ?? 0;
       const roundedScore = Number.isFinite(rawScore) ? Math.round(rawScore) : 0;
       const clampedScore = Math.max(0, Math.min(100, roundedScore));
@@ -311,7 +314,7 @@ export function Home() {
     params.set('tier', 'both');
     params.set('paperType', 'both');
     params.set('mode', 'practice');
-    navigate(`/practice-page?${params.toString()}`);
+    navigate(`/practice/${currentSubject}?${params.toString()}`);
   };
 
   const targetTrack: UserTrack = isElevenPlus ? "gcse" : "11plus";
@@ -368,10 +371,23 @@ export function Home() {
     <div className="min-h-screen bg-background">
       <div className="pt-6 pb-10 sm:pt-8 sm:pb-14 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
 
-        <div className="mb-4">
-          <span className="inline-flex items-center rounded-full border border-primary/25 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+        <div className="mb-4 flex items-center justify-between">
+          <span className={cn(
+             "inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold",
+             currentSubject === 'english'
+               ? "border-amber-500/25 bg-amber-500/10 text-amber-500"
+               : "border-primary/25 bg-primary/10 text-primary"
+          )}>
             {trackLabel}
           </span>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => navigate('/select-subject')}
+            className="text-muted-foreground hover:text-foreground"
+          >
+            ← Switch Subject
+          </Button>
         </div>
         {/* Hero Welcome Section */}
         <div 
@@ -384,9 +400,17 @@ export function Home() {
           }`}
         >
           {/* Decorative elements */}
-          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full -translate-y-1/2 translate-x-1/2" />
+          <div className={cn(
+             "absolute top-0 right-0 w-64 h-64 rounded-full -translate-y-1/2 translate-x-1/2",
+             currentSubject === 'english' ? "bg-amber-500/10" : "bg-primary/5"
+          )} />
           <div className="absolute bottom-0 left-0 w-48 h-48 bg-accent/5 rounded-full translate-y-1/2 -translate-x-1/2" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(80,120,255,0.10),transparent_45%),radial-gradient(circle_at_80%_30%,rgba(160,110,255,0.10),transparent_50%),radial-gradient(circle_at_60%_80%,rgba(80,120,255,0.08),transparent_60%)]" />
+          <div className={cn(
+             "absolute inset-0",
+             currentSubject === 'english'
+               ? "bg-[radial-gradient(circle_at_20%_20%,rgba(245,158,11,0.10),transparent_45%),radial-gradient(circle_at_80%_30%,rgba(252,211,77,0.10),transparent_50%),radial-gradient(circle_at_60%_80%,rgba(245,158,11,0.08),transparent_60%)]"
+               : "bg-[radial-gradient(circle_at_20%_20%,rgba(80,120,255,0.10),transparent_45%),radial-gradient(circle_at_80%_30%,rgba(160,110,255,0.10),transparent_50%),radial-gradient(circle_at_60%_80%,rgba(80,120,255,0.08),transparent_60%)]"
+          )} />
           
           <div className="relative z-10">
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
@@ -398,7 +422,7 @@ export function Home() {
                 )}
                 <h1 className="text-2xl sm:text-3xl lg:text-4xl font-semibold mb-3 tracking-tight">
                   <span className="text-foreground">{isNewUser ? 'Welcome,' : 'Welcome back,'}</span>{' '}
-                  <span className="text-primary">{userName}!</span>
+                  <span className={cn(currentSubject === 'english' ? "text-amber-500" : "text-primary")}>{userName}!</span>
                 </h1>
                 <p className="text-muted-foreground text-base sm:text-lg max-w-xl">
                   {isNewUser 
@@ -411,10 +435,13 @@ export function Home() {
               <div className="flex flex-col sm:flex-row gap-3">
                 {isNewUser ? (
                   <Button 
-                    onClick={() => navigate('/practice-page?mode=practice')}
+                    onClick={() => navigate(`/practice/${currentSubject}?mode=practice`)}
                     size="lg"
-                    variant="hero"
-                    className="font-medium shadow-glow min-w-[220px]"
+                    className={cn(
+                       "font-medium shadow-glow min-w-[220px]",
+                       currentSubject === 'english' ? "bg-amber-500 text-white hover:bg-amber-600 shadow-amber-500/20" : ""
+                    )}
+                    variant={currentSubject === 'english' ? 'default' : 'hero'}
                   >
                     Start exam-style practice
                     <ArrowRight className="h-4 w-4 ml-2" />
@@ -423,8 +450,11 @@ export function Home() {
                   <Button 
                     onClick={() => navigate('/mocks')}
                     size="lg"
-                    variant="premium"
-                    className="font-medium shadow-glow min-w-[170px]"
+                    className={cn(
+                       "font-medium shadow-glow min-w-[170px]",
+                       currentSubject === 'english' ? "bg-gradient-to-r from-amber-400 to-amber-600 text-white shadow-[0_0_15px_rgba(245,158,11,0.5)] border-0" : ""
+                    )}
+                    variant={currentSubject === 'english' ? 'default' : 'premium'}
                   >
                     <Zap className="h-4 w-4 mr-2" />
                     Start Revising
@@ -615,9 +645,9 @@ export function Home() {
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle>Topic Progress</CardTitle>
+                  <CardTitle>{currentSubject === 'english' ? 'English Progress' : 'Topic Progress'}</CardTitle>
                   <CardDescription>
-                    {getTrackReadinessSummaryLabel(userTrack)}
+                    {currentSubject === 'english' ? 'Your readiness across the curriculum' : getTrackReadinessSummaryLabel(userTrack)}
                   </CardDescription>
                 </div>
                 <Button 
@@ -647,21 +677,22 @@ export function Home() {
                   ))}
                 </div>
               ) : (
-                <div className={`grid sm:grid-cols-2 ${isElevenPlus ? 'lg:grid-cols-2' : 'lg:grid-cols-3'} gap-4`}>
+                <div className={`grid sm:grid-cols-2 ${currentSubject === 'english' ? 'lg:grid-cols-3' : isElevenPlus ? 'lg:grid-cols-2' : 'lg:grid-cols-3'} gap-4`}>
                   {topicData.map((topic) => (
                     (() => {
                       const tone = topicTone[topic.key] || topicTone.number;
                       return (
                     <div 
                       key={topic.key} 
-                      className={`group p-4 rounded-xl border border-border ${tone.cardBg} ${tone.hoverBorder} hover:shadow-sm cursor-pointer transition-all duration-200`}
+                      className={`group p-4 rounded-xl border border-border/60 bg-card hover:shadow-md cursor-pointer transition-all duration-300 hover:-translate-y-0.5 ${tone.hoverBorder}`}
                       onClick={() => navigate('/readiness')}
                     >
-                      <div className="flex items-center gap-3 mb-3">
+                    <div className="flex items-center gap-3 mb-3">
                         <div 
-                          className={`p-2.5 rounded-xl ${tone.iconWrap} transition-transform duration-200 group-hover:scale-105`}
+                          className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-black text-base shadow-sm"
+                          style={{ backgroundColor: topic.color }}
                         >
-                          <topic.Icon className={`h-5 w-5 ${tone.icon}`} />
+                          {topic.name.charAt(0).toUpperCase()}
                         </div>
                         <div className="flex-1 min-w-0">
                           <h4 className="font-medium text-foreground text-sm dark:text-slate-100">{topic.name}</h4>

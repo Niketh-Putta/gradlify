@@ -3,13 +3,17 @@ import { Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Search, ChevronRight, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 import notesData from "@/data/edexcel_gcse_notes.json";
 import elevenPlusNotesData from "@/data/eleven_plus_notes.json";
+import elevenPlusEnglishNotesData from "@/data/eleven_plus_english_notes.json";
 import { supabase } from "@/integrations/supabase/client";
 import { useAppContext } from "@/hooks/useAppContext";
 import { getExamBoardBadge, getExamBoardSubtitle, replaceExamBoardReferences } from "@/lib/examBoard";
 import { resolveUserTrack } from "@/lib/track";
 import { getTrackLabel, getTrackSections } from "@/lib/trackCurriculum";
+import { useSubject } from "@/contexts/SubjectContext";
 
 interface Topic {
   slug: string;
@@ -24,6 +28,7 @@ type NotesData = {
 
 const typedNotesData = notesData as NotesData;
 const typedElevenPlusNotesData = elevenPlusNotesData as NotesData;
+const typedElevenPlusEnglishNotesData = elevenPlusEnglishNotesData as NotesData;
 
 // Section config with purple accent theme
 const sectionConfig: Record<string, {
@@ -66,6 +71,18 @@ const sectionConfig: Record<string, {
     abbr: "S",
     desc: "Data handling with averages/charts and core probability."
   },
+  "Comprehension": {
+    abbr: "C",
+    desc: "Master reading speed, factual retrieval, and advanced inference techniques for 11+ GL texts."
+  },
+  "Vocabulary": {
+    abbr: "V",
+    desc: "Synonyms, antonyms, prefixes, suffixes, and cloze passage mastery to boost your verbal score."
+  },
+  "SPaG": {
+    abbr: "S",
+    desc: "Perfect your punctuation, word classes, and technical accuracy for the SPaG section."
+  },
 };
 
 const sectionDisplayName: Record<string, string> = {
@@ -77,13 +94,20 @@ const elevenPlusSectionDescriptions: Record<string, string> = {
   "Algebra & Ratio": "Ratio, proportion, algebra basics, solving equations, and sequences.",
   "Geometry & Measures": "2D/3D shape properties, angles, perimeter/area/volume, measures/time, coordinates and transformations.",
   "Statistics & Data": "Averages, charts, and probability fundamentals.",
+  "Comprehension": "Master reading speed, factual retrieval, and advanced inference techniques for 11+ GL texts.",
+  "Vocabulary": "Synonyms, antonyms, prefixes, suffixes, and cloze passage mastery to boost your verbal score.",
+  "SPaG": "Perfect your punctuation, word classes, and technical accuracy for the SPaG section.",
+  "Writing": "Story planning, descriptive techniques, figurative language, sentence rhythm, and narrative voice.",
 };
+
+
 
 export default function RevisionNotes() {
   const { user, profile } = useAppContext();
+  const { currentSubject } = useSubject();
   const userTrack = resolveUserTrack(profile?.track ?? null);
   const isElevenPlus = userTrack === '11plus';
-  const elevenPlusSections = getTrackSections(userTrack);
+  const elevenPlusSections = getTrackSections(userTrack, currentSubject);
   const [searchQuery, setSearchQuery] = useState("");
   const [progress, setProgress] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(true);
@@ -127,7 +151,7 @@ export default function RevisionNotes() {
   const sections = useMemo(
     () => (
       isElevenPlus
-        ? elevenPlusSections.map((section) => section.label)
+        ? elevenPlusSections.map((section) => section.id)
         : Object.keys(boardAwareNotesData)
     ),
     [boardAwareNotesData, elevenPlusSections, isElevenPlus]
@@ -138,13 +162,14 @@ export default function RevisionNotes() {
       return elevenPlusSections.flatMap((section) =>
         section.subtopics.map((topic) => {
           const expectedSlug = `${section.key}-${topic.key}`;
-          const authoredTopic = typedElevenPlusNotesData[section.label]?.find(t => t.slug === expectedSlug);
+          const typedNotes = currentSubject === 'english' ? typedElevenPlusEnglishNotesData : typedElevenPlusNotesData;
+          const authoredTopic = typedNotes[section.id]?.find(t => t.slug === expectedSlug);
           return {
             slug: expectedSlug,
             title: topic.name,
             level: "11+",
             md: authoredTopic?.md || "",
-            section: section.label,
+            section: section.id,
           };
         })
       );
@@ -176,7 +201,7 @@ export default function RevisionNotes() {
 
   const getSectionStats = (section: string) => {
     if (isElevenPlus) {
-      const match = elevenPlusSections.find((item) => item.label === section);
+      const match = elevenPlusSections.find((item) => item.id === section);
       return { total: match?.subtopics.length ?? 0, completed: 0 };
     }
 
@@ -220,137 +245,161 @@ export default function RevisionNotes() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-[1200px] mx-auto px-4 sm:px-8 py-12 sm:py-20">
-        {/* Hero Section */}
-        <section className="text-center max-w-[800px] mx-auto mb-16">
-          <span className="notes-hero-badge mb-6">
-            {isElevenPlus ? getTrackLabel(userTrack) : getExamBoardBadge((profile?.onboarding as any)?.examBoard)}
-          </span>
-          
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight mb-5">
-            <span className="notes-gradient-text">Master Mathematics</span>
-          </h1>
-          
-          <p className="text-lg text-muted-foreground leading-relaxed max-w-[600px] mx-auto">
-            {isElevenPlus
-              ? "Comprehensive 11+ lessons with interactive diagrams, worked examples, and practice questions."
-              : "Comprehensive lessons with interactive diagrams, worked examples, and practice questions. Everything you need to achieve your best grade."}
-          </p>
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-8 py-10 sm:py-16">
+        {/* Sleek Header & Progress Section */}
+        <section className="flex flex-col lg:flex-row lg:items-start justify-between gap-10 mb-16">
+          <div className="max-w-2xl flex-1 mt-2">
+            <div className="flex items-center gap-3 mb-5">
+              <span className={cn(
+                "px-3 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-sm",
+                currentSubject === "english" 
+                  ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20"
+                  : "bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20"
+              )}>
+                {isElevenPlus ? getTrackLabel(userTrack, currentSubject) : getExamBoardBadge((profile?.onboarding as any)?.examBoard)}
+              </span>
+            </div>
+            
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight mb-4">
+              <span className={cn(
+                "bg-clip-text text-transparent",
+                currentSubject === "english" 
+                  ? "bg-gradient-to-br from-slate-900 via-slate-800 to-amber-700 dark:from-white dark:via-slate-200 dark:to-amber-500" 
+                  : "bg-gradient-to-br from-slate-900 via-slate-800 to-blue-700 dark:from-white dark:via-slate-200 dark:to-blue-500"
+              )}>
+                {currentSubject === 'english' ? "Master English" : "Master Mathematics"}
+              </span>
+            </h1>
+            
+            <p className="text-base sm:text-lg text-muted-foreground leading-relaxed max-w-xl">
+              {isElevenPlus
+                ? (currentSubject === "english" ? "Premium curated study material to master comprehension, advanced vocabulary, and critical grammar for the 11+ English exams." : "Comprehensive 11+ Maths lessons with interactive diagrams, worked examples, and practice questions.")
+                : "Comprehensive lessons with interactive diagrams, worked examples, and practice questions. Everything you need to achieve your best grade."}
+            </p>
 
-          {/* Stats Row */}
-          <div className="flex flex-wrap justify-center gap-6 sm:gap-12 mt-12 pt-12 border-t border-border/40">
-            <div className="text-center px-4 sm:px-0">
-              <div className="notes-stat-value">{totalTopics}</div>
-              <div className="text-sm text-muted-foreground mt-1">Topics</div>
-            </div>
-            <div className="text-center px-4 sm:px-0">
-              <div className="notes-stat-value">{sections.length}</div>
-              <div className="text-sm text-muted-foreground mt-1">Units</div>
-            </div>
-            <div className="text-center px-4 sm:px-0">
-              <div className="notes-stat-value">{completedTopics}</div>
-              <div className="text-sm text-muted-foreground mt-1">Completed</div>
+            {/* Subtle Inline Stats */}
+            <div className="flex items-center gap-6 sm:gap-10 mt-10 pb-6 border-b border-border/40 lg:border-none lg:pb-0">
+              <div className="flex flex-col">
+                <span className="text-2xl font-bold text-foreground">{totalTopics}</span>
+                <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mt-0.5">Topics</span>
+              </div>
+              <div className="w-px h-10 bg-border"></div>
+              <div className="flex flex-col">
+                <span className="text-2xl font-bold text-foreground">{sections.length}</span>
+                <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mt-0.5">Units</span>
+              </div>
+              <div className="w-px h-10 bg-border"></div>
+              <div className="flex flex-col">
+                <span className={cn(
+                  "text-2xl font-bold text-foreground",
+                  currentSubject === "english" ? "text-amber-600 dark:text-amber-500" : "text-blue-600 dark:text-blue-500"
+                )}>
+                  {completedTopics}
+                </span>
+                <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mt-0.5">Completed</span>
+              </div>
             </div>
           </div>
 
-          {/* Progress Section */}
+          {/* Progress Card */}
           {user && (
-            <div className="mt-12 bg-card border border-border/40 rounded-3xl p-8 shadow-sm">
-              <div className="flex items-center justify-between mb-6">
-                <span className="text-base font-semibold text-foreground">Your Progress</span>
-                <button 
+            <div className={cn(
+              "w-full lg:w-[360px] shrink-0 bg-card border rounded-2xl p-6 md:p-7 flex flex-col justify-between relative overflow-hidden transition-all duration-500",
+              currentSubject === "english" 
+                ? "border-amber-500/20 shadow-[0_8px_30px_rgba(245,158,11,0.06)] hover:border-amber-500/40 hover:shadow-[0_8px_30px_rgba(245,158,11,0.12)]" 
+                : "border-blue-500/20 shadow-[0_8px_30px_rgba(59,130,246,0.06)] hover:border-blue-500/40 hover:shadow-[0_8px_30px_rgba(59,130,246,0.12)]"
+            )}>
+              <div className={cn(
+                "absolute top-0 right-0 w-32 h-32 blur-[50px] rounded-full pointer-events-none",
+                currentSubject === "english" ? "bg-amber-500/10" : "bg-blue-500/10"
+              )} />
+              <div className="flex items-center justify-between mb-8">
+                 <span className="text-sm font-semibold text-foreground flex items-center gap-2">
+                   <div className={cn(
+                     "w-2 h-2 rounded-full animate-pulse",
+                     currentSubject === "english" ? "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.6)]" : "bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)]"
+                   )} />
+                   Your Progress
+                 </span>
+                 <button 
                   onClick={handleResetProgress}
-                  className="text-sm text-muted-foreground hover:text-destructive transition-colors flex items-center gap-1"
+                  className={cn(
+                    "text-xs text-muted-foreground transition-colors flex items-center gap-1.5 font-medium",
+                    currentSubject === "english" ? "hover:text-amber-600" : "hover:text-blue-600"
+                  )}
                 >
-                  <RotateCcw className="h-3.5 w-3.5" />
+                  <RotateCcw className="h-3 w-3" />
                   Reset
                 </button>
               </div>
-              
-              <div className="flex flex-col sm:flex-row items-center gap-8">
-                {/* Progress Ring */}
-                <div className="relative w-[120px] h-[120px] shrink-0">
-                  <svg width="120" height="120" viewBox="0 0 120 120" className="-rotate-90">
-                    <defs>
-                      <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                        <stop offset="0%" stopColor="hsl(262 83% 58%)" />
-                        <stop offset="50%" stopColor="hsl(262 83% 68%)" />
-                        <stop offset="100%" stopColor="hsl(280 70% 75%)" />
-                      </linearGradient>
-                    </defs>
-                    <circle 
-                      cx="60" cy="60" r="50" 
-                      fill="none" 
-                      stroke="hsl(var(--muted))" 
-                      strokeWidth="10"
-                    />
-                    <circle 
-                      cx="60" cy="60" r="50" 
-                      fill="none" 
-                      stroke="url(#progressGradient)" 
-                      strokeWidth="10"
-                      strokeLinecap="round"
-                      strokeDasharray={circumference}
-                      strokeDashoffset={strokeDashoffset}
-                      className="notes-progress-ring"
-                    />
-                  </svg>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-3xl font-bold notes-gradient-text">{overallProgress}%</span>
-                  </div>
-                </div>
 
-                {/* Progress Info */}
-                <div className="flex-1 text-center sm:text-left space-y-4">
-                  <div>
-                    <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Topics Mastered</div>
-                    <div className="text-2xl font-semibold text-foreground">{completedTopics} / {totalTopics}</div>
-                  </div>
-                  <div>
-                    <div className="text-xs text-muted-foreground uppercase tracking-wider mb-1">Current Focus</div>
-                    <div className="text-2xl font-semibold text-foreground">{currentUnit}</div>
-                  </div>
+              <div className="mb-8">
+                <div className="flex justify-between items-end mb-3">
+                  <span className="text-4xl font-bold text-foreground tracking-tight">{overallProgress}%</span>
+                  <span className="text-[13px] font-medium text-muted-foreground mb-1">{completedTopics} of {totalTopics} Mastered</span>
+                </div>
+                <div className="w-full h-2.5 bg-muted rounded-full overflow-hidden relative">
+                   <div 
+                     className={cn(
+                       "h-full rounded-full transition-all duration-1000 ease-out",
+                       currentSubject === "english" ? "bg-gradient-to-r from-amber-400 to-amber-500" : "bg-gradient-to-r from-blue-400 to-blue-500"
+                     )}
+                     style={{ width: `${overallProgress}%` }}
+                   />
                 </div>
               </div>
 
-              {/* Continue Button */}
-              {continueFromTopic && (
-                <Link 
-                  to={`/notes/${encodeURIComponent(continueFromTopic.section)}/${continueFromTopic.slug}`}
-                  className="block mt-8"
-                >
-                  <Button className="w-full sm:w-auto gap-2 notes-completion-btn">
-                    Continue Learning
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                </Link>
-              )}
+              <div>
+                <div className="text-[11px] text-muted-foreground uppercase tracking-wider mb-2 font-bold">Current Focus</div>
+                <div className="text-sm font-semibold text-foreground mb-5 truncate">{currentUnit}</div>
+                
+                {continueFromTopic && (
+                  <Link 
+                    to={`/notes/${encodeURIComponent(continueFromTopic.section)}/${continueFromTopic.slug}`}
+                    className="block"
+                  >
+                    <Button className="w-full text-sm font-semibold h-11 bg-foreground text-background hover:bg-foreground/90 gap-2 rounded-xl transition-transform active:scale-[0.98]">
+                      Continue Learning
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </Link>
+                )}
+              </div>
             </div>
           )}
         </section>
 
         {/* Topics Section */}
         <section>
-          <div className="text-center mb-12">
-            <h2 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">Choose a Topic</h2>
-          </div>
-
-          {/* Search */}
-          <div className="max-w-md mx-auto mb-12">
-            <div className="relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-5 mb-8">
+            <div className="flex items-center gap-3">
+              <div className={cn(
+                "w-1.5 h-6 rounded-full",
+                currentSubject === "english" ? "bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.4)]" : "bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.4)]"
+              )} />
+              <h2 className="text-2xl font-bold text-foreground tracking-tight">Curriculum Units</h2>
+            </div>
+            
+            <div className="relative w-full md:w-80 group">
+              <Search className={cn(
+                "absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 transition-colors",
+                currentSubject === "english" ? "text-muted-foreground group-focus-within:text-amber-500" : "text-muted-foreground group-focus-within:text-blue-500"
+              )} />
               <Input
                 type="text"
                 placeholder="Search topics..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-12 h-14 rounded-2xl border-border/40 bg-card text-base"
+                className={cn(
+                  "pl-10 h-11 rounded-xl border-border/60 bg-card text-sm w-full transition-all shadow-sm",
+                  currentSubject === "english" ? "focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20" : "focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20"
+                )}
               />
             </div>
           </div>
 
           {/* Topics Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {filteredSections.map((section, index) => {
               const config = sectionConfig[section] || { abbr: section[0] || "?", desc: "" };
               const stats = getSectionStats(section);
@@ -362,34 +411,58 @@ export default function RevisionNotes() {
                 <Link 
                   key={section} 
                   to={`/notes/${encodeURIComponent(section)}`}
-                  className="fade-up"
-                  style={{ animationDelay: `${index * 0.05}s` }}
+                  className="fade-up block"
+                  style={{ animationDelay: `${index * 0.04}s` }}
                 >
-                  <div className="notes-topic-card group">
-                    {/* Icon */}
-                    <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-xl font-bold text-white mb-6"
-                      style={{ background: 'var(--notes-gradient)' }}
-                    >
-                      {config.abbr}
+                  <div className={cn(
+                    "bg-card border rounded-2xl p-6 cursor-pointer transition-all duration-300 hover:-translate-y-1 flex flex-col h-full group relative overflow-hidden",
+                    currentSubject === "english" 
+                      ? "border-border/60 hover:border-amber-500/50 hover:shadow-[0_12px_35px_rgba(245,158,11,0.1)]" 
+                      : "border-border/60 hover:border-blue-500/50 hover:shadow-[0_12px_35px_rgba(59,130,246,0.1)]"
+                  )}>
+                    {/* Hover Glow Behind Card Accent */}
+                    <div className={cn(
+                      "absolute -top-10 -right-10 w-32 h-32 rounded-full blur-[40px] opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none",
+                      currentSubject === "english" ? "bg-amber-500/20" : "bg-blue-500/20"
+                    )} />
+                    
+                    <div className="flex gap-4 items-start mb-4 relative z-10">
+                      <div className="w-12 h-12 rounded-xl flex items-center justify-center text-lg font-bold shadow-sm shrink-0"
+                        style={{ 
+                          background: currentSubject === "english" 
+                            ? 'linear-gradient(135deg, hsl(38 92% 50%) 0%, hsl(43 96% 56%) 100%)' 
+                            : 'linear-gradient(135deg, hsl(221 83% 53%) 0%, hsl(217 91% 60%) 100%)',
+                          color: 'white'
+                        }}
+                      >
+                        {config.abbr}
+                      </div>
+                      <div className="flex-1 mt-1">
+                        <h3 className={cn(
+                          "font-semibold text-[17px] text-foreground tracking-tight transition-colors line-clamp-2",
+                          currentSubject === "english" ? "group-hover:text-amber-600 dark:group-hover:text-amber-500" : "group-hover:text-blue-600 dark:group-hover:text-blue-500"
+                        )}>
+                          {displayName}
+                        </h3>
+                      </div>
                     </div>
-
-                    {/* Content */}
-                    <h3 className="text-xl font-bold text-foreground mb-2 tracking-tight">
-                      {displayName}
-                    </h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed mb-6 line-clamp-2">
+                    
+                    <p className="text-sm text-muted-foreground leading-relaxed mb-6 line-clamp-2 flex-grow">
                       {description}
                     </p>
 
-                    {/* Footer */}
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">
-                        {stats.total} topic{stats.total !== 1 ? "s" : ""}
+                    {/* Footer Progress */}
+                    <div className="flex items-center justify-between border-t border-border/40 pt-5 mt-auto">
+                      <span className="text-[13px] font-semibold text-muted-foreground">
+                        {stats.completed} / {stats.total} complete
                       </span>
-                      <div className="notes-progress-bar w-[100px]">
+                      <div className="w-32 h-1.5 rounded-full bg-muted overflow-hidden relative">
                         <div 
-                          className="notes-progress-fill"
-                          style={{ width: `${sectionProgress}%` }}
+                          className="h-full rounded-full transition-all duration-500"
+                          style={{ 
+                            width: `${sectionProgress}%`,
+                            background: sectionProgress === 100 ? '#10b981' : (currentSubject === "english" ? '#f59e0b' : '#3b82f6')
+                          }}
                         />
                       </div>
                     </div>
@@ -400,12 +473,12 @@ export default function RevisionNotes() {
           </div>
 
           {filteredSections.length === 0 && (
-            <div className="text-center py-20">
-              <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-5">
-                <Search className="h-10 w-10 text-primary/80" />
+            <div className="text-center py-20 bg-card rounded-2xl border border-border/40 mt-4">
+              <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
+                <Search className="h-6 w-6 text-muted-foreground" />
               </div>
-              <h3 className="font-semibold text-lg mb-2">No results found</h3>
-              <p className="text-muted-foreground">
+              <h3 className="font-semibold text-lg text-foreground mb-1">No results found</h3>
+              <p className="text-sm text-muted-foreground">
                 Try searching with different keywords
               </p>
             </div>
@@ -416,7 +489,7 @@ export default function RevisionNotes() {
         <footer className="text-center mt-20 pt-10 border-t border-border/40">
           <p className="text-sm text-muted-foreground/60">
             {isElevenPlus
-              ? `11+ Maths track · Gradlify © ${new Date().getFullYear()}`
+              ? `11+ ${currentSubject === "english" ? "English" : "Maths"} track · Gradlify © ${new Date().getFullYear()}`
               : `${getExamBoardSubtitle((profile?.onboarding as any)?.examBoard)} · Gradlify © ${new Date().getFullYear()}`}
           </p>
         </footer>

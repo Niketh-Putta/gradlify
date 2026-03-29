@@ -2,15 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { computeOverallReadinessFromTopics } from '@/lib/readinessUtils';
 import { isAbortLikeError } from '@/lib/errors';
-
-const CANONICAL_TOPICS = [
-  'Number',
-  'Algebra',
-  'Ratio & Proportion',
-  'Geometry',
-  'Probability',
-  'Statistics'
-] as const;
+import { buildTrackReadinessRows } from '@/lib/trackCurriculum';
 
 type TopicReadiness = {
   topic: string;
@@ -20,7 +12,7 @@ type TopicReadiness = {
 const normalizeTrack = (track?: string | null): 'gcse' | '11plus' =>
   track === '11plus' || track === 'eleven_plus' ? '11plus' : 'gcse';
 
-export function useOverallReadiness(userId?: string, trackKey?: string | null) {
+export function useOverallReadiness(userId?: string, trackKey?: string | null, currentSubject: 'maths' | 'english' = 'maths') {
   const [overall, setOverall] = useState<number>(0);
   const [loading, setLoading] = useState(true);
   const resolveTrack = useCallback(async (): Promise<'gcse' | '11plus'> => {
@@ -66,15 +58,12 @@ export function useOverallReadiness(userId?: string, trackKey?: string | null) {
       if (error) throw error;
 
       const topics = (topicsData as TopicReadiness[]) || [];
-      const merged = CANONICAL_TOPICS.map((topic) => {
-        const match = topics.find((t) => t.topic === topic);
-        return {
-          topic,
-          readiness: match ? match.readiness : 0,
-        };
-      });
 
-      setOverall(computeOverallReadinessFromTopics(merged));
+      // Pass the fully resolved user track along with the explicitly selected subject
+      // to ensure Maths vs English mapping is strongly isolated at this level.
+      const subjectTopics = buildTrackReadinessRows(resolvedTrack, topics, currentSubject);
+
+      setOverall(computeOverallReadinessFromTopics(subjectTopics));
     } catch (error) {
       if (isAbortLikeError(error)) return;
       console.error('Error fetching overall readiness:', error);

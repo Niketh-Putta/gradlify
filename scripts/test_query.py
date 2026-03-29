@@ -12,15 +12,16 @@ supabase: Client = create_client(url, key)
 res = supabase.rpc("fetch_exam_questions_v3", {
     "p_tiers": ["11+ Standard"],
     "p_calculators": ["Non-Calculator"],
-    "p_question_types": ["Number & Arithmetic", "Algebra"],
-    "p_subtopics": None,
+    "p_question_types": ["Geometry & Measures"],
+    "p_subtopics": ["geometry|2d-3d-shapes", "geometry.2d-3d-shapes", "geometry,2d-3d-shapes"],
     "p_difficulty_min": 1,
-    "p_difficulty_max": 2,
+    "p_difficulty_max": 3,
+    "p_track": "11plus",
     "p_exclude_ids": None,
     "p_limit": 5
 }).execute()
 
-print("RPC Data:")
+print("RPC Data count:", len(res.data))
 for r in res.data:
     print(r.get('id'), r.get('question_type'), r.get('tier'))
 
