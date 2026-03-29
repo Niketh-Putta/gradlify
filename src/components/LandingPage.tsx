@@ -64,7 +64,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
   const motionCfg = useLandingMotion();
   const isDark = theme === "dark";
   const isElevenPlus = variant === "11plus";
-  const trackTitle = "11+ Maths";
+  const trackTitle = "11+";
   const trackShort = "11+";
   const sprintCopy = getSprintUpgradeCopy();
   const [isScrolled, setIsScrolled] = useState(false);
@@ -287,7 +287,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
         label: "Priority 01",
         title: "Exam-style questions that feel like real 11+",
         body: isElevenPlus
-          ? "Structured by 11+ maths skills and difficulty so practice translates directly into exam confidence."
+          ? "Structured by 11+ skills and difficulty so practice translates directly into exam confidence."
           : "Structured by calculator/non-calculator, Foundation/Higher, and difficulty — practice translates directly into exam performance.",
         badge: "Exam-style practice",
         hoverFact: "Hover the preview — it mirrors the real exam flow.",
@@ -470,7 +470,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                 </h1>
 
                 <p className={`mt-4 text-sm sm:text-lg ${mutedText} max-w-2xl leading-relaxed`}>
-                  A serious {trackTitle} system that keeps practice aligned, progress visible, and revision simple.
+                  A serious 11+ system that keeps practice aligned, progress visible, and revision simple.
                 </p>
                 {showInternationalTagline && (
                   <p className={`mt-2 text-[13px] sm:text-base ${mutedText} max-w-2xl`}>
@@ -498,7 +498,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                     isElevenPlus
                       ? "1,500+ 11+ style questions"
                       : `4,000+ ${trackShort}-style questions`,
-                    "11+ maths-aligned practice",
+                    "11+ Maths & English",
                     isElevenPlus ? "Core arithmetic + reasoning" : "Foundation + Higher",
                     isElevenPlus ? "Speed + accuracy training" : "Calculator & Non-Calculator",
                   ].map((label) => (
