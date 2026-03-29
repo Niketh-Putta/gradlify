@@ -14,7 +14,7 @@ export default function SubjectSelection() {
 
   const handleSelect = (subject: 'maths' | 'english') => {
     setSubject(subject);
-    navigate("/dashboard");
+    navigate("/practice-page");
   };
 
   return (
@@ -27,7 +27,7 @@ export default function SubjectSelection() {
           displayTier === 'Ultra' 
             ? "bg-gradient-to-r from-amber-200 to-amber-500 text-slate-900 border-amber-300 shadow-[0_0_15px_rgba(245,158,11,0.3)]" 
             : displayTier === 'Premium'
-              ? "bg-gradient-to-r from-blue-500 to-indigo-500 text-white border-blue-400 shadow-[0_0_15px_rgba(59,130,246,0.3)]"
+              ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white border-blue-400 shadow-[0_0_15px_rgba(59,130,246,0.3)]"
               : "bg-card border-border text-muted-foreground"
         )}>
           {displayTier} Plan
@@ -56,8 +56,8 @@ export default function SubjectSelection() {
             className="group relative flex flex-col justify-between text-left p-8 sm:p-10 rounded-2xl bg-card border border-border border-t-4 border-t-blue-500/70 shadow-sm hover:shadow-md hover:border-blue-200 transition-all duration-300"
           >
             <div>
-              <div className="w-14 h-14 rounded-lg bg-blue-50/50 border border-blue-100 flex items-center justify-center mb-8 group-hover:bg-blue-600 group-hover:border-blue-600 transition-colors duration-300">
-                <Calculator className="w-6 h-6 text-blue-600/80 group-hover:text-white transition-colors duration-300" strokeWidth={1.5} />
+              <div className="w-14 h-14 rounded-lg bg-blue-100 dark:bg-blue-500/20 border border-blue-200 dark:border-blue-500/30 flex items-center justify-center mb-8 shadow-sm group-hover:bg-blue-600 group-hover:border-blue-600 transition-all duration-300">
+                <Calculator className="w-7 h-7 text-blue-600 dark:text-blue-400 group-hover:text-white transition-colors duration-300" strokeWidth={1.5} />
               </div>
               
               <h2 className="text-2xl font-bold text-foreground mb-3 tracking-tight">Mathematics</h2>
@@ -80,8 +80,8 @@ export default function SubjectSelection() {
             className="group relative flex flex-col justify-between text-left p-8 sm:p-10 rounded-2xl bg-card border border-border border-t-4 border-t-amber-500/70 shadow-sm hover:shadow-md hover:border-amber-200 transition-all duration-300"
           >
             <div>
-              <div className="w-14 h-14 rounded-lg bg-amber-50/50 border border-amber-100 flex items-center justify-center mb-8 group-hover:bg-amber-500 group-hover:border-amber-500 transition-colors duration-300">
-                <BookOpen className="w-6 h-6 text-amber-600/80 group-hover:text-white transition-colors duration-300" strokeWidth={1.5} />
+              <div className="w-14 h-14 rounded-lg bg-amber-100 dark:bg-amber-500/20 border border-amber-200 dark:border-amber-500/30 flex items-center justify-center mb-8 shadow-sm group-hover:bg-amber-500 group-hover:border-amber-500 transition-all duration-300">
+                <BookOpen className="w-7 h-7 text-amber-600 dark:text-amber-400 group-hover:text-white transition-colors duration-300" strokeWidth={1.5} />
               </div>
               
               <h2 className="text-2xl font-bold text-foreground mb-3 tracking-tight">English</h2>
