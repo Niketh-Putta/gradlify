@@ -357,7 +357,16 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
         <div className="space-y-8 sm:space-y-10 pb-16">
           <section>
             <h2 className="text-sm font-semibold text-foreground uppercase tracking-widest flex items-center gap-2 mb-4"><Play className="h-3.5 w-3.5" />Session Mode</h2>
-            <RadioGroup value={examMode} onValueChange={(val) => setExamMode(val as ExamMode)} className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <RadioGroup 
+              value={examMode} 
+              onValueChange={(val) => {
+                setExamMode(val as ExamMode);
+                if (val === 'mock-exam') {
+                  setSelectedTopics(availableSections.map(s => s.id));
+                }
+              }} 
+              className="grid grid-cols-1 sm:grid-cols-2 gap-3"
+            >
               {[
                 { id: 'practice', label: 'Practice Mode', sub: 'Learn at your own pace', icon: BookOpen },
                 { id: 'mock-exam', label: 'Mock Exam', sub: 'Timed session, exam format', icon: Timer },

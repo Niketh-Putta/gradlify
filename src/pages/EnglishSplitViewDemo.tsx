@@ -433,6 +433,7 @@ export function EnglishSplitViewDemo() {
   );
 
   const [isFinished, setIsFinished] = useState<boolean>(false);
+  const [isReviewMode, setIsReviewMode] = useState<boolean>(false);
 
   const [activeQuestionId, setActiveQuestionId] = useState<string>("q1");
   const [selectedAnswers, setSelectedAnswers] = useState<Record<string, string>>({});
@@ -444,6 +445,7 @@ export function EnglishSplitViewDemo() {
 
   const passageContainerRef = useRef<HTMLDivElement>(null);
   const passageSectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const passageLineRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const rightPaneRef = useRef<HTMLDivElement>(null);
   const questionRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
@@ -556,7 +558,10 @@ export function EnglishSplitViewDemo() {
       }
     }
 
-    if (targetSectionId && passageSectionRefs.current[targetSectionId]) {
+    if (targetEvidenceLine && passageLineRefs.current[targetEvidenceLine]) {
+      // Intelligently scroll the master left-container exactly to the evidence piece
+      passageLineRefs.current[targetEvidenceLine]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } else if (targetSectionId && passageSectionRefs.current[targetSectionId]) {
       // Intelligently scroll the master left-container to the correct passage block
       passageSectionRefs.current[targetSectionId]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
@@ -654,7 +659,7 @@ export function EnglishSplitViewDemo() {
                   )}
                 </div>
               </div>
-              <Button onClick={() => setIsFinished(false)} variant="outline" className="w-full h-12 rounded-xl font-bold">
+              <Button onClick={() => { setIsFinished(false); setIsReviewMode(true); }} variant="outline" className="w-full h-12 rounded-xl font-bold">
                 Review Paper Details & Tutor Notes
               </Button>
             </div>
@@ -728,11 +733,11 @@ export function EnglishSplitViewDemo() {
                         isTargetEvidence = true;
                       }
 
-                      // Scaffold highlighting is strictly practice mode only
-                      const showScaffold = examMode === 'practice' && isTargetEvidence;
+                      // Scaffold highlighting is active in practice mode OR review mode!
+                      const showScaffold = (examMode === 'practice' || isReviewMode) && isTargetEvidence;
                       
                       return (
-                        <div key={p.id} className="relative group">
+                        <div key={p.id} className="relative group" ref={(el) => { passageLineRefs.current[p.id] = el; }}>
                           {p.text.match(/^\d+/) && (
                             <div className="absolute -left-10 top-1.5 text-xs text-amber-500/80 font-black select-none pointer-events-none w-8 text-right opacity-0 group-hover:opacity-100 transition-opacity">
                               ♦
@@ -798,7 +803,7 @@ export function EnglishSplitViewDemo() {
           <div className="max-w-xl mx-auto w-full p-8 pb-48">
             <div className="mb-8">
               <h1 className="text-2xl font-bold tracking-tight mb-2">
-                {examMode === 'mock' ? 'Wilsons Format Master Mock' : `${practiceFocus.toUpperCase()} DRILLS`}
+                {examMode === 'mock' ? 'Mock Exam' : `${practiceFocus.toUpperCase()} DRILLS`}
               </h1>
               <p className="text-sm text-muted-foreground">
                 {examMode === 'mock' ? 'You have configured a custom Mock Exam mixing multiple passages.' : 'Answer the questions based on the source text strictly.'}
@@ -877,32 +882,39 @@ export function EnglishSplitViewDemo() {
                           <div className="space-y-3">
                             {q.options.map((opt) => {
                               const selected = selectedAnswers[q.id] === opt.id;
-                              const showDistractor = examMode === 'practice' && showTrap === q.id && selected && opt.trap;
-                              const evaluateCorrectness = examMode === 'practice' && selected;
+                              
+                              // Logic for showing distractors / evaluations
+                              const showDistractor = (examMode === 'practice' && showTrap === q.id && selected && opt.trap) || (isReviewMode && opt.trap && (selected || opt.correct));
+                              const evaluateCorrectness = (examMode === 'practice' && selected) || (isReviewMode && opt.correct);
 
                               return (
                                 <div key={opt.id}>
                                   <button
                                     onClick={(e) => {
                                       e.stopPropagation();
+                                      if (isReviewMode) return;
                                       handleSelectAnswer(q.id, opt.id, opt.trap);
                                     }}
                                     className={cn(
                                       "w-full text-left p-4 rounded-xl border transition-all duration-200 flex items-center gap-4 group",
                                       selected 
-                                        ? (examMode === 'mock' 
+                                        ? ((examMode === 'mock' && !isReviewMode)
                                             ? "border-foreground/50 bg-foreground/5 text-foreground ring-2 ring-foreground/20" 
                                             : (opt.correct 
                                               ? "border-emerald-500 bg-emerald-500/5 text-emerald-700 dark:text-emerald-300 ring-2 ring-emerald-500/20" 
                                               : "border-rose-500 bg-rose-500/5 text-rose-700 dark:text-rose-300 ring-2 ring-rose-500/20"))
-                                        : "border-border/60 bg-background hover:border-foreground/30 hover:bg-muted/50"
+                                        : (isReviewMode && opt.correct
+                                            ? "border-emerald-500/50 bg-emerald-500/5 text-emerald-700 dark:text-emerald-300 ring-1 ring-emerald-500/20"
+                                            : "border-border/60 bg-background hover:border-foreground/30 hover:bg-muted/50")
                                     )}
                                   >
                                     <span className={cn(
                                       "w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold transition-colors shadow-sm",
                                       selected
-                                        ? (examMode === 'mock' ? "bg-foreground text-background shadow-md" : (opt.correct ? "bg-emerald-500 text-white shadow-md shadow-emerald-500/20" : "bg-rose-500 text-white shadow-md shadow-rose-500/20"))
-                                        : "bg-card border border-border/80 text-muted-foreground group-hover:text-foreground"
+                                        ? ((examMode === 'mock' && !isReviewMode) ? "bg-foreground text-background shadow-md" : (opt.correct ? "bg-emerald-500 text-white shadow-md shadow-emerald-500/20" : "bg-rose-500 text-white shadow-md shadow-rose-500/20"))
+                                        : (isReviewMode && opt.correct
+                                            ? "bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border-emerald-500/30"
+                                            : "bg-card border border-border/80 text-muted-foreground group-hover:text-foreground")
                                     )}>
                                       {opt.id}
                                     </span>
