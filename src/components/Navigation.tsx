@@ -315,8 +315,10 @@ export function Navigation({ user, profile, onSettings, onSignOut }: NavigationP
                   variant={getTierVariant()}
                   className={cn(
                     "text-[8px] h-3.5 px-1 whitespace-nowrap uppercase tracking-widest",
+                    founderTrack === 'founder' && currentSubject === 'english' && "bg-gradient-to-r from-amber-400 to-amber-500 text-white border-0 shadow-sm",
+                    founderTrack === 'founder' && currentSubject !== 'english' && "bg-gradient-to-r from-indigo-500 to-blue-500 text-white border-0 shadow-sm",
                     isUltra && "bg-gradient-to-r from-amber-200 to-amber-400 text-slate-900 border-0 shadow-sm",
-                    isPremium && !isUltra && "bg-gradient-to-r from-indigo-500 to-blue-500 text-white border-0 shadow-sm"
+                    isPremium && !isUltra && !founderTrack && "bg-gradient-to-r from-indigo-500 to-blue-500 text-white border-0 shadow-sm"
                   )}
                 >
                   {getTierDisplay()}
@@ -395,8 +397,10 @@ export function Navigation({ user, profile, onSettings, onSignOut }: NavigationP
               variant={getTierVariant()}
               className={cn(
                 "text-xs whitespace-nowrap transition-all",
+                founderTrack === 'founder' && currentSubject === 'english' && "bg-gradient-to-r from-amber-400 to-amber-500 text-white border-0 font-bold shadow-[0_0_10px_rgba(245,158,11,0.2)]",
+                founderTrack === 'founder' && currentSubject !== 'english' && "bg-gradient-to-r from-indigo-500 to-blue-500 text-white border-0 font-bold shadow-[0_0_10px_rgba(99,102,241,0.2)]",
                 isUltra && "bg-gradient-to-r from-amber-200 to-amber-400 text-slate-900 border-0 font-bold shadow-[0_0_10px_rgba(245,158,11,0.2)]",
-                isPremium && !isUltra && "bg-gradient-to-r from-indigo-500 to-blue-500 text-white border-0 shadow-[0_0_10px_rgba(99,102,241,0.2)]"
+                isPremium && !isUltra && !founderTrack && "bg-gradient-to-r from-indigo-500 to-blue-500 text-white border-0 shadow-[0_0_10px_rgba(99,102,241,0.2)]"
               )}
             >
               {getTierDisplay()}

@@ -32,7 +32,7 @@ supabase/.temp/
 *.sln
 *.sw?
 
-# Local scratch / accidental assets
-tmp/
-src/assets/notes section.mov
-public/sprint-mock.png
+# Meta and deployment directories
+.vercel
+.claude
+.codex

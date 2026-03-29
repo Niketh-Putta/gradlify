@@ -1,5 +1,0 @@
-id,question_type,tier,calculator,track,subtopic,question,correct_answer,wrong_answers,marks,difficulty,estimated_time_sec,image_url,image_alt,explanation
-,Algebra,Higher Tier,Calculator,gcse,algebra|equations,"Solve for x: 2x + 3 = 7","2","{""1"",""3"",""4""}",1,2,60,generated/example/linear1.svg,Linear equation diagram,"Subtract 3 then divide by 2."
-,Algebra,Foundation Tier,Non-Calculator,gcse,algebra|equations,"Solve for x: 5x + 0 = 20","4","{""2"",""3"",""5""}",1,1,45,,,
-,Number,Foundation Tier,Calculator,gcse,number|fractions,"Calculate 3/4 of 20","15","{""10"",""12"",""18""}",1,2,60,,,"3/4 of 20 = 20 ÷ 4 × 3"
-,Number,11+ Standard,Non-Calculator,11plus,"number,place-value","Round 47,582 to the nearest hundred.","47,600","{""47,500"",""47,700"",""48,000""}",1,1,60,,,"Step 1: Identify the hundreds digit (5).\nStep 2: Check the tens digit (8), so round the hundreds up to 6.\nTip: If the checking digit is 5 or more, round up."

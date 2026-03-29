@@ -481,7 +481,7 @@ function renderTextWithMath(children: ReactNode) {
   return <MathText text={text} />;
 }
 
-function NotesMarkdown({ children }: { children: string }) {
+function NotesMarkdown({ children, blockType }: { children: string, blockType?: string }) {
   return (
     <ReactMarkdown
       remarkPlugins={[remarkMath]}
@@ -503,7 +503,10 @@ function NotesMarkdown({ children }: { children: string }) {
           <ol className="space-y-4 mb-6 list-decimal list-outside ml-6 font-serif italic font-medium">{children}</ol>
         ),
         li: ({ children }) => (
-          <li className="leading-relaxed text-[15px] sm:text-[17px] text-foreground/90 font-medium relative pl-5 before:absolute before:left-0 before:top-2.5 before:w-1.5 before:h-1.5 before:rounded-full before:bg-primary/50 before:opacity-100">
+          <li className={cn(
+            "leading-relaxed text-[15px] sm:text-[17px] text-foreground/90 font-medium relative pl-5 before:absolute before:left-0 before:top-2.5 before:w-1.5 before:h-1.5 before:rounded-full before:opacity-100",
+            (blockType === 'passage' || blockType === 'vocab_list') ? "before:bg-amber-500/50" : "before:bg-primary/50"
+          )}>
             {renderTextWithMath(children)}
           </li>
         ),
@@ -518,8 +521,14 @@ function NotesMarkdown({ children }: { children: string }) {
           );
         },
         h3: ({ children }) => (
-          <h3 className="text-xl sm:text-2xl font-black text-foreground mt-8 mb-4 flex items-center gap-3">
-            <span className="w-1.5 h-6 bg-primary/60 rounded-full"></span>
+          <h3 className={cn(
+            "text-xl sm:text-2xl font-black mt-8 mb-4 flex items-center gap-3",
+            (blockType === 'passage' || blockType === 'vocab_list') ? "text-amber-950 border-t border-amber-950/10 pt-6 mt-6" : "text-foreground"
+          )}>
+            <span className={cn(
+               "w-1.5 h-6 rounded-full shrink-0",
+               (blockType === 'passage' || blockType === 'vocab_list') ? "bg-amber-500/60" : "bg-primary/60"
+            )}></span>
             {renderTextWithMath(children)}
           </h3>
         ),
@@ -958,10 +967,10 @@ export default function RevisionNotesTopic() {
           >
             <div className={cn(
               "p-6 sm:p-8 notes-content-wrapper", 
-              block.type === 'passage' && 'font-serif text-[1.1rem] leading-relaxed text-amber-950/90',
-              block.type === 'vocab_list' && 'text-[1.05rem] leading-relaxed text-amber-950/90'
+              block.type === 'passage' && 'font-serif text-[1.1rem] leading-relaxed text-amber-950/90 overflow-y-auto max-h-[calc(100vh-16rem)] custom-scrollbar',
+              block.type === 'vocab_list' && 'text-[1.05rem] leading-relaxed text-amber-950/90 overflow-y-auto max-h-[calc(100vh-16rem)] custom-scrollbar'
             )}>
-              <NotesMarkdown>{block.content}</NotesMarkdown>
+              <NotesMarkdown blockType={block.type}>{block.content}</NotesMarkdown>
             </div>
           </div>
         </div>
