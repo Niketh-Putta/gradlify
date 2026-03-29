@@ -253,7 +253,7 @@ export function Navigation({ user, profile, onSettings, onSignOut }: NavigationP
       {/* Desktop Sidebar */}
       <aside 
         className={cn(
-          "hidden lg:block lg:fixed lg:inset-y-0 bg-gradient-card border-r shadow-card transition-all duration-300 ease-in-out z-50 overflow-hidden whitespace-nowrap",
+          "hidden lg:block lg:fixed lg:inset-y-0 bg-background border-r border-border/40 shadow-card transition-all duration-300 ease-in-out z-50 overflow-hidden whitespace-nowrap",
           sidebarHovered ? "w-64" : "w-16"
         )}
         onMouseEnter={() => setSidebarHovered(true)}
@@ -420,7 +420,7 @@ export function Navigation({ user, profile, onSettings, onSignOut }: NavigationP
 
         {/* Mobile Menu Dropdown */}
         {mobileMenuOpen && (
-          <div className="bg-gradient-card absolute top-full left-0 right-0 z-50 shadow-lg rounded-b-3xl">
+          <div className="bg-background border-b border-border/40 absolute top-full left-0 right-0 z-50 shadow-lg rounded-b-3xl">
             <div className="p-4">
               <p className="font-medium text-sm whitespace-nowrap overflow-hidden text-ellipsis">
                 {userName}
@@ -464,7 +464,7 @@ export function Navigation({ user, profile, onSettings, onSignOut }: NavigationP
 
       {/* Mobile Bottom Navigation - Phone and Tablet */}
       <nav className={cn(
-        "block lg:hidden fixed bottom-0 left-0 right-0 bg-gradient-card shadow-card pb-safe z-50 transition-transform duration-300 ease-in-out rounded-t-3xl",
+        "block lg:hidden fixed bottom-0 left-0 right-0 bg-background border-t border-border/40 shadow-card pb-safe z-50 transition-transform duration-300 ease-in-out rounded-t-3xl",
         bottomNavHidden ? "translate-y-full" : "translate-y-0"
       )}>
         {/* More Menu Popup */}

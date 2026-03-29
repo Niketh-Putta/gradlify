@@ -465,7 +465,7 @@ export function Home() {
               <div className="flex flex-col sm:flex-row gap-3">
                 {isNewUser ? (
                   <Button 
-                    onClick={() => navigate(`/practice/${currentSubject}?mode=practice`)}
+                    onClick={() => navigate(`/practice/${currentSubject}`)}
                     size="lg"
                     className={cn(
                        "font-medium shadow-glow min-w-[220px]",
