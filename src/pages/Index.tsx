@@ -256,7 +256,7 @@ const Index = () => {
       {user ? (
         <>
           <Route path="/" element={<Navigate to="/home" replace />} />
-          <Route path="/select-subject" element={<Navigate to="/home" replace />} />
+          <Route path="/select-subject" element={<SubjectSelection />} />
           <Route path="/11-plus" element={<Navigate to="/home" replace />} />
           <Route path="/tools" element={<Tools />} />
           <Route path="/free-tools" element={<Tools />} />

@@ -5,79 +5,6 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 
 // --- DATA ARCHITECTURE DEFINITION ---
-// Mock exams contain multiple sections, each with its OWN distinct passage/text block on the left.
-// --- MOCK GENERATOR HELPERS ---
-const generateOptions = (correctAnswer: string, traps: string[], isMock = false) => {
-  return [
-    { id: "A", text: correctAnswer, correct: true },
-    { id: "B", text: traps[0] || "A convincing distractor that tests selective reading.", trap: "Context Trap: Plausible but directly contradicted later in the passage.", correct: false },
-    { id: "C", text: traps[1] || "A literal interpretation of a metaphorical phrase.", trap: "Literal Trap: Fails to understand the figurative language used.", correct: false },
-    { id: "D", text: traps[2] || "Extrapolated information not present in the text.", trap: "Inference Trap: You assumed facts not in evidence.", correct: false },
-  ].sort(() => Math.random() - 0.5).map((opt, i) => ({ ...opt, id: ['A', 'B', 'C', 'D'][i] }));
-};
-
-const generateComprehensionQuestions = (count: number) => {
-  const tags = ["Retrieval", "Inference", "Analysis", "Synthesis", "Word Meaning"];
-  const colors = [
-    "bg-blue-500/10 text-blue-600 border-blue-500/20",
-    "bg-amber-500/10 text-amber-600 border-amber-500/20",
-    "bg-rose-500/10 text-rose-600 border-rose-500/20",
-    "bg-cyan-500/10 text-cyan-600 border-cyan-500/20",
-    "bg-fuchsia-500/10 text-fuchsia-600 border-fuchsia-500/20"
-  ];
-  const stems = [
-    "What implies the main character's true motivation in paragraph",
-    "Identify the literary device used to build tension in paragraph",
-    "Based on the description of the setting in paragraph",
-    "Which phrase best captures the author's tone in paragraph",
-    "The word 'miasma' or its equivalent is used to establish what atmosphere?"
-  ];
-
-  return Array.from({ length: count }).map((_, i) => {
-    const typeIdx = i % 5;
-    const passageIdx = (i % 8) + 1; // p1 to p8
-    return {
-      id: `c_q${i + 1}`,
-      tag: tags[typeIdx],
-      tagColor: colors[typeIdx],
-      text: `${stems[typeIdx]} ${passageIdx}...?`,
-      evidenceLine: `p${passageIdx}`,
-      options: generateOptions(`The nuanced answer deriving from paragraph ${passageIdx}.`, [
-        "A surface-level assumption.",
-        "An exaggerated interpretation.",
-        "A perfectly logical but completely unsupported claim."
-      ])
-    };
-  });
-};
-
-const generateSpagQuestions = (type: 'spelling' | 'punctuation' | 'grammar', prefix: string, count: number, passageLen: number = 3) => {
-  const meta = {
-    spelling: { tag: "Error-Hunt", color: "bg-violet-500/10 text-violet-600 border-violet-500/20", prompt: "Identify the segment with the spelling error, or select 'N'." },
-    punctuation: { tag: "Punctuation Hunt", color: "bg-pink-500/10 text-pink-600 border-pink-500/20", prompt: "Identify the punctuation error in this segment." },
-    grammar: { tag: "Grammar Cloze", color: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20", prompt: "Select the correct grammatical component for this gap." }
-  };
-
-  return Array.from({ length: count }).map((_, i) => {
-    const pIdx = (i % passageLen) + 1;
-    return {
-      id: `${prefix}_q${i + 1}`,
-      tag: meta[type].tag,
-      tagColor: meta[type].color,
-      text: `Line ${20 + i}: ${meta[type].prompt}`,
-      evidenceLine: `${prefix}${pIdx}`,
-      options: [
-        { id: "A", text: `Segment one of line ${20 + i}`, trap: null, correct: false },
-        { id: "B", text: `Segment two of line ${20 + i}`, trap: null, correct: false },
-        { id: "C", text: `The erroneous segment in line ${20 + i}`, trap: `${type} Trap: Commonly taught exception.`, correct: true },
-        { id: "D", text: `Segment four of line ${20 + i}`, trap: null, correct: false },
-        ...(type !== 'grammar' ? [{ id: "N", text: "No Mistake", trap: "Vigilance Trap.", correct: false }] : [])
-      ]
-    };
-  });
-};
-
-// --- DATA ARCHITECTURE DEFINITION ---
 const TEST_DATA = [
   {
     sectionId: 'comprehension',
@@ -96,7 +23,108 @@ const TEST_DATA = [
       { id: 'p7', text: "As she approached the clock, the ticking seemed to magnify, drowning out the erratic violin from the floor above. She reached out, running a tentative finger along the polished glass. Behind it, a heavy brass pendulum swung with hypnotic consistency." },
       { id: 'p8', text: "Suddenly, the ticking stopped. The violin stopped. The very air seemed to hold its breath. A shadow detached itself from the heavy velvet drapes, moving with a terrifying, liquid grace toward her. She was no longer alone." }
     ],
-    questions: generateComprehensionQuestions(20)
+    questions: [
+      {
+        id: "c_q1", tag: "Retrieval", tagColor: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+        text: "What item in Eliza's possession 'demanded urgency'?", evidenceLine: "p1",
+        options: [
+          { id: "A", text: "A heavy wax seal", trap: "Detail trap: the seal is part of the item, not the item itself.", correct: false },
+          { id: "B", text: "A letter from a fallen house", trap: null, correct: true },
+          { id: "C", text: "Her woollen shawl", trap: "Detail retrieval trap.", correct: false },
+          { id: "D", text: "A map of the labyrinth", trap: "Fabrication.", correct: false }
+        ]
+      },
+      {
+        id: "c_q2", tag: "Word Meaning", tagColor: "bg-fuchsia-500/10 text-fuchsia-600 border-fuchsia-500/20",
+        text: "In paragraph 2, the word 'miasma' most likely refers to:", evidenceLine: "p2",
+        options: [
+          { id: "A", text: "The flickering gas lamps", trap: "Context trap: the lamps pierce it.", correct: false },
+          { id: "B", text: "The thick, oppressive fog", trap: null, correct: true },
+          { id: "C", text: "The stray cats", trap: "Irrelevant detail.", correct: false },
+          { id: "D", text: "The treacherous corridors", trap: "Literal interpretation trap.", correct: false }
+        ]
+      },
+      {
+        id: "c_q3", tag: "Inference", tagColor: "bg-amber-500/10 text-amber-600 border-amber-500/20",
+        text: "Why did Eliza ignore the warning 'not to venture out past curfew'?", evidenceLine: "p1",
+        options: [
+          { id: "A", text: "She enjoyed the thrill of the chase.", trap: "Unsupported inference.", correct: false },
+          { id: "B", text: "She was compelled by the urgent nature of the crested letter.", trap: null, correct: true },
+          { id: "C", text: "She needed to escape a fallen house.", trap: "Misreading of the text.", correct: false },
+          { id: "D", text: "She was running away from shadows.", trap: "Event happens later, not the reason she went out.", correct: false }
+        ]
+      },
+      {
+        id: "c_q4", tag: "Analysis", tagColor: "bg-rose-500/10 text-rose-600 border-rose-500/20",
+        text: "In paragraph 2, the author states: 'The city was a labyrinth of secrets, and she was but a mouse navigating its treacherous corridors.' What literary device is being used?", evidenceLine: "p2",
+        options: [
+          { id: "A", text: "Simile", trap: "Metaphor trap: no 'like' or 'as'.", correct: false },
+          { id: "B", text: "Personification", trap: "Incorrect technique.", correct: false },
+          { id: "C", text: "Metaphor", trap: null, correct: true },
+          { id: "D", text: "Hyperbole", trap: "Incorrect technique.", correct: false }
+        ]
+      },
+      {
+        id: "c_q5", tag: "Synthesis", tagColor: "bg-cyan-500/10 text-cyan-600 border-cyan-500/20",
+        text: "What mood is established in paragraph 5 when Eliza enters the manor?", evidenceLine: "p5",
+        options: [
+          { id: "A", text: "Joyous and welcoming.", trap: "Opposite mood.", correct: false },
+          { id: "B", text: "Oppressive and unnerving.", trap: null, correct: true },
+          { id: "C", text: "Peaceful and serene.", trap: "Opposite mood.", correct: false },
+          { id: "D", text: "Chaotic and frenetic.", trap: "Matches earlier paragraph, not p5.", correct: false }
+        ]
+      },
+      {
+        id: "c_q6", tag: "Retrieval", tagColor: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+        text: "According to the erratic handwriting in the letter, what was being watched?", evidenceLine: "p6",
+        options: [
+          { id: "A", text: "The grandfather clock", trap: "Close, but specific word needed.", correct: false },
+          { id: "B", text: "The pendulum", trap: null, correct: true },
+          { id: "C", text: "The desolate hallway", trap: "Detail trap.", correct: false },
+          { id: "D", text: "The shadowy figures", trap: "Detail trap.", correct: false }
+        ]
+      },
+      {
+        id: "c_q7", tag: "Inference", tagColor: "bg-amber-500/10 text-amber-600 border-amber-500/20",
+        text: "The sentence 'The violin stopped. The very air seemed to hold its breath.' suggests that:", evidenceLine: "p8",
+        options: [
+          { id: "A", text: "An intense moment of suspension and impending danger has arrived.", trap: null, correct: true },
+          { id: "B", text: "Eliza is struggling to breathe due to the stale air.", trap: "Literal misinterpretation.", correct: false },
+          { id: "C", text: "The musician has finally finished practicing.", trap: "Contextually weak.", correct: false },
+          { id: "D", text: "The clock has completely broken down.", trap: "Irrelevant.", correct: false }
+        ]
+      },
+      {
+        id: "c_q8", tag: "Word Meaning", tagColor: "bg-fuchsia-500/10 text-fuchsia-600 border-fuchsia-500/20",
+        text: "What does 'erratic' mean in the context of paragraph 6?", evidenceLine: "p6",
+        options: [
+          { id: "A", text: "Neat and meticulous", trap: "Antonym.", correct: false },
+          { id: "B", text: "Unpredictable and irregular", trap: null, correct: true },
+          { id: "C", text: "Written in a foreign language", trap: "Fabrication.", correct: false },
+          { id: "D", text: "Extremely large", trap: "Fabrication.", correct: false }
+        ]
+      },
+      {
+        id: "c_q9", tag: "Retrieval", tagColor: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+        text: "How is the heavy brass pendulum described in paragraph 7?", evidenceLine: "p7",
+        options: [
+          { id: "A", text: "Swinging sporadically", trap: "Contradicts text.", correct: false },
+          { id: "B", text: "Swinging with hypnotic consistency", trap: null, correct: true },
+          { id: "C", text: "Ticking thunderously", trap: "Confuses floorboards with pendulum.", correct: false },
+          { id: "D", text: "Covered in undisturbed dust", trap: "Confuses foyer with pendulum.", correct: false }
+        ]
+      },
+      {
+        id: "c_q10", tag: "Analysis", tagColor: "bg-rose-500/10 text-rose-600 border-rose-500/20",
+        text: "In the final paragraph, the shadow is described as moving with 'liquid grace'. What does this imply?", evidenceLine: "p8",
+        options: [
+          { id: "A", text: "It moved clumsily and loudly.", trap: "Antonym.", correct: false },
+          { id: "B", text: "It moved smoothly, fluidly, and stealthily.", trap: null, correct: true },
+          { id: "C", text: "It was physically made of water.", trap: "Literal interpretation.", correct: false },
+          { id: "D", text: "It was melting into the floor.", trap: "Literal interpretation.", correct: false }
+        ]
+      }
+    ]
   },
   {
     sectionId: 'spelling',
@@ -105,34 +133,209 @@ const TEST_DATA = [
     icon: SpellCheck,
     desc: 'In these sentences there are some spelling mistakes. Find the group of words with the mistake. If there is no mistake, mark N.',
     leftTitle: 'Spelling Exercises Overview',
-    passageBlocks: Array.from({ length: 10 }).map((_, i) => ({
-      id: `s${i + 1}`, text: `${20 + i}. The ${i % 2 === 0 ? 'imediate' : 'immediate'} atmosphere around the laboratory was completely chaotic and unpredicable.`
-    })),
-    questions: generateSpagQuestions('spelling', 's', 10, 10)
+    passageBlocks: [
+      { id: 's1', text: "20. The immediate / atmosphere around / the laboratory was / completly chaotic." },
+      { id: 's2', text: "21. The desperate / climber clung / to the jagged edge / with exaustion." },
+      { id: 's3', text: "22. The independant / journalist refused / to compromise / her sources." },
+      { id: 's4', text: "23. Despite the / terrible weather, / the exhibition / was successful." },
+      { id: 's5', text: "24. The proffesor / confidently delivered / a fascinating / presentation." }
+    ],
+    questions: [
+      {
+        id: "s_q1", tag: "Error-Hunt", tagColor: "bg-violet-500/10 text-violet-600 border-violet-500/20",
+        text: "Line 20: Identify the segment with the spelling error, or select 'N'.", evidenceLine: "s1",
+        options: [
+          { id: "A", text: "The immediate", trap: null, correct: false },
+          { id: "B", text: "atmosphere around", trap: null, correct: false },
+          { id: "C", text: "the laboratory was", trap: null, correct: false },
+          { id: "D", text: "completly chaotic.", trap: "Missing 'e' in completely.", correct: true },
+          { id: "N", text: "No Mistake", trap: "Vigilance Trap.", correct: false }
+        ]
+      },
+      {
+        id: "s_q2", tag: "Error-Hunt", tagColor: "bg-violet-500/10 text-violet-600 border-violet-500/20",
+        text: "Line 21: Identify the segment with the spelling error, or select 'N'.", evidenceLine: "s2",
+        options: [
+          { id: "A", text: "The desperate", trap: null, correct: false },
+          { id: "B", text: "climber clung", trap: null, correct: false },
+          { id: "C", text: "to the jagged edge", trap: null, correct: false },
+          { id: "D", text: "with exaustion.", trap: "Missing 'h' in exhaustion.", correct: true },
+          { id: "N", text: "No Mistake", trap: null, correct: false }
+        ]
+      },
+      {
+        id: "s_q3", tag: "Error-Hunt", tagColor: "bg-violet-500/10 text-violet-600 border-violet-500/20",
+        text: "Line 22: Identify the segment with the spelling error, or select 'N'.", evidenceLine: "s3",
+        options: [
+          { id: "A", text: "The independant", trap: "Ends in 'ent', not 'ant'.", correct: true },
+          { id: "B", text: "journalist refused", trap: null, correct: false },
+          { id: "C", text: "to compromise", trap: null, correct: false },
+          { id: "D", text: "her sources.", trap: null, correct: false },
+          { id: "N", text: "No Mistake", trap: null, correct: false }
+        ]
+      },
+      {
+        id: "s_q4", tag: "Error-Hunt", tagColor: "bg-violet-500/10 text-violet-600 border-violet-500/20",
+        text: "Line 23: Identify the segment with the spelling error, or select 'N'.", evidenceLine: "s4",
+        options: [
+          { id: "A", text: "Despite the", trap: null, correct: false },
+          { id: "B", text: "terrible weather,", trap: null, correct: false },
+          { id: "C", text: "the exhibition", trap: null, correct: false },
+          { id: "D", text: "was successful.", trap: null, correct: false },
+          { id: "N", text: "No Mistake", trap: "Accurate! There is no spelling mistake here.", correct: true }
+        ]
+      },
+      {
+        id: "s_q5", tag: "Error-Hunt", tagColor: "bg-violet-500/10 text-violet-600 border-violet-500/20",
+        text: "Line 24: Identify the segment with the spelling error, or select 'N'.", evidenceLine: "s5",
+        options: [
+          { id: "A", text: "The proffesor", trap: "Should be 'professor' (one f, two s's).", correct: true },
+          { id: "B", text: "confidently delivered", trap: null, correct: false },
+          { id: "C", text: "a fascinating", trap: null, correct: false },
+          { id: "D", text: "presentation.", trap: null, correct: false },
+          { id: "N", text: "No Mistake", trap: null, correct: false }
+        ]
+      }
+    ]
   },
   {
     sectionId: 'punctuation',
     subEngine: 'punctuation',
-    title: 'SECTION C: PUNCTUATION (HIPPOS)',
+    title: 'SECTION C: PUNCTUATION EXERCISES',
     icon: TextCursorInput,
-    desc: 'In this passage there are some punctuation mistakes. Find the group of words with the mistake in it.',
-    leftTitle: 'Passage 2: Hippos',
-    passageBlocks: Array.from({ length: 10 }).map((_, i) => ({
-      id: `h${i + 1}`, text: `${20 + i} Mention the word hippo and you will probably think of a cute but robust animal that${i % 3 === 0 ? 's' : "'s"} missing its commas.`
-    })),
-    questions: generateSpagQuestions('punctuation', 'h', 10, 10)
+    desc: 'In this passage there are some punctuation mistakes. Find the group of words with the mistake in it. If there is no mistake, mark N.',
+    leftTitle: 'Punctuation Exercises Overview',
+    passageBlocks: [
+      { id: 'h1', text: "25. James packed / his bag with / an apple a sandwich / and some crisps." },
+      { id: 'h2', text: "26. \"Stop right there!\" / shouted the officer, / \"You're entering / a restricted zone.\"" },
+      { id: 'h3', text: "27. The dogs / bone was buried / deep in the / back garden." },
+      { id: 'h4', text: "28. Its completely / understandable / why they chose / to leave early." },
+      { id: 'h5', text: "29. Although it / was raining heavily / we decided to continue / the hike." }
+    ],
+    questions: [
+      {
+        id: "h_q1", tag: "Punctuation Hunt", tagColor: "bg-pink-500/10 text-pink-600 border-pink-500/20",
+        text: "Line 25: Identify the segment with the punctuation error, or select 'N'.", evidenceLine: "h1",
+        options: [
+          { id: "A", text: "James packed", trap: null, correct: false },
+          { id: "B", text: "his bag with", trap: null, correct: false },
+          { id: "C", text: "an apple a sandwich", trap: "Missing commas in the list.", correct: true },
+          { id: "D", text: "and some crisps.", trap: null, correct: false },
+          { id: "N", text: "No Mistake", trap: null, correct: false }
+        ]
+      },
+      {
+        id: "h_q2", tag: "Punctuation Hunt", tagColor: "bg-pink-500/10 text-pink-600 border-pink-500/20",
+        text: "Line 26: Identify the segment with the punctuation error, or select 'N'.", evidenceLine: "h2",
+        options: [
+          { id: "A", text: "\"Stop right there!\"", trap: null, correct: false },
+          { id: "B", text: "shouted the officer,", trap: "Should end with a full stop since the next quote is a new sentence.", correct: true },
+          { id: "C", text: "\"You're entering", trap: null, correct: false },
+          { id: "D", text: "a restricted zone.\"", trap: null, correct: false },
+          { id: "N", text: "No Mistake", trap: null, correct: false }
+        ]
+      },
+      {
+        id: "h_q3", tag: "Punctuation Hunt", tagColor: "bg-pink-500/10 text-pink-600 border-pink-500/20",
+        text: "Line 27: Identify the segment with the punctuation error, or select 'N'.", evidenceLine: "h3",
+        options: [
+          { id: "A", text: "The dogs", trap: "Missing possessive apostrophe (dog's).", correct: true },
+          { id: "B", text: "bone was buried", trap: null, correct: false },
+          { id: "C", text: "deep in the", trap: null, correct: false },
+          { id: "D", text: "back garden.", trap: null, correct: false },
+          { id: "N", text: "No Mistake", trap: null, correct: false }
+        ]
+      },
+      {
+        id: "h_q4", tag: "Punctuation Hunt", tagColor: "bg-pink-500/10 text-pink-600 border-pink-500/20",
+        text: "Line 28: Identify the segment with the punctuation error, or select 'N'.", evidenceLine: "h4",
+        options: [
+          { id: "A", text: "Its completely", trap: "Needs contraction apostrophe (It's).", correct: true },
+          { id: "B", text: "understandable", trap: null, correct: false },
+          { id: "C", text: "why they chose", trap: null, correct: false },
+          { id: "D", text: "to leave early.", trap: null, correct: false },
+          { id: "N", text: "No Mistake", trap: null, correct: false }
+        ]
+      },
+      {
+        id: "h_q5", tag: "Punctuation Hunt", tagColor: "bg-pink-500/10 text-pink-600 border-pink-500/20",
+        text: "Line 29: Identify the segment with the punctuation error, or select 'N'.", evidenceLine: "h5",
+        options: [
+          { id: "A", text: "Although it", trap: null, correct: false },
+          { id: "B", text: "was raining heavily", trap: "Missing comma after a subordinate clause at the start.", correct: true },
+          { id: "C", text: "we decided to continue", trap: null, correct: false },
+          { id: "D", text: "the hike.", trap: null, correct: false },
+          { id: "N", text: "No Mistake", trap: null, correct: false }
+        ]
+      }
+    ]
   },
   {
     sectionId: 'grammar',
     subEngine: 'grammar',
-    title: 'SECTION D: PERFORMANCE TIME CLOZE',
+    title: 'SECTION D: GRAMMAR CLOZE',
     icon: Type,
-    desc: 'Choose the best word to complete each numbered line so it makes grammatical sense.',
-    leftTitle: 'Passage 3: Performance Time',
-    passageBlocks: Array.from({ length: 10 }).map((_, i) => ({
-      id: `g${i + 1}`, text: `Waiting in the wings, the students' nerves soared as they listened to the [ ${20 + i} ] whispers from the crowd...`
-    })),
-    questions: generateSpagQuestions('grammar', 'g', 10, 10)
+    desc: 'Choose the best word to complete each numbered gap so it makes grammatical sense.',
+    leftTitle: 'Passage 3: The Discovery',
+    passageBlocks: [
+      { id: 'g1', text: "The explorers bravely ventured into the [ 30 ] cavern, unaware of the dangers ahead." },
+      { id: 'g2', text: "As they walked, the ground began to [ 31 ] beneath their heavy boots." },
+      { id: 'g3', text: "They realized they had entered a chamber [ 32 ] belonged to a long-forgotten civilization." },
+      { id: 'g4', text: "Suddenly, a tremendous roar echoed, and a horde of bats [ 33 ] swiftly past them." },
+      { id: 'g5', text: "It was undoubtedly the most [ 34 ] experience of their entire expedition." }
+    ],
+    questions: [
+      {
+        id: "g_q1", tag: "Adjectives", tagColor: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
+        text: "Gap 30: Select the most appropriate word to fill the gap.", evidenceLine: "g1",
+        options: [
+          { id: "A", text: "darkly", trap: "Adverb, not adjective.", correct: false },
+          { id: "B", text: "mysterious", trap: null, correct: true },
+          { id: "C", text: "mystery", trap: "Noun.", correct: false },
+          { id: "D", text: "mystify", trap: "Verb.", correct: false }
+        ]
+      },
+      {
+        id: "g_q2", tag: "Verbs", tagColor: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
+        text: "Gap 31: Select the most appropriate word to fill the gap.", evidenceLine: "g2",
+        options: [
+          { id: "A", text: "tremble", trap: null, correct: true },
+          { id: "B", text: "trembling", trap: "Incorrect tense after 'to'.", correct: false },
+          { id: "C", text: "trembled", trap: "Past tense after infinitive marker 'to'.", correct: false },
+          { id: "D", text: "trembles", trap: "Present tense after infinitive marker 'to'.", correct: false }
+        ]
+      },
+      {
+        id: "g_q3", tag: "Pronouns", tagColor: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
+        text: "Gap 32: Select the most appropriate word to fill the gap.", evidenceLine: "g3",
+        options: [
+          { id: "A", text: "who", trap: "Used for people.", correct: false },
+          { id: "B", text: "where", trap: "Used for location, doesn't fit grammar.", correct: false },
+          { id: "C", text: "which", trap: null, correct: true },
+          { id: "D", text: "whose", trap: "Used for possession.", correct: false }
+        ]
+      },
+      {
+        id: "g_q4", tag: "Verbs (Tense)", tagColor: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
+        text: "Gap 33: Select the most appropriate word to fill the gap.", evidenceLine: "g4",
+        options: [
+          { id: "A", text: "flew", trap: null, correct: true },
+          { id: "B", text: "flown", trap: "Needs auxiliary verb (had flown).", correct: false },
+          { id: "C", text: "flies", trap: "Incorrect tense.", correct: false },
+          { id: "D", text: "flying", trap: "Incomplete verb phrase.", correct: false }
+        ]
+      },
+      {
+        id: "g_q5", tag: "Adjectives", tagColor: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
+        text: "Gap 34: Select the most appropriate word to fill the gap.", evidenceLine: "g5",
+        options: [
+          { id: "A", text: "terrify", trap: "Verb.", correct: false },
+          { id: "B", text: "terrified", trap: "Describes feelings, not the experience itself.", correct: false },
+          { id: "C", text: "terrifying", trap: null, correct: true },
+          { id: "D", text: "terror", trap: "Noun.", correct: false }
+        ]
+      }
+    ]
   }
 ];
 
@@ -150,12 +353,58 @@ const VOCAB_PRACTICE = {
     { id: 'v3', text: "His lethargic successors failed to maintain the facade, allowing ivy to aggressively pillage the grand stonework." },
     { id: 'v4', text: "By sunset, the once-imposing edifice became a sinister silhouette, casting an ominous and deleterious shadow over the surrounding valleys." }
   ],
-  questions: Array.from({ length: 10 }).map((_, i) => ({
-    id: `v_q${i + 1}`, tag: i % 2 === 0 ? "Synonym" : "Antonym", tagColor: "bg-cyan-500/10 text-cyan-600 border-cyan-500/20",
-    text: `Based on passage ${i % 4 + 1}, find the closest ${i % 2 === 0 ? "synonym" : "antonym"} to the underlined target word.`, 
-    evidenceLine: `v${i % 4 + 1}`,
-    options: generateOptions(`The accurate lexical ${i % 2 === 0 ? "match" : "opposite"}.`, ["An incorrect shade of meaning.", "A homophone distractor.", "A word with similar prefix but wrong root."])
-  }))
+  questions: [
+    {
+      id: "v_q1", tag: "Synonym", tagColor: "bg-cyan-500/10 text-cyan-600 border-cyan-500/20",
+      text: "Based on line v1, find the closest synonym to the word 'meticulous'.", evidenceLine: "v1",
+      options: [
+        { id: "A", text: "Careless", trap: "Antonym.", correct: false },
+        { id: "B", text: "Painstaking", trap: null, correct: true },
+        { id: "C", text: "Ancient", trap: "Context word, not a synonym.", correct: false },
+        { id: "D", text: "Grand", trap: "Unrelated meaning.", correct: false }
+      ]
+    },
+    {
+      id: "v_q2", tag: "Antonym", tagColor: "bg-cyan-500/10 text-cyan-600 border-cyan-500/20",
+      text: "Based on line v2, find the closest antonym to the word 'sporadic'.", evidenceLine: "v2",
+      options: [
+        { id: "A", text: "Occasional", trap: "Synonym, not antonym.", correct: false },
+        { id: "B", text: "Sudden", trap: "Similar meaning.", correct: false },
+        { id: "C", text: "Constant", trap: null, correct: true },
+        { id: "D", text: "Erratic", trap: "Synonym.", correct: false }
+      ]
+    },
+    {
+      id: "v_q3", tag: "Synonym", tagColor: "bg-cyan-500/10 text-cyan-600 border-cyan-500/20",
+      text: "Based on line v3, find the closest synonym to the word 'lethargic'.", evidenceLine: "v3",
+      options: [
+        { id: "A", text: "Energetic", trap: "Antonym.", correct: false },
+        { id: "B", text: "Sluggish", trap: null, correct: true },
+        { id: "C", text: "Wealthy", trap: "Refers to the predecessor.", correct: false },
+        { id: "D", text: "Aggressive", trap: "Context word, not synonym.", correct: false }
+      ]
+    },
+    {
+      id: "v_q4", tag: "Synonym", tagColor: "bg-cyan-500/10 text-cyan-600 border-cyan-500/20",
+      text: "Based on line v3, find the closest synonym to the word 'pillage'.", evidenceLine: "v3",
+      options: [
+        { id: "A", text: "Preserve", trap: "Antonym.", correct: false },
+        { id: "B", text: "Decorate", trap: "Incorrect understanding of the ivy's effect.", correct: false },
+        { id: "C", text: "Plunder", trap: null, correct: true },
+        { id: "D", text: "Climb", trap: "Literal action of ivy, not the meaning of 'pillage'.", correct: false }
+      ]
+    },
+    {
+      id: "v_q5", tag: "Antonym", tagColor: "bg-cyan-500/10 text-cyan-600 border-cyan-500/20",
+      text: "Based on line v4, find the closest antonym to the word 'deleterious'.", evidenceLine: "v4",
+      options: [
+        { id: "A", text: "Harmful", trap: "Synonym, not antonym.", correct: false },
+        { id: "B", text: "Sinister", trap: "Context word.", correct: false },
+        { id: "C", text: "Beneficial", trap: null, correct: true },
+        { id: "D", text: "Toxic", trap: "Synonym.", correct: false }
+      ]
+    }
+  ]
 };
 
 export function EnglishSplitViewDemo() {
@@ -306,6 +555,48 @@ export function EnglishSplitViewDemo() {
     }
   }, [activeQuestionId, activeSections]);
 
+  // Compute actual results upon finishing
+  const results = useMemo(() => {
+    if (!isFinished) return null;
+    
+    let compTotal = 0;
+    let compCorrect = 0;
+    let spagTotal = 0;
+    let spagCorrect = 0;
+
+    activeSections.forEach(sec => {
+      const isComp = sec.sectionId === 'comprehension' || sec.sectionId === 'vocab';
+      sec.questions.forEach(q => {
+        if (isComp) compTotal++;
+        else spagTotal++;
+        
+        const ans = selectedAnswers[q.id];
+        const correctOpt = q.options.find(o => o.correct);
+        if (ans && correctOpt && ans === correctOpt.id) {
+          if (isComp) compCorrect++;
+          else spagCorrect++;
+        }
+      });
+    });
+
+    const compPerc = compTotal > 0 ? Math.round((compCorrect / compTotal) * 100) : 0;
+    const spagPerc = spagTotal > 0 ? Math.round((spagCorrect / spagTotal) * 100) : 0;
+    
+    const overallTotal = compTotal + spagTotal;
+    const overallCorrect = compCorrect + spagCorrect;
+    const overallPerc = overallTotal > 0 ? Math.round((overallCorrect / overallTotal) * 100) : 0;
+    
+    // Percentile mock logic
+    const percentile = Math.min(99, Math.max(1, Math.round((overallPerc / 100) * 40 + 59))); // Maps to 59-99th percentile for a better UX, or just overallPerc if we want raw
+    const displayPercentile = overallTotal === 0 ? 0 : percentile;
+    
+    let percentileColor = "text-emerald-500";
+    if (displayPercentile < 70) percentileColor = "text-rose-500";
+    else if (displayPercentile < 85) percentileColor = "text-amber-500";
+    
+    return { compTotal, compPerc, spagTotal, spagPerc, overallTotal, overallCorrect, displayPercentile, percentileColor };
+  }, [isFinished, activeSections, selectedAnswers]);
+
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -321,7 +612,7 @@ export function EnglishSplitViewDemo() {
           <Trophy className="w-16 h-16 text-amber-500 mx-auto mb-6" />
           <h2 className="text-3xl font-bold tracking-tight mb-2">Session Complete</h2>
           
-          {isPremium ? (
+          {isPremium && results ? (
             <div className="space-y-6 mt-8">
               <div className="p-8 rounded-3xl bg-amber-500/5 border border-amber-500/20 text-left">
                 <div className="flex items-center justify-between mb-8">
@@ -334,18 +625,26 @@ export function EnglishSplitViewDemo() {
                 </div>
                 
                 <p className="text-foreground leading-relaxed mb-6 bg-background rounded-2xl p-5 border border-border/40 font-medium">
-                  Excellent work! You are currently scoring in the <strong className="text-amber-600 dark:text-amber-400 text-xl font-black">92nd percentile</strong> across this selected Mock configuration.
+                  {results.overallTotal > 0 ? (
+                    <>Excellent work! You are currently scoring in the <strong className={cn("text-xl font-black", results.percentileColor)}>{results.displayPercentile}{['11','12','13'].includes(results.displayPercentile.toString().slice(-2)) ? 'th' : ['st', 'nd', 'rd'][(results.displayPercentile % 10) - 1] || 'th'} percentile</strong> across this selected Mock configuration.</>
+                  ) : (
+                    <>You did not answer any questions in this session.</>
+                  )}
                 </p>
                 
                 <div className="grid grid-cols-2 gap-4 mb-4">
-                  <div className="bg-card border border-border/60 p-5 rounded-2xl shadow-sm">
-                    <div className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1.5">Comprehension</div>
-                    <div className="text-4xl font-black text-amber-500">100%</div>
-                  </div>
-                  <div className="bg-card border border-border/60 p-5 rounded-2xl shadow-sm">
-                    <div className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1.5">SPaG Precision</div>
-                    <div className="text-4xl font-black text-emerald-500">80%</div>
-                  </div>
+                  {results.compTotal > 0 && (
+                    <div className="bg-card border border-border/60 p-5 rounded-2xl shadow-sm">
+                      <div className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1.5">Comprehension</div>
+                      <div className={cn("text-4xl font-black", results.compPerc >= 80 ? 'text-amber-500' : results.compPerc >= 60 ? 'text-amber-400' : 'text-rose-400')}>{results.compPerc}%</div>
+                    </div>
+                  )}
+                  {results.spagTotal > 0 && (
+                    <div className={cn("bg-card border border-border/60 p-5 rounded-2xl shadow-sm", results.compTotal === 0 ? "col-span-2" : "")}>
+                      <div className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1.5">SPaG Precision</div>
+                      <div className={cn("text-4xl font-black", results.spagPerc >= 80 ? 'text-emerald-500' : results.spagPerc >= 60 ? 'text-amber-400' : 'text-rose-400')}>{results.spagPerc}%</div>
+                    </div>
+                  )}
                 </div>
               </div>
               <Button onClick={() => setIsFinished(false)} variant="outline" className="w-full h-12 rounded-xl font-bold">
