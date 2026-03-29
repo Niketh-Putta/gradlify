@@ -3,6 +3,8 @@ import { BookMarked } from "lucide-react";
 import { useAppContext } from "@/hooks/useAppContext";
 import { resolveUserTrack } from "@/lib/track";
 import { useNotesProgress } from "@/hooks/useNotesProgress";
+import { useSubject } from "@/contexts/SubjectContext";
+import { cn } from "@/lib/utils";
 
 interface NotesProgressCardProps {
   className?: string;
@@ -15,6 +17,7 @@ interface NotesProgressCardProps {
 export function NotesProgressCard({ className, id, 'data-animate': dataAnimate, isVisible, onClick }: NotesProgressCardProps) {
   const { completedCount, totalNotes, loading } = useNotesProgress();
   const { profile } = useAppContext();
+  const { currentSubject } = useSubject();
   const userTrack = resolveUserTrack(profile?.track ?? null);
   const focusLabel = userTrack === '11plus' ? '11+ sections' : 'GCSE sections';
 
@@ -28,7 +31,10 @@ export function NotesProgressCard({ className, id, 'data-animate': dataAnimate, 
     >
       <CardHeader className="text-center pb-2 sm:pb-3 px-2 sm:px-3">
         <div className="flex items-center justify-center gap-2 mb-1">
-          <BookMarked className="h-5 w-5 text-primary" />
+          <BookMarked className={cn(
+             "h-5 w-5",
+             currentSubject === 'english' ? "text-amber-500" : "text-primary"
+          )} />
           <CardTitle className="text-base sm:text-lg md:text-xl font-bold text-foreground">
             Notes Progress
           </CardTitle>

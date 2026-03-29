@@ -206,7 +206,10 @@ export function Navigation({ user, profile, onSettings, onSignOut }: NavigationP
         cn(
           "flex items-center rounded-xl transition-all duration-300 ease-in-out relative overflow-hidden",
           isActive
-            ? 'bg-primary/10 text-primary font-semibold'
+            ? cn(
+                 "font-semibold",
+                 currentSubject === 'english' ? "bg-amber-500/10 text-amber-500" : "bg-primary/10 text-primary"
+              )
             : 'text-muted-foreground hover:text-foreground hover:bg-muted/70',
           isMobile 
             ? 'justify-center flex-col gap-1 min-h-[56px] py-2 px-1 w-full' 
@@ -288,8 +291,14 @@ export function Navigation({ user, profile, onSettings, onSignOut }: NavigationP
              sidebarHovered ? "w-[236px] bg-muted/40" : "w-11 bg-transparent"
           )}>
             <div className="w-11 h-11 flex items-center justify-center shrink-0">
-              <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center shrink-0 border border-primary/20 shadow-sm">
-                <span className="text-[10px] font-bold text-primary">
+              <div className={cn(
+                 "w-8 h-8 rounded-full flex items-center justify-center shrink-0 border shadow-sm",
+                 currentSubject === 'english' ? "bg-amber-500/10 border-amber-500/20" : "bg-primary/10 border-primary/20"
+              )}>
+                <span className={cn(
+                   "text-[10px] font-bold",
+                   currentSubject === 'english' ? "text-amber-500" : "text-primary"
+                )}>
                   {userName.charAt(0).toUpperCase()}
                 </span>
               </div>
@@ -469,7 +478,7 @@ export function Navigation({ user, profile, onSettings, onSignOut }: NavigationP
                     cn(
                       "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200",
                       isActive
-                        ? 'bg-primary text-primary-foreground'
+                        ? cn(currentSubject === 'english' ? 'bg-amber-500 text-white' : 'bg-primary text-primary-foreground')
                         : 'text-muted-foreground hover:text-foreground hover:bg-muted/70'
                     )
                   }
@@ -496,7 +505,7 @@ export function Navigation({ user, profile, onSettings, onSignOut }: NavigationP
                 "flex items-center gap-1 px-2.5 py-1.5 rounded-lg transition-colors duration-150 ease-out relative w-full",
                 "justify-center flex-col min-h-[56px]",
                 bottomMoreOpen
-                  ? 'bg-primary text-primary-foreground shadow-primary'
+                  ? cn(currentSubject === 'english' ? 'bg-amber-500 text-white shadow-amber-500/20' : 'bg-primary text-primary-foreground shadow-primary')
                   : 'text-muted-foreground hover:text-foreground hover:bg-muted/70'
               )}
             >

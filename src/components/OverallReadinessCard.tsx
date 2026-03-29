@@ -8,6 +8,8 @@ import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { AI_FEATURE_ENABLED } from '@/lib/featureFlags';
 import { isAbortLikeError } from '@/lib/errors';
 import { elevenPlusReadinessLabel, nextElevenPlusBand } from '@/lib/readinessHelpers';
+import { useSubject } from '@/contexts/SubjectContext';
+import { cn } from '@/lib/utils';
 
 interface OverallReadinessCardProps {
   userId?: string;
@@ -35,6 +37,7 @@ export function OverallReadinessCard({
   loadingOverride,
 }: OverallReadinessCardProps) {
   const { overall, loading: overallLoading } = useOverallReadiness(userId, trackKey);
+  const { currentSubject } = useSubject();
   const [latestChange, setLatestChange] = useState<ReadinessHistory | null>(null);
   const [loadingHistory, setLoadingHistory] = useState(true);
   const displayOverall = Number.isFinite(overallOverride) ? Number(overallOverride) : overall;
@@ -139,7 +142,10 @@ export function OverallReadinessCard({
           {/* Readiness Meter (stylised pill) */}
           <div className="flex items-center gap-4 sm:gap-5">
             <div className="min-w-[92px]">
-              <div className="text-3xl sm:text-4xl font-bold font-gradlify bg-gradient-gradlify bg-clip-text text-transparent leading-none">
+              <div className={cn(
+                 "text-3xl sm:text-4xl font-bold font-gradlify bg-clip-text text-transparent leading-none",
+                 currentSubject === 'english' ? "bg-gradient-to-r from-amber-400 to-amber-600" : "bg-gradient-gradlify"
+              )}>
                 {meter.clamped.toFixed(0)}%
               </div>
               <div className="mt-1 text-xs sm:text-sm text-muted-foreground">
@@ -160,16 +166,25 @@ export function OverallReadinessCard({
 
                 {/* Fill */}
                 <div
-                  className="absolute left-0 top-0 h-full rounded-full bg-gradient-gradlify shadow-glow transition-all duration-700 ease-out"
+                  className={cn(
+                     "absolute left-0 top-0 h-full rounded-full shadow-glow transition-all duration-700 ease-out",
+                     currentSubject === 'english' ? "bg-gradient-to-r from-amber-400 to-amber-600" : "bg-gradient-gradlify"
+                  )}
                   style={{ width: `${meter.clamped}%` }}
                 >
                   {/* Shine */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
+                  <div className={cn(
+                     "absolute inset-0 bg-gradient-to-r from-transparent to-transparent",
+                     currentSubject === 'english' ? "via-amber-500/20" : "via-primary/20"
+                  )} />
                 </div>
 
                 {/* Marker */}
                 <div
-                  className="absolute top-1/2 -translate-y-1/2 w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full bg-background border border-primary/40 shadow-sm"
+                  className={cn(
+                     "absolute top-1/2 -translate-y-1/2 w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full bg-background border shadow-sm",
+                     currentSubject === 'english' ? "border-amber-500/40" : "border-primary/40"
+                  )}
                   style={{ left: `calc(${meter.marker}% - 0.5rem)` }}
                   aria-hidden="true"
                 />

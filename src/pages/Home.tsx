@@ -518,12 +518,24 @@ export function Home() {
               }`}
             >
               <Card className="h-full relative overflow-hidden">
-                <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-primary/10 to-transparent" aria-hidden="true" />
-                <div className="absolute -bottom-8 -right-8 h-40 w-40 rounded-full bg-primary/10 blur-2xl" aria-hidden="true" />
+                <div className={cn(
+                   "absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t to-transparent",
+                   currentSubject === 'english' ? "from-amber-500/10" : "from-primary/10"
+                )} aria-hidden="true" />
+                <div className={cn(
+                   "absolute -bottom-8 -right-8 h-40 w-40 rounded-full blur-2xl",
+                   currentSubject === 'english' ? "bg-amber-500/10" : "bg-primary/10"
+                )} aria-hidden="true" />
                 <CardContent className="p-6 relative">
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="p-2.5 rounded-xl bg-primary/10">
-                      <Brain className="h-5 w-5 text-primary" />
+                    <div className={cn(
+                       "p-2.5 rounded-xl",
+                       currentSubject === 'english' ? "bg-amber-500/10" : "bg-primary/10"
+                    )}>
+                      <Brain className={cn(
+                         "h-5 w-5",
+                         currentSubject === 'english' ? "text-amber-500" : "text-primary"
+                      )} />
                     </div>
                     <div>
                       <h3 className="font-semibold text-foreground">AI Study Helper</h3>
@@ -550,7 +562,10 @@ export function Home() {
                   {/* Embedded illustration (kept in-flow to avoid overlapping controls) */}
                   <div className="mt-4">
                     <div
-                      className="pointer-events-none select-none relative overflow-hidden rounded-2xl bg-primary/5"
+                      className={cn(
+                         "pointer-events-none select-none relative overflow-hidden rounded-2xl",
+                         currentSubject === 'english' ? "bg-amber-500/5" : "bg-primary/5"
+                      )}
                       aria-hidden="true"
                     >
                       <div className="flex items-center justify-center h-[140px]">
@@ -586,12 +601,24 @@ export function Home() {
               }`}
             >
               <Card className="h-full relative overflow-hidden">
-                <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-primary/12 via-transparent to-transparent" aria-hidden="true" />
-                <div className="absolute -bottom-10 -right-10 h-44 w-44 rounded-full bg-primary/10 blur-2xl" aria-hidden="true" />
-                <div className="absolute -top-8 -left-8 h-32 w-32 rounded-full bg-indigo-500/10 blur-2xl" aria-hidden="true" />
+                <div className={cn(
+                   "absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t via-transparent to-transparent",
+                   currentSubject === 'english' ? "from-amber-500/12" : "from-primary/12"
+                )} aria-hidden="true" />
+                <div className={cn(
+                   "absolute -bottom-10 -right-10 h-44 w-44 rounded-full blur-2xl",
+                   currentSubject === 'english' ? "bg-amber-500/10" : "bg-primary/10"
+                )} aria-hidden="true" />
+                <div className={cn(
+                   "absolute -top-8 -left-8 h-32 w-32 rounded-full blur-2xl",
+                   currentSubject === 'english' ? "bg-amber-500/10" : "bg-indigo-500/10"
+                )} aria-hidden="true" />
                 <CardContent className="p-6 relative">
                   <div className="flex items-center gap-2 text-base font-semibold text-foreground mb-2">
-                    <span className="inline-flex h-2.5 w-2.5 rounded-full bg-gradient-to-br from-indigo-500 to-violet-500" />
+                    <span className={cn(
+                       "inline-flex h-2.5 w-2.5 rounded-full bg-gradient-to-br",
+                       currentSubject === 'english' ? "from-amber-400 to-amber-600" : "from-indigo-500 to-violet-500"
+                    )} />
                     <span>Focus Topic</span>
                   </div>
                   <p className="text-sm text-muted-foreground">
@@ -620,7 +647,10 @@ export function Home() {
                   </Button>
 
                   <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
-                    <span className="inline-flex items-center rounded-full border border-indigo-500/20 bg-indigo-500/10 px-2 py-0.5 text-indigo-700">
+                    <span className={cn(
+                       "inline-flex items-center rounded-full border px-2 py-0.5",
+                       currentSubject === 'english' ? "border-amber-500/20 bg-amber-500/10 text-amber-700 dark:text-amber-400" : "border-indigo-500/20 bg-indigo-500/10 text-indigo-700"
+                    )}>
                       Personalised focus
                     </span>
                     <span>Mixed tiers • Exam-style</span>
@@ -730,10 +760,16 @@ export function Home() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <button
               onClick={() => navigate('/mocks')}
-              className="group p-5 rounded-xl bg-card border border-border hover:border-primary/30 hover:shadow-sm transition-all duration-200 text-left dark:bg-slate-950/70 dark:border-white/10 dark:hover:border-primary/40"
+              className={cn(
+                 "group p-5 rounded-xl bg-card border transition-all duration-200 text-left dark:bg-slate-950/70 dark:border-white/10 hover:shadow-sm",
+                 currentSubject === 'english' ? "border-border hover:border-amber-500/30 dark:hover:border-amber-500/40" : "border-border hover:border-primary/30 dark:hover:border-primary/40"
+              )}
             >
-              <div className="p-3 rounded-xl bg-primary/10 w-fit mb-3 group-hover:scale-105 transition-transform duration-200">
-                <BookOpen className="h-5 w-5 text-primary" />
+              <div className={cn(
+                 "p-3 rounded-xl w-fit mb-3 group-hover:scale-105 transition-transform duration-200",
+                 currentSubject === 'english' ? "bg-amber-500/10" : "bg-primary/10"
+              )}>
+                <BookOpen className={cn("h-5 w-5", currentSubject === 'english' ? "text-amber-500" : "text-primary")} />
               </div>
               <h3 className="font-medium text-foreground mb-1">Practice Questions</h3>
               <p className="text-sm text-muted-foreground dark:text-slate-300">Test your knowledge with exam-style questions</p>
@@ -753,10 +789,16 @@ export function Home() {
             {AI_FEATURE_ENABLED && (
               <button
                 onClick={() => navigate('/chat')}
-                className="group p-5 rounded-xl bg-card border border-border hover:border-primary/30 hover:shadow-sm transition-all duration-200 text-left dark:bg-slate-950/70 dark:border-white/10 dark:hover:border-primary/40"
+                className={cn(
+                   "group p-5 rounded-xl bg-card border transition-all duration-200 text-left dark:bg-slate-950/70 dark:border-white/10 hover:shadow-sm",
+                   currentSubject === 'english' ? "border-border hover:border-amber-500/30 dark:hover:border-amber-500/40" : "border-border hover:border-primary/30 dark:hover:border-primary/40"
+                )}
               >
-                <div className="p-3 rounded-xl bg-primary/10 w-fit mb-3 group-hover:scale-105 transition-transform duration-200">
-                  <MessageSquare className="h-5 w-5 text-primary" />
+                <div className={cn(
+                   "p-3 rounded-xl w-fit mb-3 group-hover:scale-105 transition-transform duration-200",
+                   currentSubject === 'english' ? "bg-amber-500/10" : "bg-primary/10"
+                )}>
+                  <MessageSquare className={cn("h-5 w-5", currentSubject === 'english' ? "text-amber-500" : "text-primary")} />
                 </div>
                 <h3 className="font-medium text-foreground mb-1">AI Study Helper</h3>
                 <p className="text-sm text-muted-foreground dark:text-slate-300">Get instant help with any question</p>
