@@ -184,13 +184,16 @@ export default function PracticePage({ forcedSubject }: PracticePageProps) {
               <button
                 key={item.id}
                 onClick={() => setDifficultyLevel(item.id as any)}
+                disabled={item.id !== 'mixed'}
                 className={cn(
                   'relative px-4 py-6 rounded-2xl border-2 font-bold text-sm transition-all text-center flex flex-col items-center justify-center gap-1',
-                  difficultyLevel === item.id 
+                  item.id !== 'mixed' 
+                    ? 'opacity-40 cursor-not-allowed bg-slate-50/50 border-slate-100 text-slate-400'
+                    : difficultyLevel === item.id 
                     ? 'bg-white shadow-sm border-blue-500 text-slate-800' 
                     : 'bg-slate-50 border-slate-100 text-slate-400 hover:border-slate-200'
                 )}
-                style={{ borderColor: difficultyLevel === item.id ? themeColor : undefined }}
+                style={{ borderColor: (difficultyLevel === item.id && item.id === 'mixed') ? themeColor : undefined }}
               >
                 <span>{item.label}</span>
                 {item.level && <span className="text-[10px] font-normal opacity-70">Level {item.level}</span>}

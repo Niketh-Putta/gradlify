@@ -382,7 +382,19 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
                 <h2 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Difficulty</h2>
                 <div className="grid grid-cols-2 gap-2">
                   {ELEVEN_PLUS_DIFFICULTY_OPTIONS.map((opt) => (
-                    <button key={opt.value} onClick={() => setElevenPlusDifficulty(opt.value)} className={cn("px-3 py-2.5 rounded-xl border text-xs font-semibold transition-all", elevenPlusDifficulty === opt.value ? (currentSubject === 'english' ? "border-amber-500 bg-amber-500/5 text-amber-600" : "border-primary bg-primary/5 text-primary") : "border-border/60 bg-card text-muted-foreground hover:bg-muted/30")}>
+                    <button 
+                      key={opt.value} 
+                      onClick={() => setElevenPlusDifficulty(opt.value)} 
+                      disabled={opt.value !== 'mixed'}
+                      className={cn(
+                        "px-3 py-2.5 rounded-xl border text-xs font-semibold transition-all", 
+                        opt.value !== 'mixed' 
+                          ? "opacity-40 cursor-not-allowed bg-muted/20 text-muted-foreground border-border/30"
+                          : elevenPlusDifficulty === opt.value 
+                            ? (currentSubject === 'english' ? "border-amber-500 bg-amber-500/5 text-amber-600" : "border-primary bg-primary/5 text-primary") 
+                            : "border-border/60 bg-card text-muted-foreground hover:bg-muted/30"
+                      )}
+                    >
                       {opt.label}
                     </button>
                   ))}
