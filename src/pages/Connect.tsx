@@ -351,7 +351,7 @@ export default function Connect() {
 
         <div className="flex items-end justify-between gap-2">
           <div className="min-w-0">
-            <h1 className="text-xl sm:text-2xl font-semibold tracking-tight">Leaderboard</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Leaderboard</h1>
             <p className="text-muted-foreground text-[10px] sm:text-xs font-light mt-0.5 truncate">Ranked by correct answers</p>
             <p className="text-muted-foreground text-[10px] sm:text-xs font-light truncate">{periodDescriptor}</p>
           </div>

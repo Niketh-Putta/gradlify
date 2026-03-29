@@ -281,7 +281,7 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
             <span className="inline-flex items-center rounded-full border border-primary/25 bg-primary/10 px-2.5 py-1 text-[11px] font-semibold text-primary mb-2">
               {getTrackLabel(userTrack, currentSubject)}
             </span>
-            <h1 className="text-lg sm:text-xl font-semibold tracking-tight text-foreground">{currentSubject === 'english' ? 'English ' : 'Maths '}Mock Exams & Practice</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">{currentSubject === 'english' ? 'English ' : 'Maths '}Mock Exams & Practice</h1>
             <span className="text-xs sm:text-sm text-muted-foreground">Configure your perfect session</span>
           </div>
           {user && (
