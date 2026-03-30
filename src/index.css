@@ -310,7 +310,7 @@
     --connect-bronze: 30 50% 55%;
   }
 
-  .dark.theme-english {
+  .dark .theme-english, .dark.theme-english {
     /* English Dark Mode - Warm Amber Tinges for a unified look */
     --background: 43 100% 2%;  
     --card: 43 60% 5%;
