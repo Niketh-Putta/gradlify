@@ -29,7 +29,10 @@ import {
   Percent,
   Activity,
   Target,
-  Gauge
+  Gauge,
+  BrainCircuit,
+  Swords,
+  Flame
 } from "lucide-react";
 import { usePremium } from "@/hooks/usePremium";
 import { supabase } from "@/integrations/supabase/client";
@@ -631,61 +634,104 @@ export function Home() {
                   : 'translate-y-8 opacity-0'
               }`}
             >
-              <Card className="h-full relative overflow-hidden">
+              <Card className={cn(
+                "h-full relative overflow-hidden border-0 shadow-xl",
+                currentSubject === 'english' 
+                  ? "bg-gradient-to-br from-amber-500/10 via-orange-500/5 to-rose-500/5 dark:from-amber-500/10 dark:via-orange-500/5 dark:to-rose-500/5"
+                  : "bg-gradient-to-br from-indigo-500/10 via-purple-500/5 to-pink-500/5 dark:from-indigo-500/10 dark:via-purple-500/5 dark:to-pink-500/5"
+              )}>
+                {/* Stunning animated gradient background bubbles */}
                 <div className={cn(
-                   "absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t via-transparent to-transparent",
-                   currentSubject === 'english' ? "from-amber-500/12" : "from-primary/12"
-                )} aria-hidden="true" />
+                  "absolute -top-24 -right-24 w-64 h-64 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-[64px] opacity-40 animate-[pulse_4s_ease-in-out_infinite]",
+                  currentSubject === 'english' ? "bg-amber-400/50" : "bg-indigo-400/50"
+                )} />
                 <div className={cn(
-                   "absolute -bottom-10 -right-10 h-44 w-44 rounded-full blur-2xl",
-                   currentSubject === 'english' ? "bg-amber-500/10" : "bg-primary/10"
-                )} aria-hidden="true" />
-                <div className={cn(
-                   "absolute -top-8 -left-8 h-32 w-32 rounded-full blur-2xl",
-                   currentSubject === 'english' ? "bg-amber-500/10" : "bg-indigo-500/10"
-                )} aria-hidden="true" />
-                <CardContent className="p-6 relative">
-                  <div className="flex items-center gap-2 text-base font-semibold text-foreground mb-2">
-                    <span className={cn(
-                       "inline-flex h-2.5 w-2.5 rounded-full bg-gradient-to-br",
-                       currentSubject === 'english' ? "from-amber-400 to-amber-600" : "from-indigo-500 to-violet-500"
-                    )} />
-                    <span>Focus Topic</span>
+                  "absolute -bottom-24 -left-24 w-64 h-64 rounded-full mix-blend-multiply dark:mix-blend-screen filter blur-[64px] opacity-40 animate-[pulse_5s_ease-in-out_infinite_1s]",
+                  currentSubject === 'english' ? "bg-rose-400/30" : "bg-purple-400/30"
+                )} />
+                
+                {/* Inner glass layer */}
+                <div className="absolute inset-[1px] rounded-[inherit] bg-background/80 backdrop-blur-xl z-0" />
+
+                <CardContent className="h-full p-6 relative z-10 flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-2">
+                        <div className={cn(
+                          "flex items-center justify-center w-8 h-8 rounded-full shadow-inner",
+                          currentSubject === 'english' 
+                            ? "bg-gradient-to-br from-amber-400 to-orange-500" 
+                            : "bg-gradient-to-br from-indigo-400 to-primary"
+                        )}>
+                          <Target className="w-4 h-4 text-white drop-shadow-sm" />
+                        </div>
+                        <span className="font-bold tracking-tight text-foreground/80 uppercase text-[11px]">Recommended Focus</span>
+                      </div>
+                      <div className={cn(
+                        "px-2.5 py-1 rounded-full border text-[10px] font-bold tracking-wide uppercase shadow-sm flex items-center gap-1",
+                        currentSubject === 'english'
+                          ? "bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800"
+                          : "bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800"
+                      )}>
+                        <Flame className="w-3 h-3" />
+                        High Priority
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5 mb-6">
+                      <h3 className="text-2xl sm:text-3xl font-black text-foreground drop-shadow-sm line-clamp-2 leading-tight">
+                        {lowestReadinessTopic ? lowestReadinessTopic.topic : 'First Session'}
+                      </h3>
+                      <p className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
+                        Readiness
+                        <span className={cn(
+                          "font-bold",
+                          lowestReadinessTopic && lowestReadinessTopic.readiness < 40 ? "text-red-500 drop-shadow-sm" :
+                          lowestReadinessTopic && lowestReadinessTopic.readiness < 70 ? "text-amber-500 drop-shadow-sm" : "text-emerald-500 drop-shadow-sm"
+                        )}>
+                          {lowestReadinessTopic ? Math.round(lowestReadinessTopic.readiness) : 0}%
+                        </span>
+                      </p>
+                    </div>
+
+                    <div className="w-full bg-muted/60 rounded-full h-2 mb-8 overflow-hidden flex shadow-inner">
+                      <div 
+                        className={cn(
+                          "h-full rounded-full transition-all duration-1000 ease-out",
+                          currentSubject === 'english' 
+                            ? "bg-gradient-to-r from-amber-400 to-orange-500" 
+                            : "bg-gradient-to-r from-indigo-400 to-primary"
+                        )}
+                        style={{ width: `${lowestReadinessTopic ? Math.max(5, Math.round(lowestReadinessTopic.readiness)) : 0}%` }}
+                      />
+                    </div>
                   </div>
-                  <p className="text-sm text-muted-foreground">
-                    {lowestReadinessTopic
-                      ? `Section: ${lowestReadinessTopic.topic}`
-                      : 'Start your first practice session'}
-                  </p>
-                  {lowestReadinessTopic && (
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Readiness: {Math.round(lowestReadinessTopic.readiness)}%
-                    </p>
-                  )}
 
-                  <Progress 
-                    value={lowestReadinessTopic ? Math.round(lowestReadinessTopic.readiness) : 0} 
-                    indicatorClassName={currentSubject === 'english' ? "bg-amber-500" : undefined}
-                    className="h-2 mb-4 mt-4"
-                  />
+                  <div className="space-y-5">
+                    <Button 
+                      onClick={startFocusedPractice}
+                      className={cn(
+                        "w-full h-12 text-base font-bold text-white shadow-md hover:shadow-xl transition-all hover:-translate-y-0.5 relative group overflow-hidden rounded-xl",
+                        currentSubject === 'english' 
+                          ? "bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500"
+                          : "bg-gradient-to-r from-indigo-500 to-primary hover:from-indigo-400 hover:to-primary"
+                      )}
+                    >
+                      <div className="absolute inset-0 w-full h-full bg-white/20 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite] skew-x-12" />
+                      <Zap className="h-5 w-5 mr-2 animate-pulse" />
+                      Train Weakness
+                    </Button>
 
-                  <Button 
-                    onClick={startFocusedPractice}
-                    variant="outline"
-                    className="w-full"
-                  >
-                    <Zap className="h-4 w-4 mr-2" />
-                    Start focused practice
-                  </Button>
-
-                  <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
-                    <span className={cn(
-                       "inline-flex items-center rounded-full border px-2 py-0.5",
-                       currentSubject === 'english' ? "border-amber-500/20 bg-amber-500/10 text-amber-700 dark:text-amber-400" : "border-indigo-500/20 bg-indigo-500/10 text-indigo-700"
-                    )}>
-                      Personalised focus
-                    </span>
-                    <span>Mixed tiers • Exam-style</span>
+                    <div className="flex flex-wrap items-center justify-center gap-2">
+                      <span className="flex items-center gap-1.5 px-3 py-1.5 bg-background/60 backdrop-blur-sm border border-border/50 rounded-full text-xs font-semibold text-muted-foreground shadow-sm hover:bg-muted/50 transition-colors">
+                        <BrainCircuit className="w-3.5 h-3.5" />
+                        AI Personalised
+                      </span>
+                      <span className="flex items-center gap-1.5 px-3 py-1.5 bg-background/60 backdrop-blur-sm border border-border/50 rounded-full text-xs font-semibold text-muted-foreground shadow-sm hover:bg-muted/50 transition-colors">
+                        <Swords className="w-3.5 h-3.5" />
+                        Mixed Tiers
+                      </span>
+                    </div>
                   </div>
                 </CardContent>
               </Card>

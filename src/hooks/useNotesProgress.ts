@@ -4,13 +4,15 @@ import { resolveUserTrack } from '@/lib/track';
 import { getTrackSections } from '@/lib/trackCurriculum';
 import notesData from '@/data/edexcel_gcse_notes.json';
 import { useAppContext } from '@/hooks/useAppContext';
+import { useSubject } from '@/contexts/SubjectContext';
 import { isAbortLikeError } from '@/lib/errors';
 
 export function useNotesProgress() {
   const { user, profile } = useAppContext();
+  const { currentSubject } = useSubject();
   const userTrack = resolveUserTrack(profile?.track ?? null);
   const isElevenPlus = userTrack === '11plus';
-  const trackSections = getTrackSections(userTrack);
+  const trackSections = getTrackSections(userTrack, currentSubject);
   const gcseTopicCount = useMemo(
     () => Object.values(notesData).reduce((sum, section) => sum + (Array.isArray(section) ? section.length : 0), 0),
     [],
