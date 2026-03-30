@@ -310,6 +310,44 @@
     --connect-bronze: 30 50% 55%;
   }
 
+  .dark.theme-english {
+    /* English Dark Mode - Warm Amber Tinges for a unified look */
+    --background: 43 100% 2%;  
+    --card: 43 60% 5%;
+    --popover: 43 60% 5%;
+    
+    --primary: 43 96% 56%;
+    --primary-glow: 43 96% 66%;
+    --secondary: 43 40% 10%;
+    --muted: 43 40% 10%;
+    
+    /* Yellow/Amber Tinge Box Outlines */
+    --border: 43 50% 15%; 
+    --input: 43 40% 10%;
+    --ring: 43 96% 56%;
+
+    /* Border Gradient for English Mode */
+    --border-gradient: linear-gradient(135deg, hsl(43 96% 56%) 0%, hsl(43 96% 66%) 100%);
+
+    /* Theme English Overrides for Gradients */
+    --gradient-hero: linear-gradient(135deg, hsl(43 96% 56%) 0%, hsl(43 96% 66%) 100%);
+    --gradient-hero-banner: linear-gradient(135deg, hsl(43 96% 56%) 0%, hsl(43 96% 66%) 100%);
+    --gradient-primary: linear-gradient(135deg, hsl(43 96% 56%) 0%, hsl(43 96% 66%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(43 60% 5%) 0%, hsl(43 60% 7%) 100%);
+    --gradient-premium: linear-gradient(135deg, hsl(43 96% 60%) 0%, hsl(43 96% 65%) 100%);
+
+    /* Section Background Tints */
+    --bg-readiness: 43 50% 5%;
+    --bg-topics: 43 45% 6%;
+    --bg-actions: 43 55% 4%;
+    --bg-chat-sidebar: 43 60% 3%;
+    --bg-quick-start: 43 40% 7%;
+    --bg-usage-card: 43 45% 6%;
+    
+    /* Shadows */
+    --shadow-glow: 0 0 0 1px hsl(43 96% 56% / 0.15), 0 4px 12px -1px hsl(43 96% 56% / 0.2);
+  }
+
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
