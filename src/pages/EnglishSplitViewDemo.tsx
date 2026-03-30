@@ -644,7 +644,7 @@ export function EnglishSplitViewDemo() {
                   )}
                 </p>
                 
-                <div className="grid grid-cols-2 gap-4 mb-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                   {results.compTotal > 0 && (
                     <div className="bg-card border border-border/60 p-5 rounded-2xl shadow-sm">
                       <div className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1.5">Comprehension</div>
@@ -691,12 +691,12 @@ export function EnglishSplitViewDemo() {
       
       {/* Production UI start (Demo controls removed) */}
 
-      <div className="flex flex-1 overflow-hidden relative">
+      <div className="flex flex-col lg:flex-row flex-1 overflow-hidden relative">
         
         {/* ---------------- LEFT PANE: DYNAMIC PASSAGES ---------------- */}
-        <div className="w-[45%] border-r border-border/80 flex flex-col bg-card/50 relative overflow-hidden transition-all duration-300">
+        <div className="w-full lg:w-[45%] lg:border-r border-b lg:border-b-0 border-border/80 flex flex-col bg-card/50 relative overflow-hidden transition-all duration-300 h-[45vh] lg:h-auto shrink-0 z-10">
           
-          <div className="px-6 py-4 border-b border-border flex items-center justify-between bg-card shrink-0 z-10 sticky top-0 shadow-sm">
+          <div className="px-5 lg:px-6 py-3 lg:py-4 border-b border-border flex items-center justify-between bg-card shrink-0 z-10 sticky top-0 shadow-sm">
             <div className="flex items-center gap-2">
               <BookOpen className="w-4 h-4 text-amber-500" />
               <span className="font-serif font-bold tracking-tight text-foreground line-clamp-1">
