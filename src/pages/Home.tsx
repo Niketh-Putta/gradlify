@@ -128,27 +128,27 @@ export function Home() {
         const [practiceRes, mockRes, sessionRes] = await Promise.all([
           supabase
             .from('practice_results')
-            .select('id', { count: 'exact', head: true })
+            .select('id')
             .eq('user_id', user.id)
             .limit(1),
           supabase
             .from('mock_attempts')
-            .select('id', { count: 'exact', head: true })
+            .select('id')
             .eq('user_id', user.id)
             .limit(1),
           supabase
             .from('study_sessions')
-            .select('id', { count: 'exact', head: true })
+            .select('id')
             .eq('user_id', user.id)
             .limit(1)
         ]);
 
         const hasActivity = 
-          (practiceRes.count && practiceRes.count > 0) ||
-          (mockRes.count && mockRes.count > 0) ||
-          (sessionRes.count && sessionRes.count > 0);
+          (practiceRes.data && practiceRes.data.length > 0) ||
+          (mockRes.data && mockRes.data.length > 0) ||
+          (sessionRes.data && sessionRes.data.length > 0);
 
-        setPracticeCount(practiceRes.count ?? 0);
+        setPracticeCount(practiceRes.data ? practiceRes.data.length : 0);
         setIsFirstVisit(!hasActivity);
       } catch (error) {
         console.error('Error checking first visit:', error);

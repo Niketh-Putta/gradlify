@@ -165,23 +165,26 @@ export function Layout({ user, onSettings, onSignOut }: LayoutProps) {
       // Progress counters are best-effort; don't block profile rendering on these.
       const planPromise = supabase
         .from('study_plans')
-        .select('id', { count: 'exact', head: true })
-        .eq('user_id', user.id);
+        .select('id')
+        .eq('user_id', user.id)
+        .limit(1);
 
       const readinessPromise = supabase
         .from('readiness_scores')
-        .select('user_id', { count: 'exact', head: true })
-        .eq('user_id', user.id);
+        .select('user_id')
+        .eq('user_id', user.id)
+        .limit(1);
 
       const sessionsPromise = supabase
         .from('study_sessions')
-        .select('id', { count: 'exact', head: true })
-        .eq('user_id', user.id);
+        .select('id')
+        .eq('user_id', user.id)
+        .limit(1);
 
       const progressResults = await Promise.allSettled([planPromise, readinessPromise, sessionsPromise]);
-      const planCount = progressResults[0].status === 'fulfilled' ? progressResults[0].value.count : 0;
-      const readinessCount = progressResults[1].status === 'fulfilled' ? progressResults[1].value.count : 0;
-      const sessionCount = progressResults[2].status === 'fulfilled' ? progressResults[2].value.count : 0;
+      const planCount = progressResults[0].status === 'fulfilled' ? (progressResults[0].value.data?.length ?? 0) : 0;
+      const readinessCount = progressResults[1].status === 'fulfilled' ? (progressResults[1].value.data?.length ?? 0) : 0;
+      const sessionCount = progressResults[2].status === 'fulfilled' ? (progressResults[2].value.data?.length ?? 0) : 0;
       setHasProgress(Boolean(planCount || readinessCount || sessionCount));
     } catch (error) {
       const abortError = isAbortLikeError(error);

@@ -300,15 +300,16 @@ export function usePremium(trackOverride?: UserTrack) {
 
           const startOfDay = new Date(now);
           startOfDay.setHours(0, 0, 0, 0);
-          const { count: trackChallengeCount, error: challengeCountError } = await supabase
+          const { data: trackChallengeData, error: challengeCountError } = await supabase
             .from('extreme_results')
-            .select('id', { count: 'exact', head: true })
+            .select('id')
             .eq('user_id', profile.user_id)
             .eq('track', activeTrack)
-            .gte('created_at', startOfDay.toISOString());
+            .gte('created_at', startOfDay.toISOString())
+            .limit(1);
           if (challengeCountError) throw challengeCountError;
 
-          const serverUses = trackChallengeCount || 0;
+          const serverUses = trackChallengeData?.length ? 1 : 0;
           const effectiveUses = Math.max(serverUses, localUses);
           setDailyChallengeUses(effectiveUses);
           writeLocalChallengeUsage(activeTrack, effectiveUses, data.daily_challenge_reset_at || localUsage.resetAt || null);
@@ -440,14 +441,15 @@ export function usePremium(trackOverride?: UserTrack) {
 
         const startOfDay = new Date(now);
         startOfDay.setHours(0, 0, 0, 0);
-        const { count, error: countError } = await supabase
+        const { data: trackChallengeData, error: countError } = await supabase
           .from('extreme_results')
-          .select('id', { count: 'exact', head: true })
+          .select('id')
           .eq('user_id', profile.user_id)
           .eq('track', activeTrack)
-          .gte('created_at', startOfDay.toISOString());
+          .gte('created_at', startOfDay.toISOString())
+          .limit(1);
         if (!countError) {
-          serverUses = count || 0;
+          serverUses = trackChallengeData?.length ? 1 : 0;
         }
       }
     } catch (e) {
