@@ -310,7 +310,9 @@
     --connect-bronze: 30 50% 55%;
   }
 
-  .dark .theme-english, .dark.theme-english {
+  html.dark body.theme-english,
+  body.theme-english.dark,
+  .dark .theme-english {
     /* English Dark Mode - Warm Amber Tinges for a unified look */
     --background: 43 100% 2%;  
     --card: 43 60% 5%;
@@ -321,8 +323,8 @@
     --secondary: 43 40% 10%;
     --muted: 43 40% 10%;
     
-    /* Yellow/Amber Tinge Box Outlines */
-    --border: 43 50% 15%; 
+    /* Enhanced Yellow/Amber Tinge Box Outlines for distinct visibility */
+    --border: 43 80% 22%;  
     --input: 43 40% 10%;
     --ring: 43 96% 56%;
 
