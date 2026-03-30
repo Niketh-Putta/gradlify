@@ -634,69 +634,64 @@ export function Home() {
                   : 'translate-y-8 opacity-0'
               }`}
             >
-              <Card className="h-full border border-border/40 bg-card hover:bg-accent/5 transition-colors duration-500 overflow-hidden relative shadow-sm">
-                <CardContent className="h-full p-5 sm:p-6 flex flex-col justify-between">
-                  <div>
-                    {/* Header */}
-                    <div className="flex items-center gap-2 mb-5">
-                      <div className={cn(
-                        "w-2 h-2 rounded-full",
-                        currentSubject === 'english' ? "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]" : "bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.5)]"
-                      )} />
-                      <span className="font-semibold tracking-[0.05em] text-muted-foreground uppercase text-[10px]">
-                        Recommended Focus
-                      </span>
-                    </div>
+              <Card 
+                className="h-full border-border/40 hover:shadow-lg transition-all duration-300"
+                style={{ backgroundColor: 'hsl(var(--bg-readiness))' }}
+              >
+                <CardHeader className="text-center pb-2 sm:pb-3 px-2 sm:px-3">
+                  <div className="flex items-center justify-center gap-2 mb-1">
+                    <Target className={cn(
+                      "h-5 w-5",
+                      currentSubject === 'english' ? "text-amber-500" : "text-primary"
+                    )} />
+                    <CardTitle className="text-base sm:text-lg md:text-xl font-bold text-foreground">
+                      Focus Topic
+                    </CardTitle>
+                  </div>
+                  <CardDescription className="text-xs sm:text-sm text-muted-foreground">
+                    Your highest priority area to improve
+                  </CardDescription>
+                </CardHeader>
 
-                    {/* Topic Name */}
-                    <div className="mb-4">
-                      <h3 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight leading-snug mb-1.5">
-                        {lowestReadinessTopic ? lowestReadinessTopic.topic : 'Initial Assessment'}
-                      </h3>
-                      <p className="text-sm text-muted-foreground font-medium">
-                        Readiness: {" "}
-                        <span className={cn(
-                          "font-semibold",
+                <CardContent className="px-2 sm:px-3 pb-4">
+                  <div className="bg-muted/30 rounded-xl p-6 text-center space-y-3 mb-4">
+                    <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-widest text-muted-foreground">
+                      Recommended Section
+                    </p>
+                    <p className="text-xl sm:text-2xl font-bold text-foreground leading-tight px-2">
+                      {lowestReadinessTopic ? lowestReadinessTopic.topic : 'Initial Assessment'}
+                    </p>
+                    <div className="flex flex-col items-center justify-center pt-2">
+                      <p className="text-xs text-muted-foreground font-medium flex items-center gap-1">
+                        Current Readiness: <span className={cn(
+                          "font-bold",
                           lowestReadinessTopic && lowestReadinessTopic.readiness < 40 ? "text-red-500" :
                           lowestReadinessTopic && lowestReadinessTopic.readiness < 70 ? "text-amber-500" : "text-emerald-500"
-                        )}>
-                          {lowestReadinessTopic ? Math.round(lowestReadinessTopic.readiness) : 0}%
-                        </span>
+                        )}>{lowestReadinessTopic ? Math.round(lowestReadinessTopic.readiness) : 0}%</span>
                       </p>
-                    </div>
-
-                    {/* Minimal Progress Bar */}
-                    <div className="w-full bg-muted/50 rounded-full h-[4px] mb-8 overflow-hidden">
-                      <div 
-                        className={cn(
-                          "h-full rounded-full transition-all duration-1000 ease-out",
-                          currentSubject === 'english' ? "bg-amber-500" : "bg-indigo-500"
-                        )}
-                        style={{ width: `${lowestReadinessTopic ? Math.max(2, Math.round(lowestReadinessTopic.readiness)) : 0}%` }}
-                      />
+                      
+                      {/* Extremely thin, elegant progress bar */}
+                      <div className="w-32 bg-muted/80 rounded-full h-1 overflow-hidden mt-2 mx-auto">
+                        <div 
+                          className={cn(
+                            "h-full rounded-full transition-all duration-1000",
+                            currentSubject === 'english' ? "bg-amber-500" : "bg-primary"
+                          )}
+                          style={{ width: `${lowestReadinessTopic ? Math.max(2, Math.round(lowestReadinessTopic.readiness)) : 0}%` }}
+                        />
+                      </div>
                     </div>
                   </div>
 
-                  <div className="space-y-4">
-                    {/* Action Button */}
+                  <div className="px-2 sm:px-4">
                     <Button 
                       onClick={startFocusedPractice}
                       variant="outline"
-                      className="w-full h-11 text-sm font-semibold rounded-lg shadow-sm border-border hover:bg-foreground hover:text-background transition-colors duration-300"
+                      className="w-full text-foreground hover:bg-muted/50 h-10 text-sm font-medium shadow-sm transition-colors rounded-lg border-border/50"
                     >
                       <Zap className="h-4 w-4 mr-2" />
-                      Train Weakness
+                      Start focused practice
                     </Button>
-
-                    <div className="flex items-center justify-center gap-3">
-                      <span className="text-[10px] font-medium text-muted-foreground tracking-wide uppercase">
-                        AI Personalised
-                      </span>
-                      <span className="w-1 h-1 rounded-full bg-muted-foreground/30" />
-                      <span className="text-[10px] font-medium text-muted-foreground tracking-wide uppercase">
-                        Mixed Tiers
-                      </span>
-                    </div>
                   </div>
                 </CardContent>
               </Card>
