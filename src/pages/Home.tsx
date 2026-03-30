@@ -641,10 +641,10 @@ export function Home() {
                   currentSubject === 'english' ? "bg-amber-500" : "bg-indigo-500"
                 )} />
 
-                <CardContent className="h-full p-6 flex flex-col justify-between relative z-10">
-                  <div>
-                    {/* Header */}
-                    <div className="flex items-center justify-between mb-6">
+                <CardContent className="h-full p-6 flex flex-col relative z-10">
+                  {/* Header */}
+                  <div className="flex-[0_0_auto]">
+                    <div className="flex items-center justify-between mb-1">
                       <div className="flex items-center gap-1.5">
                         <Flame className={cn("w-3.5 h-3.5", currentSubject === 'english' ? "text-amber-500" : "text-indigo-500")} />
                         <span className="font-bold tracking-widest text-muted-foreground uppercase text-[10px]">
@@ -656,7 +656,10 @@ export function Home() {
                         <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Personalised</span>
                       </div>
                     </div>
+                  </div>
 
+                  {/* Centered Middle Section */}
+                  <div className="flex-1 flex flex-col justify-center py-2">
                     {/* Topic Name */}
                     <div className="mb-4">
                       <h3 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight leading-tight mb-2 pr-4">
@@ -676,7 +679,7 @@ export function Home() {
                     </div>
 
                     {/* Progress Bar */}
-                    <div className="w-full bg-secondary rounded-full h-[3px] mb-8 overflow-hidden shadow-inner">
+                    <div className="w-full bg-secondary rounded-full h-[3px] overflow-hidden shadow-inner">
                       <div 
                         className={cn(
                           "h-full rounded-full transition-all duration-1000",
@@ -687,7 +690,8 @@ export function Home() {
                     </div>
                   </div>
 
-                  <div className="pt-5 border-t border-border/40 mt-auto">
+                  {/* Bottom Section */}
+                  <div className="pt-4 border-t border-border/40 mt-auto flex-[0_0_auto]">
                     {/* Action Button */}
                     <Button 
                       onClick={startFocusedPractice}
