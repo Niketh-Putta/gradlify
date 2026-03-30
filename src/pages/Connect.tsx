@@ -339,9 +339,9 @@ export default function Connect() {
   const displayLeaderboard = filteredLeaderboard;
 
   return (
-    <div className="max-w-2xl mx-auto px-3 sm:px-6 py-3 sm:py-4 h-full flex flex-col overflow-x-hidden">
+    <div className="w-full max-w-2xl mx-auto px-2 sm:px-6 py-3 sm:py-4 h-full flex flex-col overflow-x-hidden">
       {/* Header */}
-      <header className="mb-2 sm:mb-3 flex-shrink-0 animate-fade-in">
+      <header className="mb-2 sm:mb-3 flex-shrink-0 animate-fade-in w-full">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-1.5">
             <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-lg bg-gradient-to-br from-primary to-indigo-500 flex items-center justify-center">
@@ -386,7 +386,7 @@ export default function Connect() {
       </header>
 
       {/* Secondary Actions Row - Compact on mobile */}
-      <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3 flex-shrink-0 animate-fade-in flex-wrap" style={{ animationDelay: '0.05s' }}>
+      <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3 flex-shrink-0 animate-fade-in flex-wrap w-full" style={{ animationDelay: '0.05s' }}>
         {/* Visibility Toggle */}
         <button
           onClick={handleGlobalOptInToggle}
@@ -487,8 +487,8 @@ export default function Connect() {
       )}
 
       {/* Filters Row - Compact single line */}
-      <div className="flex items-center gap-2 sm:gap-4 mb-1.5 sm:mb-2 flex-shrink-0 animate-fade-in" style={{ animationDelay: '0.08s' }}>
-        <nav className="flex items-center gap-2 sm:gap-3">
+      <div className="flex flex-wrap items-center gap-2 sm:gap-4 mb-2 flex-shrink-0 animate-fade-in w-full" style={{ animationDelay: '0.08s' }}>
+        <nav className="flex items-center gap-2 sm:gap-3 flex-wrap">
           <button
             onClick={() => setScope('global')}
             className={cn(
@@ -586,10 +586,10 @@ export default function Connect() {
               <div
                 key={entry.user_id}
                 className={cn(
-                  "leaderboard-row py-2.5 mx-[-10px] px-2.5 rounded-xl transition-colors group",
+                  "leaderboard-row py-2 mx-0 px-2 rounded-xl transition-colors group",
                   entry.rank <= 10 && "top-ten-highlight",
                   index > 0 && "border-t border-border/50",
-                  isYou && "bg-primary/5 border-l-2 border-l-primary ml-[-12px] pl-3",
+                  isYou && "bg-primary/5 border-l-2 border-l-primary pl-2",
                   canRemoveFriend && "cursor-pointer"
                 )}
                 onDoubleClick={() => {

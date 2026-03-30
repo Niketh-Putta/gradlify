@@ -212,9 +212,9 @@ export function Navigation({ user, profile, onSettings, onSignOut }: NavigationP
               )
             : 'text-muted-foreground hover:text-foreground hover:bg-muted/70',
           isMobile 
-            ? 'justify-center flex-col gap-1 min-h-[56px] py-2 px-1 w-full' 
+            ? 'justify-center flex-col gap-0.5 min-h-[48px] py-1.5 px-0 w-full' 
             : inGrid 
-              ? 'py-2.5 px-3 gap-3 min-h-[56px] w-full'
+              ? 'py-2 px-2 gap-2 min-h-[44px] w-full'
               : cn('h-11', sidebarHovered ? 'w-full' : 'w-11')
         )
       }
@@ -222,11 +222,11 @@ export function Navigation({ user, profile, onSettings, onSignOut }: NavigationP
     >
       <div className={cn(
         "flex items-center justify-center shrink-0",
-        isMobile ? "h-6 w-full" : inGrid ? "w-6 h-6" : "w-11 h-11"
+        isMobile ? "h-4 w-full" : inGrid ? "w-4 h-4" : "w-11 h-11"
       )}>
         <item.icon className={cn(
           "shrink-0 transition-transform duration-300",
-          isMobile ? 'h-5 w-5' : 'h-[18px] w-[18px]',
+          isMobile || inGrid ? 'h-4 w-4' : 'h-[18px] w-[18px]',
           !isMobile && !inGrid && sidebarHovered && 'scale-105'
         )} />
       </div>
@@ -238,9 +238,9 @@ export function Navigation({ user, profile, onSettings, onSignOut }: NavigationP
           {item.label}
         </span>
       ) : (
-        <span className={cn(
-           "font-medium whitespace-nowrap overflow-hidden pr-2",
-           inGrid ? 'text-sm' : 'text-xs'
+         <span className={cn(
+           "font-medium whitespace-nowrap overflow-hidden px-0.5",
+           isMobile ? 'text-[9px] tracking-tight text-center w-full' : (inGrid ? 'text-xs truncate' : 'text-xs')
         )}>
           {item.label}
         </span>
@@ -436,25 +436,25 @@ export function Navigation({ user, profile, onSettings, onSignOut }: NavigationP
               <div className="mt-2 pt-2 space-y-1 border-t border-border/50">
                 <Button
                   variant="ghost"
-                  className="w-full justify-start whitespace-nowrap overflow-hidden text-ellipsis"
+                  className="w-full justify-start whitespace-nowrap overflow-hidden text-ellipsis h-10 px-3"
                   onClick={() => {
                     onSettings();
                     setMobileMenuOpen(false);
                   }}
                 >
-                  <Settings className="h-4 w-4 mr-3 shrink-0" />
-                  <span className="overflow-hidden text-ellipsis">Settings</span>
+                  <Settings className="h-4 w-4 mr-2 shrink-0" />
+                  <span className="overflow-hidden text-ellipsis text-xs">Settings</span>
                 </Button>
                 <Button
                   variant="ghost"
-                  className="w-full justify-start text-destructive hover:text-destructive whitespace-nowrap overflow-hidden text-ellipsis"
+                  className="w-full justify-start text-destructive hover:text-destructive whitespace-nowrap overflow-hidden text-ellipsis h-10 px-3"
                   onClick={() => {
                     onSignOut();
                     setMobileMenuOpen(false);
                   }}
                 >
-                  <LogOut className="h-4 w-4 mr-3 shrink-0" />
-                  <span className="overflow-hidden text-ellipsis">Sign Out</span>
+                  <LogOut className="h-4 w-4 mr-2 shrink-0" />
+                  <span className="overflow-hidden text-ellipsis text-xs">Sign Out</span>
                 </Button>
               </div>
             </nav>
@@ -497,26 +497,26 @@ export function Navigation({ user, profile, onSettings, onSignOut }: NavigationP
           </>
         )}
         
-        <div className="flex items-center justify-around px-2 py-2">
+        <div className="flex items-center justify-between px-1 py-1.5 w-full">
           {primaryNavigationItems.map((item) => (
-            <div key={item.path} className="flex-1 max-w-[120px]">
+            <div key={item.path} className="flex-1 w-[20%]">
               <NavItem item={item} isMobile />
             </div>
           ))}
           {/* More Button */}
-          <div className="flex-1 max-w-[120px]">
+          <div className="flex-1 w-[20%]">
             <button
               onClick={() => setBottomMoreOpen(!bottomMoreOpen)}
               className={cn(
-                "flex items-center gap-1 px-2.5 py-1.5 rounded-lg transition-colors duration-150 ease-out relative w-full",
-                "justify-center flex-col min-h-[56px]",
+                "flex items-center gap-0.5 px-0 py-1.5 rounded-lg transition-colors duration-150 ease-out relative w-full",
+                "justify-center flex-col min-h-[48px]",
                 bottomMoreOpen
                   ? cn(currentSubject === 'english' ? 'bg-amber-500 text-white shadow-amber-500/20' : 'bg-primary text-primary-foreground shadow-primary')
                   : 'text-muted-foreground hover:text-foreground hover:bg-muted/70'
               )}
             >
-              <MoreHorizontal className="h-4 w-4" />
-              <span className="font-medium text-xs">More</span>
+              <MoreHorizontal className="h-4 w-4 shrink-0" />
+              <span className="font-medium text-[9px] tracking-tight truncate w-full text-center px-0.5">More</span>
             </button>
           </div>
         </div>

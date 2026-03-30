@@ -528,7 +528,7 @@ export function EnglishSplitViewDemo() {
         if (topQ) setActiveQuestionId(topQ);
       }
     }, {
-      root: rightPaneRef.current,
+      root: window.innerWidth < 1024 ? null : rightPaneRef.current,
       rootMargin: "-40% 0px -40% 0px",
       threshold: 0
     });
@@ -853,8 +853,8 @@ export function EnglishSplitViewDemo() {
                           className={cn(
                             "p-6 rounded-2xl border transition-all duration-500 cursor-default scroll-m-24 relative",
                             isSelected 
-                              ? (examMode === 'mock' ? "border-foreground/20 bg-card shadow-[0_10px_40px_-15px_rgba(0,0,0,0.3)] ring-1 ring-foreground/10 scale-[1.02]" : "border-amber-500/50 bg-card shadow-[0_10px_40px_-15px_rgba(245,158,11,0.2)] ring-4 ring-amber-500/10 scale-[1.02]")
-                              : "border-border/60 bg-card/40 hover:bg-card/80 opacity-60 hover:opacity-100"
+                              ? (examMode === 'mock' ? "border-amber-500/30 dark:border-amber-500/40 bg-card shadow-lg ring-1 ring-amber-500/10 scale-[1.02]" : "border-amber-500/50 bg-card shadow-xl ring-4 ring-amber-500/10 scale-[1.02]")
+                              : "border-border/60 dark:border-amber-500/20 bg-card/40 hover:bg-card/80 hover:border-amber-500/30 opacity-60 hover:opacity-100"
                           )}
                         >
                           {examMode === 'mock' && (
@@ -884,7 +884,7 @@ export function EnglishSplitViewDemo() {
                               const selected = selectedAnswers[q.id] === opt.id;
                               
                               // Logic for showing distractors / evaluations
-                              const showDistractor = (examMode === 'practice' && showTrap === q.id && selected && opt.trap) || (isReviewMode && opt.trap && (selected || opt.correct));
+                              const showDistractor = (examMode === 'practice' && showTrap === q.id && selected && opt.trap) || (isReviewMode && opt.trap);
                               const evaluateCorrectness = (examMode === 'practice' && selected) || (isReviewMode && opt.correct);
 
                               return (

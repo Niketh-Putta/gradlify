@@ -170,12 +170,12 @@ export function LeaderboardTab() {
           <Tabs
             value={period}
             onValueChange={(v) => setPeriod(v === 'day' || v === 'week' || v === 'month' ? v : 'day')}
-            className="w-full sm:w-auto"
+            className="w-full sm:w-auto overflow-hidden"
           >
-            <TabsList>
-              <TabsTrigger value="day">Today</TabsTrigger>
-              <TabsTrigger value="week">This Week</TabsTrigger>
-              <TabsTrigger value="month">This Month</TabsTrigger>
+            <TabsList className="flex w-full overflow-x-auto no-scrollbar justify-start sm:justify-center">
+              <TabsTrigger value="day" className="shrink-0">Today</TabsTrigger>
+              <TabsTrigger value="week" className="shrink-0">This Week</TabsTrigger>
+              <TabsTrigger value="month" className="shrink-0">This Month</TabsTrigger>
             </TabsList>
           </Tabs>
 

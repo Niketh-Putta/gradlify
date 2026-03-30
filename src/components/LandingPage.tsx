@@ -157,7 +157,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
       {
         q: isElevenPlus ? "Which 11+ formats does Gradlify support?" : "Which exam boards does Gradlify support?",
         a: isElevenPlus
-          ? "11+ maths preparation with exam-style question formats and readiness tracking for GL, CEM, and ISEB."
+          ? "11+ Maths and English preparation with exam-style question formats and readiness tracking for GL, CEM, and ISEB."
           : "All GCSE boards - the content is aligned to the standard GCSE Maths curriculum.",
       },
       {
@@ -470,11 +470,11 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                 </h1>
 
                 <p className={`mt-4 text-sm sm:text-lg ${mutedText} max-w-2xl leading-relaxed`}>
-                  A serious 11+ system that keeps practice aligned, progress visible, and revision simple.
+                  A serious 11+ Maths & English system that keeps practice aligned, progress visible, and revision simple.
                 </p>
                 {showInternationalTagline && (
                   <p className={`mt-2 text-[13px] sm:text-base ${mutedText} max-w-2xl`}>
-                    Learn UK maths and practise properly from anywhere - our exam-style questions, step-by-step feedback, and readiness tracking are trusted by learners worldwide.
+                    Learn UK Maths & English and practise properly from anywhere - our exam-style questions, step-by-step feedback, and readiness tracking are trusted by learners worldwide.
                   </p>
                 )}
 
