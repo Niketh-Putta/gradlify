@@ -636,21 +636,21 @@ export function Home() {
             >
               <Card className={cn(
                 "h-full border transition-all duration-500 overflow-hidden relative shadow-md group hover:shadow-lg",
-                currentSubject === 'english' ? "border-amber-500/30 bg-gradient-to-br from-card to-amber-500/5 hover:border-amber-500/50" : "border-indigo-500/30 bg-gradient-to-br from-card to-indigo-500/5 hover:border-indigo-500/50"
+                currentSubject === 'english' ? "border-amber-500/30 bg-gradient-to-br from-card to-amber-500/5 hover:border-amber-500/50" : "border-primary/30 bg-gradient-to-br from-card to-primary/5 hover:border-primary/50"
               )}>
                 {/* Extremely subtle ambient corner glow */}
                 <div className={cn(
                   "absolute -right-20 -top-20 w-40 h-40 rounded-full blur-[50px] opacity-15 transition-opacity group-hover:opacity-30",
-                  currentSubject === 'english' ? "bg-amber-500" : "bg-indigo-500"
+                  currentSubject === 'english' ? "bg-amber-500" : "bg-primary"
                 )} />
 
                 <CardContent className="h-full p-6 flex flex-col relative z-10">
                   {/* Header */}
                   <div className="flex-[0_0_auto]">
                     <div className="flex items-center justify-between mb-1">
-                      <div className={cn("flex items-center gap-1.5 px-3 py-1.5 rounded-full border shadow-sm backdrop-blur-sm", currentSubject === 'english' ? "bg-amber-500/10 border-amber-500/20" : "bg-indigo-500/10 border-indigo-500/20")}>
-                        <Flame className={cn("w-3.5 h-3.5", currentSubject === 'english' ? "text-amber-500" : "text-indigo-500")} />
-                        <span className={cn("font-bold tracking-widest uppercase text-[9px] md:text-[10px]", currentSubject === 'english' ? "text-amber-600 dark:text-amber-500" : "text-indigo-600 dark:text-indigo-400")}>
+                      <div className={cn("flex items-center gap-1.5 px-3 py-1.5 rounded-full border shadow-sm backdrop-blur-sm", currentSubject === 'english' ? "bg-amber-500/10 border-amber-500/20" : "bg-primary/10 border-primary/20")}>
+                        <Flame className={cn("w-3.5 h-3.5", currentSubject === 'english' ? "text-amber-500" : "text-primary")} />
+                        <span className={cn("font-bold tracking-widest uppercase text-[9px] md:text-[10px]", currentSubject === 'english' ? "text-amber-600 dark:text-amber-500" : "text-primary dark:text-blue-400")}>
                           Target Focus
                         </span>
                       </div>
@@ -704,7 +704,7 @@ export function Home() {
                         "border border-white/10",
                         currentSubject === 'english' 
                           ? "bg-amber-500 hover:bg-amber-400 text-slate-900" 
-                          : "bg-indigo-600 hover:bg-indigo-500 text-white"
+                          : "bg-primary hover:bg-blue-500 text-primary-foreground"
                       )}
                     >
                       <Zap className="h-4 w-4 mr-2" />

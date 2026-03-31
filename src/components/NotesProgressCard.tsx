@@ -27,7 +27,7 @@ export function NotesProgressCard({ className, id, 'data-animate': dataAnimate, 
       data-animate={dataAnimate}
       className={cn(
         className,
-        "border border-dashed transition-all duration-500 bg-background/50",
+        "border transition-all duration-500 bg-background/50 backdrop-blur-sm",
         currentSubject === 'english' ? "border-amber-500/20" : "border-primary/20",
         onClick && 'cursor-pointer hover:shadow-md hover:border-solid',
         currentSubject === 'english' && onClick ? 'hover:border-amber-500/40' : onClick ? 'hover:border-primary/40' : ''

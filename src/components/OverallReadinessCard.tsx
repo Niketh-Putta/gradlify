@@ -127,10 +127,9 @@ export function OverallReadinessCard({
       className={cn(
         className,
         "border overflow-hidden relative shadow-md transition-all duration-500",
-        currentSubject === 'english' ? "bg-amber-500/[0.03] border-amber-500/20" : "bg-primary/[0.03] border-primary/20",
-        onClick && 'cursor-pointer hover:shadow-lg hover:-translate-y-0.5 hover:border-amber-500/40' // Added hover effect for English specifically, but we'll conditionally switch it
+        currentSubject === 'english' ? "bg-amber-500/[0.03] border-amber-500/20 hover:border-amber-500/50" : "bg-primary/[0.03] border-primary/20 hover:border-primary/50",
+        onClick && 'cursor-pointer hover:shadow-lg hover:-translate-y-0.5'
       )}
-      style={onClick && currentSubject !== 'english' ? { borderColor: 'hsl(var(--primary) / 0.4)' } : {}}
       id={id} 
       data-animate={dataAnimate}
       onClick={onClick}
