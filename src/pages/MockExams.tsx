@@ -331,7 +331,7 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
           )}
         </header>
 
-        <div className="bg-card border border-border/40 rounded-2xl p-4 sm:p-5 mb-10 sm:mb-14 shadow-sm space-y-4">
+        <div className={cn("bg-card border rounded-2xl p-4 sm:p-5 mb-10 sm:mb-14 shadow-sm space-y-4", currentSubject === 'english' ? "border-amber-500/30" : "border-border/40")}>
           <div className="flex items-center gap-3 sm:gap-4">
             <div className="w-9 h-9 sm:w-10 sm:h-10 bg-muted rounded-lg flex items-center justify-center text-muted-foreground"><Timer className="h-4 w-4" /></div>
             <div className="flex-1">
@@ -372,11 +372,11 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
                 { id: 'mock-exam', label: 'Mock Exam', sub: 'Timed session, exam format', icon: Timer },
                 { id: 'challenge', label: 'Challenge Session', sub: 'Hardest questions only', icon: Crown }
               ].filter(m => !(currentSubject === 'english' && m.id === 'challenge')).map((m) => (
-                <Label key={m.id} htmlFor={m.id} className={cn("flex flex-col gap-1 p-4 rounded-2xl border transition-all cursor-pointer relative", examMode === m.id ? (currentSubject === 'english' ? "border-amber-500 bg-amber-500/5 shadow-sm" : "border-primary bg-primary/5 shadow-sm") : "border-border/60 bg-card hover:bg-muted/30")}>
+                <Label key={m.id} htmlFor={m.id} className={cn("flex flex-col gap-1 p-4 rounded-2xl border transition-all cursor-pointer relative", examMode === m.id ? (currentSubject === 'english' ? "border-amber-500 bg-amber-500/5 shadow-sm" : "border-primary bg-primary/5 shadow-sm") : (currentSubject === 'english' ? "border-amber-500/20 bg-card hover:bg-amber-500/5" : "border-border/60 bg-card hover:bg-muted/30"))}>
                   <div className="flex items-center justify-between mb-1">
                     <span className="font-semibold text-sm">{m.label}</span>
                     <RadioGroupItem value={m.id} id={m.id} className="sr-only" />
-                    <div className={cn("h-4 w-4 rounded-full border-2 flex items-center justify-center", examMode === m.id ? (currentSubject === 'english' ? "border-amber-500 bg-amber-500 text-white" : "border-primary bg-primary text-white") : "border-muted")}>
+                    <div className={cn("h-4 w-4 rounded-full border-2 flex items-center justify-center", examMode === m.id ? (currentSubject === 'english' ? "border-amber-500 bg-amber-500 text-white" : "border-primary bg-primary text-white") : (currentSubject === 'english' ? "border-amber-500/30" : "border-muted"))}>
                       {examMode === m.id && <Check className="h-2.5 w-2.5" />}
                     </div>
                   </div>
@@ -399,10 +399,10 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
                       className={cn(
                         "px-3 py-2.5 rounded-xl border text-xs font-semibold transition-all", 
                         opt.value !== 'mixed' 
-                          ? "opacity-40 cursor-not-allowed bg-muted/20 text-muted-foreground border-border/30"
+                          ? (currentSubject === 'english' ? "opacity-40 cursor-not-allowed bg-amber-500/5 text-amber-600/50 border-amber-500/20" : "opacity-40 cursor-not-allowed bg-muted/20 text-muted-foreground border-border/30")
                           : elevenPlusDifficulty === opt.value 
                             ? (currentSubject === 'english' ? "border-amber-500 bg-amber-500/5 text-amber-600" : "border-primary bg-primary/5 text-primary") 
-                            : "border-border/60 bg-card text-muted-foreground hover:bg-muted/30"
+                            : (currentSubject === 'english' ? "border-amber-500/30 bg-card text-amber-600/70 hover:bg-amber-500/5" : "border-border/60 bg-card text-muted-foreground hover:bg-muted/30")
                       )}
                     >
                       {opt.label}
@@ -415,7 +415,7 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
                 <h2 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Tier</h2>
                 <div className="grid grid-cols-3 gap-2">
                   {['foundation', 'higher', 'both'].map((t) => (
-                    <button key={t} onClick={() => setTierSelection(t as any)} className={cn("px-2 py-2.5 rounded-xl border text-[11px] font-semibold transition-all capitalize", tierSelection === t ? "border-primary bg-primary/5 text-primary" : "border-border/60 bg-card text-muted-foreground hover:bg-muted/30")}>
+                    <button key={t} onClick={() => setTierSelection(t as any)} className={cn("px-2 py-2.5 rounded-xl border text-[11px] font-semibold transition-all capitalize", tierSelection === t ? (currentSubject === 'english' ? "border-amber-500 bg-amber-500/5 text-amber-600" : "border-primary bg-primary/5 text-primary") : (currentSubject === 'english' ? "border-amber-500/30 bg-card text-amber-600/70 hover:bg-amber-500/5" : "border-border/60 bg-card text-muted-foreground hover:bg-muted/30"))}>
                       {t}
                     </button>
                   ))}
@@ -427,7 +427,7 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
                 <h2 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Calculator</h2>
                 <div className="grid grid-cols-3 gap-2">
                   {['calculator', 'non-calculator', 'both'].map((p) => (
-                    <button key={p} onClick={() => setCalcSelection(p as any)} className={cn("px-2 py-2.5 rounded-xl border text-[11px] font-semibold transition-all capitalize", calcSelection === p ? "border-primary bg-primary/5 text-primary" : "border-border/60 bg-card text-muted-foreground hover:bg-muted/30")}>
+                    <button key={p} onClick={() => setCalcSelection(p as any)} className={cn("px-2 py-2.5 rounded-xl border text-[11px] font-semibold transition-all capitalize", calcSelection === p ? (currentSubject === 'english' ? "border-amber-500 bg-amber-500/5 text-amber-600" : "border-primary bg-primary/5 text-primary") : (currentSubject === 'english' ? "border-amber-500/30 bg-card text-amber-600/70 hover:bg-amber-500/5" : "border-border/60 bg-card text-muted-foreground hover:bg-muted/30"))}>
                       {p.replace('-', ' ')}
                     </button>
                   ))}
@@ -454,7 +454,7 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
                     onClick={() => toggleTopic(section.id)}
                     className={cn(
                       "flex items-center justify-between p-4 rounded-2xl border transition-all text-left group",
-                      isSelected ? "shadow-sm" : "border-border/60 bg-card hover:bg-muted/30 opacity-60"
+                      isSelected ? "shadow-sm" : (currentSubject === 'english' ? "border-amber-500/20 bg-card hover:bg-amber-500/5 opacity-60" : "border-border/60 bg-card hover:bg-muted/30 opacity-60")
                     )}
                     style={{ borderColor: isSelected ? color : undefined, backgroundColor: isSelected ? `${color}10` : undefined }}
                   >
@@ -467,7 +467,7 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
                         {isSelected && <span className="text-[10px] font-bold" style={{ color: color }}>{count} Questions</span>}
                       </div>
                     </div>
-                    <div className={cn("h-5 w-5 rounded-full border-2 flex items-center justify-center transition-all", isSelected ? (currentSubject === 'english' ? "bg-amber-500 border-amber-500 text-white" : "bg-primary border-primary text-white") : "border-muted")}>
+                    <div className={cn("h-5 w-5 rounded-full border-2 flex items-center justify-center transition-all", isSelected ? (currentSubject === 'english' ? "bg-amber-500 border-amber-500 text-white" : "bg-primary border-primary text-white") : (currentSubject === 'english' ? "border-amber-500/30" : "border-muted"))}>
                       {isSelected && <Check className="h-3 w-3" />}
                     </div>
                   </button>
@@ -477,7 +477,7 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
           </section>
 
           {selectedTopics.length > 0 && examMode !== 'challenge' && currentSubject !== 'english' && (
-            <section className="bg-muted/20 rounded-2xl p-5 border border-dashed border-border/60">
+            <section className={cn("bg-muted/20 rounded-2xl p-5 border border-dashed", currentSubject === 'english' ? "border-amber-500/30" : "border-border/60")}>
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Advanced Filter (Subtopics)</h3>
                 <span className="text-[10px] text-muted-foreground italic">Optional</span>
@@ -498,7 +498,7 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
                           <button
                             key={subtopicId}
                             onClick={() => setSelectedSubtopics(p => isSelected ? p.filter(id => id !== subtopicId) : [...p, subtopicId])}
-                            className={cn("group flex items-center gap-2 px-3 py-1.5 rounded-lg border text-[11px] font-medium transition-all", isSelected ? "text-white" : (currentSubject === 'english' ? "bg-card text-muted-foreground hover:border-amber-500/50" : "bg-card text-muted-foreground hover:border-primary/50"))}
+                            className={cn("group flex items-center gap-2 px-3 py-1.5 rounded-lg border text-[11px] font-medium transition-all", isSelected ? "text-white" : (currentSubject === 'english' ? "bg-card border-amber-500/20 text-amber-600/70 hover:border-amber-500/50" : "bg-card border-border/60 text-muted-foreground hover:border-primary/50"))}
                             style={{ backgroundColor: isSelected ? section.color : undefined, borderColor: isSelected ? section.color : undefined }}
                           >
                             {st.name}
