@@ -517,55 +517,54 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
           <div className="fixed bottom-6 left-0 lg:left-16 right-0 z-[60] flex justify-center pointer-events-none px-4 sm:px-0">
             <div className={cn("w-full max-w-[600px] pointer-events-auto transition-all duration-500 ease-out", selectedTopics.length > 0 ? "translate-y-0 opacity-100" : "translate-y-14 opacity-0 pointer-events-none")}>
               <div className="relative">
-              {/* Soft lift shadow */}
-              <div className="absolute inset-x-10 -bottom-2 h-6 blur-xl rounded-full" style={{ background: 'rgba(0,0,0,0.1)' }} />
+              {/* Soft lift shadow that adapts to themes */}
+              <div className="absolute inset-x-10 -bottom-2 h-6 blur-xl rounded-full bg-black/5 dark:bg-black/40" />
 
-              {/* Light frosted glass card */}
+              {/* Light frosted glass card replacing muddy inline rgba wrappers */}
               <div
-                className="relative flex items-center gap-4 px-4 py-3 rounded-[1.25rem]"
-                style={{
-                  background: 'rgba(255,255,255,0.25)', // More opaque
-                  backdropFilter: 'blur(20px) saturate(180%)',
-                  WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-                  border: currentSubject === 'english' ? '1.5px solid rgba(245,158,11,0.5)' : '1.5px solid rgba(59,130,246,0.5)',
-                  boxShadow: currentSubject === 'english' 
-                    ? '0 10px 30px -5px rgba(245,158,11,0.25), 0 4px 12px rgba(0,0,0,0.1)' 
-                    : '0 10px 30px -5px rgba(59,130,246,0.25), 0 4px 12px rgba(0,0,0,0.1)',
-                }}
+                className={cn(
+                  "relative flex items-center gap-4 px-4 py-3 rounded-2xl backdrop-blur-2xl transition-all duration-300",
+                  "bg-white/80 dark:bg-slate-900/70 border-[1.5px]",
+                  currentSubject === 'english'
+                    ? "border-amber-500/30 dark:border-amber-500/20 shadow-[0_8px_30px_-5px_rgba(245,158,11,0.15)] dark:shadow-[0_8px_30px_-5px_rgba(245,158,11,0.1)]"
+                    : "border-primary/30 dark:border-primary/20 shadow-[0_8px_30px_-5px_rgba(59,130,246,0.15)] dark:shadow-[0_8px_30px_-5px_rgba(59,130,246,0.1)]"
+                )}
               >
-                {/* Icon box - tinted with primary color */}
+                {/* Icon box - tinted intelligently for both modes */}
                 <div
-                  className="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center"
-                  style={{ background: currentSubject === 'english' ? 'rgba(245,158,11,0.1)' : 'hsl(var(--primary) / 0.1)' }}
+                  className={cn(
+                    "shrink-0 w-10 h-10 rounded-xl flex items-center justify-center",
+                    currentSubject === 'english' ? "bg-amber-500/10 dark:bg-amber-500/20" : "bg-primary/10 dark:bg-primary/20"
+                  )}
                 >
-                  <Play className="h-4 w-4" style={{ color: currentSubject === 'english' ? '#d97706' : 'hsl(var(--primary))' }} />
+                  <Play className={cn("h-4 w-4", currentSubject === 'english' ? "text-amber-600 dark:text-amber-400" : "text-primary dark:text-primary")} />
                 </div>
 
-                {/* Text */}
+                {/* Text - Adaptive contrast tokens instead of static slates */}
                 <div className="flex-1 min-w-0">
-                  <p className="text-[13px] font-semibold text-slate-800 leading-tight truncate">
+                  <p className="text-[13px] font-semibold text-slate-800 dark:text-slate-100 leading-tight truncate">
                     {getTopicsLabel()} · ~{getTotalEstimatedQuestions()} questions
                   </p>
-                  <p className="text-[11px] text-slate-400 mt-0.5">
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
                     {getModeLabel()} &nbsp;·&nbsp; {getTierLabel()} &nbsp;·&nbsp; {getCalcLabel()}
                   </p>
                 </div>
 
-                {/* Glowing CTA - the hero element */}
+                {/* Glowing CTA - Elite Button */}
                 <Button
                   onClick={examMode === 'practice' ? startPractice : (examMode === 'challenge' ? startChallengeSession : startMockExam)}
                   disabled={selectedTopics.length === 0 || loading}
-                  className="shrink-0 h-10 px-5 rounded-[0.85rem] font-semibold text-[13px] border-0 transition-all duration-200 active:scale-[0.97] text-white"
+                  className="shrink-0 h-10 px-5 rounded-xl font-semibold text-[13px] border-0 transition-all duration-200 active:scale-[0.97] text-white"
                   style={examMode === 'challenge' ? {
                     background: 'linear-gradient(135deg, #f59e0b, #fbbf24)',
-                    boxShadow: '0 0 0 1px rgba(245,158,11,0.3), 0 4px 16px rgba(245,158,11,0.45), 0 8px 32px rgba(245,158,11,0.25)',
+                    boxShadow: '0 0 0 1px rgba(245,158,11,0.2), 0 4px 16px rgba(245,158,11,0.3)',
                     color: '#451a03',
                   } : currentSubject === 'english' ? {
                     background: 'linear-gradient(135deg, #f59e0b, #d97706)',
-                    boxShadow: '0 0 0 1px rgba(245,158,11,0.3), 0 4px 16px rgba(245,158,11,0.4), 0 8px 32px rgba(245,158,11,0.2)',
+                    boxShadow: '0 0 0 1px rgba(245,158,11,0.2), 0 4px 16px rgba(245,158,11,0.3)',
                   } : {
                     background: 'linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary) / 0.8))',
-                    boxShadow: '0 0 0 1px hsl(var(--primary) / 0.3), 0 4px 16px hsl(var(--primary) / 0.4), 0 8px 32px hsl(var(--primary) / 0.2)',
+                    boxShadow: '0 0 0 1px hsl(var(--primary) / 0.2), 0 4px 16px hsl(var(--primary) / 0.3)',
                   }}
                 >
                   {loading ? 'Starting...' : 'Start Session'}
