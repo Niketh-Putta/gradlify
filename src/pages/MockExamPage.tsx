@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { useAppContext } from "@/hooks/useAppContext";
 import { resolveUserTrack } from "@/lib/track";
 import { usePremium } from "@/hooks/usePremium";
+import { useSubject } from "@/contexts/SubjectContext";
 import { ImageWithFallback } from "@/components/ImageWithFallback";
 import MathText from '@/components/MathText';
 import RichQuestionContent, { normalizeNewlines } from '@/components/RichQuestionContent';
@@ -156,6 +157,7 @@ export default function MockExamPage() {
   const userTrack = resolveUserTrack(context.profile?.track ?? null);
   const user = context?.user || null;
   const { canStartMockExam, refreshUsage } = usePremium();
+  const { currentSubject } = useSubject();
   
   // Extract exam parameters from URL
   const tier = searchParams.get('tier') || 'higher';
@@ -296,8 +298,9 @@ export default function MockExamPage() {
           navigate('/mocks');
           return;
         }
-        if (!usageData?.allowed) {
-          toast.error(usageData?.message || 'Daily mock exam limit reached.');
+        const usageResult = usageData as { allowed?: boolean; message?: string } | null;
+        if (!usageResult?.allowed) {
+          toast.error(usageResult?.message || 'Daily mock exam limit reached.');
           setLoading(false);
           navigate('/mocks');
           return;
@@ -1428,7 +1431,7 @@ const questionCalculatorLabel = (() => {
               <div className="flex items-center gap-2">
                 <span className="text-sm font-semibold text-foreground">Question {currentIndex + 1}</span>
                 <span className="w-1 h-1 rounded-full bg-muted-foreground"></span>
-                <span className="inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
+                <span className={cn("inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold", currentSubject === 'english' ? "border-amber-500/20 bg-amber-500/10 text-amber-500" : "border-primary/20 bg-primary/10 text-primary")}>
                   {currentQuestion ? getQuestionMarks(currentQuestion) : 1} mark{currentQuestion && getQuestionMarks(currentQuestion) === 1 ? "" : "s"}
                 </span>
                 {currentDifficultyLevel && (

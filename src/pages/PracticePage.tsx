@@ -46,7 +46,7 @@ export default function PracticePage({ forcedSubject }: PracticePageProps) {
                       location.pathname.includes('/practice/maths') ? 'maths' : undefined;
   
   const currentSubject = forcedSubject || pathSubject || contextSubject;
-  const themeColor = currentSubject === 'english' ? '#10b981' : '#3b82f6';
+  const themeColor = currentSubject === 'english' ? '#f59e0b' : '#3b82f6';
 
   let user = null;
   let userTrack: 'gcse' | '11plus' = 'gcse';

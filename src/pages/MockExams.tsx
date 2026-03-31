@@ -477,7 +477,7 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
           </section>
 
           {selectedTopics.length > 0 && examMode !== 'challenge' && currentSubject !== 'english' && (
-            <section className={cn("bg-muted/20 rounded-2xl p-5 border border-dashed", currentSubject === 'english' ? "border-amber-500/30" : "border-border/60")}>
+            <section className="bg-muted/20 rounded-2xl p-5 border border-dashed border-border/60">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Advanced Filter (Subtopics)</h3>
                 <span className="text-[10px] text-muted-foreground italic">Optional</span>
@@ -498,7 +498,7 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
                           <button
                             key={subtopicId}
                             onClick={() => setSelectedSubtopics(p => isSelected ? p.filter(id => id !== subtopicId) : [...p, subtopicId])}
-                            className={cn("group flex items-center gap-2 px-3 py-1.5 rounded-lg border text-[11px] font-medium transition-all", isSelected ? "text-white" : (currentSubject === 'english' ? "bg-card border-amber-500/20 text-amber-600/70 hover:border-amber-500/50" : "bg-card border-border/60 text-muted-foreground hover:border-primary/50"))}
+                            className={cn("group flex items-center gap-2 px-3 py-1.5 rounded-lg border text-[11px] font-medium transition-all", isSelected ? "text-white" : "bg-card text-muted-foreground hover:border-primary/50 border-border/60")}
                             style={{ backgroundColor: isSelected ? section.color : undefined, borderColor: isSelected ? section.color : undefined }}
                           >
                             {st.name}
