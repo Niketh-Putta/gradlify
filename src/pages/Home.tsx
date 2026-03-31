@@ -644,7 +644,7 @@ export function Home() {
                   currentSubject === 'english' ? "bg-amber-500" : "bg-primary"
                 )} />
 
-                <CardContent className="h-full p-6 flex flex-col relative z-10">
+                <CardContent className="h-full p-6 pt-6 flex flex-col relative z-10">
                   {/* Header */}
                   <div className="flex-[0_0_auto]">
                     <div className="flex items-center justify-between mb-1">
