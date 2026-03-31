@@ -383,7 +383,7 @@ export function Layout({ user, onSettings, onSignOut }: LayoutProps) {
         className={
           isChatRoute
             ? "lg:ml-16 pb-0 h-screen h-[100dvh] overflow-hidden transition-all duration-200 ease-in-out"
-            : "lg:ml-16 pb-16 sm:pb-20 lg:pb-4 transition-all duration-200 ease-in-out"
+            : "lg:ml-16 pb-14 sm:pb-16 lg:pb-4 transition-all duration-200 ease-in-out"
         }
       >
         <div className={isChatRoute ? "w-full h-full max-w-full overflow-hidden" : "w-full max-w-full overflow-x-clip"}>

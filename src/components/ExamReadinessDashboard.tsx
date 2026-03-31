@@ -419,7 +419,7 @@ const loadTopicHistory = async (topic: string) => {
               <CardContent className="p-3 sm:p-4 md:p-6 pt-0">
                 <div className="space-y-2 sm:space-y-3">
                   {recentHistory.map((hist) => (
-                    <div key={hist.id} className="flex items-start gap-2 text-xs sm:text-sm border-l-2 border-primary/20 pl-2 sm:pl-3 py-1">
+                    <div key={hist.id} className={cn("flex items-start gap-2 text-xs sm:text-sm border-l-2 pl-2 sm:pl-3 py-1", currentSubject === 'english' ? "border-amber-500/20" : "border-primary/20")}>
                       <div className="flex-1">
                         <div className="font-medium">{formatInsight(hist)}</div>
                         <div className="text-xs text-muted-foreground">

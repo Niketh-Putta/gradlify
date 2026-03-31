@@ -212,7 +212,7 @@ export function Navigation({ user, profile, onSettings, onSignOut }: NavigationP
               )
             : 'text-muted-foreground hover:text-foreground hover:bg-muted/70',
           isMobile 
-            ? 'justify-center flex-col gap-0.5 min-h-[48px] py-1.5 px-0 w-full' 
+            ? 'justify-center flex-col gap-0.5 min-h-[42px] py-1 px-0 w-full' 
             : inGrid 
               ? 'py-2 px-2 gap-2 min-h-[44px] w-full'
               : cn('h-11', sidebarHovered ? 'w-full' : 'w-11')
@@ -222,11 +222,11 @@ export function Navigation({ user, profile, onSettings, onSignOut }: NavigationP
     >
       <div className={cn(
         "flex items-center justify-center shrink-0",
-        isMobile ? "h-4 w-full" : inGrid ? "w-4 h-4" : "w-11 h-11"
+        isMobile ? "h-3.5 w-full" : inGrid ? "w-4 h-4" : "w-11 h-11"
       )}>
         <item.icon className={cn(
           "shrink-0 transition-transform duration-300",
-          isMobile || inGrid ? 'h-4 w-4' : 'h-[18px] w-[18px]',
+          isMobile || inGrid ? 'h-[15px] w-[15px]' : 'h-[18px] w-[18px]',
           !isMobile && !inGrid && sidebarHovered && 'scale-105'
         )} />
       </div>
@@ -240,7 +240,7 @@ export function Navigation({ user, profile, onSettings, onSignOut }: NavigationP
       ) : (
          <span className={cn(
            "font-medium whitespace-nowrap overflow-hidden px-0.5",
-           isMobile ? 'text-[9px] tracking-tight text-center w-full' : (inGrid ? 'text-xs truncate' : 'text-xs')
+           isMobile ? 'text-[8.5px] tracking-tighter text-center w-full' : (inGrid ? 'text-xs truncate' : 'text-xs')
         )}>
           {item.label}
         </span>
@@ -497,26 +497,31 @@ export function Navigation({ user, profile, onSettings, onSignOut }: NavigationP
           </>
         )}
         
-        <div className="flex items-center justify-between px-1 py-1.5 w-full">
+        <div className="flex items-center justify-between px-0.5 py-1 w-full gap-0.5">
           {primaryNavigationItems.map((item) => (
-            <div key={item.path} className="flex-1 w-[20%]">
+            <div key={item.path} className="flex-1 min-w-0">
               <NavItem item={item} isMobile />
             </div>
           ))}
           {/* More Button */}
-          <div className="flex-1 w-[20%]">
+          <div className="flex-1 min-w-0">
             <button
               onClick={() => setBottomMoreOpen(!bottomMoreOpen)}
               className={cn(
-                "flex items-center gap-0.5 px-0 py-1.5 rounded-lg transition-colors duration-150 ease-out relative w-full",
-                "justify-center flex-col min-h-[48px]",
+                "flex items-center gap-0.5 px-0 py-1 rounded-xl transition-all duration-300 ease-in-out relative w-full",
+                "justify-center flex-col min-h-[42px]",
                 bottomMoreOpen
-                  ? cn(currentSubject === 'english' ? 'bg-amber-500 text-white shadow-amber-500/20' : 'bg-primary text-primary-foreground shadow-primary')
+                  ? cn(
+                       "font-semibold",
+                       currentSubject === 'english' ? 'bg-amber-500/10 text-amber-500' : 'bg-primary/10 text-primary'
+                    )
                   : 'text-muted-foreground hover:text-foreground hover:bg-muted/70'
               )}
             >
-              <MoreHorizontal className="h-4 w-4 shrink-0" />
-              <span className="font-medium text-[9px] tracking-tight truncate w-full text-center px-0.5">More</span>
+              <div className="flex items-center justify-center shrink-0 h-3.5 w-full">
+                <MoreHorizontal className="shrink-0 h-[15px] w-[15px] transition-transform duration-300" />
+              </div>
+              <span className="font-medium text-[8.5px] tracking-tighter truncate w-full text-center px-0.5">More</span>
             </button>
           </div>
         </div>
