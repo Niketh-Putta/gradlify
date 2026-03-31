@@ -16,9 +16,15 @@ import AdminQuestions from "./pages/AdminQuestions";
 import AdminAnalytics from "./pages/AdminAnalytics";
 import Tools from "./pages/Tools";
 
+import { GoogleOAuthProvider } from '@react-oauth/google';
+
 const queryClient = new QueryClient();
 
-const App = () => (
+// Only initialize if the client ID exists, otherwise use standard provider.
+// This allows a seamless fallback to the old OAuth redirect method.
+const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
+
+const AppContent = () => (
   <QueryClientProvider client={queryClient}>
     <SubjectProvider>
       <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
@@ -50,5 +56,16 @@ const App = () => (
     </SubjectProvider>
   </QueryClientProvider>
 );
+
+const App = () => {
+  if (googleClientId) {
+    return (
+      <GoogleOAuthProvider clientId={googleClientId}>
+        <AppContent />
+      </GoogleOAuthProvider>
+    );
+  }
+  return <AppContent />;
+};
 
 export default App;
