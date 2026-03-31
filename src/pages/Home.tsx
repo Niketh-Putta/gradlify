@@ -634,10 +634,13 @@ export function Home() {
                   : 'translate-y-8 opacity-0'
               }`}
             >
-              <Card className="h-full border border-border/60 bg-card hover:bg-card/80 transition-all duration-500 overflow-hidden relative shadow-sm group">
+              <Card className={cn(
+                "h-full border transition-all duration-500 overflow-hidden relative shadow-md group hover:shadow-lg",
+                currentSubject === 'english' ? "border-amber-500/30 bg-gradient-to-br from-card to-amber-500/5 hover:border-amber-500/50" : "border-indigo-500/30 bg-gradient-to-br from-card to-indigo-500/5 hover:border-indigo-500/50"
+              )}>
                 {/* Extremely subtle ambient corner glow */}
                 <div className={cn(
-                  "absolute -right-20 -top-20 w-40 h-40 rounded-full blur-[50px] opacity-10 transition-opacity group-hover:opacity-20",
+                  "absolute -right-20 -top-20 w-40 h-40 rounded-full blur-[50px] opacity-15 transition-opacity group-hover:opacity-30",
                   currentSubject === 'english' ? "bg-amber-500" : "bg-indigo-500"
                 )} />
 
@@ -645,15 +648,15 @@ export function Home() {
                   {/* Header */}
                   <div className="flex-[0_0_auto]">
                     <div className="flex items-center justify-between mb-1">
-                      <div className="flex items-center gap-1.5">
+                      <div className={cn("flex items-center gap-1.5 px-3 py-1.5 rounded-full border shadow-sm backdrop-blur-sm", currentSubject === 'english' ? "bg-amber-500/10 border-amber-500/20" : "bg-indigo-500/10 border-indigo-500/20")}>
                         <Flame className={cn("w-3.5 h-3.5", currentSubject === 'english' ? "text-amber-500" : "text-indigo-500")} />
-                        <span className="font-bold tracking-widest text-muted-foreground uppercase text-[10px]">
+                        <span className={cn("font-bold tracking-widest uppercase text-[9px] md:text-[10px]", currentSubject === 'english' ? "text-amber-600 dark:text-amber-500" : "text-indigo-600 dark:text-indigo-400")}>
                           Target Focus
                         </span>
                       </div>
-                      <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-emerald-500/20 bg-emerald-500/10 shadow-sm backdrop-blur-sm">
+                      <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/15 shadow-sm backdrop-blur-sm">
                         <Sparkles className="w-3 h-3 text-emerald-500" />
-                        <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Personalised</span>
+                        <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">Personalised</span>
                       </div>
                     </div>
                   </div>

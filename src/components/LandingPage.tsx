@@ -496,11 +496,11 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                 >
                   {[
                     isElevenPlus
-                      ? "1,500+ 11+ style questions"
+                      ? "3,000+ 11+ style questions"
                       : `4,000+ ${trackShort}-style questions`,
-                    "11+ Maths & English",
-                    isElevenPlus ? "Core arithmetic + reasoning" : "Foundation + Higher",
-                    isElevenPlus ? "Speed + accuracy training" : "Calculator & Non-Calculator",
+                    isElevenPlus ? "Maths & English Tracks" : "Foundation + Higher",
+                    isElevenPlus ? "Comprehension & SPaG" : "Calculator & Non-Calculator",
+                    isElevenPlus ? "Arithmetic & Reasoning" : "Instant Marking",
                   ].map((label) => (
                     <div key={label} className={`inline-flex items-center gap-2 rounded-full px-2 py-1 sm:px-3 sm:py-2 ${chipClass}`}>
                     <CheckCircle className={`h-3 w-3 sm:h-4 sm:w-4 ${isDark ? (isElevenPlus ? "text-amber-200" : "text-orange-300") : (isElevenPlus ? "text-amber-600" : "text-orange-500")}`} />

@@ -528,8 +528,8 @@ export function EnglishSplitViewDemo() {
         if (topQ) setActiveQuestionId(topQ);
       }
     }, {
-      root: window.innerWidth < 1024 ? null : rightPaneRef.current,
-      rootMargin: "-40% 0px -40% 0px",
+      root: rightPaneRef.current,
+      rootMargin: "-25% 0px -25% 0px",
       threshold: 0
     });
 
@@ -884,8 +884,8 @@ export function EnglishSplitViewDemo() {
                               const selected = selectedAnswers[q.id] === opt.id;
                               
                               // Logic for showing distractors / evaluations
-                              const showDistractor = (examMode === 'practice' && showTrap === q.id && selected && opt.trap) || (isReviewMode && opt.trap);
-                              const evaluateCorrectness = (examMode === 'practice' && selected) || (isReviewMode && opt.correct);
+                              const showDistractor = (examMode === 'practice' && showTrap === q.id && selected && opt.trap) || (isReviewMode && selected && opt.trap && !opt.correct);
+                              const evaluateCorrectness = (examMode === 'practice' && selected) || (isReviewMode && opt.correct) || (isReviewMode && selected);
 
                               return (
                                 <div key={opt.id}>
@@ -948,9 +948,16 @@ export function EnglishSplitViewDemo() {
                                   {evaluateCorrectness && opt.correct && (
                                     <div className="mt-3 ml-12 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 animate-in slide-in-from-top-2 fade-in flex items-center gap-2">
                                       <Zap className="w-4 h-4 text-emerald-600" />
-                                      <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-400">
-                                        Excellent! You isolated the correct rule.
-                                      </p>
+                                      <div className="flex-1">
+                                        <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-400">
+                                          {selected ? "Excellent! You isolated the correct rule." : "This is the correct answer."}
+                                        </p>
+                                        {isReviewMode && opt.trap && (
+                                           <p className="text-xs text-emerald-700/80 dark:text-emerald-400/80 mt-1">
+                                             Note: {opt.trap}
+                                           </p>
+                                        )}
+                                      </div>
                                     </div>
                                   )}
                                 </div>

@@ -25,8 +25,13 @@ export function NotesProgressCard({ className, id, 'data-animate': dataAnimate, 
     <Card 
       id={id}
       data-animate={dataAnimate}
-      className={`${className} ${onClick ? 'cursor-pointer transition-all hover:shadow-lg hover:scale-[1.02]' : ''}`}
-      style={{ backgroundColor: 'hsl(var(--bg-readiness))' }}
+      className={cn(
+        className,
+        "border border-dashed transition-all duration-500 bg-background/50",
+        currentSubject === 'english' ? "border-amber-500/20" : "border-primary/20",
+        onClick && 'cursor-pointer hover:shadow-md hover:border-solid',
+        currentSubject === 'english' && onClick ? 'hover:border-amber-500/40' : onClick ? 'hover:border-primary/40' : ''
+      )}
       onClick={onClick}
     >
       <CardHeader className="text-center pb-2 sm:pb-3 px-2 sm:px-3">

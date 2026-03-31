@@ -124,11 +124,19 @@ export function OverallReadinessCard({
 
   return (
     <Card 
-      className={`${className} ${onClick ? 'cursor-pointer transition-all hover:shadow-lg hover:scale-[1.02]' : ''}`} 
+      className={cn(
+        className,
+        "border overflow-hidden relative shadow-md transition-all duration-500",
+        currentSubject === 'english' ? "bg-amber-500/[0.03] border-amber-500/20" : "bg-primary/[0.03] border-primary/20",
+        onClick && 'cursor-pointer hover:shadow-lg hover:-translate-y-0.5 hover:border-amber-500/40' // Added hover effect for English specifically, but we'll conditionally switch it
+      )}
+      style={onClick && currentSubject !== 'english' ? { borderColor: 'hsl(var(--primary) / 0.4)' } : {}}
       id={id} 
       data-animate={dataAnimate}
       onClick={onClick}
     >
+      {/* Subtle top glare */}
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
       <CardHeader className="p-3 sm:p-4 md:p-6 pb-2 sm:pb-3">
         <CardTitle className="text-base sm:text-lg md:text-xl">Overall Exam Readiness</CardTitle>
         <CardDescription className="text-xs sm:text-sm">
