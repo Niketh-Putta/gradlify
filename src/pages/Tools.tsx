@@ -88,7 +88,7 @@ export default function Tools() {
               </div>
               <Link
                 to="/gcse-maths-grade-boundaries"
-                className="mt-5 inline-flex w-full items-center justify-center rounded-full bg-gradient-to-r from-indigo-500 via-blue-500 to-purple-500 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/30 transition hover:brightness-105"
+                className="mt-5 inline-flex w-full items-center justify-center rounded-full bg-gradient-to-r from-primary via-blue-600 to-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary/30 transition hover:brightness-105"
               >
                 Open calculator
               </Link>
@@ -107,7 +107,7 @@ export default function Tools() {
               </div>
               <Link
                 to="/free-tools/gcse-maths-topic-weakness-test"
-                className="mt-5 inline-flex w-full items-center justify-center rounded-full bg-gradient-to-r from-indigo-500 via-blue-500 to-purple-500 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/30 transition hover:brightness-105"
+                className="mt-5 inline-flex w-full items-center justify-center rounded-full bg-gradient-to-r from-primary via-blue-600 to-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary/30 transition hover:brightness-105"
               >
                 Start test
               </Link>
@@ -126,7 +126,7 @@ export default function Tools() {
               </div>
               <Link
                 to="/free-tools/gcse-maths-grade-target-planner"
-                className="mt-5 inline-flex w-full items-center justify-center rounded-full bg-gradient-to-r from-indigo-500 via-blue-500 to-purple-500 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/30 transition hover:brightness-105"
+                className="mt-5 inline-flex w-full items-center justify-center rounded-full bg-gradient-to-r from-primary via-blue-600 to-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary/30 transition hover:brightness-105"
               >
                 Plan my grade
               </Link>

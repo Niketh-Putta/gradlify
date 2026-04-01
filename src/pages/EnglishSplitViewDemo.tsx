@@ -5,7 +5,39 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 
 // --- DATA ARCHITECTURE DEFINITION ---
-const TEST_DATA = [
+export interface EnglishOption {
+  id: string;
+  text: string;
+  trap: string | null;
+  correct: boolean;
+}
+
+export interface EnglishQuestion {
+  id: string;
+  tag: string;
+  tagColor: string;
+  text: string;
+  evidenceLine: string | 'global';
+  options: EnglishOption[];
+}
+
+export interface EnglishPassageBlock {
+  id: string;
+  text: string;
+}
+
+export interface EnglishSection {
+  sectionId: string;
+  subEngine: string;
+  title: string;
+  icon: any; // Keep Lucide icon generic for now
+  desc: string;
+  leftTitle: string;
+  passageBlocks: EnglishPassageBlock[];
+  questions: EnglishQuestion[];
+}
+
+const TEST_DATA: EnglishSection[] = [
   {
     sectionId: 'comprehension',
     subEngine: 'comprehension',
@@ -14,9 +46,9 @@ const TEST_DATA = [
     desc: 'Read the text excerpt carefully and answer the following questions.',
     leftTitle: 'Passage 1: 19th Century Classic',
     passageBlocks: [
-      { id: 'p1', text: "The fog was so thick it seemed to swallow the cobbled streets of London whole. Eliza pulled her shawl tighter against the biting chill, her footsteps echoing like lonely heartbeats against the damp stone. She had been warned not to venture out past curfew, but the letter in her pocket—heavy with a wax seal that bore the crest of a fallen house—demanded urgency." },
+      { id: 'p1', text: "The fog was so thick it seemed to swallow the cobbled streets of London whole. Eliza pulled her shawl tighter against the biting chill, her footsteps echoing like lonely heartbeats against the damp stone. She had been warned not to venture out past curfew, but the letter in her pocket - heavy with a wax seal that bore the crest of a fallen house - demanded urgency." },
       { id: 'p2', text: "Above her, the gas lamps flickered weakly, struggling to pierce the miasma. A sudden clatter from a nearby alleyway made her freeze. Naturally, her mind raced. Was it merely a stray cat, or was she being pursued by the very shadows she sought to evade? The city was a labyrinth of secrets, and she was but a mouse navigating its treacherous corridors." },
-      { id: 'p3', text: "Clutching the letter, she turned the corner onto Blackwood Avenue. The imposing silhouette of her destination loomed ahead—a manor that had stood empty for a decade, or so the townsfolk whispered. Yet, a single, pale light burned in the highest window." },
+      { id: 'p3', text: "Clutching the letter, she turned the corner onto Blackwood Avenue. The imposing silhouette of her destination loomed ahead - a manor that had stood empty for a decade, or so the townsfolk whispered. Yet, a single, pale light burned in the highest window." },
       { id: 'p4', text: "Without hesitation, Eliza ascended the crumbling stone steps. The heavy oak door was ajar, as though expecting her. From deep within the belly of the house, a violin played a haunting, frenetic melody that seemed to pull her forward against her better judgment." },
       { id: 'p5', text: "Inside, the air grew incredibly stale, smelling of undisturbed dust, old parchment, and something metallic. The foyer stretched upwards into darkness, an abyss of mahogany and tarnished silver. Every creak of the floorboards felt thunderous." },
       { id: 'p6', text: "She unfolded the letter. The handwriting was erratic, ink sploshed frantically across the vellum. 'They are watching the pendulum,' it read. Nothing more. What pendulum? Eliza scanned the desolate hallway, her eyes landing on the monolithic grandfather clock ticking rhythmically in the corner." },
@@ -29,29 +61,29 @@ const TEST_DATA = [
         text: "What item in Eliza's possession 'demanded urgency'?", evidenceLine: "p1",
         options: [
           { id: "A", text: "A heavy wax seal", trap: "Detail trap: the seal is part of the item, not the item itself.", correct: false },
-          { id: "B", text: "A letter from a fallen house", trap: null, correct: true },
-          { id: "C", text: "Her woollen shawl", trap: "Detail retrieval trap.", correct: false },
-          { id: "D", text: "A map of the labyrinth", trap: "Fabrication.", correct: false }
+          { id: "B", text: "A letter from a fallen house", trap: "Direct Evidence: The first paragraph mentions 'the letter in her pocket - heavy with a wax seal that bore the crest of a fallen house - demanded urgency.'", correct: true },
+          { id: "C", text: "Her woollen shawl", trap: "Detail retrieval trap: While mentioned, it did not 'demand urgency'.", correct: false },
+          { id: "D", text: "A map of the labyrinth", trap: "Fabrication: The city is described as a labyrinth, but there is no mention of a physical map.", correct: false }
         ]
       },
       {
         id: "c_q2", tag: "Word Meaning", tagColor: "bg-fuchsia-500/10 text-fuchsia-600 border-fuchsia-500/20",
         text: "In paragraph 2, the word 'miasma' most likely refers to:", evidenceLine: "p2",
         options: [
-          { id: "A", text: "The flickering gas lamps", trap: "Context trap: the lamps pierce it.", correct: false },
-          { id: "B", text: "The thick, oppressive fog", trap: null, correct: true },
-          { id: "C", text: "The stray cats", trap: "Irrelevant detail.", correct: false },
-          { id: "D", text: "The treacherous corridors", trap: "Literal interpretation trap.", correct: false }
+          { id: "A", text: "The flickering gas lamps", trap: "Context trap: the lamps are what struggle to pierce the miasma, not the miasma itself.", correct: false },
+          { id: "B", text: "The thick, oppressive fog", trap: "Direct Evidence: 'Miasma' in this 19th-century context refers to the thick, polluted air or 'fog' described in the opening line.", correct: true },
+          { id: "C", text: "The stray cats", trap: "Irrelevant detail from a different sentence.", correct: false },
+          { id: "D", text: "The treacherous corridors", trap: "Literal interpretation trap: these are metaphors for streets, not the miasma.", correct: false }
         ]
       },
       {
         id: "c_q3", tag: "Inference", tagColor: "bg-amber-500/10 text-amber-600 border-amber-500/20",
         text: "Why did Eliza ignore the warning 'not to venture out past curfew'?", evidenceLine: "p1",
         options: [
-          { id: "A", text: "She enjoyed the thrill of the chase.", trap: "Unsupported inference.", correct: false },
-          { id: "B", text: "She was compelled by the urgent nature of the crested letter.", trap: null, correct: true },
-          { id: "C", text: "She needed to escape a fallen house.", trap: "Misreading of the text.", correct: false },
-          { id: "D", text: "She was running away from shadows.", trap: "Event happens later, not the reason she went out.", correct: false }
+          { id: "A", text: "She enjoyed the thrill of the chase.", trap: "Unsupported inference: The text emphasizes her fear and caution, not enjoyment.", correct: false },
+          { id: "B", text: "She was compelled by the urgent nature of the crested letter.", trap: "Direct Evidence: The text states the letter 'demanded urgency,' over-riding the warning to stay inside.", correct: true },
+          { id: "C", text: "She needed to escape a fallen house.", trap: "Misreading of the text: The letter came FROM a fallen house; she wasn't inside one yet.", correct: false },
+          { id: "D", text: "She was running away from shadows.", trap: "Timing error: The encounter with shadows happens at the end of the text, not as the initial motivation.", correct: false }
         ]
       },
       {
@@ -340,7 +372,7 @@ const TEST_DATA = [
 ];
 
 // Completely Separate module for Vocab Practice (Never in Mock Exams)
-const VOCAB_PRACTICE = {
+const VOCAB_PRACTICE: EnglishSection = {
   sectionId: 'vocab',
   subEngine: 'vocab',
   title: 'SECTION E: VOCABULARY SYNONYMS',
@@ -439,7 +471,32 @@ export function EnglishSplitViewDemo() {
   const [selectedAnswers, setSelectedAnswers] = useState<Record<string, string>>({});
   const [flaggedQuestions, setFlaggedQuestions] = useState<Record<string, boolean>>({});
   const [showTrap, setShowTrap] = useState<string | null>(null);
-  const [highlights, setHighlights] = useState<string[]>([]);
+  
+  // Storage key based on mode and topics
+  const highlightsStorageKey = `gradlify_highlights_${examMode}_${selectedTopics}`;
+  const [highlights, setHighlights] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem(highlightsStorageKey);
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    localStorage.setItem(highlightsStorageKey, JSON.stringify(highlights));
+  }, [highlights, highlightsStorageKey]);
+
+  const [isUserScrolling, setIsUserScrolling] = useState<boolean>(false);
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handlePassageScroll = () => {
+    setIsUserScrolling(true);
+    if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+    scrollTimeoutRef.current = setTimeout(() => {
+      setIsUserScrolling(false);
+    }, 3000); // Resume auto-snap after 3 seconds of no scrolling
+  };
   
   const [timeLeft, setTimeLeft] = useState(3000); 
 
@@ -451,8 +508,7 @@ export function EnglishSplitViewDemo() {
 
   // 1. FILTERING LOGIC
   const activeSections = useMemo(() => {
-    // In a Mock exam, we present the FULL paper (Comprehension + SPaG natively defined in TEST_DATA + Vocab).
-    let sections = examMode === 'mock' 
+    const processedSections = examMode === 'mock' 
       ? [...TEST_DATA, VOCAB_PRACTICE] 
       : (practiceFocus === 'vocab' 
           ? [VOCAB_PRACTICE] 
@@ -462,14 +518,29 @@ export function EnglishSplitViewDemo() {
             )
         );
 
-    // If Practice & Free Tier: Hard clamp to 1 question to enforce paywall
-    if (examMode === 'practice' && !isPremium && sections.length > 0) {
+    // CRITICAL: Always sort questions by their Evidence Line order (p1, p2, p3...) 
+    // to ensure the scroll-sync highlights move linearly down the text.
+    // 'global' questions drop to the bottom.
+    const sorted = processedSections.map(sec => ({
+      ...sec,
+      questions: [...sec.questions].sort((a, b) => {
+        if (a.evidenceLine === 'global') return 1;
+        if (b.evidenceLine === 'global') return -1;
+        const aNum = parseInt(a.evidenceLine.match(/\d+/)?.[0] || '0', 10);
+        const bNum = parseInt(b.evidenceLine.match(/\d+/)?.[0] || '0', 10);
+        return aNum - bNum;
+      })
+    }));
+
+    // If Practice & Free Tier: Clamp to 1 question only after sorting!
+    if (examMode === 'practice' && !isPremium && sorted.length > 0) {
       return [{
-        ...sections[0],
-        questions: sections[0].questions.slice(0, 1) // Harsh clamp!
+        ...sorted[0],
+        questions: sorted[0].questions.slice(0, 1)
       }];
     }
-    return sections;
+
+    return sorted;
   }, [examMode, mockConfig, practiceFocus, isPremium]);
 
   // Timer logic for Mock Mode
@@ -521,15 +592,17 @@ export function EnglishSplitViewDemo() {
   useEffect(() => {
     if (isFinished) return;
     const observer = new IntersectionObserver((entries) => {
+      // Find the question that is currently crossing or occupying the vertical midpoint
       const visibleEntries = entries.filter(e => e.isIntersecting);
       if (visibleEntries.length > 0) {
+        // Sort by how close they are to the top of the right pane to find the logically "current" one
         const sorted = visibleEntries.sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
         const topQ = sorted[0].target.getAttribute('data-qid');
         if (topQ) setActiveQuestionId(topQ);
       }
     }, {
       root: rightPaneRef.current,
-      rootMargin: "-25% 0px -25% 0px",
+      rootMargin: "-50% 0px -50% 0px", // Precisely detect when the top of the box touches the vertical midpoint
       threshold: 0
     });
 
@@ -545,6 +618,12 @@ export function EnglishSplitViewDemo() {
   useEffect(() => {
     if (!activeQuestionId) return;
     
+    // Detect mobile screens where panes stack vertically. Auto-scroll ruins mobile UX.
+    if (window.innerWidth < 1024) return;
+    
+    // Respect user autonomy: if they are manually scrolling the passage, do not snap.
+    if (isUserScrolling) return;
+
     let targetSectionId = null;
     let targetEvidenceLine = null;
     
@@ -558,14 +637,19 @@ export function EnglishSplitViewDemo() {
       }
     }
 
+    if (targetEvidenceLine === 'global') {
+      // Global questions require the whole text, do not force a scroll jump.
+      return; 
+    }
+
     if (targetEvidenceLine && passageLineRefs.current[targetEvidenceLine]) {
       // Intelligently scroll the master left-container exactly to the evidence piece
-      passageLineRefs.current[targetEvidenceLine]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      passageLineRefs.current[targetEvidenceLine]?.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
     } else if (targetSectionId && passageSectionRefs.current[targetSectionId]) {
       // Intelligently scroll the master left-container to the correct passage block
-      passageSectionRefs.current[targetSectionId]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      passageSectionRefs.current[targetSectionId]?.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
     }
-  }, [activeQuestionId, activeSections]);
+  }, [activeQuestionId, activeSections, isUserScrolling]);
 
   // Compute actual results upon finishing
   const results = useMemo(() => {
@@ -598,15 +682,14 @@ export function EnglishSplitViewDemo() {
     const overallCorrect = compCorrect + spagCorrect;
     const overallPerc = overallTotal > 0 ? Math.round((overallCorrect / overallTotal) * 100) : 0;
     
-    // Percentile mock logic
-    const percentile = Math.min(99, Math.max(1, Math.round((overallPerc / 100) * 40 + 59))); // Maps to 59-99th percentile for a better UX, or just overallPerc if we want raw
-    const displayPercentile = overallTotal === 0 ? 0 : percentile;
+    // Standardised Age Score (SAS) logic based on rough 11+ equivalency (70 - 141 scale)
+    const sas = overallTotal === 0 ? 0 : Math.min(141, Math.max(70, Math.round(overallPerc * 0.71) + 70));
     
-    let percentileColor = "text-emerald-500";
-    if (displayPercentile < 70) percentileColor = "text-rose-500";
-    else if (displayPercentile < 85) percentileColor = "text-amber-500";
+    let sasColor = "text-emerald-500";
+    if (sas < 105) sasColor = "text-rose-500";
+    else if (sas < 120) sasColor = "text-amber-500";
     
-    return { compTotal, compPerc, spagTotal, spagPerc, overallTotal, overallCorrect, displayPercentile, percentileColor };
+    return { compTotal, compPerc, spagTotal, spagPerc, overallTotal, overallCorrect, displaySAS: sas, sasColor };
   }, [isFinished, activeSections, selectedAnswers]);
 
   const formatTime = (seconds: number) => {
@@ -638,7 +721,7 @@ export function EnglishSplitViewDemo() {
                 
                 <p className="text-foreground leading-relaxed mb-6 bg-background rounded-2xl p-5 border border-border/40 font-medium">
                   {results.overallTotal > 0 ? (
-                    <>Excellent work! You are currently scoring in the <strong className={cn("text-xl font-black", results.percentileColor)}>{results.displayPercentile}{['11','12','13'].includes(results.displayPercentile.toString().slice(-2)) ? 'th' : ['st', 'nd', 'rd'][(results.displayPercentile % 10) - 1] || 'th'} percentile</strong> across this selected Mock configuration.</>
+                    <>Excellent work! Based on standard 11+ normalisation limits, you achieved an estimated <strong>Standardised Age Score (SAS)</strong> of <strong className={cn("text-xl font-black", results.sasColor)}>{results.displaySAS} / 141</strong> across this rigorous configuration.</>
                   ) : (
                     <>You did not answer any questions in this session.</>
                   )}
@@ -705,7 +788,11 @@ export function EnglishSplitViewDemo() {
             </div>
           </div>
 
-          <div ref={passageContainerRef} className="flex-1 overflow-y-auto p-8 sm:px-10 text-base sm:text-[17px] leading-loose text-foreground/90 font-serif relative scroll-smooth pb-48">
+          <div 
+            ref={passageContainerRef} 
+            onScroll={handlePassageScroll}
+            className="flex-1 overflow-y-auto p-8 sm:px-10 text-base sm:text-[17px] leading-loose text-foreground/90 font-serif relative scroll-smooth pb-48"
+          >
             <div className="absolute top-4 left-4 text-[10px] font-bold tracking-widest uppercase text-muted-foreground/60 select-none">Source</div>
 
             <div className="space-y-16 relative">
@@ -745,12 +832,17 @@ export function EnglishSplitViewDemo() {
                           )}
                           <p 
                             className={cn(
-                              "transition-all duration-500 p-2 -mx-2 rounded-lg cursor-text",
+                              "transition-all duration-700 p-4 -mx-4 rounded-xl cursor-text relative",
                               showScaffold 
-                                ? "bg-amber-500/5 dark:bg-amber-500/10 border-l-2 border-amber-500 text-foreground" 
-                                : "group-hover:bg-black/5 dark:group-hover:bg-white/5 opacity-90"
+                                ? "bg-amber-50/80 dark:bg-amber-500/10 border-l-4 border-amber-500 shadow-sm ring-1 ring-amber-200/50 scale-[1.01] text-foreground font-medium z-10" 
+                                : "opacity-60 group-hover:opacity-100 hover:bg-black/5 dark:hover:bg-white/5"
                             )}
                           >
+                            {showScaffold && (
+                              <div className="absolute -left-1 flex items-center justify-center h-full top-0">
+                                <div className="h-1/3 w-1 bg-amber-500 rounded-full animate-pulse" />
+                              </div>
+                            )}
                             {renderHighlightedText(p.text)}
                           </p>
                         </div>
@@ -924,17 +1016,17 @@ export function EnglishSplitViewDemo() {
                                     {selected && examMode === 'mock' && <Check className="w-4 h-4 text-foreground/50" />}
                                   </button>
 
-                                  {/* The Trap Label / Explainer (PRACTICE MODE ONLY) */}
+                                  {/* The Trap Label / Explainer (PRACTICE MODE ONLY or REVIEW) */}
                                   {showDistractor && (
-                                    <div className="mt-3 ml-12 p-4 rounded-xl bg-orange-500/10 border border-orange-500/20 animate-in slide-in-from-top-2 fade-in">
+                                    <div className="mt-3 ml-12 p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 animate-in slide-in-from-top-2 fade-in">
                                       <div className="flex items-start gap-3">
-                                        <div className="mt-0.5 p-1 rounded-full bg-orange-500/20 text-orange-600">
-                                          <MapPin className="w-3.5 h-3.5" />
+                                        <div className="mt-0.5 p-1 rounded-full bg-rose-500/20 text-rose-600">
+                                          <AlertTriangle className="w-3.5 h-3.5" />
                                         </div>
                                         <div>
-                                          <div className="text-xs font-bold text-orange-600 dark:text-orange-400 uppercase tracking-wide mb-1 flex items-center gap-2">
-                                            Evidence Path 
-                                            <ChevronRight className="w-3 h-3 text-orange-500/50" />
+                                          <div className="text-xs font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wide mb-1 flex items-center gap-2">
+                                            Evidence Check
+                                            <ChevronRight className="w-3 h-3 text-rose-500/50" />
                                             Tutor Note
                                           </div>
                                           <p className="text-sm font-medium text-foreground/80 leading-relaxed">
@@ -950,9 +1042,9 @@ export function EnglishSplitViewDemo() {
                                       <Zap className="w-4 h-4 text-emerald-600" />
                                       <div className="flex-1">
                                         <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-400">
-                                          {selected ? "Excellent! You isolated the correct rule." : "This is the correct answer."}
+                                          {selected ? (opt.trap || "Excellent! You isolated the correct rule.") : "This is the correct answer."}
                                         </p>
-                                        {isReviewMode && opt.trap && (
+                                        {isReviewMode && !selected && opt.trap && (
                                            <p className="text-xs text-emerald-700/80 dark:text-emerald-400/80 mt-1">
                                              Note: {opt.trap}
                                            </p>

@@ -161,6 +161,10 @@ export default {
 				'fadeIn': {
 					'from': { opacity: '0', transform: 'translateY(8px)' },
 					'to': { opacity: '1', transform: 'translateY(0)' }
+				},
+				'marquee': {
+					'0%': { transform: 'translateX(0)' },
+					'100%': { transform: 'translateX(-50%)' }
 				}
 			},
 			animation: {
@@ -170,7 +174,8 @@ export default {
 				'float': 'float 3s ease-in-out infinite',
 				'green-burst': 'green-burst 0.6s ease-out',
 				'red-burst': 'red-burst 0.6s ease-out',
-				'fade-in': 'fadeIn 0.4s ease forwards'
+				'fade-in': 'fadeIn 0.4s ease forwards',
+				'marquee': 'marquee 25s linear infinite'
 			}
 		}
 	},

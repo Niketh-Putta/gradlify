@@ -118,7 +118,7 @@ export function SprintHowItWorks() {
                   <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-[1fr_340px] lg:gap-10">
                     <div className="space-y-4">
                       <div>
-                        <p className="inline-flex items-center rounded-full border border-indigo-200 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-indigo-600">
+                        <p className="inline-flex items-center rounded-full border border-primary-200 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-primary-600">
                           Limited event - Final Week of February
                         </p>
                       </div>
@@ -136,11 +136,11 @@ export function SprintHowItWorks() {
                       <div className="space-y-1 text-sm text-slate-600">
                         <p className="text-base">
                           <span className="font-semibold text-slate-900">Sprint begins:</span>{" "}
-                          <span className="text-indigo-600">{EVENT_START_LABEL}</span>
+                          <span className="text-primary-600">{EVENT_START_LABEL}</span>
                         </p>
                         <p className="text-base">
                           <span className="font-semibold text-slate-900">Sprint ends:</span>{" "}
-                          <span className="text-indigo-600">{EVENT_END_LABEL}</span> - No points are counted after the deadline.
+                          <span className="text-primary-600">{EVENT_END_LABEL}</span> - No points are counted after the deadline.
                         </p>
                       </div>
                       <div className="mt-4 flex justify-center lg:justify-start">
@@ -167,7 +167,7 @@ export function SprintHowItWorks() {
                       </div>
                       </div>
                       <div className="mt-6 h-2 w-full rounded-full bg-slate-100">
-                        <div className="h-full w-[100%] rounded-full bg-indigo-500" />
+                        <div className="h-full w-[100%] rounded-full bg-primary-500" />
                       </div>
                       <p className="mt-2 text-xs text-slate-500">Points freeze at {EVENT_END_LABEL}.</p>
                     </div>
@@ -179,23 +179,23 @@ export function SprintHowItWorks() {
                   <div className="rounded-[16px] border border-[#E6E8F0] bg-gradient-to-br from-white via-white to-[#f0f1ff] p-5 shadow-[0_16px_30px_-22px_rgba(79,70,229,0.3)]">
                     <div className="space-y-3 text-sm text-slate-600">
                       <div className="flex items-start gap-2">
-                        <span className="mt-1 h-2 w-2 flex-shrink-0 rounded-full bg-indigo-500" />
+                        <span className="mt-1 h-2 w-2 flex-shrink-0 rounded-full bg-primary-500" />
                         <span>Only Mock Exams and Challenge sessions earn sprint points.</span>
                       </div>
                       <div className="flex items-start gap-2">
-                        <span className="mt-1 h-2 w-2 flex-shrink-0 rounded-full bg-indigo-500" />
+                        <span className="mt-1 h-2 w-2 flex-shrink-0 rounded-full bg-primary-500" />
                         <span>Practice mode does <span className="font-semibold text-slate-900">NOT</span> count toward sprint rankings.</span>
                       </div>
                       <div className="flex items-start gap-2">
-                        <span className="mt-1 h-2 w-2 flex-shrink-0 rounded-full bg-indigo-500" />
+                        <span className="mt-1 h-2 w-2 flex-shrink-0 rounded-full bg-primary-500" />
                         <span>Highest total points in the 7-day window wins.</span>
                       </div>
                       <div className="flex items-start gap-2">
-                        <span className="mt-1 h-2 w-2 flex-shrink-0 rounded-full bg-indigo-500" />
+                        <span className="mt-1 h-2 w-2 flex-shrink-0 rounded-full bg-primary-500" />
                         <span>Premium users can attempt unlimited sprint sessions per day.</span>
                       </div>
                       <div className="flex items-start gap-2">
-                        <span className="mt-1 h-2 w-2 flex-shrink-0 rounded-full bg-indigo-500" />
+                        <span className="mt-1 h-2 w-2 flex-shrink-0 rounded-full bg-primary-500" />
                         <span>Accuracy and consistency matter.</span>
                       </div>
                     </div>
@@ -252,7 +252,7 @@ export function SprintHowItWorks() {
                 </section>
                 <p className="mt-6 text-xs text-slate-500">
                   Any questions, contact:{" "}
-                  <a className="font-semibold text-indigo-600 hover:text-indigo-700" href="mailto:team@gradlify.com">
+                  <a className="font-semibold text-primary-600 hover:text-primary-700" href="mailto:team@gradlify.com">
                     team@gradlify.com
                   </a>
                 </p>
@@ -312,11 +312,11 @@ export function SprintHowItWorks() {
                         This GCSE sprint is separate from the 11+ Launch Sprint.
                       </p>
                       <div className="mt-5 flex flex-col gap-2 text-sm">
-                        <div className="flex flex-wrap gap-3 text-indigo-600 text-base font-semibold leading-tight">
+                        <div className="flex flex-wrap gap-3 text-primary-600 text-base font-semibold leading-tight">
                           <span>Starts:</span>
                           <span className="font-bold">{nextStartLabel}</span>
                         </div>
-                        <div className="flex flex-wrap gap-3 text-indigo-600 text-base font-semibold leading-tight">
+                        <div className="flex flex-wrap gap-3 text-primary-600 text-base font-semibold leading-tight">
                           <span>Ends:</span>
                           <span className="font-bold">{endLabel}</span>
                         </div>
@@ -334,7 +334,7 @@ export function SprintHowItWorks() {
                       >
                         View leaderboard
                       </button>
-                      <a className="text-sm font-semibold text-indigo-600 hover:text-indigo-700" href="#scoring">
+                      <a className="text-sm font-semibold text-primary-600 hover:text-primary-700" href="#scoring">
                         How scoring works
                       </a>
                     </div>
@@ -348,7 +348,7 @@ export function SprintHowItWorks() {
                       {isActive ? `Ends ${endLabel}` : `Starts ${nextStartLabel}`}
                     </p>
                     <div className="mt-4 h-2 w-full rounded-full bg-slate-100">
-                      <div className="h-full w-[35%] rounded-full bg-indigo-500" />
+                      <div className="h-full w-[35%] rounded-full bg-primary-500" />
                     </div>
                     <p className="mt-2 text-xs text-slate-500">Daily limits reset every 24 hours.</p>
                   </div>
@@ -363,19 +363,19 @@ export function SprintHowItWorks() {
               </p>
               <div className="mt-4 space-y-3">
                 <div className="flex items-center gap-2 text-sm text-slate-600">
-                  <span className="h-2 w-2 rounded-full bg-indigo-500" />
+                  <span className="h-2 w-2 rounded-full bg-primary-500" />
                   <span>Correct answers in sprint sessions earn points.</span>
                 </div>
                 <div className="flex items-center gap-2 border-t border-slate-200 pt-3 text-sm text-slate-600">
-                  <span className="h-2 w-2 rounded-full bg-indigo-500" />
+                  <span className="h-2 w-2 rounded-full bg-primary-500" />
                   <span>Consistency across the sprint matters more than one-off sessions.</span>
                 </div>
                 <div className="flex items-center gap-2 border-t border-slate-200 pt-3 text-sm text-slate-600">
-                  <span className="h-2 w-2 rounded-full bg-indigo-500" />
+                  <span className="h-2 w-2 rounded-full bg-primary-500" />
                   <span>Premium users can attempt more mock exams per day, increasing their opportunity to earn sprint points.</span>
                 </div>
                 <div className="flex items-center gap-2 border-t border-slate-200 pt-3 text-sm text-slate-600">
-                  <span className="h-2 w-2 rounded-full bg-indigo-500" />
+                  <span className="h-2 w-2 rounded-full bg-primary-500" />
                   <span>Highest total by the end of the sprint wins.</span>
                 </div>
               </div>
@@ -418,7 +418,7 @@ export function SprintHowItWorks() {
                 <p className="text-xs text-slate-500">Top consistent performers may be invited.</p>
                 <p className="mt-2 text-xs text-slate-500">Consistency during sprint weeks is a key signal for invitations.</p>
                 <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-slate-600">Circle members get</p>
-                <ul className="mt-2 list-disc space-y-1 pl-4 text-xs text-slate-500 marker:text-indigo-500">
+                <ul className="mt-2 list-disc space-y-1 pl-4 text-xs text-slate-500 marker:text-primary-500">
                   <li>Discounted premium access</li>
                   <li>Early access to new features</li>
                   <li>Shape the development of Gradlify</li>

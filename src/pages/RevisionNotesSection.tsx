@@ -50,19 +50,19 @@ const sectionDisplayName: Record<string, string> = {
 
 // Section config - matching exact JSON keys
 const sectionConfig: Record<string, { abbr: string; gradient: string }> = {
-  "Number": { abbr: "N", gradient: "from-purple-500 to-purple-600" },
-  "Algebra": { abbr: "A", gradient: "from-blue-500 to-blue-600" },
+  "Number": { abbr: "N", gradient: "from-blue-500 to-blue-600" },
+  "Algebra": { abbr: "A", gradient: "from-blue-600 to-blue-700" },
   "Ratio, Proportion & Rates of Change": { abbr: "R", gradient: "from-emerald-500 to-emerald-600" },
-  "Geometry & Measures": { abbr: "G", gradient: "from-violet-500 to-violet-600" },
-  "Probability": { abbr: "P", gradient: "from-amber-500 to-amber-600" },
-  "Statistics": { abbr: "S", gradient: "from-cyan-500 to-cyan-600" },
-  "Arithmetic & Number Skills": { abbr: "A", gradient: "from-purple-500 to-purple-600" },
-  "Number & Arithmetic": { abbr: "N", gradient: "from-purple-500 to-purple-600" },
-  "Algebra & Ratio": { abbr: "A", gradient: "from-pink-500 to-pink-600" },
+  "Geometry & Measures": { abbr: "G", gradient: "from-cyan-500 to-cyan-600" },
+  "Probability": { abbr: "P", gradient: "from-sky-500 to-sky-600" },
+  "Statistics": { abbr: "S", gradient: "from-teal-500 to-teal-600" },
+  "Arithmetic & Number Skills": { abbr: "A", gradient: "from-blue-500 to-blue-600" },
+  "Number & Arithmetic": { abbr: "N", gradient: "from-blue-600 to-blue-700" },
+  "Algebra & Ratio": { abbr: "A", gradient: "from-cyan-600 to-cyan-700" },
   "Statistics & Data": { abbr: "S", gradient: "from-teal-500 to-teal-600" },
   "Comprehension": { abbr: "C", gradient: "from-blue-500 to-blue-600" },
-  "Vocabulary": { abbr: "V", gradient: "from-pink-500 to-pink-600" },
-  "SPaG": { abbr: "S", gradient: "from-amber-500 to-amber-600" },
+  "Vocabulary": { abbr: "V", gradient: "from-amber-500 to-amber-600" },
+  "SPaG": { abbr: "S", gradient: "from-orange-500 to-orange-600" },
 };
 
 export default function RevisionNotesSection() {

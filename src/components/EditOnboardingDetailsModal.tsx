@@ -33,7 +33,7 @@ const YEAR_GROUPS = ['Year 7', 'Year 8', 'Year 9', 'Year 10', 'Year 11', 'Year 1
 const STUDY_TIMES = ['10 min', '20 min', '30 min', '45 min', '60 min', '90+ min', UNSURE] as const;
 const CURRENT_GRADES = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'U', UNSURE] as const;
 const TARGET_GRADES = ['4', '5', '6', '7', '8', '9', UNSURE] as const;
-const ELEVEN_PLUS_YEAR_GROUPS = ['Year 4', 'Year 5', 'Year 6', 'Teacher', 'Parent', 'Unsure'] as const;
+const ELEVEN_PLUS_YEAR_GROUPS = ['Year 2', 'Year 3', 'Year 4', 'Year 5', 'Year 6', 'Teacher', 'Parent', 'Unsure'] as const;
 const ELEVEN_PLUS_EXAM_FORMATS = ['GL Assessment', 'CEM', 'Not sure'] as const;
 const ELEVEN_PLUS_CONFIDENCE_AREAS = [
   'Arithmetic speed',

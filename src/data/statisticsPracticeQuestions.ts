@@ -33,7 +33,7 @@ export const statisticsPracticeQuestions: Record<string, PracticeQA[]> = {
   "frequency-tables": [
     {
       question:
-        "A grouped table has classes 0–10 (f=3), 10–20 (f=5), 20–30 (f=2). Find the midpoints and the estimated mean.",
+        "A grouped table has classes 0-10 (f=3), 10-20 (f=5), 20-30 (f=2). Find the midpoints and the estimated mean.",
       answer:
         "Midpoints: 5, 15, 25\n\nsum(f) = 3 + 5 + 2 = 10\n\nsum(fx) = 3×5 + 5×15 + 2×25 = 15 + 75 + 50 = 140\n\nEstimated mean = 140 ÷ 10 = **14**",
     },
@@ -52,7 +52,7 @@ export const statisticsPracticeQuestions: Record<string, PracticeQA[]> = {
       question:
         "A frequency table has values 2, 3, 4 with frequencies 5, 2, 5. Find the mode and the median.",
       answer:
-        "Mode: **2 and 4** (both have frequency 5).\n\nTotal n = 12 → median is the average of the 6th and 7th values.\n\nPositions 1–5 are 2s, positions 6–7 are 3s → median = **3**.",
+        "Mode: **2 and 4** (both have frequency 5).\n\nTotal n = 12 → median is the average of the 6th and 7th values.\n\nPositions 1-5 are 2s, positions 6-7 are 3s → median = **3**.",
     },
     {
       question:
@@ -96,7 +96,7 @@ export const statisticsPracticeQuestions: Record<string, PracticeQA[]> = {
   histograms: [
     {
       question:
-        "A class interval 10–30 has frequency 40. Find the frequency density.",
+        "A class interval 10-30 has frequency 40. Find the frequency density.",
       answer: "Class width = 20 → density = 40 ÷ 20 = **2**.",
     },
     {

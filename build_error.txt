@@ -1,0 +1,28 @@
+
+> vite_react_shadcn_ts@0.0.0 build
+> vite build
+
+vite v7.3.0 building client environment for production...
+transforming...
+
+warn - The class `ease-[cubic-bezier(0.23,1,0.32,1)]` is ambiguous and matches multiple utilities.
+warn - If this is content and not a class, replace it with `ease-&lsqb;cubic-bezier(0.23,1,0.32,1)&rsqb;` to silence this warning.
+✓ 2501 modules transformed.
+✗ Build failed in 3.93s
+error during build:
+Invalid regular expression: /^(Final answer|Answer)\s*[:).- - -]?\s*(.*)$/i: Range out of order in character class
+    at new RegExp (<anonymous>)
+    at Array.literalRegExp (file:///Users/nikethputta/Downloads/GRADLIFY%20APP%20CODES/11+%20GRADLIFY/node_modules/rollup/dist/es/shared/node-entry.js:16195:22)
+    at convertNode (file:///Users/nikethputta/Downloads/GRADLIFY%20APP%20CODES/11+%20GRADLIFY/node_modules/rollup/dist/es/shared/node-entry.js:16389:28)
+    at convertNodeList (file:///Users/nikethputta/Downloads/GRADLIFY%20APP%20CODES/11+%20GRADLIFY/node_modules/rollup/dist/es/shared/node-entry.js:16400:38)
+    at Array.callExpression (file:///Users/nikethputta/Downloads/GRADLIFY%20APP%20CODES/11+%20GRADLIFY/node_modules/rollup/dist/es/shared/node-entry.js:15889:26)
+    at convertNode (file:///Users/nikethputta/Downloads/GRADLIFY%20APP%20CODES/11+%20GRADLIFY/node_modules/rollup/dist/es/shared/node-entry.js:16389:28)
+    at Array.variableDeclarator (file:///Users/nikethputta/Downloads/GRADLIFY%20APP%20CODES/11+%20GRADLIFY/node_modules/rollup/dist/es/shared/node-entry.js:16361:49)
+    at convertNode (file:///Users/nikethputta/Downloads/GRADLIFY%20APP%20CODES/11+%20GRADLIFY/node_modules/rollup/dist/es/shared/node-entry.js:16389:28)
+    at convertNodeList (file:///Users/nikethputta/Downloads/GRADLIFY%20APP%20CODES/11+%20GRADLIFY/node_modules/rollup/dist/es/shared/node-entry.js:16400:38)
+    at Array.variableDeclaration (file:///Users/nikethputta/Downloads/GRADLIFY%20APP%20CODES/11+%20GRADLIFY/node_modules/rollup/dist/es/shared/node-entry.js:16355:29)
+npm notice
+npm notice New major version of npm available! 10.9.3 -> 11.12.1
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.12.1
+npm notice To update run: npm install -g npm@11.12.1
+npm notice

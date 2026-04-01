@@ -7,10 +7,10 @@ export const formatExplanation = (explanation?: string | null): string => {
   clean = clean.replace(/\[([A-Z\s]+:[^\]]+|[A-Za-z\s]+)\]\s*/g, "");
 
   // Format Step numbers cleanly by ensuring they are separated by double newlines.
-  clean = clean.replace(/\s*(Step\s*\d+\s*[:).–-]?)\s*/gi, (match, stepName) => `\n\n${stepName.trim()} `);
+  clean = clean.replace(/\s*(Step\s*\d+\s*[:).\-]?)\s*/gi, (match, stepName) => `\n\n${stepName.trim()} `);
   
   // Format "answer: £4" or "Answer: 4" or "Final Answer: " into its own line
-  clean = clean.replace(/\s*((?:Final\s*)?answer\s*[:).–-]?)\s*(.*)/ig, (match, ansPrefix, ans) => `\n\n${ansPrefix.trim()} ${ans}`);
+  clean = clean.replace(/\s*((?:Final\s*)?answer\s*[:).\-]?)\s*(.*)/ig, (match, ansPrefix, ans) => `\n\n${ansPrefix.trim()} ${ans}`);
   
   // Cleanup any extra newlines created by replacements
   clean = clean.replace(/\n{3,}/g, "\n\n").trim();

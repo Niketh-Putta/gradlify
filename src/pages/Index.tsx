@@ -82,9 +82,9 @@ const Index = () => {
         
         if (session) {
           setUser(session.user);
-          // If on public route and authenticated, redirect to the dashboard (home)
+          // If on public route and authenticated, redirect to the subject selection
           if (publicRoutes.includes(currentPath)) {
-            redirectTo = '/home';
+            redirectTo = '/select-subject';
           }
         } else {
           setUser(null);
@@ -252,12 +252,12 @@ const Index = () => {
       <Route path="/pay/success" element={<PayReturn />} />
       <Route path="/pay/cancelled" element={<PayReturn />} />
       
-      {/* Redirect authenticated users from landing page to dashboard */}
+      {/* Redirect authenticated users from landing page to subject selection */}
       {user ? (
         <>
-          <Route path="/" element={<Navigate to="/home" replace />} />
+          <Route path="/" element={<Navigate to="/select-subject" replace />} />
           <Route path="/select-subject" element={<SubjectSelection />} />
-          <Route path="/11-plus" element={<Navigate to="/home" replace />} />
+          <Route path="/11-plus" element={<Navigate to="/select-subject" replace />} />
           <Route path="/tools" element={<Tools />} />
           <Route path="/free-tools" element={<Tools />} />
           <Route 

@@ -31,6 +31,7 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from '@/components/ui/drawer';
+import { cn } from "@/lib/utils";
 import { Badge } from '@/components/ui/badge';
 import { AI_FEATURE_ENABLED } from '@/lib/featureFlags';
 import { AIUnavailableRedirect } from '@/components/AIUnavailableRedirect';
@@ -111,7 +112,12 @@ export default function Mindprint() {
   return (
     <div className="min-h-screen bg-background pb-16 sm:pb-20 lg:pb-8">
       {/* Header */}
-      <div className="bg-gradient-to-r from-violet-600/20 via-cyan-600/20 to-purple-600/20 border-b border-border/50">
+      <div className={cn(
+        "border-b border-border/50",
+        currentSubject === 'english' 
+          ? "bg-gradient-to-r from-amber-600/20 via-orange-600/20 to-amber-600/20" 
+          : "bg-gradient-to-r from-blue-600/20 via-cyan-600/20 to-blue-600/20"
+      )}>
         <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 lg:py-8">
           <motion.div
             initial={{ opacity: 0, y: -20 }}
@@ -122,8 +128,8 @@ export default function Mindprint() {
             <div className="flex flex-col lg:flex-row items-start justify-between gap-3 sm:gap-4">
               <div className="flex-1 w-full">
                 <div className="flex items-center gap-2 sm:gap-3">
-                  <div className="p-1.5 sm:p-2 rounded-lg bg-violet-500/20">
-                    <Brain className="h-5 w-5 sm:h-6 sm:w-6 text-violet-500" />
+                  <div className={cn("p-1.5 sm:p-2 rounded-lg", currentSubject === 'english' ? "bg-amber-500/20" : "bg-primary/20")}>
+                    <Brain className={cn("h-5 w-5 sm:h-6 sm:w-6", currentSubject === 'english' ? "text-amber-500" : "text-primary")} />
                   </div>
                   <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground">Your {currentSubject === 'english' ? 'English ' : 'Maths '}Mindprint</h1>
                 </div>
@@ -133,7 +139,12 @@ export default function Mindprint() {
                       onClick={handleGenerateInsights}
                       disabled={generating}
                       size="sm"
-                      className="bg-gradient-to-r from-violet-600 to-cyan-600 hover:from-violet-700 hover:to-cyan-700 text-xs sm:text-sm"
+                      className={cn(
+                        "text-xs sm:text-sm",
+                        currentSubject === 'english'
+                          ? "bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700"
+                          : "bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700"
+                      )}
                     >
                       <RefreshCw className={`h-3 w-3 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 ${generating ? 'animate-spin' : ''}`} />
                       <span className="hidden sm:inline">{generating ? 'Analyzing...' : 'Generate Insights'}</span>
@@ -154,11 +165,16 @@ export default function Mindprint() {
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.5, delay: 0.2 }}
-                  className="p-3 sm:p-4 rounded-xl bg-gradient-to-br from-violet-500/10 to-cyan-500/10 border border-violet-500/30 w-full lg:max-w-xs"
+                  className={cn(
+                    "p-3 sm:p-4 rounded-xl border w-full lg:max-w-xs",
+                    currentSubject === 'english'
+                      ? "bg-gradient-to-br from-amber-500/10 to-orange-500/10 border-amber-500/30"
+                      : "bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border-blue-500/30"
+                  )}
                 >
                   <div className="flex items-start gap-2 sm:gap-3">
-                    <div className="p-1.5 sm:p-2 rounded-lg bg-violet-500/20 shrink-0">
-                      <TrendingUp className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-violet-500" />
+                    <div className={cn("p-1.5 sm:p-2 rounded-lg shrink-0", currentSubject === 'english' ? "bg-amber-500/20" : "bg-blue-500/20")}>
+                      <TrendingUp className={cn("h-3.5 w-3.5 sm:h-4 sm:w-4", currentSubject === 'english' ? "text-amber-500" : "text-blue-500")} />
                     </div>
                     <div className="space-y-1.5 sm:space-y-2 flex-1 min-w-0">
                       <h3 className="font-semibold text-xs sm:text-sm text-foreground">
@@ -191,11 +207,16 @@ export default function Mindprint() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="p-4 sm:p-5 lg:p-6 rounded-xl sm:rounded-2xl bg-gradient-to-br from-violet-500/10 via-cyan-500/10 to-purple-500/10 border border-border/50"
+            className={cn(
+              "p-4 sm:p-5 lg:p-6 rounded-xl sm:rounded-2xl border border-border/50",
+              currentSubject === 'english'
+                ? "bg-gradient-to-br from-amber-500/10 via-orange-500/10 to-amber-500/10"
+                : "bg-gradient-to-br from-blue-500/10 via-cyan-500/10 to-blue-500/10"
+            )}
           >
             <div className="flex items-start gap-2 sm:gap-3">
-              <div className="p-1.5 sm:p-2 rounded-lg bg-violet-500/20 mt-0.5 sm:mt-1 shrink-0">
-                <Brain className="h-4 w-4 sm:h-5 sm:w-5 text-violet-500" />
+              <div className={cn("p-1.5 sm:p-2 rounded-lg mt-0.5 sm:mt-1 shrink-0", currentSubject === 'english' ? "bg-amber-500/20" : "bg-blue-500/20")}>
+                <Brain className={cn("h-4 w-4 sm:h-5 sm:w-5", currentSubject === 'english' ? "text-amber-500" : "text-blue-500")} />
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className="text-base sm:text-lg font-semibold text-foreground mb-1.5 sm:mb-2">AI Analysis</h3>
@@ -247,7 +268,7 @@ export default function Mindprint() {
         <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-md mx-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-violet-500" />
+              <TrendingUp className={cn("h-5 w-5", currentSubject === 'english' ? "text-amber-500" : "text-blue-500")} />
               Suggested Study Session
             </DialogTitle>
             <DialogDescription>
@@ -327,10 +348,15 @@ export default function Mindprint() {
             {/* Peak Performance */}
             <div className="space-y-3">
               <h4 className="font-semibold text-sm text-foreground">Peak Performance Hours</h4>
-              <div className="p-4 bg-gradient-to-r from-cyan-500/10 to-violet-500/10 rounded-lg border border-border/50">
+              <div className={cn(
+                "p-4 rounded-lg border border-border/50",
+                currentSubject === 'english'
+                  ? "bg-gradient-to-r from-amber-500/10 to-orange-500/10"
+                  : "bg-gradient-to-r from-cyan-500/10 to-blue-500/10"
+              )}>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">Optimal study time</span>
-                  <Badge className="bg-cyan-600 hover:bg-cyan-700">
+                  <Badge className={cn(currentSubject === 'english' ? "bg-amber-600 hover:bg-amber-700" : "bg-cyan-600 hover:bg-cyan-700")}>
                     {overview.data?.peakHours || 'Not enough data'}
                   </Badge>
                 </div>

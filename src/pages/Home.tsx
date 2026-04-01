@@ -40,6 +40,7 @@ import { toast } from "sonner";
 import { LeaderboardSnapshot } from "@/components/LeaderboardSnapshot";
 import { PremiumUpgradeButton } from "@/components/PremiumUpgradeButton";
 import { useReadinessStore } from "@/lib/stores/useReadinessStore";
+import { PracticeConfirmationModal } from "@/components/readiness/PracticeConfirmationModal";
 
 import { DiscordFooterEntry } from "@/components/DiscordFooterEntry";
 import { AI_FEATURE_ENABLED } from "@/lib/featureFlags";
@@ -76,6 +77,13 @@ export function Home() {
   const [isFirstVisit, setIsFirstVisit] = useState<boolean>(false);
   const [practiceCount, setPracticeCount] = useState<number | null>(null);
   const [trackSwitching, setTrackSwitching] = useState(false);
+  
+  // Practice Confirmation Modal State
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [confirmModalData, setConfirmModalData] = useState<{
+    topic: string;
+    mode: "weakness" | "general";
+  }>({ topic: "", mode: "general" });
     
   const premiumBannerTitle = "Gradlify Premium\nStart Your 3 Day Free Trial";
   const premiumBannerSubtitle = AI_FEATURE_ENABLED
@@ -330,10 +338,16 @@ export function Home() {
     });
   }, [overallReadiness, readinessLoading, lowestTopicReadiness, onboardingCurrentGrade, onboardingTargetGrade]);
 
+  const initiatePractice = (topicOverride?: string, practiceMode: "weakness" | "general" = "general") => {
+    const topic = topicOverride || (practiceMode === "weakness" ? lowestReadinessTopic?.topic : (currentSubject === "english" ? "General English" : "General Maths")) || (currentSubject === "english" ? "General English" : "General Maths");
+    setConfirmModalData({ topic, mode: practiceMode });
+    setIsConfirmModalOpen(true);
+  };
+
   const startFocusedPractice = () => {
     const params = new URLSearchParams();
-    if (lowestReadinessTopic?.topic) {
-      params.set('topics', lowestReadinessTopic.topic);
+    if (confirmModalData.topic) {
+      params.set('topics', confirmModalData.topic);
     }
     params.set('tier', 'both');
     params.set('paperType', 'both');
@@ -468,7 +482,7 @@ export function Home() {
               <div className="flex flex-col sm:flex-row gap-3">
                 {isNewUser ? (
                   <Button 
-                    onClick={() => navigate(`/practice/${currentSubject}`)}
+                    onClick={() => initiatePractice("", "general")}
                     size="lg"
                     className={cn(
                        "font-medium shadow-glow min-w-[220px]",
@@ -481,7 +495,7 @@ export function Home() {
                   </Button>
                 ) : (
                   <Button 
-                    onClick={() => navigate('/mocks')}
+                    onClick={() => initiatePractice("", "general")}
                     size="lg"
                     className={cn(
                        "font-medium shadow-glow min-w-[170px]",
@@ -644,7 +658,7 @@ export function Home() {
                   currentSubject === 'english' ? "bg-amber-500" : "bg-primary"
                 )} />
 
-                <CardContent className="h-full p-6 pt-6 flex flex-col relative z-10">
+                <CardContent className="h-full p-6 pt-6 sm:pt-6 flex flex-col relative z-10">
                   {/* Header */}
                   <div className="flex-[0_0_auto]">
                     <div className="flex items-center justify-between mb-1">
@@ -666,18 +680,19 @@ export function Home() {
                     {/* Topic Name */}
                     <div className="mb-4">
                       <h3 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight leading-tight mb-2 pr-4">
-                        {lowestReadinessTopic ? lowestReadinessTopic.topic : 'Initial Assessment'}
+                        {isFirstVisit ? 'Initial Baseline' : lowestReadinessTopic ? lowestReadinessTopic.topic : 'Initial Assessment'}
                       </h3>
                       <div className="flex items-center justify-between mt-3 text-xs font-semibold">
                         <span className="text-muted-foreground">Mastery Level</span>
                         <span className={cn(
                           "rounded-md px-1.5 py-0.5 border",
+                          isFirstVisit ? "text-slate-600 dark:text-slate-400 bg-slate-500/10 border-slate-500/20" :
                           lowestReadinessTopic && lowestReadinessTopic.readiness < 40 
                             ? "text-red-600 dark:text-red-400 bg-red-500/10 border-red-500/20" :
                           lowestReadinessTopic && lowestReadinessTopic.readiness < 70 
                             ? "text-amber-600 dark:text-amber-400 bg-amber-500/10 border-amber-500/20" : 
                             "text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20"
-                        )}>{lowestReadinessTopic ? Math.round(lowestReadinessTopic.readiness) : 0}%</span>
+                        )}>{isFirstVisit ? 'Untested' : lowestReadinessTopic ? Math.round(lowestReadinessTopic.readiness) + '%' : '0%'}</span>
                       </div>
                     </div>
 
@@ -688,27 +703,34 @@ export function Home() {
                           "h-full rounded-full transition-all duration-1000",
                           currentSubject === 'english' ? "bg-amber-500" : "bg-primary"
                         )}
-                        style={{ width: `${lowestReadinessTopic ? Math.max(2, Math.round(lowestReadinessTopic.readiness)) : 0}%` }}
+                        style={{ width: `${isFirstVisit ? 0 : lowestReadinessTopic ? Math.max(2, Math.round(lowestReadinessTopic.readiness)) : 0}%` }}
                       />
                     </div>
                   </div>
 
                   {/* Bottom Section */}
-                  <div className="pt-4 border-t border-border/40 mt-auto flex-[0_0_auto]">
+                  <div className="pt-6 border-t border-border/40 mt-auto flex-[0_0_auto]">
                     {/* Action Button */}
                     <Button 
-                      onClick={startFocusedPractice}
+                      onClick={() => initiatePractice(lowestReadinessTopic?.topic, "weakness")}
                       className={cn(
-                        "w-full h-11 text-sm font-semibold rounded-lg shadow-md transition-all",
-                        "hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]",
-                        "border border-white/10",
+                        "w-full h-12 text-sm font-semibold rounded-xl shadow-xl transition-all duration-300 relative overflow-hidden group/btn",
+                        "hover:shadow-2xl hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]",
+                        "border border-white/20",
                         currentSubject === 'english' 
-                          ? "bg-amber-500 hover:bg-amber-400 text-slate-900" 
-                          : "bg-primary hover:bg-blue-500 text-primary-foreground"
+                          ? "bg-gradient-to-r from-amber-400 to-amber-600 hover:from-amber-300 hover:to-amber-500 text-white shadow-[0_0_15px_rgba(245,158,11,0.5)] border-0" 
+                          : "bg-gradient-to-r from-primary to-blue-600 hover:from-blue-500 hover:to-blue-700 text-white shadow-primary/25"
                       )}
                     >
-                      <Zap className="h-4 w-4 mr-2" />
-                      Train Weakness
+                      {/* Subtle Shine Effect */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-[100%] group-hover/btn:animate-shine" />
+                      
+                      <div className="flex items-center justify-center relative z-10 transition-transform group-hover/btn:scale-[1.02]">
+                        <Zap className="h-4 w-4 mr-2" />
+                        <span>
+                          {isFirstVisit ? 'Start Baseline Test' : 'Train Weakness'}
+                        </span>
+                      </div>
                     </Button>
                   </div>
                 </CardContent>
@@ -765,21 +787,22 @@ export function Home() {
               ) : (
                 <div className={`grid sm:grid-cols-2 ${currentSubject === 'english' ? 'lg:grid-cols-3' : isElevenPlus ? 'lg:grid-cols-2' : 'lg:grid-cols-3'} gap-4`}>
                   {topicData.map((topic) => {
-                      const tone = topicTone[topic.key] || topicTone.number;
                       const isEnglish = currentSubject === 'english';
                       return (
                     <div 
                       key={topic.key} 
                       className={cn(
                         "group p-4 rounded-xl border border-border/60 bg-card hover:shadow-md cursor-pointer transition-all duration-300 hover:-translate-y-0.5",
-                        isEnglish ? "hover:border-amber-500/30" : tone.hoverBorder
+                        isEnglish ? "hover:border-amber-500/30" : "hover:border-primary/30"
                       )}
                       onClick={() => navigate('/readiness')}
                     >
                     <div className="flex items-center gap-3 mb-3">
                         <div 
-                          className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-black text-base shadow-sm"
-                          style={{ backgroundColor: isEnglish ? '#f59e0b' : topic.color }}
+                          className={cn(
+                            "w-10 h-10 rounded-xl flex items-center justify-center text-white font-black text-base shadow-sm",
+                            isEnglish ? "bg-amber-500 shadow-amber-500/10" : "bg-primary shadow-primary/10"
+                          )}
                         >
                           {topic.name.charAt(0).toUpperCase()}
                         </div>
@@ -789,14 +812,14 @@ export function Home() {
                         </div>
                         <span className={cn(
                           "text-lg font-semibold",
-                          isEnglish ? "text-amber-600 dark:text-amber-400" : tone.score
+                          isEnglish ? "text-amber-600 dark:text-amber-400" : "text-primary dark:text-blue-400"
                         )}>
                           {topic.score}%
                         </span>
                       </div>
                       <Progress 
                         value={topic.score} 
-                        indicatorClassName={isEnglish ? "bg-amber-500" : undefined}
+                        indicatorClassName={isEnglish ? "bg-amber-500" : "bg-primary"}
                         className="h-2"
                       />
                     </div>
@@ -1016,6 +1039,15 @@ export function Home() {
             className="pointer-events-none absolute inset-x-4 -bottom-2 h-16 rounded-[999px] bg-gradient-to-b from-slate-900/30 via-slate-900/12 to-transparent blur-2xl sm:inset-x-8 sm:h-20"
           />
         </div>
+        
+        <PracticeConfirmationModal
+          isOpen={isConfirmModalOpen}
+          onOpenChange={setIsConfirmModalOpen}
+          onConfirm={startFocusedPractice}
+          topicName={confirmModalData.topic}
+          subject={currentSubject as "maths" | "english"}
+          mode={confirmModalData.mode}
+        />
 
       </div>
     </div>

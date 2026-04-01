@@ -1,12 +1,14 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { 
   Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer,
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine
 } from 'recharts';
-import { Target, AlertCircle, Info, Sparkles } from 'lucide-react';
+import { Target, AlertCircle, Info, Sparkles, BookOpen, Zap, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { getTrackReadinessSections } from '@/lib/trackCurriculum';
 
 interface TopicData {
   topic: string;
@@ -19,11 +21,39 @@ interface PremiumAnalyticsProps {
   speedPct: number;
   profileName: string;
   subject?: 'maths' | 'english';
+  onInitiatePractice?: (topic: string, mode: "weakness" | "general") => void;
 }
 
-export function PremiumAnalyticsDashboard({ displayTopics, accuracyPct, speedPct, profileName, subject = 'maths' }: PremiumAnalyticsProps) {
+export function PremiumAnalyticsDashboard({ 
+  displayTopics, 
+  accuracyPct, 
+  speedPct, 
+  profileName, 
+  subject = 'maths',
+  onInitiatePractice
+}: PremiumAnalyticsProps) {
   const navigate = useNavigate();
-  const firstName = profileName ? profileName.split(' ')[0] : 'The student';
+  const firstName = profileName ? profileName.split(' ')[0] : 'the student';
+
+  const englishInsights = useMemo(() => {
+    if (subject !== 'english' || displayTopics.length === 0) return null;
+    
+    // Sort to find the weakest overall readiness
+    const sorted = [...displayTopics].sort((a, b) => a.readiness - b.readiness);
+    const weakest = sorted[0];
+    
+    // Get proper display name and key for routing
+    const topicKey = weakest.topic; // "Comprehension", "SPaG", or "Vocabulary"
+    
+    // Find the best practice subtopic (the one with 0% or lowest score if we had subtopic data, 
+    // but here we'll just recommend the broad topic for now to ensure valid practice)
+    
+    return {
+      weakestTopic: topicKey,
+      notes_recommendation: `Based on current performance, ${firstName} should focus on ${topicKey} to boost their overall English score.`,
+      practice_recommendation: `Direct practice in ${topicKey} will address the primary readiness gap identified in the latest assessment.`
+    };
+  }, [subject, displayTopics, firstName]);
 
   const { radarData, targetScore } = useMemo(() => {
     const validTopics = displayTopics.filter(t => t.topic && t.readiness !== undefined);
@@ -73,16 +103,19 @@ export function PremiumAnalyticsDashboard({ displayTopics, accuracyPct, speedPct
 
   const insights = useMemo(() => {
     const valid = displayTopics.filter(t => t.topic);
-    if (valid.length < 2) return { best: 'core concepts', worst: 'advanced topics', recommendation: 'Initiate daily practice sessions.' };
+    if (valid.length < 2) return { best: 'core concepts', worst: 'advanced topics', worstRaw: 'advanced topics', worst2Raw: 'core concepts', recommendation: 'Initiate daily practice sessions.' };
     
     const sorted = [...valid].sort((a, b) => (b.readiness || 0) - (a.readiness || 0));
     const bestTopic = sorted[0].topic.toLowerCase();
-    const worstTopic = sorted[sorted.length - 1].topic.toLowerCase();
+    const worstTopicRaw = sorted[sorted.length - 1].topic;
+    const secondWorstRaw = sorted[sorted.length - 2].topic;
+    const worstTopic = worstTopicRaw.toLowerCase();
     
     return {
       best: bestTopic,
       worst: worstTopic,
-      worstRaw: sorted[sorted.length - 1].topic,
+      worstRaw: worstTopicRaw,
+      worst2Raw: secondWorstRaw,
       recommendation: `Initiate timed, targeted 10-minute Sprint practice sessions in ${worstTopic}.`
     };
   }, [displayTopics]);
@@ -279,37 +312,119 @@ export function PremiumAnalyticsDashboard({ displayTopics, accuracyPct, speedPct
              </div>
           </div>
   
-          {/* Recommended Actions */}
+            {/* Recommended Actions */}
           <div className={cn(
-            "bg-[#FFFDF8] dark:bg-card rounded-[24px] p-6 sm:p-8 border shadow-sm flex flex-col justify-center",
-            subject === 'english' ? "border-amber-100/50" : "border-blue-100/50"
+            "bg-[#FFFDF8] dark:bg-[#0A0906] rounded-[24px] p-6 lg:p-7 border shadow-sm flex flex-col transition-all duration-300",
+            subject === 'english' 
+              ? "border-amber-100/50 dark:border-amber-900/30 shadow-[0_8px_30px_rgba(245,158,11,0.03)]" 
+              : "border-blue-100/50 dark:border-blue-900/30 shadow-[0_8px_30px_rgba(59,130,246,0.03)]"
           )}>
-            <h3 className={cn(
-               "text-[13px] font-serif font-black tracking-[0.15em] uppercase mb-6",
-               subject === 'english' ? "text-amber-950/80 dark:text-amber-100/80" : "text-blue-950/80 dark:text-blue-100/80"
-            )}>
-               Recommended Protocol
-            </h3>
-             <ul className="space-y-4">
-               <li 
-                 className="flex items-center justify-between pb-4 border-b border-border/50 group cursor-pointer"
-                 onClick={() => navigate(`/practice/${subject}?topics=${encodeURIComponent(insights.worstRaw)}&mode=practice`)}
-               >
-                 <span className="text-[14px] sm:text-[15px] font-medium text-foreground group-hover:text-primary transition-colors capitalize">{insights.worst} Module</span>
-               <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-primary transition-transform group-hover:translate-x-1">
-                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="m9 18 6-6-6-6"/></svg>
-               </div>
-             </li>
+            <div className="flex items-center justify-between mb-5">
+              <h3 className={cn(
+                "text-[10px] font-bold tracking-[0.25em] uppercase",
+                subject === 'english' ? "text-amber-950/40 dark:text-amber-100/30" : "text-blue-950/40 dark:text-blue-100/30"
+              )}>
+                AI Recommendation
+              </h3>
+              <div className={cn(
+                "flex items-center gap-1.5 px-3 py-1 rounded-full border shadow-sm",
+                subject === 'english' 
+                  ? "bg-amber-500/10 border-amber-500/10" 
+                  : "bg-emerald-500/10 border-emerald-500/10"
+              )}>
+                <div className={cn(
+                  "w-1.5 h-1.5 rounded-full",
+                  subject === 'english' 
+                    ? "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.6)]" 
+                    : "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]"
+                )} />
+                <span className={cn(
+                  "text-[9px] font-black uppercase tracking-widest",
+                  subject === 'english' ? "text-amber-600 dark:text-amber-400" : "text-emerald-600 dark:text-emerald-400"
+                )}>Analysis Active</span>
+              </div>
+            </div>
+
+            {subject === 'english' ? (
+              <div className="relative flex flex-col pt-2">                 
+                {englishInsights ? (
+                  <div className="relative">
+                    <p className="text-sm font-medium text-amber-950/80 dark:text-amber-100/80 leading-relaxed mb-6">
+                      Priority: Focus on <span className="font-bold text-amber-700 dark:text-amber-400">{englishInsights.weakestTopic}</span> to address the primary readiness gap.
+                    </p>
+                    
+                    <div className="flex flex-col gap-2.5">
+                      {/* High-Impact Execution Button */}
+                      <button 
+                         onClick={() => {
+                           if (onInitiatePractice) {
+                             onInitiatePractice(englishInsights.weakestTopic, "weakness");
+                           } else {
+                             navigate(`/practice/english?topics=${encodeURIComponent(englishInsights.weakestTopic)}&mode=practice`);
+                           }
+                         }}
+                         className="flex items-center justify-between w-full px-4 py-3 bg-amber-500 hover:bg-amber-600 dark:bg-amber-500 dark:hover:bg-amber-400 text-white dark:text-amber-950 rounded-xl transition-all duration-200 shadow-sm shadow-amber-500/20 group active:scale-[0.98]"
+                      >
+                         <div className="flex items-center gap-2.5">
+                           <Zap className="w-4 h-4 fill-current text-white dark:text-amber-950" />
+                           <span className="font-semibold text-sm">Launch Practice</span>
+                         </div>
+                         <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                      </button>
+
+                      {/* Premium Theory Button */}
+                      <button 
+                         onClick={() => navigate(`/notes/${encodeURIComponent(englishInsights.weakestTopic)}`)}
+                         className="flex items-center justify-between w-full px-4 py-3 bg-amber-500/10 hover:bg-amber-500/20 dark:bg-amber-500/10 dark:hover:bg-amber-500/20 text-amber-700 dark:text-amber-400 rounded-xl transition-all duration-200 group active:scale-[0.98]"
+                      >
+                         <div className="flex items-center gap-2.5">
+                           <BookOpen className="w-4 h-4" />
+                           <span className="font-semibold text-sm">Review Details</span>
+                         </div>
+                         <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-[13px] font-bold text-amber-800/40 font-serif italic py-8 text-center tracking-widest">
+                    SYNTHESIZING ANALYTICS...
+                  </div>
+                )}
+              </div>
+            ) : (
+             <ul className="flex-1 flex flex-col justify-center space-y-4 pt-2">
+                <li 
+                  className="flex items-center justify-between pb-4 border-b border-border/50 group cursor-pointer"
+                  onClick={() => {
+                    if (onInitiatePractice) {
+                      onInitiatePractice(insights.worstRaw, "weakness");
+                    } else {
+                      navigate(`/practice/${subject}?topics=${encodeURIComponent(insights.worstRaw)}&mode=practice`);
+                    }
+                  }}
+                >
+                  <span className="text-[14px] sm:text-[15px] font-medium text-foreground group-hover:text-primary transition-colors">{insights.worstRaw}</span>
+                <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-primary transition-transform group-hover:translate-x-1">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="m9 18 6-6-6-6"/></svg>
+                </div>
+              </li>
              <li 
                className="flex items-center justify-between pb-4 border-b border-border/50 group cursor-pointer"
-               onClick={() => navigate(`/mocks`)}
+               onClick={() => {
+                 if (onInitiatePractice) {
+                   onInitiatePractice(insights.worst2Raw, "weakness");
+                 } else {
+                   navigate(`/practice/${subject}?topics=${encodeURIComponent(insights.worst2Raw)}&mode=practice`);
+                 }
+               }}
              >
-               <span className="text-[15px] font-medium text-foreground group-hover:text-primary transition-colors">Time-Management Module</span>
+               <span className="text-[14px] sm:text-[15px] font-medium text-foreground group-hover:text-primary transition-colors">{insights.worst2Raw}</span>
                <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-primary transition-transform group-hover:translate-x-1">
                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="m9 18 6-6-6-6"/></svg>
                </div>
              </li>
           </ul>
+          )}
         </div>
       </div>
     </div>

@@ -446,7 +446,7 @@ const Resources = () => {
             Study Resources
           </Badge>
           <h1 className="text-4xl md:text-5xl font-serif text-foreground leading-[1.1] tracking-tight">
-            {currentSubject === 'english' ? '11+ English Resources' : '11+ Maths Resources'}
+            <span className="text-5xl md:text-7xl">11+</span> {currentSubject === 'english' ? 'English Resources' : 'Maths Resources'}
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground font-light leading-relaxed tracking-wide">
             High-fidelity practice papers, expert channels, and live strategy feeds - expertly selected for intentional 11+ {currentSubject === 'english' ? 'English' : 'Mathematics'} preparation.
@@ -508,29 +508,7 @@ const Resources = () => {
           ))}
         </div>
 
-        {/* Sprint Premium Banner - Editorial format */}
-        <section className="mt-24 pt-16 border-t border-border/30">
-          <div className="max-w-3xl mx-auto text-center space-y-8">
-             <h3 className="text-3xl font-serif text-foreground">Gradlify Sprint Access</h3>
-             <p className="text-base text-muted-foreground font-light leading-relaxed">
-               Transcend standard revision. Encounter our proprietary daily drills, topic-driven structural guides, and precision-timed mock examinations within an undisturbed environment.
-             </p>
-             <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-                 <Link
-                   to="/mocks?track=11plus"
-                   className="inline-flex items-center justify-center h-12 px-8 rounded-full bg-foreground text-background font-medium text-sm transition-all duration-300 hover:opacity-90 tracking-wide shadow-sm hover:shadow-md"
-                 >
-                    Start a Mock
-                 </Link>
-                 <Link
-                   to="/notes?track=11plus"
-                   className="inline-flex items-center justify-center h-12 px-8 rounded-full bg-secondary text-foreground font-medium text-sm transition-all duration-300 hover:bg-muted tracking-wide border border-border/50"
-                 >
-                    Read Topic Notes
-                 </Link>
-             </div>
-          </div>
-        </section>
+
       </div>
     );
   }
@@ -578,10 +556,10 @@ const Resources = () => {
       </div>
 
       {/* Maths News Section */}
-      <Card className="group hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-blue-50/50 to-indigo-50/50 dark:from-blue-950/10 dark:to-indigo-950/10">
+      <Card className="group hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-blue-50/50 to-blue-100/30 dark:from-blue-950/10 dark:to-blue-900/10">
         <CardHeader className="pb-4">
           <div className="flex items-center gap-4">
-            <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+            <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-700 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
               <Newspaper className="h-6 w-6 text-white" />
             </div>
             <div className="flex-1">

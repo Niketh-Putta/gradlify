@@ -47,7 +47,7 @@ export function TopicBreakdown({ topics }: TopicBreakdownProps) {
                     <span className="font-medium">{topic.topic}</span>
                     {topic.readiness === 0 && (
                       <p className="text-xs text-muted-foreground mt-0.5">
-                        Needs work – complete practice to build your readiness
+                        Needs work - complete practice to build your readiness
                       </p>
                     )}
                   </div>

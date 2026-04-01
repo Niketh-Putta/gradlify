@@ -685,7 +685,7 @@ export function Settings({ user, onBackToChat, onSignOut }: SettingsProps) {
               </p>
             </div>
           </div>
-          <Button variant="outline" onClick={onBackToChat} className="shrink-0 rounded-full px-6 bg-card">
+          <Button variant="outline" onClick={onBackToChat} className="shrink-0 rounded-full px-6 bg-card border-border/50 dark:border-border/80 hover:bg-muted/50">
             Back to Dashboard
           </Button>
         </div>
@@ -705,13 +705,13 @@ export function Settings({ user, onBackToChat, onSignOut }: SettingsProps) {
                     <Input 
                       value={user.email || ''} 
                       disabled 
-                      className="bg-muted/30 border-none rounded-xl h-11"
+                      className="bg-muted/30 border border-border/50 dark:border-border/80 rounded-xl h-11"
                     />
                   </div>
                   <div className="space-y-2">
                     <Label className="text-xs uppercase text-muted-foreground font-semibold">Access Tier</Label>
-                    <div className="h-11 flex items-center bg-muted/30 rounded-xl px-4 inline-flex w-full">
-                      <Badge variant={accessIsPremium ? "default" : "secondary"} className="bg-primary/20 text-primary hover:bg-primary/20 border-none">
+                    <div className="h-11 flex items-center bg-muted/30 border border-border/50 dark:border-border/80 rounded-xl px-4 inline-flex w-full">
+                      <Badge variant={accessIsPremium ? "default" : "secondary"} className="bg-primary/20 text-primary hover:bg-primary/20 border border-primary/30">
                         {accessLabel} Member
                       </Badge>
                     </div>
@@ -725,7 +725,7 @@ export function Settings({ user, onBackToChat, onSignOut }: SettingsProps) {
                     <h3 className="text-sm font-semibold text-foreground">Study Profile</h3>
                     <p className="text-sm text-muted-foreground">Refine your exam board, target grades, and timeline.</p>
                   </div>
-                  <Button onClick={() => setIsEditingStudyProfile(true)} className="rounded-xl bg-foreground text-background hover:bg-foreground/90 shrink-0">
+                  <Button onClick={() => setIsEditingStudyProfile(true)} className="rounded-xl bg-foreground text-background hover:bg-foreground/90 shrink-0 border border-border/20 dark:border-white/20">
                     Update Profile
                   </Button>
                 </div>
@@ -745,7 +745,7 @@ export function Settings({ user, onBackToChat, onSignOut }: SettingsProps) {
                         value={currentPassword}
                         onChange={(e) => setCurrentPassword(e.target.value)}
                         placeholder="Enter current password"
-                        className="bg-muted/30 border-none rounded-xl h-11 pr-10"
+                        className="bg-muted/30 border border-border/50 dark:border-border/80 rounded-xl h-11 pr-10"
                       />
                       <Button
                         type="button"
@@ -768,7 +768,7 @@ export function Settings({ user, onBackToChat, onSignOut }: SettingsProps) {
                           value={newPassword}
                           onChange={(e) => setNewPassword(e.target.value)}
                           placeholder="Enter new password"
-                          className="bg-muted/30 border-none rounded-xl h-11 pr-10"
+                          className="bg-muted/30 border border-border/50 dark:border-border/80 rounded-xl h-11 pr-10"
                         />
                         <Button
                           type="button"
@@ -789,7 +789,7 @@ export function Settings({ user, onBackToChat, onSignOut }: SettingsProps) {
                           value={confirmPassword}
                           onChange={(e) => setConfirmPassword(e.target.value)}
                           placeholder="Verify new password"
-                          className="bg-muted/30 border-none rounded-xl h-11 pr-10"
+                          className="bg-muted/30 border border-border/50 dark:border-border/80 rounded-xl h-11 pr-10"
                         />
                         <Button
                           type="button"
@@ -808,7 +808,7 @@ export function Settings({ user, onBackToChat, onSignOut }: SettingsProps) {
                     <Button 
                       onClick={handleChangePassword} 
                       disabled={isChangingPassword}
-                      className="rounded-xl px-6 bg-muted/80 text-foreground hover:bg-muted"
+                      className="rounded-xl px-6 bg-muted/50 dark:bg-muted/30 text-foreground hover:bg-muted border border-border/50 dark:border-border/80"
                     >
                       {isChangingPassword ? "Updating..." : "Update Password"}
                     </Button>

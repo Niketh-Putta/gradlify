@@ -63,12 +63,12 @@ export function normalizeNewlines(text: string): string {
   // Ensure step-by-step explanations appear on their own lines for readability.
   // Example: "Step 1: ... Step 2: ... Final answer: ..."
   normalized = normalized
-    .replace(/(\S)\s*(Step\s*\d+\s*[:).–-]?)/gi, "$1\n\n$2")
-    .replace(/(\S)\s*((?:Final\s*)?Answer\s*[:).–-]?)/gi, "$1\n\n$2")
+    .replace(/(\S)\s*(Step\s*\d+\s*[:).\-]?)/gi, "$1\n\n$2")
+    .replace(/(\S)\s*((?:Final\s*)?Answer\s*[:).\-]?)/gi, "$1\n\n$2")
     // Force step labels into their own block but KEEP content on the same line if concise, or let user formatting handle it
-    .replace(/\s*(Step\s*\d+\s*[:).–-]?)\s*/gi, "\n\n$1 ")
+    .replace(/\s*(Step\s*\d+\s*[:).\-]?)\s*/gi, "\n\n$1 ")
     // Force final answer labels onto their own block.
-    .replace(/\s*((?:Final\s*)?Answer)\s*[:).–-]?\s*/gi, "\n\n$1: ")
+    .replace(/\s*((?:Final\s*)?Answer)\s*[:).\-]?\s*/gi, "\n\n$1: ")
     // Collapse excessive blank lines introduced by splitting.
     .replace(/\n{3,}/g, "\n\n")
     .trim();
@@ -185,7 +185,7 @@ function isCenteredMathLine(line: string): boolean {
 }
 
 function isStepLabel(line: string): boolean {
-  return /^Step\s*\d+\s*[:).– - -]?\s*$/i.test((line ?? "").trim());
+  return /^Step\s*\d+\s*[:).\-]?\s*$/i.test((line ?? "").trim());
 }
 
 function isFinalAnswerLabel(line: string): boolean {

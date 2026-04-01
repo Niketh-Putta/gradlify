@@ -60,7 +60,7 @@ const formatRange = (startIso: string, endIso: string) => {
     month: "short",
     day: "numeric",
   })
-  return `${startLabel} – ${endLabel}`
+  return `${startLabel} - ${endLabel}`
 }
 
 const formatCurrency = (value: number, currency: string) =>

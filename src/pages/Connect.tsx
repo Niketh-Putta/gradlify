@@ -327,11 +327,11 @@ export default function Connect() {
     const now = new Date();
     if (period === "week") {
       const { start, end } = getWeekRange();
-      return `Weekly leaderboard (Mon–Sun ${formatDate(start)} – ${formatDate(end)})`;
+      return `Weekly leaderboard (Mon-Sun ${formatDate(start)} - ${formatDate(end)})`;
     }
     if (period === "month") {
       const { start, end } = getMonthRange();
-      return `Monthly leaderboard: ${formatDate(start)} – ${formatDate(end)}`;
+      return `Monthly leaderboard: ${formatDate(start)} - ${formatDate(end)}`;
     }
     return `Daily leaderboard (${formatDate(now)})`;
   }, [period]);
@@ -344,10 +344,16 @@ export default function Connect() {
       <header className="mb-2 sm:mb-3 flex-shrink-0 animate-fade-in w-full">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-1.5">
-            <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-lg bg-gradient-to-br from-primary to-indigo-500 flex items-center justify-center">
+            <div className={cn(
+              "w-5 h-5 sm:w-6 sm:h-6 rounded-lg flex items-center justify-center bg-gradient-to-br",
+              currentSubject === "english" ? "from-amber-400 to-amber-600" : "from-primary to-blue-600"
+            )}>
               <Users className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-white" />
             </div>
-            <span className="text-[10px] sm:text-xs font-medium bg-gradient-to-r from-primary to-indigo-500 bg-clip-text text-transparent tracking-tight">Connect</span>
+            <span className={cn(
+              "text-[10px] sm:text-xs font-medium bg-clip-text text-transparent tracking-tight bg-gradient-to-r",
+              currentSubject === "english" ? "from-amber-400 to-amber-600" : "from-primary to-blue-600"
+            )}>Connect</span>
           </div>
         </div>
 
@@ -372,13 +378,19 @@ export default function Connect() {
             <div className="text-right">
               <div className="flex items-baseline gap-0.5 justify-end">
                 <span className="text-[10px] text-muted-foreground">#</span>
-                <span className="text-lg sm:text-xl font-semibold bg-gradient-to-r from-primary to-indigo-500 bg-clip-text text-transparent">
+                <span className={cn(
+                  "text-lg sm:text-xl font-semibold bg-clip-text text-transparent bg-gradient-to-r",
+                  currentSubject === "english" ? "from-amber-400 to-amber-600" : "from-primary to-blue-600"
+                )}>
                   {globalOptIn && myEntry ? myEntry.rank : ' - '}
                 </span>
               </div>
               <div className="text-[9px] sm:text-[10px] text-muted-foreground">{periodLabels[period]}</div>
             </div>
-            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gradient-to-br from-primary to-indigo-500 flex items-center justify-center text-white text-[10px] sm:text-xs font-medium flex-shrink-0">
+            <div className={cn(
+              "w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-white text-[10px] sm:text-xs font-medium flex-shrink-0 bg-gradient-to-br",
+              currentSubject === "english" ? "from-amber-400 to-amber-600" : "from-primary to-blue-600"
+            )}>
               You
             </div>
           </div>
@@ -401,7 +413,9 @@ export default function Connect() {
           <div 
             className={cn(
               "w-6 h-3.5 sm:w-7 sm:h-4 rounded-full relative transition-colors flex-shrink-0",
-              globalOptIn ? "bg-gradient-to-r from-primary to-indigo-500" : "bg-border"
+              globalOptIn 
+                ? (currentSubject === "english" ? "bg-gradient-to-r from-amber-400 to-amber-600" : "bg-gradient-to-r from-primary to-blue-600")
+                : "bg-border"
             )}
           >
             <div 
@@ -439,7 +453,10 @@ export default function Connect() {
           <div className="flex items-center justify-between mb-1.5">
             <div className="flex items-center gap-1.5">
               <span className="text-[10px] sm:text-[11px] font-medium text-muted-foreground">Requests</span>
-              <span className="bg-gradient-to-r from-primary to-indigo-500 text-white text-[9px] sm:text-[10px] font-semibold px-1.5 py-0.5 rounded-full min-w-[14px] text-center">
+              <span className={cn(
+                "text-white text-[9px] sm:text-[10px] font-semibold px-1.5 py-0.5 rounded-full min-w-[14px] text-center bg-gradient-to-r",
+                currentSubject === "english" ? "from-amber-400 to-amber-600" : "from-primary to-blue-600"
+              )}>
                 {pendingRequests.length}
               </span>
             </div>
@@ -475,7 +492,10 @@ export default function Connect() {
                     size="sm"
                     onClick={() => handleRespond(request.request_id, 'accept')}
                     disabled={respondingTo === request.request_id}
-                    className="flex-1 py-1 rounded-md text-[9px] sm:text-[10px] font-medium h-auto bg-gradient-to-r from-primary to-indigo-500 hover:opacity-90"
+                    className={cn(
+                      "flex-1 py-1 rounded-md text-[9px] sm:text-[10px] font-medium h-auto hover:opacity-90",
+                      currentSubject === "english" ? "bg-gradient-to-r from-amber-400 to-amber-600" : "bg-gradient-to-r from-primary to-blue-600"
+                    )}
                   >
                     Yes
                   </Button>
@@ -493,7 +513,7 @@ export default function Connect() {
             onClick={() => setScope('global')}
             className={cn(
               "text-[11px] sm:text-xs font-medium pb-1 border-b-2 transition-colors",
-              scope === 'global' ? "text-primary border-primary" : "text-muted-foreground border-transparent hover:text-foreground"
+              scope === 'global' ? (currentSubject === "english" ? "text-amber-500 border-amber-500" : "text-primary border-primary") : "text-muted-foreground border-transparent hover:text-foreground"
             )}
           >
             All
@@ -502,7 +522,7 @@ export default function Connect() {
             onClick={() => setScope('friends')}
             className={cn(
               "text-[11px] sm:text-xs font-medium pb-1 border-b-2 transition-colors",
-              scope === 'friends' ? "text-primary border-primary" : "text-muted-foreground border-transparent hover:text-foreground"
+              scope === 'friends' ? (currentSubject === "english" ? "text-amber-500 border-amber-500" : "text-primary border-primary") : "text-muted-foreground border-transparent hover:text-foreground"
             )}
           >
             Friends
@@ -520,7 +540,7 @@ export default function Connect() {
               className={cn(
                 "px-2 py-0.5 sm:px-2.5 sm:py-1 text-[10px] sm:text-[11px] font-medium rounded-lg sm:rounded-xl transition-all",
                 period === p
-                  ? "bg-gradient-to-r from-primary to-indigo-500 text-white shadow-sm"
+                  ? cn("text-white shadow-sm", currentSubject === "english" ? "bg-gradient-to-r from-amber-400 to-amber-600" : "bg-gradient-to-r from-primary to-blue-600")
                   : "text-muted-foreground hover:text-foreground"
               )}
             >
@@ -537,7 +557,7 @@ export default function Connect() {
             placeholder="Search"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="text-[10px] sm:text-xs py-1 sm:py-1.5 pl-6 sm:pl-7 pr-2 sm:pr-3 rounded-full w-16 sm:w-24 h-6 sm:h-7 bg-muted/60 border-border/50 focus-visible:ring-primary"
+            className={cn("text-[10px] sm:text-xs py-1 sm:py-1.5 pl-6 sm:pl-7 pr-2 sm:pr-3 rounded-full w-16 sm:w-24 h-6 sm:h-7 bg-muted/60 border-border/50", currentSubject === "english" ? "focus-visible:ring-amber-500" : "focus-visible:ring-primary")}
           />
         </div>
       </div>
@@ -587,9 +607,9 @@ export default function Connect() {
                 key={entry.user_id}
                 className={cn(
                   "leaderboard-row py-2 mx-0 px-2 rounded-xl transition-colors group",
-                  entry.rank <= 10 && "top-ten-highlight",
+                  entry.rank <= 10 && (currentSubject === "english" ? "top-ten-highlight-english" : "top-ten-highlight"),
                   index > 0 && "border-t border-border/50",
-                  isYou && "bg-primary/5 border-l-2 border-l-primary pl-2",
+                  isYou && (currentSubject === "english" ? "bg-amber-500/10 border-l-2 border-l-amber-500 pl-2" : "bg-primary/5 border-l-2 border-l-primary pl-2"),
                   canRemoveFriend && "cursor-pointer"
                 )}
                 onDoubleClick={() => {
@@ -619,11 +639,14 @@ export default function Connect() {
                     <div className="flex items-center gap-2">
                       <Avatar className={cn(
                         "w-7 h-7 flex-shrink-0",
-                        isYou && "bg-gradient-to-br from-primary to-indigo-500",
-                        entryIsFriend && !isYou && "ring-2 ring-offset-2 ring-offset-background ring-indigo-500"
+                        isYou && (currentSubject === "english" ? "bg-gradient-to-br from-amber-400 to-amber-600" : "bg-gradient-to-br from-primary to-blue-600"),
+                        entryIsFriend && !isYou && (currentSubject === "english" ? "ring-2 ring-offset-2 ring-offset-background ring-amber-400" : "ring-2 ring-offset-2 ring-offset-background ring-blue-400")
                       )}>
                         {isYou ? (
-                          <AvatarFallback className="bg-gradient-to-br from-primary to-indigo-500 text-white text-[11px] font-medium">
+                          <AvatarFallback className={cn(
+                            "text-white text-[11px] font-medium bg-gradient-to-br",
+                            currentSubject === "english" ? "from-amber-400 to-amber-600" : "from-primary to-blue-600"
+                          )}>
                             You
                           </AvatarFallback>
                         ) : (
@@ -651,7 +674,7 @@ export default function Connect() {
                       <button
                         onClick={() => handleSendRequest(entry.user_id)}
                         disabled={sendingTo === entry.user_id}
-                        className="opacity-0 group-hover:opacity-100 text-[10px] text-primary font-medium hover:underline transition-opacity"
+                        className={cn("opacity-0 group-hover:opacity-100 text-[10px] font-medium hover:underline transition-opacity", currentSubject === "english" ? "text-amber-500" : "text-primary")}
                       >
                         + Add
                       </button>

@@ -81,6 +81,13 @@ export default function PracticePage({ forcedSubject }: PracticePageProps) {
     }
   }, [availableSections]);
 
+  // Reset difficulty to mixed if English has > 2 topics selected
+  useEffect(() => {
+    if (currentSubject === 'english' && selectedTopics.length > 2 && difficultyLevel !== 'mixed') {
+      setDifficultyLevel('mixed');
+    }
+  }, [selectedTopics.length, currentSubject, difficultyLevel]);
+
   const startPractice = () => {
     const getDifficultyRange = (level: DifficultySelection) => {
       const max = isElevenPlus ? 3 : 4;
@@ -180,25 +187,33 @@ export default function PracticePage({ forcedSubject }: PracticePageProps) {
               { id: 'application', label: 'Application', level: '2' },
               { id: 'reasoning', label: 'Reasoning', level: '3' },
               { id: 'mixed', label: 'Mixed', level: null }
-            ].map((item) => (
-              <button
-                key={item.id}
-                onClick={() => setDifficultyLevel(item.id as any)}
-                disabled={item.id !== 'mixed'}
-                className={cn(
-                  'relative px-4 py-6 rounded-2xl border-2 font-bold text-sm transition-all text-center flex flex-col items-center justify-center gap-1',
-                  item.id !== 'mixed' 
-                    ? 'opacity-40 cursor-not-allowed bg-slate-50/50 border-slate-100 text-slate-400'
-                    : difficultyLevel === item.id 
-                    ? 'bg-white shadow-sm border-blue-500 text-slate-800' 
-                    : 'bg-slate-50 border-slate-100 text-slate-400 hover:border-slate-200'
-                )}
-                style={{ borderColor: (difficultyLevel === item.id && item.id === 'mixed') ? themeColor : undefined }}
-              >
-                <span>{item.label}</span>
-                {item.level && <span className="text-[10px] font-normal opacity-70">Level {item.level}</span>}
-              </button>
-            ))}
+            ].map((item) => {
+              const isDisabled = item.id !== 'mixed' && currentSubject === 'english' && selectedTopics.length > 2;
+              const isSelected = difficultyLevel === item.id;
+              
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => !isDisabled && setDifficultyLevel(item.id as any)}
+                  disabled={isDisabled}
+                  className={cn(
+                    'relative px-4 py-6 rounded-2xl border-2 font-bold text-sm transition-all text-center flex flex-col items-center justify-center gap-1',
+                    isDisabled 
+                      ? 'opacity-40 cursor-not-allowed bg-slate-50/50 border-slate-100 text-slate-400'
+                      : isSelected 
+                      ? 'bg-white shadow-sm text-slate-800' 
+                      : 'bg-slate-50 border-slate-100 text-slate-400 hover:border-slate-200'
+                  )}
+                  style={{ 
+                    borderColor: isSelected ? themeColor : 'transparent',
+                    boxShadow: isSelected ? `0 0 15px ${themeColor}15` : undefined
+                  }}
+                >
+                  <span>{item.label}</span>
+                  {item.level && <span className="text-[10px] font-normal opacity-70">Level {item.level}</span>}
+                </button>
+              );
+            })}
           </div>
         </div>
 

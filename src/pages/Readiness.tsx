@@ -11,6 +11,7 @@ import { AIExplainerModal } from '@/components/readiness/AIExplainerModal';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { formatDistanceToNow } from 'date-fns';
+import { PracticeConfirmationModal } from '@/components/readiness/PracticeConfirmationModal';
 import { TrendingUp, TrendingDown, ChevronRight, BookOpen, Sparkles } from 'lucide-react';
 import { PremiumAnalyticsDashboard } from '@/components/readiness/PremiumAnalyticsDashboard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -370,6 +371,19 @@ export function SubjectReadinessView({ subject }: { subject: 'english' | 'maths'
     bestStreak: 0,
     lastPracticeAt: null as string | null,
   });
+
+  // Practice Confirmation Modal State
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [confirmModalData, setConfirmModalData] = useState<{
+    topic: string;
+    mode: "weakness" | "general";
+    onConfirm: () => void;
+  }>({ topic: "", mode: "general", onConfirm: () => {} });
+
+  const initiatePractice = (topic: string, mode: "weakness" | "general", onConfirm: () => void) => {
+    setConfirmModalData({ topic, mode, onConfirm });
+    setIsConfirmModalOpen(true);
+  };
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -1181,36 +1195,36 @@ export function SubjectReadinessView({ subject }: { subject: 'english' | 'maths'
       return;
     }
 
-    setStartingRecommendationPractice(true);
-    try {
-      const params = new URLSearchParams();
+    const onConfirmAction = () => {
+      setStartingRecommendationPractice(true);
+      try {
+        const params = new URLSearchParams();
+        params.set('topics', recommendation.question_type);
+        params.set('tier', 'both');
+        params.set('paperType', 'both');
+        params.set('mode', 'practice');
 
-      // IMPORTANT: use question_type (the exact main topic) so we don't accidentally
-      // include a broad/cross-topic label in `recommendation.topic`.
-      params.set('topics', recommendation.question_type);
-      // Use adaptive/mixed filters by default so recommendations never "blank out"
-      // due to an overly narrow default (e.g., higher+calculator only).
-      params.set('tier', 'both');
-      params.set('paperType', 'both');
-      params.set('mode', 'practice');
+        if (recommendationSubtopicId) {
+          params.set('subtopic', recommendationSubtopicId);
+        }
 
-      if (recommendationSubtopicId) {
-        params.set('subtopic', recommendationSubtopicId);
+        const ids = (recommendation.question_ids || []).map((id: any) => String(id)).filter(Boolean);
+        if (ids.length > 0) {
+          params.set('questionIds', ids.join(','));
+        }
+
+        recordRecentSubtopic(recommendationSubtopicId);
+        navigate(`/practice-page?${params.toString()}`);
+      } catch (err) {
+        console.error('Failed to start recommended practice pack:', err);
+        toast.error('Failed to start practice. Please try again.');
+      } finally {
+        setStartingRecommendationPractice(false);
       }
+    };
 
-      const ids = (recommendation.question_ids || []).map((id: any) => String(id)).filter(Boolean);
-      if (ids.length > 0) {
-        params.set('questionIds', ids.join(','));
-      }
-
-      recordRecentSubtopic(recommendationSubtopicId);
-      navigate(`/practice-page?${params.toString()}`);
-    } catch (err) {
-      console.error('Failed to start recommended practice pack:', err);
-      toast.error('Failed to start practice. Please try again.');
-    } finally {
-      setStartingRecommendationPractice(false);
-    }
+    const topicToDisplay = recommendation.subtopic_title || recommendation.topic;
+    initiatePractice(topicToDisplay, "weakness", onConfirmAction);
   };
 
   const startQuickWinPractice = async (win: QuickWin) => {
@@ -1287,7 +1301,7 @@ export function SubjectReadinessView({ subject }: { subject: 'english' | 'maths'
       {/* Grade Progression Section */}
       <section className="mb-12 sm:mb-16">
         <div className="mb-6 sm:mb-8">
-          <div className="text-[12px] font-bold tracking-[0.2em] uppercase text-primary/80 mb-2">
+          <div className={cn("text-[12px] font-bold tracking-[0.2em] uppercase mb-2", subject === 'english' ? "text-amber-500/80" : "text-blue-500/80")}>
             {isElevenPlusTrack ? 'Selective Progress' : 'Exam Trajectory'}
           </div>
           <div className="text-xl sm:text-2xl font-semibold tracking-tight text-foreground leading-snug max-w-2xl">
@@ -1352,14 +1366,14 @@ export function SubjectReadinessView({ subject }: { subject: 'english' | 'maths'
           {/* Separation Arrow */}
           <div className="flex items-center justify-center gap-2 py-4 md:py-0">
             {isElevenPlusTrack ? (
-              <ReadinessArrow orientation="horizontal" label={`Trajectory`} />
+              <ReadinessArrow orientation="horizontal" label={`Trajectory`} subject={subject} />
             ) : gradeGain > 0 ? (
               <>
                 <div className="hidden md:flex">
-                  <ReadinessArrow orientation="horizontal" label={`+${gradeGain} ${gradeGain > 1 ? 'Grades' : 'Grade'}`} />
+                  <ReadinessArrow orientation="horizontal" label={`+${gradeGain} ${gradeGain > 1 ? 'Grades' : 'Grade'}`} subject={subject} />
                 </div>
                 <div className="flex md:hidden">
-                  <ReadinessArrow orientation="vertical" label={`+${gradeGain} ${gradeGain > 1 ? 'Grades' : 'Grade'}`} />
+                  <ReadinessArrow orientation="vertical" label={`+${gradeGain} ${gradeGain > 1 ? 'Grades' : 'Grade'}`} subject={subject} />
                 </div>
               </>
             ) : (
@@ -1593,8 +1607,28 @@ export function SubjectReadinessView({ subject }: { subject: 'english' | 'maths'
           speedPct={speedPct}
           profileName={(profile as any)?.full_name || (profile as any)?.username || 'Student'}
           subject={subject}
+          onInitiatePractice={(topic, mode) => {
+            const onConfirmAction = () => {
+              const params = new URLSearchParams();
+              params.set('topics', topic);
+              params.set('tier', 'both');
+              params.set('paperType', 'both');
+              params.set('mode', 'practice');
+              navigate(`/practice-page?${params.toString()}`);
+            };
+            initiatePractice(topic || (subject === 'english' ? "General English" : "General Maths"), mode, onConfirmAction);
+          }}
         />
       </div>
+
+      <PracticeConfirmationModal
+        isOpen={isConfirmModalOpen}
+        onOpenChange={setIsConfirmModalOpen}
+        onConfirm={confirmModalData.onConfirm}
+        topicName={confirmModalData.topic}
+        subject={subject as "maths" | "english"}
+        mode={confirmModalData.mode}
+      />
 
       {/* AI Explainer Modal */}
       {AI_FEATURE_ENABLED ? (

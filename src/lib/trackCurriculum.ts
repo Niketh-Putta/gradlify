@@ -187,6 +187,45 @@ export function getReadinessSourceTopics(track: UserTrack, topic: string): strin
   return Array.from(aliases);
 }
 
+export const ELEVEN_PLUS_ENGLISH_PRACTICE_SECTIONS: TrackSection[] = [
+  {
+    key: "comprehension",
+    id: "Comprehension",
+    label: "Comprehension",
+    color: "#059669",
+    subtopics: [
+      { key: "fiction", name: "Fiction" },
+      { key: "non_fiction", name: "Non-Fiction" },
+      { key: "poetry", name: "Poetry" },
+    ],
+  },
+  {
+    key: "spag",
+    id: "SPaG",
+    label: "SPaG",
+    color: "#d97706",
+    subtopics: [
+      { key: "spelling", name: "Spelling" },
+      { key: "punctuation", name: "Punctuation" },
+      { key: "grammar", name: "Grammar" },
+    ],
+  },
+  {
+    key: "vocabulary",
+    id: "Vocabulary",
+    label: "Vocabulary",
+    color: "#db2777",
+    subtopics: [],
+  },
+];
+
+export function getTrackPracticeSections(track: UserTrack, subject: 'maths' | 'english' = 'maths'): TrackSection[] {
+  if (track === "11plus") {
+    return subject === 'english' ? ELEVEN_PLUS_ENGLISH_PRACTICE_SECTIONS : ELEVEN_PLUS_SECTIONS;
+  }
+  return GCSE_SECTIONS;
+}
+
 export function getTrackSections(track: UserTrack, subject: 'maths' | 'english' = 'maths'): TrackSection[] {
   if (track === "11plus") {
     return subject === 'english' ? ELEVEN_PLUS_ENGLISH_SECTIONS : ELEVEN_PLUS_SECTIONS;

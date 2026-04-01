@@ -1093,7 +1093,7 @@ export function StatisticsDiagrams({ topicSlug }: { topicSlug?: string }) {
                     <tbody>
                       {sampleHistogramData.map((r, i) => (
                         <tr key={i} className="border-t border-border/40">
-                          <td className="py-2">{r.classLower}–{r.classUpper}</td>
+                          <td className="py-2">{r.classLower}-{r.classUpper}</td>
                           <td className="py-2">{r.frequency}</td>
                         </tr>
                       ))}

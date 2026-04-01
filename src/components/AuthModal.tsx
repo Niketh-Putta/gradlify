@@ -467,7 +467,7 @@ export const AuthModal = ({
                    useOneTap
                    theme={isDark ? "filled_black" : "outline"}
                    text="continue_with"
-                   shape="rectangular"
+                   shape="circle"
                    width="400"
                 />
               </div>
@@ -475,7 +475,7 @@ export const AuthModal = ({
               <Button 
                 type="button"
                 variant="outline"
-                className={`w-full h-11 rounded-xl ${outlineButtonClass} font-medium text-sm flex items-center justify-center gap-3 transition-all`}
+                className={`w-full h-11 rounded-full ${outlineButtonClass} font-medium text-sm flex items-center justify-center gap-3 transition-all`}
                 onClick={handleGoogleSignIn}
                 disabled={loading}
               >

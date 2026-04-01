@@ -282,7 +282,7 @@ export function toLatex(text: string): string {
   
   // 1. Normalize punctuation
   // Convert en/em dashes to hyphens
-  result = result.replace(/[– - ]/g, '-');
+  result = result.replace(/[- - ]/g, '-');
   
   // Convert smart quotes to ASCII
   result = result.replace(/[""]/g, '"');

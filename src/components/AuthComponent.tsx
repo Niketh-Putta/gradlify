@@ -416,7 +416,7 @@ export const AuthComponent = ({ onAuthSuccess, onBack, initialMode = 'login' }: 
                    useOneTap
                    theme="outline"
                    text="continue_with"
-                   shape="rectangular"
+                   shape="circle"
                    width="380"
                 />
               </div>
@@ -424,7 +424,7 @@ export const AuthComponent = ({ onAuthSuccess, onBack, initialMode = 'login' }: 
               <Button 
                 type="button"
                 variant="outline"
-                className="w-full h-10 sm:h-11 rounded-md border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 font-medium text-xs sm:text-sm flex items-center justify-center gap-2"
+                className="w-full h-10 sm:h-11 rounded-full border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 font-medium text-xs sm:text-sm flex items-center justify-center gap-2"
                 onClick={handleGoogleSignIn}
                 disabled={loading}
               >

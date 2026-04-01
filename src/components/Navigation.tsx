@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DevModeBadge } from "@/components/DevModeBadge";
@@ -20,7 +20,8 @@ import {
   Users,
   ChevronDown,
   ChevronRight,
-  MoreHorizontal
+  MoreHorizontal,
+  ArrowLeftRight
 } from "lucide-react";
 import { User } from '@supabase/supabase-js';
 import { cn } from "@/lib/utils";
@@ -60,6 +61,7 @@ export function Navigation({ user, profile, onSettings, onSignOut }: NavigationP
   const lastScrollYRef = useRef(0);
   const scrollTickingRef = useRef(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   const shouldAutoCollapseDesktopSidebar = () => {
     if (typeof window === 'undefined') return false;
@@ -285,6 +287,8 @@ export function Navigation({ user, profile, onSettings, onSignOut }: NavigationP
             </div>
           </NavLink>
 
+
+
           {/* User Info */}
           <div className={cn(
              "flex items-center shrink-0 h-11 overflow-hidden mb-2 relative rounded-xl transition-all duration-300",
@@ -338,8 +342,38 @@ export function Navigation({ user, profile, onSettings, onSignOut }: NavigationP
             </div>
           </nav>
 
+          {/* Subject Switcher Spacer & Button */}
+          <div className="shrink-0 mt-2 mb-2 pb-1">
+            <button
+              onClick={() => {
+                handleNavSelection({ isMobile: false });
+                navigate('/select-subject');
+              }}
+              className={cn(
+                "group flex items-center shrink-0 overflow-hidden relative rounded-xl transition-all duration-300",
+                "border shadow-sm h-10",
+                currentSubject === 'english'
+                  ? "bg-amber-500/5 hover:bg-amber-500/10 border-amber-500/20 text-amber-600 dark:text-amber-500"
+                  : "bg-primary/5 hover:bg-primary/10 border-primary/20 text-primary",
+                sidebarHovered ? "w-[236px]" : "w-11"
+              )}
+              title="Switch Subject"
+            >
+              <div className="w-11 h-10 flex items-center justify-center shrink-0">
+                <ArrowLeftRight className={cn(
+                  "h-[15px] w-[15px] shrink-0 transition-transform group-hover:scale-110",
+                  currentSubject === 'english' ? "text-amber-500" : "text-primary/80"
+                )} />
+              </div>
+              <span className={cn(
+                "font-semibold text-xs whitespace-nowrap absolute left-11 transition-all duration-300",
+                sidebarHovered ? "opacity-100 translate-x-1" : "opacity-0 -translate-x-4 pointer-events-none"
+              )}>Switch Subject</span>
+            </button>
+          </div>
+
           {/* Settings & Logout */}
-          <div className="space-y-1 shrink-0 border-t border-border/50 pt-3 mt-2">
+          <div className="space-y-1 shrink-0 border-t border-border/50 pt-3 mt-1">
             <button
               className={cn(
                 "flex items-center rounded-xl transition-all duration-300 ease-in-out text-muted-foreground hover:text-foreground hover:bg-muted/70 h-11 overflow-hidden relative",

@@ -11,6 +11,8 @@ import { cn } from '@/lib/utils';
 import { Check, Sparkles, X } from 'lucide-react';
 import { getSprintUpgradeCopy } from '@/lib/foundersSprint';
 import { AI_FEATURE_ENABLED } from '@/lib/featureFlags';
+import { UK_SECONDARY_SCHOOLS } from '@/lib/schools';
+import { useNavigate } from 'react-router-dom';
 
 type OnboardingAnswers = {
   preferredTrack?: string;
@@ -19,7 +21,8 @@ type OnboardingAnswers = {
   yearGroup?: string;
   targetSchools?: string[];
   examFormat?: string;
-  confidenceAreas?: string[];
+  englishWeaknesses?: string[];
+  mathsWeaknesses?: string[];
   studyFrequency?: string;
   goalLevel?: string;
   focusPreference?: string;
@@ -64,24 +67,7 @@ type Step =
 
 const UNSURE = 'Unsure';
 
-const ELEVEN_PLUS_SCHOOLS = [
-  'Queen Elizabeth’s School, Barnet',
-  'The Henrietta Barnett School',
-  'St Olave’s Grammar School',
-  'Latymer School',
-  'Wilson’s School',
-  'Sutton Grammar School',
-  'Tiffin School',
-  'Tiffin Girls’ School',
-  'Nonsuch High School for Girls',
-  'Wallington County Grammar School',
-  'Wallington High School for Girls',
-  'Kendrick School',
-  'Reading School',
-  'Colyton Grammar School',
-  'King Edward VI Camp Hill School for Boys',
-  'King Edward VI Camp Hill School for Girls',
-];
+const ELEVEN_PLUS_SCHOOLS = UK_SECONDARY_SCHOOLS;
 
 const GCSE_STEPS: Step[] = [
   {
@@ -117,7 +103,7 @@ const GCSE_STEPS: Step[] = [
     kind: 'options',
     key: 'currentGrade',
     title: 'What grade are you at right now?',
-    description: 'GCSE 1–9 (or choose Unsure).',
+    description: 'GCSE 1-9 (or choose Unsure).',
     options: ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'U', UNSURE],
   },
   {
@@ -143,7 +129,7 @@ const ELEVEN_PLUS_STEPS: Step[] = [
     key: 'yearGroup',
     title: 'What year are you currently in?',
     description: 'If a parent is filling this out, choose the child’s year group.',
-    options: ['Year 4', 'Year 5', 'Year 6', 'Teacher', 'Parent', UNSURE],
+    options: ['Year 2', 'Year 3', 'Year 4', 'Year 5', 'Year 6', 'Teacher', 'Parent', UNSURE],
   },
   {
     kind: 'search-multi',
@@ -157,20 +143,32 @@ const ELEVEN_PLUS_STEPS: Step[] = [
     kind: 'options',
     key: 'examFormat',
     title: 'Do you know which exam board your schools use?',
-    options: ['GL Assessment', 'CEM', 'Not sure'],
+    options: ['GL', 'CEM', 'ISEB', 'Unsure'],
   },
   {
     kind: 'multi-options',
-    key: 'confidenceAreas',
-    title: 'Which areas feel hardest right now?',
+    key: 'englishWeaknesses',
+    title: 'Which English areas feel hardest?',
     description: 'Select any that apply.',
     options: [
-      'Arithmetic speed',
-      'Fractions & percentages',
-      'Word problems',
-      'Angles & geometry',
-      'Data & probability',
-      'Multi-step reasoning',
+      'Comprehension',
+      'SPaG',
+      'Vocabulary',
+      'Creative Writing',
+    ],
+  },
+  {
+    kind: 'multi-options',
+    key: 'mathsWeaknesses',
+    title: 'Which Maths areas feel hardest?',
+    description: 'Select any that apply.',
+    options: [
+      'Arithmetic',
+      'Fractions & Percentages',
+      'Word Problems',
+      'Geometry',
+      'Data & Probability',
+      'Non-Verbal Reasoning',
     ],
   },
   {
@@ -242,6 +240,7 @@ const shuffle = <T,>(arr: T[]) => {
 };
 
 export function OnboardingModal({ isOpen, userId, tier, premiumTrack, founderTrack, initialAnswers, onCompleted }: OnboardingModalProps) {
+  const navigate = useNavigate();
   const [stepIndex, setStepIndex] = useState(0);
   const [answers, setAnswers] = useState<OnboardingAnswers>({ ...(initialAnswers || {}) });
   const [schoolQuery, setSchoolQuery] = useState('');
@@ -399,16 +398,12 @@ export function OnboardingModal({ isOpen, userId, tier, premiumTrack, founderTra
 
       if (error) throw error;
 
-      if (hasPremiumForSelectedTrack || founderTrack === 'founder') {
-        toast.success('All set! Your study plan is ready.');
-        setPhase('questions');
-        setStepIndex(0);
-        onCompleted();
-        return;
-      }
-
-      // Non-premium users: show paywall/upsell after generating.
-      setPhase('upsell');
+      toast.success('All set! Your study plan is ready.');
+      setPhase('questions');
+      setStepIndex(0);
+      onCompleted();
+      navigate('/select-subject', { replace: true });
+      return;
     } catch (err) {
       console.error('Onboarding save failed:', err);
       toast.error('Could not save your answers. Please try again.');
@@ -618,8 +613,40 @@ export function OnboardingModal({ isOpen, userId, tier, premiumTrack, founderTra
                           </button>
                         ))}
                       {step.options.filter((opt) => opt.toLowerCase().includes(schoolQuery.toLowerCase())).length === 0 ? (
-                        <div className="px-3 py-2 text-sm text-muted-foreground">No schools found.</div>
-                      ) : null}
+                        <div className="px-3 py-2 text-sm text-muted-foreground">
+                          {schoolQuery.trim() ? (
+                            <button
+                              type="button"
+                              className="w-full text-left font-medium text-primary hover:underline"
+                              onClick={() => {
+                                toggleMulti(schoolQuery.trim());
+                                setSchoolQuery('');
+                              }}
+                              disabled={saving}
+                            >
+                              Add custom school: "{schoolQuery.trim()}"
+                            </button>
+                          ) : (
+                            "No schools found."
+                          )}
+                        </div>
+                      ) : (
+                        schoolQuery.trim() && 
+                        !step.options.some(opt => opt.toLowerCase() === schoolQuery.trim().toLowerCase()) && 
+                        !(Array.isArray(selected) ? selected : []).some(s => s.toLowerCase() === schoolQuery.trim().toLowerCase()) ? (
+                          <button
+                            type="button"
+                            className="w-full rounded-md px-3 py-2 text-left text-sm font-medium text-primary hover:bg-muted/60"
+                            onClick={() => {
+                              toggleMulti(schoolQuery.trim());
+                              setSchoolQuery('');
+                            }}
+                            disabled={saving}
+                          >
+                            + Add custom: "{schoolQuery.trim()}"
+                          </button>
+                        ) : null
+                      )}
                     </div>
                   </div>
                 )}

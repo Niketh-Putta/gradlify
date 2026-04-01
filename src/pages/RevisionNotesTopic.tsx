@@ -103,19 +103,19 @@ const sectionDisplayName: Record<string, string> = {
 
 // Section config with proper GCSE codes - matching exact JSON keys
 const sectionConfig: Record<string, { abbr: string; color: string; gradient: string }> = {
-  "Number": { abbr: "N", color: "hsl(38 92% 50%)", gradient: "from-amber-500 to-amber-600" },
-  "Algebra": { abbr: "A", color: "hsl(221 83% 53%)", gradient: "from-blue-500 to-blue-600" },
+  "Number": { abbr: "N", color: "hsl(221 83% 53%)", gradient: "from-blue-500 to-blue-600" },
+  "Algebra": { abbr: "A", color: "hsl(221 83% 53%)", gradient: "from-blue-600 to-blue-700" },
   "Ratio, Proportion & Rates of Change": { abbr: "R", color: "hsl(142 76% 36%)", gradient: "from-emerald-500 to-emerald-600" },
-  "Geometry & Measures": { abbr: "G", color: "hsl(280 70% 50%)", gradient: "from-violet-500 to-violet-600" },
-  "Probability": { abbr: "P", color: "hsl(43 96% 56%)", gradient: "from-amber-500 to-amber-600" },
-  "Statistics": { abbr: "S", color: "hsl(199 89% 48%)", gradient: "from-cyan-500 to-cyan-600" },
+  "Geometry & Measures": { abbr: "G", color: "hsl(199 89% 48%)", gradient: "from-cyan-500 to-cyan-600" },
+  "Probability": { abbr: "P", color: "hsl(38 92% 50%)", gradient: "from-amber-500 to-amber-600" },
+  "Statistics": { abbr: "S", color: "hsl(174 72% 42%)", gradient: "from-teal-500 to-teal-600" },
   "Number & Arithmetic": { abbr: "N", color: "hsl(221 83% 53%)", gradient: "from-blue-500 to-blue-600" },
-  "Algebra & Ratio": { abbr: "A", color: "hsl(330 81% 60%)", gradient: "from-pink-500 to-pink-600" },
+  "Algebra & Ratio": { abbr: "A", color: "hsl(199 89% 48%)", gradient: "from-blue-500 to-cyan-500" },
   "Statistics & Data": { abbr: "S", color: "hsl(174 72% 42%)", gradient: "from-teal-500 to-cyan-500" },
-  "Exam Preparation": { abbr: "E", color: "hsl(199 89% 48%)", gradient: "from-sky-500 to-blue-500" },
+  "Exam Preparation": { abbr: "E", color: "hsl(221 100% 43%)", gradient: "from-blue-600 to-blue-800" },
   "Comprehension": { abbr: "C", color: "hsl(221 83% 53%)", gradient: "from-blue-500 to-blue-600" },
-  "Vocabulary": { abbr: "V", color: "hsl(330 81% 60%)", gradient: "from-pink-500 to-pink-600" },
-  "SPaG": { abbr: "S", color: "hsl(43 96% 56%)", gradient: "from-amber-500 to-amber-600" },
+  "Vocabulary": { abbr: "V", color: "hsl(38 92% 50%)", gradient: "from-amber-500 to-amber-600" },
+  "SPaG": { abbr: "S", color: "hsl(38 92% 50%)", gradient: "from-orange-500 to-orange-600" },
 };
 
 // Block type configuration with enhanced visual hierarchy
@@ -129,10 +129,10 @@ const blockConfig: Record<string, {
 }> = {
   concepts: { 
     icon: <Sparkles className="h-5 w-5" />, 
-    color: "text-purple-400",
-    bgClass: "bg-gradient-to-br from-purple-500/15 to-purple-600/5 dark:from-purple-500/20 dark:to-purple-600/10",
-    borderClass: "border-purple-500/40 border-l-4 border-l-purple-500",
-    headerClass: "bg-purple-500/10",
+    color: "text-primary",
+    bgClass: "bg-gradient-to-br from-primary/10 to-primary/5 dark:from-primary/15 dark:to-primary/10",
+    borderClass: "border-primary/40 border-l-4 border-l-primary",
+    headerClass: "bg-primary/10",
     priority: 'high'
   },
   example: { 
@@ -177,10 +177,10 @@ const blockConfig: Record<string, {
   },
   checks: { 
     icon: <Sparkles className="h-5 w-5" />, 
-    color: "text-violet-400",
-    bgClass: "bg-gradient-to-br from-violet-500/10 to-violet-600/5 dark:from-violet-500/15 dark:to-violet-600/5",
-    borderClass: "border-violet-500/30",
-    headerClass: "bg-violet-500/5",
+    color: "text-blue-400",
+    bgClass: "bg-gradient-to-br from-blue-500/10 to-blue-600/5 dark:from-blue-500/15 dark:to-blue-600/5",
+    borderClass: "border-blue-500/30",
+    headerClass: "bg-blue-500/5",
     priority: 'low'
   },
   info: { 
@@ -201,10 +201,10 @@ const blockConfig: Record<string, {
   },
   vocab_list: { 
     icon: <Sparkles className="h-5 w-5" />, 
-    color: "text-rose-500",
-    bgClass: "bg-rose-50/80 dark:bg-rose-950/20",
-    borderClass: "border-rose-400/50 border-l-4 border-l-rose-500 shadow-inner",
-    headerClass: "bg-rose-500/10",
+    color: "text-orange-500",
+    bgClass: "bg-orange-50/80 dark:bg-orange-950/20",
+    borderClass: "border-orange-400/50 border-l-4 border-l-orange-500 shadow-inner",
+    headerClass: "bg-orange-500/10",
     priority: 'high'
   },
 };
@@ -1181,7 +1181,12 @@ export default function RevisionNotesTopic() {
                 {nextTopic && (
                   <Button
                     onClick={() => navigateToTopic(nextTopic)}
-                    className="gap-2 flex-1 justify-end h-auto py-4 bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-500 hover:to-violet-500 text-white shadow-lg hover:shadow-xl transition-all border-0 ring-1 ring-white/10"
+                    className={cn(
+                      "gap-2 flex-1 justify-end h-auto py-4 text-white shadow-lg hover:shadow-xl transition-all border-0 ring-1 ring-white/10",
+                      currentSubject === 'english'
+                        ? "bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 shadow-amber-500/20"
+                        : "bg-gradient-to-r from-blue-600 to-primary hover:from-blue-500 hover:to-primary/90 shadow-primary/20"
+                    )}
                   >
                     <div className="text-right min-w-0">
                       <span className="text-xs block font-bold tracking-widest uppercase opacity-90">Next Section</span>
@@ -1214,8 +1219,8 @@ export default function RevisionNotesTopic() {
         {practiceQuestions.length > 0 && (
           <div id="practice-questions" className="mb-10 scroll-mt-24">
             <div className="flex items-center gap-3 mb-6">
-              <div className="p-2.5 rounded-xl bg-violet-500/10">
-                <PenLine className="h-5 w-5 text-violet-400" />
+              <div className={cn("p-2.5 rounded-xl", currentSubject === 'english' ? "bg-amber-500/10" : "bg-primary/10")}>
+                <PenLine className={cn("h-5 w-5", currentSubject === 'english' ? "text-amber-500" : "text-primary")} />
               </div>
               <h2 className="text-xl font-bold text-foreground">Practice Questions</h2>
             </div>

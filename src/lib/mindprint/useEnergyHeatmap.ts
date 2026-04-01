@@ -46,7 +46,7 @@ export function useEnergyHeatmap() {
 
       // Build heatmap
       const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-      const hourBlocks = ['6–9', '9–12', '12–15', '15–18', '18–21', '21–24'];
+      const hourBlocks = ['6-9', '9-12', '12-15', '15-18', '18-21', '21-24'];
       
       const cellStats: Record<string, { correct: number; total: number }> = {};
 
@@ -58,12 +58,12 @@ export function useEnergyHeatmap() {
         const dayOfWeek = days[dayIndex];
         const hour = date.getHours();
         
-        let hourBlock = '6–9';
-        if (hour >= 9 && hour < 12) hourBlock = '9–12';
-        else if (hour >= 12 && hour < 15) hourBlock = '12–15';
-        else if (hour >= 15 && hour < 18) hourBlock = '15–18';
-        else if (hour >= 18 && hour < 21) hourBlock = '18–21';
-        else if (hour >= 21 || hour < 6) hourBlock = '21–24';
+        let hourBlock = '6-9';
+        if (hour >= 9 && hour < 12) hourBlock = '9-12';
+        else if (hour >= 12 && hour < 15) hourBlock = '12-15';
+        else if (hour >= 15 && hour < 18) hourBlock = '15-18';
+        else if (hour >= 18 && hour < 21) hourBlock = '18-21';
+        else if (hour >= 21 || hour < 6) hourBlock = '21-24';
 
         const key = `${dayOfWeek}-${hourBlock}`;
         if (!cellStats[key]) {

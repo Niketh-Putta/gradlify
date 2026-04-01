@@ -26,7 +26,7 @@ export function EnergyTrackerCard({ data, loading }: EnergyTrackerCardProps) {
   }
 
   const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  const hourBlocks = ['6–9', '9–12', '12–15', '15–18', '18–21', '21–24'];
+  const hourBlocks = ['6-9', '9-12', '12-15', '15-18', '18-21', '21-24'];
 
   const getColorForScore = (score: number, hasData: boolean) => {
     if (!hasData) return 'no-data-cell'; // Special class for no data

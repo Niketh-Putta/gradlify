@@ -376,7 +376,7 @@ export default function Auth() {
                        useOneTap
                        theme="outline"
                        text="continue_with"
-                       shape="rectangular"
+                       shape="circle"
                        width="400"
                     />
                   </div>
@@ -384,7 +384,7 @@ export default function Auth() {
                   <Button 
                     type="button"
                     variant="outline"
-                    className="w-full h-12 rounded-md border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 font-medium text-sm flex items-center justify-center gap-3 mb-4"
+                    className="w-full h-12 rounded-full border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 font-medium text-sm flex items-center justify-center gap-3 mb-4"
                     onClick={handleGoogleSignIn}
                     disabled={isLoading}
                   >

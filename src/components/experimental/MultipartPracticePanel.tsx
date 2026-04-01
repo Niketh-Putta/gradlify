@@ -140,7 +140,7 @@ export default function MultipartPracticePanel({ userEmail }: MultipartPracticeP
             Experimental: Multi-part Questions (Testing)
           </h2>
           <p className="mt-1 text-sm text-purple-700/80">
-            Experimental questions – not part of the main question bank.
+            Experimental questions - not part of the main question bank.
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -174,7 +174,7 @@ export default function MultipartPracticePanel({ userEmail }: MultipartPracticeP
             <div>
               <p className="text-xs uppercase tracking-wide text-purple-600">Question</p>
               <p className="text-base font-semibold text-slate-900">
-                {question.tier} Tier – Multi-part
+                {question.tier} Tier - Multi-part
               </p>
             </div>
             <div className="flex items-center gap-2">

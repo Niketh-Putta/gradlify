@@ -123,14 +123,15 @@ def q_number_bidmas(diff):
         wrong = generate_wrong(ans, "int", 5)
         return q, str(ans), wrong, expl
     else:
-        a = random.randint(2, 5)
-        b = random.randint(2, 4)
-        c = random.randint(1, 3)
-        d = random.choice([4, 9, 16, 25])
-        ans = (a + b**2) * c - int(math.sqrt(d))
+        # LEVEL 3: MUST BE GENUINELY DIFFICULT
+        a = random.randint(-5, 5) if random.random() > 0.5 else random.randint(5, 12)
+        b = random.randint(3, 4)
+        c = random.randint(2, 3)
+        d = random.choice([4, 9, 16, 25, 36])
+        ans = (a + (b**2)) * c - int(math.sqrt(d))
         q = f"Calculate: ({a} + {b}²) × {c} - √{d}"
-        expl = f"[VISUAL: BIDMAS]\nStep 1: Brackets first. Inside brackets, Indices first: {b}² = {b**2}.\nStep 2: Complete bracket: {a} + {b**2} = {a+b**2}.\nStep 3: Resolve square root: √{d} = {int(math.sqrt(d))}.\nStep 4: Multiply: {a+b**2} × {c} = {(a+b**2)*c}.\nStep 5: Subtract: {(a+b**2)*c} - {int(math.sqrt(d))} = {ans}."
-        wrong = generate_wrong(ans, "int", 8)
+        expl = f"[REASONING REQUIRED]\n[VISUAL: BIDMAS (Level 3)]\nStep 1: Indices first inside brackets: {b}² = {b**2}.\nStep 2: Complete bracket {a} + {b**2} = {a+b**2}.\nStep 3: Resolve square root: √{d} = {int(math.sqrt(d))}.\nStep 4: Multiplication before Subtraction: {(a+b**2)} × {c} = {(a+b**2)*c}.\nStep 5: Final subtraction: {(a+b**2)*c} - {int(math.sqrt(d))} = {ans}."
+        wrong = [str(ans + random.randint(1, 10)), str(ans - random.randint(1, 5)), str(ans + 12)]
         return q, str(ans), wrong, expl
 
 def q_number_factors(diff):
@@ -157,16 +158,16 @@ def q_number_factors(diff):
         wrong = [f"{p1} × {p1*p2}", f"2 × {num//2}", f"{p1}² × {p2+1}"]
         return q, str(ans), wrong[:3], expl
     else:
-        num1 = random.choice([12, 18, 24])
-        num2 = random.choice([30, 36, 48])
+        # LEVEL 3: TWO STAGES (HCF and LCM comparison)
+        num1 = 12
+        num2 = 18
         hcf = math.gcd(num1, num2)
-        lcm = abs(num1 * num2) // hcf
-        t = random.choice(["HCF", "LCM"])
-        ans = hcf if t == "HCF" else lcm
-        q = f"Find the {t} of {num1} and {num2}."
-        expl = f"[VISUAL: HCF and LCM]\nStep 1: Prime factorise both {num1} and {num2}.\nStep 2: Use the Venn Method. Place shared primes in the intersection.\nStep 3: For {t}, multiply the " + ("middle numbers." if t=="HCF" else "all numbers in the diagram.") + f"\nFinal answer: {ans}."
-        wrong = generate_wrong(ans, "int", 15)
-        return q, str(ans), wrong, expl
+        lcm = (num1 * num2) // hcf
+        ans = lcm - hcf
+        q = f"Calculate the difference between the Lowest Common Multiple (LCM) and the Highest Common Factor (HCF) of 12 and 18."
+        expl = f"[REASONING REQUIRED]\nStep 1: Find HCF of 12 and 18. Factors of 12 (1,2,3,4,6,12), 18 (1,2,3,6,9,18). HCF = 6.\nStep 2: Find LCM of 12 and 18. Multiples of 12 (12, 24, 36...), 18 (18, 36...). LCM = 36.\nStep 3: Subtract them: 36 - 6 = {ans}.\nFinal answer: {ans}."
+        wrong = ["30", "42", "24", "12"]
+        return q, str(ans), wrong[:3], expl
 
 def q_algebra_ratio(diff):
     if diff == 1:
@@ -192,17 +193,16 @@ def q_algebra_ratio(diff):
         wrong = generate_wrong(ans, "int", 8)
         return q, str(ans), wrong, expl
     else:
-        a = random.randint(2, 4)
-        b = random.randint(3, 5)
-        c = random.randint(2, 4)
-        q = f"The ratio of red to blue marbles is {a}:{b}. The ratio of blue to green marbles is {b*2}:{c}. What is the ratio of red to green marbles?"
-        ans_r = a * 2
-        ans_g = c
-        gc = math.gcd(ans_r, ans_g)
-        ans = f"{ans_r//gc}:{ans_g//gc}"
-        expl = f"Step 1: Make the 'blue' parts equal. In the first ratio blue is {b}. In the second it is {b*2}.\nStep 2: Multiply the first ratio by 2: {a*2}:{b*2}.\nStep 3: Now we can combine them: Red:Blue:Green = {a*2}:{b*2}:{c}.\nStep 4: The ratio of Red to Green is {a*2}:{c}, which simplifies to {ans}."
-        wrong = [f"{a}:{c}", f"{a*2}:{c*2}", f"{b}:{c}"]
-        return q, ans, wrong, expl
+        # LEVEL 3: 3-PART MIXTURE OR REVERSE LOGIC
+        a=2; b=3; c=4
+        total_parts = a+b+c
+        part_val = random.randint(3, 6)
+        total = total_parts * part_val
+        ans = c * part_val
+        q = f"A recipe uses ingredients in the ratio 2:3:4. If the total mixture weighs {total}g, how many grams of the largest ingredient are needed?"
+        expl = f"[REASONING REQUIRED]\nStep 1: Total parts in ratio = 2 + 3 + 4 = 9.\nStep 2: Value of 1 part = {total}g ÷ 9 = {part_val}g.\nStep 3: Largest ingredient has 4 parts.\nStep 4: 4 × {part_val}g = {ans}g.\nFinal answer: {ans}."
+        wrong = [f"{ans+10}", f"{ans-15}", str(total//2)]
+        return q, str(ans), wrong, expl
 
 def q_geometry_angles(diff):
     if diff == 1:
