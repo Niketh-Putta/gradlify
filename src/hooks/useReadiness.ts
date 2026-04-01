@@ -141,6 +141,71 @@ export function useReadiness(userId?: string, trackKey?: string | null, currentS
 
   // Debounce timer ref
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  const fetchPracticeMetrics = useCallback(async () => {
+    if (!userId) return {};
+    let query = supabase
+      .from('practice_results')
+      .select('topic, attempts, correct, difficulty')
+      .eq('user_id', userId);
+
+    if (resolvedTrack === '11plus') {
+      query = query.eq('track', '11plus');
+    } else {
+      query = query.or('track.eq.gcse,track.is.null');
+    }
+
+    const { data } = await query;
+    const metrics: Record<string, { attempts: number; correct: number; hardAttempts: number }> = {};
+    if (data) {
+      data.forEach((row) => {
+        const t = normalizeTopicName(row.topic || '');
+        if (!t) return;
+        if (!metrics[t]) metrics[t] = { attempts: 0, correct: 0, hardAttempts: 0 };
+        
+        metrics[t].attempts += Number(row.attempts || 0);
+        metrics[t].correct += Number(row.correct || 0);
+        
+        const diff = String(row.difficulty || '').toLowerCase();
+        if (diff.includes('3') || diff.includes('4') || diff.includes('synthesis') || diff.includes('extreme') || diff.includes('hard')) {
+          metrics[t].hardAttempts += Number(row.attempts || 0);
+        }
+      });
+    }
+    return metrics;
+  }, [userId, resolvedTrack]);
+
+  const applyConfidenceSmoothing = useCallback((rawTopics: TopicReadiness[], metricsByTopic: Record<string, { attempts: number; correct: number; hardAttempts: number }>) => {
+    return rawTopics.map((r) => {
+      const topicUrl = normalizeTopicName(r.topic);
+      if (!topicUrl) return r;
+      const metrics = metricsByTopic[topicUrl] || { attempts: 0, correct: 0, hardAttempts: 0 };
+      
+      const rawReadiness = Number(r.readiness || 0);
+
+      // If no valid practice attempts exist, safely cap history or mock results to 90%
+      if (metrics.attempts === 0) {
+        return { ...r, readiness: Math.min(rawReadiness, 90.0) };
+      }
+
+      // Bayesian style blending prioritizing question volume
+      // Reaching maximum true representation threshold requires 25 attempts
+      const volumeConfidence = Math.min(1.0, metrics.attempts / 25.0);
+      
+      // Starter default readiness to avoid 0 to 100 on exactly 1 correct shot
+      const baseline = 35.0;
+      let smoothed = baseline + (rawReadiness - baseline) * volumeConfidence;
+
+      // Ensure they have adequate Synthesis/Level 3 exposure before hitting 90-100%
+      if (metrics.hardAttempts < 6) {
+        smoothed = Math.min(smoothed, 85.0);
+      }
+
+      smoothed = Math.max(0, Math.min(100, smoothed));
+      return { ...r, readiness: Math.round(smoothed * 10) / 10 };
+    });
+  }, []);
+
   const fetchLastChangeRows = useCallback(async () => {
     const base = supabase
       .from('v_topic_last_change' as never)
@@ -195,6 +260,7 @@ export function useReadiness(userId?: string, trackKey?: string | null, currentS
         topicsResult,
         lastChangesResult,
         historyResult,
+        practiceMetrics
       ] = await Promise.all([
         supabase
           .from('user_settings')
@@ -204,6 +270,7 @@ export function useReadiness(userId?: string, trackKey?: string | null, currentS
         fetchTopicRows(),
         fetchLastChangeRows(),
         fetchHistoryRows(10),
+        fetchPracticeMetrics()
       ]);
 
       if (settingsResult.error) throw settingsResult.error;
@@ -215,7 +282,9 @@ export function useReadiness(userId?: string, trackKey?: string | null, currentS
         setAutoReadiness(settingsResult.data.auto_readiness || false);
       }
 
-      const mergedTopics = mergeTopics((topicsResult.data as TopicReadiness[]) || []);
+      let mergedTopics = mergeTopics((topicsResult.data as TopicReadiness[]) || []);
+      mergedTopics = applyConfidenceSmoothing(mergedTopics, practiceMetrics);
+
       const subjectTopics = getSubjectTopics(mergedTopics);
       setTopics(subjectTopics);
       setOverall(computeOverallReadinessFromTopics(subjectTopics));
@@ -280,13 +349,17 @@ export function useReadiness(userId?: string, trackKey?: string | null, currentS
           topicsResult,
           lastChangesResult,
           latestHistoryResult,
+          practiceMetrics
         ] = await Promise.all([
           fetchTopicRows(),
           fetchLastChangeRows(),
           fetchHistoryRows(1),
+          fetchPracticeMetrics()
         ]);
 
-        const mergedTopics = mergeTopics((topicsResult.data as TopicReadiness[]) || []);
+        let mergedTopics = mergeTopics((topicsResult.data as TopicReadiness[]) || []);
+        mergedTopics = applyConfidenceSmoothing(mergedTopics, practiceMetrics);
+
         const subjectTopics = getSubjectTopics(mergedTopics);
         setTopics(subjectTopics);
         setOverall(computeOverallReadinessFromTopics(subjectTopics));
