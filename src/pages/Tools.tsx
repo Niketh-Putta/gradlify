@@ -18,8 +18,8 @@ const TOOLS_STRUCTURED_DATA = {
 
 export default function Tools() {
   return (
-    <ForceTheme theme="light">
-      <div className="min-h-screen bg-white text-slate-900" style={{ colorScheme: "light" }}>
+    <ForceTheme theme="dark">
+      <div className="min-h-screen overflow-x-hidden bg-[radial-gradient(1200px_460px_at_20%_-5%,rgba(185,28,28,0.25),transparent_62%),radial-gradient(900px_420px_at_82%_8%,rgba(234,88,12,0.2),transparent_68%),#04050a] text-white" style={{ colorScheme: "dark" }}>
         <Helmet>
           <title>{TOOLS_TITLE}</title>
           <meta name="description" content={TOOLS_DESCRIPTION} />
@@ -40,20 +40,22 @@ export default function Tools() {
 
           <script type="application/ld+json">{JSON.stringify(TOOLS_STRUCTURED_DATA)}</script>
         </Helmet>
-        <ToolsNav label="Free Tools by Gradlify" lockTheme="light" />
+        <ToolsNav label="Free 11+ Tools" lockTheme="dark" />
 
-        <main className="mx-auto w-full max-w-7xl px-4 pb-16 pt-10 sm:px-6 lg:px-8">
-          <header className="mb-10 max-w-2xl">
-            <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Free tools</p>
-            <h1 className="mt-3 text-3xl font-semibold text-slate-900 sm:text-4xl">
+        <main className="mx-auto w-full max-w-7xl px-4 pb-24 pt-16 sm:px-6 lg:px-8 relative z-10">
+          <header className="mb-16 max-w-2xl">
+            <p className="text-xs sm:text-sm font-bold uppercase tracking-[0.3em] text-amber-500/80 mb-4">
+              Free tools
+            </p>
+            <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-5xl text-transparent bg-clip-text bg-gradient-to-r from-[#DF3526] via-[#F17E31] to-[#FAD446] leading-[1.1]">
               Free Tools by Gradlify
             </h1>
-            <p className="mt-3 text-sm text-slate-600 sm:text-base">
+            <p className="mt-6 text-base sm:text-lg font-medium leading-relaxed text-slate-300">
               Focused tools built for 11+ students who want fast answers, clearer targets, and smarter revision.
             </p>
           </header>
 
-          <section className="grid gap-5 lg:grid-cols-3">
+          <section className="grid gap-6 lg:grid-cols-3">
 
 
             {[
@@ -75,33 +77,29 @@ export default function Tools() {
             ].map(({ title, subtitle, track }) => (
               <div
                 key={title}
-                className="rounded-2xl border border-slate-200/70 bg-white/70 p-6 shadow-md shadow-slate-200/30 opacity-70"
+                className="rounded-[24px] border border-white/10 bg-black/20 backdrop-blur-xl p-6 sm:p-8 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.4)] group relative overflow-hidden transition-all duration-500 hover:border-orange-500/30 hover:shadow-[0_48px_80px_-16px_rgba(245,158,11,0.12)] opacity-85 hover:opacity-100"
               >
-                <div className="flex items-center justify-between gap-3">
+                <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 via-amber-500/5 to-transparent z-0 pointer-events-none" />
+                <div className="relative z-10 flex items-start justify-between gap-3">
                   <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-[11px] font-semibold uppercase tracking-[0.3em] text-slate-400">
+                    <div className="flex items-center gap-2 mb-4">
+                      <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-amber-500">
                         Coming soon
                       </span>
                       <span
-                        className={`rounded-full px-2 text-[11px] font-semibold ${
-                          track === "11+" ? "bg-red-50 text-red-700" : "bg-slate-50 text-slate-600"
-                        }`}
+                        className="rounded-full border border-white/10 bg-white/10 px-2.5 py-0.5 text-[10px] font-bold text-white shadow-sm uppercase tracking-widest"
                       >
                         {track}
                       </span>
                     </div>
-                    <h3 className="mt-3 text-base font-semibold text-slate-900">{title}</h3>
+                    <h3 className="text-xl sm:text-2xl font-bold text-slate-100 tracking-tight leading-snug">{title}</h3>
                   </div>
-                  <span className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-semibold text-slate-500">
-                    Coming soon
-                  </span>
                 </div>
-                <p className="mt-2 text-sm text-slate-500">{subtitle}</p>
+                <p className="relative z-10 mt-3 text-sm font-medium leading-relaxed text-slate-400">{subtitle}</p>
                 <button
                   type="button"
                   disabled
-                  className="mt-5 inline-flex w-full items-center justify-center rounded-full border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-400"
+                  className="relative z-10 mt-8 inline-flex w-full items-center justify-center rounded-full border border-white/10 bg-white/5 px-4 py-3 text-xs sm:text-sm font-bold tracking-wide text-slate-400 uppercase transition-colors"
                 >
                   Coming soon
                 </button>
@@ -109,8 +107,8 @@ export default function Tools() {
             ))}
           </section>
 
-          <p className="mt-8 text-sm text-slate-500">
-            More tools coming soon. We’re building focused helpers for grades, revision, and exam readiness.
+          <p className="mt-12 text-sm font-medium text-slate-500 max-w-2xl">
+            More tools coming soon. We're building focused helpers for grades, revision, and 11+ exam readiness.
           </p>
 
 
