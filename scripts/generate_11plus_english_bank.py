@@ -50,7 +50,7 @@ OUTPUT FORMAT: Return ONLY valid JSON matching this schema exactly (no markdown 
 def generate_passage(api_key: str, section: str, subtopic: str, difficulty: int, batch_index: int) -> dict:
     prompt = generate_system_prompt(section, subtopic, difficulty)
     print(f"[*] Generating {section.upper()} | {subtopic.upper()} | Level {difficulty} (Iter: {batch_index})...")
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key={api_key}"
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-preview:generateContent?key={api_key}"
     headers = {'Content-Type': 'application/json'}
     payload = {
         "contents": [{"parts": [{"text": prompt}]}],
@@ -70,16 +70,27 @@ def main():
     if not api_key:
         print("Set GEMINI_API_KEY")
         return
-    blueprint = [{"section": "comprehension", "subtopic": "fiction", "volume": 1}]
+    blueprint = [
+        {"section": "comprehension", "subtopic": "fiction", "volume": 45},
+        {"section": "comprehension", "subtopic": "non_fiction", "volume": 15},
+        {"section": "comprehension", "subtopic": "poetry", "volume": 15},
+        {"section": "spag", "subtopic": "spelling", "volume": 15},
+        {"section": "spag", "subtopic": "punctuation", "volume": 15},
+        {"section": "spag", "subtopic": "grammar", "volume": 15},
+        {"section": "vocabulary", "subtopic": "vocabulary", "volume": 30}
+    ]
     total_generated = []
     output_path = 'supabase/data/generated/11plus_premium_english_bank.json'
-    for v in range(blueprint[0]["volume"]):
-        data = generate_passage(api_key, blueprint[0]["section"], blueprint[0]["subtopic"], 1, v+1)
-        if data:
-            data["id"] = f"eng-passage-{uuid.uuid4().hex[:8]}"
-            total_generated.append(data)
-            with open(output_path, 'w') as f:
-                json.dump(total_generated, f, indent=2)
+    for topic_rule in blueprint:
+        for v in range(topic_rule["volume"]):
+            # Add basic 4 second delay to avoid free API RPM limits
+            time.sleep(4)
+            data = generate_passage(api_key, topic_rule["section"], topic_rule["subtopic"], (v % 3) + 1, v+1)
+            if data:
+                data["id"] = f"eng-passage-{uuid.uuid4().hex[:8]}"
+                total_generated.append(data)
+                with open(output_path, 'w') as f:
+                    json.dump(total_generated, f, indent=2)
     print(f"\n[+] Output securely written to {output_path}")
 
 if __name__ == "__main__":

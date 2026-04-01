@@ -503,13 +503,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                   The definitive system behind top 11+ results. Master both Maths & English with our intelligent Split-View practice and elite Readiness Tracking.
                 </p>
 
-                <div className={cn(
-                  "mt-6 text-sm sm:text-base font-bold flex items-center gap-2",
-                  isDark ? "text-amber-400" : "text-[#E65C2B]"
-                )}>
-                   <div className="w-2 h-2 rounded-full bg-current animate-pulse" />
-                   Get the exact system 3,500+ students use.
-                </div>
+
 
                 <div className="mt-8 flex flex-col sm:flex-row gap-3 items-start sm:items-center">
                    <HeroCTA onClick={handleSignup} tone={theme} accentGradient={accentGradient} />
