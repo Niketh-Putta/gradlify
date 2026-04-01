@@ -4,37 +4,16 @@ import { ToolsNav } from "@/components/ToolsNav";
 import { ForceTheme } from "@/components/ForceTheme";
 
 const TOOLS_URL = "https://gradlify.com/free-tools";
-const TOOLS_TITLE = "Free GCSE Maths Tools by Gradlify";
+const TOOLS_TITLE = "Free 11+ Tools by Gradlify";
 const TOOLS_DESCRIPTION =
-  "Free GCSE Maths tools for grade boundaries, topic weakness diagnostics, and grade target planning. Built for clarity, speed, and exam alignment.";
+  "Free 11+ tools for timed arithmetic, readiness estimators, and revision planning. Built for clarity, speed, and exam alignment.";
 const OG_IMAGE_URL = "https://gradlify.com/og-logo-v2.png";
-
-const TOOL_LINKS = [
-  {
-    name: "GCSE Maths Grade Boundaries Calculator",
-    url: "https://gradlify.com/gcse-maths-grade-boundaries",
-  },
-  {
-    name: "GCSE Maths Topic Weakness Test",
-    url: "https://gradlify.com/free-tools/gcse-maths-topic-weakness-test",
-  },
-  {
-    name: "GCSE Maths Grade Target Planner",
-    url: "https://gradlify.com/free-tools/gcse-maths-grade-target-planner",
-  },
-];
 
 const TOOLS_STRUCTURED_DATA = {
   "@context": "https://schema.org",
-  "@type": "ItemList",
-  name: "Free GCSE Maths Tools by Gradlify",
+  "@type": "WebPage",
+  name: "Free 11+ Tools by Gradlify",
   url: TOOLS_URL,
-  itemListElement: TOOL_LINKS.map((tool, index) => ({
-    "@type": "ListItem",
-    position: index + 1,
-    name: tool.name,
-    url: tool.url,
-  })),
 };
 
 export default function Tools() {
@@ -70,67 +49,12 @@ export default function Tools() {
               Free Tools by Gradlify
             </h1>
             <p className="mt-3 text-sm text-slate-600 sm:text-base">
-              Focused tools built for GCSE Maths students who want fast answers, clearer targets, and smarter revision.
+              Focused tools built for 11+ students who want fast answers, clearer targets, and smarter revision.
             </p>
           </header>
 
           <section className="grid gap-5 lg:grid-cols-3">
-            <div className="rounded-2xl border border-slate-200/70 bg-white/90 p-6 shadow-lg shadow-slate-200/40 backdrop-blur">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <h2 className="text-lg font-semibold text-slate-900">
-                    GCSE Maths Grade Boundaries Calculator
-                  </h2>
-                  <p className="mt-2 text-sm text-slate-600">
-                    Estimate your grade instantly using real past grade boundaries.
-                  </p>
-                </div>
-              </div>
-              <Link
-                to="/gcse-maths-grade-boundaries"
-                className="mt-5 inline-flex w-full items-center justify-center rounded-full bg-gradient-to-r from-primary via-blue-600 to-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary/30 transition hover:brightness-105"
-              >
-                Open calculator
-              </Link>
-            </div>
 
-            <div className="rounded-2xl border border-slate-200/70 bg-white p-6 shadow-lg shadow-slate-200/40">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <h2 className="text-lg font-semibold text-slate-900">
-                    GCSE Maths Topic Weakness Test
-                  </h2>
-                  <p className="mt-2 text-sm text-slate-600">
-                    Answer 10 questions and find the topics you need to focus on.
-                  </p>
-                </div>
-              </div>
-              <Link
-                to="/free-tools/gcse-maths-topic-weakness-test"
-                className="mt-5 inline-flex w-full items-center justify-center rounded-full bg-gradient-to-r from-primary via-blue-600 to-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary/30 transition hover:brightness-105"
-              >
-                Start test
-              </Link>
-            </div>
-
-            <div className="rounded-2xl border border-slate-200/70 bg-white p-6 shadow-lg shadow-slate-200/40">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <h2 className="text-lg font-semibold text-slate-900">
-                    GCSE Maths Grade Target Planner
-                  </h2>
-                  <p className="mt-2 text-sm text-slate-600">
-                    Find out how many marks you need to reach your target grade.
-                  </p>
-                </div>
-              </div>
-              <Link
-                to="/free-tools/gcse-maths-grade-target-planner"
-                className="mt-5 inline-flex w-full items-center justify-center rounded-full bg-gradient-to-r from-primary via-blue-600 to-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-primary/30 transition hover:brightness-105"
-              >
-                Plan my grade
-              </Link>
-            </div>
 
             {[
               {
@@ -189,46 +113,7 @@ export default function Tools() {
             More tools coming soon. We’re building focused helpers for grades, revision, and exam readiness.
           </p>
 
-          <section className="mt-8 max-w-3xl rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-            <div className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-              Quick routes
-            </div>
-            <div className="mt-4 space-y-3 text-sm text-slate-700">
-              <a
-                href="/free-tools/gcse-maths-grade-target-planner"
-                className="block rounded-2xl border border-slate-200 bg-slate-50/70 px-4 py-3 transition hover:border-slate-300"
-              >
-                <span className="font-semibold text-slate-900">
-                  Plan your next grade → Grade Target Planner
-                </span>
-                <span className="mt-1 block text-slate-600">
-                  See how many marks you need to move up a grade.
-                </span>
-              </a>
-              <a
-                href="/gcse-maths-grade-boundaries"
-                className="block rounded-2xl border border-slate-200 bg-slate-50/70 px-4 py-3 transition hover:border-slate-300"
-              >
-                <span className="font-semibold text-slate-900">
-                  Check published thresholds → Grade Boundaries Calculator
-                </span>
-                <span className="mt-1 block text-slate-600">
-                  Convert marks to grades by board and year.
-                </span>
-              </a>
-              <a
-                href="/free-tools/gcse-maths-topic-weakness-test"
-                className="block rounded-2xl border border-slate-200 bg-slate-50/70 px-4 py-3 transition hover:border-slate-300"
-              >
-                <span className="font-semibold text-slate-900">
-                  Find your weakest topics → Topic Weakness Test
-                </span>
-                <span className="mt-1 block text-slate-600">
-                  Get a topic-by-topic signal in 10 questions.
-                </span>
-              </a>
-            </div>
-          </section>
+
         </main>
       </div>
     </ForceTheme>
