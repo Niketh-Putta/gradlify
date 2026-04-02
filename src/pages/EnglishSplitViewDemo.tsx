@@ -881,7 +881,8 @@ export function EnglishSplitViewDemo() {
                 else if (sType.includes('spag') || sType.includes('spell') || sType.includes('punct') || sType.includes('gramm')) topicLabel = 'SPaG';
                 
                 const typeNoun = topicLabel === 'Comprehension' ? 'Passage' : 'Questions';
-                const cleanDisplayTitle = `${topicLabel} ${typeNoun} - ${section.leftTitle}`;
+                const displayTitle = topicLabel === 'Comprehension' ? section.leftTitle : `${topicLabel} ${typeNoun}`;
+                const cleanDisplayTitle = topicLabel === 'Comprehension' ? `${topicLabel} ${typeNoun} - ${displayTitle}` : displayTitle;
 
                 return (
                  <div 
@@ -1015,7 +1016,8 @@ export function EnglishSplitViewDemo() {
               else if (sType.includes('spag') || sType.includes('spell') || sType.includes('punct') || sType.includes('gramm')) topicLabel = 'SPaG';
               
               const typeNoun = topicLabel === 'Comprehension' ? 'Passage' : 'Questions';
-              const cleanDisplayTitle = `${topicLabel} ${typeNoun} - ${section.leftTitle}`;
+              const displayTitle = topicLabel === 'Comprehension' ? section.leftTitle : `${topicLabel} ${typeNoun}`;
+              const cleanDisplayTitle = topicLabel === 'Comprehension' ? `${topicLabel} ${typeNoun} - ${displayTitle}` : displayTitle;
 
               return (
                 <div key={section.sectionId} className={cn("mb-16", secIndex === 0 && examMode === 'practice' ? "mt-4" : "")}>
@@ -1024,7 +1026,7 @@ export function EnglishSplitViewDemo() {
                     <div className={cn("relative flex justify-between items-end w-full border-b border-border/60 pb-5 mb-10", secIndex === 0 ? "mt-4" : "mt-14")}>
                       <div className="flex flex-col gap-1.5 items-start">
                         <span className="px-2 py-0.5 rounded text-[9px] font-black tracking-[0.15em] uppercase bg-foreground/10 text-foreground/60">{topicLabel} {typeNoun}</span>
-                        <span className="text-xl font-bold tracking-tight text-foreground/90">{section.leftTitle}</span>
+                        <span className="text-xl font-bold tracking-tight text-foreground/90">{displayTitle}</span>
                       </div>
 
                       {section.tier && (
