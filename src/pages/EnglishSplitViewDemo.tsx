@@ -566,9 +566,13 @@ export function EnglishSplitViewDemo() {
     // Filter down to the user's requested topics
     if (examMode === 'mock') {
         const pool: EnglishSection[] = [];
-        if (selectedTopics.includes('comprehension')) pool.push(...groups.comprehension);
-        if (selectedTopics.includes('spag')) pool.push(...groups.spag);
-        if (selectedTopics.includes('vocabulary')) pool.push(...groups.vocab);
+        // Round-robin iteration to perfectly interleave the topics in the exact requested order
+        const maxLen = Math.max(groups.comprehension.length, groups.spag.length, groups.vocab.length);
+        for(let i=0; i<maxLen; i++) {
+           if (selectedTopics.includes('comprehension') && groups.comprehension[i]) pool.push(groups.comprehension[i]);
+           if (selectedTopics.includes('spag') && groups.spag[i]) pool.push(groups.spag[i]);
+           if (selectedTopics.includes('vocabulary') && groups.vocab[i]) pool.push(groups.vocab[i]);
+        }
         finalSections = pool.length > 0 ? pool.slice(0, 5) : sourceData.slice(0, 5);
     } else {
         // Practice Mode: The user wants EXACTLY 1 passage of EACH topic they deliberately checked!
@@ -625,7 +629,7 @@ export function EnglishSplitViewDemo() {
     const pattern = new RegExp(`(${highlights.map(escapeRegExp).join('|')})`, 'gi');
     return text.split(pattern).map((part, i) => {
       if (highlights.some(h => h.toLowerCase() === part.toLowerCase())) {
-        return <mark key={i} className="bg-yellow-200 dark:bg-yellow-500/40 text-yellow-950 dark:text-yellow-100 rounded-sm px-0.5">{part}</mark>;
+        return <mark key={i} className="bg-teal-200 dark:bg-teal-500/40 text-teal-950 dark:text-teal-50 rounded-sm px-0.5">{part}</mark>;
       }
       return part;
     });
@@ -869,19 +873,28 @@ export function EnglishSplitViewDemo() {
             <div className="absolute top-6 left-6 sm:left-8 text-[11px] font-black tracking-[0.2em] uppercase text-muted-foreground/30 select-none">Passage</div>
 
             <div className="space-y-16 relative mt-8">
-              {activeSections.map((section, secIdx) => (
-                <div 
+              {activeSections.map((section, secIdx) => {
+                const sType = (section.sectionId + " " + (section.subEngine || "")).toLowerCase();
+                let topicLabel = 'Comprehension';
+                if (sType.includes('vocab')) topicLabel = 'Vocabulary';
+                else if (sType.includes('spag') || sType.includes('spell') || sType.includes('punct') || sType.includes('gramm')) topicLabel = 'SPaG';
+                
+                const typeNoun = topicLabel === 'Comprehension' ? 'Passage' : 'Questions';
+                const cleanDisplayTitle = `${topicLabel} ${typeNoun} - ${section.leftTitle}`;
+
+                return (
+                 <div 
                   key={section.sectionId} 
                   ref={(el) => { passageSectionRefs.current[section.sectionId] = el; }}
                   className="scroll-m-8 border-b border-border/40 pb-12 last:border-0"
-                >
+                 >
                   {examMode === 'mock' && (
                     <div className="mb-6 font-sans font-bold text-lg text-foreground/80 tracking-tight flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-amber-500/10 text-amber-600 flex items-center justify-center text-sm border border-amber-500/20">
+                        <div className="w-8 h-8 rounded-full bg-amber-500/10 text-amber-600 flex items-center justify-center text-sm border border-amber-500/20 shrink-0">
                           {secIdx + 1}
                         </div>
-                        {section.leftTitle}
+                        {cleanDisplayTitle}
                       </div>
                       {section.tier && (
                         <div className="px-2.5 py-1 bg-muted/50 border border-border/80 rounded-md text-xs font-bold text-muted-foreground uppercase tracking-wide">
@@ -930,7 +943,8 @@ export function EnglishSplitViewDemo() {
                     })}
                   </div>
                 </div>
-              ))}
+              );
+            })}
             </div>
 
             {/* FOMO Gradient Overlay for Free Tier */}
@@ -1002,6 +1016,14 @@ export function EnglishSplitViewDemo() {
 
             {activeSections.map((section, secIndex) => {
               const Icon = section.icon || BookOpen;
+              
+              const sType = (section.sectionId + " " + (section.subEngine || "")).toLowerCase();
+              let topicLabel = 'Comprehension';
+              if (sType.includes('vocab')) topicLabel = 'Vocabulary';
+              else if (sType.includes('spag') || sType.includes('spell') || sType.includes('punct') || sType.includes('gramm')) topicLabel = 'SPaG';
+              
+              const typeNoun = topicLabel === 'Comprehension' ? 'Passage' : 'Questions';
+              const cleanDisplayTitle = `${topicLabel} ${typeNoun} - ${section.leftTitle}`;
 
               return (
                 <div key={section.sectionId} className={cn("mb-16", secIndex === 0 && examMode === 'practice' ? "mt-4" : "")}>
@@ -1015,12 +1037,13 @@ export function EnglishSplitViewDemo() {
                       )}
                       
                       <div className="relative flex justify-between w-full">
-                        <span className="bg-background/95 px-4 py-2 rounded-xl bg-muted/30 border border-border shadow-sm flex items-center gap-3 transform hover:scale-105 transition-transform cursor-default">
-                          <span className="text-xs font-black tracking-widest text-foreground uppercase pt-0.5 whitespace-nowrap">{section.title}</span>
+                        <span className="bg-background/95 px-5 py-2 rounded-xl bg-muted/30 border border-border shadow-sm flex items-center gap-3 transform hover:scale-105 transition-transform cursor-default overflow-hidden max-w-[80%]">
+                          <span className="text-xs font-black tracking-widest text-foreground uppercase pt-0.5 truncate shrink-0 underline underline-offset-[3px] decoration-foreground/40">{topicLabel} {typeNoun}</span>
+                          <span className="text-xs font-bold text-muted-foreground truncate border-l border-border/60 pl-3 hidden sm:inline-block underline underline-offset-[3px] decoration-border">({section.leftTitle})</span>
                         </span>
 
                         {section.tier && (
-                          <span className="relative bg-background/95 border border-amber-500/30 px-4 py-1.5 rounded-full bg-amber-500/10 shadow-sm flex items-center gap-2 cursor-default shrink-0">
+                          <span className="relative bg-background/95 border border-amber-500/30 px-4 py-1.5 rounded-full bg-amber-500/10 shadow-sm flex items-center gap-2 cursor-default shrink-0 ml-4">
                             <Sparkles className="w-3 h-3 text-amber-500" />
                             <span className="text-xs font-black tracking-widest text-amber-600 uppercase pt-0.5">{section.tier}</span>
                           </span>
