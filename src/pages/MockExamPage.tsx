@@ -169,6 +169,7 @@ export default function MockExamPage() {
   const paperType = searchParams.get('paperType') || 'calculator';
   const topics = searchParams.get('topics') || 'Number';
   const mode = searchParams.get('mode') || 'mock';
+  const isPractice = mode === 'practice';
   const questionsCount = parseInt(searchParams.get('questions') || '10');
   const initialDurationMinutes = parseInt(searchParams.get('duration') || '15');
   const subtopicParam = searchParams.get('subtopic') || '';
@@ -966,9 +967,9 @@ export default function MockExamPage() {
     handleSubmitRef.current = handleSubmit;
   }, [handleSubmit]);
 
-  // Timer
+  // Timer — disabled in practice mode
   useEffect(() => {
-    if (view !== 'exam' || loading || examQuestions.length === 0 || timeLeftRef.current <= 0) return;
+    if (isPractice || view !== 'exam' || loading || examQuestions.length === 0 || timeLeftRef.current <= 0) return;
 
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
@@ -1398,12 +1399,14 @@ const questionCalculatorLabel = (() => {
               <Flag className="w-3.5 h-3.5" fill={flagged.size > 0 ? "currentColor" : "none"} />
               <span className="text-xs font-medium">{flagged.size} flagged</span>
             </div>
-            <div className={cn("flex items-center gap-2 px-3 py-1.5 rounded-xl border transition-all", getTimerClass())}>
-              <Clock className="w-4 h-4 text-muted-foreground" />
-              <span className={cn("text-sm font-semibold", timeLeft <= 60 ? "text-red-500" : timeLeft <= 300 ? "text-amber-500" : "text-foreground")}>
-                {formatTime(timeLeft)}
-              </span>
-            </div>
+            {!isPractice && (
+              <div className={cn("flex items-center gap-2 px-3 py-1.5 rounded-xl border transition-all", getTimerClass())}>
+                <Clock className="w-4 h-4 text-muted-foreground" />
+                <span className={cn("text-sm font-semibold", timeLeft <= 60 ? "text-red-500" : timeLeft <= 300 ? "text-amber-500" : "text-foreground")}>
+                  {formatTime(timeLeft)}
+                </span>
+              </div>
+            )}
           </div>
         </div>
         <div className="h-1.5 rounded-full bg-border overflow-hidden">
@@ -1523,36 +1526,64 @@ const questionCalculatorLabel = (() => {
             )}
 
             <div className="space-y-2.5">
-              {currentAnswers.map((answer, idx) => {
-                const isSelected = currentSelectedAnswer === answer;
-                return (
-                  <button
-                    key={idx}
-                    onClick={() => handleSelectAnswer(answer)}
-                    className={cn(
-                      "option-card w-full text-left p-4 rounded-xl transition-all duration-200 border",
-                      isSelected 
-                        ? "border-primary bg-gradient-to-r from-primary/10 to-violet-500/10 shadow-[0_0_0_3px_rgba(139,92,246,0.12)]" 
-                        : "border-border bg-card hover:border-primary/50 hover:bg-gradient-to-r hover:from-primary/5 hover:to-violet-500/5 hover:translate-x-1"
-                    )}
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className={cn(
-                        "flex-shrink-0 w-9 h-9 rounded-lg border-2 flex items-center justify-center text-sm font-semibold transition-all duration-200",
-                        isSelected 
-                          ? "bg-gradient-to-r from-primary to-violet-500 text-white border-transparent" 
-                          : "border-border text-muted-foreground"
-                      )}>
-                        {letters[idx]}
-                      </span>
-                      <span className="text-sm font-medium text-foreground">
-                        <MathText text={answer} />
-                      </span>
-                    </div>
-                  </button>
-                );
-              })}
+              {(() => {
+                const correctAnswer = currentPart?.correct_answer ?? currentQuestion.correct_answer;
+                const hasAnswered = currentSelectedAnswer !== null && currentSelectedAnswer !== undefined;
+                const practiceAnswered = isPractice && hasAnswered;
+                return currentAnswers.map((answer, idx) => {
+                  const isSelected = currentSelectedAnswer === answer;
+                  const isCorrect = answer === correctAnswer;
+                  const showCorrect = practiceAnswered && isCorrect;
+                  const showWrong = practiceAnswered && isSelected && !isCorrect;
+                  return (
+                    <button
+                      key={idx}
+                      onClick={() => !practiceAnswered && handleSelectAnswer(answer)}
+                      disabled={practiceAnswered}
+                      className={cn(
+                        "option-card w-full text-left p-4 rounded-xl transition-all duration-200 border",
+                        showCorrect
+                          ? "border-emerald-500 bg-emerald-500/10 shadow-[0_0_0_3px_rgba(16,185,129,0.12)]"
+                          : showWrong
+                          ? "border-red-500 bg-red-500/10 shadow-[0_0_0_3px_rgba(239,68,68,0.12)]"
+                          : isSelected 
+                          ? "border-primary bg-gradient-to-r from-primary/10 to-violet-500/10 shadow-[0_0_0_3px_rgba(139,92,246,0.12)]" 
+                          : "border-border bg-card hover:border-primary/50 hover:bg-gradient-to-r hover:from-primary/5 hover:to-violet-500/5 hover:translate-x-1",
+                        practiceAnswered && !isSelected && !isCorrect && "opacity-50"
+                      )}
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className={cn(
+                          "flex-shrink-0 w-9 h-9 rounded-lg border-2 flex items-center justify-center text-sm font-semibold transition-all duration-200",
+                          showCorrect
+                            ? "bg-emerald-500 text-white border-transparent"
+                            : showWrong
+                            ? "bg-red-500 text-white border-transparent"
+                            : isSelected 
+                            ? "bg-gradient-to-r from-primary to-violet-500 text-white border-transparent" 
+                            : "border-border text-muted-foreground"
+                        )}>
+                          {showCorrect ? '✓' : showWrong ? '✗' : letters[idx]}
+                        </span>
+                        <span className="text-sm font-medium text-foreground">
+                          <MathText text={answer} />
+                        </span>
+                      </div>
+                    </button>
+                  );
+                });
+              })()}
             </div>
+
+            {/* Practice mode: show explanation inline after answering */}
+            {isPractice && currentSelectedAnswer != null && currentQuestion.explanation && (
+              <div className="mt-5 rounded-xl border border-border/70 bg-muted/30 p-5 fade-up">
+                <div className="text-xs uppercase tracking-wide text-muted-foreground font-semibold mb-3">Explanation</div>
+                <div className="text-sm leading-relaxed text-foreground">
+                  <RichQuestionContent text={formatExplanation(currentQuestion.explanation)} className="space-y-2" />
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
