@@ -35,11 +35,12 @@ export function normalizeNewlines(text: string): string {
   // Treat HTML line breaks and the `/n` shorthand as explicit new lines for imported explanations.
   normalized = normalized.replace(/<br\s*\/?>/gi, "\n").replace(/\/n/g, "\n");
 
-  // Insert line breaks after sentences when the full stop is not part of a decimal.
-  // We first break at all period+space boundaries.
-  normalized = normalized.replace(/\.\s+/g, ".\n");
+  // Insert line breaks between sentences only when a period is followed by a space and
+  // a capital letter (indicating a genuine new sentence), not after every period.
+  // This keeps explanations flowing naturally as paragraphs instead of one-line-per-sentence.
+  normalized = normalized.replace(/\.(\s+)([A-Z])/g, ".\n$2");
   
-  // Then we restore numbered lists that were broken by the sentence splitter.
+  // Restore numbered lists that were broken by the sentence splitter.
   // E.g., "1.\nSet up" -> "1. Set up"
   normalized = normalized.replace(/(^|\n)(\s*\d+)\.\n/g, "$1$2. ");
 

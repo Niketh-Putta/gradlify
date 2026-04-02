@@ -12,8 +12,9 @@ export const formatExplanation = (explanation?: string | null): string => {
   // Format Step numbers cleanly by ensuring they are separated by double newlines.
   clean = clean.replace(/\s*(Step\s*\d+\s*[:).\-]?)\s*/gi, (match, stepName) => `\n\n${stepName.trim()} `);
   
-  // Format "answer: £4" or "Answer: 4" or "Final Answer: " into its own line
-  clean = clean.replace(/\s*((?:Final\s*)?answer\s*[:).\-]?)\s*(.*)/ig, (match, ansPrefix, ans) => `\n\n${ansPrefix.trim()} ${ans}`);
+  // Format "Answer: 4" or "Final Answer: " into its own line — but only when it starts a sentence,
+  // NOT inside phrases like "To answer this question" or "the answer is".
+  clean = clean.replace(/(^|[.\n])\s*((?:Final\s*)?Answer\s*[:).\-])\s*/gim, (match, before, ansPrefix) => `${before}\n\n${ansPrefix.trim()} `);
   
   // Cleanup any extra newlines created by replacements
   clean = clean.replace(/\n{3,}/g, "\n\n").trim();
