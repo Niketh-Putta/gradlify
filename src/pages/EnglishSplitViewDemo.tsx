@@ -942,8 +942,8 @@ export function EnglishSplitViewDemo() {
                         isTargetEvidence = true;
                       }
 
-                      // Scaffold highlighting is active in practice mode OR review mode!
-                      const showScaffold = (examMode === 'practice' || isReviewMode) && isTargetEvidence;
+                      // Scaffold highlighting indicates the exact paragraph being questioned.
+                      const showScaffold = isTargetEvidence;
                       
                       const uniqueRefKey = `${section.sectionId}_${p.id}`;
 
@@ -956,15 +956,15 @@ export function EnglishSplitViewDemo() {
                           )}
                           <p 
                             className={cn(
-                              "transition-all duration-150 ease-out p-4 -mx-4 rounded-xl cursor-text relative border-l-[3px]",
+                              "transition-all duration-200 ease-out p-4 -mx-4 rounded-xl cursor-text relative border-l-[3px]",
                               showScaffold 
-                                ? "bg-amber-50/80 dark:bg-amber-500/10 border-amber-500 shadow-sm ring-1 ring-amber-200/50 text-foreground z-10" 
-                                : "border-transparent opacity-60 group-hover:opacity-100 hover:bg-black/5 dark:hover:bg-white/5"
+                                ? "bg-amber-50/90 dark:bg-amber-500/10 border-amber-500 shadow-md ring-1 ring-amber-500/30 text-foreground z-10 scale-[1.02]" 
+                                : "border-transparent opacity-70 group-hover:opacity-100 hover:bg-black/5 dark:hover:bg-white/5"
                             )}
                           >
                             {showScaffold && (
-                              <div className="absolute -left-1 flex items-center justify-center h-full top-0">
-                                <div className="h-1/3 w-1 bg-amber-500 rounded-full animate-pulse" />
+                              <div className="absolute -left-1.5 flex items-center justify-center h-full top-0">
+                                <div className="h-2/3 w-[5px] bg-amber-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(245,158,11,0.5)]" />
                               </div>
                             )}
                             {renderHighlightedText(p.text)}
@@ -1078,7 +1078,7 @@ export function EnglishSplitViewDemo() {
                           data-qid={q.id}
                           ref={(el) => { questionRefs.current[q.id] = el; }}
                           className={cn(
-                            "p-6 rounded-2xl border transition-all duration-500 cursor-default scroll-m-24 relative snap-center",
+                            "p-6 rounded-2xl border transition-all duration-150 ease-out cursor-default scroll-m-24 relative snap-center",
                             isSelected 
                               ? (examMode === 'mock' ? "border-amber-500/30 dark:border-amber-500/40 bg-card shadow-lg ring-1 ring-amber-500/10 scale-[1.02]" : "border-amber-500/50 bg-card shadow-xl ring-4 ring-amber-500/10 scale-[1.02]")
                               : "border-border/60 dark:border-amber-500/20 bg-card/40 hover:bg-card/80 hover:border-amber-500/30 opacity-60 hover:opacity-100"
