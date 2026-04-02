@@ -563,12 +563,33 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
                         return (
                           <button
                             key={subtopicId}
-                            onClick={() => setSelectedSubtopics(p => isSelected ? p.filter(id => id !== subtopicId) : [...p, subtopicId])}
-                            className={cn("group flex items-center gap-2 px-3 py-1.5 rounded-lg border text-[11px] font-medium transition-all", isSelected ? "text-white" : (isEnglish ? "bg-card text-muted-foreground hover:border-amber-500/50 border-amber-500/60" : "bg-card text-muted-foreground hover:border-primary/50 border-primary/60"))}
-                            style={{ backgroundColor: isSelected ? section.color : undefined, borderColor: isSelected ? section.color : undefined }}
+                            onClick={() => {
+                              if (examMode === 'practice') {
+                                setSelectedSubtopics(prev => {
+                                  // Clear ONLY the subtopics belonging to this specific parent category (e.g. SPaG)
+                                  const isolatedFromThisSection = prev.filter(id => !id.startsWith(section.key + '|'));
+                                  return isSelected ? isolatedFromThisSection : [...isolatedFromThisSection, subtopicId];
+                                });
+                              } else {
+                                setSelectedSubtopics(p => isSelected ? p.filter(id => id !== subtopicId) : [...p, subtopicId]);
+                              }
+                            }}
+                            className={cn(
+                              "group flex items-center gap-2.5 px-3.5 py-2 rounded-[1rem] border-[1.5px] text-xs font-bold transition-all duration-300 ease-out", 
+                              isSelected 
+                                ? "text-white scale-[1.03] shadow-md ring-2 ring-offset-2 ring-offset-background" 
+                                : (isEnglish ? "bg-card/50 text-muted-foreground hover:bg-amber-500/5 hover:border-amber-500/50 border-amber-500/20 hover:scale-[1.02]" : "bg-card/50 text-muted-foreground hover:bg-primary/5 hover:border-primary/50 border-primary/20 hover:scale-[1.02]")
+                            )}
+                            style={{ 
+                              backgroundColor: isSelected ? section.color : undefined, 
+                              borderColor: isSelected ? section.color : undefined,
+                              '--ring-color': section.color
+                            } as React.CSSProperties}
                           >
-                            {st.name}
-                            <span className={cn("text-[9px] font-bold px-1.5 py-0.5 rounded-full", isSelected ? "bg-black/20 text-white" : "bg-black/5 dark:bg-white/10 text-foreground/70 dark:text-white/80")}>{currentSubject === 'english' ? `${count} Passages` : count}</span>
+                            <span className="tracking-wide">{st.name}</span>
+                            <span className={cn("text-[9px] font-black px-2 py-0.5 rounded-full border", isSelected ? "bg-black/20 text-white border-white/20" : "bg-foreground/5 dark:bg-white/10 text-muted-foreground border-border/50")}>
+                              {currentSubject === 'english' ? `${count} Passages` : count}
+                            </span>
                           </button>
                         );
                       })}

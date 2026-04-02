@@ -185,6 +185,9 @@ export function expandSubtopicIdsForDb(rawId: string): string[] {
   if (canonicalInput === 'number_arithmetic|number_properties') {
     addSubtopicVariants('number|factors-multiples-primes', candidates);
     addSubtopicVariants('number|powers', candidates);
+    addSubtopicVariants('number|negative-numbers', candidates);
+    addSubtopicVariants('number|roman-numerals', candidates);
+    addSubtopicVariants('number|word-problems', candidates);
   }
   if (canonicalInput === 'number_arithmetic|fractions') {
     addSubtopicVariants('number|fractions', candidates);
@@ -199,6 +202,7 @@ export function expandSubtopicIdsForDb(rawId: string): string[] {
   if (canonicalInput === 'algebra_ratio|algebra_basics') {
     addSubtopicVariants('algebra|basics', candidates);
     addSubtopicVariants('algebra|substitution', candidates);
+    addSubtopicVariants('algebra|function-machines', candidates);
   }
   if (canonicalInput === 'algebra_ratio|solving_equations') {
     addSubtopicVariants('algebra|equations', candidates);
@@ -208,6 +212,7 @@ export function expandSubtopicIdsForDb(rawId: string): string[] {
   }
   if (canonicalInput === 'geometry_measures|shape_properties_2d_3d') {
     addSubtopicVariants('geometry|2d-3d-shapes', candidates);
+    addSubtopicVariants('geometry|symmetry-reflection', candidates);
   }
   if (canonicalInput === 'geometry_measures|angles') {
     addSubtopicVariants('geometry|angles', candidates);
@@ -227,6 +232,7 @@ export function expandSubtopicIdsForDb(rawId: string): string[] {
   if (canonicalInput === 'statistics_data|data_handling') {
     addSubtopicVariants('stats|data-handling', candidates);
     addSubtopicVariants('stats|charts-graphs', candidates);
+    addSubtopicVariants('stats|venn-diagrams', candidates);
   }
   if (canonicalInput === 'statistics_data|probability') {
     addSubtopicVariants('stats|probability', candidates);

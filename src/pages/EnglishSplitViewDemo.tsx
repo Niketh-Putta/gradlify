@@ -705,9 +705,6 @@ export function EnglishSplitViewDemo() {
   useEffect(() => {
     if (!activeQuestionId) return;
     
-    // Detect mobile screens where panes stack vertically. Auto-scroll ruins mobile UX.
-    if (window.innerWidth < 1024) return;
-    
     // Respect user autonomy: removed to fix delay bug
 
     let targetSectionId = null;
@@ -733,11 +730,6 @@ export function EnglishSplitViewDemo() {
 
     if (targetSectionId && targetEvidenceLine) {
       const uniqueRefKey = `${targetSectionId}_${targetEvidenceLine}`;
-      
-      // If the upcoming active question references the EXACT same passage text block, do not shift the left side globally!
-      if (lastEvidenceRefKey.current === uniqueRefKey) {
-          return; 
-      }
       lastEvidenceRefKey.current = uniqueRefKey;
 
       const targetElement = passageLineRefs.current[uniqueRefKey];
@@ -1056,20 +1048,37 @@ export function EnglishSplitViewDemo() {
               const Icon = section.icon || BookOpen;
               
               const sType = (section.sectionId + " " + (section.subEngine || "")).toLowerCase();
-              let topicLabel = 'Comprehension';
-              if (sType.includes('vocab')) topicLabel = 'Vocabulary';
-              else if (sType.includes('spag') || sType.includes('spell') || sType.includes('punct') || sType.includes('gramm')) topicLabel = 'SPaG';
+              let parentTopic = 'Comprehension';
+              let subTopic = '';
+
+              if (sType.includes('vocab')) {
+                 parentTopic = 'Vocabulary';
+              } else if (sType.includes('spag') || sType.includes('spell') || sType.includes('punct') || sType.includes('gramm')) {
+                 parentTopic = 'SPaG';
+                 if (sType.includes('spell')) subTopic = 'Spelling';
+                 else if (sType.includes('punct')) subTopic = 'Punctuation';
+                 else if (sType.includes('gramm')) subTopic = 'Grammar';
+              } else {
+                 if (sType.includes('non-fiction') || sType.includes('nonfiction')) subTopic = 'Non-Fiction';
+                 else if (sType.includes('fiction')) subTopic = 'Fiction';
+                 else if (sType.includes('poetry') || sType.includes('poem')) subTopic = 'Poetry';
+              }
               
-              const typeNoun = topicLabel === 'Comprehension' ? 'Passage' : 'Questions';
-              const displayTitle = topicLabel === 'Comprehension' ? section.leftTitle : `${topicLabel} ${typeNoun}`;
-              const cleanDisplayTitle = topicLabel === 'Comprehension' ? `${topicLabel} ${typeNoun} - ${displayTitle}` : displayTitle;
+              const typeNoun = parentTopic === 'Comprehension' ? 'Passage' : 'Questions';
+              const badgeLabel = subTopic ? `${parentTopic} ${typeNoun} (${subTopic})` : `${parentTopic} ${typeNoun}`;
+              
+              const displayTitle = parentTopic === 'Comprehension' 
+                ? section.leftTitle 
+                : (subTopic ? `${subTopic} ${typeNoun}` : `${parentTopic} ${typeNoun}`);
+
+              const cleanDisplayTitle = parentTopic === 'Comprehension' ? `${badgeLabel} - ${displayTitle}` : displayTitle;
 
               return (
                 <div key={section.sectionId} className={cn("mb-16", secIndex === 0 && examMode === 'practice' ? "mt-4" : "")}>
                   {/* Always Show Tier and specific passage title */}
                   <div className={cn("relative flex justify-between items-end w-full border-b border-border/60 pb-5 mb-10", secIndex === 0 ? "mt-4" : "mt-14")}>
                     <div className="flex flex-col gap-1.5 items-start">
-                      <span className="px-2 py-0.5 rounded text-[9px] font-black tracking-[0.15em] uppercase bg-foreground/10 text-foreground/60">{topicLabel} {typeNoun}</span>
+                      <span className="px-2 py-0.5 rounded text-[9px] font-black tracking-[0.15em] uppercase bg-foreground/10 text-foreground/60">{badgeLabel}</span>
                       <span className="text-xl font-bold tracking-tight text-foreground/90">{displayTitle}</span>
                     </div>
 
