@@ -1041,7 +1041,7 @@ export function EnglishSplitViewDemo() {
           )}
 
           <div className="max-w-xl mx-auto w-full p-8 pb-48">
-            <div className="mb-8 flex items-start justify-between gap-4">
+            <div className="mb-10 flex items-start justify-between gap-4 snap-start scroll-m-24">
               <div>
                 <h1 className="text-2xl font-bold tracking-tight mb-2">
                   {examMode === 'mock' ? 'Mock Exam' : (activeSections.length > 1 ? 'MIXED TOPIC DRILLS' : `${practiceFocus.toUpperCase()} DRILLS`)}
