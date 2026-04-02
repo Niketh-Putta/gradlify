@@ -592,8 +592,10 @@ export function EnglishSplitViewDemo() {
     const sorted = finalSections.map(sec => ({
       ...sec,
       questions: [...(sec.questions || [])].sort((a, b) => {
-        if (a.evidenceLine === 'global') return 1;
-        if (b.evidenceLine === 'global') return -1;
+        const aGlobal = a.evidenceLine === 'global' || a.evidenceLine === 'Overall' || a.evidenceLine?.toLowerCase().includes('overall');
+        const bGlobal = b.evidenceLine === 'global' || b.evidenceLine === 'Overall' || b.evidenceLine?.toLowerCase().includes('overall');
+        if (aGlobal && !bGlobal) return 1;
+        if (!aGlobal && bGlobal) return -1;
         const aNum = parseInt(a.evidenceLine.match(/\d+/)?.[0] || '0', 10);
         const bNum = parseInt(b.evidenceLine.match(/\d+/)?.[0] || '0', 10);
         return aNum - bNum;
@@ -721,8 +723,11 @@ export function EnglishSplitViewDemo() {
       }
     }
 
-    if (targetEvidenceLine === 'global') {
-      // Global questions require the whole text, do not force a scroll jump.
+    const isGlobal = targetEvidenceLine === 'global' || targetEvidenceLine?.toLowerCase().includes('overall');
+    if (isGlobal) {
+      if (targetSectionId && passageSectionRefs.current[targetSectionId]) {
+        passageSectionRefs.current[targetSectionId]?.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
+      }
       return; 
     }
 
@@ -736,25 +741,11 @@ export function EnglishSplitViewDemo() {
       lastEvidenceRefKey.current = uniqueRefKey;
 
       const targetElement = passageLineRefs.current[uniqueRefKey];
-      const questionElement = questionRefs.current[activeQuestionId];
-      const leftContainer = passageContainerRef.current;
-      const rightContainer = rightPaneRef.current;
-
-      if (targetElement && questionElement && leftContainer && rightContainer) {
-        const syncScroll = () => {
-          // Identify exactly where the active question sits currently on screen
-          const relativeY = questionElement.offsetTop - rightContainer.scrollTop;
-          
-          // Command the left text container to scroll so the evidence text matches that precise y-coord
-          const targetScroll = targetElement.offsetTop - relativeY;
-          leftContainer.scrollTo({ top: targetScroll, behavior: 'smooth' });
-        };
-
-        // Fire instantly for smooth tracking natively
-        syncScroll();
-        // Fire securely after the user's right-pane scroll completely finishes resolving/snapping 
-        const timeout = setTimeout(syncScroll, 400);
-        return () => clearTimeout(timeout);
+      
+      if (targetElement) {
+        // Scroll natively and simultaneously smoothly into the exact center of the screen bounds
+        targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
       }
     }
     
@@ -958,11 +949,13 @@ export function EnglishSplitViewDemo() {
 
                   <div className="space-y-6">
                     {section.passageBlocks.map((p, i) => {
-                      // Check if the exact line is being referenced right now based on active question
                       let isTargetEvidence = false;
                       const activeQInfo = section.questions.find(q => `${section.sectionId}_${q.id}` === activeQuestionId);
-                      if (activeQInfo && activeQInfo.evidenceLine === p.id) {
-                        isTargetEvidence = true;
+                      if (activeQInfo) {
+                        const isGlobal = activeQInfo.evidenceLine === 'global' || activeQInfo.evidenceLine === 'Overall' || activeQInfo.evidenceLine?.toLowerCase().includes('overall');
+                        if (activeQInfo.evidenceLine === p.id || isGlobal) {
+                          isTargetEvidence = true;
+                        }
                       }
 
                       // Scaffold highlighting indicates the exact paragraph being questioned.
@@ -1073,22 +1066,20 @@ export function EnglishSplitViewDemo() {
 
               return (
                 <div key={section.sectionId} className={cn("mb-16", secIndex === 0 && examMode === 'practice' ? "mt-4" : "")}>
-                  {/* Show Tier mid-scroll for Mock Exams OR Mixed Practice with multiple passages */}
-                  {(examMode === 'mock' || activeSections.length > 1) && (
-                    <div className={cn("relative flex justify-between items-end w-full border-b border-border/60 pb-5 mb-10", secIndex === 0 ? "mt-4" : "mt-14")}>
-                      <div className="flex flex-col gap-1.5 items-start">
-                        <span className="px-2 py-0.5 rounded text-[9px] font-black tracking-[0.15em] uppercase bg-foreground/10 text-foreground/60">{topicLabel} {typeNoun}</span>
-                        <span className="text-xl font-bold tracking-tight text-foreground/90">{displayTitle}</span>
-                      </div>
-
-                      {section.tier && (
-                        <span className="mb-1 relative bg-amber-500/10 border border-amber-500/20 px-3 py-1 rounded-full shadow-sm flex items-center gap-1.5 cursor-default shrink-0 transition-transform hover:scale-105">
-                          <Sparkles className="w-3 h-3 text-amber-500" />
-                          <span className="text-[10px] font-black tracking-widest text-amber-600 uppercase pt-0.5">{section.tier}</span>
-                        </span>
-                      )}
+                  {/* Always Show Tier and specific passage title */}
+                  <div className={cn("relative flex justify-between items-end w-full border-b border-border/60 pb-5 mb-10", secIndex === 0 ? "mt-4" : "mt-14")}>
+                    <div className="flex flex-col gap-1.5 items-start">
+                      <span className="px-2 py-0.5 rounded text-[9px] font-black tracking-[0.15em] uppercase bg-foreground/10 text-foreground/60">{topicLabel} {typeNoun}</span>
+                      <span className="text-xl font-bold tracking-tight text-foreground/90">{displayTitle}</span>
                     </div>
-                  )}
+
+                    {section.tier && (
+                      <span className="mb-1 relative bg-amber-500/10 border border-amber-500/20 px-3 py-1 rounded-full shadow-sm flex items-center gap-1.5 cursor-default shrink-0 transition-transform hover:scale-105">
+                        <Sparkles className="w-3 h-3 text-amber-500" />
+                        <span className="text-[10px] font-black tracking-widest text-amber-600 uppercase pt-0.5">{section.tier}</span>
+                      </span>
+                    )}
+                  </div>
 
                   <div className="space-y-12">
                     {section.questions.map((q, qIndex) => {
