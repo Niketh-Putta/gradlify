@@ -35,7 +35,10 @@ export function LogoMark({ className, size = 40, variant = "auto" }: LogoMarkPro
       <img
         src={logoSrc}
         alt="Gradlify logo"
-        className="h-full w-full object-contain rounded-full"
+        className={cn(
+          "h-full w-full object-contain rounded-full",
+          resolvedVariant === "light" && "mix-blend-multiply"
+        )}
         aria-hidden="true"
       />
     </div>
