@@ -333,7 +333,7 @@ export function Home() {
     params.set('tier', 'both');
     params.set('paperType', 'both');
     params.set('mode', 'practice');
-    navigate(`/practice/${currentSubject}?${params.toString()}`);
+    navigate(currentSubject === 'english' ? `/english-demo?${params.toString()}` : `/mock-exam?${params.toString()}`);
   };
 
   const targetTrack: UserTrack = isElevenPlus ? "gcse" : "11plus";

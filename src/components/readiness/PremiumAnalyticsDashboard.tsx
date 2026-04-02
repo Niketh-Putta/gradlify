@@ -360,7 +360,7 @@ export function PremiumAnalyticsDashboard({
                            if (onInitiatePractice) {
                              onInitiatePractice(englishInsights.weakestTopic, "weakness");
                            } else {
-                             navigate(`/practice/english?topics=${encodeURIComponent(englishInsights.weakestTopic)}&mode=practice`);
+                             navigate(`/english-demo?topics=${encodeURIComponent(englishInsights.weakestTopic)}&mode=practice`);
                            }
                          }}
                          className="flex items-center justify-between w-full px-4 py-3 bg-amber-500 hover:bg-amber-600 dark:bg-amber-500 dark:hover:bg-amber-400 text-white dark:text-amber-950 rounded-xl transition-all duration-200 shadow-sm shadow-amber-500/20 group active:scale-[0.98]"
@@ -399,7 +399,8 @@ export function PremiumAnalyticsDashboard({
                     if (onInitiatePractice) {
                       onInitiatePractice(insights.worstRaw, "weakness");
                     } else {
-                      navigate(`/practice/${subject}?topics=${encodeURIComponent(insights.worstRaw)}&mode=practice`);
+                      const baseUrl = '/mock-exam';
+                      navigate(`${baseUrl}?topics=${encodeURIComponent(insights.worstRaw)}&mode=practice`);
                     }
                   }}
                 >
@@ -414,7 +415,8 @@ export function PremiumAnalyticsDashboard({
                  if (onInitiatePractice) {
                    onInitiatePractice(insights.worst2Raw, "weakness");
                  } else {
-                   navigate(`/practice/${subject}?topics=${encodeURIComponent(insights.worst2Raw)}&mode=practice`);
+                   const baseUrl = '/mock-exam';
+                   navigate(`${baseUrl}?topics=${encodeURIComponent(insights.worst2Raw)}&mode=practice`);
                  }
                }}
              >
