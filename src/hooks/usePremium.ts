@@ -541,14 +541,15 @@ export function usePremium(trackOverride?: UserTrack, subject?: 'maths' | 'engli
       // Allowed — insert a mock_attempts row RIGHT NOW to consume the limit immediately.
       // Even if the user backs out, the attempt is used up.
       const mockMode = subject === 'english' ? 'mock-exam' : 'mock';
-      await supabase.from('mock_attempts').insert({
+      const { error } = await supabase.from('mock_attempts').insert({
         user_id: user!.id,
-        track: activeTrack,
         title: `${subject === 'english' ? 'English' : 'Maths'} Mock Exam`,
         mode: mockMode,
         total_marks: 0,
         status: 'started'
       });
+      
+      if (error) throw error;
 
       setDailyMockUses(1);
       emitMockUsageUpdate();
