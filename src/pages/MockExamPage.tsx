@@ -1418,34 +1418,36 @@ const questionCalculatorLabel = (() => {
       </div>
 
       {/* Question Navigation */}
-      <div className="card rounded-2xl p-3 mb-4 border border-border fade-up fade-up-2">
-        <div className="flex flex-wrap gap-1.5">
-          {examQuestions.map((_, idx) => {
-            const navQuestion = examQuestions[idx];
-            const { hasAny, isComplete } = getQuestionAnswerState(navQuestion);
-            const isAnswered = hasAny;
-            const isFlagged = flagged.has(idx);
-            const isCurrent = idx === currentIndex;
-            
-            return (
-              <button
-                key={idx}
-                onClick={() => setCurrentIndex(idx)}
-                className={cn(
-                  "q-nav-btn w-8 h-8 rounded-lg text-xs font-semibold transition-all duration-200 hover:scale-110 active:scale-95",
-                  isCurrent && "bg-gradient-to-r from-primary to-violet-500 text-white shadow-md",
-                  isFlagged && !isCurrent && "bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-400/40",
-                  isComplete && !isCurrent && !isFlagged && "bg-sky-500/20 text-sky-600 dark:text-sky-300 border border-sky-400/40",
-                  isAnswered && !isComplete && !isCurrent && !isFlagged && "bg-violet-500/15 text-violet-600 dark:text-violet-300 border border-violet-400/40",
-                  !isAnswered && !isCurrent && !isFlagged && "bg-muted text-muted-foreground"
-                )}
-              >
-                {idx + 1}
-              </button>
-            );
-          })}
+      {!isPractice && (
+        <div className="card rounded-2xl p-3 mb-4 border border-border fade-up fade-up-2">
+          <div className="flex flex-wrap gap-1.5">
+            {examQuestions.map((_, idx) => {
+              const navQuestion = examQuestions[idx];
+              const { hasAny, isComplete } = getQuestionAnswerState(navQuestion);
+              const isAnswered = hasAny;
+              const isFlagged = flagged.has(idx);
+              const isCurrent = idx === currentIndex;
+              
+              return (
+                <button
+                  key={idx}
+                  onClick={() => setCurrentIndex(idx)}
+                  className={cn(
+                    "q-nav-btn w-8 h-8 rounded-lg text-xs font-semibold transition-all duration-200 hover:scale-110 active:scale-95",
+                    isCurrent && "bg-gradient-to-r from-primary to-violet-500 text-white shadow-md",
+                    isFlagged && !isCurrent && "bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-400/40",
+                    isComplete && !isCurrent && !isFlagged && "bg-sky-500/20 text-sky-600 dark:text-sky-300 border border-sky-400/40",
+                    isAnswered && !isComplete && !isCurrent && !isFlagged && "bg-violet-500/15 text-violet-600 dark:text-violet-300 border border-violet-400/40",
+                    !isAnswered && !isCurrent && !isFlagged && "bg-muted text-muted-foreground"
+                  )}
+                >
+                  {idx + 1}
+                </button>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Question Card */}
       {currentQuestion && (
