@@ -423,8 +423,8 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
                   ) : (
                     <>
                       {`${dailyMockUses}/${dailyMockLimit}`}
-                      <span className="text-2xl font-bold text-slate-200 dark:text-slate-800 ml-3 italic">
-                        { dailyMockUses === 0 ? 'used per day' : 'used' }
+                      <span className="text-2xl font-bold text-slate-400 dark:text-slate-500 ml-3 italic">
+                        { dailyMockUses === 0 ? 'available today' : 'used today' }
                       </span>
                     </>
                   )}
