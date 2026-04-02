@@ -1377,45 +1377,45 @@ const questionCalculatorLabel = (() => {
   return (
     <div className="max-w-2xl mx-auto px-4 w-full pt-2 pb-8">
       {/* Header */}
-      <div className="py-4 fade-up fade-up-1">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-3">
-            <button 
-              onClick={() => setShowExitModal(true)}
-              className="p-1.5 -ml-1.5 rounded-lg transition-all duration-200 hover:bg-muted hover:scale-105 text-muted-foreground"
-            >
-              <X className="w-4 h-4" />
-            </button>
-            <div className="flex items-center gap-1.5">
-              <span className="text-base font-semibold text-foreground">{currentIndex + 1}</span>
-              <span className="text-sm text-muted-foreground">of {examQuestions.length}</span>
+      {!isPractice && (
+        <div className="py-4 fade-up fade-up-1">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-3">
+              <button 
+                onClick={() => setShowExitModal(true)}
+                className="p-1.5 -ml-1.5 rounded-lg transition-all duration-200 hover:bg-muted hover:scale-105 text-muted-foreground"
+              >
+                <X className="w-4 h-4" />
+              </button>
+              <div className="flex items-center gap-1.5">
+                <span className="text-base font-semibold text-foreground">{currentIndex + 1}</span>
+                <span className="text-sm text-muted-foreground">of {examQuestions.length}</span>
+              </div>
             </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className={cn(
-              "flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-all duration-200",
-              flagged.size > 0 ? "bg-amber-500/10 text-amber-500" : "bg-muted text-muted-foreground"
-            )}>
-              <Flag className="w-3.5 h-3.5" fill={flagged.size > 0 ? "currentColor" : "none"} />
-              <span className="text-xs font-medium">{flagged.size} flagged</span>
-            </div>
-            {!isPractice && (
+            <div className="flex items-center gap-2">
+              <div className={cn(
+                "flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-all duration-200",
+                flagged.size > 0 ? "bg-amber-500/10 text-amber-500" : "bg-muted text-muted-foreground"
+              )}>
+                <Flag className="w-3.5 h-3.5" fill={flagged.size > 0 ? "currentColor" : "none"} />
+                <span className="text-xs font-medium">{flagged.size} flagged</span>
+              </div>
               <div className={cn("flex items-center gap-2 px-3 py-1.5 rounded-xl border transition-all", getTimerClass())}>
                 <Clock className="w-4 h-4 text-muted-foreground" />
                 <span className={cn("text-sm font-semibold", timeLeft <= 60 ? "text-red-500" : timeLeft <= 300 ? "text-amber-500" : "text-foreground")}>
                   {formatTime(timeLeft)}
                 </span>
               </div>
-            )}
+            </div>
+          </div>
+          <div className="h-1.5 rounded-full bg-border overflow-hidden">
+            <div 
+              className="h-full rounded-full bg-gradient-to-r from-primary to-violet-500 transition-all duration-300"
+              style={{ width: `${((currentIndex + 1) / examQuestions.length) * 100}%` }}
+            />
           </div>
         </div>
-        <div className="h-1.5 rounded-full bg-border overflow-hidden">
-          <div 
-            className="h-full rounded-full bg-gradient-to-r from-primary to-violet-500 transition-all duration-300"
-            style={{ width: `${((currentIndex + 1) / examQuestions.length) * 100}%` }}
-          />
-        </div>
-      </div>
+      )}
 
       {/* Question Navigation */}
       {!isPractice && (
