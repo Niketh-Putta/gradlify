@@ -67,15 +67,6 @@ const ELEVEN_PLUS_SECTIONS: TrackSection[] = [
       { key: "probability", name: "Probability" },
     ],
   },
-  {
-    key: "exam_prep",
-    id: "Exam Preparation",
-    label: "Exam Preparation",
-    color: "#0ea5e9",
-    subtopics: [
-      { key: "general_skills", name: "General Skills & Strategies" },
-    ],
-  },
 ];
 
 const ELEVEN_PLUS_READINESS_MAP: Record<string, string[]> = {
