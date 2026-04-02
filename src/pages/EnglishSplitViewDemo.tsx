@@ -640,7 +640,7 @@ export function EnglishSplitViewDemo() {
     if (examMode !== 'mock' || activeSections.length === 0) return;
     
     // Create a unique fingerprint of the active passages to detect if we generated a NEW mock exam
-    const bundleSignature = activeSections.map(s => s.sectionId).join('|');
+    const bundleSignature = activeSections.map(s => s.title).join('|');
     if (timerInitialized.current === bundleSignature) return; // Do not hard-reset if it's the same bundle
     
     let totalSeconds = 0;

@@ -169,7 +169,17 @@ export default function PracticePage({ forcedSubject }: PracticePageProps) {
     <div className="max-w-4xl mx-auto px-4 py-8 bg-slate-50/30 min-h-screen">
       <header className="mb-12">
         <h1 className="text-3xl font-serif font-bold text-slate-900 mb-2">{currentSubject === 'english' ? 'English ' : 'Maths '}Practice</h1>
-        <p className="text-slate-500">Configure your session for maximum performance</p>
+        <p className="text-slate-500 mb-4">Configure your session for maximum performance</p>
+        
+        {isElevenPlus && currentSubject === 'maths' && (
+          <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-blue-500/20 bg-blue-500/10 text-blue-700 dark:text-blue-400 text-xs font-bold tracking-wide shadow-sm">
+            <span className="relative flex h-2 w-2 mr-1">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+            </span>
+            1500+ Premium Questions Available
+          </div>
+        )}
       </header>
 
       <MultipartPracticePanel userEmail={user?.email ?? null} />
