@@ -555,39 +555,25 @@ function NotesMarkdown({ children, blockType }: { children: string, blockType?: 
         blockquote: ({ children }) => {
           let alertType: 'note' | 'tip' | 'important' | null = null;
           
-          // Non-mutative detection and cleaning of alert tags
-          const processChildren = (nodes: React.ReactNode): React.ReactNode => {
-            return React.Children.map(nodes, (child, index) => {
-              if (index === 0 && React.isValidElement(child) && child.props.children) {
-                const innerChildren = React.Children.toArray(child.props.children);
-                const firstChild = innerChildren[0];
-                
-                if (typeof firstChild === 'string') {
-                  const trimmed = firstChild.trim();
-                  
-                  if (trimmed.includes('@@NOTE-ALERT@@')) {
-                    alertType = 'note';
-                  } else if (trimmed.includes('@@TIP-ALERT@@')) {
-                    alertType = 'tip';
-                  } else if (trimmed.includes('@@IMPORTANT-ALERT@@')) {
-                    alertType = 'important';
-                  }
-                  
-                  if (alertType) {
-                    // Remove the marker and fix colon spacing for the header if needed
-                    const newText = firstChild
-                      .replace(/@@[A-Z-]+-ALERT@@\s?/g, '')
-                      .replace(/:(\S)/g, ': $1');
-                    const newInner = [newText, ...innerChildren.slice(1)];
-                    return React.cloneElement(child as any, {}, ...newInner);
-                  }
-                }
+          const processNode = (node: React.ReactNode): React.ReactNode => {
+            if (typeof node === 'string') {
+              if (node.includes('@@NOTE-ALERT@@')) alertType = 'note';
+              else if (node.includes('@@TIP-ALERT@@')) alertType = 'tip';
+              else if (node.includes('@@IMPORTANT-ALERT@@')) alertType = 'important';
+              
+              if (alertType) {
+                return node.replace(/@@[A-Z-]+-ALERT@@\s?/g, '').replace(/:(\S)/g, ': $1');
               }
-              return child;
-            });
+              return node;
+            }
+            if (React.isValidElement(node) && node.props.children) {
+               const newChildren = React.Children.map(node.props.children, processNode);
+               return React.cloneElement(node as any, {}, ...newChildren);
+            }
+            return node;
           };
 
-          const cleanedChildren = processChildren(children);
+          const cleanedChildren = React.Children.map(children, processNode);
 
           if (alertType) {
             const config = {
