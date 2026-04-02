@@ -760,7 +760,7 @@ export function EnglishSplitViewDemo() {
       }
     }
 
-    const isGlobal = targetEvidenceLine === 'global' || targetEvidenceLine?.toLowerCase().includes('overall');
+    const isGlobal = !targetEvidenceLine || targetEvidenceLine === 'global' || targetEvidenceLine?.toLowerCase().includes('overall');
     if (isGlobal) {
       if (targetSectionId && passageSectionRefs.current[targetSectionId]) {
         passageSectionRefs.current[targetSectionId]?.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
@@ -808,7 +808,7 @@ export function EnglishSplitViewDemo() {
 
     activeSections.forEach(sec => {
       const isComp = sec.sectionId === 'comprehension' || sec.sectionId === 'vocab';
-      const visibleQuestions = !isPremium ? sec.questions.slice(0, 3) : sec.questions;
+      const visibleQuestions = (!isPremium && examMode !== 'mock') ? sec.questions.slice(0, 3) : sec.questions;
       
       visibleQuestions.forEach(q => {
         if (isComp) compTotal++;
@@ -1059,7 +1059,7 @@ export function EnglishSplitViewDemo() {
                         if (activeQInfo) {
                           const isQuestionPaywalled = !isPremium && examMode !== 'mock' && activeQIndex >= PAYWALL_THRESHOLD;
                           if (!isQuestionPaywalled) {
-                            const isGlobal = activeQInfo.evidenceLine === 'global' || activeQInfo.evidenceLine === 'Overall' || activeQInfo.evidenceLine?.toLowerCase().includes('overall');
+                            const isGlobal = !activeQInfo.evidenceLine || activeQInfo.evidenceLine === 'global' || activeQInfo.evidenceLine === 'Overall' || activeQInfo.evidenceLine.toLowerCase().includes('overall');
                             if (activeQInfo.evidenceLine === p.id || isGlobal) {
                               isTargetEvidence = true;
                             }
