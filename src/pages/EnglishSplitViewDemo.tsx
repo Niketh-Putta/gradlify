@@ -1010,7 +1010,7 @@ export function EnglishSplitViewDemo() {
                 let lastAllowedEvidenceIndex = -1;
                 let isEntireSectionPaywalled = false;
                 
-                if (!isPremium) {
+                if (!isPremium && examMode !== 'mock') {
                   const allowedEvidenceLines = section.questions
                     .slice(0, PAYWALL_THRESHOLD)
                     .map(q => q.evidenceLine);
@@ -1046,6 +1046,7 @@ export function EnglishSplitViewDemo() {
                     {(() => {
                       const getIsPaywalledBlock = (i: number) => {
                         if (isPremium) return false;
+                        if (examMode === 'mock') return false;
                         if (isEntireSectionPaywalled) return true;
                         return lastAllowedEvidenceIndex !== -1 && i > lastAllowedEvidenceIndex;
                       };
@@ -1056,7 +1057,7 @@ export function EnglishSplitViewDemo() {
                         const activeQInfo = activeQIndex !== -1 ? section.questions[activeQIndex] : undefined;
                         
                         if (activeQInfo) {
-                          const isQuestionPaywalled = !isPremium && activeQIndex >= PAYWALL_THRESHOLD;
+                          const isQuestionPaywalled = !isPremium && examMode !== 'mock' && activeQIndex >= PAYWALL_THRESHOLD;
                           if (!isQuestionPaywalled) {
                             const isGlobal = activeQInfo.evidenceLine === 'global' || activeQInfo.evidenceLine === 'Overall' || activeQInfo.evidenceLine?.toLowerCase().includes('overall');
                             if (activeQInfo.evidenceLine === p.id || isGlobal) {
