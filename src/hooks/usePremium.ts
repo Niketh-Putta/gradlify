@@ -546,7 +546,7 @@ export function usePremium(trackOverride?: UserTrack, subject?: 'maths' | 'engli
         title: `${subject === 'english' ? 'English' : 'Maths'} Mock Exam`,
         mode: mockMode,
         total_marks: 0,
-        status: 'started'
+        status: 'in_progress'
       });
       
       if (error) throw error;
