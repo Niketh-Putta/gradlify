@@ -137,20 +137,31 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
 
         const results = await Promise.all(jobs.map(async ({ topicId, sectionKey, subtopicKey }) => {
           const subtopicId = `${sectionKey}|${subtopicKey}`;
-          const questionTypes = expandQuestionTypesForDb(topicId);
-          const subtopicFilter = expandSubtopicIdsForDb(subtopicId);
+          const isEng = currentSubject === 'english';
           
-          let query = supabase.from('exam_questions').select('id', { count: 'exact', head: true })
-            .in('question_type', questionTypes.length > 0 ? questionTypes : [topicId])
-            .in('subtopic', subtopicFilter.length > 0 ? subtopicFilter : [subtopicId])
+          let query = supabase.from((isEng ? 'english_passages' : 'exam_questions') as any)
+            .select('id', { count: 'exact', head: true })
             .eq('track', userTrack);
+            
+          if (isEng) {
+            query = query.eq('sectionId', topicId.toLowerCase());
+            // Map subtopicKey to exact strings used in python: 'fiction', 'non_fiction', 'poetry', 'spelling', etc.
+            query = query.eq('subtopic', subtopicKey.replace('-', '_').toLowerCase());
+          } else {
+            const questionTypes = expandQuestionTypesForDb(topicId);
+            const subtopicFilter = expandSubtopicIdsForDb(subtopicId);
+            query = query.in('question_type', questionTypes.length > 0 ? questionTypes : [topicId])
+                         .in('subtopic', subtopicFilter.length > 0 ? subtopicFilter : [subtopicId]);
+                         
+            if (dbTier.length === 1) query = query.eq('tier', dbTier[0]); else query = query.in('tier', dbTier);
+            if (dbCalculator.length === 1) query = query.eq('calculator', dbCalculator[0]); else query = query.in('calculator', dbCalculator);
+          }
 
-          if (dbTier.length === 1) query = query.eq('tier', dbTier[0]); else query = query.in('tier', dbTier);
-          if (dbCalculator.length === 1) query = query.eq('calculator', dbCalculator[0]); else query = query.in('calculator', dbCalculator);
           if (difficultyRange.min != null) query = query.gte('difficulty', difficultyRange.min);
           if (difficultyRange.max != null) query = query.lte('difficulty', difficultyRange.max);
 
-          const { count } = await query;
+          const { count, error } = await query;
+          if (error) console.error(error);
           return [subtopicId, count || 0] as const;
         }));
 
@@ -162,7 +173,7 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
       }
     };
     fetchSubtopicCounts();
-  }, [selectedTopics, tierSelection, calcSelection, elevenPlusDifficulty, userTrack, availableSections, isElevenPlus]);
+  }, [selectedTopics, tierSelection, calcSelection, elevenPlusDifficulty, userTrack, availableSections, isElevenPlus, currentSubject]);
 
   useEffect(() => {
     const fetchTopicCounts = async () => {
@@ -172,13 +183,20 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
         const difficultyRange = isElevenPlus ? getElevenPlusDifficultyRange(elevenPlusDifficulty) : { min: null, max: null };
 
         const results = await Promise.all(availableSections.map(async s => {
-          const questionTypes = expandQuestionTypesForDb(s.id);
-          let query = supabase.from('exam_questions').select('id', { count: 'exact', head: true })
-            .in('question_type', questionTypes.length > 0 ? questionTypes : [s.id])
+          const isEng = currentSubject === 'english';
+          let query = supabase.from((isEng ? 'english_passages' : 'exam_questions') as any)
+            .select('id', { count: 'exact', head: true })
             .eq('track', userTrack);
 
-          if (dbTier.length === 1) query = query.eq('tier', dbTier[0]); else query = query.in('tier', dbTier);
-          if (dbCalculator.length === 1) query = query.eq('calculator', dbCalculator[0]); else query = query.in('calculator', dbCalculator);
+          if (isEng) {
+            query = query.eq('sectionId', s.id.toLowerCase());
+          } else {
+            const questionTypes = expandQuestionTypesForDb(s.id);
+            query = query.in('question_type', questionTypes.length > 0 ? questionTypes : [s.id]);
+            if (dbTier.length === 1) query = query.eq('tier', dbTier[0]); else query = query.in('tier', dbTier);
+            if (dbCalculator.length === 1) query = query.eq('calculator', dbCalculator[0]); else query = query.in('calculator', dbCalculator);
+          }
+
           if (difficultyRange.min != null) query = query.gte('difficulty', difficultyRange.min);
           if (difficultyRange.max != null) query = query.lte('difficulty', difficultyRange.max);
 
@@ -189,7 +207,7 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
       } catch (e) { }
     };
     fetchTopicCounts();
-  }, [availableSections, tierSelection, calcSelection, elevenPlusDifficulty, userTrack, isElevenPlus]);
+  }, [availableSections, tierSelection, calcSelection, elevenPlusDifficulty, userTrack, isElevenPlus, currentSubject]);
 
   const toggleTopic = (id: string) => setSelectedTopics(p => p.includes(id) ? p.filter(t => t !== id) : [...p, id]);
   const toggleAllTopics = () => setSelectedTopics(selectedTopics.length === availableSections.length ? [] : availableSections.map(s => s.id));
@@ -383,6 +401,31 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
                 </Label>
               ))}
             </RadioGroup>
+
+            {currentSubject === 'english' && (
+              <div className="mt-4 p-4 rounded-2xl bg-amber-500/5 border border-amber-500/20">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div className="flex gap-3 items-start">
+                    <BookOpen className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                    <div className="space-y-1">
+                      <p className="text-[11px] font-bold text-amber-900 dark:text-amber-100 uppercase tracking-wider">Practice Workflow</p>
+                      <p className="text-xs text-amber-800/70 dark:text-amber-400/70 leading-relaxed">
+                        Instant feedback with tutor notes. Change answers until right. Only first attempts count for ranking.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex gap-3 items-start">
+                    <Timer className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                    <div className="space-y-1">
+                      <p className="text-[11px] font-bold text-amber-900 dark:text-amber-100 uppercase tracking-wider">Mock Environment</p>
+                      <p className="text-xs text-amber-800/70 dark:text-amber-400/70 leading-relaxed">
+                        Uninterrupted timed completion. See standardised scores and cross-examine all explanations at the end.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </section>
 
           <section className="grid grid-cols-1 sm:grid-cols-2 gap-8">
@@ -450,7 +493,7 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
               <div className="mb-6 p-4 rounded-2xl bg-amber-500/5 border border-amber-500/20 flex items-start gap-3">
                 <Sparkles className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                 <div className="space-y-1">
-                  <p className="text-[11px] font-bold text-amber-900 dark:text-amber-100 uppercase tracking-wider">Exam Structure Intelligence</p>
+                  <p className="text-[11px] font-bold text-amber-900 dark:text-amber-100 uppercase tracking-wider">Exam Structure</p>
                   <p className="text-xs text-amber-800/70 dark:text-amber-400/70 leading-relaxed">
                     English sessions are divided into <strong>Passages</strong>. Each passage contains exactly <strong>10 sub-questions</strong>.
                   </p>
@@ -484,7 +527,7 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
                         {isSelected && (
                           <span className="text-[10px] font-bold" style={{ color: color }}>
                             {currentSubject === 'english' 
-                              ? `${Math.ceil(count / 10)} Passages (${count} Questions)` 
+                              ? `${count} Passages (${count * 10} Questions)` 
                               : `${count} Questions`}
                           </span>
                         )}
@@ -525,7 +568,7 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
                             style={{ backgroundColor: isSelected ? section.color : undefined, borderColor: isSelected ? section.color : undefined }}
                           >
                             {st.name}
-                            <span className={cn("text-[9px] font-bold px-1.5 py-0.5 rounded-full", isSelected ? "bg-black/20 text-white" : "bg-black/5 dark:bg-white/10 text-foreground/70 dark:text-white/80")}>{currentSubject === 'english' ? `${Math.ceil(count / 10)} Passages` : count}</span>
+                            <span className={cn("text-[9px] font-bold px-1.5 py-0.5 rounded-full", isSelected ? "bg-black/20 text-white" : "bg-black/5 dark:bg-white/10 text-foreground/70 dark:text-white/80")}>{currentSubject === 'english' ? `${count} Passages` : count}</span>
                           </button>
                         );
                       })}
@@ -569,7 +612,7 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
                 <div className="flex-1 min-w-0">
                   <p className="text-[13px] font-semibold text-slate-800 dark:text-slate-100 leading-tight truncate">
                     {getTopicsLabel()} · {currentSubject === 'english' 
-                      ? `~${Math.ceil(getTotalEstimatedQuestions() / 10)} Passages (${getTotalEstimatedQuestions()} Qs)` 
+                      ? `~${getTotalEstimatedQuestions()} Passages (${getTotalEstimatedQuestions() * 10} Qs)` 
                       : `~${getTotalEstimatedQuestions()} questions`}
                   </p>
                   <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
