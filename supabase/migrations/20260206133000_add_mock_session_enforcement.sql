@@ -9,7 +9,7 @@ DECLARE
   v_profile public.profiles%ROWTYPE;
   v_now timestamptz := now();
   v_reset_at timestamptz;
-  v_limit integer := 1;
+  v_limit integer := 2;
   v_is_admin boolean := false;
   v_is_premium boolean := false;
   v_count integer := COALESCE(p_question_count, 10);

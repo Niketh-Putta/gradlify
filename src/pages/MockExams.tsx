@@ -286,27 +286,14 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
     
     try {
       if (!isPremium) {
-        const { data: usageData, error: usageError } = await supabase.rpc('consume_mock_session', {
-          p_question_count: 10
-        });
+        const result = await incrementMockUsage(10);
         
-        if (usageError) {
-          console.error('Error consuming mock session:', usageError);
-          toast.error("Could not register mock attempt. Please try again.");
-          setLoading(false);
-          return;
-        }
-
-        const usageResult = usageData as { allowed?: boolean; message?: string } | null;
-        if (!usageResult?.allowed) {
-          toast.error(usageResult?.message || "Usage limit reached.");
+        if (!result.allowed) {
+          toast.error(result.message || "Usage limit reached.");
           setShowPaywall(true);
           setLoading(false);
           return;
         }
-        
-        // Refresh local state
-        await refreshUsage();
       }
 
       const tiers = isElevenPlus ? ['11plus-standard'] : (tierSelection === 'both' ? ['foundation', 'higher'] : [tierSelection]);
