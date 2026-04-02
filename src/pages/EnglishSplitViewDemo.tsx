@@ -552,9 +552,23 @@ export function EnglishSplitViewDemo() {
   const activeSections = useMemo(() => {
     const sourceData = dbSections.length > 0 ? dbSections : [...TEST_DATA, VOCAB_PRACTICE];
     
+    // Intelligent exhaustion system:
+    let seenPassages: string[] = [];
+    try { seenPassages = JSON.parse(localStorage.getItem('seen_english_passages') || '[]'); } catch(e) {}
+    
+    // Forcefully randomize everything to prevent deterministic cycles
+    const shuffled = [...sourceData].sort(() => Math.random() - 0.5);
+    
+    // Bubble up entirely unseen passages to the exact top!
+    shuffled.sort((a, b) => {
+        const aSeen = seenPassages.includes(a.sectionId) ? 1 : 0;
+        const bSeen = seenPassages.includes(b.sectionId) ? 1 : 0;
+        return aSeen - bSeen;
+    });
+
     // Group passages aggressively by core engine
     const groups: Record<string, EnglishSection[]> = { comprehension: [], spag: [], vocab: [] };
-    sourceData.forEach(sec => {
+    shuffled.forEach(sec => {
         const id = (sec.sectionId || "").toLowerCase();
         const sub = (sec.subEngine || "").toLowerCase();
         if (id === 'vocabulary' || sub === 'vocabulary' || id === 'vocab') groups.vocab.push(sec);
@@ -604,6 +618,24 @@ export function EnglishSplitViewDemo() {
 
     return sorted;
   }, [examMode, selectedTopics, isPremium, dbSections]);
+
+  // Securely update the historic ledger of what texts have been seen
+  useEffect(() => {
+    if (activeSections.length > 0) {
+      try {
+        let seen = JSON.parse(localStorage.getItem('seen_english_passages') || '[]');
+        const newIds = activeSections.map(s => s.sectionId);
+        seen = [...new Set([...seen, ...newIds])];
+        
+        // If they have naturally exhausted almost the entire bank, reset the loop back to zero (minus current load)
+        if (dbSections.length > 10 && seen.length >= dbSections.length - 2) {
+            seen = newIds; 
+        }
+        
+        localStorage.setItem('seen_english_passages', JSON.stringify(seen));
+      } catch(e) {}
+    }
+  }, [activeSections, dbSections.length]);
 
   // Timer logic for Mock Mode
   useEffect(() => {
@@ -704,11 +736,17 @@ export function EnglishSplitViewDemo() {
       return; 
     }
 
-    if (targetEvidenceLine && passageLineRefs.current[targetEvidenceLine]) {
-      // Intelligently scroll the master left-container exactly to the evidence piece
-      passageLineRefs.current[targetEvidenceLine]?.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
-    } else if (targetSectionId && passageSectionRefs.current[targetSectionId]) {
-      // Intelligently scroll the master left-container to the correct passage block
+    if (targetSectionId && targetEvidenceLine) {
+      const uniqueRefKey = `${targetSectionId}_${targetEvidenceLine}`;
+      if (passageLineRefs.current[uniqueRefKey]) {
+        // Intelligently scroll the master left-container exactly to the isolated evidence piece
+        passageLineRefs.current[uniqueRefKey]?.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+        return;
+      }
+    }
+    
+    if (targetSectionId && passageSectionRefs.current[targetSectionId]) {
+      // Intelligently scroll the master left-container to the correct passage block wrapper
       passageSectionRefs.current[targetSectionId]?.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
     }
   }, [activeQuestionId, activeSections, isUserScrolling]);
@@ -918,8 +956,10 @@ export function EnglishSplitViewDemo() {
                       // Scaffold highlighting is active in practice mode OR review mode!
                       const showScaffold = (examMode === 'practice' || isReviewMode) && isTargetEvidence;
                       
+                      const uniqueRefKey = `${section.sectionId}_${p.id}`;
+
                       return (
-                        <div key={p.id} className="relative group" ref={(el) => { passageLineRefs.current[p.id] = el; }}>
+                        <div key={p.id} className="relative group" ref={(el) => { passageLineRefs.current[uniqueRefKey] = el; }}>
                           {p.text.match(/^\d+/) && (
                             <div className="absolute -left-10 top-1.5 text-xs text-amber-500/80 font-black select-none pointer-events-none w-8 text-right opacity-0 group-hover:opacity-100 transition-opacity">
                               ♦
@@ -927,7 +967,7 @@ export function EnglishSplitViewDemo() {
                           )}
                           <p 
                             className={cn(
-                              "transition-all duration-700 p-4 -mx-4 rounded-xl cursor-text relative border-l-[3px]",
+                              "transition-all duration-150 ease-out p-4 -mx-4 rounded-xl cursor-text relative border-l-[3px]",
                               showScaffold 
                                 ? "bg-amber-50/80 dark:bg-amber-500/10 border-amber-500 shadow-sm ring-1 ring-amber-200/50 text-foreground z-10" 
                                 : "border-transparent opacity-60 group-hover:opacity-100 hover:bg-black/5 dark:hover:bg-white/5"
