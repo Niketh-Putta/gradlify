@@ -458,6 +458,16 @@ export function EnglishSplitViewDemo() {
            query = query.eq('difficulty', parseInt(diffParam));
         }
 
+        const diffMinParam = searchParams.get('difficultyMin');
+        const diffMaxParam = searchParams.get('difficultyMax');
+
+        if (diffMinParam) {
+           query = query.gte('difficulty', parseInt(diffMinParam));
+        }
+        if (diffMaxParam) {
+           query = query.lte('difficulty', parseInt(diffMaxParam));
+        }
+
         const { data, error } = await query;
         if (error) throw error;
         
@@ -569,25 +579,14 @@ export function EnglishSplitViewDemo() {
 
     let finalSections: EnglishSection[] = [];
 
-    // Filter down to the user's requested topics
-    if (examMode === 'mock') {
-        const pool: EnglishSection[] = [];
-        // Round-robin iteration to perfectly interleave the topics in the exact requested order
-        const maxLen = Math.max(groups.comprehension.length, groups.spag.length, groups.vocab.length);
-        for(let i=0; i<maxLen; i++) {
-           if (selectedTopics.includes('comprehension') && groups.comprehension[i]) pool.push(groups.comprehension[i]);
-           if (selectedTopics.includes('spag') && groups.spag[i]) pool.push(groups.spag[i]);
-           if (selectedTopics.includes('vocabulary') && groups.vocab[i]) pool.push(groups.vocab[i]);
-        }
-        finalSections = pool.length > 0 ? pool.slice(0, 5) : sourceData.slice(0, 5);
-    } else {
-        // Practice Mode: The user wants EXACTLY 1 passage of EACH topic they deliberately checked!
-        if (selectedTopics.includes('comprehension') && groups.comprehension.length > 0) finalSections.push(groups.comprehension[0]);
-        if (selectedTopics.includes('spag') && groups.spag.length > 0) finalSections.push(groups.spag[0]);
-        if (selectedTopics.includes('vocabulary') && groups.vocab.length > 0) finalSections.push(groups.vocab[0]);
-        
-        if (finalSections.length === 0) finalSections = sourceData.slice(0, 1);
-    }
+    // Filter down to the user's requested topics. 
+    // They want exactly 1 passage per requested block.
+    if (selectedTopics.includes('comprehension') && groups.comprehension.length > 0) finalSections.push(groups.comprehension[0]);
+    if (selectedTopics.includes('spag') && groups.spag.length > 0) finalSections.push(groups.spag[0]);
+    if (selectedTopics.includes('vocabulary') && groups.vocab.length > 0) finalSections.push(groups.vocab[0]);
+    
+    // Safety fallback
+    if (finalSections.length === 0) finalSections = sourceData.slice(0, 1);
 
     const sorted = finalSections.map(sec => ({
       ...sec,
@@ -1256,19 +1255,15 @@ export function EnglishSplitViewDemo() {
                     }}
                     title={`Question ${idx + 1}`}
                     className={cn(
-                      "w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-black transition-all relative shrink-0",
+                      "transition-all duration-300 relative shrink-0 rounded-full cursor-pointer my-1.5",
                       isSelected 
-                        ? "bg-amber-500 text-amber-950 scale-110 shadow-md ring-4 ring-amber-500/10" 
+                        ? "w-3.5 h-3.5 bg-amber-500 shadow-sm ring-4 ring-amber-500/20" 
                         : isAnswered 
-                          ? "bg-amber-500/10 text-amber-600 border border-amber-500/30" 
-                          : "bg-muted/50 text-muted-foreground border border-transparent hover:border-border hover:bg-muted"
+                          ? "w-2.5 h-2.5 bg-amber-500/50 hover:bg-amber-500/80" 
+                          : "w-2.5 h-2.5 bg-border hover:bg-muted-foreground/40",
+                      isFlagged && "ring-2 ring-rose-500 ring-offset-2 ring-offset-background"
                     )}
-                  >
-                    {idx + 1}
-                    {isFlagged && (
-                      <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-rose-500 rounded-full border-2 border-background shadow-sm" />
-                    )}
-                  </button>
+                  />
                 );
               })}
             </div>
