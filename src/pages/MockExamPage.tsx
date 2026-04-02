@@ -132,6 +132,11 @@ const formatPaperType = (raw: string, isElevenPlus: boolean): string => {
   return papers[0] ?? 'Calculator';
 };
 
+const formatRemainderAnswer = (ans: string) => {
+  if (typeof ans !== 'string') return ans;
+  return ans.replace(/^(\d+)\s*R\s*(\d+)$/i, "$1 remainder $2");
+};
+
 const TOPIC_MAPPING: Record<string, string> = {
   number: 'Number',
   algebra: 'Algebra',
@@ -288,25 +293,7 @@ export default function MockExamPage() {
           navigate('/mocks');
           return;
         }
-        const { data: usageData, error: usageError } = await supabase.rpc('consume_mock_session', {
-          p_question_count: questionsCount
-        });
-        if (usageError) {
-          console.error('Error enforcing mock limits:', usageError);
-          toast.error('Failed to start mock exam. Please try again.');
-          setLoading(false);
-          navigate('/mocks');
-          return;
-        }
-        const usageResult = usageData as { allowed?: boolean; message?: string } | null;
-        if (!usageResult?.allowed) {
-          toast.error(usageResult?.message || 'Daily mock exam limit reached.');
-          setLoading(false);
-          navigate('/mocks');
-          return;
-        }
-        void refreshUsage();
-
+        
         const isAuthed = true;
         
         const rawTopicList = topics
@@ -745,10 +732,10 @@ export default function MockExamPage() {
             return {
               ...q,
               question: multipart ? (multipart.stem ?? "") : q.question,
-              correct_answer: sanitized.correct,
-              all_answers: shuffledAnswers,
+              correct_answer: formatRemainderAnswer(sanitized.correct),
+              all_answers: shuffledAnswers.map(formatRemainderAnswer),
               index: index + 1,
-              image_url: resolveQuestionImageUrl(q.image_url, q.question),
+              image_url: undefined, // Explicitly disabled diagrams for maths questions
               marks: computedMarks,
               multipart
             };

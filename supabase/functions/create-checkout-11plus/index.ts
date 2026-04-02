@@ -302,6 +302,7 @@ serve(async (req) => {
         },
       ],
       mode: "subscription",
+      automatic_tax: { enabled: true },
       payment_method_collection: "always",
       custom_text: {
         submit: {

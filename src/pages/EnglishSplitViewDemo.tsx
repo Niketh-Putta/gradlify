@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
-import { BookOpen, AlertTriangle, Lock, Search, Highlighter, MapPin, Sparkles, ChevronRight, Flag, Timer, Zap, Trophy, ShieldAlert, Check, Type, SpellCheck, TextCursorInput, ListChecks, Languages, CheckCircle } from 'lucide-react';
+import { ArrowLeft, BookOpen, AlertTriangle, Lock, Search, Highlighter, MapPin, Sparkles, ChevronRight, Flag, Timer, Zap, Trophy, ShieldAlert, Check, Type, SpellCheck, TextCursorInput, ListChecks, Languages, CheckCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
+import { usePremium } from '@/hooks/usePremium';
+import { PremiumPaywall } from '@/components/PremiumPaywall';
 // --- DATA ARCHITECTURE DEFINITION ---
 export interface EnglishOption {
   id: string;
@@ -445,7 +447,8 @@ const VOCAB_PRACTICE: EnglishSection = {
 export function EnglishSplitViewDemo() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [isPremium, setIsPremium] = useState<boolean>(true); // Assume true for now or read from hook later
+  const { isPremium, incrementMockUsage, refreshUsage, canStartMockExam } = usePremium('11plus');
+  const mockConsumedRef = useRef(false);
   
   const diffParam = searchParams.get('difficulty');
   
@@ -503,7 +506,7 @@ export function EnglishSplitViewDemo() {
   const selectedTopics = rawTopics.toLowerCase();
   
   const examMode = modeParam === 'mock-exam' ? 'mock' : 'practice';
-  
+
   const mockConfig: Record<string, boolean> = {
     comprehension: selectedTopics.includes('comprehension'),
     spelling: selectedTopics.includes('spag'),
@@ -519,6 +522,7 @@ export function EnglishSplitViewDemo() {
 
   const [isFinished, setIsFinished] = useState<boolean>(false);
   const [isReviewMode, setIsReviewMode] = useState<boolean>(false);
+  const [showPaywall, setShowPaywall] = useState<boolean>(false);
   const [reviewViewedOptions, setReviewViewedOptions] = useState<Record<string, string>>({});
 
   const [activeQuestionId, setActiveQuestionId] = useState<string | null>(null);
@@ -604,13 +608,6 @@ export function EnglishSplitViewDemo() {
         return aNum - bNum;
       })
     }));
-
-    if (examMode === 'practice' && !isPremium && sorted.length > 0) {
-      return sorted.map(sec => ({
-        ...sec,
-        questions: sec.questions.slice(0, 3) // Give them exactly 3 questions per section to hook them
-      }));
-    }
 
     return sorted;
   }, [examMode, selectedTopics, isPremium, dbSections]);
@@ -766,7 +763,7 @@ export function EnglishSplitViewDemo() {
     const isGlobal = targetEvidenceLine === 'global' || targetEvidenceLine?.toLowerCase().includes('overall');
     if (isGlobal) {
       if (targetSectionId && passageSectionRefs.current[targetSectionId]) {
-        passageSectionRefs.current[targetSectionId]?.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
+        passageSectionRefs.current[targetSectionId]?.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
       }
       return; 
     }
@@ -778,15 +775,16 @@ export function EnglishSplitViewDemo() {
       const targetElement = passageLineRefs.current[uniqueRefKey];
       
       if (targetElement) {
-        // Scroll natively and simultaneously smoothly into the exact center of the screen bounds
+        // Re-enabled scrollIntoView natively. We use CSS scroll-margin-top on the block
+        // so it won't hide the section title or get stuck under the sticky header.
         targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
         return;
       }
     }
     
+    // Fallback scroll if exact paragraph missing
     if (targetSectionId && passageSectionRefs.current[targetSectionId]) {
-      // Fallback for missing exact evidence block -> align to top of entire passage chunk
-      passageSectionRefs.current[targetSectionId]?.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
+      passageSectionRefs.current[targetSectionId]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
   }, [activeQuestionId, activeSections]);
 
@@ -810,7 +808,9 @@ export function EnglishSplitViewDemo() {
 
     activeSections.forEach(sec => {
       const isComp = sec.sectionId === 'comprehension' || sec.sectionId === 'vocab';
-      sec.questions.forEach(q => {
+      const visibleQuestions = !isPremium ? sec.questions.slice(0, 3) : sec.questions;
+      
+      visibleQuestions.forEach(q => {
         if (isComp) compTotal++;
         else spagTotal++;
         
@@ -902,21 +902,36 @@ export function EnglishSplitViewDemo() {
               </div>
             </div>
           ) : (
-            <div className="space-y-6 mt-8">
-              <div className="p-6 rounded-2xl bg-muted/40 border border-border/60">
-                <p className="text-lg font-medium mb-2">You scored {results?.overallPerc || 0}% ({results?.overallCorrect || 0} out of {results?.overallTotal || 0} correct).</p>
-                <p className="text-sm text-muted-foreground mb-6">
-                  You are missing <strong className="text-foreground">over 80+ Elite questions</strong> encompassing isolated SPaG passages, Cloze structures, and rigorous full-length exams.
-                </p>
+            <div className="space-y-4 mt-8 w-full max-w-lg mx-auto">
+              <div className="p-8 rounded-[2rem] bg-gradient-to-b from-card to-muted/20 border border-border/80 shadow-xl shadow-black/5 text-center relative overflow-hidden group">
+                <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-amber-400 to-amber-600 opacity-60" />
+                <div className="absolute inset-0 bg-gradient-to-tr from-amber-500/5 to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
                 
-                <Button className="w-full bg-amber-500 hover:bg-amber-600 text-amber-950 font-bold shadow-lg shadow-amber-500/20 py-6 rounded-xl text-lg">
-                  <Lock className="w-5 h-5 mr-2" />
+                <h3 className="text-2xl font-black tracking-tight mb-1 text-foreground">You scored <span className="text-amber-600 dark:text-amber-500">{results?.overallPerc || 0}%</span></h3>
+                <p className="text-sm font-semibold text-muted-foreground uppercase tracking-widest mb-6">({results?.overallCorrect || 0} out of {results?.overallTotal || 0} correct)</p>
+                
+                <div className="bg-amber-50/50 dark:bg-amber-500/5 border border-amber-500/20 rounded-2xl p-5 mb-8 text-sm text-amber-900 dark:text-amber-100/90 leading-relaxed relative isolate">
+                  <div className="absolute -inset-px ring-1 ring-amber-500/10 rounded-2xl -z-10" />
+                  You are missing <strong className="font-bold text-amber-600 dark:text-amber-400">over 1300+ English questions</strong> encompassing isolated SPaG passages, Cloze structures, and rigorous full-length exams.
+                </div>
+                
+                <Button onClick={() => setShowPaywall(true)} className="w-full bg-gradient-to-b from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-amber-950 font-bold shadow-xl shadow-amber-500/25 py-6 rounded-xl text-lg transition-all duration-300 hover:scale-[1.02] border border-amber-400/50">
+                  <Lock className="w-5 h-5 mr-3" />
                   Unlock Full Access
                 </Button>
               </div>
-              <Button onClick={() => setIsFinished(false)} variant="ghost" className="w-full text-muted-foreground">
-                Return to Demo
-              </Button>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                <Button onClick={() => { setIsFinished(false); setIsReviewMode(true); }} variant="outline" className="w-full h-14 rounded-[1rem] font-bold text-foreground bg-card border-border/80 shadow-sm hover:bg-accent transition-all">
+                  Review Answers
+                </Button>
+                <Link to="/mocks/english" className="block w-full">
+                  <Button variant="ghost" className="w-full h-14 rounded-[1rem] text-muted-foreground hover:text-foreground font-semibold hover:bg-muted/80 transition-all group/back">
+                    <ArrowLeft className="w-4 h-4 mr-2 transition-transform group-hover/back:-translate-x-1" />
+                    Return to Dashboard
+                  </Button>
+                </Link>
+              </div>
             </div>
           )}
         </div>
@@ -935,11 +950,20 @@ export function EnglishSplitViewDemo() {
         <div className="w-full lg:w-[45%] lg:border-r border-b lg:border-b-0 border-border/80 flex flex-col bg-card/50 relative overflow-hidden transition-all duration-300 h-[45vh] lg:h-auto shrink-0 z-10">
           
           <div className="px-5 lg:px-6 py-3 lg:py-4 border-b border-border flex items-center justify-between bg-card shrink-0 z-10 sticky top-0 shadow-sm">
-            <div className="flex items-center gap-2">
-              <BookOpen className="w-4 h-4 text-amber-500" />
-              <span className="font-serif font-bold tracking-tight text-foreground line-clamp-1">
-                {examMode === 'mock' ? 'Full Mock Examination Paper' : `Practice Source: ${activeSections[0]?.leftTitle}`}
-              </span>
+            <div className="flex items-center gap-4">
+              <button 
+                onClick={() => navigate(examMode === 'mock' ? '/mocks/english' : '/practice/english')}
+                className="p-2 -ml-2 hover:bg-muted rounded-full transition-colors text-muted-foreground hover:text-foreground group"
+                title="Back to Selection"
+              >
+                <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-0.5" />
+              </button>
+              <div className="flex items-center gap-2">
+                <BookOpen className="w-4 h-4 text-amber-500" />
+                <span className="font-serif font-bold tracking-tight text-foreground line-clamp-1">
+                  {examMode === 'mock' ? 'Full Mock Examination Paper' : `Practice Source: ${activeSections[0]?.leftTitle}`}
+                </span>
+              </div>
             </div>
             
             {/* Highlight Toggle Button */}
@@ -961,13 +985,19 @@ export function EnglishSplitViewDemo() {
             ref={passageContainerRef} 
             onMouseUp={isHighlightMode ? handleHighlight : undefined}
             onTouchEnd={isHighlightMode ? handleHighlight : undefined}
-            className="flex-1 overflow-y-auto p-8 sm:px-10 sm:py-12 text-base sm:text-[17px] leading-loose text-foreground/90 font-serif relative pb-48"
+            className="flex-1 overflow-y-auto p-5 sm:p-8 md:px-10 md:py-12 text-sm sm:text-base md:text-[17px] leading-loose text-foreground/90 font-serif relative pb-48"
           >
             <div className="absolute top-6 left-6 sm:left-8 text-[11px] font-black tracking-[0.2em] uppercase text-muted-foreground/30 select-none">Passage</div>
 
             <div className="space-y-16 relative mt-8">
-              {activeSections.map((section, secIdx) => {
-                const sType = (section.sectionId + " " + (section.subEngine || "")).toLowerCase();
+              {(() => {
+                const seenTitles = new Set<string>();
+                return activeSections.map((section, secIdx) => {
+                  const isDuplicatePassage = seenTitles.has(section.leftTitle);
+                  seenTitles.add(section.leftTitle);
+                  if (isDuplicatePassage) return null;
+
+                  const sType = (section.sectionId + " " + (section.subEngine || "")).toLowerCase();
                 let topicLabel = 'Comprehension';
                 if (sType.includes('vocab')) topicLabel = 'Vocabulary';
                 else if (sType.includes('spag') || sType.includes('spell') || sType.includes('punct') || sType.includes('gramm')) topicLabel = 'SPaG';
@@ -976,96 +1006,142 @@ export function EnglishSplitViewDemo() {
                 const displayTitle = topicLabel === 'Comprehension' ? section.leftTitle : `${topicLabel} ${typeNoun}`;
                 const cleanDisplayTitle = topicLabel === 'Comprehension' ? `${topicLabel} ${typeNoun} - ${displayTitle}` : displayTitle;
 
+                const PAYWALL_THRESHOLD = 3;
+                let lastAllowedEvidenceIndex = -1;
+                let isEntireSectionPaywalled = false;
+                
+                if (!isPremium) {
+                  const allowedEvidenceLines = section.questions
+                    .slice(0, PAYWALL_THRESHOLD)
+                    .map(q => q.evidenceLine);
+                  
+                  // If there are free questions, explicitly ensure at least the very first block is readable
+                  if (allowedEvidenceLines.length > 0) {
+                    lastAllowedEvidenceIndex = 0;
+                  }
+
+                  section.passageBlocks.forEach((pb, idx) => {
+                    if (allowedEvidenceLines.includes(pb.id)) {
+                      lastAllowedEvidenceIndex = Math.max(lastAllowedEvidenceIndex, idx);
+                    }
+                  });
+                }
+
                 return (
                  <div 
                   key={section.sectionId} 
                   ref={(el) => { passageSectionRefs.current[section.sectionId] = el; }}
                   className="scroll-m-8 border-b border-border/40 pb-12 last:border-0"
                  >
-                  {examMode === 'mock' && (
-                    <div className="mb-6 font-sans font-bold text-lg text-foreground/80 tracking-tight flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-amber-500/10 text-amber-600 flex items-center justify-center text-sm border border-amber-500/20 shrink-0">
-                          {secIdx + 1}
-                        </div>
-                        {cleanDisplayTitle}
+                  <div className="mb-6 font-sans font-bold text-lg text-foreground/80 tracking-tight flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-amber-500/10 text-amber-600 flex items-center justify-center text-sm border border-amber-500/20 shrink-0">
+                        {secIdx + 1}
                       </div>
-                      </div>
-                  )}
+                      {cleanDisplayTitle}
+                    </div>
+                  </div>
 
                   <div className="space-y-6">
-                    {section.passageBlocks.map((p, i) => {
-                      let isTargetEvidence = false;
-                      const activeQInfo = section.questions.find(q => `${section.sectionId}_${q.id}` === activeQuestionId);
-                      if (activeQInfo) {
-                        const isGlobal = activeQInfo.evidenceLine === 'global' || activeQInfo.evidenceLine === 'Overall' || activeQInfo.evidenceLine?.toLowerCase().includes('overall');
-                        if (activeQInfo.evidenceLine === p.id || isGlobal) {
-                          isTargetEvidence = true;
-                        }
-                      }
-
-                      // Scaffold highlighting indicates the exact paragraph being questioned.
-                      const showScaffold = isTargetEvidence;
+                    {(() => {
+                      const getIsPaywalledBlock = (i: number) => {
+                        if (isPremium) return false;
+                        if (isEntireSectionPaywalled) return true;
+                        return lastAllowedEvidenceIndex !== -1 && i > lastAllowedEvidenceIndex;
+                      };
                       
-                      const uniqueRefKey = `${section.sectionId}_${p.id}`;
+                      const renderPassageBlock = (p: EnglishPassageBlock, originalIndex: number, isPaywalledBlock: boolean) => {
+                        let isTargetEvidence = false;
+                        const activeQIndex = section.questions.findIndex(q => `${section.sectionId}_${q.id}` === activeQuestionId);
+                        const activeQInfo = activeQIndex !== -1 ? section.questions[activeQIndex] : undefined;
+                        
+                        if (activeQInfo) {
+                          const isQuestionPaywalled = !isPremium && activeQIndex >= PAYWALL_THRESHOLD;
+                          if (!isQuestionPaywalled) {
+                            const isGlobal = activeQInfo.evidenceLine === 'global' || activeQInfo.evidenceLine === 'Overall' || activeQInfo.evidenceLine?.toLowerCase().includes('overall');
+                            if (activeQInfo.evidenceLine === p.id || isGlobal) {
+                              isTargetEvidence = true;
+                            }
+                          }
+                        }
 
-                      return (
-                        <div key={p.id} className="relative group" ref={(el) => { passageLineRefs.current[uniqueRefKey] = el; }}>
-                          {p.text.match(/^\d+/) && (
-                            <div className="absolute -left-10 top-1.5 text-xs text-amber-500/80 font-black select-none pointer-events-none w-8 text-right opacity-0 group-hover:opacity-100 transition-opacity">
-                              ♦
-                            </div>
-                          )}
-                          <p 
-                            className={cn(
-                              "transition-all duration-200 ease-out p-4 -mx-4 rounded-xl cursor-text relative border-l-[3px]",
-                              showScaffold 
-                                ? "bg-amber-50/90 dark:bg-amber-500/10 border-amber-500 shadow-md ring-1 ring-amber-500/30 text-foreground z-10 scale-[1.02]" 
-                                : "border-transparent opacity-70 group-hover:opacity-100 hover:bg-black/5 dark:hover:bg-white/5"
-                            )}
-                          >
-                            {showScaffold && (
-                              <div className="absolute -left-1.5 flex items-center justify-center h-full top-0">
-                                <div className="h-2/3 w-[5px] bg-amber-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(245,158,11,0.5)]" />
+                        const showScaffold = isTargetEvidence && !isPaywalledBlock;
+                        const uniqueRefKey = `${section.sectionId}_${p.id}`;
+
+                        return (
+                          <div key={p.id} className="relative group scroll-m-[160px]" ref={(el) => { passageLineRefs.current[uniqueRefKey] = el; }}>
+                            {p.text.match(/^\d+/) && (
+                              <div className="absolute -left-10 top-1.5 text-xs text-amber-500/80 font-black select-none pointer-events-none w-8 text-right opacity-0 group-hover:opacity-100 transition-opacity">
+                                ♦
                               </div>
                             )}
-                            {renderHighlightedText(p.text)}
-                          </p>
-                        </div>
+                            <p 
+                              className={cn(
+                                "transition-all duration-200 ease-out p-4 -mx-4 rounded-xl relative border-l-[3px]",
+                                showScaffold 
+                                  ? "bg-amber-50/90 dark:bg-amber-500/10 border-amber-500 shadow-md ring-1 ring-amber-500/30 text-foreground z-10 scale-[1.02]" 
+                                  : "border-transparent opacity-75 group-hover:opacity-100 hover:bg-black/5 dark:hover:bg-white/5",
+                                isPaywalledBlock && "blur-[3px] opacity-40 select-none pointer-events-none scale-[0.98]"
+                              )}
+                            >
+                              {showScaffold && (
+                                <div className="absolute -left-1.5 flex items-center justify-center h-full top-0">
+                                  <div className="h-2/3 w-[5px] bg-amber-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(245,158,11,0.5)]" />
+                                </div>
+                              )}
+                              {renderHighlightedText(p.text)}
+                            </p>
+                          </div>
+                        );
+                      };
+
+                      const freeBlocks = section.passageBlocks.filter((_, i) => !getIsPaywalledBlock(i));
+                      const paywalledBlocks = section.passageBlocks.filter((_, i) => getIsPaywalledBlock(i));
+
+                      return (
+                        <>
+                          {freeBlocks.map(p => renderPassageBlock(p, section.passageBlocks.indexOf(p), false))}
+                          
+                          {paywalledBlocks.length > 0 && (
+                            <div className="relative space-y-6 mt-6">
+                              <div className="absolute inset-x-0 inset-y-0 z-30 pointer-events-none" style={{ paddingTop: '2rem' }}>
+                                <div className="sticky top-[30%] pointer-events-auto mx-auto w-[calc(100%-2rem)] max-w-[320px] bg-card/95 backdrop-blur-xl border border-border/80 shadow-2xl rounded-3xl p-6 md:p-8 ring-1 ring-amber-500/20 text-center transition-all hover:scale-[1.02]">
+                                  <div className="w-12 h-12 md:w-14 md:h-14 bg-amber-500/10 text-amber-600 rounded-2xl flex items-center justify-center mx-auto mb-5 md:mb-6 border border-amber-500/20 shadow-inner">
+                                    <Lock className="w-5 h-5 md:w-6 md:h-6" />
+                                  </div>
+                                  <h3 className="text-base md:text-lg font-bold tracking-tight mb-2 text-foreground">Free plan limit reached</h3>
+                                  <p className="text-xs font-medium text-muted-foreground mb-6 md:mb-8 leading-relaxed">
+                                    To see the full passage and to access all questions, upgrade to Premium.
+                                  </p>
+                                  <Button onClick={() => setShowPaywall(true)} className="w-full h-12 md:h-12 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl shadow-lg shadow-amber-600/20 transition-all">
+                                    <Sparkles className="w-4 h-4 mr-2" />
+                                    Unlock Full Version
+                                  </Button>
+                                </div>
+                              </div>
+                              {paywalledBlocks.map(p => renderPassageBlock(p, section.passageBlocks.indexOf(p), true))}
+                            </div>
+                          )}
+                        </>
                       );
-                    })}
+                    })()}
                   </div>
                 </div>
               );
-            })}
+            });
+          })()}
             </div>
-
-            {/* FOMO Gradient Overlay for Free Tier */}
-            {!isPremium && (
-              <div className="absolute bottom-0 left-0 right-0 h-64 bg-gradient-to-t from-background via-background/95 to-transparent flex flex-col items-center justify-end pb-8 px-6 text-center select-none pointer-events-none z-20">
-                <div className="pointer-events-auto bg-card border border-border/80 shadow-xl rounded-2xl p-6 max-w-sm ring-1 ring-amber-500/20 transform transition-all hover:-translate-y-1">
-                  <div className="w-12 h-12 bg-amber-500/10 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-4 border border-amber-500/20">
-                    <Lock className="w-5 h-5" />
-                  </div>
-                  <h3 className="text-sm font-bold tracking-tight mb-2">Paywall Active</h3>
-                  <p className="text-xs text-muted-foreground mb-4 px-2 leading-relaxed">
-                    {examMode === 'mock' 
-                      ? 'You have reached the end of the free Mock trial. Upgrade for access to full timed mock papers.' 
-                      : `You have hit the limit for this ${practiceFocus.toUpperCase()} practice session.`}
-                  </p>
-                  <Button onClick={() => setIsPremium(true)} className="w-full bg-amber-500 hover:bg-amber-600 text-amber-950 font-semibold shadow-md">
-                    <Sparkles className="w-4 h-4 mr-2" />
-                    Unlock Full Version
-                  </Button>
-                </div>
-              </div>
-            )}
             
           </div>
         </div>
 
+        {/* Mobile Split Divider */}
+        <div className="h-4 lg:hidden w-full bg-muted/40 shrink-0 border-y border-border shadow-inner relative flex justify-center items-center z-20">
+          <div className="w-12 h-1 bg-border rounded-full" />
+        </div>
+
         {/* ---------------- RIGHT PANE: QUESTIONS ---------------- */}
-        <div className="flex-1 overflow-y-auto bg-background/50 flex flex-col relative snap-y snap-proximity" ref={rightPaneRef}>
+        <div className="flex-1 overflow-y-auto bg-background lg:bg-background/50 flex flex-col relative snap-y snap-proximity shadow-[0_-10px_30px_rgba(0,0,0,0.05)] lg:shadow-none" ref={rightPaneRef}>
           
           {examMode === 'mock' && (
             <div className="sticky top-0 z-20 bg-card/80 backdrop-blur-md border-b border-border/60 px-6 py-3 flex items-center justify-between shadow-sm">
@@ -1093,8 +1169,8 @@ export function EnglishSplitViewDemo() {
             </div>
           )}
 
-          <div className="max-w-xl mx-auto w-full p-8 pb-48">
-            <div className="mb-10 flex items-start justify-between gap-4 snap-start scroll-m-24">
+          <div className="max-w-xl mx-auto w-full p-4 sm:p-6 md:p-8 pb-48">
+            <div className="mb-8 md:mb-10 flex items-start justify-between gap-4 snap-start scroll-m-24">
               <div>
                 <h1 className="text-2xl font-bold tracking-tight mb-2">
                   {examMode === 'mock' ? 'Mock Exam' : (activeSections.length > 1 ? 'MIXED TOPIC DRILLS' : `${practiceFocus.toUpperCase()} DRILLS`)}
@@ -1110,252 +1186,254 @@ export function EnglishSplitViewDemo() {
               <div className="text-center p-12 border border-border border-dashed rounded-3xl text-muted-foreground font-medium">
                 No sections selected or configured.
               </div>
-            )}
+            )}            {activeSections.map((section, secIndex) => {
+              const PAYWALL_THRESHOLD = 3;
+                const sType = (section.sectionId + " " + (section.subEngine || "")).toLowerCase();
+                let parentTopic = 'Comprehension';
+                let subTopic = '';
 
-            {activeSections.map((section, secIndex) => {
-              const Icon = section.icon || BookOpen;
-              
-              const sType = (section.sectionId + " " + (section.subEngine || "")).toLowerCase();
-              let parentTopic = 'Comprehension';
-              let subTopic = '';
+                if (sType.includes('vocab')) {
+                   parentTopic = 'Vocabulary';
+                } else if (sType.includes('spag') || sType.includes('spell') || sType.includes('punct') || sType.includes('gramm')) {
+                   parentTopic = 'SPaG';
+                   if (sType.includes('spell')) subTopic = 'Spelling';
+                   else if (sType.includes('punct')) subTopic = 'Punctuation';
+                   else if (sType.includes('gramm')) subTopic = 'Grammar';
+                } else {
+                   if (sType.includes('non-fiction') || sType.includes('nonfiction')) subTopic = 'Non-Fiction';
+                   else if (sType.includes('fiction')) subTopic = 'Fiction';
+                   else if (sType.includes('poetry') || sType.includes('poem')) subTopic = 'Poetry';
+                }
+                
+                const typeNoun = parentTopic === 'Comprehension' ? 'Passage' : 'Questions';
+                const badgeLabel = subTopic ? `${parentTopic} ${typeNoun} (${subTopic})` : `${parentTopic} ${typeNoun}`;
+                const displayTitle = parentTopic === 'Comprehension' 
+                  ? section.leftTitle 
+                  : (subTopic ? `${subTopic} ${typeNoun}` : `${parentTopic} ${typeNoun}`);
 
-              if (sType.includes('vocab')) {
-                 parentTopic = 'Vocabulary';
-              } else if (sType.includes('spag') || sType.includes('spell') || sType.includes('punct') || sType.includes('gramm')) {
-                 parentTopic = 'SPaG';
-                 if (sType.includes('spell')) subTopic = 'Spelling';
-                 else if (sType.includes('punct')) subTopic = 'Punctuation';
-                 else if (sType.includes('gramm')) subTopic = 'Grammar';
-              } else {
-                 if (sType.includes('non-fiction') || sType.includes('nonfiction')) subTopic = 'Non-Fiction';
-                 else if (sType.includes('fiction')) subTopic = 'Fiction';
-                 else if (sType.includes('poetry') || sType.includes('poem')) subTopic = 'Poetry';
-              }
-              
-              const typeNoun = parentTopic === 'Comprehension' ? 'Passage' : 'Questions';
-              const badgeLabel = subTopic ? `${parentTopic} ${typeNoun} (${subTopic})` : `${parentTopic} ${typeNoun}`;
-              
-              const displayTitle = parentTopic === 'Comprehension' 
-                ? section.leftTitle 
-                : (subTopic ? `${subTopic} ${typeNoun}` : `${parentTopic} ${typeNoun}`);
+                return (
+                  <div key={section.sectionId} className={cn("mb-16", secIndex === 0 && examMode === 'practice' ? "mt-4" : "")}>
+                    <div className={cn("relative flex flex-col md:flex-row justify-between items-start md:items-end gap-6 w-full border-b border-border/60 pb-5 mb-10", secIndex === 0 ? "mt-4" : "mt-14")}>
+                      <div className="flex flex-col gap-1.5 items-start">
+                        <span className="px-2 py-0.5 rounded text-[9px] font-black tracking-[0.15em] uppercase bg-foreground/10 text-foreground/60">{badgeLabel}</span>
+                        <span className="text-xl font-bold tracking-tight text-foreground/90">{displayTitle}</span>
+                      </div>
 
-              const cleanDisplayTitle = parentTopic === 'Comprehension' ? `${badgeLabel} - ${displayTitle}` : displayTitle;
-
-              return (
-                <div key={section.sectionId} className={cn("mb-16", secIndex === 0 && examMode === 'practice' ? "mt-4" : "")}>
-                  {/* Always Show Tier and specific passage title with premium spacing */}
-                  <div className={cn("relative flex flex-col md:flex-row justify-between items-start md:items-end gap-6 w-full border-b border-border/60 pb-5 mb-10", secIndex === 0 ? "mt-4" : "mt-14")}>
-                    <div className="flex flex-col gap-1.5 items-start">
-                      <span className="px-2 py-0.5 rounded text-[9px] font-black tracking-[0.15em] uppercase bg-foreground/10 text-foreground/60">{badgeLabel}</span>
-                      <span className="text-xl font-bold tracking-tight text-foreground/90">{displayTitle}</span>
-                    </div>
-
-                    {section.tier && (
-                      <span className="mb-1 relative bg-amber-500/10 border border-amber-500/20 px-3 py-1 rounded-full shadow-sm flex items-center gap-1.5 cursor-default shrink-0 transition-transform hover:scale-105">
-                        <Sparkles className="w-3 h-3 text-amber-500" />
-                        <span className="text-[10px] font-black tracking-widest text-amber-600 uppercase pt-0.5">
-                          {section.difficulty ? `LEVEL ${section.difficulty}` : (section.tier.match(/(Level\s*\d+)/i)?.[1] || section.tier.split(/[\(\:\-]/)[0].trim())}
+                      {section.tier && (
+                        <span className="mb-1 relative bg-amber-500/10 border border-amber-500/20 px-3 py-1 rounded-full shadow-sm flex items-center gap-1.5 cursor-default shrink-0 transition-transform hover:scale-105">
+                          <Sparkles className="w-3 h-3 text-amber-500" />
+                          <span className="text-[10px] font-black tracking-widest text-amber-600 uppercase pt-0.5">
+                            {section.difficulty ? `LEVEL ${section.difficulty}` : (section.tier.match(/(Level\s*\d+)/i)?.[1] || section.tier.split(/[\(\:\-]/)[0].trim())}
+                          </span>
                         </span>
-                      </span>
-                    )}
-                  </div>
+                      )}
+                    </div>
+                    <div className="space-y-12">
+                      {(() => {
+                        const PAYWALL_THRESHOLD = 3;
+                        const getIsPaywalledQuestion = (qIndex: number) => {
+                          if (isPremium) return false;
+                          return qIndex >= PAYWALL_THRESHOLD;
+                        };
 
-                  <div className="space-y-12">
-                    {section.questions.map((q, qIndex) => {
-                      const qKey = `${section.sectionId}_${q.id}`;
-                      const isSelected = activeQuestionId === qKey;
-                      const isFlagged = flaggedQuestions[qKey];
-                      
-                      return (
-                        <div 
-                          key={qKey}
-                          data-qid={qKey}
-                          ref={(el) => { questionRefs.current[qKey] = el; }}
-                          className={cn(
-                            "p-6 rounded-2xl border transition-all duration-150 ease-out cursor-default scroll-m-24 relative snap-center",
-                            isSelected 
-                              ? (examMode === 'mock' ? "border-amber-500/30 dark:border-amber-500/40 bg-card shadow-lg ring-1 ring-amber-500/10 scale-[1.02]" : "border-amber-500/50 bg-card shadow-xl ring-4 ring-amber-500/10 scale-[1.02]")
-                              : "border-border/60 dark:border-amber-500/20 bg-card/40 hover:bg-card/80 hover:border-amber-500/30 opacity-60 hover:opacity-100"
-                          )}
-                        >
-                          {examMode === 'mock' && (
-                            <button 
-                              onClick={(e) => toggleFlag(qKey, e)}
-                              className={cn("absolute -top-3 -right-3 p-2 rounded-full border shadow-sm bg-card transition-colors z-10 hover:bg-muted", isFlagged ? "text-rose-500 border-rose-500/50" : "text-muted-foreground border-border")}
+                        const renderQuestion = (q: EnglishQuestion, originalIndex: number, isPaywalledQuestion: boolean) => {
+                          const qKey = `${section.sectionId}_${q.id}`;
+                          const isSelected = activeQuestionId === qKey;
+                          const isFlagged = flaggedQuestions[qKey];
+                          
+                          return (
+                            <div 
+                              key={qKey}
+                              data-qid={qKey}
+                              ref={(el) => { questionRefs.current[qKey] = el; }}
+                              onClick={() => { if (isPaywalledQuestion) setShowPaywall(true); }}
+                              className={cn(
+                                "p-4 sm:p-6 rounded-2xl border transition-all duration-150 ease-out cursor-default scroll-m-24 relative snap-center",
+                                isSelected 
+                                  ? (examMode === 'mock' ? "border-amber-500/30 dark:border-amber-500/40 bg-card shadow-lg ring-1 ring-amber-500/10 scale-[1.02]" : "border-amber-500/50 bg-card shadow-xl ring-4 ring-amber-500/10 scale-[1.02]")
+                                  : "border-border/60 dark:border-amber-500/20 bg-card/40 hover:bg-card/80 hover:border-amber-500/30 opacity-60 hover:opacity-100",
+                                isPaywalledQuestion && "blur-[2px] opacity-40 select-none pointer-events-none scale-[0.98]"
+                              )}
                             >
-                              <Flag className={cn("w-4 h-4", isFlagged && "fill-rose-500 text-rose-500")} />
-                            </button>
-                          )}
+                            {examMode === 'mock' && (
+                              <button 
+                                onClick={(e) => toggleFlag(qKey, e)}
+                                className={cn("absolute -top-3 -right-3 p-2 rounded-full border shadow-sm bg-card transition-colors z-10 hover:bg-muted", isFlagged ? "text-rose-500 border-rose-500/50" : "text-muted-foreground border-border")}
+                              >
+                                <Flag className={cn("w-4 h-4", isFlagged && "fill-rose-500 text-rose-500")} />
+                              </button>
+                            )}
 
-                          <div className="flex items-center justify-between mb-4">
-                            <span className="text-xs font-black tracking-widest uppercase text-muted-foreground flex items-center gap-2">
-                              {examMode === 'mock' ? `Q${qIndex + 1}` : `Question ${qIndex + 1}`}
-                            </span>
-                            <div className={cn(
-                              "px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide border", 
-                              q.tagColor || "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20"
-                            )}>
-                              {q.tag}
+                            <div className="flex items-center justify-between mb-4">
+                              <span className="text-xs font-black tracking-widest uppercase text-muted-foreground flex items-center gap-2">
+                                {examMode === 'mock' ? `Q${originalIndex + 1}` : `Question ${originalIndex + 1}`}
+                              </span>
+                              <div className={cn(
+                                "px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide border", 
+                                q.tagColor || "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20"
+                              )}>
+                                {q.tag}
+                              </div>
+                            </div>
+                            
+                            <h3 className="text-sm sm:text-[15px] font-semibold leading-relaxed mb-4 sm:mb-6">
+                              {q.text}
+                            </h3>
+
+                            <div className="space-y-3">
+                              {q.options.map((opt) => {
+                                const selected = selectedAnswers[qKey] === opt.id;
+                                const isViewedInReview = isReviewMode && reviewViewedOptions[qKey] === opt.id;
+                                
+                                const showDistractor = (examMode === 'practice' && showTrap === qKey && selected && !opt.correct) || 
+                                                       (isReviewMode && selected && !opt.correct) ||
+                                                       (isViewedInReview && !opt.correct);
+                                                       
+                                const evaluateCorrectness = (examMode === 'practice' && selected) || (isReviewMode && opt.correct) || (isReviewMode && selected);
+
+                                return (
+                                  <div key={opt.id}>
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        if (isReviewMode) {
+                                          setReviewViewedOptions(prev => ({ ...prev, [qKey]: opt.id }));
+                                          return;
+                                        }
+                                        handleSelectAnswer(qKey, opt.id);
+                                      }}
+                                      className={cn(
+                                        "w-full text-left p-3 sm:p-4 rounded-xl border transition-all duration-200 flex items-center gap-3 sm:gap-4 group",
+                                        selected 
+                                          ? ((examMode === 'mock' && !isReviewMode)
+                                              ? "border-amber-500 bg-amber-500/5 text-amber-900 dark:text-amber-100 ring-2 ring-amber-500/20" 
+                                              : (opt.correct 
+                                                ? "border-emerald-500 bg-emerald-500/5 text-emerald-700 dark:text-emerald-300 ring-2 ring-emerald-500/20" 
+                                                : "border-rose-500 bg-rose-500/5 text-rose-700 dark:text-rose-300 ring-2 ring-rose-500/20"))
+                                          : (isReviewMode && opt.correct
+                                              ? "border-emerald-500/50 bg-emerald-500/5 text-emerald-700 dark:text-emerald-300 ring-1 ring-emerald-500/20"
+                                              : "border-border/60 bg-background hover:border-foreground/30 hover:bg-muted/50")
+                                      )}
+                                    >
+                                      <span className={cn(
+                                        "w-7 h-7 sm:w-8 sm:h-8 shrink-0 rounded-lg flex items-center justify-center text-xs font-bold transition-colors shadow-sm",
+                                        selected
+                                          ? ((examMode === 'mock' && !isReviewMode) ? "bg-amber-500 text-white shadow-md shadow-amber-500/30" : (opt.correct ? "bg-emerald-500 text-white shadow-md shadow-emerald-500/20" : "bg-rose-500 text-white shadow-md shadow-rose-500/20"))
+                                          : (isReviewMode && opt.correct
+                                              ? "bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border-emerald-500/30"
+                                              : "bg-card border border-border/80 text-muted-foreground group-hover:text-foreground")
+                                      )}>
+                                        {opt.id}
+                                      </span>
+                                      <span className="flex-1 text-sm sm:text-[15px] font-medium leading-normal">
+                                        {opt.text}
+                                      </span>
+                                      {selected && examMode === 'mock' && <Check className="w-4 h-4 sm:w-5 sm:h-5 shrink-0 text-amber-500 font-bold" />}
+                                    </button>
+
+                                    {showDistractor && opt.correct === false && (
+                                      <div className="mt-3 ml-12 p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 animate-in slide-in-from-top-2 fade-in">
+                                        <div className="flex items-start gap-3">
+                                          <div className="mt-0.5 p-1 rounded-full bg-rose-500/20 text-rose-600">
+                                            <AlertTriangle className="w-3.5 h-3.5" />
+                                          </div>
+                                          <div>
+                                            <div className="text-xs font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wide mb-1 flex items-center gap-2">
+                                              Evidence Check
+                                              <ChevronRight className="w-3 h-3 text-rose-500/50" />
+                                              Tutor Note
+                                            </div>
+                                            <p className="text-sm font-medium text-foreground/80 leading-relaxed">
+                                              {opt.trap || q.explanation || "Review the passage carefully to see why this option is unsupported."}
+                                            </p>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    )}
+
+                                    {evaluateCorrectness && opt.correct === true && (
+                                      <div className="mt-3 ml-12 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 animate-in slide-in-from-top-2 fade-in flex items-center gap-2">
+                                        <Zap className="w-4 h-4 text-emerald-600" />
+                                        <div className="flex-1">
+                                          <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-400">
+                                            {selected 
+                                              ? (q.explanation || opt.trap || "Excellent! You isolated the correct rule.") 
+                                              : (q.explanation || "This is the correct answer.")
+                                            }
+                                          </p>
+                                          {isReviewMode && !selected && opt.trap && (
+                                             <p className="text-xs text-emerald-700/80 dark:text-emerald-400/80 mt-1">
+                                               Note: {opt.trap}
+                                             </p>
+                                          )}
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                );
+                              })}
                             </div>
                           </div>
-                          
-                          <h3 className="text-[15px] font-semibold leading-relaxed mb-6">
-                            {q.text}
-                          </h3>
+                          );
+                        };
 
-                          <div className="space-y-3">
-                            {q.options.map((opt) => {
-                              const selected = selectedAnswers[qKey] === opt.id;
-                              const isViewedInReview = isReviewMode && reviewViewedOptions[qKey] === opt.id;
-                              
-                              // Logic for showing distractors / evaluations
-                              const showDistractor = (examMode === 'practice' && showTrap === qKey && selected && !opt.correct) || 
-                                                     (isReviewMode && selected && !opt.correct) ||
-                                                     (isViewedInReview && !opt.correct);
-                                                     
-                              const evaluateCorrectness = (examMode === 'practice' && selected) || (isReviewMode && opt.correct) || (isReviewMode && selected);
+                        const freeQuestions = section.questions.filter((_, i) => !getIsPaywalledQuestion(i));
+                        const paywalledQuestions = section.questions.filter((_, i) => getIsPaywalledQuestion(i));
 
-                              return (
-                                <div key={opt.id}>
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      if (isReviewMode) {
-                                        setReviewViewedOptions(prev => ({ ...prev, [qKey]: opt.id }));
-                                        return;
-                                      }
-                                      handleSelectAnswer(qKey, opt.id);
-                                    }}
-                                    className={cn(
-                                      "w-full text-left p-4 rounded-xl border transition-all duration-200 flex items-center gap-4 group",
-                                      selected 
-                                        ? ((examMode === 'mock' && !isReviewMode)
-                                            ? "border-amber-500 bg-amber-500/5 text-amber-900 dark:text-amber-100 ring-2 ring-amber-500/20" 
-                                            : (opt.correct 
-                                              ? "border-emerald-500 bg-emerald-500/5 text-emerald-700 dark:text-emerald-300 ring-2 ring-emerald-500/20" 
-                                              : "border-rose-500 bg-rose-500/5 text-rose-700 dark:text-rose-300 ring-2 ring-rose-500/20"))
-                                        : (isReviewMode && opt.correct
-                                            ? "border-emerald-500/50 bg-emerald-500/5 text-emerald-700 dark:text-emerald-300 ring-1 ring-emerald-500/20"
-                                            : "border-border/60 bg-background hover:border-foreground/30 hover:bg-muted/50")
-                                    )}
-                                  >
-                                    <span className={cn(
-                                      "w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold transition-colors shadow-sm",
-                                      selected
-                                        ? ((examMode === 'mock' && !isReviewMode) ? "bg-amber-500 text-white shadow-md shadow-amber-500/30" : (opt.correct ? "bg-emerald-500 text-white shadow-md shadow-emerald-500/20" : "bg-rose-500 text-white shadow-md shadow-rose-500/20"))
-                                        : (isReviewMode && opt.correct
-                                            ? "bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border-emerald-500/30"
-                                            : "bg-card border border-border/80 text-muted-foreground group-hover:text-foreground")
-                                    )}>
-                                      {opt.id}
-                                    </span>
-                                    <span className="flex-1 text-[15px] font-medium leading-normal">
-                                      {opt.text}
-                                    </span>
-                                    {selected && examMode === 'mock' && <Check className="w-5 h-5 text-amber-500 font-bold" />}
-                                  </button>
-
-                                  {/* The Trap Label / Explainer (PRACTICE MODE ONLY or REVIEW) */}
-                                  {showDistractor && opt.correct === false && (
-                                    <div className="mt-3 ml-12 p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 animate-in slide-in-from-top-2 fade-in">
-                                      <div className="flex items-start gap-3">
-                                        <div className="mt-0.5 p-1 rounded-full bg-rose-500/20 text-rose-600">
-                                          <AlertTriangle className="w-3.5 h-3.5" />
-                                        </div>
-                                        <div>
-                                          <div className="text-xs font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wide mb-1 flex items-center gap-2">
-                                            Evidence Check
-                                            <ChevronRight className="w-3 h-3 text-rose-500/50" />
-                                            Tutor Note
-                                          </div>
-                                          <p className="text-sm font-medium text-foreground/80 leading-relaxed">
-                                            {opt.trap || q.explanation || "Review the passage carefully to see why this option is unsupported."}
-                                          </p>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  )}
-
-                                  {evaluateCorrectness && opt.correct === true && (
-                                    <div className="mt-3 ml-12 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 animate-in slide-in-from-top-2 fade-in flex items-center gap-2">
-                                      <Zap className="w-4 h-4 text-emerald-600" />
-                                      <div className="flex-1">
-                                        <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-400">
-                                          {selected 
-                                            ? (q.explanation || opt.trap || "Excellent! You isolated the correct rule.") 
-                                            : (q.explanation || "This is the correct answer.")
-                                          }
-                                        </p>
-                                        {isReviewMode && !selected && opt.trap && (
-                                           <p className="text-xs text-emerald-700/80 dark:text-emerald-400/80 mt-1">
-                                             Note: {opt.trap}
-                                           </p>
-                                        )}
-                                      </div>
-                                    </div>
-                                  )}
+                        return (
+                          <>
+                            {freeQuestions.map(q => renderQuestion(q, section.questions.indexOf(q), false))}
+                            
+                            {paywalledQuestions.length > 0 && (
+                              <div className="relative space-y-12 mt-12">
+                              <div className="absolute inset-x-0 inset-y-0 z-30 pointer-events-none" style={{ paddingTop: '2rem' }}>
+                                <div className="sticky top-[30%] pointer-events-auto mx-auto w-[calc(100%-2rem)] max-w-[320px] bg-card/95 backdrop-blur-xl border border-border/80 shadow-2xl rounded-3xl p-6 md:p-8 ring-1 ring-amber-500/20 text-center transition-all hover:scale-[1.02]">
+                                  <div className="w-12 h-12 md:w-14 md:h-14 bg-amber-500/10 text-amber-600 rounded-2xl flex items-center justify-center mx-auto mb-5 md:mb-6 border border-amber-500/20 shadow-inner">
+                                    <Lock className="w-5 h-5 md:w-6 md:h-6" />
+                                  </div>
+                                  <h3 className="text-base md:text-lg font-bold tracking-tight mb-2 text-foreground">Free plan limit reached</h3>
+                                  <p className="text-xs font-medium text-muted-foreground mb-6 md:mb-8 leading-relaxed">
+                                    To see the full passage and to access all questions, upgrade to Premium.
+                                  </p>
+                                  <Button onClick={() => setShowPaywall(true)} className="w-full h-12 md:h-12 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl shadow-lg shadow-amber-600/20 transition-all">
+                                    <Sparkles className="w-4 h-4 mr-2" />
+                                    Unlock Full Version
+                                  </Button>
                                 </div>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      );
-                    })}
+                              </div>
+                                {paywalledQuestions.map(q => renderQuestion(q, section.questions.indexOf(q), true))}
+                              </div>
+                            )}
+                          </>
+                        );
+                      })()}
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
 
             {activeSections.length > 0 && (
               <div className="pt-10 border-t border-border/40 mt-12 mb-12 flex justify-end snap-end scroll-m-8">
-                <Button onClick={() => setIsFinished(true)} className="bg-amber-500 hover:bg-amber-600 text-amber-950 font-bold px-8 h-12 rounded-xl text-md shadow-[0_0_20px_rgba(245,158,11,0.3)]">
-                  {isReviewMode ? 'Return to Results' : 'Submit Mock Exam'}
+                <Button 
+                  onClick={() => {
+                    if (isReviewMode) setIsFinished(true); // Return to Results
+                    else if (examMode === 'practice') navigate('/mocks/english'); 
+                    else setIsFinished(true);
+                  }} 
+                  className="bg-amber-500 hover:bg-amber-600 text-amber-950 font-bold px-8 h-12 rounded-xl text-md shadow-[0_0_20px_rgba(245,158,11,0.3)]">
+                  {isReviewMode ? 'Return to Results' : (examMode === 'practice' ? 'Finish' : 'Submit Mock Exam')}
                 </Button>
               </div>
             )}
-
           </div>
         </div>
-
-        {/* ---------------- FLOATING PROGRESS PILL ---------------- */}
-        {!isFinished && activeSections.length > 0 && (
-          <div className="absolute right-8 top-1/2 -translate-y-1/2 max-h-[50vh] w-10 bg-card/80 backdrop-blur-xl rounded-[2rem] shadow-xl border border-border/60 hidden lg:flex flex-col items-center py-6 overflow-y-auto z-50 custom-scrollbar hide-scroll">
-            <div className="flex flex-col items-center w-full gap-3">
-              {activeSections.map(s => s.questions.map(q => ({ sec: s, q }))).flat().map(({ sec, q }, idx) => {
-                const qKey = `${sec.sectionId}_${q.id}`;
-                const isSelected = activeQuestionId === qKey;
-                const isAnswered = !!selectedAnswers[qKey];
-                const isFlagged = flaggedQuestions[qKey];
-
-                return (
-                  <button
-                    key={qKey}
-                    id={`pill-dot-${qKey}`}
-                    onClick={() => {
-                      questionRefs.current[qKey]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }}
-                    title={`Question ${idx + 1}`}
-                    className={cn(
-                      "transition-all duration-300 relative shrink-0 rounded-full cursor-pointer",
-                      isSelected 
-                        ? "shadow-[0_0_8px_rgba(245,158,11,0.4)]" 
-                        : "",
-                      isSelected && (!isReviewMode || !isAnswered) ? "w-3 h-3 bg-amber-500" :
-                      isSelected && isReviewMode && selectedAnswers[qKey] === q.options.find(o => o.correct)?.id ? "w-3 h-3 bg-emerald-500" :
-                      isSelected && isReviewMode && selectedAnswers[qKey] !== q.options.find(o => o.correct)?.id ? "w-3 h-3 bg-rose-500" :
-                      (isReviewMode && isAnswered) 
-                        ? (selectedAnswers[qKey] === q.options.find(o => o.correct)?.id ? "w-2 h-2 bg-emerald-500/60 hover:bg-emerald-500" : "w-2 h-2 bg-rose-500/60 hover:bg-rose-500")
-                        : isAnswered 
-                          ? "w-2 h-2 bg-amber-500/50 hover:bg-amber-500/80" 
-                          : "w-2 h-2 bg-border hover:bg-muted-foreground/40",
-                      isFlagged && "ring-2 ring-rose-500 ring-offset-2 ring-offset-card/80"
-                    )}
-                  />
-                );
-              })}
-            </div>
-          </div>
-        )}
+        {/* Paywall Modal */}
+        <PremiumPaywall 
+          open={showPaywall} 
+          onOpenChange={setShowPaywall}
+          title="Unlock Full Exam"
+          description="Gain access to all questions, full rationales, and advanced scoring." 
+        />
       </div>
     </div>
   );

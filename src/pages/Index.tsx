@@ -14,7 +14,7 @@ import ExamReadiness from "@/pages/ExamReadiness";
 
 import MockExams from "@/pages/MockExams";
 import MockExamPage from "@/pages/MockExamPage";
-import PracticePage from "@/pages/PracticePage";
+
 import Resources from "@/pages/Resources";
 import RevisionNotes from "@/pages/RevisionNotes";
 import RevisionNotesSection from "@/pages/RevisionNotesSection";
@@ -287,9 +287,9 @@ const Index = () => {
             <Route path="mocks/english" element={<MockExams forcedSubject="english" />} />
             <Route path="mock-exam" element={<MockExamPage />} />
             <Route path="english-demo" element={<EnglishSplitViewDemo />} />
-            <Route path="practice-page" element={<PracticePage />} />
-            <Route path="practice/maths" element={<PracticePage forcedSubject="maths" />} />
-            <Route path="practice/english" element={<PracticePage forcedSubject="english" />} />
+            <Route path="practice-page" element={<Navigate to="/mocks" replace />} />
+            <Route path="practice/maths" element={<Navigate to="/mocks/maths" replace />} />
+            <Route path="practice/english" element={<Navigate to="/mocks/english" replace />} />
             <Route path="resources" element={<Resources />} />
             <Route path="notes" element={<RevisionNotes />} />
             <Route path="notes/:section" element={<RevisionNotesSection />} />

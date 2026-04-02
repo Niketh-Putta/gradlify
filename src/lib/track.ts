@@ -24,6 +24,12 @@ export function getSignupTrack(): UserTrack | null {
 export function clearSignupTrack() {}
 
 export function resolveUserTrack(profileTrack?: string | null): UserTrack {
+  if (!profileTrack) return DEFAULT_TRACK;
+  const lower = profileTrack.toLowerCase();
+  if (lower.includes('11') || lower.includes('11-plus') || lower.includes('11plus')) {
+    return '11plus';
+  }
+  if (lower.includes('gcse')) return 'gcse';
   return DEFAULT_TRACK;
 }
 

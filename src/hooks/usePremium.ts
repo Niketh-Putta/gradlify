@@ -4,7 +4,7 @@ import { useAppContext } from './useAppContext';
 import { FREE_CHALLENGE_LIMIT } from '@/lib/limits';
 import { isAbortLikeError } from '@/lib/errors';
 import { resolveUserTrack, type UserTrack } from '@/lib/track';
-import { getMissingColumnFromError, markProfileColumnMissing, profileSelect } from '@/lib/schemaCompatibility';
+import { getMissingColumnFromError, markProfileColumnMissing, profileSelect, isKnownMissingProfileColumn } from '@/lib/schemaCompatibility';
 
 const emitMockUsageUpdate = () => {
   if (typeof window !== 'undefined') {
@@ -56,6 +56,10 @@ interface UsageData {
   daily_reset_at: string | null;
   daily_mock_uses: number;
   daily_mock_reset_at: string | null;
+  daily_maths_mock_uses?: number;
+  daily_maths_mock_reset_at?: string | null;
+  daily_english_mock_uses?: number;
+  daily_english_mock_reset_at?: string | null;
   daily_challenge_uses: number;
   daily_challenge_reset_at: string | null;
   founder_track: 'competitor' | 'founder' | null;
@@ -63,6 +67,8 @@ interface UsageData {
   tier: string;
   plan: string | null;
   current_period_end: string | null;
+  is_premium?: boolean;
+  premium_until?: string | null;
 }
 
 type DatabasePremiumTrack = 'gcse' | '11plus' | 'eleven_plus' | null;
@@ -82,7 +88,7 @@ const readGuestUsage = (key: string) => {
   return Number.isFinite(parsed) ? parsed : 0;
 };
 
-export function usePremium(trackOverride?: UserTrack) {
+export function usePremium(trackOverride?: UserTrack, subject?: 'maths' | 'english' | null) {
   const contextData = useAppContext();
   const user = contextData?.user ?? null;
   const profile = contextData?.profile ?? null;
@@ -106,13 +112,15 @@ export function usePremium(trackOverride?: UserTrack) {
   );
   const [isAdmin, setIsAdmin] = useState(false);
 
-  const [guestMockUses, setGuestMockUses] = useState(() => readGuestUsage('guestMockUsage'));
+  // Subject-specific guest states
+  const guestMockKey = subject ? `guestMockUsage_${subject}` : 'guestMockUsage';
+  const [guestMockUses, setGuestMockUses] = useState(() => readGuestUsage(guestMockKey));
   const [guestChallengeUses, setGuestChallengeUses] = useState(() => readGuestUsage(guestChallengeUsageKey(activeTrack)));
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    const handleGuestMockUsageChanged = () => setGuestMockUses(readGuestUsage('guestMockUsage'));
+    const handleGuestMockUsageChanged = () => setGuestMockUses(readGuestUsage(guestMockKey));
     const handleGuestChallengeUsageChanged = () => setGuestChallengeUses(readGuestUsage(guestChallengeUsageKey(activeTrack)));
 
     window.addEventListener('guestMockUsageChanged', handleGuestMockUsageChanged);
@@ -122,7 +130,7 @@ export function usePremium(trackOverride?: UserTrack) {
       window.removeEventListener('guestMockUsageChanged', handleGuestMockUsageChanged);
       window.removeEventListener('guestChallengeUsageChanged', handleGuestChallengeUsageChanged);
     };
-  }, [activeTrack]);
+  }, [activeTrack, guestMockKey]);
 
   useEffect(() => {
     setGuestChallengeUses(readGuestUsage(guestChallengeUsageKey(activeTrack)));
@@ -191,8 +199,11 @@ export function usePremium(trackOverride?: UserTrack) {
     }
   }, [profile?.user_id, tier]);
 
-  const resetDailyMockUsage = useCallback(async () => {
+  const resetDailyMockUsage = useCallback(async (isSpecificSubject: boolean, subjectColRaw?: string, resetColRaw?: string) => {
     if (!profile?.user_id) return;
+
+    const useCol = isSpecificSubject && subjectColRaw ? subjectColRaw : 'daily_mock_uses';
+    const resetCol = isSpecificSubject && resetColRaw ? resetColRaw : 'daily_mock_reset_at';
 
     try {
       const tomorrow = new Date();
@@ -202,8 +213,8 @@ export function usePremium(trackOverride?: UserTrack) {
       const { error } = await supabase
         .from('profiles')
         .update({
-          daily_mock_uses: 0,
-          daily_mock_reset_at: tomorrow.toISOString()
+          [useCol]: 0,
+          [resetCol]: tomorrow.toISOString()
         })
         .eq('user_id', profile.user_id);
 
@@ -249,7 +260,7 @@ export function usePremium(trackOverride?: UserTrack) {
 
     try {
       const requiredColumns = ['daily_uses', 'daily_reset_at', 'daily_mock_uses', 'daily_mock_reset_at', 'daily_challenge_uses', 'daily_challenge_reset_at', 'founder_track', 'tier', 'plan', 'current_period_end'] as const;
-      const optionalColumns = ['premium_track'] as const;
+      const optionalColumns = ['premium_track', 'daily_maths_mock_uses', 'daily_maths_mock_reset_at', 'daily_english_mock_uses', 'daily_english_mock_reset_at', 'is_premium', 'premium_until'] as const;
       const attemptUsageFetch = async () =>
         supabase
           .from('profiles')
@@ -269,7 +280,11 @@ export function usePremium(trackOverride?: UserTrack) {
       if (data) {
         const now = new Date();
         const resetAt = data.daily_reset_at ? new Date(data.daily_reset_at) : null;
-        const mockResetAt = data.daily_mock_reset_at ? new Date(data.daily_mock_reset_at) : null;
+        
+        let usesVal = data.daily_mock_uses || 0;
+        let mockResetAtDt: Date | null = null;
+        if (data.daily_mock_reset_at) mockResetAtDt = new Date(data.daily_mock_reset_at);
+
         const challengeResetAt = data.daily_challenge_reset_at ? new Date(data.daily_challenge_reset_at) : null;
         setFounderTrack(data.founder_track || null);
         setPremiumTrack(normalizePremiumTrack((data as UsageData).premium_track ?? null));
@@ -285,14 +300,14 @@ export function usePremium(trackOverride?: UserTrack) {
         }
 
         // Check if we need to reset daily mock usage
-        if (!mockResetAt || now > mockResetAt) {
-          await resetDailyMockUsage();
+        if (!mockResetAtDt || now > mockResetAtDt) {
+          await resetDailyMockUsage(false);
         } else {
-          setDailyMockUses(data.daily_mock_uses || 0);
+          setDailyMockUses(usesVal);
         }
 
         if (!challengeResetAt || now > challengeResetAt) {
-          await resetDailyChallengeUsage(mockResetAt);
+          await resetDailyChallengeUsage(mockResetAtDt);
         } else {
           const localUsage = readLocalChallengeUsage(activeTrack);
           const localResetAt = localUsage.resetAt ? new Date(localUsage.resetAt) : null;
@@ -322,7 +337,7 @@ export function usePremium(trackOverride?: UserTrack) {
     } finally {
       setIsLoading(false);
     }
-  }, [activeTrack, profile?.user_id, resetDailyChallengeUsage, resetDailyMockUsage, resetDailyUsage]);
+  }, [activeTrack, profile?.user_id, resetDailyChallengeUsage, resetDailyMockUsage, resetDailyUsage, subject]);
 
   useEffect(() => {
     if (!hasUserContext) {
@@ -467,11 +482,11 @@ export function usePremium(trackOverride?: UserTrack) {
   const incrementMockUsage = async () => {
     if (!hasUserContext) {
       const currentUses = guestMockUses;
-      const allowed = currentUses < 1; // 1 mock per day for guests
+      const allowed = currentUses < 1; // 1 mock per day for guests per subject
       const nextUses = allowed ? currentUses + 1 : currentUses;
       setGuestMockUses(nextUses);
       if (typeof window !== 'undefined') {
-        localStorage.setItem('guestMockUsage', String(nextUses));
+        localStorage.setItem(guestMockKey, String(nextUses));
         window.dispatchEvent(new CustomEvent('guestMockUsageChanged'));
       }
       return { allowed, uses: nextUses, limit: 1 };
@@ -480,17 +495,23 @@ export function usePremium(trackOverride?: UserTrack) {
 
     try {
       const updatedUses = dailyMockUses + 1;
+      
+      const targetCol = 'daily_mock_uses';
+      
       const { data, error } = await supabase
         .from('profiles')
-        .update({ daily_mock_uses: updatedUses })
+        .update({ [targetCol]: updatedUses })
         .eq('user_id', profile.user_id)
-        .select('daily_mock_uses')
+        .select(targetCol)
         .single();
         
-      if (error) throw error;
-      setDailyMockUses(data.daily_mock_uses);
+      if (error) {
+        throw error;
+      };
+      
+      setDailyMockUses((data as any)[targetCol]);
       emitMockUsageUpdate();
-      return { allowed: true, uses: data.daily_mock_uses, limit: isPremium ? Infinity : 1 };
+      return { allowed: true, uses: (data as any)[targetCol], limit: isPremium ? Infinity : 1 };
     } catch (error) {
       console.error('Error incrementing mock usage:', error);
       return { allowed: false, uses: dailyMockUses, limit: isPremium ? Infinity : 1 };
@@ -501,22 +522,32 @@ export function usePremium(trackOverride?: UserTrack) {
   const profileTier = profile?.tier ?? null;
   const profilePlan = profile?.plan ?? null;
   const profilePeriodEnd = profile?.current_period_end ?? null;
+  const profileIsPremium = (profile as any)?.is_premium ?? null;
+  const profilePremiumUntil = (profile as any)?.premium_until ?? null;
   const profilePremiumTrack = normalizePremiumTrack(
     (profile as { premium_track?: DatabasePremiumTrack } | null)?.premium_track ?? null
   );
   const effectivePremiumTrack = premiumTrack ?? profilePremiumTrack;
-  // Legacy fallback: existing premium users without premium_track are treated as GCSE premium.
-  const hasPremiumForActiveTrack = effectivePremiumTrack ? effectivePremiumTrack === activeTrack : activeTrack === 'gcse';
+
   // Premium features
+  const premiumUntilStr = profilePremiumUntil ?? profilePeriodEnd ?? currentPeriodEnd ?? null;
+  const hasActivePeriod = !premiumUntilStr || new Date(premiumUntilStr).getTime() > Date.now();
+  const isPremiumFlag = Boolean(profileIsPremium) && hasActivePeriod;
+
   const hasPremiumSubscription =
     tier === 'premium' ||
     profileTier === 'premium' ||
     isPlanActive(plan, currentPeriodEnd) ||
-    isPlanActive(profilePlan || 'free', profilePeriodEnd);
+    isPlanActive(profilePlan || 'free', profilePeriodEnd) ||
+    isPremiumFlag;
+
+  const isUltra = plan === 'ultra' || profilePlan === 'ultra';
+  
+  // Since there is only one gradlify product, any valid premium/ultra subscription opens all modules.
   const isPremium =
     isAdmin ||
     isFounder ||
-    (hasPremiumSubscription && hasPremiumForActiveTrack);
+    hasPremiumSubscription;
   const isUnlimited = isPremium;
   const dailyLimit = isPremium ? Infinity : 5;
   const remainingUses = isPremium ? Infinity : Math.max(0, dailyLimit - dailyUses);
@@ -528,7 +559,7 @@ export function usePremium(trackOverride?: UserTrack) {
   };
 
   // Mock exam restrictions
-  const dailyMockLimit = isPremium ? Infinity : 2;
+  const dailyMockLimit = isPremium ? Infinity : 1;
   const remainingMockUses = isPremium ? Infinity : Math.max(0, dailyMockLimit - dailyMockUses);
   const canStartMockExam = isPremium || dailyMockUses < dailyMockLimit;
   const dailyChallengeLimit = isPremium ? Infinity : FREE_CHALLENGE_LIMIT;
@@ -537,6 +568,7 @@ export function usePremium(trackOverride?: UserTrack) {
   const canUse10Questions = true; // Always free
   const canUse20Questions = isPremium;
   const canUse30Questions = isPremium;
+  const canUse40Questions = isPremium;
   const canUseFullPaper = isPremium;
 
   const refreshUsage = async () => {
@@ -560,6 +592,7 @@ export function usePremium(trackOverride?: UserTrack) {
     ? remainingChallengeUses
     : Math.max(0, effectiveDailyChallengeLimit - guestChallengeUses);
   const effectiveIsPremium = hasUserContext ? isPremium : false;
+  const effectiveIsUltra = hasUserContext ? isUltra : false;
   const effectiveIsFounder = hasUserContext ? isFounder : false;
   const effectiveCanUseFeature = hasUserContext ? canUseFeature : true;
   const effectiveCanStartMockExam = hasUserContext ? canStartMockExam : guestMockUses < effectiveDailyMockLimit;
@@ -571,6 +604,7 @@ export function usePremium(trackOverride?: UserTrack) {
   return {
     isLoading: effectiveIsLoading,
     isPremium: effectiveIsPremium,
+    isUltra: effectiveIsUltra,
     isFounder: effectiveIsFounder,
     isAdmin: hasUserContext ? isAdmin : false,
     isUnlimited: hasUserContext ? isUnlimited : false,
@@ -592,6 +626,7 @@ export function usePremium(trackOverride?: UserTrack) {
     canUse10Questions,
     canUse20Questions: hasUserContext ? canUse20Questions : false,
     canUse30Questions: hasUserContext ? canUse30Questions : false,
+    canUse40Questions: hasUserContext ? canUse40Questions : false,
     canUseFullPaper: hasUserContext ? canUseFullPaper : false,
     incrementUsage,
     incrementChallengeUsage,

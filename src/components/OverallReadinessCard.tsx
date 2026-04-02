@@ -147,7 +147,7 @@ export function OverallReadinessCard({
       <CardContent className="p-3 sm:p-4 md:p-6 pt-2 sm:pt-3">
         <div className="space-y-3 sm:space-y-4">
           {/* Readiness Meter (stylised pill) */}
-          <div className="flex items-center gap-4 sm:gap-5">
+          <div className="flex flex-wrap items-center gap-4 sm:gap-5">
             <div className="min-w-[92px]">
               <div className={cn(
                  "text-3xl sm:text-4xl font-bold font-gradlify bg-clip-text text-transparent leading-none",
@@ -160,7 +160,7 @@ export function OverallReadinessCard({
               </div>
             </div>
 
-            <div className="flex-1">
+            <div className="flex-1 min-w-[160px]">
               <div className="relative h-7 sm:h-8 rounded-full bg-muted/40 border border-border/40 overflow-hidden shadow-card">
                 {/* Subtle tick marks */}
                 <div className="absolute inset-0 flex justify-between px-3 opacity-50">

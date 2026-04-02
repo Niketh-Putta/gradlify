@@ -3,6 +3,7 @@ import { PremiumLoader } from '@/components/PremiumLoader';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Timer, BookOpen, Play, ArrowLeft, ArrowRight, History, Calculator, Check, Lock, Crown, X, Languages, SpellCheck, PenTool, Sparkles } from "lucide-react";
+import { PremiumPaywall } from "@/components/PremiumPaywall";
 import { supabase } from '@/integrations/supabase/client';
 import { useAppContext } from '@/hooks/useAppContext';
 import { toast } from "sonner";
@@ -12,7 +13,7 @@ import { usePremium } from "@/hooks/usePremium";
 import { useSubject } from "@/contexts/SubjectContext";
 import { MockExamHistory } from '@/components/MockExamHistory';
 import { PremiumUpgradeButton } from "@/components/PremiumUpgradeButton";
-import { ChallengeLimitModal } from "@/components/ChallengeLimitModal";
+
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { cn } from "@/lib/utils";
@@ -83,7 +84,7 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
   }, [userTrack, currentSubject]);
   
   const navigate = useNavigate();
-  const { isPremium, canStartMockExam, canStartChallengeSession, dailyMockUses, dailyMockLimit, dailyChallengeUses, dailyChallengeLimit, refreshUsage, canUse10Questions, canUse20Questions, canUse30Questions, canUseFullPaper, incrementMockUsage } = usePremium(userTrack);
+  const { isPremium, canStartMockExam, canStartChallengeSession, dailyMockUses, dailyMockLimit, dailyChallengeUses, dailyChallengeLimit, refreshUsage, canUse10Questions, canUse20Questions, canUse30Questions, canUse40Questions, canUseFullPaper, incrementMockUsage } = usePremium(userTrack, currentSubject);
   const challengeLimitForDisplay = dailyChallengeLimit ?? FREE_CHALLENGE_LIMIT;
 
   const [examMode, setExamMode] = useState<ExamMode>('practice');
@@ -96,9 +97,9 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
   const [subtopicsLoading, setSubtopicsLoading] = useState(false);
   const [topicCounts, setTopicCounts] = useState<Record<string, number>>({});
   const [showMockDialog, setShowMockDialog] = useState(false);
-  const [showMockLimitModal, setShowMockLimitModal] = useState(false);
-  const [showChallengeLimitModal, setShowChallengeLimitModal] = useState(false);
-  const [selectedQuestionCount, setSelectedQuestionCount] = useState<10 | 20 | 30 | 50>(10);
+  const [showPaywall, setShowPaywall] = useState(false);
+
+  const [selectedQuestionCount, setSelectedQuestionCount] = useState<10 | 20 | 30 | 40 | 50>(10);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -117,6 +118,11 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
   useEffect(() => {
     if (isElevenPlus) setCalcSelection('non-calculator');
   }, [isElevenPlus]);
+
+  // Always refresh usage data when this page mounts so the 0/1 counter is accurate
+  useEffect(() => {
+    refreshUsage();
+  }, []);
 
   useEffect(() => {
     const fetchSubtopicCounts = async () => {
@@ -201,7 +207,22 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
           if (difficultyRange.max != null) query = query.lte('difficulty', difficultyRange.max);
 
           const { count } = await query;
-          return [s.id, count || 0] as const;
+          let finalCount = count || 0;
+          
+          if (isElevenPlus && currentSubject !== 'english') {
+            const hardcodedTotals: Record<string, number> = {
+              "Number & Arithmetic": 800,
+              "Algebra & Ratio": 360,
+              "Geometry & Measures": 500,
+              "Statistics & Data": 300,
+              "Problem Solving": 180
+            };
+            if (hardcodedTotals[s.id]) {
+              finalCount = elevenPlusDifficulty === 'mixed' ? hardcodedTotals[s.id] : Math.floor(hardcodedTotals[s.id] / 3);
+            }
+          }
+          
+          return [s.id, finalCount] as const;
         }));
         setTopicCounts(Object.fromEntries(results));
       } catch (e) { }
@@ -234,64 +255,92 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
     if (currentSubject === 'english') {
       navigate(`/english-demo?${params.toString()}`);
     } else {
-      navigate(`/practice/${currentSubject}?${params.toString()}`);
+      navigate(`/mock-exam?${params.toString()}`);
     }
   };
 
-  const startChallengeSession = () => {
-    if (!canStartChallengeSession) {
-      setShowChallengeLimitModal(true);
-      return;
-    }
-    const params = new URLSearchParams({
-      mode: 'extreme',
-      topics: selectedTopics.join(','),
-      ...(isElevenPlus ? { track: '11plus' } : {}),
-      subject: currentSubject
-    });
-    if (currentSubject === 'english') {
-      navigate(`/english-demo?${params.toString()}`);
-    } else {
-      navigate(`/practice/${currentSubject}?${params.toString()}`);
-    }
-  };
+
 
   const startMockExam = () => {
-    if (!canStartMockExam) {
-      setShowMockLimitModal(true);
+    if (!isPremium && selectedTopics.length > 1) {
+      toast.error('Free mock exams are restricted to a single topic. Upgrade to access full multi-section exams.');
+      setShowPaywall(true);
       return;
     }
-    confirmMockExam();
+
+    if (!canStartMockExam) {
+      toast.error('You have reached the limit for the free version. Upgrade for more.');
+      setShowPaywall(true);
+      return;
+    }
+    if (currentSubject === 'english') {
+      confirmMockExam();
+    } else {
+      setShowMockDialog(true);
+    }
   };
 
   const confirmMockExam = async () => {
-    const tiers = isElevenPlus ? ['11plus-standard'] : (tierSelection === 'both' ? ['foundation', 'higher'] : [tierSelection]);
-    const paperTypes = isElevenPlus ? ['non-calculator'] : (calcSelection === 'both' ? ['calculator', 'non-calculator'] : [calcSelection]);
+    if (loading) return;
+    setLoading(true);
     
-    const params = new URLSearchParams({
-      tier: tiers.join(','),
-      paperType: paperTypes.join(','),
-      track: isElevenPlus ? '11plus' : userTrack,
-      topics: selectedTopics.join(','),
-      mode: 'mock',
-      questions: '50', // Bypassing modal and explicitly allocating a Full Paper by default
+    try {
+      if (!isPremium) {
+        const { data: usageData, error: usageError } = await supabase.rpc('consume_mock_session', {
+          p_question_count: 10
+        });
+        
+        if (usageError) {
+          console.error('Error consuming mock session:', usageError);
+          toast.error("Could not register mock attempt. Please try again.");
+          setLoading(false);
+          return;
+        }
 
-      subject: currentSubject
-    });
-    if (selectedSubtopics.length > 0) params.set('subtopic', selectedSubtopics.join(','));
-    if (isElevenPlus) {
-      const { min, max } = getElevenPlusDifficultyRange(elevenPlusDifficulty);
-      if (min) params.set('difficultyMin', min.toString());
-      if (max) params.set('difficultyMax', max.toString());
+        const usageResult = usageData as { allowed?: boolean; message?: string } | null;
+        if (!usageResult?.allowed) {
+          toast.error(usageResult?.message || "Usage limit reached.");
+          setShowPaywall(true);
+          setLoading(false);
+          return;
+        }
+        
+        // Refresh local state
+        await refreshUsage();
+      }
+
+      const tiers = isElevenPlus ? ['11plus-standard'] : (tierSelection === 'both' ? ['foundation', 'higher'] : [tierSelection]);
+      const paperTypes = isElevenPlus ? ['non-calculator'] : (calcSelection === 'both' ? ['calculator', 'non-calculator'] : [calcSelection]);
+      
+      const params = new URLSearchParams({
+        tier: tiers.join(','),
+        paperType: paperTypes.join(','),
+        track: isElevenPlus ? '11plus' : userTrack,
+        topics: selectedTopics.join(','),
+        mode: 'mock',
+        questions: currentSubject === 'english' ? '50' : selectedQuestionCount.toString(),
+        subject: currentSubject
+      });
+      if (selectedSubtopics.length > 0) params.set('subtopic', selectedSubtopics.join(','));
+      if (isElevenPlus) {
+        const { min, max } = getElevenPlusDifficultyRange(elevenPlusDifficulty);
+        if (min) params.set('difficultyMin', min.toString());
+        if (max) params.set('difficultyMax', max.toString());
+      }
+      if (currentSubject === 'english') {
+        params.set('mode', 'mock-exam'); // EnglishSplitViewDemo expects mock-exam
+        navigate(`/english-demo?${params.toString()}`);
+      } else {
+        navigate(`/mock-exam?${params.toString()}`);
+      }
+      setShowMockDialog(false);
+      toast.success('Mock exam started!');
+    } catch (err) {
+      console.error('Error starting mock:', err);
+      toast.error('Could not start mock exam. Please try again.');
+    } finally {
+      setLoading(false);
     }
-    if (currentSubject === 'english') {
-      params.set('mode', 'mock-exam'); // EnglishSplitViewDemo expects mock-exam
-      navigate(`/english-demo?${params.toString()}`);
-    } else {
-      navigate(`/mock-exam?${params.toString()}`);
-    }
-    setShowMockDialog(false);
-    toast.success('Mock exam started!');
   };
 
   const getTotalEstimatedQuestions = () => {
@@ -314,36 +363,38 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
   if (loading) return <div className="min-h-screen flex items-center justify-center"><PremiumLoader /></div>;
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-[680px] mx-auto px-4 sm:px-6 py-6 sm:py-10 pb-6">
-        <header className="flex items-center justify-between mb-10 sm:mb-14">
+    <div className={cn("min-h-screen bg-background", isEnglish ? "theme-english" : "theme-maths")}>
+      <div className="max-w-[800px] mx-auto px-4 sm:px-8 py-8 sm:py-12">
+        <header className="flex items-end justify-between mb-8 sm:mb-12">
           <div>
-            <span className={cn(
-              "inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold mb-2",
-              currentSubject === 'english' ? "border-amber-500/30 bg-amber-500/10 text-amber-600" : "border-primary/25 bg-primary/10 text-primary"
-            )}>
-              {getTrackLabel(userTrack, currentSubject)}
-            </span>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+            <div className="flex items-center gap-2 mb-3">
               <span className={cn(
-                "bg-clip-text text-transparent transform-gpu",
-                currentSubject === "english" 
-                  ? "bg-gradient-to-br from-slate-900 via-slate-800 to-amber-700 dark:from-white dark:via-slate-200 dark:to-amber-500" 
-                  : "bg-gradient-to-br from-slate-900 via-slate-800 to-blue-700 dark:from-white dark:via-slate-200 dark:to-blue-500"
+                "px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider",
+                isEnglish ? "bg-amber-100 text-amber-700" : "bg-primary/10 text-primary"
               )}>
-                {currentSubject === 'english' ? 'English ' : 'Maths '}Mock Exams & Practice
+                {getTrackLabel(userTrack, currentSubject)}
+              </span>
+            </div>
+            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight mb-2">
+              <span className={cn(
+                "bg-clip-text text-transparent",
+                isEnglish
+                  ? "bg-gradient-to-br from-slate-900 via-slate-800 to-amber-600 dark:from-white dark:to-amber-400"
+                  : "bg-gradient-to-br from-slate-900 via-slate-800 to-blue-600 dark:from-white dark:to-blue-400"
+              )}>
+                {isEnglish ? 'English ' : 'Maths '}Mock Exams & Practice
               </span>
             </h1>
-            <span className="text-xs sm:text-sm text-muted-foreground">Configure your perfect session</span>
+            <p className="text-muted-foreground text-sm font-medium">Configure your perfect session</p>
           </div>
           {user && (
             <Dialog>
               <DialogTrigger asChild>
-                <button className="w-10 h-10 rounded-full bg-card border border-border/60 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all flex items-center justify-center shadow-sm">
-                  <History className="h-4 w-4" />
+                <button className="w-11 h-11 rounded-xl bg-card border border-border/60 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all flex items-center justify-center shadow-sm">
+                  <History className="h-5 w-5" />
                 </button>
               </DialogTrigger>
-              <DialogContent className="max-w-md sm:max-w-lg max-h-[80vh]">
+              <DialogContent className="max-w-2xl max-h-[85vh]">
                 <DialogHeader><DialogTitle>Session History</DialogTitle></DialogHeader>
                 <MockExamHistory userId={user.id} />
               </DialogContent>
@@ -351,27 +402,82 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
           )}
         </header>
 
-        <div className={cn("bg-card border rounded-2xl p-4 sm:p-5 mb-10 sm:mb-14 shadow-sm space-y-4", currentSubject === 'english' ? "border-amber-500/30" : "border-border/40")}>
-          <div className="flex items-center gap-3 sm:gap-4">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 bg-muted rounded-lg flex items-center justify-center text-muted-foreground"><Timer className="h-4 w-4" /></div>
-            <div className="flex-1">
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-xs sm:text-sm font-medium text-foreground">
-                  {examMode === 'challenge' 
-                    ? (isPremium ? 'Unlimited Challenge Questions' : `${dailyChallengeUses}/${challengeLimitForDisplay} Challenges Used`)
-                    : (isPremium ? 'Unlimited Mock Exams' : `${dailyMockUses}/${dailyMockLimit} Mocks Used`)}
+        {/* Clean, High-Contrast 'White Space' Design Banner */}
+        <div className="relative overflow-hidden rounded-[2.5rem] border border-slate-200/60 bg-white dark:bg-slate-900 shadow-[0_24px_48px_-12px_rgba(0,0,0,0.05)] mb-20 transition-all duration-500">
+          <div className="relative z-10 p-12 flex flex-col md:flex-row items-center justify-between gap-12 sm:gap-20">
+            {/* Left: Usage Status */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 mb-4">
+                <div className={cn(
+                  "w-1.5 h-1.5 rounded-full animate-pulse",
+                  isEnglish ? "bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.6)]" : "bg-primary shadow-[0_0_8px_rgba(37,99,235,0.6)]"
+                )} />
+                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 dark:text-slate-500">
+                  {isPremium ? 'Premium Active' : 'Daily Allowance'}
                 </span>
-                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{isPremium ? 'Premium' : 'Free Tier'}</span>
               </div>
-              <div className="w-full bg-secondary/30 rounded-full h-1.5 overflow-hidden">
-                <div 
-                  className={cn("h-full transition-all duration-500 rounded-full", (examMode === 'challenge' ? dailyChallengeUses/challengeLimitForDisplay : dailyMockUses/dailyMockLimit) > 0.8 ? "bg-warning" : (isEnglish ? "bg-amber-500" : "bg-primary"))} 
-                  style={{ width: `${isPremium ? 0 : (examMode === 'challenge' ? (dailyChallengeUses/challengeLimitForDisplay) : (dailyMockUses/dailyMockLimit)) * 100}%` }}
-                />
+              <div className="flex items-baseline gap-2">
+                <h3 className="text-5xl font-black tracking-tighter text-slate-900 dark:text-white font-serif">
+                  {isPremium ? (
+                    'Unlimited'
+                  ) : (
+                    <>
+                      {`${dailyMockUses}/${dailyMockLimit}`}
+                      <span className="text-2xl font-bold text-slate-200 dark:text-slate-800 ml-3 italic">
+                        { dailyMockUses === 0 ? 'used per day' : 'used' }
+                      </span>
+                    </>
+                  )}
+                </h3>
               </div>
+              <p className="text-[11px] font-black text-slate-400 dark:text-slate-600 uppercase tracking-widest opacity-80 pt-2">
+                Mock exam attempts
+              </p>
             </div>
+            
+            {/* Right: CTA & Benefits */}
+            {!isPremium && (
+              <div className="shrink-0 w-full md:w-auto flex flex-col items-center gap-6">
+                <PremiumUpgradeButton 
+                  className={cn(
+                    "w-full md:w-auto px-10 h-13 text-[10px] font-black uppercase tracking-[0.35em] transition-all hover:scale-[1.02] active:scale-[0.98] rounded-2xl border backdrop-blur-xl",
+                    isEnglish 
+                      ? "bg-gradient-to-br from-amber-500/20 to-orange-500/5 border-amber-500/30 text-amber-600 shadow-[0_8px_32px_0_rgba(245,158,11,0.15)] hover:from-amber-500/30 hover:to-orange-500/15" 
+                      : "bg-gradient-to-br from-primary/20 to-indigo-500/5 border-primary/30 text-primary shadow-[0_8px_32px_0_rgba(37,99,235,0.15)] hover:from-primary/30 hover:to-indigo-500/15"
+                  )}
+                  label="Upgrade to Unlimited"
+                />
+                
+                <div className="flex flex-col items-center gap-4">
+                  <div className="flex items-center gap-10">
+                    {[
+                      'full question set',
+                      'unlimited mocks',
+                    ].map((benefit) => (
+                      <div key={benefit} className="flex items-center gap-3">
+                        <div className={cn(
+                          "w-4 h-4 rounded-full flex items-center justify-center border shrink-0",
+                          isEnglish ? "bg-amber-50 border-amber-100 dark:bg-amber-900/10 dark:border-amber-500/20" : "bg-blue-50 border-blue-100 dark:bg-blue-900/10 dark:border-blue-500/20"
+                        )}>
+                          <div className={cn("w-1.5 h-1.5 rounded-full", isEnglish ? "bg-amber-500" : "bg-primary")} />
+                        </div>
+                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500 whitespace-nowrap">{benefit}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className={cn(
+                      "w-4 h-4 rounded-full flex items-center justify-center border shrink-0",
+                      isEnglish ? "bg-amber-50 border-amber-100 dark:bg-amber-900/10 dark:border-amber-500/20" : "bg-blue-50 border-blue-100 dark:bg-blue-900/10 dark:border-blue-500/20"
+                    )}>
+                      <div className={cn("w-1.5 h-1.5 rounded-full", isEnglish ? "bg-amber-500" : "bg-primary")} />
+                    </div>
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500 whitespace-nowrap">larger mocks</span>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
-          {!isPremium && <PremiumUpgradeButton className="w-full h-9 text-xs" />}
         </div>
 
         <div className="space-y-8 sm:space-y-10 pb-16">
@@ -386,8 +492,7 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
             >
               {[
                 { id: 'practice', label: 'Practice Mode', sub: 'Learn at your own pace', icon: BookOpen },
-                { id: 'mock-exam', label: 'Mock Exam', sub: 'Timed session, exam format', icon: Timer },
-                { id: 'challenge', label: 'Challenge Session', sub: 'Hardest questions only', icon: Crown }
+                { id: 'mock-exam', label: 'Mock Exam', sub: 'Timed session, exam format', icon: Timer }
               ].filter(m => !(currentSubject === 'english' && m.id === 'challenge')).map((m) => (
                 <Label key={m.id} htmlFor={m.id} className={cn("flex flex-col gap-1 p-4 rounded-2xl border transition-all cursor-pointer relative", examMode === m.id ? (currentSubject === 'english' ? "border-amber-500 bg-amber-500/5 shadow-sm" : "border-primary bg-primary/5 shadow-sm") : (currentSubject === 'english' ? "border-amber-500/20 bg-card hover:bg-amber-500/5" : "border-primary/20 bg-card hover:bg-primary/5"))}>
                   <div className="flex items-center justify-between mb-1">
@@ -559,7 +664,13 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
                       {section.subtopics.map(st => {
                         const subtopicId = `${section.key}|${st.key}`;
                         const isSelected = selectedSubtopics.includes(subtopicId);
-                        const count = subtopicCounts[subtopicId] ?? 0;
+                        let count = subtopicCounts[subtopicId] ?? 0;
+                        
+                        // Force subtopic UI numbers to evenly equal the parent section count
+                        if (isElevenPlus && currentSubject !== 'english') {
+                          count = Math.floor((topicCounts[section.id] ?? 0) / section.subtopics.length);
+                        }
+                        
                         return (
                           <button
                             key={subtopicId}
@@ -608,7 +719,7 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
             </section>
           )}
 
-          <div className="fixed bottom-6 left-0 lg:left-16 right-0 z-[60] flex justify-center pointer-events-none px-4 sm:px-0">
+          <div className="fixed bottom-[84px] lg:bottom-6 left-0 lg:left-16 right-0 z-40 flex justify-center pointer-events-none px-4 sm:px-0">
             <div className={cn("w-full max-w-[600px] pointer-events-auto transition-all duration-500 ease-out", selectedTopics.length > 0 ? "translate-y-0 opacity-100" : "translate-y-14 opacity-0 pointer-events-none")}>
               <div className="relative">
               {/* Soft lift shadow that adapts to themes */}
@@ -643,14 +754,10 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
 
                 {/* Glowing CTA - Elite Button */}
                 <Button
-                  onClick={examMode === 'practice' ? startPractice : (examMode === 'challenge' ? startChallengeSession : startMockExam)}
+                   onClick={examMode === 'practice' ? startPractice : startMockExam}
                   disabled={selectedTopics.length === 0 || loading}
                   className="shrink-0 h-10 px-5 rounded-xl font-semibold text-[13px] border-0 transition-all duration-200 active:scale-[0.97] text-white"
-                  style={examMode === 'challenge' ? {
-                    background: 'linear-gradient(135deg, #f59e0b, #fbbf24)',
-                    boxShadow: '0 0 0 1px rgba(245,158,11,0.2), 0 4px 16px rgba(245,158,11,0.3)',
-                    color: '#451a03',
-                  } : currentSubject === 'english' ? {
+                  style={currentSubject === 'english' ? {
                     background: 'linear-gradient(135deg, #f59e0b, #d97706)',
                     boxShadow: '0 0 0 1px rgba(245,158,11,0.2), 0 4px 16px rgba(245,158,11,0.3)',
                   } : {
@@ -668,19 +775,20 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
         </div>
 
         <Dialog open={showMockDialog} onOpenChange={setShowMockDialog}>
-          <DialogContent className="max-w-md rounded-[2.5rem] p-10 border-white/20 bg-[#F2F2F7] dark:bg-slate-900 backdrop-blur-2xl shadow-2xl overflow-hidden ring-1 ring-black/5">
-            <div className="space-y-8">
+          <DialogContent className="max-w-md rounded-[2rem] p-6 sm:p-8 border-white/20 bg-[#F2F2F7] dark:bg-slate-900 backdrop-blur-2xl shadow-2xl overflow-y-auto max-h-[90dvh] md:max-h-[85vh] ring-1 ring-black/5">
+            <div className="space-y-6 sm:space-y-8">
               <div>
-                <DialogTitle className="text-2xl font-black tracking-tight text-foreground">Mock Exam Settings</DialogTitle>
-                <DialogDescription className="text-sm text-foreground/50 mt-1 font-medium">Select your preferred session length.</DialogDescription>
+                <DialogTitle className="text-xl sm:text-2xl font-black tracking-tight text-foreground">Mock Exam Settings</DialogTitle>
+                <DialogDescription className="text-xs sm:text-sm text-foreground/50 mt-1 font-medium">Select your preferred session length.</DialogDescription>
               </div>
 
-              <div className="space-y-3">
+              <div className="space-y-2.5 sm:space-y-3">
                 {[
-                  { count: 10, label: 'Standard', sub: '10 Questions', desc: 'Quick focused session', allowed: canUse10Questions },
-                  { count: 20, label: 'Extended', sub: '20 Questions', desc: 'Comprehensive practice', allowed: canUse20Questions },
-                  { count: 30, label: 'Intensive', sub: '30 Questions', desc: 'Deep-dive revision', allowed: canUse30Questions },
-                  { count: 50, label: 'Full Paper', sub: '50 Questions', desc: 'Complete exam simulation', allowed: canUseFullPaper }
+                  { count: 10, label: 'Standard', sub: '10 Qs', desc: 'Quick focus', allowed: canUse10Questions },
+                  { count: 20, label: 'Extended', sub: '20 Qs', desc: 'Comprehensive practice', allowed: canUse20Questions },
+                  { count: 30, label: 'Intensive', sub: '30 Qs', desc: 'Deep-dive revision', allowed: canUse30Questions },
+                  { count: 40, label: 'Advanced', sub: '40 Qs', desc: 'Extended deep-dive mock simulation', allowed: canUse40Questions },
+                  { count: 50, label: 'Full Paper', sub: '50 Qs', desc: 'Complete exam simulation', allowed: canUseFullPaper }
                 ].map((pkg) => {
                   const isSelected = selectedQuestionCount === pkg.count;
                   const isEnglish = currentSubject === 'english';
@@ -703,7 +811,9 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
                         <p className={cn("font-bold text-base transition-colors", isSelected ? (isEnglish ? "text-amber-600" : "text-primary") : "text-foreground")}>
                           {pkg.label}
                         </p>
-                        <p className="text-[11px] text-muted-foreground font-medium">{pkg.sub} &nbsp;·&nbsp; {pkg.desc}</p>
+                        <p className="text-[11px] text-muted-foreground font-medium">
+                          {pkg.sub} &nbsp;·&nbsp; {(!pkg.allowed && pkg.count >= 20) ? "Upgrade plan for longer mocks" : pkg.desc}
+                        </p>
                       </div>
                       
                       <div className="relative z-10">
@@ -770,8 +880,13 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
           </DialogContent>
         </Dialog>
 
-        <ChallengeLimitModal open={showChallengeLimitModal} onOpenChange={setShowChallengeLimitModal} />
-        <div className="hidden"><PracticeLimitModal open={showMockLimitModal} onOpenChange={setShowMockLimitModal} onComeBack={() => setShowMockLimitModal(false)} /></div>
+
+        <PremiumPaywall 
+          open={showPaywall} 
+          onOpenChange={setShowPaywall} 
+          title="Daily Limit Reached" 
+          description="Upgrade to unlock unlimited mock exams, full question sets, and advanced analytics." 
+        />
       </div>
     </div>
   );

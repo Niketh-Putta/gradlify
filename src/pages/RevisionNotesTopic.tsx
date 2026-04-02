@@ -1,7 +1,7 @@
 import React, { Fragment, type ReactNode, useState, useEffect, useMemo } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ArrowRight, Check, BookOpen, Clock, ChevronRight, CheckCircle, ChevronDown, Lightbulb, AlertTriangle, Target, FileText, Zap, HelpCircle, PenLine, Eye, EyeOff, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, BookOpen, Clock, ChevronRight, CheckCircle, ChevronDown, Lightbulb, AlertTriangle, Target, FileText, Zap, HelpCircle, PenLine, Eye, EyeOff, Sparkles, Lock as LucideLock } from "lucide-react";
 import notesData from "@/data/edexcel_gcse_notes.json";
 import elevenPlusNotesData from "@/data/eleven_plus_notes.json";
 import elevenPlusEnglishNotesData from "@/data/eleven_plus_english_notes.json";
@@ -970,7 +970,7 @@ export default function RevisionNotesTopic() {
   const renderHeader = () => (
     <div className="mb-10">
       <div className="flex items-center gap-3 mb-4">
-      <div className={cn("px-4 py-2 rounded-xl text-sm font-bold text-white bg-gradient-to-r", config.gradient)}>
+      <div className={cn("px-4 py-2 rounded-xl text-sm font-bold text-white bg-gradient-to-r", activeGradient)}>
         {config.abbr.toUpperCase()}{currentIndex + 1}
       </div>
       <span className="text-sm text-muted-foreground">
@@ -1114,87 +1114,173 @@ export default function RevisionNotesTopic() {
             {renderBreadcrumb()}
             {renderHeader()}
           </div>
-
-          <div className="w-full flex flex-col xl:flex-row items-stretch gap-8 xl:gap-12 relative pb-24">
-            {/* Left Column - Sticky Reference Box */}
-            <div className="w-full xl:w-[45%] shrink-0">
-              <div className="sticky top-24">
-                {stickyBlocks.length > 0 ? (
-                  renderBlocks(stickyBlocks)
-                ) : (
-                  <div className="p-8 bg-amber-50/80 rounded-2xl border border-amber-200/60 text-center text-amber-800/80 shadow-sm font-medium">
-                    No dedicated active reference in this section.
+          {isPaywalled ? (
+            <>
+            <div className="relative overflow-hidden mb-20 rounded-2xl border border-border/10 cursor-pointer group" onClick={() => setShowPaywall(true)}>
+              {/* Blurred Mock Content */}
+              <div className="opacity-35 blur-[6px] pointer-events-none select-none overflow-hidden transition-all duration-1000">
+                <div className="w-full flex flex-col xl:flex-row items-stretch gap-8 xl:gap-12 p-4">
+                  {/* Left Column - Sticky Reference Box */}
+                  <div className="w-full xl:w-[45%] shrink-0">
+                    {stickyBlocks.length > 0 ? renderBlocks(stickyBlocks) : <div className="p-8 bg-amber-50/80 rounded-2xl border border-amber-200/60 shadow-sm" />}
                   </div>
-                )}
-              </div>
-            </div>
-
-            {/* Right Column - Lesson Notes & Practice */}
-            <div className="flex-1 w-full xl:w-[55%] space-y-8">
-              {/* Lesson notes */}
-              {renderBlocks(utilityBlocks)}
-
-              {/* Practice Questions */}
-              {practiceQuestions.length > 0 && (
-                <div className="mt-12 bg-gradient-to-br from-card to-background border border-border rounded-2xl overflow-hidden shadow-sm">
-                  <div className="p-6 sm:p-8 border-b border-border/50 bg-muted/30">
-                    <h2 className="text-2xl font-bold flex items-center gap-3">
-                      <Zap className="h-6 w-6 text-primary" />
-                      {practiceTitle}
-                    </h2>
-                    <p className="text-muted-foreground mt-2">{practiceDesc}</p>
-                  </div>
-                  <div className="p-6 sm:p-8 space-y-6">
-                    {practiceQuestions.map((pq, idx) => (
-                      <PracticeQuestionCard
-                        key={idx}
-                        question={pq.question}
-                        answer={pq.answer}
-                        number={idx + 1}
-                      />
-                    ))}
+                  {/* Right Column - Lesson Notes */}
+                  <div className="flex-1 w-full xl:w-[55%] space-y-8">
+                    {renderBlocks(utilityBlocks)}
+                    
+                    {/* Real Practice Questions (Blurred) */}
+                    {practiceQuestions.length > 0 && (
+                      <div className="mt-12 bg-gradient-to-br from-card to-background border border-border rounded-2xl overflow-hidden shadow-sm">
+                        <div className="p-6 sm:p-8 border-b border-border/50 bg-muted/30">
+                          <h2 className="text-2xl font-bold flex items-center gap-3">
+                            <Zap className="h-6 w-6 text-primary" />
+                            {practiceTitle}
+                          </h2>
+                          <p className="text-muted-foreground mt-2">{practiceDesc}</p>
+                        </div>
+                        <div className="p-6 sm:p-8 space-y-6">
+                          {practiceQuestions.map((pq, idx) => (
+                            <PracticeQuestionCard
+                              key={idx}
+                              question={pq.question}
+                              answer={pq.answer}
+                              number={idx + 1}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
-              )}
+              </div>
+              
+              {/* Paywall Overlay CTA (Polished Premium) */}
+              <div className="absolute inset-x-0 top-0 bottom-0 z-10 flex flex-col items-center pointer-events-none">
+                <div className="sticky top-[25vh] flex flex-col items-center justify-center p-8 sm:p-12 text-center bg-white/95 dark:bg-card/95 backdrop-blur-2xl border border-border/80 shadow-2xl rounded-[2.5rem] mx-4 max-w-[380px] pointer-events-auto transition-all duration-300">
+                  <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center mb-6", (currentSubject as string) === 'english' ? "bg-amber-100 text-amber-600" : "bg-primary/10 text-primary")}>
+                    <LucideLock className="h-7 w-7" />
+                  </div>
+                  
+                  <h3 className="text-2xl font-bold mb-3 tracking-tight text-foreground">Unlock Full Module</h3>
+                  <p className="text-sm font-medium text-muted-foreground/70 mb-8 leading-relaxed">
+                    Gain unrestricted access to our entire premium study syllabus, including expert guides and quizzes.
+                  </p>
 
-              {/* Navigation Footer */}
-              <div className="flex items-center justify-between gap-4 mt-8 pt-8 border-t border-border/10">
-                {prevTopic ? (
-                  <Button
-                    variant="ghost"
-                    onClick={() => navigateToTopic(prevTopic)}
-                    className="gap-2 text-muted-foreground hover:text-foreground flex-1 justify-start h-auto py-4"
-                  >
-                    <ArrowLeft className="h-4 w-4 shrink-0" />
-                    <div className="text-left min-w-0">
-                      <span className="text-xs block opacity-70">Previous Section</span>
-                      <span className="font-medium truncate block max-w-[200px]">{prevTopic.title}</span>
-                    </div>
-                  </Button>
-                ) : (
-                  <div className="flex-1" />
-                )}
+                  <div className="space-y-2.5 w-full mb-8">
+                    {['Interactive Study Notes', 'Expert Practice Questions', 'Full Topic Progress'].map((feat) => (
+                      <div key={feat} className="flex items-center gap-3 text-xs font-bold text-muted-foreground/80 justify-start px-5 py-3 bg-muted/40 rounded-xl border border-border/50">
+                        <Check className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+                        {feat}
+                      </div>
+                    ))}
+                  </div>
 
-                {nextTopic && (
-                  <Button
-                    onClick={() => navigateToTopic(nextTopic)}
+                  <Button 
                     className={cn(
-                      "gap-2 flex-1 justify-end h-auto py-4 text-white shadow-lg hover:shadow-xl transition-all border-0 ring-1 ring-white/10",
-                      currentSubject === 'english'
-                        ? "bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 shadow-amber-500/20"
-                        : "bg-gradient-to-r from-blue-600 to-primary hover:from-blue-500 hover:to-primary/90 shadow-primary/20"
+                      "w-full h-12 rounded-xl text-sm font-bold text-white transition-all shadow-lg",
+                      (currentSubject as string) === 'english' 
+                        ? "bg-amber-600 hover:bg-amber-700 shadow-amber-600/20" 
+                        : "bg-primary hover:bg-primary/90 shadow-primary/20"
                     )}
                   >
-                    <div className="text-right min-w-0">
-                      <span className="text-xs block font-bold tracking-widest uppercase opacity-90">Next Section</span>
-                      <span className="font-medium truncate block max-w-[200px]">{nextTopic.title}</span>
-                    </div>
-                    <ArrowRight className="h-5 w-5 shrink-0" />
+                    Unlock Now
                   </Button>
-                )}
+                </div>
               </div>
+              {/* Modal (moved outside clickable container to prevent React event bubbling) */}
             </div>
-          </div>
+            
+            <PremiumPaywall 
+              open={showPaywall} 
+              onOpenChange={setShowPaywall} 
+              title="Unlock All Notes" 
+              description="Get unrestricted access to our entire premium study syllabus." 
+            />
+          </>
+          ) : (
+            <>
+              <div className="w-full flex flex-col xl:flex-row items-stretch gap-8 xl:gap-12 relative pb-24">
+                {/* Left Column - Sticky Reference Box */}
+                <div className="w-full xl:w-[45%] shrink-0">
+                  <div className="sticky top-24">
+                    {stickyBlocks.length > 0 ? (
+                      renderBlocks(stickyBlocks)
+                    ) : (
+                      <div className="p-8 bg-amber-50/80 rounded-2xl border border-amber-200/60 text-center text-amber-800/80 shadow-sm font-medium">
+                        No dedicated active reference in this section.
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Right Column - Lesson Notes & Practice */}
+                <div className="flex-1 w-full xl:w-[55%] space-y-8">
+                  {/* Lesson notes */}
+                  {renderBlocks(utilityBlocks)}
+
+                  {/* Practice Questions */}
+                  {practiceQuestions.length > 0 && (
+                    <div className="mt-12 bg-gradient-to-br from-card to-background border border-border rounded-2xl overflow-hidden shadow-sm">
+                      <div className="p-6 sm:p-8 border-b border-border/50 bg-muted/30">
+                        <h2 className="text-2xl font-bold flex items-center gap-3">
+                          <Zap className="h-6 w-6 text-primary" />
+                          {practiceTitle}
+                        </h2>
+                        <p className="text-muted-foreground mt-2">{practiceDesc}</p>
+                      </div>
+                      <div className="p-6 sm:p-8 space-y-6">
+                        {practiceQuestions.map((pq, idx) => (
+                          <PracticeQuestionCard
+                            key={idx}
+                            question={pq.question}
+                            answer={pq.answer}
+                            number={idx + 1}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Navigation Footer */}
+                  <div className="flex items-center justify-between gap-4 mt-8 pt-8 border-t border-border/10">
+                    {prevTopic ? (
+                      <Button
+                        variant="ghost"
+                        onClick={() => navigateToTopic(prevTopic)}
+                        className="gap-2 text-muted-foreground hover:text-foreground flex-1 justify-start h-auto py-4"
+                      >
+                        <ArrowLeft className="h-4 w-4 shrink-0" />
+                        <div className="text-left min-w-0">
+                          <span className="text-xs block opacity-70">Previous Section</span>
+                          <span className="font-medium truncate block max-w-[200px]">{prevTopic.title}</span>
+                        </div>
+                      </Button>
+                    ) : (
+                      <div className="flex-1" />
+                    )}
+
+                    {nextTopic && (
+                      <Button
+                        onClick={() => navigateToTopic(nextTopic)}
+                        className={cn(
+                          "gap-2 flex-1 justify-end h-auto py-4 text-white shadow-lg hover:shadow-xl transition-all border-0 ring-1 ring-white/10",
+                          currentSubject === 'english'
+                            ? "bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 shadow-amber-500/20"
+                            : "bg-gradient-to-r from-blue-600 to-primary hover:from-blue-500 hover:to-primary/90 shadow-primary/20"
+                        )}
+                      >
+                        <div className="text-right min-w-0">
+                          <span className="text-xs block font-bold tracking-widest uppercase opacity-90">Next Section</span>
+                          <span className="font-medium truncate block max-w-[200px]">{nextTopic.title}</span>
+                        </div>
+                        <ArrowRight className="h-5 w-5 shrink-0" />
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </div>
     );
@@ -1208,32 +1294,80 @@ export default function RevisionNotesTopic() {
           {renderHeader()}
         
         {isPaywalled ? (
+          <>
           <div className="relative overflow-hidden mb-20 rounded-2xl border border-border/10 cursor-pointer group" onClick={() => setShowPaywall(true)}>
             {/* Blurred Mock Content */}
-            <div className="opacity-30 blur-[6px] pointer-events-none select-none max-h-[600px] overflow-hidden" style={{ maskImage: 'linear-gradient(to bottom, black 20%, transparent 100%)' }}>
-              <div className="space-y-5 mb-10 p-4">
+            <div className="opacity-40 blur-[1.5px] pointer-events-none select-none overflow-hidden transition-all duration-1000">
+              <div className="space-y-10 mb-10 p-4">
                 {renderBlocks(contentBlocks)}
+                
+                {/* Real Practice Questions (Blurred) */}
+                {practiceQuestions.length > 0 && (
+                  <div id="practice-questions" className="mb-10">
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className={cn("p-2.5 rounded-xl", (currentSubject as string) === 'english' ? "bg-amber-500/10" : "bg-primary/10")}>
+                        <PenLine className={cn("h-5 w-5", (currentSubject as string) === 'english' ? "text-amber-500" : "text-primary")} />
+                      </div>
+                      <h2 className="text-xl font-bold text-foreground">Practice Questions</h2>
+                    </div>
+                    <div className="notes-practice-container">
+                      {practiceQuestions.map((q, i) => (
+                        <PracticeQuestionCard
+                          key={i}
+                          question={q.question}
+                          answer={q.answer}
+                          number={i + 1}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
             
-            {/* Paywall Overlay CTA */}
-            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center p-6 text-center transition-transform group-hover:scale-105">
-              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                <Sparkles className="h-8 w-8 text-primary" />
+            {/* Paywall Overlay CTA (Polished Premium) */}
+            <div className="absolute inset-x-0 top-0 bottom-0 z-10 flex flex-col items-center pointer-events-none">
+              <div className="sticky top-[25vh] flex flex-col items-center justify-center p-8 sm:p-12 text-center bg-white/95 dark:bg-card/95 backdrop-blur-2xl border border-border/80 shadow-2xl rounded-[2.5rem] mx-4 max-w-[380px] pointer-events-auto transition-all duration-300">
+                <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center mb-6", (currentSubject as string) === 'english' ? "bg-amber-100 text-amber-600" : "bg-primary/10 text-primary")}>
+                  <LucideLock className="h-7 w-7" />
+                </div>
+                
+                <h3 className="text-2xl font-bold mb-3 tracking-tight text-foreground">Unlock Full Module</h3>
+                <p className="text-sm font-medium text-muted-foreground/70 mb-8 leading-relaxed">
+                  Gain unrestricted access to our entire premium study syllabus, including expert guides and quizzes.
+                </p>
+
+                <div className="space-y-2.5 w-full mb-8">
+                  {['Interactive Study Notes', 'Expert Practice Questions', 'Full Topic Progress'].map((feat) => (
+                    <div key={feat} className="flex items-center gap-3 text-xs font-bold text-muted-foreground/80 justify-start px-5 py-3 bg-muted/40 rounded-xl border border-border/50">
+                      <Check className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+                      {feat}
+                    </div>
+                  ))}
+                </div>
+
+                <Button 
+                  className={cn(
+                    "w-full h-12 rounded-xl text-sm font-bold text-white transition-all shadow-lg",
+                    (currentSubject as string) === 'english' 
+                      ? "bg-amber-600 hover:bg-amber-700 shadow-amber-600/20" 
+                      : "bg-primary hover:bg-primary/90 shadow-primary/20"
+                  )}
+                >
+                  Unlock Now
+                </Button>
               </div>
-              <h3 className="text-2xl font-bold mb-2">Unlock Full Syllabus</h3>
-              <p className="text-muted-foreground mb-6 max-w-sm">Upgrade to Premium to access all detailed notes, practice questions, and expert tips for this section.</p>
-              <Button className="font-semibold px-8 rounded-xl h-11 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 border-none shadow-lg shadow-amber-500/20 text-white">Unlock Now</Button>
             </div>
 
-            {/* Modal */}
-            <PremiumPaywall 
-              open={showPaywall} 
-              onOpenChange={setShowPaywall} 
-              title="Unlock All Notes" 
-              description="Get unrestricted access to our entire premium study syllabus." 
-            />
+            {/* Modal (moved outside clickable container to prevent React event bubbling) */}
           </div>
+          <PremiumPaywall 
+            open={showPaywall} 
+            onOpenChange={setShowPaywall} 
+            title="Unlock All Notes" 
+            description="Get unrestricted access to our entire premium study syllabus." 
+          />
+          </>
         ) : (
           <>
             {/* Content Blocks */}
@@ -1245,8 +1379,8 @@ export default function RevisionNotesTopic() {
             {practiceQuestions.length > 0 && (
               <div id="practice-questions" className="mb-10 scroll-mt-24">
                 <div className="flex items-center gap-3 mb-6">
-                  <div className={cn("p-2.5 rounded-xl", currentSubject === 'english' ? "bg-amber-500/10" : "bg-primary/10")}>
-                    <PenLine className={cn("h-5 w-5", currentSubject === 'english' ? "text-amber-500" : "text-primary")} />
+                  <div className={cn("p-2.5 rounded-xl", (currentSubject as string) === 'english' ? "bg-amber-500/10" : "bg-primary/10")}>
+                    <PenLine className={cn("h-5 w-5", (currentSubject as string) === 'english' ? "text-amber-500" : "text-primary")} />
                   </div>
                   <h2 className="text-xl font-bold text-foreground">Practice Questions</h2>
                 </div>

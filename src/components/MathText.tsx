@@ -202,7 +202,7 @@ function looksLikeBareMath(text: string): boolean {
 function isMathJoiner(text: string): boolean {
   if (!text) return false;
   if (/[A-Za-z]/.test(text)) return false;
-  return /^[-\s0-9.,:+×÷·*/=(){}[\]<>≤≥≠≈π√^_|\\]+$/.test(text);
+  return /^[-\s0-9.,:+×÷·*/=(){}[\]<>≤≥≠≈π√^_|\\−²³⁴⁵⁶⁷⁸⁹⁰]+$/.test(text);
 }
 
 /**
@@ -287,6 +287,15 @@ function repairBrokenLatex(text: string): string {
   // Handle 'imes' and 'times' missing backslashes more robustly
   // Using explicit word boundaries to catch (imes 10) etc.
   result = result.replace(/(?<!\\)\bi?mes\b/gi, '\\times');
+  
+  // Safely translate the standalone letter 'x' into multiplication (\times) 
+  // ONLY in definitive arithmetic contexts so we do not break algebra variables (e.g. 4x).
+  result = result.replace(/(£?\d+(?:\.\d+)?(?:[/]\d+)?(?:[a-zA-Z]{1,2})?)\s+x\s+(£?\d+(?:\.\d+)?(?:[/]\d+)?(?:[a-zA-Z]{1,2})?)/gi, "$1 \\times $2");
+  result = result.replace(/(£?\d+(?:\.\d+)?(?:[/]\d+)?(?:[a-zA-Z]{1,2})?)\s*x\s*\?/gi, "$1 \\times ?");
+  result = result.replace(/\?\s*x\s*(£?\d+(?:\.\d+)?(?:[/]\d+)?(?:[a-zA-Z]{1,2})?)/gi, "? \\times $1");
+  result = result.replace(/\?\s*x\s*\?/gi, "? \\times ?");
+  result = result.replace(/(£?\d+(?:\.\d+)?(?:[/]\d+)?(?:[a-zA-Z]{1,2})?)\s+x\s+\(/gi, "$1 \\times (");
+  result = result.replace(/\)\s+x\s+(£?\d+(?:\.\d+)?(?:[/]\d+)?(?:[a-zA-Z]{1,2})?)/gi, ") \\times $1");
   
   result = result.replace(/(?<![\\a-zA-Z])qrt\{/g, '\\sqrt{');
   result = result.replace(/(?<![\\a-zA-Z])qrt(\d)/g, '\\sqrt{$1}');
@@ -377,7 +386,7 @@ export default function MathText({ text, display = false, className }: MathTextP
     const hasMathPatterns =
       /\d/.test(normalized)
       || /\b\d+[A-Za-z]\b|\b[A-Za-z]\d+\b/.test(normalized)
-      || /\^\{|\^[0-9a-zA-Z]|_\{|_[0-9a-zA-Z]|×|÷|·|√|⇒|→|←|⇐|↔|≤|≥|≠|≈|π|\\begin\{|\\(sqrt|frac|overline|dot|binom|text|mathrm|mathbf|vec)\{|\\(times|div|cdot|pm|Rightarrow|rightarrow|leftarrow|Leftarrow|leftrightarrow|equiv|mid|approx|cdots|gcd|lcm)\b|\\[a-zA-Z]+/i.test(
+      || /\^\{|\^[0-9a-zA-Z]|_\{|_[0-9a-zA-Z]|×|÷|·|√|⇒|→|←|⇐|↔|≤|≥|≠|≈|π|−|[²³⁴⁵⁶⁷⁸⁹⁰]|\\begin\{|\\(sqrt|frac|overline|dot|binom|text|mathrm|mathbf|vec)\{|\\(times|div|cdot|pm|Rightarrow|rightarrow|leftarrow|Leftarrow|leftrightarrow|equiv|mid|approx|cdots|gcd|lcm)\b|\\[a-zA-Z]+/i.test(
         normalized,
       ) || hasEquationPattern || bareMathOnly;
     
@@ -393,7 +402,7 @@ export default function MathText({ text, display = false, className }: MathTextP
     // Mixed content: parse and render math inline with text.
     // Brace-aware handling is needed because normalization can introduce nested braces
     // (e.g. x^2 -> x^{2}) inside \frac{...}{...}.
-    const mathRegex = /\\begin\{[a-zA-Z*]+\}[\s\S]*?\\end\{[a-zA-Z*]+\}|\\mathbf\{[^}]+\}|\\vec\{[^}]+\}|\\binom\{[^}]+\}\{[^}]+\}|\\text\{[^}]+\}|\\mathrm\{[^}]+\}|\\overline\{[^}]+\}|\\dot\{[^}]+\}|\([^)]*\)\^\{[^}]+\}|\([^)]*\)\^[0-9a-zA-Z]|\\(?:sin|cos|tan|sec|csc|cot)\([^)]+\)|\\(?:sin|cos|tan|sec|csc|cot|log|ln|pi|theta|alpha|beta|gamma|delta|sigma|omega|circ|neq|leq|geq|le|ge|equiv|mid|approx|cdots|gcd|lcm|pm|cdot|times|div|to|infty|sum|int|lim|dot|overline|Rightarrow|rightarrow|leftarrow|Leftarrow|leftrightarrow)|\\sqrt\\[[^\\]]+\\]\\{[^}]+\\}|\\[a-zA-Z]+\{[^}]+\}|\\[a-zA-Z]+|\b\d+(?![dD]\b)[A-Za-z]\b|\b(?![QAqa]\d+\b)[A-Za-z]\d+\b|[a-zA-Z0-9]+_\{[^}]+\}|[a-zA-Z0-9]+_[a-zA-Z0-9]+|[a-zA-Z0-9]+\^\{[^}]+\}|[a-zA-Z0-9]+\^\d+|[a-zA-Z0-9]+\^[a-zA-Z]|[a-zA-Z0-9]+\^\\circ|\b(?![AaIi]\b)[A-Za-z]\b|\b\d+(?:\.\d+)?\b|\d+°|√\d+|×|÷|·|⇒|→|←|⇐|↔|≤|≥|≠|≈|π/g;
+    const mathRegex = /\\begin\{[a-zA-Z*]+\}[\s\S]*?\\end\{[a-zA-Z*]+\}|\\mathbf\{[^}]+\}|\\vec\{[^}]+\}|\\binom\{[^}]+\}\{[^}]+\}|\\text\{[^}]+\}|\\mathrm\{[^}]+\}|\\overline\{[^}]+\}|\\dot\{[^}]+\}|(?:\([^)]*\)|[0-9.]*[a-zA-Z0-9]+)\^\{[^}]+\}|(?:\([^)]*\)|[0-9.]*[a-zA-Z0-9]+)\^[0-9a-zA-Z]|(?:\([^)]*\)|[0-9.]*[a-zA-Z0-9]+)\^\\circ|(?:[0-9.]*[a-zA-Z0-9]+)_\{[^}]+\}|(?:[0-9.]*[a-zA-Z0-9]+)_[a-zA-Z0-9]+|\\(?:sin|cos|tan|sec|csc|cot)\([^)]+\)|\\(?:sin|cos|tan|sec|csc|cot|log|ln|pi|theta|alpha|beta|gamma|delta|sigma|omega|circ|neq|leq|geq|le|ge|equiv|mid|approx|cdots|gcd|lcm|pm|cdot|times|div|to|infty|sum|int|lim|dot|overline|Rightarrow|rightarrow|leftarrow|Leftarrow|leftrightarrow)|\\sqrt\\[[^\\]]+\\]\\{[^}]+\\}|\\[a-zA-Z]+\{[^}]+\}|\\[a-zA-Z]+|\b\d+(?![dD]\b)[A-Za-z]\b|\b(?![QAqa]\d+\b)[A-Za-z]\d+\b|\b(?![AaIi]\b)[A-Za-z]\b|\b\d+(?:\.\d+)?\b|\d+°|√\d+|×|÷|·|⇒|→|←|⇐|↔|≤|≥|≠|≈|π|−|[²³⁴⁵⁶⁷⁸⁹⁰]+/g;
 
     const renderRegexSegment = (segment: string, keySeed: { value: number }, out: (string | JSX.Element)[]) => {
       mathRegex.lastIndex = 0;

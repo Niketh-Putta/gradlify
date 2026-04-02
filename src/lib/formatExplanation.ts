@@ -6,6 +6,9 @@ export const formatExplanation = (explanation?: string | null): string => {
   // We match brackets that contain a colon (e.g. [VISUAL: ...]) OR contain only letters/spaces.
   clean = clean.replace(/\[([A-Z\s]+:[^\]]+|[A-Za-z\s]+)\]\s*/g, "");
 
+  // Remove "💡 Key Insight:" or "Key Insight:" anywhere in the text
+  clean = clean.replace(/(?:💡\s*)?(?:Key\s+Insight\s*[:.\-]?)\s*/gi, "");
+
   // Format Step numbers cleanly by ensuring they are separated by double newlines.
   clean = clean.replace(/\s*(Step\s*\d+\s*[:).\-]?)\s*/gi, (match, stepName) => `\n\n${stepName.trim()} `);
   

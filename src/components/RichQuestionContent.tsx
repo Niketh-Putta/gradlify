@@ -24,16 +24,27 @@ export function normalizeNewlines(text: string): string {
   const raw = text ?? "";
   let normalized = raw;
 
+  // Convert markdown-style asterisk bullet points into unicode bullets on a new line.
+  // This must be done before bold/italic stripping so we don't accidentally match bullet pairs.
+  normalized = normalized.replace(/(^|\n)\s*\*\s+/g, "$1• ");
+
   // Remove markdown-style bold/italic markers to prevent stray asterisks from leaking into the UI.
-  normalized = normalized.replace(/\*\*(.*?)\*\*/g, "$1").replace(/\*(.*?)\*/g, "$1");
+  // Also remove stray inline code backticks as our custom equation handler renders math implicitly.
+  normalized = normalized.replace(/\*\*(.*?)\*\*/g, "$1").replace(/\*(.*?)\*/g, "$1").replace(/`/g, "");
 
   // Treat HTML line breaks and the `/n` shorthand as explicit new lines for imported explanations.
   normalized = normalized.replace(/<br\s*\/?>/gi, "\n").replace(/\/n/g, "\n");
 
   // Insert line breaks after sentences when the full stop is not part of a decimal.
-  normalized = normalized
-    .replace(/(?<!\d)\.\s+/g, ".\n")
-    .replace(/(?<=\d)\.(?!\d)/g, ".\n");
+  // We first break at all period+space boundaries.
+  normalized = normalized.replace(/\.\s+/g, ".\n");
+  
+  // Then we restore numbered lists that were broken by the sentence splitter.
+  // E.g., "1.\nSet up" -> "1. Set up"
+  normalized = normalized.replace(/(^|\n)(\s*\d+)\.\n/g, "$1$2. ");
+
+  // Handle sentences that awkwardly run into a capital letter without a space (e.g. "answer is 5.The next")
+  normalized = normalized.replace(/([^.\d]\d*|\d)\.([A-Z])/g, "$1.\n$2");
 
   // Ensure units stay separated from digits when they are glued to letters (e.g. "a3m" -> "a 3m").
   normalized = normalized.replace(/([a-zA-Z])(\d+(?:\.\d+)?m\b)/g, "$1 $2");
@@ -60,6 +71,11 @@ export function normalizeNewlines(text: string): string {
   // Example: "... gives x = 5 x + 4 = 0 gives x = -4" -> line break before "x + 4 = 0".
   normalized = normalized.replace(/(gives\s+x\s*=\s*[^\\n]+?)\s+(x\s*[+-])/gi, "$1\n$2");
 
+  // Split multiple-choice options A) through E) onto separate lines.
+  // We handle both missing-space scenarios (e.g., "4D)") and space scenarios.
+  normalized = normalized.replace(/([^ \n])([A-E]\)\s)/g, "$1\n$2");
+  normalized = normalized.replace(/([ \t]+)([A-E]\)\s)/g, "\n$2");
+
   // Ensure step-by-step explanations appear on their own lines for readability.
   // Example: "Step 1: ... Step 2: ... Final answer: ..."
   normalized = normalized
@@ -79,7 +95,7 @@ export function normalizeNewlines(text: string): string {
   // "\\n" when it's not immediately followed by a lowercase letter.
   normalized = normalized
     .replace(/\n(?=\s*[.,:;!?])/g, " ")
-    .replace(/(\S)\n(\S)/g, "$1 $2");
+    .replace(/(\S)\n(?!\s*[•\-*]|\s*\d+(?:\.|\))\s)(\S)/g, "$1 $2");
   return normalized
     .replace(/\\\\r\\\\n/g, "\n")
     .replace(/\\\\n/g, "\n")

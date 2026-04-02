@@ -1333,7 +1333,7 @@ export function SubjectReadinessView({ subject }: { subject: 'english' | 'maths'
                   )} />
                   {isElevenPlusTrack ? 'Current Level' : 'Current Grade'}
                 </div>
-                <div className={`font-black tracking-tighter text-foreground leading-tight pb-2 mb-2 ${isElevenPlusTrack ? 'text-5xl sm:text-[56px]' : 'text-6xl sm:text-[80px]'}`}>
+                <div className={`font-black tracking-tighter text-foreground leading-tight pb-2 mb-2 whitespace-normal break-words ${isElevenPlusTrack ? 'text-4xl sm:text-5xl md:text-3xl lg:text-4xl xl:text-[56px]' : 'text-5xl sm:text-[60px] md:text-5xl lg:text-[70px] xl:text-[80px]'}`}>
                   {isElevenPlusTrack ? elevenPlusReadinessBand : displayCurrentGrade}
                 </div>
                 <div className="text-[14px] sm:text-[15px] text-muted-foreground tracking-tight font-medium max-w-[260px] mx-auto">
@@ -1407,7 +1407,7 @@ export function SubjectReadinessView({ subject }: { subject: 'english' | 'maths'
                   )} />
                   {isElevenPlusTrack ? 'Target Level' : 'Maximum Potential'}
                 </div>
-                <div className={`font-black tracking-tighter text-foreground leading-tight pb-3 -mb-2 px-4 -mx-4 drop-shadow-sm ${isElevenPlusTrack ? 'text-5xl sm:text-[60px]' : 'text-6xl sm:text-[80px]'}`}>
+                <div className={`font-black tracking-tighter text-foreground leading-tight pb-3 -mb-2 px-4 -mx-4 drop-shadow-sm whitespace-normal break-words ${isElevenPlusTrack ? 'text-4xl sm:text-5xl md:text-3xl lg:text-4xl xl:text-[60px]' : 'text-5xl sm:text-[60px] md:text-5xl lg:text-[70px] xl:text-[80px]'}`}>
                   {isElevenPlusTrack && elevenPlusNextBand ? elevenPlusNextBand : displayPotentialGrade}
                 </div>
                 <div className="text-[14px] sm:text-[15px] text-muted-foreground tracking-tight font-medium max-w-[260px] mx-auto">

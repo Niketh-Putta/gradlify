@@ -612,7 +612,7 @@ export function Home() {
                 <CardContent className="h-full p-6 pt-6 sm:pt-6 flex flex-col relative z-10">
                   {/* Header */}
                   <div className="flex-[0_0_auto]">
-                    <div className="flex items-center justify-between mb-1">
+                    <div className="flex flex-wrap items-center justify-between gap-y-2 gap-x-1 mb-1">
                       <div className={cn("flex items-center gap-1.5 px-3 py-1.5 rounded-full border shadow-sm backdrop-blur-sm", currentSubject === 'english' ? "bg-amber-500/10 border-amber-500/20" : "bg-primary/10 border-primary/20")}>
                         <Flame className={cn("w-3.5 h-3.5", currentSubject === 'english' ? "text-amber-500" : "text-primary")} />
                         <span className={cn("font-bold tracking-widest uppercase text-[9px] md:text-[10px]", currentSubject === 'english' ? "text-amber-600 dark:text-amber-500" : "text-primary dark:text-blue-400")}>
@@ -630,7 +630,7 @@ export function Home() {
                   <div className="flex-1 flex flex-col justify-center py-2">
                     {/* Topic Name */}
                     <div className="mb-4">
-                      <h3 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight leading-tight mb-2 pr-4">
+                      <h3 className="text-2xl lg:text-[1.35rem] xl:text-2xl 2xl:text-3xl font-bold text-foreground tracking-tight leading-tight mb-2 line-clamp-2">
                         {isFirstVisit ? 'Initial Baseline' : lowestReadinessTopic ? lowestReadinessTopic.topic : 'Initial Assessment'}
                       </h3>
                       <div className="flex items-center justify-between mt-3 text-xs font-semibold">

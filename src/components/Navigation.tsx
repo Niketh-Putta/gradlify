@@ -149,10 +149,8 @@ export function Navigation({ user, profile, onSettings, onSignOut }: NavigationP
       !premiumUntil || new Date(premiumUntil).getTime() > Date.now();
     const isPlanActive = hasPlan && hasActivePeriod;
     const isPremiumFlag = Boolean(profile.is_premium) && hasActivePeriod;
-    const premiumTrack = normalizePremiumTrack(profile.premium_track ?? null);
-    const hasTrackPremium = premiumTrack ? premiumTrack === userTrack : userTrack === 'gcse';
-    const isPremium = (profile.tier === 'premium' || isPlanActive || isPremiumFlag) && hasTrackPremium;
-    const isUltra = profile.plan === 'ultra' && hasTrackPremium;
+    const isPremium = profile.tier === 'premium' || isPlanActive || isPremiumFlag;
+    const isUltra = profile.plan === 'ultra';
     const founderTrack = profile.founder_track ?? null;
 
     return { isPremium, isUltra, founderTrack };
@@ -455,10 +453,30 @@ export function Navigation({ user, profile, onSettings, onSignOut }: NavigationP
         {/* Mobile Menu Dropdown */}
         {mobileMenuOpen && (
           <div className="bg-background border-b border-border/40 absolute top-full left-0 right-0 z-50 shadow-lg rounded-b-3xl">
-            <div className="p-4">
+            <div className="p-4 flex items-center justify-between">
               <p className="font-medium text-sm whitespace-nowrap overflow-hidden text-ellipsis">
                 {userName}
               </p>
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  navigate('/select-subject');
+                }}
+                className={cn(
+                  "group flex items-center shrink-0 overflow-hidden relative rounded-xl transition-all duration-300",
+                  "border shadow-sm h-8 px-3 gap-2",
+                  currentSubject === 'english'
+                    ? "bg-amber-500/5 hover:bg-amber-500/10 border-amber-500/20 text-amber-600 dark:text-amber-500"
+                    : "bg-primary/5 hover:bg-primary/10 border-primary/20 text-primary"
+                )}
+                title="Switch Subject"
+              >
+                <ArrowLeftRight className={cn(
+                  "h-[13px] w-[13px] shrink-0 transition-transform group-hover:scale-110",
+                  currentSubject === 'english' ? "text-amber-500" : "text-primary/80"
+                )} />
+                <span className="font-semibold text-[11px] whitespace-nowrap">Switch Subject</span>
+              </button>
             </div>
             <nav className="p-2">
               <div className="grid grid-cols-2 gap-1.5">
@@ -498,7 +516,7 @@ export function Navigation({ user, profile, onSettings, onSignOut }: NavigationP
 
       {/* Mobile Bottom Navigation - Phone and Tablet */}
       <nav className={cn(
-        "block lg:hidden fixed bottom-0 left-0 right-0 bg-background border-t border-border/40 shadow-card pb-safe z-50 transition-transform duration-300 ease-in-out rounded-t-3xl",
+        "block lg:hidden fixed bottom-0 left-0 right-0 bg-background border-t border-border/40 shadow-card pb-safe z-[70] transition-transform duration-300 ease-in-out rounded-t-3xl",
         bottomNavHidden ? "translate-y-full" : "translate-y-0"
       )}>
         {/* More Menu Popup */}

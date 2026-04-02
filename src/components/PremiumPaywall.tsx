@@ -69,165 +69,167 @@ export function PremiumPaywall({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[96vw] max-w-3xl mx-auto px-4 py-6 sm:px-8 sm:py-8 rounded-3xl border-border/50 bg-background/95 backdrop-blur-3xl shadow-2xl overflow-hidden" style={{ marginLeft: 'auto', marginRight: 'auto' }}>
+      <DialogContent className="w-[96vw] max-w-2xl mx-auto p-0 rounded-[2rem] border-none bg-background dark:bg-slate-900 shadow-2xl overflow-y-auto max-h-[90dvh] md:max-h-[85vh]" style={{ marginLeft: 'auto', marginRight: 'auto' }}>
         
-        {/* Ambient Glow */}
-        <div className="absolute top-0 inset-x-0 h-40 bg-gradient-to-b from-purple-500/10 via-amber-500/5 to-transparent pointer-events-none" />
+        <div className="relative px-6 py-6 sm:px-8 sm:py-8">
+          <DialogHeader className="text-center space-y-2 mb-6 sm:mb-8">
+            <DialogTitle className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight text-slate-900 dark:text-white">
+              {title}
+            </DialogTitle>
+            <p className="text-xs sm:text-sm text-slate-400 dark:text-slate-500 max-w-[85%] mx-auto font-medium lowercase italic tracking-tight">
+              {description}
+            </p>
+          </DialogHeader>
 
-        <DialogHeader className="relative text-center pb-2">
-          <div className="mx-auto w-14 h-14 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center mb-4 shadow-xl shadow-purple-500/20 ring-1 ring-purple-500/30">
-            <LockIcon className="w-7 h-7 text-white" />
+          {/* Billing Switcher (Extremely Concise) */}
+          <div className="flex justify-center mb-6 sm:mb-8">
+            <div className="inline-flex p-1 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm">
+              <button
+                onClick={() => setBillingCycle('monthly')}
+                className={cn(
+                  "px-6 py-2 text-[10px] font-black uppercase tracking-[0.2em] rounded-lg transition-all",
+                  billingCycle === 'monthly' ? "text-slate-900 bg-white shadow-sm" : "text-slate-400 hover:text-slate-600"
+                )}
+              >
+                Monthly
+              </button>
+              <button
+                onClick={() => setBillingCycle('annual')}
+                className={cn(
+                  "px-4 sm:px-6 py-2 text-[10px] font-black uppercase tracking-[0.2em] rounded-lg transition-all flex items-center gap-1.5 sm:gap-2",
+                  billingCycle === 'annual' ? "text-slate-900 bg-white shadow-sm" : "text-slate-400 hover:text-slate-600"
+                )}
+              >
+                Annual
+                <span className="bg-emerald-50 text-emerald-600 px-1.5 py-0.5 rounded text-[8px] font-black">SAVE 35%</span>
+              </button>
+            </div>
           </div>
-          <DialogTitle className="text-2xl sm:text-3xl font-black tracking-tight text-foreground">
-            {title}
-          </DialogTitle>
-          <p className="text-sm sm:text-[15px] mt-2 text-muted-foreground max-w-[85%] mx-auto font-medium leading-relaxed">
-            {description}
-          </p>
-        </DialogHeader>
 
-        {children}
-
-        {/* Billing Toggle */}
-        <div className="flex justify-center mt-6">
-          <div className="relative flex p-1 bg-muted/60 hover:bg-muted/80 transition-colors rounded-full ring-1 ring-border/50">
+          <div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2">
+            {/* Premium Plan (Blue) */}
             <button
-              onClick={() => setBillingCycle('monthly')}
+              onClick={() => setSelectedTier('premium')}
               className={cn(
-                "relative z-10 px-6 py-2 text-sm font-bold rounded-full transition-all duration-300",
-                billingCycle === 'monthly' ? "text-foreground shadow-sm bg-background ring-1 ring-border/60" : "text-muted-foreground hover:text-foreground"
+                "group text-left rounded-3xl p-5 sm:p-6 md:p-8 transition-all duration-300 relative border-2",
+                selectedTier === 'premium' ? "bg-white border-primary shadow-xl shadow-blue-500/5" : "bg-white border-slate-100 hover:border-blue-200"
               )}
             >
-              Pay Monthly
+              <div className="space-y-4 sm:space-y-5">
+                <div>
+                  <h3 className="text-lg md:text-xl font-black text-slate-900 dark:text-white tracking-tight">Gradlify Premium</h3>
+                  <p className="text-[9px] md:text-[10px] font-bold text-blue-500/60 uppercase tracking-[0.15em] mt-1">FOUNDATIONAL MASTERY</p>
+                </div>
+                <div className="flex flex-col">
+                  <div className="flex items-baseline gap-1 flex-wrap">
+                    <span className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
+                      £{billingCycle === 'monthly' ? '19.99' : '12.50'}
+                    </span>
+                    <span className="text-[10px] sm:text-xs font-bold text-slate-300 tracking-tight shrink-0">/mo</span>
+                  </div>
+                  {billingCycle === 'annual' && (
+                    <p className="text-[8px] md:text-[9px] font-black text-slate-300 uppercase tracking-widest mt-1">Billed as £149.99 annually</p>
+                  )}
+                </div>
+                <div className="h-px w-full bg-slate-50 dark:bg-slate-800" />
+                <ul className="space-y-3">
+                  {[
+                    "Full Practice Bank Access", 
+                    "Infinite Mock Exam Generator", 
+                    "Advanced AI Pedagogy Engine", 
+                    "Standard 11+ Study Notes"
+                  ].map(feat => (
+                    <li key={feat} className="flex items-start md:items-center gap-2 md:gap-3">
+                      <Check className="w-3.5 h-3.5 text-blue-500 stroke-[3px] shrink-0 mt-0.5 md:mt-0" />
+                      <span className="text-[10px] md:text-[11px] font-bold text-slate-500 leading-tight">{feat}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </button>
+
+            {/* Ultra Plan (Amber) */}
             <button
-              onClick={() => setBillingCycle('annual')}
+              onClick={() => setSelectedTier('ultra')}
               className={cn(
-                "relative z-10 px-8 py-2 text-sm font-bold rounded-full transition-all duration-300 flex items-center gap-2",
-                billingCycle === 'annual' ? "text-foreground shadow-sm bg-background ring-1 ring-border/60" : "text-muted-foreground hover:text-foreground"
+                "group text-left rounded-3xl p-5 sm:p-6 md:p-8 transition-all duration-300 relative border-2",
+                selectedTier === 'ultra' ? "bg-white border-amber-500 shadow-xl shadow-amber-500/5" : "bg-white border-slate-100 hover:border-amber-200"
               )}
             >
-              Pay Annually
-              <span className={cn("px-2 py-0.5 text-[10px] uppercase font-black rounded-full shadow-sm tracking-wider", billingCycle === 'annual' ? "bg-emerald-500/10 text-emerald-600" : "bg-emerald-500/10 text-emerald-600 bg-opacity-50")}>Save 40%</span>
+              <div className="space-y-4 sm:space-y-5">
+                <div>
+                  <h3 className="text-lg md:text-xl font-black text-slate-900 dark:text-white tracking-tight">Gradlify Ultra</h3>
+                  <p className="text-[9px] md:text-[10px] font-bold text-amber-500/60 uppercase tracking-[0.15em] mt-1">ULTIMATE PREPARATION</p>
+                </div>
+                <div className="flex flex-col">
+                  <div className="flex items-baseline gap-1 flex-wrap">
+                    <span className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
+                      £{billingCycle === 'monthly' ? '99.99' : '83.33'}
+                    </span>
+                    <span className="text-[10px] sm:text-xs font-bold text-slate-300 tracking-tight shrink-0">/mo</span>
+                  </div>
+                  {billingCycle === 'annual' && (
+                    <p className="text-[8px] md:text-[9px] font-black text-slate-300 uppercase tracking-widest mt-1">Billed as £999.99 annually</p>
+                  )}
+                </div>
+                <div className="h-px w-full bg-slate-50 dark:bg-slate-800" />
+                <ul className="space-y-3">
+                  {[
+                    "Everything in Premium", 
+                    "1 to 1 weekly sessions with tutor team & founders", 
+                    "Handwritten mocks from tutor team specialised for your child"
+                  ].map(feat => (
+                    <li key={feat} className="flex items-start md:items-center gap-2 md:gap-3">
+                      <Check className="w-3.5 h-3.5 text-amber-500 stroke-[3px] shrink-0 mt-0.5 md:mt-0" />
+                      <span className="text-[10px] md:text-[11px] font-black text-slate-700 leading-tight">{feat}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </button>
           </div>
-        </div>
 
-        {/* Tier Cards */}
-        <div className="mt-8 grid gap-4 grid-cols-1 md:grid-cols-2 relative z-10">
-          
-          {/* Premium Tier */}
-          <button
-            onClick={() => setSelectedTier('premium')}
-            className={cn(
-              "text-left rounded-3xl p-6 transition-all duration-300 border-2 relative overflow-hidden group outline-none",
-              selectedTier === 'premium' 
-                ? "border-purple-500 bg-purple-500/5 shadow-[0_0_30px_rgba(168,85,247,0.15)] scale-[1.02]" 
-                : "border-border/60 bg-muted/30 hover:border-purple-500/40 hover:bg-muted/50"
-            )}
-          >
-            {selectedTier === 'premium' && <div className="absolute top-4 right-4"><CheckCircle className="w-6 h-6 text-purple-500" /></div>}
-            <div className="flex items-center gap-3 mb-2">
-              <div className={cn("p-2 rounded-xl transition-colors", selectedTier === 'premium' ? "bg-purple-500 text-white shadow-lg shadow-purple-500/25" : "bg-muted-foreground/10 text-muted-foreground")}>
-                <Crown className="w-5 h-5" />
-              </div>
-              <h3 className="text-xl font-bold tracking-tight">Premium</h3>
-            </div>
-            <div className="mb-6 mt-4">
-              <span className="text-4xl font-black">${billingCycle === 'monthly' ? '29' : '17'}</span>
-              <span className="text-sm font-bold text-muted-foreground">/mo</span>
-              {billingCycle === 'annual' && <div className="text-[11px] font-bold text-muted-foreground mt-1 uppercase tracking-wider">Billed $204 yearly</div>}
-            </div>
-            <ul className="space-y-3.5 mt-6">
-              {[
-                "Full Practice Bank Access",
-                "Infinite Mock Exam Generator",
-                "Advanced AI Pedagogy Engine",
-                "Standard 11+ Study Notes"
-              ].map(feat => (
-                <li key={feat} className="flex items-start gap-3">
-                  <Check className={cn("w-4 h-4 mt-0.5 shrink-0", selectedTier === 'premium' ? "text-purple-500" : "text-muted-foreground/70")} />
-                  <span className={cn("text-sm font-medium leading-tight", selectedTier === 'premium' ? "text-foreground" : "text-muted-foreground")}>{feat}</span>
-                </li>
-              ))}
-            </ul>
-          </button>
-
-          {/* Ultra Tier */}
-          <button
-            onClick={() => setSelectedTier('ultra')}
-            className={cn(
-              "text-left rounded-3xl p-6 transition-all duration-300 border-2 relative overflow-hidden group outline-none",
-              selectedTier === 'ultra' 
-                ? "border-amber-500 bg-amber-500/5 shadow-[0_0_30px_rgba(245,158,11,0.15)] scale-[1.02]" 
-                : "border-border/60 bg-muted/30 hover:border-amber-500/40 hover:bg-muted/50"
-            )}
-          >
-            <div className="absolute top-0 right-0 bg-gradient-to-l from-amber-500/20 to-transparent w-32 h-32 blur-3xl pointer-events-none" />
-            {selectedTier === 'ultra' && <div className="absolute top-4 right-4"><CheckCircle className="w-6 h-6 text-amber-500" /></div>}
-            
-            <div className="flex items-center gap-3 mb-2">
-              <div className={cn("p-2 rounded-xl transition-colors", selectedTier === 'ultra' ? "bg-amber-500 text-white shadow-lg shadow-amber-500/25" : "bg-muted-foreground/10 text-muted-foreground")}>
-                <Sparkles className="w-5 h-5" />
-              </div>
-              <h3 className="text-xl font-bold tracking-tight">Ultra Elite</h3>
-            </div>
-            <div className="mb-6 mt-4 relative">
-              <span className="text-4xl font-black">${billingCycle === 'monthly' ? '89' : '49'}</span>
-              <span className="text-sm font-bold text-muted-foreground">/mo</span>
-              {billingCycle === 'annual' && <div className="text-[11px] font-bold text-muted-foreground mt-1 uppercase tracking-wider">Billed $588 yearly</div>}
-            </div>
-            <ul className="space-y-3.5 mt-6 relative">
-              {[
-                "Everything in Premium",
-                "Olympiad & Level 3 Engine",
-                "Elite Target School Matching",
-                "1-on-1 Virtual Tutoring Priority"
-              ].map(feat => (
-                <li key={feat} className="flex items-start gap-3">
-                  <Check className={cn("w-4 h-4 mt-0.5 shrink-0", selectedTier === 'ultra' ? "text-amber-500" : "text-muted-foreground/70")} />
-                  <span className={cn("text-sm font-medium leading-tight", selectedTier === 'ultra' ? "text-foreground" : "text-muted-foreground")}>{feat}</span>
-                </li>
-              ))}
-            </ul>
-          </button>
-
-        </div>
-
-        <div className="mt-8 sm:mt-10 space-y-3 relative z-10 pt-6 border-t border-border/40">
-          <Button
-            onClick={handleUpgrade}
-            disabled={isUpgrading}
-            className={cn(
-              "w-full justify-center text-[15px] font-bold h-14 rounded-2xl shadow-lg transition-all",
-              selectedTier === 'ultra' ? "bg-amber-500 hover:bg-amber-600 text-amber-950 shadow-amber-500/20" : "bg-purple-600 hover:bg-purple-700 text-white shadow-purple-600/20"
-            )}
-          >
-            {isUpgrading ? (
-              <>
-                <Loader2 className="mr-3 h-5 w-5 animate-spin" />
-                <span>Securing your plan...</span>
-              </>
-            ) : (
-              <>
-                <Zap className="mr-2 h-5 w-5 fill-current" />
-                <span>Checkout for {selectedTier === 'ultra' ? 'Ultra Elite' : 'Premium'}</span>
-              </>
-            )}
-          </Button>
-          <Button
-            variant="ghost"
-            onClick={() => {
-              onOpenChange(false);
-              onComeBack?.();
-            }}
-            className="w-full text-sm font-semibold text-muted-foreground hover:text-foreground h-12 rounded-xl"
-          >
-            {secondaryLabel}
-          </Button>
+          <div className="mt-8 sm:mt-10 flex flex-col items-center space-y-4 sm:space-y-5">
+            <Button
+              onClick={handleUpgrade}
+              disabled={isUpgrading}
+              className="w-full max-w-sm h-12 md:h-14 rounded-2xl text-[12px] md:text-[14px] font-black uppercase tracking-[0.2em] bg-amber-500 hover:bg-amber-600 text-white shadow-xl shadow-amber-500/20 transition-all hover:scale-[1.02] active:scale-[0.98] border-none"
+            >
+              {isUpgrading ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <>
+                  Checkout for {selectedTier === 'ultra' ? 'Ultra Plan' : 'Premium Plan'} <ArrowRight className="ml-2 h-4 w-4 shrink-0" />
+                </>
+              )}
+            </Button>
+            <button
+              onClick={() => onOpenChange(false)}
+              className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] text-slate-300 hover:text-slate-500 transition-colors pb-2"
+            >
+              Maybe Later
+            </button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
+  );
+}
+
+// Minimal missing icons
+function X(props: any) {
+  return (
+    <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+    </svg>
+  );
+}
+
+function ArrowRight(props: any) {
+  return (
+    <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+    </svg>
   );
 }
 
