@@ -259,6 +259,31 @@ export function usePremium(trackOverride?: UserTrack, subject?: 'maths' | 'engli
   const fetchUsageData = useCallback(async () => {
     if (!profile?.user_id) return;
 
+    // 1) IMMEDIATELY Count today's actual mock attempts for this subject from the database.
+    // This is the single source of truth — no localStorage, no profile counters.
+    // We do this BEFORE the profile query so that if profile schemas are temporarily out-of-sync, 
+    // the UI mock attempt counters still perfectly reflect the truth on initialization.
+    if (user?.id) {
+      try {
+        const startOfDay = new Date();
+        startOfDay.setHours(0, 0, 0, 0);
+        const { data: todayMocks } = await supabase
+          .from('mock_attempts')
+          .select('id, mode')
+          .eq('user_id', user.id)
+          .gte('created_at', startOfDay.toISOString())
+          .in('mode', ['mock', 'mock-exam']);
+        
+        const subjectCount = subject === 'english'
+          ? (todayMocks || []).filter(m => m.mode === 'mock-exam').length
+          : (todayMocks || []).filter(m => m.mode === 'mock').length;
+        
+        setDailyMockUses(subjectCount);
+      } catch (err) {
+        console.error("Error fetching mock attempts directly:", err);
+      }
+    }
+
     try {
       const requiredColumns = ['daily_uses', 'daily_reset_at', 'daily_mock_uses', 'daily_mock_reset_at', 'daily_challenge_uses', 'daily_challenge_reset_at', 'founder_track', 'tier', 'plan', 'current_period_end'] as const;
       const optionalColumns = ['premium_track', 'daily_maths_mock_uses', 'daily_maths_mock_reset_at', 'daily_english_mock_uses', 'daily_english_mock_reset_at', 'is_premium', 'premium_until'] as const;
@@ -298,23 +323,6 @@ export function usePremium(trackOverride?: UserTrack, subject?: 'maths' | 'engli
           setTier(data.tier || 'free');
           setPlan(data.plan || 'free');
           setCurrentPeriodEnd(data.current_period_end || null);
-        }
-
-        // Count today's actual mock attempts for this subject from the database
-        // This is the single source of truth — no localStorage, no profile counters
-        if (user?.id) {
-          const startOfDay = new Date();
-          startOfDay.setHours(0, 0, 0, 0);
-          const { data: todayMocks } = await supabase
-            .from('mock_attempts')
-            .select('id, mode')
-            .eq('user_id', user.id)
-            .gte('created_at', startOfDay.toISOString())
-            .in('mode', ['mock', 'mock-exam']);
-          const subjectCount = subject === 'english'
-            ? (todayMocks || []).filter(m => m.mode === 'mock-exam').length
-            : (todayMocks || []).filter(m => m.mode === 'mock').length;
-          setDailyMockUses(subjectCount);
         }
 
         if (!challengeResetAt || now > challengeResetAt) {

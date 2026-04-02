@@ -1233,6 +1233,7 @@ export function EnglishSplitViewDemo() {
                         const PAYWALL_THRESHOLD = 3;
                         const getIsPaywalledQuestion = (qIndex: number) => {
                           if (isPremium) return false;
+                          if (examMode === 'mock') return false; // Mock limits are enforced upfront via usePremium
                           return qIndex >= PAYWALL_THRESHOLD;
                         };
 
