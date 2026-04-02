@@ -633,32 +633,44 @@ export function EnglishSplitViewDemo() {
     }
   }, [activeSections, dbSections.length]);
 
-  const timerInitialized = useRef(false);
+  const timerInitialized = useRef<string>("");
 
   // Dynamically calibrate Mock Timer based on Passage Loads, Pedagogy, and 11+ Recommended Norms
   useEffect(() => {
-    if (examMode !== 'mock' || activeSections.length === 0 || timerInitialized.current) return;
+    if (examMode !== 'mock' || activeSections.length === 0) return;
+    
+    // Create a unique fingerprint of the active passages to detect if we generated a NEW mock exam
+    const bundleSignature = activeSections.map(s => s.sectionId).join('|');
+    if (timerInitialized.current === bundleSignature) return; // Do not hard-reset if it's the same bundle
     
     let totalSeconds = 0;
     activeSections.forEach(sec => {
       const isComp = sec.sectionId.toLowerCase() === 'comprehension' || (sec.subEngine || '').toLowerCase() === 'comprehension';
       
-      // 1. Base Text Density Processing: 3.5 mins for Comp passages, 0 for isolated SPaG blocks
-      const readingAllowance = isComp ? 210 : 0;
+      let secTime = 0;
+      if (sec.difficulty === 1) {
+        // Level 1: Standard (Fast)
+        const reading = isComp ? 150 : 0; // 2.5 mins
+        const perQ = isComp ? 45 : 30;
+        secTime = reading + (sec.questions.length * perQ);
+      } else if (sec.difficulty === 2) {
+        // Level 2: Intermediate
+        const reading = isComp ? 180 : 0; // 3.0 mins
+        const perQ = isComp ? 55 : 40;
+        secTime = reading + (sec.questions.length * perQ);
+      } else {
+        // Level 3: Elite / Advanced (Heavy)
+        const reading = isComp ? 240 : 0; // 4.0 mins
+        const perQ = isComp ? 75 : 55;
+        secTime = reading + (sec.questions.length * perQ);
+      }
       
-      // 2. Base Per-Question Velocity: 55 seconds for Comp (inferential), 40 seconds for SPaG/Vocab (recall)
-      const basePerQuestion = isComp ? 55 : 40;
-      
-      // 3. Exam Board Scaler: Adjust for complexity bandwidth (e.g. 1.25x for Synthesis/Level 3)
-      const diffMultiplier = sec.difficulty === 3 ? 1.25 : (sec.difficulty === 2 ? 1.1 : 1.0);
-      
-      const secTime = readingAllowance + (sec.questions.length * basePerQuestion * diffMultiplier);
-      totalSeconds += Math.round(secTime);
+      totalSeconds += secTime;
     });
     
     if (totalSeconds > 0) {
       setTimeLeft(totalSeconds);
-      timerInitialized.current = true;
+      timerInitialized.current = bundleSignature;
     }
   }, [activeSections, examMode]);
 
@@ -978,12 +990,7 @@ export function EnglishSplitViewDemo() {
                         </div>
                         {cleanDisplayTitle}
                       </div>
-                      {section.tier && (
-                        <div className="px-2.5 py-1 bg-muted/50 border border-border/80 rounded-md text-xs font-bold text-muted-foreground uppercase tracking-wide">
-                          {section.tier}
-                        </div>
-                      )}
-                    </div>
+                      </div>
                   )}
 
                   <div className="space-y-6">
