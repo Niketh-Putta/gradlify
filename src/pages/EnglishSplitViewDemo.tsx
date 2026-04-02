@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
-import { BookOpen, AlertTriangle, Lock, Search, Highlighter, MapPin, Sparkles, ChevronRight, Flag, Timer, Zap, Trophy, ShieldAlert, Check, Type, SpellCheck, TextCursorInput, ListChecks, Languages } from 'lucide-react';
+import { useSearchParams, useNavigate, Link } from 'react-router-dom';
+import { BookOpen, AlertTriangle, Lock, Search, Highlighter, MapPin, Sparkles, ChevronRight, Flag, Timer, Zap, Trophy, ShieldAlert, Check, Type, SpellCheck, TextCursorInput, ListChecks, Languages, CheckCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
@@ -664,11 +664,11 @@ export function EnglishSplitViewDemo() {
 
   // Timer logic for Mock Mode
   useEffect(() => {
-    if (examMode === 'mock' && !isFinished && timeLeft > 0) {
+    if (examMode === 'mock' && !isFinished && !isReviewMode && timeLeft > 0) {
       const timer = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
       return () => clearInterval(timer);
     }
-  }, [examMode, isFinished, timeLeft]);
+  }, [examMode, isFinished, isReviewMode, timeLeft]);
 
   // Handle Highlighting
   const handleHighlight = () => {
@@ -869,9 +869,16 @@ export function EnglishSplitViewDemo() {
                   )}
                 </div>
               </div>
-              <Button onClick={() => { setIsFinished(false); setIsReviewMode(true); }} variant="outline" className="w-full h-12 rounded-xl font-bold">
-                Review Paper Details & Tutor Notes
-              </Button>
+              <div className="space-y-3">
+                <Button onClick={() => { setIsFinished(false); setIsReviewMode(true); }} variant="outline" className="w-full h-12 rounded-xl font-bold">
+                  Review Paper Details & Tutor Notes
+                </Button>
+                <Link to="/11plus/readiness">
+                  <Button variant="ghost" className="w-full h-12 rounded-xl text-muted-foreground hover:bg-muted font-semibold">
+                    Return to Dashboard
+                  </Button>
+                </Link>
+              </div>
             </div>
           ) : (
             <div className="space-y-6 mt-8">
@@ -1046,13 +1053,27 @@ export function EnglishSplitViewDemo() {
           
           {examMode === 'mock' && (
             <div className="sticky top-0 z-20 bg-card/80 backdrop-blur-md border-b border-border/60 px-6 py-3 flex items-center justify-between shadow-sm">
-              <div className="flex items-center gap-2 text-rose-600 font-bold font-mono">
-                <Timer className="w-4 h-4" />
-                {formatTime(timeLeft)}
-              </div>
-              <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
-                <ListChecks className="w-4 h-4" /> Exam Conditions Active
-              </div>
+              {!isReviewMode ? (
+                <>
+                  <div className="flex items-center gap-2 text-rose-600 font-bold font-mono">
+                    <Timer className="w-4 h-4" />
+                    {formatTime(timeLeft)}
+                  </div>
+                  <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+                    <ListChecks className="w-4 h-4" /> Exam Conditions Active
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="flex items-center gap-2 text-emerald-600 font-bold font-mono">
+                    <CheckCircle className="w-4 h-4" />
+                    Review Mode
+                  </div>
+                  <div className="text-xs font-semibold text-emerald-600/80 uppercase tracking-wider flex items-center gap-2">
+                    Evaluation Complete
+                  </div>
+                </>
+              )}
             </div>
           )}
 
@@ -1216,7 +1237,7 @@ export function EnglishSplitViewDemo() {
                                   </button>
 
                                   {/* The Trap Label / Explainer (PRACTICE MODE ONLY or REVIEW) */}
-                                  {showDistractor && (
+                                  {showDistractor && opt.correct === false && (
                                     <div className="mt-3 ml-12 p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 animate-in slide-in-from-top-2 fade-in">
                                       <div className="flex items-start gap-3">
                                         <div className="mt-0.5 p-1 rounded-full bg-rose-500/20 text-rose-600">
@@ -1236,7 +1257,7 @@ export function EnglishSplitViewDemo() {
                                     </div>
                                   )}
 
-                                  {evaluateCorrectness && opt.correct && (
+                                  {evaluateCorrectness && opt.correct === true && (
                                     <div className="mt-3 ml-12 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 animate-in slide-in-from-top-2 fade-in flex items-center gap-2">
                                       <Zap className="w-4 h-4 text-emerald-600" />
                                       <div className="flex-1">
@@ -1269,7 +1290,7 @@ export function EnglishSplitViewDemo() {
             {activeSections.length > 0 && (
               <div className="pt-10 border-t border-border/40 mt-12 flex justify-end">
                 <Button onClick={() => setIsFinished(true)} className="bg-amber-500 hover:bg-amber-600 text-amber-950 font-bold px-8 h-12 rounded-xl text-md shadow-[0_0_20px_rgba(245,158,11,0.3)]">
-                  Submit & Review Results
+                  {isReviewMode ? 'Return to Results' : 'Submit Mock Exam'}
                 </Button>
               </div>
             )}
