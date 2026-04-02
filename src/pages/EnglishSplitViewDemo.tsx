@@ -528,16 +528,7 @@ export function EnglishSplitViewDemo() {
     localStorage.setItem(highlightsStorageKey, JSON.stringify(highlights));
   }, [highlights, highlightsStorageKey]);
 
-  const [isUserScrolling, setIsUserScrolling] = useState<boolean>(false);
-  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const handlePassageScroll = () => {
-    setIsUserScrolling(true);
-    if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
-    scrollTimeoutRef.current = setTimeout(() => {
-      setIsUserScrolling(false);
-    }, 3000); // Resume auto-snap after 3 seconds of no scrolling
-  };
   
   const [timeLeft, setTimeLeft] = useState(3000); 
   const [isHighlightMode, setIsHighlightMode] = useState<boolean>(false);
@@ -715,8 +706,7 @@ export function EnglishSplitViewDemo() {
     // Detect mobile screens where panes stack vertically. Auto-scroll ruins mobile UX.
     if (window.innerWidth < 1024) return;
     
-    // Respect user autonomy: if they are manually scrolling the passage, do not snap.
-    if (isUserScrolling) return;
+    // Respect user autonomy: removed to fix delay bug
 
     let targetSectionId = null;
     let targetEvidenceLine = null;
@@ -749,7 +739,7 @@ export function EnglishSplitViewDemo() {
       // Intelligently scroll the master left-container to the correct passage block wrapper
       passageSectionRefs.current[targetSectionId]?.scrollIntoView({ behavior: 'auto', block: 'start', inline: 'nearest' });
     }
-  }, [activeQuestionId, activeSections, isUserScrolling]);
+  }, [activeQuestionId, activeSections]);
 
   // Compute actual results upon finishing
   const results = useMemo(() => {
@@ -904,10 +894,9 @@ export function EnglishSplitViewDemo() {
 
           <div 
             ref={passageContainerRef} 
-            onScroll={handlePassageScroll}
             onMouseUp={isHighlightMode ? handleHighlight : undefined}
             onTouchEnd={isHighlightMode ? handleHighlight : undefined}
-            className="flex-1 overflow-y-auto p-8 sm:px-10 sm:py-12 text-base sm:text-[17px] leading-loose text-foreground/90 font-serif relative scroll-smooth pb-48"
+            className="flex-1 overflow-y-auto p-8 sm:px-10 sm:py-12 text-base sm:text-[17px] leading-loose text-foreground/90 font-serif relative pb-48"
           >
             <div className="absolute top-6 left-6 sm:left-8 text-[11px] font-black tracking-[0.2em] uppercase text-muted-foreground/30 select-none">Passage</div>
 
