@@ -397,13 +397,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
         <div className="max-w-7xl mx-auto px-3 pr-4 sm:px-6 sm:pr-6 py-2.5 sm:py-4">
           <div className="flex items-center justify-between gap-3 sm:gap-4">
             <a href="#" className="flex items-center gap-3">
-              <div
-                className={`rounded-full p-1 sm:p-1.5 shadow-lg ${
-                  isDark ? "bg-white/10 backdrop-blur-md border border-white/10" : "bg-white border border-slate-200"
-                }`}
-              >
-                <LogoMark className="w-8 h-8 sm:w-9 sm:h-9" variant={isDark ? "dark" : "light"} />
-              </div>
+              <LogoMark className="w-8 h-8 sm:w-9 sm:h-9 shadow-sm" variant={isDark ? "dark" : "light"} />
               <div className="leading-tight">
                 <div className={`text-[13px] sm:text-sm font-semibold ${primaryText}`}>Gradlify</div>
                 <div className={`text-[11px] sm:text-xs ${subtleText} hidden sm:block`}>

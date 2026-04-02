@@ -606,10 +606,10 @@ export function EnglishSplitViewDemo() {
     }));
 
     if (examMode === 'practice' && !isPremium && sorted.length > 0) {
-      return [{
-        ...sorted[0],
-        questions: sorted[0].questions.slice(0, 1) // Paywall slice
-      }];
+      return sorted.map(sec => ({
+        ...sec,
+        questions: sec.questions.slice(0, 3) // Give them exactly 3 questions per section to hook them
+      }));
     }
 
     return sorted;
@@ -1191,7 +1191,10 @@ export function EnglishSplitViewDemo() {
                             <span className="text-xs font-black tracking-widest uppercase text-muted-foreground flex items-center gap-2">
                               {examMode === 'mock' ? `Q${qIndex + 1}` : `Question ${qIndex + 1}`}
                             </span>
-                            <div className={cn("px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide border", q.tagColor)}>
+                            <div className={cn(
+                              "px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide border", 
+                              q.tagColor || "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20"
+                            )}>
                               {q.tag}
                             </div>
                           </div>

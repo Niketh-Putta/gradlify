@@ -12,6 +12,8 @@ import { toast } from "@/hooks/use-toast";
 import ReactMarkdown from "react-markdown";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
+import { usePremium } from "@/hooks/usePremium";
+import { PremiumPaywall } from "@/components/PremiumPaywall";
 import rehypeRaw from "rehype-raw";
 import rehypeSanitize, { defaultSchema } from "rehype-sanitize";
 import "katex/dist/katex.min.css";
@@ -674,9 +676,11 @@ export default function RevisionNotesTopic() {
   const navigate = useNavigate();
   const [isDone, setIsDone] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [showPaywall, setShowPaywall] = useState(false);
 
   const decodedSection = section ? decodeURIComponent(section) : "";
   const userTrack = resolveUserTrack(profile?.track ?? null);
+  const { isPremium } = usePremium(userTrack);
   const isElevenPlus = userTrack === "11plus";
   const trackSections = getTrackSections(userTrack, currentSubject);
   const topics = useMemo(() => {
@@ -718,6 +722,13 @@ export default function RevisionNotesTopic() {
   }, [decodedSection, examBoardValue, isElevenPlus, trackSections, currentSubject]);
   const currentTopic = topics.find((t) => t.slug === topicSlug);
   const currentIndex = topics.findIndex((t) => t.slug === topicSlug);
+  
+  // Calculate paywall status
+  // For English: First 3 indices (0, 1, 2) are free
+  // For Maths: First 1 index (0) is free
+  const freeThreshold = currentSubject === 'english' ? 3 : 1;
+  const isPaywalled = !isPremium && currentIndex >= freeThreshold;
+
   const fallbackAbbr = decodedSection.trim().charAt(0).toUpperCase() || "N";
   const config =
     sectionConfig[decodedSection] ||
@@ -1196,67 +1207,98 @@ export default function RevisionNotesTopic() {
           {renderBreadcrumb()}
           {renderHeader()}
         
-        {/* Content Blocks */}
-        <div className="space-y-5 mb-10">
-          {renderBlocks(contentBlocks)}
-        </div>
-
-        {/* Practice Questions Section */}
-        {practiceQuestions.length > 0 && (
-          <div id="practice-questions" className="mb-10 scroll-mt-24">
-            <div className="flex items-center gap-3 mb-6">
-              <div className={cn("p-2.5 rounded-xl", currentSubject === 'english' ? "bg-amber-500/10" : "bg-primary/10")}>
-                <PenLine className={cn("h-5 w-5", currentSubject === 'english' ? "text-amber-500" : "text-primary")} />
+        {isPaywalled ? (
+          <div className="relative overflow-hidden mb-20 rounded-2xl border border-border/10 cursor-pointer group" onClick={() => setShowPaywall(true)}>
+            {/* Blurred Mock Content */}
+            <div className="opacity-30 blur-[6px] pointer-events-none select-none max-h-[600px] overflow-hidden" style={{ maskImage: 'linear-gradient(to bottom, black 20%, transparent 100%)' }}>
+              <div className="space-y-5 mb-10 p-4">
+                {renderBlocks(contentBlocks)}
               </div>
-              <h2 className="text-xl font-bold text-foreground">Practice Questions</h2>
             </div>
-            <div className="notes-practice-container">
-              {practiceQuestions.map((q, i) => (
-                <PracticeQuestionCard
-                  key={i}
-                  question={q.question}
-                  answer={q.answer}
-                  number={i + 1}
-                />
-              ))}
+            
+            {/* Paywall Overlay CTA */}
+            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center p-6 text-center transition-transform group-hover:scale-105">
+              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                <Sparkles className="h-8 w-8 text-primary" />
+              </div>
+              <h3 className="text-2xl font-bold mb-2">Unlock Full Syllabus</h3>
+              <p className="text-muted-foreground mb-6 max-w-sm">Upgrade to Premium to access all detailed notes, practice questions, and expert tips for this section.</p>
+              <Button className="font-semibold px-8 rounded-xl h-11 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 border-none shadow-lg shadow-amber-500/20 text-white">Unlock Now</Button>
             </div>
-          </div>
-        )}
 
-        {/* Completion Block */}
-        <div className="notes-completion-block mb-10">
-          <h3 className="text-2xl font-bold text-foreground mb-3">
-            {isDone ? "Topic Completed!" : "Finished reading?"}
-          </h3>
-          <p className="text-muted-foreground mb-6">
-            {isDone 
-              ? "Great work! Move on to the next topic or review anytime." 
-              : "Mark this topic as complete to track your progress."
-            }
-          </p>
-          {user && (
-            <Button
-              onClick={handleToggleDone}
-              disabled={loading}
-              className={cn(
-                "notes-completion-btn",
-                isDone && "complete"
+            {/* Modal */}
+            <PremiumPaywall 
+              open={showPaywall} 
+              onOpenChange={setShowPaywall} 
+              title="Unlock All Notes" 
+              description="Get unrestricted access to our entire premium study syllabus." 
+            />
+          </div>
+        ) : (
+          <>
+            {/* Content Blocks */}
+            <div className="space-y-5 mb-10">
+              {renderBlocks(contentBlocks)}
+            </div>
+
+            {/* Practice Questions Section */}
+            {practiceQuestions.length > 0 && (
+              <div id="practice-questions" className="mb-10 scroll-mt-24">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className={cn("p-2.5 rounded-xl", currentSubject === 'english' ? "bg-amber-500/10" : "bg-primary/10")}>
+                    <PenLine className={cn("h-5 w-5", currentSubject === 'english' ? "text-amber-500" : "text-primary")} />
+                  </div>
+                  <h2 className="text-xl font-bold text-foreground">Practice Questions</h2>
+                </div>
+                <div className="notes-practice-container">
+                  {practiceQuestions.map((q, i) => (
+                    <PracticeQuestionCard
+                      key={i}
+                      question={q.question}
+                      answer={q.answer}
+                      number={i + 1}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Completion Block */}
+            <div className="notes-completion-block mb-10">
+              <h3 className="text-2xl font-bold text-foreground mb-3">
+                {isDone ? "Topic Completed!" : "Finished reading?"}
+              </h3>
+              <p className="text-muted-foreground mb-6">
+                {isDone 
+                  ? "Great work! Move on to the next topic or review anytime." 
+                  : "Mark this topic as complete to track your progress."
+                }
+              </p>
+              {user && (
+                <Button
+                  onClick={handleToggleDone}
+                  disabled={loading}
+                  className={cn(
+                    "notes-completion-btn",
+                    isDone && "complete"
+                  )}
+                >
+                  {isDone ? (
+                    <>
+                      <CheckCircle className="h-5 w-5" />
+                      Completed
+                    </>
+                  ) : (
+                    <>
+                      <Check className="h-5 w-5" />
+                      Mark as Complete
+                    </>
+                  )}
+                </Button>
               )}
-            >
-              {isDone ? (
-                <>
-                  <CheckCircle className="h-5 w-5" />
-                  Completed
-                </>
-              ) : (
-                <>
-                  <Check className="h-5 w-5" />
-                  Mark as Complete
-                </>
-              )}
-            </Button>
-          )}
-        </div>
+            </div>
+          </>
+        )}
 
         {/* Navigation Footer */}
         <div className="flex items-center justify-between gap-4">

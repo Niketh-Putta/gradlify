@@ -464,6 +464,39 @@ export function usePremium(trackOverride?: UserTrack) {
     return { allowed, uses: nextUses, limit };
   };
 
+  const incrementMockUsage = async () => {
+    if (!hasUserContext) {
+      const currentUses = guestMockUses;
+      const allowed = currentUses < 1; // 1 mock per day for guests
+      const nextUses = allowed ? currentUses + 1 : currentUses;
+      setGuestMockUses(nextUses);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('guestMockUsage', String(nextUses));
+        window.dispatchEvent(new CustomEvent('guestMockUsageChanged'));
+      }
+      return { allowed, uses: nextUses, limit: 1 };
+    }
+    if (isAdmin) return { allowed: true, uses: dailyMockUses, limit: Infinity };
+
+    try {
+      const updatedUses = dailyMockUses + 1;
+      const { data, error } = await supabase
+        .from('profiles')
+        .update({ daily_mock_uses: updatedUses })
+        .eq('user_id', profile.user_id)
+        .select('daily_mock_uses')
+        .single();
+        
+      if (error) throw error;
+      setDailyMockUses(data.daily_mock_uses);
+      emitMockUsageUpdate();
+      return { allowed: true, uses: data.daily_mock_uses, limit: isPremium ? Infinity : 1 };
+    } catch (error) {
+      console.error('Error incrementing mock usage:', error);
+      return { allowed: false, uses: dailyMockUses, limit: isPremium ? Infinity : 1 };
+    }
+  };
+
   const isFounder = founderTrack === 'founder';
   const profileTier = profile?.tier ?? null;
   const profilePlan = profile?.plan ?? null;
@@ -562,6 +595,7 @@ export function usePremium(trackOverride?: UserTrack) {
     canUseFullPaper: hasUserContext ? canUseFullPaper : false,
     incrementUsage,
     incrementChallengeUsage,
+    incrementMockUsage,
     fetchUsageData: hasUserContext ? fetchUsageData : async () => {},
     canSpendUsage,
     refreshUsage

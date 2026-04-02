@@ -83,7 +83,7 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
   }, [userTrack, currentSubject]);
   
   const navigate = useNavigate();
-  const { isPremium, canStartMockExam, canStartChallengeSession, dailyMockUses, dailyMockLimit, dailyChallengeUses, dailyChallengeLimit, refreshUsage, canUse10Questions, canUse20Questions, canUse30Questions, canUseFullPaper } = usePremium(userTrack);
+  const { isPremium, canStartMockExam, canStartChallengeSession, dailyMockUses, dailyMockLimit, dailyChallengeUses, dailyChallengeLimit, refreshUsage, canUse10Questions, canUse20Questions, canUse30Questions, canUseFullPaper, incrementMockUsage } = usePremium(userTrack);
   const challengeLimitForDisplay = dailyChallengeLimit ?? FREE_CHALLENGE_LIMIT;
 
   const [examMode, setExamMode] = useState<ExamMode>('practice');
