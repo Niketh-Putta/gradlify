@@ -548,6 +548,7 @@ export function EnglishSplitViewDemo() {
   const passageLineRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const rightPaneRef = useRef<HTMLDivElement>(null);
   const questionRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const lastEvidenceRefKey = useRef<string | null>(null);
 
   // 1. FILTERING LOGIC
   const activeSections = useMemo(() => {
@@ -727,6 +728,13 @@ export function EnglishSplitViewDemo() {
 
     if (targetSectionId && targetEvidenceLine) {
       const uniqueRefKey = `${targetSectionId}_${targetEvidenceLine}`;
+      
+      // If the upcoming active question references the EXACT same passage text block, do not shift the left side globally!
+      if (lastEvidenceRefKey.current === uniqueRefKey) {
+          return; 
+      }
+      lastEvidenceRefKey.current = uniqueRefKey;
+
       const targetElement = passageLineRefs.current[uniqueRefKey];
       const questionElement = questionRefs.current[activeQuestionId];
       const leftContainer = passageContainerRef.current;
@@ -1233,14 +1241,10 @@ export function EnglishSplitViewDemo() {
           </div>
         </div>
 
-        {/* ---------------- FAR RIGHT SCROLL/PROGRESS COLUMN ---------------- */}
+        {/* ---------------- FLOATING PROGRESS PILL ---------------- */}
         {!isFinished && activeSections.length > 0 && (
-          <div className="w-[72px] border-l border-border/60 bg-card/40 hidden lg:flex flex-col items-center py-6 gap-3 overflow-y-auto z-10 custom-scrollbar relative">
-            <div className="text-[9px] font-black tracking-widest text-muted-foreground/40 uppercase mb-2 writing-vertical transform -rotate-90 whitespace-nowrap mt-4">
-              Progress
-            </div>
-            
-            <div className="flex flex-col items-center gap-2.5 w-full mt-4">
+          <div className="absolute right-8 top-1/2 -translate-y-1/2 max-h-[50vh] w-10 bg-card/80 backdrop-blur-xl rounded-[2rem] shadow-xl border border-border/60 hidden lg:flex flex-col items-center py-6 overflow-y-auto z-50 custom-scrollbar hide-scroll">
+            <div className="flex flex-col items-center w-full gap-3">
               {activeSections.map(s => s.questions.map(q => ({ sec: s, q }))).flat().map(({ sec, q }, idx) => {
                 const qKey = `${sec.sectionId}_${q.id}`;
                 const isSelected = activeQuestionId === qKey;
@@ -1255,13 +1259,13 @@ export function EnglishSplitViewDemo() {
                     }}
                     title={`Question ${idx + 1}`}
                     className={cn(
-                      "transition-all duration-300 relative shrink-0 rounded-full cursor-pointer my-1.5",
+                      "transition-all duration-300 relative shrink-0 rounded-full cursor-pointer",
                       isSelected 
-                        ? "w-3.5 h-3.5 bg-amber-500 shadow-sm ring-4 ring-amber-500/20" 
+                        ? "w-3 h-3 bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.4)]" 
                         : isAnswered 
-                          ? "w-2.5 h-2.5 bg-amber-500/50 hover:bg-amber-500/80" 
-                          : "w-2.5 h-2.5 bg-border hover:bg-muted-foreground/40",
-                      isFlagged && "ring-2 ring-rose-500 ring-offset-2 ring-offset-background"
+                          ? "w-2 h-2 bg-amber-500/50 hover:bg-amber-500/80" 
+                          : "w-2 h-2 bg-border hover:bg-muted-foreground/40",
+                      isFlagged && "ring-2 ring-rose-500 ring-offset-2 ring-offset-card/80"
                     )}
                   />
                 );
