@@ -506,6 +506,7 @@ export function EnglishSplitViewDemo() {
 
   const [isFinished, setIsFinished] = useState<boolean>(false);
   const [isReviewMode, setIsReviewMode] = useState<boolean>(false);
+  const [reviewViewedOptions, setReviewViewedOptions] = useState<Record<string, string>>({});
 
   const [activeQuestionId, setActiveQuestionId] = useState<string>("q1");
   const [selectedAnswers, setSelectedAnswers] = useState<Record<string, string>>({});
@@ -925,10 +926,10 @@ export function EnglishSplitViewDemo() {
                           )}
                           <p 
                             className={cn(
-                              "transition-all duration-700 p-4 -mx-4 rounded-xl cursor-text relative",
+                              "transition-all duration-700 p-4 -mx-4 rounded-xl cursor-text relative border-l-[3px]",
                               showScaffold 
-                                ? "bg-amber-50/80 dark:bg-amber-500/10 border-l-4 border-amber-500 shadow-sm ring-1 ring-amber-200/50 scale-[1.01] text-foreground font-medium z-10" 
-                                : "opacity-60 group-hover:opacity-100 hover:bg-black/5 dark:hover:bg-white/5"
+                                ? "bg-amber-50/80 dark:bg-amber-500/10 border-amber-500 shadow-sm ring-1 ring-amber-200/50 text-foreground z-10" 
+                                : "border-transparent opacity-60 group-hover:opacity-100 hover:bg-black/5 dark:hover:bg-white/5"
                             )}
                           >
                             {showScaffold && (
@@ -996,15 +997,6 @@ export function EnglishSplitViewDemo() {
                   {examMode === 'mock' ? 'You have configured a custom Mock Exam mixing multiple passages.' : 'Answer the questions based on the source texts strictly.'}
                 </p>
               </div>
-              
-              {examMode === 'practice' && activeSections.length > 0 && activeSections[0].tier && (
-                <div className="shrink-0 mt-1">
-                  <span className="relative bg-background/95 border border-amber-500/30 px-4 py-2 rounded-full bg-amber-500/10 shadow-sm flex items-center gap-2 cursor-default">
-                    <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                    <span className="text-xs font-black tracking-widest text-amber-600 uppercase pt-0.5">{activeSections[0].tier}</span>
-                  </span>
-                </div>
-              )}
             </div>
 
             {/* Render all the loaded sections linearly */}
@@ -1029,26 +1021,18 @@ export function EnglishSplitViewDemo() {
                 <div key={section.sectionId} className={cn("mb-16", secIndex === 0 && examMode === 'practice' ? "mt-4" : "")}>
                   {/* Show Tier mid-scroll for Mock Exams OR Mixed Practice with multiple passages */}
                   {(examMode === 'mock' || activeSections.length > 1) && (
-                    <div className={cn("relative flex justify-end w-full mb-8", secIndex === 0 ? "mt-4" : "mt-10")}>
-                      {secIndex > 0 && (
-                        <div className="absolute inset-0 flex items-center" aria-hidden="true">
-                          <div className="w-full border-t border-border/80" />
-                        </div>
-                      )}
-                      
-                      <div className="relative flex justify-between w-full">
-                        <span className="bg-background/95 px-5 py-2 rounded-xl bg-muted/30 border border-border shadow-sm flex items-center gap-3 transform hover:scale-105 transition-transform cursor-default overflow-hidden max-w-[80%]">
-                          <span className="text-xs font-black tracking-widest text-foreground uppercase pt-0.5 truncate shrink-0 underline underline-offset-[3px] decoration-foreground/40">{topicLabel} {typeNoun}</span>
-                          <span className="text-xs font-bold text-muted-foreground truncate border-l border-border/60 pl-3 hidden sm:inline-block underline underline-offset-[3px] decoration-border">({section.leftTitle})</span>
-                        </span>
-
-                        {section.tier && (
-                          <span className="relative bg-background/95 border border-amber-500/30 px-4 py-1.5 rounded-full bg-amber-500/10 shadow-sm flex items-center gap-2 cursor-default shrink-0 ml-4">
-                            <Sparkles className="w-3 h-3 text-amber-500" />
-                            <span className="text-xs font-black tracking-widest text-amber-600 uppercase pt-0.5">{section.tier}</span>
-                          </span>
-                        )}
+                    <div className={cn("relative flex justify-between items-end w-full border-b border-border/60 pb-5 mb-10", secIndex === 0 ? "mt-4" : "mt-14")}>
+                      <div className="flex flex-col gap-1.5 items-start">
+                        <span className="px-2 py-0.5 rounded text-[9px] font-black tracking-[0.15em] uppercase bg-foreground/10 text-foreground/60">{topicLabel} {typeNoun}</span>
+                        <span className="text-xl font-bold tracking-tight text-foreground/90">{section.leftTitle}</span>
                       </div>
+
+                      {section.tier && (
+                        <span className="mb-1 relative bg-amber-500/10 border border-amber-500/20 px-3 py-1 rounded-full shadow-sm flex items-center gap-1.5 cursor-default shrink-0 transition-transform hover:scale-105">
+                          <Sparkles className="w-3 h-3 text-amber-500" />
+                          <span className="text-[10px] font-black tracking-widest text-amber-600 uppercase pt-0.5">{section.tier}</span>
+                        </span>
+                      )}
                     </div>
                   )}
 
@@ -1094,9 +1078,13 @@ export function EnglishSplitViewDemo() {
                           <div className="space-y-3">
                             {q.options.map((opt) => {
                               const selected = selectedAnswers[q.id] === opt.id;
+                              const isViewedInReview = isReviewMode && reviewViewedOptions[q.id] === opt.id;
                               
                               // Logic for showing distractors / evaluations
-                              const showDistractor = (examMode === 'practice' && showTrap === q.id && selected && opt.trap) || (isReviewMode && selected && opt.trap && !opt.correct);
+                              const showDistractor = (examMode === 'practice' && showTrap === q.id && selected && opt.trap) || 
+                                                     (isReviewMode && selected && opt.trap && !opt.correct) ||
+                                                     (isViewedInReview && opt.trap && !opt.correct);
+                                                     
                               const evaluateCorrectness = (examMode === 'practice' && selected) || (isReviewMode && opt.correct) || (isReviewMode && selected);
 
                               return (
@@ -1104,7 +1092,10 @@ export function EnglishSplitViewDemo() {
                                   <button
                                     onClick={(e) => {
                                       e.stopPropagation();
-                                      if (isReviewMode) return;
+                                      if (isReviewMode) {
+                                        setReviewViewedOptions(prev => ({ ...prev, [q.id]: opt.id }));
+                                        return;
+                                      }
                                       handleSelectAnswer(q.id, opt.id, opt.trap);
                                     }}
                                     className={cn(
