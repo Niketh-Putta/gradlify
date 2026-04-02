@@ -73,8 +73,7 @@ export function Home() {
   const { remainingUses, isPremium, dailyLimit, fetchUsageData } = usePremium();
   const isFounder = profile?.founder_track === 'founder' || profile?.founder_track === 'competitor';
   const navigate = useNavigate();
-  const [visibleElements, setVisibleElements] = useState<Set<string>>(new Set());
-  const [isFirstVisit, setIsFirstVisit] = useState<boolean>(false);
+    const [isFirstVisit, setIsFirstVisit] = useState<boolean>(false);
   const [practiceCount, setPracticeCount] = useState<number | null>(null);
   const [trackSwitching, setTrackSwitching] = useState(false);
   
@@ -109,25 +108,7 @@ export function Home() {
     }
   }, [fetchUsageData]);
 
-  // Scroll animation hook
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setVisibleElements(prev => new Set(prev).add(entry.target.id));
-          }
-        });
-      },
-      { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
-    );
-
-    const elements = document.querySelectorAll('[data-animate]');
-    elements.forEach(el => observer.observe(el));
-
-    return () => observer.disconnect();
-  }, []);
-
+  
 
 
   // Check if this is the user's first visit
@@ -429,13 +410,7 @@ export function Home() {
         </div>
         {/* Hero Welcome Section */}
         <div 
-          id="welcome"
-          data-animate
-          className={`relative overflow-hidden rounded-2xl bg-gradient-card border border-border/40 shadow-card p-6 sm:p-8 lg:p-10 mb-8 transition-all duration-700 ${
-            visibleElements.has('welcome') 
-              ? 'translate-y-0 opacity-100' 
-              : 'translate-y-8 opacity-0'
-          }`}
+          className="relative overflow-hidden rounded-2xl bg-gradient-card border border-border/40 shadow-card p-6 sm:p-8 lg:p-10 mb-8 transition-all duration-700"
         >
           {/* Decorative elements */}
           <div className={cn(
@@ -517,13 +492,7 @@ export function Home() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           {/* Overall Readiness Card */}
           <div 
-            id="overall-readiness"
-            data-animate
-            className={`transition-all duration-700 delay-100 ${
-              visibleElements.has('overall-readiness') 
-                ? 'translate-y-0 opacity-100' 
-                : 'translate-y-8 opacity-0'
-            }`}
+            className="delay-100"
           >
             <OverallReadinessCard
               userId={user?.id}
@@ -539,30 +508,18 @@ export function Home() {
 
           {/* Notes Progress Card */}
           <div 
-            id="notes-progress"
-            data-animate
-            className={`transition-all duration-700 delay-150 ${
-              visibleElements.has('notes-progress') 
-                ? 'translate-y-0 opacity-100' 
-                : 'translate-y-8 opacity-0'
-            }`}
+            className="delay-150"
           >
             <NotesProgressCard
               className="h-full"
-              isVisible={visibleElements.has('notes-progress')}
+              isVisible={true}
               onClick={() => navigate('/notes')}
             />
           </div>
 
           {AI_FEATURE_ENABLED && (
             <div 
-              id="ai-usage"
-              data-animate
-              className={`transition-all duration-700 delay-200 ${
-                visibleElements.has('ai-usage') 
-                  ? 'translate-y-0 opacity-100' 
-                  : 'translate-y-8 opacity-0'
-              }`}
+              className="delay-200"
             >
               <Card className="h-full relative overflow-hidden">
                 <div className={cn(
@@ -640,13 +597,7 @@ export function Home() {
 
           {!AI_FEATURE_ENABLED && (
             <div 
-              id="focus-topic"
-              data-animate
-              className={`transition-all duration-700 delay-200 ${
-                visibleElements.has('focus-topic') 
-                  ? 'translate-y-0 opacity-100' 
-                  : 'translate-y-8 opacity-0'
-              }`}
+              className="delay-200"
             >
               <Card className={cn(
                 "h-full border transition-all duration-500 overflow-hidden relative shadow-md group hover:shadow-lg",
@@ -741,13 +692,7 @@ export function Home() {
 
         {/* Topic Breakdown Section */}
         <div 
-          id="topics"
-          data-animate
-          className={`mb-8 transition-all duration-700 delay-250 ${
-            visibleElements.has('topics') 
-              ? 'translate-y-0 opacity-100' 
-              : 'translate-y-8 opacity-0'
-          }`}
+          className="mb-8 delay-250"
         >
           <Card>
             <CardHeader className="pb-2">
@@ -833,13 +778,7 @@ export function Home() {
 
         {/* Quick Actions */}
         <div 
-          id="actions"
-          data-animate
-          className={`mb-8 transition-all duration-700 delay-300 ${
-            visibleElements.has('actions') 
-              ? 'translate-y-0 opacity-100' 
-              : 'translate-y-8 opacity-0'
-          }`}
+          className="mb-8 delay-300"
         >
           <h2 className="text-lg font-semibold text-foreground mb-4">Quick Actions</h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -936,13 +875,7 @@ export function Home() {
 
         {/* Leaderboard Section */}
         <div 
-          id="leaderboard"
-          data-animate
-          className={`mb-8 transition-all duration-700 delay-350 ${
-            visibleElements.has('leaderboard') 
-              ? 'translate-y-0 opacity-100' 
-              : 'translate-y-8 opacity-0'
-          }`}
+          className="mb-8 delay-350"
         >
           <LeaderboardSnapshot />
         </div>
@@ -950,13 +883,7 @@ export function Home() {
         {/* Premium Upgrade Banner - Only hide for paid premium users */}
         {!isPremium && !isFounder && (
           <div 
-            id="premium"
-            data-animate
-            className={`mb-8 transition-all duration-700 delay-400 ${
-              visibleElements.has('premium') 
-                ? 'translate-y-0 opacity-100' 
-                : 'translate-y-8 opacity-0'
-            }`}
+            className="mb-8 delay-400"
           >
             <div className="rounded-2xl overflow-hidden border border-border/40">
               <div className={cn(
