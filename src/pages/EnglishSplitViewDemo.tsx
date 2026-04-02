@@ -19,6 +19,7 @@ export interface EnglishQuestion {
   text: string;
   evidenceLine: string | 'global';
   options: EnglishOption[];
+  explanation?: string;
 }
 
 export interface EnglishPassageBlock {
@@ -34,6 +35,7 @@ export interface EnglishSection {
   desc: string;
   leftTitle: string;
   tier?: string;
+  difficulty?: number;
   passageBlocks: EnglishPassageBlock[];
   questions: EnglishQuestion[];
 }
@@ -480,6 +482,7 @@ export function EnglishSplitViewDemo() {
              desc: row.desc || 'Read the text carefully and answer the following questions.',
              leftTitle: row.title || 'Practice Source',
              tier: row.tier || 'Level Unknown',
+             difficulty: row.difficulty,
              passageBlocks: row.passageBlocks || [],
              questions: row.questions || []
            }));
@@ -630,6 +633,35 @@ export function EnglishSplitViewDemo() {
     }
   }, [activeSections, dbSections.length]);
 
+  const timerInitialized = useRef(false);
+
+  // Dynamically calibrate Mock Timer based on Passage Loads, Pedagogy, and 11+ Recommended Norms
+  useEffect(() => {
+    if (examMode !== 'mock' || activeSections.length === 0 || timerInitialized.current) return;
+    
+    let totalSeconds = 0;
+    activeSections.forEach(sec => {
+      const isComp = sec.sectionId.toLowerCase() === 'comprehension' || (sec.subEngine || '').toLowerCase() === 'comprehension';
+      
+      // 1. Base Text Density Processing: 3.5 mins for Comp passages, 0 for isolated SPaG blocks
+      const readingAllowance = isComp ? 210 : 0;
+      
+      // 2. Base Per-Question Velocity: 55 seconds for Comp (inferential), 40 seconds for SPaG/Vocab (recall)
+      const basePerQuestion = isComp ? 55 : 40;
+      
+      // 3. Exam Board Scaler: Adjust for complexity bandwidth (e.g. 1.25x for Synthesis/Level 3)
+      const diffMultiplier = sec.difficulty === 3 ? 1.25 : (sec.difficulty === 2 ? 1.1 : 1.0);
+      
+      const secTime = readingAllowance + (sec.questions.length * basePerQuestion * diffMultiplier);
+      totalSeconds += Math.round(secTime);
+    });
+    
+    if (totalSeconds > 0) {
+      setTimeLeft(totalSeconds);
+      timerInitialized.current = true;
+    }
+  }, [activeSections, examMode]);
+
   // Timer logic for Mock Mode
   useEffect(() => {
     if (examMode === 'mock' && !isFinished && timeLeft > 0) {
@@ -661,11 +693,10 @@ export function EnglishSplitViewDemo() {
     });
   };
 
-  const handleSelectAnswer = (qId: string, optId: string, isTrap?: string) => {
+  const handleSelectAnswer = (qId: string, optId: string) => {
     setSelectedAnswers(prev => ({ ...prev, [qId]: optId }));
     if (examMode === 'practice') {
-      if (isTrap) setShowTrap(qId);
-      else setShowTrap(null);
+      setShowTrap(qId);
     }
   };
 
@@ -762,7 +793,7 @@ export function EnglishSplitViewDemo() {
         if (isComp) compTotal++;
         else spagTotal++;
         
-        const ans = selectedAnswers[q.id];
+        const ans = selectedAnswers[`${sec.sectionId}_${q.id}`];
         const correctOpt = q.options.find(o => o.correct);
         if (ans && correctOpt && ans === correctOpt.id) {
           if (isComp) compCorrect++;
@@ -785,7 +816,7 @@ export function EnglishSplitViewDemo() {
     if (sas < 105) sasColor = "text-rose-500";
     else if (sas < 120) sasColor = "text-amber-500";
     
-    return { compTotal, compPerc, spagTotal, spagPerc, overallTotal, overallCorrect, displaySAS: sas, sasColor };
+    return { compTotal, compPerc, spagTotal, spagPerc, overallTotal, overallCorrect, overallPerc, displaySAS: sas, sasColor };
   }, [isFinished, activeSections, selectedAnswers]);
 
   const formatTime = (seconds: number) => {
@@ -817,7 +848,7 @@ export function EnglishSplitViewDemo() {
                 
                 <p className="text-foreground leading-relaxed mb-6 bg-background rounded-2xl p-5 border border-border/40 font-medium">
                   {results.overallTotal > 0 ? (
-                    <>Excellent work! Based on standard 11+ normalisation limits, you achieved an estimated <strong>Standardised Age Score (SAS)</strong> of <strong className={cn("text-xl font-black", results.sasColor)}>{results.displaySAS} / 141</strong> across this rigorous configuration.</>
+                    <>Excellent work! Based on standard 11+ normalisation limits, you achieved a highly competitive <strong>Standardised Exam Score</strong> of <strong className={cn("text-xl font-black", results.sasColor)}>{results.overallPerc}%</strong> across this rigorous configuration.</>
                   ) : (
                     <>You did not answer any questions in this session.</>
                   )}
@@ -845,7 +876,7 @@ export function EnglishSplitViewDemo() {
           ) : (
             <div className="space-y-6 mt-8">
               <div className="p-6 rounded-2xl bg-muted/40 border border-border/60">
-                <p className="text-lg font-medium mb-2">You got 1 out of 1 correct.</p>
+                <p className="text-lg font-medium mb-2">You scored {results?.overallPerc || 0}% ({results?.overallCorrect || 0} out of {results?.overallTotal || 0} correct).</p>
                 <p className="text-sm text-muted-foreground mb-6">
                   You are missing <strong className="text-foreground">over 80+ Elite questions</strong> encompassing isolated SPaG passages, Cloze structures, and rigorous full-length exams.
                 </p>
@@ -1075,8 +1106,8 @@ export function EnglishSplitViewDemo() {
 
               return (
                 <div key={section.sectionId} className={cn("mb-16", secIndex === 0 && examMode === 'practice' ? "mt-4" : "")}>
-                  {/* Always Show Tier and specific passage title */}
-                  <div className={cn("relative flex justify-between items-end w-full border-b border-border/60 pb-5 mb-10", secIndex === 0 ? "mt-4" : "mt-14")}>
+                  {/* Always Show Tier and specific passage title with premium spacing */}
+                  <div className={cn("relative flex flex-col md:flex-row justify-between items-start md:items-end gap-6 w-full border-b border-border/60 pb-5 mb-10", secIndex === 0 ? "mt-4" : "mt-14")}>
                     <div className="flex flex-col gap-1.5 items-start">
                       <span className="px-2 py-0.5 rounded text-[9px] font-black tracking-[0.15em] uppercase bg-foreground/10 text-foreground/60">{badgeLabel}</span>
                       <span className="text-xl font-bold tracking-tight text-foreground/90">{displayTitle}</span>
@@ -1085,7 +1116,9 @@ export function EnglishSplitViewDemo() {
                     {section.tier && (
                       <span className="mb-1 relative bg-amber-500/10 border border-amber-500/20 px-3 py-1 rounded-full shadow-sm flex items-center gap-1.5 cursor-default shrink-0 transition-transform hover:scale-105">
                         <Sparkles className="w-3 h-3 text-amber-500" />
-                        <span className="text-[10px] font-black tracking-widest text-amber-600 uppercase pt-0.5">{section.tier}</span>
+                        <span className="text-[10px] font-black tracking-widest text-amber-600 uppercase pt-0.5">
+                          {section.difficulty ? `LEVEL ${section.difficulty}` : (section.tier.match(/(Level\s*\d+)/i)?.[1] || section.tier.split(/[\(\:\-]/)[0].trim())}
+                        </span>
                       </span>
                     )}
                   </div>
@@ -1136,9 +1169,9 @@ export function EnglishSplitViewDemo() {
                               const isViewedInReview = isReviewMode && reviewViewedOptions[qKey] === opt.id;
                               
                               // Logic for showing distractors / evaluations
-                              const showDistractor = (examMode === 'practice' && showTrap === qKey && selected && opt.trap) || 
-                                                     (isReviewMode && selected && opt.trap && !opt.correct) ||
-                                                     (isViewedInReview && opt.trap && !opt.correct);
+                              const showDistractor = (examMode === 'practice' && showTrap === qKey && selected && !opt.correct) || 
+                                                     (isReviewMode && selected && !opt.correct) ||
+                                                     (isViewedInReview && !opt.correct);
                                                      
                               const evaluateCorrectness = (examMode === 'practice' && selected) || (isReviewMode && opt.correct) || (isReviewMode && selected);
 
@@ -1151,13 +1184,13 @@ export function EnglishSplitViewDemo() {
                                         setReviewViewedOptions(prev => ({ ...prev, [qKey]: opt.id }));
                                         return;
                                       }
-                                      handleSelectAnswer(qKey, opt.id, opt.trap);
+                                      handleSelectAnswer(qKey, opt.id);
                                     }}
                                     className={cn(
                                       "w-full text-left p-4 rounded-xl border transition-all duration-200 flex items-center gap-4 group",
                                       selected 
                                         ? ((examMode === 'mock' && !isReviewMode)
-                                            ? "border-foreground/50 bg-foreground/5 text-foreground ring-2 ring-foreground/20" 
+                                            ? "border-amber-500 bg-amber-500/5 text-amber-900 dark:text-amber-100 ring-2 ring-amber-500/20" 
                                             : (opt.correct 
                                               ? "border-emerald-500 bg-emerald-500/5 text-emerald-700 dark:text-emerald-300 ring-2 ring-emerald-500/20" 
                                               : "border-rose-500 bg-rose-500/5 text-rose-700 dark:text-rose-300 ring-2 ring-rose-500/20"))
@@ -1169,7 +1202,7 @@ export function EnglishSplitViewDemo() {
                                     <span className={cn(
                                       "w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold transition-colors shadow-sm",
                                       selected
-                                        ? ((examMode === 'mock' && !isReviewMode) ? "bg-foreground text-background shadow-md" : (opt.correct ? "bg-emerald-500 text-white shadow-md shadow-emerald-500/20" : "bg-rose-500 text-white shadow-md shadow-rose-500/20"))
+                                        ? ((examMode === 'mock' && !isReviewMode) ? "bg-amber-500 text-white shadow-md shadow-amber-500/30" : (opt.correct ? "bg-emerald-500 text-white shadow-md shadow-emerald-500/20" : "bg-rose-500 text-white shadow-md shadow-rose-500/20"))
                                         : (isReviewMode && opt.correct
                                             ? "bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border-emerald-500/30"
                                             : "bg-card border border-border/80 text-muted-foreground group-hover:text-foreground")
@@ -1179,7 +1212,7 @@ export function EnglishSplitViewDemo() {
                                     <span className="flex-1 text-[15px] font-medium leading-normal">
                                       {opt.text}
                                     </span>
-                                    {selected && examMode === 'mock' && <Check className="w-4 h-4 text-foreground/50" />}
+                                    {selected && examMode === 'mock' && <Check className="w-5 h-5 text-amber-500 font-bold" />}
                                   </button>
 
                                   {/* The Trap Label / Explainer (PRACTICE MODE ONLY or REVIEW) */}
@@ -1196,7 +1229,7 @@ export function EnglishSplitViewDemo() {
                                             Tutor Note
                                           </div>
                                           <p className="text-sm font-medium text-foreground/80 leading-relaxed">
-                                            {opt.trap}
+                                            {opt.trap || q.explanation || "Review the passage carefully to see why this option is unsupported."}
                                           </p>
                                         </div>
                                       </div>
@@ -1208,7 +1241,10 @@ export function EnglishSplitViewDemo() {
                                       <Zap className="w-4 h-4 text-emerald-600" />
                                       <div className="flex-1">
                                         <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-400">
-                                          {selected ? (opt.trap || "Excellent! You isolated the correct rule.") : "This is the correct answer."}
+                                          {selected 
+                                            ? (q.explanation || opt.trap || "Excellent! You isolated the correct rule.") 
+                                            : (q.explanation || "This is the correct answer.")
+                                          }
                                         </p>
                                         {isReviewMode && !selected && opt.trap && (
                                            <p className="text-xs text-emerald-700/80 dark:text-emerald-400/80 mt-1">
@@ -1261,7 +1297,13 @@ export function EnglishSplitViewDemo() {
                     className={cn(
                       "transition-all duration-300 relative shrink-0 rounded-full cursor-pointer",
                       isSelected 
-                        ? "w-3 h-3 bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.4)]" 
+                        ? "shadow-[0_0_8px_rgba(245,158,11,0.4)]" 
+                        : "",
+                      isSelected && (!isReviewMode || !isAnswered) ? "w-3 h-3 bg-amber-500" :
+                      isSelected && isReviewMode && selectedAnswers[qKey] === q.options.find(o => o.correct)?.id ? "w-3 h-3 bg-emerald-500" :
+                      isSelected && isReviewMode && selectedAnswers[qKey] !== q.options.find(o => o.correct)?.id ? "w-3 h-3 bg-rose-500" :
+                      (isReviewMode && isAnswered) 
+                        ? (selectedAnswers[qKey] === q.options.find(o => o.correct)?.id ? "w-2 h-2 bg-emerald-500/60 hover:bg-emerald-500" : "w-2 h-2 bg-rose-500/60 hover:bg-rose-500")
                         : isAnswered 
                           ? "w-2 h-2 bg-amber-500/50 hover:bg-amber-500/80" 
                           : "w-2 h-2 bg-border hover:bg-muted-foreground/40",
