@@ -1214,7 +1214,7 @@ export function SubjectReadinessView({ subject }: { subject: 'english' | 'maths'
         }
 
         recordRecentSubtopic(recommendationSubtopicId);
-        navigate(`/practice-page?${params.toString()}`);
+        navigate(subject === 'english' ? `/english-demo?${params.toString()}` : `/mock-exam?${params.toString()}`);
       } catch (err) {
         console.error('Failed to start recommended practice pack:', err);
         toast.error('Failed to start practice. Please try again.');
@@ -1243,7 +1243,7 @@ export function SubjectReadinessView({ subject }: { subject: 'english' | 'maths'
     recordRecentSubtopic(win.subtopicId);
     setExecutedQuickWinKey(executedKey);
     setQuickWins((prev) => prev.filter((item) => buildWinKey(item.questionIds) !== executedKey));
-    navigate(`/practice-page?${params.toString()}`);
+    navigate(subject === 'english' ? `/english-demo?${params.toString()}` : `/mock-exam?${params.toString()}`);
   };
 
   const recommendationSubtopicScore = recommendationSubtopicProgress
@@ -1580,7 +1580,10 @@ export function SubjectReadinessView({ subject }: { subject: 'english' | 'maths'
                     </p>
                   </div>
                   <Button 
-                    onClick={() => navigate(`/practice-page?mode=exam&tier=${isElevenPlusTrack ? '11plus-standard' : 'both'}&paperType=${isElevenPlusTrack ? 'non-calculator' : 'both'}&topics=${isElevenPlusTrack ? encodeURIComponent('Number & Arithmetic,Algebra & Ratio,Geometry & Measures,Statistics & Data,Problem Solving & Strategies') : 'all'}&title=Baseline+Assessment${isElevenPlusTrack ? '&track=11plus' : ''}`)}
+                    onClick={() => {
+                      const baseUrl = subject === 'english' ? '/english-demo' : '/mock-exam';
+                      navigate(`${baseUrl}?mode=exam&tier=${isElevenPlusTrack ? '11plus-standard' : 'both'}&paperType=${isElevenPlusTrack ? 'non-calculator' : 'both'}&topics=${isElevenPlusTrack ? encodeURIComponent('Number & Arithmetic,Algebra & Ratio,Geometry & Measures,Statistics & Data,Problem Solving & Strategies') : 'all'}&title=Baseline+Assessment${isElevenPlusTrack ? '&track=11plus' : ''}`);
+                    }}
                     size="lg"
                     className={cn(
                        "w-full sm:w-auto h-[56px] sm:h-[60px] px-8 sm:px-12 text-[15px] sm:text-[17px] font-semibold rounded-xl transition-all hover:scale-[1.02] ring-1",
@@ -1614,7 +1617,7 @@ export function SubjectReadinessView({ subject }: { subject: 'english' | 'maths'
               params.set('tier', 'both');
               params.set('paperType', 'both');
               params.set('mode', 'practice');
-              navigate(`/practice-page?${params.toString()}`);
+              navigate(subject === 'english' ? `/english-demo?${params.toString()}` : `/mock-exam?${params.toString()}`);
             };
             initiatePractice(topic || (subject === 'english' ? "General English" : "General Maths"), mode, onConfirmAction);
           }}
