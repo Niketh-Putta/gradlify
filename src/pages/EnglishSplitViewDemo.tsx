@@ -1049,7 +1049,7 @@ export function EnglishSplitViewDemo() {
         </div>
 
         {/* ---------------- RIGHT PANE: QUESTIONS ---------------- */}
-        <div className="flex-1 overflow-y-auto bg-background/50 flex flex-col relative snap-y snap-mandatory" ref={rightPaneRef}>
+        <div className="flex-1 overflow-y-auto bg-background/50 flex flex-col relative snap-y snap-proximity" ref={rightPaneRef}>
           
           {examMode === 'mock' && (
             <div className="sticky top-0 z-20 bg-card/80 backdrop-blur-md border-b border-border/60 px-6 py-3 flex items-center justify-between shadow-sm">
@@ -1288,7 +1288,7 @@ export function EnglishSplitViewDemo() {
             })}
 
             {activeSections.length > 0 && (
-              <div className="pt-10 border-t border-border/40 mt-12 flex justify-end">
+              <div className="pt-10 border-t border-border/40 mt-12 mb-12 flex justify-end snap-end scroll-m-8">
                 <Button onClick={() => setIsFinished(true)} className="bg-amber-500 hover:bg-amber-600 text-amber-950 font-bold px-8 h-12 rounded-xl text-md shadow-[0_0_20px_rgba(245,158,11,0.3)]">
                   {isReviewMode ? 'Return to Results' : 'Submit Mock Exam'}
                 </Button>
