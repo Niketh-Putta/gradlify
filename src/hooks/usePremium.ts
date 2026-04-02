@@ -525,10 +525,18 @@ export function usePremium(trackOverride?: UserTrack, subject?: 'maths' | 'engli
         setDailyMockUses(subjectCount);
         return { allowed: false, uses: subjectCount, limit: 1, message: 'You have already used your free mock exam for this subject today.' };
       }
+      // Allowed — insert a mock_attempts row RIGHT NOW to consume the limit immediately.
+      // Even if the user backs out, the attempt is used up.
+      const mockMode = subject === 'english' ? 'mock-exam' : 'mock';
+      await supabase.from('mock_attempts').insert({
+        user_id: user!.id,
+        track: activeTrack,
+        title: `${subject === 'english' ? 'English' : 'Maths'} Mock Exam`,
+        mode: mockMode,
+        total_marks: 0,
+        status: 'started'
+      });
 
-      // Allowed — the mock_attempts row will be inserted by MockExamPage/EnglishSplitViewDemo
-      // when the exam completes, so the count will naturally go up.
-      // We optimistically set it to 1 now for immediate UI feedback.
       setDailyMockUses(1);
       emitMockUsageUpdate();
       return { allowed: true, uses: 1, limit: 1, message: '' };

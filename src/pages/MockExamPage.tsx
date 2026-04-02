@@ -868,16 +868,50 @@ export default function MockExamPage() {
       try {
         const totalMarksForAttempt = totalMarks;
         const earnedMarksForAttempt = earnedMarks;
-        const { data: attempt } = await supabase.from('mock_attempts').insert({
-          user_id: user.id,
-          track: userTrack,
-          title: `${formatTier(tier, userTrack === '11plus')} - ${formatPaperType(paperType, userTrack === '11plus')}`,
-          mode,
-          duration_minutes: durationMinutes,
-          total_marks: totalMarksForAttempt,
-          score: earnedMarksForAttempt,
-          status: 'completed'
-        }).select().single();
+        
+        // Try to update an existing 'started' attempt (created when the mock was launched)
+        const startOfDay = new Date();
+        startOfDay.setHours(0, 0, 0, 0);
+        const { data: existingAttempt } = await supabase
+          .from('mock_attempts')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('mode', mode)
+          .eq('status', 'started')
+          .gte('created_at', startOfDay.toISOString())
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single();
+
+        let attempt: any = null;
+        if (existingAttempt) {
+          // Update the existing 'started' row with final results
+          const { data } = await supabase.from('mock_attempts')
+            .update({
+              title: `${formatTier(tier, userTrack === '11plus')} - ${formatPaperType(paperType, userTrack === '11plus')}`,
+              duration_minutes: durationMinutes,
+              total_marks: totalMarksForAttempt,
+              score: earnedMarksForAttempt,
+              status: 'completed'
+            })
+            .eq('id', existingAttempt.id)
+            .select()
+            .single();
+          attempt = data;
+        } else {
+          // Fallback: insert a new row (e.g. premium users who skip the limit check)
+          const { data } = await supabase.from('mock_attempts').insert({
+            user_id: user.id,
+            track: userTrack,
+            title: `${formatTier(tier, userTrack === '11plus')} - ${formatPaperType(paperType, userTrack === '11plus')}`,
+            mode,
+            duration_minutes: durationMinutes,
+            total_marks: totalMarksForAttempt,
+            score: earnedMarksForAttempt,
+            status: 'completed'
+          }).select().single();
+          attempt = data;
+        }
 
         if (attempt) {
           const questionsToInsert = examQuestions.map((q, idx) => ({
