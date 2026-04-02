@@ -45,27 +45,6 @@ const writeLocalChallengeUsage = (track: UserTrack, uses: number, resetAt: strin
   );
 };
 
-const mockLocalKey = (subj: string | null | undefined) => `gradlify:mockUsageLocal:${subj || 'general'}`;
-
-const readLocalMockUsage = (subj: string | null | undefined): { uses: number; resetAt: string | null } => {
-  if (typeof window === 'undefined') return { uses: 0, resetAt: null };
-  try {
-    const raw = localStorage.getItem(mockLocalKey(subj));
-    if (!raw) return { uses: 0, resetAt: null };
-    const parsed = JSON.parse(raw);
-    return {
-      uses: Number.isFinite(parsed?.uses) ? parsed.uses : 0,
-      resetAt: typeof parsed?.resetAt === 'string' ? parsed.resetAt : null,
-    };
-  } catch {
-    return { uses: 0, resetAt: null };
-  }
-};
-
-const writeLocalMockUsage = (subj: string | null | undefined, uses: number, resetAt: string | null) => {
-  if (typeof window === 'undefined') return;
-  localStorage.setItem(mockLocalKey(subj), JSON.stringify({ uses, resetAt }));
-};
 
 const isPlanActive = (plan: string, currentPeriodEnd: string | null) => {
   if (!plan || plan === 'free') return false;
@@ -321,20 +300,21 @@ export function usePremium(trackOverride?: UserTrack, subject?: 'maths' | 'engli
           setCurrentPeriodEnd(data.current_period_end || null);
         }
 
-        // Check if we need to reset daily mock usage
-        if (!mockResetAtDt || now > mockResetAtDt) {
-          await resetDailyMockUsage(false);
-          // Also reset subject-specific local mock counter
-          const nextReset = new Date();
-          nextReset.setDate(nextReset.getDate() + 1);
-          nextReset.setHours(0, 0, 0, 0);
-          writeLocalMockUsage(subject, 0, nextReset.toISOString());
-        } else {
-          // Read subject-specific local mock usage (not the shared DB counter)
-          const localMock = readLocalMockUsage(subject);
-          const localResetAt = localMock.resetAt ? new Date(localMock.resetAt) : null;
-          const subjectMockUses = localResetAt && now > localResetAt ? 0 : localMock.uses;
-          setDailyMockUses(subjectMockUses);
+        // Count today's actual mock attempts for this subject from the database
+        // This is the single source of truth — no localStorage, no profile counters
+        if (user?.id) {
+          const startOfDay = new Date();
+          startOfDay.setHours(0, 0, 0, 0);
+          const { data: todayMocks } = await supabase
+            .from('mock_attempts')
+            .select('id, mode')
+            .eq('user_id', user.id)
+            .gte('created_at', startOfDay.toISOString())
+            .in('mode', ['mock', 'mock-exam']);
+          const subjectCount = subject === 'english'
+            ? (todayMocks || []).filter(m => m.mode === 'mock-exam').length
+            : (todayMocks || []).filter(m => m.mode === 'mock').length;
+          setDailyMockUses(subjectCount);
         }
 
         if (!challengeResetAt || now > challengeResetAt) {
@@ -368,7 +348,7 @@ export function usePremium(trackOverride?: UserTrack, subject?: 'maths' | 'engli
     } finally {
       setIsLoading(false);
     }
-  }, [activeTrack, profile?.user_id, resetDailyChallengeUsage, resetDailyMockUsage, resetDailyUsage, subject]);
+  }, [activeTrack, profile?.user_id, user?.id, resetDailyChallengeUsage, resetDailyMockUsage, resetDailyUsage, subject]);
 
   useEffect(() => {
     if (!hasUserContext) {
@@ -510,10 +490,11 @@ export function usePremium(trackOverride?: UserTrack, subject?: 'maths' | 'engli
     return { allowed, uses: nextUses, limit };
   };
 
+
   const incrementMockUsage = async (questionCount: number = 10) => {
     if (!hasUserContext) {
       const currentUses = guestMockUses;
-      const allowed = currentUses < 1; // 1 mock per day for guests per subject
+      const allowed = currentUses < 1;
       const nextUses = allowed ? currentUses + 1 : currentUses;
       setGuestMockUses(nextUses);
       if (typeof window !== 'undefined') {
@@ -525,33 +506,35 @@ export function usePremium(trackOverride?: UserTrack, subject?: 'maths' | 'engli
     if (isAdmin) return { allowed: true, uses: dailyMockUses, limit: Infinity, message: '' };
     if (isPremium) return { allowed: true, uses: dailyMockUses, limit: Infinity, message: '' };
 
+    // Fresh count from DB to decide if the user can start a mock
     try {
-      // Server-side atomic check (global limit = 2, i.e. 1 english + 1 maths)
-      const { data: usageData, error: usageError } = await supabase.rpc('consume_mock_session', {
-        p_question_count: questionCount
-      });
+      const startOfDay = new Date();
+      startOfDay.setHours(0, 0, 0, 0);
+      const { data: todayMocks } = await supabase
+        .from('mock_attempts')
+        .select('id, mode')
+        .eq('user_id', user!.id)
+        .gte('created_at', startOfDay.toISOString())
+        .in('mode', ['mock', 'mock-exam']);
 
-      if (usageError) {
-        console.error('Error consuming mock session:', usageError);
-        return { allowed: false, uses: dailyMockUses, limit: 1, message: 'Could not register mock attempt. Please try again.' };
+      const subjectCount = subject === 'english'
+        ? (todayMocks || []).filter(m => m.mode === 'mock-exam').length
+        : (todayMocks || []).filter(m => m.mode === 'mock').length;
+
+      if (subjectCount >= 1) {
+        setDailyMockUses(subjectCount);
+        return { allowed: false, uses: subjectCount, limit: 1, message: 'You have already used your free mock exam for this subject today.' };
       }
 
-      const usageResult = usageData as { allowed?: boolean; message?: string; daily_mock_reset_at?: string } | null;
-      if (!usageResult?.allowed) {
-        return { allowed: false, uses: dailyMockUses, limit: 1, message: usageResult?.message || 'Daily mock exam limit reached.' };
-      }
-
-      // Server allowed — update subject-specific local counter
-      const localMock = readLocalMockUsage(subject);
-      const newUses = (localMock.uses || 0) + 1;
-      const resetAt = usageResult?.daily_mock_reset_at || localMock.resetAt || null;
-      writeLocalMockUsage(subject, newUses, resetAt);
-      setDailyMockUses(newUses);
+      // Allowed — the mock_attempts row will be inserted by MockExamPage/EnglishSplitViewDemo
+      // when the exam completes, so the count will naturally go up.
+      // We optimistically set it to 1 now for immediate UI feedback.
+      setDailyMockUses(1);
       emitMockUsageUpdate();
-      return { allowed: true, uses: newUses, limit: 1, message: '' };
+      return { allowed: true, uses: 1, limit: 1, message: '' };
     } catch (error) {
-      console.error('Error incrementing mock usage:', error);
-      return { allowed: false, uses: dailyMockUses, limit: 1, message: 'Error starting mock exam.' };
+      console.error('Error in incrementMockUsage:', error);
+      return { allowed: false, uses: dailyMockUses, limit: 1, message: 'Error checking mock limit.' };
     }
   };
 
