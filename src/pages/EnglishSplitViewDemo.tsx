@@ -740,14 +740,14 @@ export function EnglishSplitViewDemo() {
       const uniqueRefKey = `${targetSectionId}_${targetEvidenceLine}`;
       if (passageLineRefs.current[uniqueRefKey]) {
         // Intelligently scroll the master left-container exactly to the isolated evidence piece
-        passageLineRefs.current[uniqueRefKey]?.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+        passageLineRefs.current[uniqueRefKey]?.scrollIntoView({ behavior: 'auto', block: 'center', inline: 'nearest' });
         return;
       }
     }
     
     if (targetSectionId && passageSectionRefs.current[targetSectionId]) {
       // Intelligently scroll the master left-container to the correct passage block wrapper
-      passageSectionRefs.current[targetSectionId]?.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
+      passageSectionRefs.current[targetSectionId]?.scrollIntoView({ behavior: 'auto', block: 'start', inline: 'nearest' });
     }
   }, [activeQuestionId, activeSections, isUserScrolling]);
 
