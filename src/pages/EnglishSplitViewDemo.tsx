@@ -3,7 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { BookOpen, AlertTriangle, Lock, Search, Highlighter, MapPin, Sparkles, ChevronRight, Flag, Timer, Zap, Trophy, ShieldAlert, Check, Type, SpellCheck, TextCursorInput, ListChecks, Languages } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-
+import { supabase } from '@/integrations/supabase/client';
 // --- DATA ARCHITECTURE DEFINITION ---
 export interface EnglishOption {
   id: string;
@@ -33,6 +33,7 @@ export interface EnglishSection {
   icon: any; // Keep Lucide icon generic for now
   desc: string;
   leftTitle: string;
+  tier?: string;
   passageBlocks: EnglishPassageBlock[];
   questions: EnglishQuestion[];
 }
@@ -444,6 +445,45 @@ export function EnglishSplitViewDemo() {
   const navigate = useNavigate();
   const [isPremium, setIsPremium] = useState<boolean>(true); // Assume true for now or read from hook later
   
+  const diffParam = searchParams.get('difficulty');
+  
+  const [dbSections, setDbSections] = useState<EnglishSection[]>([]);
+  const [isLoadingDb, setIsLoadingDb] = useState<boolean>(true);
+
+  useEffect(() => {
+    const fetchPassages = async () => {
+      try {
+        let query = supabase.from('english_passages' as any).select('*');
+        if (diffParam && diffParam !== 'mixed' && diffParam !== 'all') {
+           query = query.eq('difficulty', parseInt(diffParam));
+        }
+
+        const { data, error } = await query;
+        if (error) throw error;
+        
+        if (data && data.length > 0) {
+           const mapped: EnglishSection[] = data.map((row: any) => ({
+             sectionId: row.sectionId,
+             subEngine: row.subtopic,
+             title: row.title || `SECTION: ${row.sectionId.toUpperCase()}`,
+             icon: BookOpen,
+             desc: row.desc || 'Read the text carefully and answer the following questions.',
+             leftTitle: row.title || 'Practice Source',
+             tier: row.tier || 'Level Unknown',
+             passageBlocks: row.passageBlocks || [],
+             questions: row.questions || []
+           }));
+           setDbSections(mapped);
+        }
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setIsLoadingDb(false);
+      }
+    };
+    fetchPassages();
+  }, [diffParam]);
+  
   const modeParam = searchParams.get('mode') || 'practice';
   // Topics usually arrives comma separated from MockExams, e.g., "Comprehension,SPaG"
   const rawTopics = searchParams.get('topics') || 'Comprehension';
@@ -499,6 +539,7 @@ export function EnglishSplitViewDemo() {
   };
   
   const [timeLeft, setTimeLeft] = useState(3000); 
+  const [isHighlightMode, setIsHighlightMode] = useState<boolean>(false);
 
   const passageContainerRef = useRef<HTMLDivElement>(null);
   const passageSectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
@@ -508,22 +549,39 @@ export function EnglishSplitViewDemo() {
 
   // 1. FILTERING LOGIC
   const activeSections = useMemo(() => {
-    const processedSections = examMode === 'mock' 
-      ? [...TEST_DATA, VOCAB_PRACTICE] 
-      : (practiceFocus === 'vocab' 
-          ? [VOCAB_PRACTICE] 
-          : (practiceFocus === 'spag' 
-              ? TEST_DATA.filter(sec => ['spelling', 'punctuation', 'grammar'].includes(sec.sectionId)) 
-              : TEST_DATA.filter(sec => sec.sectionId === practiceFocus)
-            )
-        );
+    const sourceData = dbSections.length > 0 ? dbSections : [...TEST_DATA, VOCAB_PRACTICE];
+    
+    // Group passages aggressively by core engine
+    const groups: Record<string, EnglishSection[]> = { comprehension: [], spag: [], vocab: [] };
+    sourceData.forEach(sec => {
+        const id = (sec.sectionId || "").toLowerCase();
+        const sub = (sec.subEngine || "").toLowerCase();
+        if (id === 'vocabulary' || sub === 'vocabulary' || id === 'vocab') groups.vocab.push(sec);
+        else if (['spelling', 'punctuation', 'grammar'].includes(sub) || ['spelling', 'punctuation', 'grammar'].includes(id) || id === 'spag') groups.spag.push(sec);
+        else groups.comprehension.push(sec);
+    });
 
-    // CRITICAL: Always sort questions by their Evidence Line order (p1, p2, p3...) 
-    // to ensure the scroll-sync highlights move linearly down the text.
-    // 'global' questions drop to the bottom.
-    const sorted = processedSections.map(sec => ({
+    let finalSections: EnglishSection[] = [];
+
+    // Filter down to the user's requested topics
+    if (examMode === 'mock') {
+        const pool: EnglishSection[] = [];
+        if (selectedTopics.includes('comprehension')) pool.push(...groups.comprehension);
+        if (selectedTopics.includes('spag')) pool.push(...groups.spag);
+        if (selectedTopics.includes('vocabulary')) pool.push(...groups.vocab);
+        finalSections = pool.length > 0 ? pool.slice(0, 5) : sourceData.slice(0, 5);
+    } else {
+        // Practice Mode: The user wants EXACTLY 1 passage of EACH topic they deliberately checked!
+        if (selectedTopics.includes('comprehension') && groups.comprehension.length > 0) finalSections.push(groups.comprehension[0]);
+        if (selectedTopics.includes('spag') && groups.spag.length > 0) finalSections.push(groups.spag[0]);
+        if (selectedTopics.includes('vocabulary') && groups.vocab.length > 0) finalSections.push(groups.vocab[0]);
+        
+        if (finalSections.length === 0) finalSections = sourceData.slice(0, 1);
+    }
+
+    const sorted = finalSections.map(sec => ({
       ...sec,
-      questions: [...sec.questions].sort((a, b) => {
+      questions: [...(sec.questions || [])].sort((a, b) => {
         if (a.evidenceLine === 'global') return 1;
         if (b.evidenceLine === 'global') return -1;
         const aNum = parseInt(a.evidenceLine.match(/\d+/)?.[0] || '0', 10);
@@ -532,16 +590,15 @@ export function EnglishSplitViewDemo() {
       })
     }));
 
-    // If Practice & Free Tier: Clamp to 1 question only after sorting!
     if (examMode === 'practice' && !isPremium && sorted.length > 0) {
       return [{
         ...sorted[0],
-        questions: sorted[0].questions.slice(0, 1)
+        questions: sorted[0].questions.slice(0, 1) // Paywall slice
       }];
     }
 
     return sorted;
-  }, [examMode, mockConfig, practiceFocus, isPremium]);
+  }, [examMode, selectedTopics, isPremium, dbSections]);
 
   // Timer logic for Mock Mode
   useEffect(() => {
@@ -786,16 +843,32 @@ export function EnglishSplitViewDemo() {
                 {examMode === 'mock' ? 'Full Mock Examination Paper' : `Practice Source: ${activeSections[0]?.leftTitle}`}
               </span>
             </div>
+            
+            {/* Highlight Toggle Button */}
+            <Button
+              variant={isHighlightMode ? "default" : "outline"}
+              size="sm"
+              onClick={() => setIsHighlightMode(!isHighlightMode)}
+              className={cn(
+                "h-8 text-xs font-semibold rounded-full transition-all duration-300",
+                isHighlightMode ? "bg-amber-500 hover:bg-amber-600 text-amber-950 border-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.2)]" : "border-border/60 hover:bg-muted"
+              )}
+            >
+              <Highlighter className={cn("w-3.5 h-3.5 mr-1.5", isHighlightMode ? "text-amber-950" : "text-amber-500")} />
+              {isHighlightMode ? "Highlighter On" : "Highlight"}
+            </Button>
           </div>
 
           <div 
             ref={passageContainerRef} 
             onScroll={handlePassageScroll}
-            className="flex-1 overflow-y-auto p-8 sm:px-10 text-base sm:text-[17px] leading-loose text-foreground/90 font-serif relative scroll-smooth pb-48"
+            onMouseUp={isHighlightMode ? handleHighlight : undefined}
+            onTouchEnd={isHighlightMode ? handleHighlight : undefined}
+            className="flex-1 overflow-y-auto p-8 sm:px-10 sm:py-12 text-base sm:text-[17px] leading-loose text-foreground/90 font-serif relative scroll-smooth pb-48"
           >
-            <div className="absolute top-4 left-4 text-[10px] font-bold tracking-widest uppercase text-muted-foreground/60 select-none">Source</div>
+            <div className="absolute top-6 left-6 sm:left-8 text-[11px] font-black tracking-[0.2em] uppercase text-muted-foreground/30 select-none">Passage</div>
 
-            <div className="space-y-16 relative">
+            <div className="space-y-16 relative mt-8">
               {activeSections.map((section, secIdx) => (
                 <div 
                   key={section.sectionId} 
@@ -803,11 +876,18 @@ export function EnglishSplitViewDemo() {
                   className="scroll-m-8 border-b border-border/40 pb-12 last:border-0"
                 >
                   {examMode === 'mock' && (
-                    <div className="mb-6 font-sans font-bold text-lg text-foreground/80 tracking-tight flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-amber-500/10 text-amber-600 flex items-center justify-center text-sm border border-amber-500/20">
-                        {secIdx + 1}
+                    <div className="mb-6 font-sans font-bold text-lg text-foreground/80 tracking-tight flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-amber-500/10 text-amber-600 flex items-center justify-center text-sm border border-amber-500/20">
+                          {secIdx + 1}
+                        </div>
+                        {section.leftTitle}
                       </div>
-                      {section.leftTitle}
+                      {section.tier && (
+                        <div className="px-2.5 py-1 bg-muted/50 border border-border/80 rounded-md text-xs font-bold text-muted-foreground uppercase tracking-wide">
+                          {section.tier}
+                        </div>
+                      )}
                     </div>
                   )}
 
@@ -893,13 +973,24 @@ export function EnglishSplitViewDemo() {
           )}
 
           <div className="max-w-xl mx-auto w-full p-8 pb-48">
-            <div className="mb-8">
-              <h1 className="text-2xl font-bold tracking-tight mb-2">
-                {examMode === 'mock' ? 'Mock Exam' : `${practiceFocus.toUpperCase()} DRILLS`}
-              </h1>
-              <p className="text-sm text-muted-foreground">
-                {examMode === 'mock' ? 'You have configured a custom Mock Exam mixing multiple passages.' : 'Answer the questions based on the source text strictly.'}
-              </p>
+            <div className="mb-8 flex items-start justify-between gap-4">
+              <div>
+                <h1 className="text-2xl font-bold tracking-tight mb-2">
+                  {examMode === 'mock' ? 'Mock Exam' : (activeSections.length > 1 ? 'MIXED TOPIC DRILLS' : `${practiceFocus.toUpperCase()} DRILLS`)}
+                </h1>
+                <p className="text-sm text-muted-foreground">
+                  {examMode === 'mock' ? 'You have configured a custom Mock Exam mixing multiple passages.' : 'Answer the questions based on the source texts strictly.'}
+                </p>
+              </div>
+              
+              {examMode === 'practice' && activeSections.length > 0 && activeSections[0].tier && (
+                <div className="shrink-0 mt-1">
+                  <span className="relative bg-background/95 border border-amber-500/30 px-4 py-2 rounded-full bg-amber-500/10 shadow-sm flex items-center gap-2 cursor-default">
+                    <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                    <span className="text-xs font-black tracking-widest text-amber-600 uppercase pt-0.5">{activeSections[0].tier}</span>
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Render all the loaded sections linearly */}
@@ -913,22 +1004,28 @@ export function EnglishSplitViewDemo() {
               const Icon = section.icon || BookOpen;
 
               return (
-                <div key={section.sectionId} className="mb-16">
-                  {/* The Section Divider Component */}
-                  {examMode === 'mock' && (
-                    <div className="mb-10 mt-8 relative">
-                      <div className="absolute inset-0 flex items-center" aria-hidden="true">
-                        <div className="w-full border-t border-border/80" />
-                      </div>
-                      <div className="relative flex justify-center">
-                        <span className="bg-background/95 px-6 py-2.5 rounded-full border border-border bg-card shadow-sm flex items-center gap-3 transform hover:scale-105 transition-transform cursor-default">
-                          <div className="p-1.5 rounded-full bg-amber-500 text-amber-950 font-black shadow-inner">
-                            <Icon className="w-4 h-4" />
-                          </div>
-                          <span className="text-xs font-black tracking-widest text-foreground uppercase pt-0.5">{section.title}</span>
+                <div key={section.sectionId} className={cn("mb-16", secIndex === 0 && examMode === 'practice' ? "mt-4" : "")}>
+                  {/* Show Tier mid-scroll for Mock Exams OR Mixed Practice with multiple passages */}
+                  {(examMode === 'mock' || activeSections.length > 1) && (
+                    <div className={cn("relative flex justify-end w-full mb-8", secIndex === 0 ? "mt-4" : "mt-10")}>
+                      {secIndex > 0 && (
+                        <div className="absolute inset-0 flex items-center" aria-hidden="true">
+                          <div className="w-full border-t border-border/80" />
+                        </div>
+                      )}
+                      
+                      <div className="relative flex justify-between w-full">
+                        <span className="bg-background/95 px-4 py-2 rounded-xl bg-muted/30 border border-border shadow-sm flex items-center gap-3 transform hover:scale-105 transition-transform cursor-default">
+                          <span className="text-xs font-black tracking-widest text-foreground uppercase pt-0.5 whitespace-nowrap">{section.title}</span>
                         </span>
+
+                        {section.tier && (
+                          <span className="relative bg-background/95 border border-amber-500/30 px-4 py-1.5 rounded-full bg-amber-500/10 shadow-sm flex items-center gap-2 cursor-default shrink-0">
+                            <Sparkles className="w-3 h-3 text-amber-500" />
+                            <span className="text-xs font-black tracking-widest text-amber-600 uppercase pt-0.5">{section.tier}</span>
+                          </span>
+                        )}
                       </div>
-                      <p className="text-center text-xs text-muted-foreground mt-6 font-semibold max-w-sm mx-auto tracking-wide uppercase">{section.desc}</p>
                     </div>
                   )}
 
