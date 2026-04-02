@@ -383,10 +383,12 @@ export function usePremium(trackOverride?: UserTrack, subject?: 'maths' | 'engli
 
     window.addEventListener('gradlify:profile-updated', handleProfileRefresh);
     window.addEventListener('track-switched', handleProfileRefresh);
+    window.addEventListener('mockUsageUpdated', handleProfileRefresh);
 
     return () => {
       window.removeEventListener('gradlify:profile-updated', handleProfileRefresh);
       window.removeEventListener('track-switched', handleProfileRefresh);
+      window.removeEventListener('mockUsageUpdated', handleProfileRefresh);
     };
   }, [hasUserContext, fetchUsageData]);
 
@@ -522,7 +524,10 @@ export function usePremium(trackOverride?: UserTrack, subject?: 'maths' | 'engli
         : (todayMocks || []).filter(m => m.mode === 'mock').length;
 
       if (subjectCount >= 1) {
-        setDailyMockUses(subjectCount);
+        if (dailyMockUses !== subjectCount) {
+          setDailyMockUses(subjectCount);
+          emitMockUsageUpdate();
+        }
         return { allowed: false, uses: subjectCount, limit: 1, message: 'You have already used your free mock exam for this subject today.' };
       }
       // Allowed — insert a mock_attempts row RIGHT NOW to consume the limit immediately.
