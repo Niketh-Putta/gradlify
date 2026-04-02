@@ -778,6 +778,15 @@ export function EnglishSplitViewDemo() {
     }
   }, [activeQuestionId, activeSections]);
 
+  // Keep active dot visible in the floating pill
+  useEffect(() => {
+    if (!activeQuestionId) return;
+    const dotElement = document.getElementById(`pill-dot-${activeQuestionId}`);
+    if (dotElement) {
+      dotElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }, [activeQuestionId]);
+
   // Compute actual results upon finishing
   const results = useMemo(() => {
     if (!isFinished) return null;
@@ -873,9 +882,9 @@ export function EnglishSplitViewDemo() {
                 <Button onClick={() => { setIsFinished(false); setIsReviewMode(true); }} variant="outline" className="w-full h-12 rounded-xl font-bold">
                   Review Paper Details & Tutor Notes
                 </Button>
-                <Link to="/11plus/readiness">
+                <Link to={examMode === 'mock' ? "/mocks/english" : "/practice/english"}>
                   <Button variant="ghost" className="w-full h-12 rounded-xl text-muted-foreground hover:bg-muted font-semibold">
-                    Return to Dashboard
+                    Return to {examMode === 'mock' ? 'Mock' : 'Practice'} Dashboard
                   </Button>
                 </Link>
               </div>
@@ -1311,6 +1320,7 @@ export function EnglishSplitViewDemo() {
                 return (
                   <button
                     key={qKey}
+                    id={`pill-dot-${qKey}`}
                     onClick={() => {
                       questionRefs.current[qKey]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     }}
