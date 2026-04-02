@@ -508,7 +508,7 @@ export function EnglishSplitViewDemo() {
   const [isReviewMode, setIsReviewMode] = useState<boolean>(false);
   const [reviewViewedOptions, setReviewViewedOptions] = useState<Record<string, string>>({});
 
-  const [activeQuestionId, setActiveQuestionId] = useState<string>("q1");
+  const [activeQuestionId, setActiveQuestionId] = useState<string | null>(null);
   const [selectedAnswers, setSelectedAnswers] = useState<Record<string, string>>({});
   const [flaggedQuestions, setFlaggedQuestions] = useState<Record<string, boolean>>({});
   const [showTrap, setShowTrap] = useState<string | null>(null);
@@ -713,7 +713,7 @@ export function EnglishSplitViewDemo() {
     
     // Find who owns this question
     for (const sec of activeSections) {
-      const q = sec.questions.find(x => x.id === activeQuestionId);
+      const q = sec.questions.find(x => `${sec.sectionId}_${x.id}` === activeQuestionId);
       if (q) {
         targetSectionId = sec.sectionId;
         targetEvidenceLine = q.evidenceLine;
@@ -728,16 +728,32 @@ export function EnglishSplitViewDemo() {
 
     if (targetSectionId && targetEvidenceLine) {
       const uniqueRefKey = `${targetSectionId}_${targetEvidenceLine}`;
-      if (passageLineRefs.current[uniqueRefKey]) {
-        // Intelligently scroll the master left-container exactly to the isolated evidence piece
-        passageLineRefs.current[uniqueRefKey]?.scrollIntoView({ behavior: 'auto', block: 'center', inline: 'nearest' });
-        return;
+      const targetElement = passageLineRefs.current[uniqueRefKey];
+      const questionElement = questionRefs.current[activeQuestionId];
+      const leftContainer = passageContainerRef.current;
+      const rightContainer = rightPaneRef.current;
+
+      if (targetElement && questionElement && leftContainer && rightContainer) {
+        const syncScroll = () => {
+          // Identify exactly where the active question sits currently on screen
+          const relativeY = questionElement.offsetTop - rightContainer.scrollTop;
+          
+          // Command the left text container to scroll so the evidence text matches that precise y-coord
+          const targetScroll = targetElement.offsetTop - relativeY;
+          leftContainer.scrollTo({ top: targetScroll, behavior: 'smooth' });
+        };
+
+        // Fire instantly for smooth tracking natively
+        syncScroll();
+        // Fire securely after the user's right-pane scroll completely finishes resolving/snapping 
+        const timeout = setTimeout(syncScroll, 400);
+        return () => clearTimeout(timeout);
       }
     }
     
     if (targetSectionId && passageSectionRefs.current[targetSectionId]) {
-      // Intelligently scroll the master left-container to the correct passage block wrapper
-      passageSectionRefs.current[targetSectionId]?.scrollIntoView({ behavior: 'auto', block: 'start', inline: 'nearest' });
+      // Fallback for missing exact evidence block -> align to top of entire passage chunk
+      passageSectionRefs.current[targetSectionId]?.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
     }
   }, [activeQuestionId, activeSections]);
 
@@ -937,7 +953,7 @@ export function EnglishSplitViewDemo() {
                     {section.passageBlocks.map((p, i) => {
                       // Check if the exact line is being referenced right now based on active question
                       let isTargetEvidence = false;
-                      const activeQInfo = section.questions.find(q => q.id === activeQuestionId);
+                      const activeQInfo = section.questions.find(q => `${section.sectionId}_${q.id}` === activeQuestionId);
                       if (activeQInfo && activeQInfo.evidenceLine === p.id) {
                         isTargetEvidence = true;
                       }
@@ -1069,14 +1085,15 @@ export function EnglishSplitViewDemo() {
 
                   <div className="space-y-12">
                     {section.questions.map((q, qIndex) => {
-                      const isSelected = activeQuestionId === q.id;
-                      const isFlagged = flaggedQuestions[q.id];
+                      const qKey = `${section.sectionId}_${q.id}`;
+                      const isSelected = activeQuestionId === qKey;
+                      const isFlagged = flaggedQuestions[qKey];
                       
                       return (
                         <div 
-                          key={q.id}
-                          data-qid={q.id}
-                          ref={(el) => { questionRefs.current[q.id] = el; }}
+                          key={qKey}
+                          data-qid={qKey}
+                          ref={(el) => { questionRefs.current[qKey] = el; }}
                           className={cn(
                             "p-6 rounded-2xl border transition-all duration-150 ease-out cursor-default scroll-m-24 relative snap-center",
                             isSelected 
@@ -1086,7 +1103,7 @@ export function EnglishSplitViewDemo() {
                         >
                           {examMode === 'mock' && (
                             <button 
-                              onClick={(e) => toggleFlag(q.id, e)}
+                              onClick={(e) => toggleFlag(qKey, e)}
                               className={cn("absolute -top-3 -right-3 p-2 rounded-full border shadow-sm bg-card transition-colors z-10 hover:bg-muted", isFlagged ? "text-rose-500 border-rose-500/50" : "text-muted-foreground border-border")}
                             >
                               <Flag className={cn("w-4 h-4", isFlagged && "fill-rose-500 text-rose-500")} />
@@ -1108,11 +1125,11 @@ export function EnglishSplitViewDemo() {
 
                           <div className="space-y-3">
                             {q.options.map((opt) => {
-                              const selected = selectedAnswers[q.id] === opt.id;
-                              const isViewedInReview = isReviewMode && reviewViewedOptions[q.id] === opt.id;
+                              const selected = selectedAnswers[qKey] === opt.id;
+                              const isViewedInReview = isReviewMode && reviewViewedOptions[qKey] === opt.id;
                               
                               // Logic for showing distractors / evaluations
-                              const showDistractor = (examMode === 'practice' && showTrap === q.id && selected && opt.trap) || 
+                              const showDistractor = (examMode === 'practice' && showTrap === qKey && selected && opt.trap) || 
                                                      (isReviewMode && selected && opt.trap && !opt.correct) ||
                                                      (isViewedInReview && opt.trap && !opt.correct);
                                                      
@@ -1124,10 +1141,10 @@ export function EnglishSplitViewDemo() {
                                     onClick={(e) => {
                                       e.stopPropagation();
                                       if (isReviewMode) {
-                                        setReviewViewedOptions(prev => ({ ...prev, [q.id]: opt.id }));
+                                        setReviewViewedOptions(prev => ({ ...prev, [qKey]: opt.id }));
                                         return;
                                       }
-                                      handleSelectAnswer(q.id, opt.id, opt.trap);
+                                      handleSelectAnswer(qKey, opt.id, opt.trap);
                                     }}
                                     className={cn(
                                       "w-full text-left p-4 rounded-xl border transition-all duration-200 flex items-center gap-4 group",
@@ -1216,6 +1233,47 @@ export function EnglishSplitViewDemo() {
 
           </div>
         </div>
+
+        {/* ---------------- FAR RIGHT SCROLL/PROGRESS COLUMN ---------------- */}
+        {!isFinished && activeSections.length > 0 && (
+          <div className="w-[72px] border-l border-border/60 bg-card/40 hidden lg:flex flex-col items-center py-6 gap-3 overflow-y-auto z-10 custom-scrollbar relative">
+            <div className="text-[9px] font-black tracking-widest text-muted-foreground/40 uppercase mb-2 writing-vertical transform -rotate-90 whitespace-nowrap mt-4">
+              Progress
+            </div>
+            
+            <div className="flex flex-col items-center gap-2.5 w-full mt-4">
+              {activeSections.map(s => s.questions.map(q => ({ sec: s, q }))).flat().map(({ sec, q }, idx) => {
+                const qKey = `${sec.sectionId}_${q.id}`;
+                const isSelected = activeQuestionId === qKey;
+                const isAnswered = !!selectedAnswers[qKey];
+                const isFlagged = flaggedQuestions[qKey];
+
+                return (
+                  <button
+                    key={qKey}
+                    onClick={() => {
+                      questionRefs.current[qKey]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }}
+                    title={`Question ${idx + 1}`}
+                    className={cn(
+                      "w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-black transition-all relative shrink-0",
+                      isSelected 
+                        ? "bg-amber-500 text-amber-950 scale-110 shadow-md ring-4 ring-amber-500/10" 
+                        : isAnswered 
+                          ? "bg-amber-500/10 text-amber-600 border border-amber-500/30" 
+                          : "bg-muted/50 text-muted-foreground border border-transparent hover:border-border hover:bg-muted"
+                    )}
+                  >
+                    {idx + 1}
+                    {isFlagged && (
+                      <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-rose-500 rounded-full border-2 border-background shadow-sm" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
