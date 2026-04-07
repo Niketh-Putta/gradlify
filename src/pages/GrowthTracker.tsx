@@ -33,7 +33,11 @@ type ApiTimelinePoint = {
 };
 
 type ApiKpis = {
-  // Detailed kpis from the edge function
+  visitors?: {
+    unique14d: number;
+    // other fields omitted for conciseness
+  };
+  [key: string]: any;
 };
 
 type ApiTotals = {
@@ -182,6 +186,7 @@ export default function GrowthTracker() {
   const previousVisitPoint = snapshot?.timeline.at(-2);
 
   const totalUsers = snapshot?.totals.totalSignups ?? 0;
+  const uniqueVisitors = snapshot?.kpis?.visitors?.unique14d ?? 0;
   const signupsToday = latestVisitPoint?.signups ?? 0;
   const signupsYesterday = previousVisitPoint?.signups ?? 0;
   const signupsDelta = signupsToday - signupsYesterday;
@@ -224,20 +229,37 @@ export default function GrowthTracker() {
 
       {snapshot ? (
         <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500 slide-in-from-bottom-2">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             <Card className="border-slate-200 shadow-sm">
               <CardContent className="p-6">
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="text-sm font-medium text-slate-500">Total Users</p>
-                    <h3 className="text-3xl font-bold text-slate-900 mt-2">{formatNumber(totalUsers)}</h3>
+                    <p className="text-sm font-medium text-slate-500">Site Visitors (14d)</p>
+                    <h3 className="text-3xl font-bold text-slate-900 mt-2">{formatNumber(uniqueVisitors)}</h3>
                   </div>
-                  <div className="p-3 bg-blue-50 text-blue-600 rounded-xl">
+                  <div className="p-3 bg-sky-50 text-sky-600 rounded-xl">
                     <Users className="w-5 h-5" />
                   </div>
                 </div>
                 <div className="flex items-center gap-1 mt-4 text-sm">
-                  <span className="text-slate-400">Lifetime sign-ups</span>
+                  <span className="text-slate-400">Different people visited</span>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-slate-200 shadow-sm">
+              <CardContent className="p-6">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="text-sm font-medium text-slate-500">Registered Accounts</p>
+                    <h3 className="text-3xl font-bold text-slate-900 mt-2">{formatNumber(totalUsers)}</h3>
+                  </div>
+                  <div className="p-3 bg-blue-50 text-blue-600 rounded-xl">
+                    <UserPlus className="w-5 h-5" />
+                  </div>
+                </div>
+                <div className="flex items-center gap-1 mt-4 text-sm">
+                  <span className="text-slate-400">Total lifetime sign-ups</span>
                 </div>
               </CardContent>
             </Card>
