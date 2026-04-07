@@ -19,7 +19,7 @@ import {
   YAxis,
   ResponsiveContainer,
 } from "recharts";
-import { Users, UserPlus, Activity, Crown, TrendingUp, TrendingDown, Loader2 } from "lucide-react";
+import { Users, UserPlus, Activity, Crown, TrendingUp, TrendingDown, Loader2, PoundSterling, CreditCard } from "lucide-react";
 
 const DAYS_LOOKBACK = 14;
 
@@ -37,6 +37,10 @@ type ApiKpis = {
     unique14d: number;
     // other fields omitted for conciseness
   };
+  earnings?: {
+    monthly: number;
+    currency: string;
+  };
   [key: string]: any;
 };
 
@@ -53,6 +57,7 @@ type ApiPayload = {
     timeline: ApiTimelinePoint[];
     kpis: ApiKpis;
     totals: ApiTotals;
+    payingUsers?: PayingUser[];
     startDate: string;
     days: number;
   };
@@ -61,10 +66,21 @@ type ApiPayload = {
 
 type TrendPoint = ApiTimelinePoint & { label: string };
 
+export type PayingUser = {
+  id: string;
+  name: string;
+  email: string;
+  plan: string;
+  track: string;
+  created_at: string;
+  subscription_id: string;
+};
+
 type AnalyticsSnapshot = {
   timeline: TrendPoint[];
   kpis: ApiKpis;
   totals: ApiTotals;
+  payingUsers: PayingUser[];
   startDate: string;
   days: number;
 };
@@ -125,6 +141,7 @@ export default function GrowthTracker() {
         timeline,
         kpis: api.kpis,
         totals: api.totals,
+        payingUsers: api.payingUsers || [],
         startDate: api.startDate,
         days: api.days,
       });
@@ -196,7 +213,8 @@ export default function GrowthTracker() {
   const activeDelta = activeToday - activeYesterday;
 
   const premiumConversions = snapshot?.totals.premiumSignups ?? 0;
-  const premiumRate = totalUsers > 0 ? (premiumConversions / totalUsers) * 100 : 0;
+  const monthlyRevenue = snapshot?.kpis?.earnings?.monthly ?? 0;
+  const payingUsers = snapshot?.payingUsers ?? [];
 
   return (
     <div className="w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 bg-slate-50/50 min-h-screen">
@@ -228,51 +246,89 @@ export default function GrowthTracker() {
       </div>
 
       {snapshot ? (
-        <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500 slide-in-from-bottom-2">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-            <Card className="border-slate-200 shadow-sm">
+        <div className="max-w-7xl mx-auto space-y-6 animate-in fade-in duration-500 slide-in-from-bottom-2">
+          {/* Executive Overview Row */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Card className="border-slate-200 shadow-sm border-t-2 border-t-emerald-500">
               <CardContent className="p-6">
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="text-sm font-medium text-slate-500">Site Visitors (14d)</p>
-                    <h3 className="text-3xl font-bold text-slate-900 mt-2">{formatNumber(uniqueVisitors)}</h3>
+                    <p className="text-sm font-medium text-slate-500">Monthly Revenue (MRR)</p>
+                    <h3 className="text-4xl font-bold text-slate-900 mt-2">£{formatNumber(monthlyRevenue)}</h3>
                   </div>
-                  <div className="p-3 bg-sky-50 text-sky-600 rounded-xl">
-                    <Users className="w-5 h-5" />
+                  <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
+                    <PoundSterling className="w-6 h-6" />
                   </div>
                 </div>
                 <div className="flex items-center gap-1 mt-4 text-sm">
-                  <span className="text-slate-400">Different people visited</span>
+                  <span className="text-slate-400">Total recurring revenue</span>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="border-slate-200 shadow-sm">
+            <Card className="border-slate-200 shadow-sm border-t-2 border-t-purple-500">
+              <CardContent className="p-6">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="text-sm font-medium text-slate-500">Active Subscribers</p>
+                    <h3 className="text-4xl font-bold text-slate-900 mt-2">{formatNumber(premiumConversions)}</h3>
+                  </div>
+                  <div className="p-3 bg-purple-50 text-purple-600 rounded-xl">
+                    <Crown className="w-6 h-6" />
+                  </div>
+                </div>
+                <div className="flex items-center gap-1 mt-4 text-sm">
+                  <span className="text-slate-400">Live verified payments</span>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-slate-200 shadow-sm border-t-2 border-t-blue-500">
               <CardContent className="p-6">
                 <div className="flex justify-between items-start">
                   <div>
                     <p className="text-sm font-medium text-slate-500">Registered Accounts</p>
-                    <h3 className="text-3xl font-bold text-slate-900 mt-2">{formatNumber(totalUsers)}</h3>
+                    <h3 className="text-4xl font-bold text-slate-900 mt-2">{formatNumber(totalUsers)}</h3>
                   </div>
                   <div className="p-3 bg-blue-50 text-blue-600 rounded-xl">
-                    <UserPlus className="w-5 h-5" />
+                    <Users className="w-6 h-6" />
                   </div>
                 </div>
                 <div className="flex items-center gap-1 mt-4 text-sm">
-                  <span className="text-slate-400">Total lifetime sign-ups</span>
+                  <span className="text-slate-400">Total lifetime platform users</span>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Activity Pulse Row */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Card className="border-slate-200 shadow-sm">
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="text-sm font-medium text-slate-500">Site Visitors (14d)</p>
+                    <h3 className="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">{formatNumber(uniqueVisitors)}</h3>
+                  </div>
+                  <div className="p-2 sm:p-3 bg-sky-50 text-sky-600 rounded-xl">
+                    <Activity className="w-5 h-5 sm:w-6 sm:h-6" />
+                  </div>
+                </div>
+                <div className="mt-4 text-sm text-slate-400">
+                  Different people visited
                 </div>
               </CardContent>
             </Card>
 
             <Card className="border-slate-200 shadow-sm">
-              <CardContent className="p-6">
+              <CardContent className="p-4 sm:p-6">
                 <div className="flex justify-between items-start">
                   <div>
                     <p className="text-sm font-medium text-slate-500">Sign-ups (Today)</p>
-                    <h3 className="text-3xl font-bold text-slate-900 mt-2">{formatNumber(signupsToday)}</h3>
+                    <h3 className="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">{formatNumber(signupsToday)}</h3>
                   </div>
-                  <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
-                     <UserPlus className="w-5 h-5" />
+                  <div className="p-2 sm:p-3 bg-indigo-50 text-indigo-600 rounded-xl">
+                     <UserPlus className="w-5 h-5 sm:w-6 sm:h-6" />
                   </div>
                 </div>
                 <div className="flex items-center gap-1 mt-4 text-sm flex-wrap">
@@ -290,14 +346,14 @@ export default function GrowthTracker() {
             </Card>
 
             <Card className="border-slate-200 shadow-sm">
-              <CardContent className="p-6">
+              <CardContent className="p-4 sm:p-6">
                 <div className="flex justify-between items-start">
                   <div>
                     <p className="text-sm font-medium text-slate-500">Active Today</p>
-                    <h3 className="text-3xl font-bold text-slate-900 mt-2">{formatNumber(activeToday)}</h3>
+                    <h3 className="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">{formatNumber(activeToday)}</h3>
                   </div>
-                  <div className="p-3 bg-indigo-50 text-indigo-600 rounded-xl">
-                    <Activity className="w-5 h-5" />
+                  <div className="p-2 sm:p-3 bg-slate-100 text-slate-600 rounded-xl">
+                    <Users className="w-5 h-5 sm:w-6 sm:h-6" />
                   </div>
                 </div>
                 <div className="flex items-center gap-1 mt-4 text-sm flex-wrap">
@@ -310,23 +366,6 @@ export default function GrowthTracker() {
                     {activeDelta > 0 ? "+" : ""}{formatNumber(activeDelta)}
                   </span>
                   <span className="text-slate-400 whitespace-nowrap">from yesterday</span>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-slate-200 shadow-sm">
-              <CardContent className="p-6">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="text-sm font-medium text-slate-500">Premium Conversions</p>
-                    <h3 className="text-3xl font-bold text-slate-900 mt-2">{formatNumber(premiumConversions)}</h3>
-                  </div>
-                  <div className="p-3 bg-purple-50 text-purple-600 rounded-xl">
-                    <Crown className="w-5 h-5" />
-                  </div>
-                </div>
-                <div className="flex items-center gap-1 mt-4 text-sm text-slate-600 font-medium">
-                  {premiumRate.toFixed(1)}% <span className="text-slate-400 font-normal ml-1">conversion rate</span>
                 </div>
               </CardContent>
             </Card>
@@ -404,6 +443,57 @@ export default function GrowthTracker() {
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-slate-200 shadow-sm border-t-2 border-t-purple-500 overflow-hidden">
+            <CardHeader className="bg-slate-50/50 border-b border-slate-100">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <CreditCard className="w-5 h-5 text-purple-600" />
+                Live Paying Customers
+              </CardTitle>
+              <CardDescription>
+                Detailed breakdown of your specifically verified active subscribers.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-0">
+              {payingUsers.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm text-left">
+                    <thead className="bg-slate-50/80 text-slate-500 text-xs uppercase tracking-wider">
+                      <tr>
+                        <th className="px-6 py-4 font-medium">User Profile</th>
+                        <th className="px-6 py-4 font-medium">Email Address</th>
+                        <th className="px-6 py-4 font-medium">Subscription Type</th>
+                        <th className="px-6 py-4 font-medium">Since Date</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 text-slate-700">
+                      {payingUsers.map((user) => (
+                        <tr key={user.id} className="hover:bg-slate-50/50 transition-colors">
+                          <td className="px-6 py-4 font-medium text-slate-900 capitalize">
+                            {user.name && user.name !== "Unknown" ? user.name : "Anonymous"}
+                          </td>
+                          <td className="px-6 py-4">{user.email}</td>
+                          <td className="px-6 py-4">
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-50 text-purple-700 border border-purple-100">
+                              {user.plan} · {user.track === 'gcse' ? 'GCSE' : '11+'}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-slate-500">
+                            {new Date(user.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="p-8 text-center text-slate-500">
+                  <Crown className="w-10 h-10 text-slate-200 mx-auto mb-3" />
+                  <p>No guaranteed live payments verified yet.</p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>

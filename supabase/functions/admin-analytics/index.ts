@@ -101,7 +101,7 @@ Deno.serve(async (req) => {
       priceResponse,
     ] = await Promise.all([
       supabase.from('profiles').select('id', { count: 'exact', head: true }),
-      supabase.from('profiles').select('id', { count: 'exact', head: true })
+      supabase.from('profiles').select('id, full_name, plan, premium_track, onboarding, created_at, stripe_subscription_id_live', { count: 'exact' })
         .eq('tier', 'premium')
         .not('stripe_subscription_id_live', 'is', null)
         .eq('stripe_subscription_status', 'active'),
@@ -250,6 +250,24 @@ Deno.serve(async (req) => {
     const minutes7d = last7.reduce((sum, point) => sum + point.minutes, 0);
     const minutesPrev7d = prev7.reduce((sum, point) => sum + point.minutes, 0);
 
+    const payingUsersDetails = await Promise.all((premiumSummary.data ?? []).map(async (p) => {
+      let email = "unknown";
+      try {
+        const { data: userData } = await supabase.auth.admin.getUserById(p.id);
+        if (userData?.user?.email) email = userData.user.email;
+      } catch (err) {}
+      
+      return {
+        id: p.id,
+        name: p.full_name || p.onboarding?.preferredName || "Unknown",
+        email,
+        plan: p.plan || "premium",
+        track: p.premium_track || "unknown",
+        created_at: p.created_at,
+        subscription_id: p.stripe_subscription_id_live
+      };
+    }));
+
     return new Response(
       JSON.stringify({
         ok: true,
@@ -324,6 +342,7 @@ Deno.serve(async (req) => {
             sessionCount: sessionSummary.count ?? 0,
             mockAttempts: mockSummary.count ?? 0,
           },
+          payingUsers: payingUsersDetails,
           startDate,
           days,
         },
