@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.56.1';
+import Stripe from 'https://esm.sh/stripe@14.18.0?target=deno';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -104,6 +105,7 @@ Deno.serve(async (req) => {
       supabase.from('profiles').select('id, full_name, plan, premium_track, onboarding, created_at, stripe_subscription_id_live', { count: 'exact' })
         .eq('tier', 'premium')
         .not('stripe_subscription_id_live', 'is', null)
+        .eq('cancel_at_period_end', false)
         .eq('stripe_subscription_status', 'active'),
       supabase.from('study_sessions').select('id', { count: 'exact', head: true }),
       supabase.from('mock_attempts').select('id', { count: 'exact', head: true }).eq('status', 'completed'),
@@ -268,6 +270,22 @@ Deno.serve(async (req) => {
       };
     }));
 
+    let exactMrr = 0;
+    try {
+      const stripeSecret = Deno.env.get('STRIPE_SECRET_KEY_LIVE') || Deno.env.get('STRIPE_SECRET_KEY');
+      if (stripeSecret) {
+        const stripe = new Stripe(stripeSecret, { httpClient: Stripe.createFetchHttpClient() });
+        const subs = await stripe.subscriptions.list({ limit: 100, status: 'active' });
+        subs.data.forEach(sub => {
+          if (!sub.cancel_at_period_end && sub.items.data.length > 0) {
+            exactMrr += (sub.items.data[0].price.unit_amount || 0) / 100;
+          }
+        });
+      }
+    } catch (err) {
+      console.error('Stripe exact MRR match failed', err);
+    }
+
     return new Response(
       JSON.stringify({
         ok: true,
@@ -325,16 +343,11 @@ Deno.serve(async (req) => {
               signupsWoW: signupsPrev7d === 0 ? (signups7d === 0 ? 0 : 100) : ((signups7d - signupsPrev7d) / signupsPrev7d) * 100,
               minutesWoW: minutesPrev7d === 0 ? (minutes7d === 0 ? 0 : 100) : ((minutes7d - minutesPrev7d) / minutesPrev7d) * 100,
             },
-            earnings: (() => {
-              const priceData = priceResponse?.data ?? {};
-              const unitAmount = Number(priceData?.unit_amount ?? 0) / 100;
-              const monthly = (premiumSummary.count ?? 0) * unitAmount;
-              return {
-                monthly,
-                currency: priceData?.currency ?? 'usd',
-                interval: priceData?.interval ?? 'month',
-              };
-            })(),
+            earnings: {
+              monthly: exactMrr,
+              currency: 'gbp',
+              interval: 'month',
+            },
           },
           totals: {
             totalSignups: profileSummary.count ?? 0,

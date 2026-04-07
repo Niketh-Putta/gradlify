@@ -246,63 +246,69 @@ export default function GrowthTracker() {
       </div>
 
       {snapshot ? (
-        <div className="max-w-7xl mx-auto space-y-6 animate-in fade-in duration-500 slide-in-from-bottom-2">
+        <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500 slide-in-from-bottom-2">
           {/* Executive Overview Row */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card className="border-slate-200 shadow-sm border-t-2 border-t-emerald-500">
-              <CardContent className="p-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <Card className="border-slate-200 shadow-sm border-t-4 border-t-emerald-500 overflow-hidden">
+              <CardContent className="p-6 md:p-8">
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="text-sm font-medium text-slate-500">Monthly Revenue (MRR)</p>
-                    <h3 className="text-4xl font-bold text-slate-900 mt-2">£{formatNumber(monthlyRevenue)}</h3>
+                    <p className="text-sm font-semibold tracking-wide text-slate-500 uppercase">Monthly Revenue</p>
+                    <h3 className="text-4xl md:text-5xl font-bold text-slate-900 mt-4 leading-none">
+                      £{formatNumber(monthlyRevenue)}
+                    </h3>
                   </div>
-                  <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
-                    <PoundSterling className="w-6 h-6" />
+                  <div className="p-4 bg-emerald-50 text-emerald-600 rounded-2xl">
+                    <PoundSterling className="w-7 h-7" />
                   </div>
                 </div>
-                <div className="flex items-center gap-1 mt-4 text-sm">
-                  <span className="text-slate-400">Total recurring revenue</span>
+                <div className="flex items-center gap-1 mt-6 text-sm">
+                  <span className="text-slate-400 font-medium">Verified recurring payments</span>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="border-slate-200 shadow-sm border-t-2 border-t-purple-500">
-              <CardContent className="p-6">
+            <Card className="border-slate-200 shadow-sm border-t-4 border-t-purple-500 overflow-hidden">
+              <CardContent className="p-6 md:p-8">
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="text-sm font-medium text-slate-500">Active Subscribers</p>
-                    <h3 className="text-4xl font-bold text-slate-900 mt-2">{formatNumber(premiumConversions)}</h3>
+                    <p className="text-sm font-semibold tracking-wide text-slate-500 uppercase">Live Subscribers</p>
+                    <h3 className="text-4xl md:text-5xl font-bold text-slate-900 mt-4 leading-none">
+                      {formatNumber(premiumConversions)}
+                    </h3>
                   </div>
-                  <div className="p-3 bg-purple-50 text-purple-600 rounded-xl">
-                    <Crown className="w-6 h-6" />
+                  <div className="p-4 bg-purple-50 text-purple-600 rounded-2xl">
+                    <Crown className="w-7 h-7" />
                   </div>
                 </div>
-                <div className="flex items-center gap-1 mt-4 text-sm">
-                  <span className="text-slate-400">Live verified payments</span>
+                <div className="flex items-center gap-1 mt-6 text-sm">
+                  <span className="text-slate-400 font-medium">Currently active profiles</span>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="border-slate-200 shadow-sm border-t-2 border-t-blue-500">
-              <CardContent className="p-6">
+            <Card className="border-slate-200 shadow-sm border-t-4 border-t-blue-500 overflow-hidden">
+              <CardContent className="p-6 md:p-8">
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="text-sm font-medium text-slate-500">Registered Accounts</p>
-                    <h3 className="text-4xl font-bold text-slate-900 mt-2">{formatNumber(totalUsers)}</h3>
+                    <p className="text-sm font-semibold tracking-wide text-slate-500 uppercase">Registered Users</p>
+                    <h3 className="text-4xl md:text-5xl font-bold text-slate-900 mt-4 leading-none">
+                      {formatNumber(totalUsers)}
+                    </h3>
                   </div>
-                  <div className="p-3 bg-blue-50 text-blue-600 rounded-xl">
-                    <Users className="w-6 h-6" />
+                  <div className="p-4 bg-blue-50 text-blue-600 rounded-2xl">
+                    <Users className="w-7 h-7" />
                   </div>
                 </div>
-                <div className="flex items-center gap-1 mt-4 text-sm">
-                  <span className="text-slate-400">Total lifetime platform users</span>
+                <div className="flex items-center gap-1 mt-6 text-sm">
+                  <span className="text-slate-400 font-medium">Total lifetime sign-ups</span>
                 </div>
               </CardContent>
             </Card>
           </div>
 
           {/* Activity Pulse Row */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <Card className="border-slate-200 shadow-sm">
               <CardContent className="p-4 sm:p-6">
                 <div className="flex justify-between items-start">
