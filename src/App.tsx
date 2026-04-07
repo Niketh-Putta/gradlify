@@ -15,6 +15,7 @@ import UpdatePassword from "./pages/UpdatePassword";
 import AdminQuestions from "./pages/AdminQuestions";
 import AdminAnalytics from "./pages/AdminAnalytics";
 import Tools from "./pages/Tools";
+import GrowthTracker from "./pages/GrowthTracker";
 
 import { GoogleOAuthProvider } from '@react-oauth/google';
 
@@ -46,6 +47,10 @@ const AppContent = () => (
             <Route
               path="/nikethputtaadmin-xyz"
               element={<AdminAnalytics />}
+            />
+            <Route
+              path="/nikethputtaadmin-growth"
+              element={<GrowthTracker />}
             />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
