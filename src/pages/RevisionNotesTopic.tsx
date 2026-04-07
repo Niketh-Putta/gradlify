@@ -1118,7 +1118,7 @@ export default function RevisionNotesTopic() {
             <>
             <div className="relative overflow-hidden mb-20 rounded-2xl border border-border/10 cursor-pointer group" onClick={() => setShowPaywall(true)}>
               {/* Blurred Mock Content */}
-              <div className="opacity-40 blur-[4px] pointer-events-none select-none overflow-hidden transition-all duration-1000">
+              <div className="opacity-40 blur-[7px] pointer-events-none select-none overflow-hidden transition-all duration-1000">
                 <div className="w-full flex flex-col xl:flex-row items-stretch gap-8 xl:gap-12 p-4">
                   {/* Left Column - Sticky Reference Box */}
                   <div className="w-full xl:w-[45%] shrink-0">
@@ -1297,7 +1297,7 @@ export default function RevisionNotesTopic() {
           <>
           <div className="relative overflow-hidden mb-20 rounded-2xl border border-border/10 cursor-pointer group" onClick={() => setShowPaywall(true)}>
             {/* Blurred Mock Content */}
-            <div className="opacity-40 blur-[4px] pointer-events-none select-none overflow-hidden transition-all duration-1000">
+            <div className="opacity-40 blur-[7px] pointer-events-none select-none overflow-hidden transition-all duration-1000">
               <div className="space-y-10 mb-10 p-4">
                 {renderBlocks(contentBlocks)}
                 
