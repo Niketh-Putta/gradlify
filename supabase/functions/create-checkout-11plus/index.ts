@@ -303,6 +303,8 @@ serve(async (req) => {
       ],
       mode: "subscription",
       automatic_tax: { enabled: true },
+      customer_update: { address: 'auto' },
+      billing_address_collection: 'required',
       payment_method_collection: "always",
       custom_text: {
         submit: {

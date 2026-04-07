@@ -145,6 +145,27 @@ export function Settings({ user, onBackToChat, onSignOut }: SettingsProps) {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [isCreatingCheckout, setIsCreatingCheckout] = useState(false);
+
+  // Fix BFCache stuck checkout states after returning from Stripe
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        setIsCreatingCheckout(false);
+      }
+    };
+    const handlePageShow = (e: PageTransitionEvent) => {
+      if (e.persisted) {
+        setIsCreatingCheckout(false);
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+    window.addEventListener("pageshow", handlePageShow);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibility);
+      window.removeEventListener("pageshow", handlePageShow);
+    };
+  }, []);
+
   const [showPremiumOptions, setShowPremiumOptions] = useState(false);
   const [showUltraOptions, setShowUltraOptions] = useState(false);
   const [supportRequests, setSupportRequests] = useState<SupportRequest[]>([]);
