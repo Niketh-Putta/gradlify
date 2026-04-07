@@ -101,7 +101,10 @@ Deno.serve(async (req) => {
       priceResponse,
     ] = await Promise.all([
       supabase.from('profiles').select('id', { count: 'exact', head: true }),
-      supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('tier', 'premium'),
+      supabase.from('profiles').select('id', { count: 'exact', head: true })
+        .eq('tier', 'premium')
+        .not('stripe_subscription_id_live', 'is', null)
+        .eq('stripe_subscription_status', 'active'),
       supabase.from('study_sessions').select('id', { count: 'exact', head: true }),
       supabase.from('mock_attempts').select('id', { count: 'exact', head: true }).eq('status', 'completed'),
       supabase.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', start14dIso),
