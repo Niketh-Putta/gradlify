@@ -252,12 +252,39 @@ Deno.serve(async (req) => {
     const minutes7d = last7.reduce((sum, point) => sum + point.minutes, 0);
     const minutesPrev7d = prev7.reduce((sum, point) => sum + point.minutes, 0);
 
+    const stripeEmails = new Map<string, string>();
+    let exactMrr = 0;
+    try {
+      const stripeSecret = Deno.env.get('STRIPE_SECRET_KEY_LIVE') || Deno.env.get('STRIPE_SECRET_KEY');
+      if (stripeSecret) {
+        const stripe = new Stripe(stripeSecret, { httpClient: Stripe.createFetchHttpClient() });
+        const subs = await stripe.subscriptions.list({ limit: 100, status: 'active', expand: ['data.customer'] });
+        subs.data.forEach(sub => {
+          if (!sub.cancel_at_period_end && sub.items.data.length > 0) {
+            exactMrr += (sub.items.data[0].price.unit_amount || 0) / 100;
+            if (sub.customer && typeof sub.customer !== 'string' && sub.customer.email) {
+               stripeEmails.set(sub.id, sub.customer.email);
+            }
+          }
+        });
+      }
+    } catch (err) {
+      console.error('Stripe exact MRR match failed', err);
+    }
+
     const payingUsersDetails = await Promise.all((premiumSummary.data ?? []).map(async (p) => {
       let email = "unknown";
-      try {
-        const { data: userData } = await supabase.auth.admin.getUserById(p.id);
-        if (userData?.user?.email) email = userData.user.email;
-      } catch (err) {}
+      if (p.stripe_subscription_id_live && stripeEmails.has(p.stripe_subscription_id_live)) {
+         email = stripeEmails.get(p.stripe_subscription_id_live)!;
+      } else {
+        try {
+          const uId = p.user_id || p.id;
+          if (uId) {
+            const { data: userData } = await supabase.auth.admin.getUserById(uId);
+            if (userData?.user?.email) email = userData.user.email;
+          }
+        } catch (err) {}
+      }
       
       return {
         id: p.id,
@@ -269,22 +296,6 @@ Deno.serve(async (req) => {
         subscription_id: p.stripe_subscription_id_live
       };
     }));
-
-    let exactMrr = 0;
-    try {
-      const stripeSecret = Deno.env.get('STRIPE_SECRET_KEY_LIVE') || Deno.env.get('STRIPE_SECRET_KEY');
-      if (stripeSecret) {
-        const stripe = new Stripe(stripeSecret, { httpClient: Stripe.createFetchHttpClient() });
-        const subs = await stripe.subscriptions.list({ limit: 100, status: 'active' });
-        subs.data.forEach(sub => {
-          if (!sub.cancel_at_period_end && sub.items.data.length > 0) {
-            exactMrr += (sub.items.data[0].price.unit_amount || 0) / 100;
-          }
-        });
-      }
-    } catch (err) {
-      console.error('Stripe exact MRR match failed', err);
-    }
 
     return new Response(
       JSON.stringify({

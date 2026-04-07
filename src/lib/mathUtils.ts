@@ -139,7 +139,7 @@ function normalizeInner(text: string, transformations: string[] = []): string {
     // \sin31 → \sin(31)
     result = result.replace(/(\\(?:sin|cos|tan|cot|sec|csc))([0-9]+)(?![0-9^({])/g, '$1($2)');
     // sin31 → \sin(31)
-    result = result.replace(/(?<!\\)(sin|cos|tan|cot|sec|csc)([0-9]+)/g, '\\$1($2)');
+    result = result.replace(/(^|[^\\])(sin|cos|tan|cot|sec|csc)([0-9]+)/g, '$1\\$2($3)');
     if (result !== beforeTrig) {
       transformations.push('Fixed trig functions');
     }
@@ -206,8 +206,9 @@ function normalizeInner(text: string, transformations: string[] = []): string {
     result = result.replace(/\\([0-9]+)(?![a-zA-Z])/g, '$1');
     
     // Stray \( or \) without matching pair
-    result = result.replace(/(?<!\\)\\\((?![^)]*\\\))/g, '(');
-    result = result.replace(/(?<!\\)\\\)(?<!\\\([^(]*)/g, ')');
+    result = result.replace(/(^|[^\\])\\\((?![^)]*\\\))/g, '$1(');
+    // Simple substitution to avoid Safari variable-length unbounded lookbehind crashes
+    result = result.replace(/(^|[^\\])\\\)/g, '$1)');
     
     // STEP 8: Normalize Unicode superscripts
     const superscriptMap: Record<string, string> = {
@@ -225,7 +226,7 @@ function normalizeInner(text: string, transformations: string[] = []): string {
     // STEP 9: Fix unmatched braces
     // Remove or fix dangling braces
     const openCount = (result.match(/\{/g) || []).length;
-    const closeCount = (result.match(/\}/g) || []).length;
+    let closeCount = (result.match(/\}/g) || []).length;
     
     if (openCount > closeCount) {
       result += '}'.repeat(openCount - closeCount);
