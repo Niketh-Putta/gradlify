@@ -71,12 +71,14 @@ export interface StripePriceIds {
   monthly: string;
   annual: string;
   ultra?: string;
+  ultra_annual?: string;
 }
 
 export const getStripePriceIdsForMode = (mode: StripeMode): StripePriceIds => ({
   monthly: requireEnvVar(`STRIPE_PRICE_MONTHLY_${mode}`),
   annual: requireEnvVar(`STRIPE_PRICE_ANNUAL_${mode}`),
   ultra: readEnv(`STRIPE_PRICE_ULTRA_MONTHLY_${mode}`) || undefined,
+  ultra_annual: readEnv(`STRIPE_PRICE_ULTRA_ANNUAL_${mode}`) || undefined,
 });
 
 export type PremiumTrack = 'gcse' | 'eleven_plus';
@@ -111,6 +113,9 @@ export const getStripeTrackPriceIdsForMode = (mode: StripeMode): StripeTrackPric
   const elevenPlusUltra =
     readModeAware('STRIPE_PRICE_11PLUS_ULTRA_MONTHLY', mode) ||
     readModeAware('STRIPE_PRICE_ELEVEN_PLUS_ULTRA_MONTHLY', mode);
+  const elevenPlusUltraAnnual =
+    readModeAware('STRIPE_PRICE_11PLUS_ULTRA_ANNUAL', mode) ||
+    readModeAware('STRIPE_PRICE_ELEVEN_PLUS_ULTRA_ANNUAL', mode);
 
   if (!gcseMonthly || !gcseAnnual) {
     throw new Error(`Missing GCSE Stripe price IDs for mode ${mode}`);
@@ -122,7 +127,7 @@ export const getStripeTrackPriceIdsForMode = (mode: StripeMode): StripeTrackPric
 
   return {
     gcse: { monthly: gcseMonthly, annual: gcseAnnual },
-    eleven_plus: { monthly: elevenPlusMonthly, annual: elevenPlusAnnual, ultra: elevenPlusUltra },
+    eleven_plus: { monthly: elevenPlusMonthly, annual: elevenPlusAnnual, ultra: elevenPlusUltra, ultra_annual: elevenPlusUltraAnnual },
   };
 };
 
@@ -133,7 +138,7 @@ export const getPremiumTrackFromPriceId = (
   if (!priceId) return null;
   const priceIds = getStripeTrackPriceIdsForMode(mode);
   if (priceId === priceIds.gcse.monthly || priceId === priceIds.gcse.annual) return 'gcse';
-  if (priceId === priceIds.eleven_plus.monthly || priceId === priceIds.eleven_plus.annual || priceId === priceIds.eleven_plus.ultra) return 'eleven_plus';
+  if (priceId === priceIds.eleven_plus.monthly || priceId === priceIds.eleven_plus.annual || priceId === priceIds.eleven_plus.ultra || priceId === priceIds.eleven_plus.ultra_annual) return 'eleven_plus';
   return null;
 };
 
@@ -143,7 +148,7 @@ export const getPlanFromPriceId = (
 ): 'ultra' | 'premium' | 'free' => {
   if (!priceId) return 'free';
   const priceIds = getStripeTrackPriceIdsForMode(mode);
-  if (priceId === priceIds.eleven_plus.ultra) return 'ultra';
+  if (priceId === priceIds.eleven_plus.ultra || priceId === priceIds.eleven_plus.ultra_annual) return 'ultra';
   return 'premium';
 };
 
