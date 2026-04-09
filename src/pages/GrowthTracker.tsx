@@ -80,10 +80,23 @@ export type PayingUser = {
   current_period_end?: string | null;
 };
 
+const isActuallyTrial = (user: PayingUser) => {
+  if (user.status === 'trialing') return true;
+  // If their current period end is within 4 days of their account creation, 
+  // they never passed the 3-day trial window.
+  if (user.current_period_end && user.created_at) {
+    const end = new Date(user.current_period_end).getTime();
+    const start = new Date(user.created_at).getTime();
+    const diffDays = (end - start) / (1000 * 60 * 60 * 24);
+    if (diffDays <= 4) return true;
+  }
+  return false;
+};
+
 const UserRow = ({ user }: { user: PayingUser }) => {
   const [expanded, setExpanded] = useState(false);
   const isCanceled = user.cancel_at_period_end || user.status === 'canceled';
-  const isTrial = user.status === 'trialing';
+  const isTrial = isActuallyTrial(user);
 
   return (
     <>
@@ -109,7 +122,7 @@ const UserRow = ({ user }: { user: PayingUser }) => {
         <td className="px-6 py-4">{user.email}</td>
         <td className="px-6 py-4">
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-50 text-purple-700 border border-purple-100">
-            {user.plan} · {user.track === 'gcse' ? 'GCSE' : '11+'}
+            {isCanceled && user.plan === 'free' ? 'Premium (Canceled)' : user.plan} · {user.track === 'gcse' ? 'GCSE' : '11+'}
           </span>
         </td>
         <td className="px-6 py-4 whitespace-nowrap text-slate-500">
@@ -594,19 +607,19 @@ export default function GrowthTracker() {
                 </TabsContent>
                 <TabsContent value="trial" className="m-0 fade-in-0 duration-300 border-t-2 border-t-amber-500 rounded-t-xl">
                   <UserTable 
-                    users={payingUsers.filter(u => u.status === 'trialing' && !u.cancel_at_period_end)}
-                    title="Free Trials"
-                    description="Users currently evaluating the platform inside their 3-day window."
-                    emptyText="No users currently in a trial."
+                    users={payingUsers.filter(u => isActuallyTrial(u))}
+                    title="Free Trials (Active & Canceled)"
+                    description="People who started a trial and lasted 3 days or less."
+                    emptyText="No users currently match trial duration."
                     icon={Activity}
                     iconColorClass="text-amber-600"
                   />
                 </TabsContent>
                 <TabsContent value="active" className="m-0 fade-in-0 duration-300 border-t-2 border-t-emerald-500 rounded-t-xl">
                   <UserTable 
-                    users={payingUsers.filter(u => u.status === 'active' && !u.cancel_at_period_end)}
+                    users={payingUsers.filter(u => u.status === 'active' && !u.cancel_at_period_end && !isActuallyTrial(u))}
                     title="Active Paying Customers"
-                    description="Users who securely completed trial and are paying monthly/annually."
+                    description="Users who securely completed trial and are paying monthly/annually right now."
                     emptyText="No active paying customers yet."
                     icon={Crown}
                     iconColorClass="text-emerald-600"
@@ -614,9 +627,9 @@ export default function GrowthTracker() {
                 </TabsContent>
                 <TabsContent value="canceled" className="m-0 fade-in-0 duration-300 border-t-2 border-t-rose-500 rounded-t-xl">
                   <UserTable 
-                    users={payingUsers.filter(u => u.cancel_at_period_end || u.status === 'canceled')}
+                    users={payingUsers.filter(u => (u.cancel_at_period_end || u.status === 'canceled') && !isActuallyTrial(u))}
                     title="Canceled Subscribers"
-                    description="Users who cancelled their trial or subscription. Use emails to reach out for feedback."
+                    description="Verified paying users who subsequently canceled. Use emails to reach out for feedback."
                     emptyText="No canceled users."
                     icon={XCircle}
                     iconColorClass="text-rose-600"
