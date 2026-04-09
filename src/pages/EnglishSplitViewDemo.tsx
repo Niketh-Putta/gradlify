@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { usePremium } from '@/hooks/usePremium';
 import { PremiumPaywall } from '@/components/PremiumPaywall';
+import { useAppContext } from '@/hooks/useAppContext';
 // --- DATA ARCHITECTURE DEFINITION ---
 export interface EnglishOption {
   id: string;
@@ -447,6 +448,7 @@ const VOCAB_PRACTICE: EnglishSection = {
 export function EnglishSplitViewDemo() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { user } = useAppContext();
   const { isPremium, incrementMockUsage, refreshUsage, canStartMockExam } = usePremium('11plus');
   const mockConsumedRef = useRef(false);
   
@@ -839,6 +841,48 @@ export function EnglishSplitViewDemo() {
     
     return { compTotal, compPerc, spagTotal, spagPerc, overallTotal, overallCorrect, overallPerc, displaySAS: sas, sasColor };
   }, [isFinished, activeSections, selectedAnswers]);
+
+  useEffect(() => {
+    if (isFinished && user && activeSections.length > 0) {
+      const topicAgg: Record<string, { correct: number; total: number }> = {};
+      
+      activeSections.forEach(sec => {
+        let topicLabel = 'Comprehension';
+        const sType = (sec.sectionId + " " + (sec.subEngine || "")).toLowerCase();
+        if (sType.includes('vocab')) topicLabel = 'Vocabulary';
+        else if (sType.includes('spag') || sType.includes('spell') || sType.includes('punct') || sType.includes('gramm')) topicLabel = 'SPaG';
+        
+        if (!topicAgg[topicLabel]) {
+          topicAgg[topicLabel] = { correct: 0, total: 0 };
+        }
+        
+        sec.questions.forEach(q => {
+          topicAgg[topicLabel].total++;
+          const ans = selectedAnswers[`${sec.sectionId}_${q.id}`];
+          const correctOpt = q.options.find(o => o.correct);
+          if (ans && correctOpt && ans === correctOpt.id) {
+            topicAgg[topicLabel].correct++;
+          }
+        });
+      });
+
+      const rowsToInsert = Object.entries(topicAgg)
+        .filter(([_, data]) => data.total > 0)
+        .map(([topicLabel, data]) => ({
+          user_id: user.id,
+          topic: topicLabel,
+          correct: data.correct,
+          attempts: data.total,
+          track: user?.user_metadata?.track || '11plus'
+        }));
+
+      if (rowsToInsert.length > 0) {
+        supabase.from('practice_results').insert(rowsToInsert).then(({ error }) => {
+          if (error) console.error("Error saving English results:", error);
+        });
+      }
+    }
+  }, [isFinished, user, activeSections, selectedAnswers]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
