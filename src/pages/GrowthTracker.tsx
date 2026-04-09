@@ -19,7 +19,8 @@ import {
   YAxis,
   ResponsiveContainer,
 } from "recharts";
-import { Users, UserPlus, Activity, Crown, TrendingUp, TrendingDown, Loader2, PoundSterling, CreditCard } from "lucide-react";
+import { Users, UserPlus, Activity, Crown, TrendingUp, TrendingDown, Loader2, PoundSterling, CreditCard, XCircle } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const DAYS_LOOKBACK = 14;
 
@@ -142,6 +143,46 @@ const UserRow = ({ user }: { user: PayingUser }) => {
     </>
   );
 };
+
+const UserTable = ({ users, title, description, emptyText, icon: Icon, iconColorClass }: { users: PayingUser[], title: string, description: string, emptyText: string, icon: any, iconColorClass: string }) => (
+  <Card className={`border-slate-200 shadow-sm overflow-hidden`}>
+    <CardHeader className="bg-slate-50/50 border-b border-slate-100">
+      <CardTitle className="flex items-center gap-2 text-lg">
+        <Icon className={`w-5 h-5 ${iconColorClass}`} />
+        {title}
+      </CardTitle>
+      <CardDescription>
+        {description}
+      </CardDescription>
+    </CardHeader>
+    <CardContent className="p-0">
+      {users.length > 0 ? (
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm text-left">
+            <thead className="bg-slate-50/80 text-slate-500 text-xs uppercase tracking-wider">
+              <tr>
+                <th className="px-6 py-4 font-medium">User Profile</th>
+                <th className="px-6 py-4 font-medium">Email Address</th>
+                <th className="px-6 py-4 font-medium">Subscription Type</th>
+                <th className="px-6 py-4 font-medium">Since Date</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 text-slate-700">
+              {users.map((user) => (
+                <UserRow key={user.id} user={user} />
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <div className="p-8 text-center text-slate-500">
+          <Icon className="w-10 h-10 text-slate-200 mx-auto mb-3" />
+          <p>{emptyText}</p>
+        </div>
+      )}
+    </CardContent>
+  </Card>
+);
 
 type AnalyticsSnapshot = {
   timeline: TrendPoint[];
@@ -519,43 +560,71 @@ export default function GrowthTracker() {
             </CardContent>
           </Card>
 
-          <Card className="border-slate-200 shadow-sm border-t-2 border-t-purple-500 overflow-hidden">
-            <CardHeader className="bg-slate-50/50 border-b border-slate-100">
-              <CardTitle className="flex items-center gap-2 text-lg">
-                <CreditCard className="w-5 h-5 text-purple-600" />
-                Live Paying Customers
-              </CardTitle>
-              <CardDescription>
-                Detailed breakdown of your specifically verified active subscribers.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="p-0">
-              {payingUsers.length > 0 ? (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm text-left">
-                    <thead className="bg-slate-50/80 text-slate-500 text-xs uppercase tracking-wider">
-                      <tr>
-                        <th className="px-6 py-4 font-medium">User Profile</th>
-                        <th className="px-6 py-4 font-medium">Email Address</th>
-                        <th className="px-6 py-4 font-medium">Subscription Type</th>
-                        <th className="px-6 py-4 font-medium">Since Date</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100 text-slate-700">
-                      {payingUsers.map((user) => (
-                        <UserRow key={user.id} user={user} />
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              ) : (
-                <div className="p-8 text-center text-slate-500">
-                  <Crown className="w-10 h-10 text-slate-200 mx-auto mb-3" />
-                  <p>No guaranteed live payments verified yet.</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          <div className="pt-6 pb-12">
+            <div className="mb-4">
+               <h2 className="text-xl font-bold tracking-tight text-slate-900">Customer Segmentation</h2>
+               <p className="text-slate-500 text-sm mt-1">Breakdown of users by payment pipeline status.</p>
+            </div>
+            <Tabs defaultValue="all" className="w-full space-y-6">
+              <TabsList className="grid grid-cols-4 max-w-3xl bg-slate-100/50 p-1.5 rounded-xl h-auto shrink-0 md:flex">
+                <TabsTrigger value="all" className="py-2.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm md:flex-1">
+                  All Entered
+                </TabsTrigger>
+                <TabsTrigger value="trial" className="py-2.5 rounded-lg data-[state=active]:bg-white data-[state=active]:text-amber-700 data-[state=active]:shadow-sm md:flex-1">
+                  Free Trials
+                </TabsTrigger>
+                <TabsTrigger value="active" className="py-2.5 rounded-lg data-[state=active]:bg-white data-[state=active]:text-emerald-700 data-[state=active]:shadow-sm md:flex-1">
+                  Active Paying
+                </TabsTrigger>
+                <TabsTrigger value="canceled" className="py-2.5 rounded-lg data-[state=active]:bg-white data-[state=active]:text-rose-700 data-[state=active]:shadow-sm md:flex-1">
+                  Canceled
+                </TabsTrigger>
+              </TabsList>
+              
+              <div className="mt-4">
+                <TabsContent value="all" className="m-0 fade-in-0 duration-300 border-t-2 border-t-blue-500 rounded-t-xl">
+                  <UserTable 
+                    users={payingUsers}
+                    title="Bank Details Entered"
+                    description="Everyone who has crossed the paywall and entered valid payment details."
+                    emptyText="No subscriptions on record yet."
+                    icon={CreditCard}
+                    iconColorClass="text-blue-600"
+                  />
+                </TabsContent>
+                <TabsContent value="trial" className="m-0 fade-in-0 duration-300 border-t-2 border-t-amber-500 rounded-t-xl">
+                  <UserTable 
+                    users={payingUsers.filter(u => u.status === 'trialing' && !u.cancel_at_period_end)}
+                    title="Free Trials"
+                    description="Users currently evaluating the platform inside their 3-day window."
+                    emptyText="No users currently in a trial."
+                    icon={Activity}
+                    iconColorClass="text-amber-600"
+                  />
+                </TabsContent>
+                <TabsContent value="active" className="m-0 fade-in-0 duration-300 border-t-2 border-t-emerald-500 rounded-t-xl">
+                  <UserTable 
+                    users={payingUsers.filter(u => u.status === 'active' && !u.cancel_at_period_end)}
+                    title="Active Paying Customers"
+                    description="Users who securely completed trial and are paying monthly/annually."
+                    emptyText="No active paying customers yet."
+                    icon={Crown}
+                    iconColorClass="text-emerald-600"
+                  />
+                </TabsContent>
+                <TabsContent value="canceled" className="m-0 fade-in-0 duration-300 border-t-2 border-t-rose-500 rounded-t-xl">
+                  <UserTable 
+                    users={payingUsers.filter(u => u.cancel_at_period_end || u.status === 'canceled')}
+                    title="Canceled Subscribers"
+                    description="Users who cancelled their trial or subscription. Use emails to reach out for feedback."
+                    emptyText="No canceled users."
+                    icon={XCircle}
+                    iconColorClass="text-rose-600"
+                  />
+                </TabsContent>
+              </div>
+            </Tabs>
+          </div>
         </div>
       ) : errorText ? (
         <div className="max-w-7xl mx-auto rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-600 mt-8">
