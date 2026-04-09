@@ -74,6 +74,73 @@ export type PayingUser = {
   track: string;
   created_at: string;
   subscription_id: string;
+  status?: string;
+  cancel_at_period_end?: boolean;
+  current_period_end?: string | null;
+};
+
+const UserRow = ({ user }: { user: PayingUser }) => {
+  const [expanded, setExpanded] = useState(false);
+  const isCanceled = user.cancel_at_period_end || user.status === 'canceled';
+  const isTrial = user.status === 'trialing';
+
+  return (
+    <>
+      <tr 
+        onClick={() => setExpanded(!expanded)}
+        className="hover:bg-slate-50/50 transition-colors cursor-pointer border-b border-slate-100 last:border-0"
+      >
+        <td className="px-6 py-4 font-medium text-slate-900 capitalize">
+          <div className="flex items-center gap-2">
+            {user.name && user.name !== "Unknown" ? user.name : "Anonymous"}
+            {isCanceled && (
+             <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-rose-100 text-rose-700">
+                CANCELED
+              </span>
+            )}
+            {isTrial && !isCanceled && (
+             <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-700">
+                TRIALING
+              </span>
+            )}
+          </div>
+        </td>
+        <td className="px-6 py-4">{user.email}</td>
+        <td className="px-6 py-4">
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-50 text-purple-700 border border-purple-100">
+            {user.plan} · {user.track === 'gcse' ? 'GCSE' : '11+'}
+          </span>
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap text-slate-500">
+          {new Date(user.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+        </td>
+      </tr>
+      {expanded && (
+        <tr className="bg-slate-50/80 border-b border-slate-100 last:border-0">
+          <td colSpan={4} className="px-6 py-4">
+            <div className="text-sm text-slate-600 grid grid-cols-1 md:grid-cols-2 gap-4 rounded-lg bg-white p-4 border border-slate-200">
+              <div>
+                <p className="font-semibold text-slate-900 mb-1">Subscription Details</p>
+                <p><span className="text-slate-400">ID:</span> <span className="font-mono text-xs">{user.subscription_id || 'N/A'}</span></p>
+                <p><span className="text-slate-400">Status:</span> <span className="capitalize">{user.status || 'Active'}</span></p>
+                <p><span className="text-slate-400">Next Payment / End Date:</span> {user.current_period_end ? new Date(user.current_period_end).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Unknown'}</p>
+              </div>
+              <div>
+                 <p className="font-semibold text-slate-900 mb-1">Actions & Context</p>
+                 {isCanceled ? (
+                   <p className="text-rose-600">This user has cancelled their subscription. Reach out to them at <a href={`mailto:${user.email}`} className="underline font-medium">{user.email}</a> to find out why.</p>
+                 ) : isTrial ? (
+                   <p className="text-amber-600">This user is currently evaluating in a Trial stage. They entered their bank details.</p>
+                 ) : (
+                   <p className="text-emerald-600">This is a verified recurring subscriber making active payments.</p>
+                 )}
+              </div>
+            </div>
+          </td>
+        </tr>
+      )}
+    </>
+  );
 };
 
 type AnalyticsSnapshot = {
@@ -476,20 +543,7 @@ export default function GrowthTracker() {
                     </thead>
                     <tbody className="divide-y divide-slate-100 text-slate-700">
                       {payingUsers.map((user) => (
-                        <tr key={user.id} className="hover:bg-slate-50/50 transition-colors">
-                          <td className="px-6 py-4 font-medium text-slate-900 capitalize">
-                            {user.name && user.name !== "Unknown" ? user.name : "Anonymous"}
-                          </td>
-                          <td className="px-6 py-4">{user.email}</td>
-                          <td className="px-6 py-4">
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-50 text-purple-700 border border-purple-100">
-                              {user.plan} · {user.track === 'gcse' ? 'GCSE' : '11+'}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-slate-500">
-                            {new Date(user.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
-                          </td>
-                        </tr>
+                        <UserRow key={user.id} user={user} />
                       ))}
                     </tbody>
                   </table>

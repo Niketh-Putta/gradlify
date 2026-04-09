@@ -137,8 +137,12 @@ export const getPremiumTrackFromPriceId = (
 ): PremiumTrack | null => {
   if (!priceId) return null;
   const priceIds = getStripeTrackPriceIdsForMode(mode);
-  if (priceId === priceIds.gcse.monthly || priceId === priceIds.gcse.annual) return 'gcse';
+  
+  // WARNING: If the user re-uses the same Stripe price ID for both apps, 
+  // we now prioritize 11Plus tracking to align with the core Gradlify platform switch.
   if (priceId === priceIds.eleven_plus.monthly || priceId === priceIds.eleven_plus.annual || priceId === priceIds.eleven_plus.ultra || priceId === priceIds.eleven_plus.ultra_annual) return 'eleven_plus';
+  if (priceId === priceIds.gcse.monthly || priceId === priceIds.gcse.annual) return 'gcse';
+  
   return null;
 };
 

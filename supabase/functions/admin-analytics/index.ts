@@ -102,11 +102,8 @@ Deno.serve(async (req) => {
       priceResponse,
     ] = await Promise.all([
       supabase.from('profiles').select('id', { count: 'exact', head: true }),
-      supabase.from('profiles').select('id, full_name, plan, premium_track, onboarding, created_at, stripe_subscription_id_live', { count: 'exact' })
-        .eq('tier', 'premium')
-        .not('stripe_subscription_id_live', 'is', null)
-        .eq('cancel_at_period_end', false)
-        .eq('stripe_subscription_status', 'active'),
+      supabase.from('profiles').select('id, full_name, plan, premium_track, onboarding, created_at, stripe_subscription_id_live, stripe_subscription_status, cancel_at_period_end, current_period_end', { count: 'exact' })
+        .not('stripe_subscription_id_live', 'is', null),
       supabase.from('study_sessions').select('id', { count: 'exact', head: true }),
       supabase.from('mock_attempts').select('id', { count: 'exact', head: true }).eq('status', 'completed'),
       supabase.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', start14dIso),
@@ -258,13 +255,13 @@ Deno.serve(async (req) => {
       const stripeSecret = Deno.env.get('STRIPE_SECRET_KEY_LIVE') || Deno.env.get('STRIPE_SECRET_KEY');
       if (stripeSecret) {
         const stripe = new Stripe(stripeSecret, { httpClient: Stripe.createFetchHttpClient() });
-        const subs = await stripe.subscriptions.list({ limit: 100, status: 'active', expand: ['data.customer'] });
+        const subs = await stripe.subscriptions.list({ limit: 100, status: 'all', expand: ['data.customer'] });
         subs.data.forEach(sub => {
-          if (!sub.cancel_at_period_end && sub.items.data.length > 0) {
+          if (sub.status === 'active' && !sub.cancel_at_period_end && sub.items.data.length > 0) {
             exactMrr += (sub.items.data[0].price.unit_amount || 0) / 100;
-            if (sub.customer && typeof sub.customer !== 'string' && sub.customer.email) {
-               stripeEmails.set(sub.id, sub.customer.email);
-            }
+          }
+          if (sub.customer && typeof sub.customer !== 'string' && sub.customer.email) {
+             stripeEmails.set(sub.id, sub.customer.email);
           }
         });
       }
@@ -293,7 +290,10 @@ Deno.serve(async (req) => {
         plan: p.plan || "premium",
         track: p.premium_track || "unknown",
         created_at: p.created_at,
-        subscription_id: p.stripe_subscription_id_live
+        subscription_id: p.stripe_subscription_id_live,
+        status: p.stripe_subscription_status || 'unknown',
+        cancel_at_period_end: p.cancel_at_period_end || false,
+        current_period_end: p.current_period_end || null
       };
     }));
 
