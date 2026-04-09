@@ -869,7 +869,13 @@ export function EnglishSplitViewDemo() {
                 
                 <p className="text-foreground leading-relaxed mb-6 bg-background rounded-2xl p-5 border border-border/40 font-medium">
                   {results.overallTotal > 0 ? (
-                    <>Excellent work! Based on standard 11+ normalisation limits, you achieved a highly competitive <strong>Standardised Exam Score</strong> of <strong className={cn("text-xl font-black", results.sasColor)}>{results.overallPerc}%</strong> across this rigorous configuration.</>
+                    results.overallPerc < 50 ? (
+                      <>Keep practicing! Review the concepts and try again. You achieved a <strong>Standardised Exam Score</strong> of <strong className={cn("text-xl font-black", results.sasColor)}>{results.overallPerc}%</strong> across this configuration.</>
+                    ) : results.overallPerc < 80 ? (
+                      <>Good effort! Solid performance, but there is still room for improvement. You achieved a <strong>Standardised Exam Score</strong> of <strong className={cn("text-xl font-black", results.sasColor)}>{results.overallPerc}%</strong> across this configuration.</>
+                    ) : (
+                      <>Excellent work! Based on standard 11+ normalisation limits, you achieved a highly competitive <strong>Standardised Exam Score</strong> of <strong className={cn("text-xl font-black", results.sasColor)}>{results.overallPerc}%</strong> across this rigorous configuration.</>
+                    )
                   ) : (
                     <>You did not answer any questions in this session.</>
                   )}

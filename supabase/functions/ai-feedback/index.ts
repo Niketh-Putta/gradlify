@@ -188,7 +188,7 @@ Provide detailed feedback in the following JSON structure:
 Keep explanations clear and concise. Focus on the weakest topics.`;
 
     console.log('Calling Gemini API...');
-    const openaiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${openaiApiKey}`, {
+    const openaiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${openaiApiKey}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

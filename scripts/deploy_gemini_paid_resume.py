@@ -6,7 +6,7 @@ import time
 import uuid
 
 # PAID KEY from user instructions
-GEMINI_API_KEY = "AIzaSyAwYpF8asDe70YrZbe9X-c_09anHx7LU7I"
+GEMINI_API_KEY = "AIzaSyBC5y1drRFDAyrxdesvZ_gSSPARoc10cUA"
 SUPABASE_URL = "https://gknnfbalijxykqycopic.supabase.co/rest/v1/exam_questions"
 SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdrbm5mYmFsaWp4eWtxeWNvcGljIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NjYzODEzMSwiZXhwIjoyMDcyMjE0MTMxfQ.BQE_3SvvUsNOJSbVOQMbOwV9efRv3nYNJV7HC1T-o14"
 

@@ -6,6 +6,7 @@
 
 @layer base {
   :root {
+    color-scheme: light;
     /* Light Mode - Clean & Professional */
     --background: 48 30% 96%; /* Bone White inspired (#F9F8F3) */
     --foreground: 0 0% 11%;   /* Graphite Black (#1D1D1D) */
@@ -270,6 +271,7 @@
   }
 
   .dark {
+    color-scheme: dark;
     /* Dark Mode - Galaxy Aesthetic (Rich, deep indigo/space) */
     --background: 240 60% 4%; /* #04050a - Deep Space */
     --foreground: 220 20% 97%; /* Starlight white */

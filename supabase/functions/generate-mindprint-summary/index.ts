@@ -206,7 +206,7 @@ ${Object.entries(stats.accuracy_by_topic).map(([topic, data]) =>
 Provide personalized insight in 2-3 sentences.`;
 
       try {
-        const openAIResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${openAIKey}`, {
+        const openAIResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${openAIKey}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

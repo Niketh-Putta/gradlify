@@ -88,7 +88,7 @@ def direct_insert_supabase(rows):
         return False
 
 def generate_batch(topic, index):
-    # CRITICAL: We switch to gemini-1.5-flash! 
+    # CRITICAL: We switch to gemini-2.5-flash! 
     # Why? It is 10x faster, has 15 RPM (Request / minute) free tier instead of 2 RPM, 
     # and allows 1M TPM (Tokens per minute), perfectly built for massive scaling.
     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={GEMINI_API_KEY}"

@@ -434,7 +434,7 @@ export const AuthModal = ({
               Gradlify
             </h2>
             <p className={`${subtleText} text-xs sm:text-sm`}>
-              {AI_FEATURE_ENABLED ? 'Your AI companion for exam success' : 'Your companion for exam success'}
+              {AI_FEATURE_ENABLED ? 'The AI platform for exam success' : 'The platform for exam success'}
             </p>
           </div>
         </div>
@@ -465,10 +465,10 @@ export const AuthModal = ({
                      toast.error('Login Failed via Google overlay. Please try again or use standard sign-in.');
                    }}
                    useOneTap
-                   theme={isDark ? "filled_black" : "outline"}
+                   theme="outline"
                    text="continue_with"
                    shape="circle"
-                   width="400"
+                   width="340"
                 />
               </div>
             ) : (
