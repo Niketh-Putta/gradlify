@@ -565,7 +565,7 @@ export function EnglishSplitViewDemo() {
     
     // Intelligent exhaustion system:
     let seenPassages: string[] = [];
-    try { seenPassages = JSON.parse(localStorage.getItem('seen_english_passages') || '[]'); } catch(e) {}
+    try { seenPassages = JSON.parse(localStorage.getItem('seen_english_passages') || '[]'); } catch(e) { /* intentionally left empty */ }
     
     // Forcefully randomize everything to prevent deterministic cycles
     const shuffled = [...sourceData].sort(() => Math.random() - 0.5);
@@ -628,7 +628,7 @@ export function EnglishSplitViewDemo() {
         }
         
         localStorage.setItem('seen_english_passages', JSON.stringify(seen));
-      } catch(e) {}
+      } catch(e) { /* intentionally left empty */ }
     }
   }, [activeSections, dbSections.length]);
 
@@ -1058,7 +1058,7 @@ export function EnglishSplitViewDemo() {
 
                 const PAYWALL_THRESHOLD = 3;
                 let lastAllowedEvidenceIndex = -1;
-                let isEntireSectionPaywalled = false;
+                const isEntireSectionPaywalled = false;
                 
                 if (!isPremium && examMode !== 'mock') {
                   const allowedEvidenceLines = section.questions
@@ -1274,7 +1274,7 @@ export function EnglishSplitViewDemo() {
                         <span className="mb-1 relative bg-amber-500/10 border border-amber-500/20 px-3 py-1 rounded-full shadow-sm flex items-center gap-1.5 cursor-default shrink-0 transition-transform hover:scale-105">
                           <Sparkles className="w-3 h-3 text-amber-500" />
                           <span className="text-[10px] font-black tracking-widest text-amber-600 uppercase pt-0.5">
-                            {section.difficulty ? `LEVEL ${section.difficulty}` : (section.tier.match(/(Level\s*\d+)/i)?.[1] || section.tier.split(/[\(\:\-]/)[0].trim())}
+                            {section.difficulty ? `LEVEL ${section.difficulty}` : (section.tier.match(/(Level\s*\d+)/i)?.[1] || section.tier.split(/[(:-]/)[0].trim())}
                           </span>
                         </span>
                       )}

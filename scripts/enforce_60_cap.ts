@@ -53,11 +53,11 @@ async function run() {
     dbSubtopicQuestions[s].push(q.id);
   }
 
-  let idsToDelete: string[] = [];
+  const idsToDelete: string[] = [];
 
   // Special FDP rule: user explicitly said "cut down on FDP... to max 60"
   // Fractions = 60, Dec-Perc = 60. Let's make them 30 each.
-  let fdpIds: string[] = [];
+  const fdpIds: string[] = [];
   for (const k of FDP_DB_KEYS) {
      if (dbSubtopicQuestions[k]) {
          // keep first 30
@@ -87,7 +87,7 @@ async function run() {
       console.log(`UI Subtopic '${uiFilter}' has ${totalMapped} questions. Trimming to 60...`);
       
       const activeKeys = dbKeys.filter(k => itemsPerDbKey[k].length > 0);
-      let targetPerKey = Math.floor(60 / activeKeys.length);
+      const targetPerKey = Math.floor(60 / activeKeys.length);
       let remainder = 60 % activeKeys.length;
 
       for (const k of activeKeys) {

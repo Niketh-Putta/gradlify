@@ -71,7 +71,7 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
     const context = useAppContext();
     user = context.user;
     profile = context.profile;
-  } catch { }
+  } catch { /* intentionally left empty */ }
 
   const resolvedTrack = resolveUserTrack(profile?.track ?? null);
   const userTrack = is11Plus ? '11plus' : (isGCSE ? 'gcse' : resolvedTrack);
@@ -225,7 +225,7 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
           return [s.id, finalCount] as const;
         }));
         setTopicCounts(Object.fromEntries(results));
-      } catch (e) { }
+      } catch (e) { /* intentionally left empty */ }
     };
     fetchTopicCounts();
   }, [availableSections, tierSelection, calcSelection, elevenPlusDifficulty, userTrack, isElevenPlus, currentSubject]);

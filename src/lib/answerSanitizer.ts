@@ -89,7 +89,7 @@ const buildRatioWrongOption = (correct: string, existing: string[]): string | nu
 };
 
 const generateSensibleWrongOption = (correct: string, existing: string[]): string | null => {
-  const match = correct.match(/^(-?[\d\.,]+)(.*)$/);
+  const match = correct.match(/^(-?[\d.,]+)(.*)$/);
   if (match) {
     const val = parseFloat(match[1].replace(/,/g, ''));
     const unit = match[2];

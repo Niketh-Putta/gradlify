@@ -193,7 +193,7 @@ function formatChallengeExplanation(text?: string): { lines: ChallengeExplanatio
   };
 
   for (const raw of rawLines) {
-    const finalMatch = raw.match(/^(Final answer|Answer)\s*[:).\-]?\s*(.*)$/i);
+    const finalMatch = raw.match(/^(Final answer|Answer)\s*[:).-]?\s*(.*)$/i);
     if (finalMatch) {
       const remainder = String(finalMatch[2] ?? "").trim();
       if (remainder) {
@@ -211,7 +211,7 @@ function formatChallengeExplanation(text?: string): { lines: ChallengeExplanatio
       continue;
     }
 
-    const stepMatch = raw.match(/^Step\s*\d+\s*(?:\([^)]*\))?\s*[:).\-]?\s*(.*)$/i);
+    const stepMatch = raw.match(/^Step\s*\d+\s*(?:\([^)]*\))?\s*[:).-]?\s*(.*)$/i);
     if (stepMatch) {
       const stepText = String(stepMatch[1] ?? "").trim();
       lines.push({ kind: "step", text: stepText });

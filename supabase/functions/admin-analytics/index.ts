@@ -280,7 +280,7 @@ Deno.serve(async (req) => {
             const { data: userData } = await supabase.auth.admin.getUserById(uId);
             if (userData?.user?.email) email = userData.user.email;
           }
-        } catch (err) {}
+        } catch (err) { /* intentionally left empty */ }
       }
       
       return {

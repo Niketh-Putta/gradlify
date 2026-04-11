@@ -36,7 +36,7 @@ function generateSensibleWrongOption(correct: string, existing: string[]): strin
   }
 
   // Check generic numerical + units
-  const numRegex = /^(-?[\d\.,]+)(.*)$/;
+  const numRegex = /^(-?[\d.,]+)(.*)$/;
   const match = correct.match(numRegex);
   if (match) {
     const val = parseFloat(match[1].replace(/,/g, ''));
@@ -97,7 +97,7 @@ async function run() {
 
     for (const q of questions) {
       const correct = String(q.correct_answer || '').trim();
-      let wrongRaw = Array.isArray(q.wrong_answers) ? q.wrong_answers : [];
+      const wrongRaw = Array.isArray(q.wrong_answers) ? q.wrong_answers : [];
       let needsFix = false;
 
       // Evaluate if current wrong answers are high-quality
@@ -132,7 +132,7 @@ async function run() {
              if (!newOpt) {
                  // Absolute fallback
                  const lastResortCount = filteredWrong.length + 2;
-                 newOpt = correct.replace(/[\d\.]+/g, (m) => (parseFloat(m) + lastResortCount).toString());
+                 newOpt = correct.replace(/[\d.]+/g, (m) => (parseFloat(m) + lastResortCount).toString());
                  if (activeExisting.includes(newOpt) || newOpt === correct || !newOpt.match(/\d/)) {
                      newOpt = `Option ${String.fromCharCode(65 + filteredWrong.length * 2)}`;
                  }

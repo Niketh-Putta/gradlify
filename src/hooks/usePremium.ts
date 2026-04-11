@@ -307,7 +307,7 @@ export function usePremium(trackOverride?: UserTrack, subject?: 'maths' | 'engli
         const now = new Date();
         const resetAt = data.daily_reset_at ? new Date(data.daily_reset_at) : null;
         
-        let usesVal = data.daily_mock_uses || 0;
+        const usesVal = data.daily_mock_uses || 0;
         let mockResetAtDt: Date | null = null;
         if (data.daily_mock_reset_at) mockResetAtDt = new Date(data.daily_mock_reset_at);
 
