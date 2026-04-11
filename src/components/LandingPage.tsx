@@ -1014,150 +1014,6 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
           </div>
         </section>
 
-
-                        {/* Free Resources */}
-        <section id="free-resources" className={`relative py-16 sm:py-24 lg:py-32 ${sectionSurface}`}>
-          {ambientEffectsEnabled && (
-            <div
-              className={`absolute inset-0 pointer-events-none ${
-                isDark
-                  ? "bg-[radial-gradient(1000px_600px_at_50%_0%,rgba(245,158,11,0.08),transparent_70%)]"
-                  : "bg-[radial-gradient(1000px_600px_at_50%_0%,rgba(245,158,11,0.05),transparent_70%)]"
-              }`}
-            />
-          )}
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
-            <motion.div initial="hidden" whileInView="show" viewport={motionCfg.viewport} variants={motionCfg.stagger}>
-              <motion.div variants={motionCfg.fadeUp} className="max-w-2xl text-center mx-auto mb-12 sm:mb-16">
-                <div className={`inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold ${isDark ? "bg-amber-500/10 text-amber-300" : "bg-amber-100 text-amber-700"}`}>
-                  <Sparkles className="h-4 w-4" /> <span className="uppercase tracking-widest text-[10px]">Free Resources</span>
-                </div>
-                <p className={`mt-5 text-base sm:text-lg ${mutedText} leading-relaxed max-w-xl mx-auto`}>
-                  Access our top-tier 11+ practice guides, past papers, and structured PDF bundles instantly. No signup required.
-                </p>
-              </motion.div>
-              {/* 11+ Layout */}
-              <div className="grid lg:grid-cols-12 gap-6">
-                {/* Featured Resource - School Bundles spanning 8 columns */}
-                <motion.div variants={motionCfg.fadeUp} className={`lg:col-span-8 rounded-[32px] border p-8 sm:p-12 shadow-2xl relative overflow-hidden group ${isDark ? "bg-[linear-gradient(135deg,#0f172a,#020617)] border-amber-500/20" : "bg-[linear-gradient(135deg,#f8fafc,#ffffff)] border-amber-200/50"}`}>
-                  <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-amber-500/20 rounded-full blur-3xl opacity-50 group-hover:opacity-75 transition-opacity" />
-                  <div className="absolute bottom-0 right-0 w-64 h-64 bg-orange-500/10 rounded-full blur-3xl" />
-                  <div className="relative z-10 flex flex-col h-full justify-between">
-                    <div>
-                      <div className="flex flex-wrap items-center gap-3 mb-6">
-                        <span className="px-3 py-1 rounded-full bg-amber-500 text-white text-[10px] font-bold tracking-wider uppercase">PDF Packs</span>
-                        <span className="px-3 py-1 rounded-full border border-amber-200 dark:border-amber-500/30 text-amber-700 dark:text-amber-300 text-[10px] uppercase tracking-widest font-bold">Free Daily Resources</span>
-                      </div>
-                      <h3 className={`text-2xl sm:text-4xl font-bold tracking-tight ${primaryText} mb-4`}>
-                        Exclusive School Bundles <br className="hidden sm:block" />& QE Mock Guides
-                      </h3>
-                      <p className={`text-base sm:text-lg ${mutedText} max-w-lg mb-8`}>
-                        Premium, hyper-focused PDF packs tailored for specific competitive school entrances. Download our Queen Elizabeth's (QE) bundle below.
-                      </p>
-                      
-                      <div className="grid sm:grid-cols-2 gap-4 mb-10">
-                        {[
-                          { name: "QE Admissions Details", file: "The Level Field - QE BUNDLE - Admissions Details(1).pdf" },
-                          { name: "Maths Distractors Guide", file: "The Level Field - QE BUNDLE - Distractors In Maths(2).pdf" },
-                          { name: "Answer Sheet Protocols", file: "The Level Field - QE BUNDLE - Answer Sheet Precision Protocols(3).pdf" },
-                          { name: "English Paper Strategy", file: "The Level Field - QE BUNDLE - How to Tackle the English Paper(4).pdf" }
-                        ].map((item) => (
-                          <a 
-                            key={item.name}
-                            href={`/revision-guides/${item.file}`}
-                            download
-                            className={`flex items-center gap-3 p-3 rounded-2xl border transition-all duration-300 hover:scale-[1.02] ${
-                              isDark 
-                                ? "bg-white/5 border-white/10 hover:bg-white/10 text-slate-200" 
-                                : "bg-white border-slate-200 hover:border-amber-300 text-slate-700 shadow-sm"
-                            }`}
-                          >
-                            <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-500">
-                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                            </div>
-                            <span className="text-[13px] font-semibold truncate">{item.name}</span>
-                          </a>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                      <a
-                        href="https://drive.google.com/drive/folders/18zm3eRDKyJsb4ATgyy7WiIQ_9mKLGjnv?usp=drive_link"
-                        target="_blank" rel="noreferrer"
-                        className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-lg shadow-amber-500/30 hover:to-orange-500 hover:from-amber-400 px-8 py-4 font-semibold transition-transform hover:-translate-y-1"
-                      >
-                        Browse All School Bundles
-                        <ArrowRight className="ml-2 w-5 h-5" />
-                      </a>
-                      <p className={`text-xs ${mutedText} font-medium`}>Full access to 100+ resources via Drive.</p>
-                    </div>
-                  </div>
-                </motion.div>
-
-                {/* English PDFs spanning 4 columns */}
-                <motion.div variants={motionCfg.fadeUp} className="lg:col-span-4 h-full">
-                  <ResourceScrollCard
-                    title="11+ English Drop"
-                    description="High-quality passage extracts, comprehension questions, and SPaG worksheets."
-                    resources={PDF_RESOURCES.english}
-                    icon={<svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>}
-                    isDark={isDark}
-                    primaryText={primaryText}
-                    mutedText={mutedText}
-                    cardSurface={cardSurface}
-                    accentColor="sky"
-                  />
-                </motion.div>
-
-                {/* Maths PDFs spanning 4 columns */}
-                <motion.div variants={motionCfg.fadeUp} className="lg:col-span-4 h-full">
-                  <ResourceScrollCard
-                    title="11+ Mathematics Drop"
-                    description="Curated sets of multi-step problem solving grids and arithmetic exercises."
-                    resources={PDF_RESOURCES.maths}
-                    icon={<svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>}
-                    isDark={isDark}
-                    primaryText={primaryText}
-                    mutedText={mutedText}
-                    cardSurface={cardSurface}
-                    accentColor="blue"
-                  />
-                </motion.div>
-
-                {/* Verbal Reasoning PDFs spanning 4 columns */}
-                <motion.div variants={motionCfg.fadeUp} className="lg:col-span-4 h-full">
-                  <ResourceScrollCard
-                    title="Verbal Reasoning"
-                    description="Code breaking, logic problems, and advanced vocabulary preparation."
-                    resources={PDF_RESOURCES.vr}
-                    icon={<svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>}
-                    isDark={isDark}
-                    primaryText={primaryText}
-                    mutedText={mutedText}
-                    cardSurface={cardSurface}
-                    accentColor="amber"
-                  />
-                </motion.div>
-
-                {/* Non-Verbal Reasoning PDFs spanning 12 columns */}
-                <motion.div variants={motionCfg.fadeUp} className="lg:col-span-12 h-full">
-                  <ResourceScrollCard
-                    title="Non-Verbal Reasoning"
-                    description="Practise your spatial awareness and pattern recognition with our printable logic puzzles and nets."
-                    resources={PDF_RESOURCES.nvr}
-                    icon={<svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5" /></svg>}
-                    isDark={isDark}
-                    primaryText={primaryText}
-                    mutedText={mutedText}
-                    cardSurface={cardSurface}
-                    accentColor="emerald"
-                  />
-                </motion.div>
-              </div>
-            </motion.div>
-          </div>
-        </section>
-
         {/* Pricing */}
         <section id="pricing" className={`relative py-12 sm:py-16 lg:py-20 ${sectionSurface}`}>
           {ambientEffectsEnabled && (
@@ -1504,13 +1360,9 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
               >
                 Demo
               </button>
-              <button
-                type="button"
-                className={`transition-colors ${isDark ? "hover:text-white" : "hover:text-slate-900"}`}
-                onClick={() => scrollTo("free-resources")}
-              >
+              <Link to="/free-resources" className={`transition-colors ${isDark ? "hover:text-white" : "hover:text-slate-900"}`}>
                 Free Resources
-              </button>
+              </Link>
               <button
                 type="button"
                 className={`transition-colors ${isDark ? "hover:text-white" : "hover:text-slate-900"}`}
