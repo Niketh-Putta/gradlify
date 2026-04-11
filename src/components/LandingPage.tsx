@@ -1032,14 +1032,10 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                 <div className={`inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold ${isDark ? "bg-amber-500/10 text-amber-300" : "bg-amber-100 text-amber-700"}`}>
                   <Sparkles className="h-4 w-4" /> <span className="uppercase tracking-widest text-[10px]">Free Resources</span>
                 </div>
-                <h2 className={`mt-6 text-3xl sm:text-5xl font-semibold tracking-tight ${primaryText}`}>
-                  Everything you need. <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-orange-400 block sm:inline">Zero cost.</span>
-                </h2>
                 <p className={`mt-5 text-base sm:text-lg ${mutedText} leading-relaxed max-w-xl mx-auto`}>
                   Access our top-tier 11+ practice guides, past papers, and structured PDF bundles instantly. No signup required.
                 </p>
               </motion.div>
-
               {/* 11+ Layout */}
               <div className="grid lg:grid-cols-12 gap-6">
                 {/* Featured Resource - School Bundles spanning 8 columns */}
@@ -1281,7 +1277,6 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                       <div className={`text-3xl sm:text-4xl font-semibold ${primaryText}`}>£0</div>
                       <div className={`text-sm ${subtleText} pb-1`}>/month</div>
                     </div>
-                    <p className={`mt-3 text-[13px] sm:text-sm ${mutedText}`}>Everything you need to begin consistently.</p>
                     <div className={`mt-5 sm:mt-6 space-y-3 text-[13px] sm:text-sm ${mutedText}`}>
                       {[
                         "Topic practice questions",
