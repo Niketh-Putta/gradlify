@@ -259,7 +259,7 @@ const Index = () => {
           <Route path="/select-subject" element={<SubjectSelection />} />
           <Route path="/11-plus" element={<Navigate to="/select-subject" replace />} />
           <Route path="/tools" element={<Tools />} />
-          <Route path="/free-tools" element={<Tools />} />
+          <Route path="/free-resources" element={<Tools />} />
           <Route 
             path="/*" 
             element={
@@ -305,7 +305,7 @@ const Index = () => {
       <Route path="/" element={<Navigate to="/11-plus" replace />} />
       <Route path="/11-plus" element={renderElevenPlusLanding()} />
       <Route path="/tools" element={<Tools />} />
-      <Route path="/free-tools" element={<Tools />} />
+      <Route path="/free-resources" element={<Tools />} />
       <Route path="/reset-password" element={renderLanding(<UpdatePassword />)} />
       <Route path="/founders-circle" element={<FoundersCircle />} />
       <Route path="/sprint" element={<SprintHowItWorks />} />

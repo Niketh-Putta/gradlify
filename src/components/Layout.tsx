@@ -70,7 +70,7 @@ export function Layout({ user, onSettings, onSignOut }: LayoutProps) {
   const isChatRoute = location.pathname.startsWith('/chat');
   const isFreeToolsRoute =
     location.pathname.startsWith('/tools') ||
-    location.pathname.startsWith('/free-tools') ||
+    location.pathname.startsWith('/free-resources') ||
     location.pathname.startsWith('/gcse-maths-grade-boundaries') ||
     location.pathname.startsWith('/gcse-maths-topic-weakness-test') ||
     location.pathname.startsWith('/gcse-maths-grade-target-planner');

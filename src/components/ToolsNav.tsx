@@ -12,10 +12,10 @@ type ToolsNavProps = {
 
 const TOOL_PATHS = [
   "/tools",
-  "/free-tools",
+  "/free-resources",
   "/gcse-maths-grade-boundaries",
-  "/free-tools/gcse-maths-topic-weakness-test",
-  "/free-tools/gcse-maths-grade-target-planner",
+  "/free-resources/gcse-maths-topic-weakness-test",
+  "/free-resources/gcse-maths-grade-target-planner",
 ];
 
 export function ToolsNav({ label, lockTheme }: ToolsNavProps) {
@@ -37,56 +37,32 @@ export function ToolsNav({ label, lockTheme }: ToolsNavProps) {
 
   return (
     <nav className="sticky top-0 z-40 w-full border-b border-slate-100 bg-white/95 backdrop-blur dark:border-slate-800 dark:bg-slate-950/95">
-      <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-x-3 gap-y-2 px-3 py-3 sm:flex-nowrap sm:px-6">
-        <NavLink to="/" className="flex min-w-0 flex-1 items-center gap-3 sm:flex-none">
-          <div className="rounded-full border border-slate-200 bg-white p-1.5 shadow-sm dark:border-slate-800 dark:bg-slate-950">
-            <LogoMark className="h-8 w-8" />
-          </div>
-          <div className="min-w-0 leading-tight">
-            <div className="text-sm font-semibold text-slate-900 dark:text-white">Gradlify</div>
-            <div className="max-w-[170px] truncate text-xs text-slate-500 dark:text-slate-400 sm:max-w-none">
-              11+ practiced properly.
+      <div className="mx-auto flex w-full max-w-6xl items-center px-3 py-3 sm:px-6">
+        <div className="flex flex-1 justify-start">
+          <NavLink to="/" className="flex items-center gap-3">
+            <div className="rounded-full border border-slate-200 bg-white p-1.5 shadow-sm dark:border-slate-800 dark:bg-slate-950">
+              <LogoMark className="h-8 w-8" />
             </div>
-          </div>
-        </NavLink>
-
-        <div className="hidden items-center gap-5 lg:flex">
-          <NavLink to="/" className={`${linkBase} text-slate-600 dark:text-slate-300`}>
-            Gradlify Home
-          </NavLink>
-          <NavLink
-            to="/free-tools"
-            className={`${linkBase} ${isToolsActive ? activeLink : "text-slate-600 dark:text-slate-300"}`}
-          >
-            Free Tools
+            <div className="min-w-0 leading-tight">
+              <div className="text-sm font-semibold text-slate-900 dark:text-white">Gradlify</div>
+              <div className="max-w-[170px] truncate text-xs text-slate-500 dark:text-slate-400 sm:max-w-none">
+                11+ practiced properly.
+              </div>
+            </div>
           </NavLink>
         </div>
 
-        <div className="flex w-full items-center justify-end gap-1.5 sm:w-auto sm:gap-2">
-          {!lockTheme && (
-            <button
-              type="button"
-              onClick={() => setTheme(isDark ? "light" : "dark")}
-              className="hidden items-center gap-1.5 rounded-full border border-slate-200 px-2 py-1 text-[11px] font-semibold text-slate-600 transition hover:border-slate-300 hover:text-slate-900 dark:border-slate-700 dark:text-slate-300 dark:hover:text-white sm:inline-flex"
-            >
-              {isDark ? <Sun className="h-3.5 w-3.5" /> : <Moon className="h-3.5 w-3.5" />}
-              {isDark ? "Light mode" : "Dark mode"}
-            </button>
-          )}
+        <div className="flex flex-1 justify-center">
           <Button
             variant="ghost"
             asChild
-            className="px-1.5 text-xs font-medium text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white sm:px-2 sm:text-sm"
+            className="text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
           >
-            <a href="/?auth=login">Log in</a>
-          </Button>
-          <Button asChild className="rounded-full px-2.5 text-xs font-semibold sm:px-4 sm:text-sm">
-            <a href="/gcse?auth=signup">
-              <span className="sm:hidden">Start free</span>
-              <span className="hidden sm:inline">Start practising free</span>
-            </a>
+            <NavLink to="/">Home</NavLink>
           </Button>
         </div>
+
+        <div className="flex flex-1 justify-end" />
       </div>
       {label && (
         <div className="border-t border-slate-100 bg-slate-50 px-4 py-2 text-xs text-slate-500 dark:border-slate-800 dark:bg-slate-900/40 dark:text-slate-400 sm:px-6">

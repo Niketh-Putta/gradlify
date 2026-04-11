@@ -35,7 +35,7 @@ const AppContent = () => (
         <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <Routes>
             <Route path="/tools" element={<Tools />} />
-            <Route path="/free-tools" element={<Tools />} />
+            <Route path="/free-resources" element={<Tools />} />
             <Route path="/*" element={<Index />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />

@@ -84,8 +84,8 @@ export function FreeToolSEO({
       {
         "@type": "ListItem",
         position: 2,
-        name: "Free Tools",
-        item: `${SITE_URL}/free-tools`,
+        name: "Free Resources",
+        item: `${SITE_URL}/free-resources`,
       },
       {
         "@type": "ListItem",
@@ -124,10 +124,10 @@ export function FreeToolSEO({
       <div className="mx-auto w-full max-w-5xl px-4 pb-2 pt-8 sm:px-6 lg:px-8">
         <div className="mx-auto mb-6 flex max-w-3xl items-center">
           <Link
-            to="/free-tools"
+            to="/free-resources"
             className="inline-flex items-center gap-2 text-xs font-medium text-slate-500 transition hover:text-slate-900"
           >
-            ← Back to Free Tools
+            ← Back to Free Resources
           </Link>
         </div>
 
