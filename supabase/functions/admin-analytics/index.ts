@@ -1,5 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.56.1';
 import Stripe from 'https://esm.sh/stripe@14.18.0?target=deno';
+import { getStripeTrackPriceIdsForMode, getStripeModeFromLivemode } from '../shared/stripeConfig.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -101,23 +102,24 @@ Deno.serve(async (req) => {
       practice30dCount,
       priceResponse,
     ] = await Promise.all([
-      supabase.from('profiles').select('id', { count: 'exact', head: true }),
+      supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('track', '11plus'),
       supabase.from('profiles').select('id, full_name, plan, premium_track, onboarding, created_at, stripe_subscription_id_live, stripe_subscription_status, cancel_at_period_end, current_period_end', { count: 'exact' })
-        .not('stripe_subscription_id_live', 'is', null),
-      supabase.from('study_sessions').select('id', { count: 'exact', head: true }),
-      supabase.from('mock_attempts').select('id', { count: 'exact', head: true }).eq('status', 'completed'),
-      supabase.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', start14dIso),
-      supabase.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', start7dIso),
-      supabase.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', start30dIso),
-      supabase.from('mock_attempts').select('id', { count: 'exact', head: true }).eq('status', 'completed').gte('created_at', start14dIso),
-      supabase.from('mock_attempts').select('id', { count: 'exact', head: true }).eq('status', 'completed').gte('created_at', start7dIso),
-      supabase.from('mock_attempts').select('id', { count: 'exact', head: true }).eq('status', 'completed').gte('created_at', start30dIso),
-      supabase.from('study_sessions').select('id', { count: 'exact', head: true }).gte('created_at', start14dIso),
-      supabase.from('study_sessions').select('id', { count: 'exact', head: true }).gte('created_at', start7dIso),
-      supabase.from('study_sessions').select('id', { count: 'exact', head: true }).gte('created_at', start30dIso),
-      supabase.from('practice_results').select('id', { count: 'exact', head: true }).gte('created_at', start14dIso),
-      supabase.from('practice_results').select('id', { count: 'exact', head: true }).gte('created_at', start7dIso),
-      supabase.from('practice_results').select('id', { count: 'exact', head: true }).gte('created_at', start30dIso),
+        .not('stripe_subscription_id_live', 'is', null)
+        .in('premium_track', ['eleven_plus', '11plus']),
+      supabase.from('study_sessions').select('id, profiles!inner(track)', { count: 'exact', head: true }).eq('profiles.track', '11plus'),
+      supabase.from('mock_attempts').select('id', { count: 'exact', head: true }).eq('status', 'completed').eq('track', '11plus'),
+      supabase.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', start14dIso).eq('track', '11plus'),
+      supabase.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', start7dIso).eq('track', '11plus'),
+      supabase.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', start30dIso).eq('track', '11plus'),
+      supabase.from('mock_attempts').select('id', { count: 'exact', head: true }).eq('status', 'completed').gte('created_at', start14dIso).eq('track', '11plus'),
+      supabase.from('mock_attempts').select('id', { count: 'exact', head: true }).eq('status', 'completed').gte('created_at', start7dIso).eq('track', '11plus'),
+      supabase.from('mock_attempts').select('id', { count: 'exact', head: true }).eq('status', 'completed').gte('created_at', start30dIso).eq('track', '11plus'),
+      supabase.from('study_sessions').select('id, profiles!inner(track)', { count: 'exact', head: true }).gte('created_at', start14dIso).eq('profiles.track', '11plus'),
+      supabase.from('study_sessions').select('id, profiles!inner(track)', { count: 'exact', head: true }).gte('created_at', start7dIso).eq('profiles.track', '11plus'),
+      supabase.from('study_sessions').select('id, profiles!inner(track)', { count: 'exact', head: true }).gte('created_at', start30dIso).eq('profiles.track', '11plus'),
+      supabase.from('practice_results').select('id', { count: 'exact', head: true }).gte('created_at', start14dIso).eq('track', '11plus'),
+      supabase.from('practice_results').select('id', { count: 'exact', head: true }).gte('created_at', start7dIso).eq('track', '11plus'),
+      supabase.from('practice_results').select('id', { count: 'exact', head: true }).gte('created_at', start30dIso).eq('track', '11plus'),
       supabase.functions.invoke('stripe-price'),
     ]);
 
@@ -138,6 +140,7 @@ Deno.serve(async (req) => {
             .from('profiles')
             .select('created_at')
             .gte('created_at', startDateIso)
+            .eq('track', '11plus')
             .order('created_at', { ascending: true })
             .range(from, to),
         50,
@@ -148,6 +151,7 @@ Deno.serve(async (req) => {
             .from('practice_results')
             .select('attempts, correct, created_at')
             .gte('created_at', startDateIso)
+            .eq('track', '11plus')
             .order('created_at', { ascending: true })
             .range(from, to),
         50,
@@ -256,9 +260,21 @@ Deno.serve(async (req) => {
       if (stripeSecret) {
         const stripe = new Stripe(stripeSecret, { httpClient: Stripe.createFetchHttpClient() });
         const subs = await stripe.subscriptions.list({ limit: 100, status: 'all', expand: ['data.customer'] });
+        const mode = getStripeModeFromLivemode(stripeSecret.startsWith('sk_live_'));
+        const priceIds = getStripeTrackPriceIdsForMode(mode);
+        const elevenPlusPrices = [
+          priceIds.eleven_plus.monthly,
+          priceIds.eleven_plus.annual,
+          priceIds.eleven_plus.ultra,
+          priceIds.eleven_plus.ultra_annual
+        ].filter(Boolean);
+
         subs.data.forEach(sub => {
           if (sub.status === 'active' && !sub.cancel_at_period_end && sub.items.data.length > 0) {
-            exactMrr += (sub.items.data[0].price.unit_amount || 0) / 100;
+            const priceId = sub.items.data[0].price.id;
+            if (elevenPlusPrices.includes(priceId)) {
+              exactMrr += (sub.items.data[0].price.unit_amount || 0) / 100;
+            }
           }
           if (sub.customer && typeof sub.customer !== 'string' && sub.customer.email) {
              stripeEmails.set(sub.id, sub.customer.email);

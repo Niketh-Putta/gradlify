@@ -28,6 +28,8 @@ import EnglishSplitViewDemo from '@/pages/EnglishSplitViewDemo';
 import UpdatePassword from '@/pages/UpdatePassword';
 import FoundersCircle from '@/pages/FoundersCircle';
 import { SprintHowItWorks } from '@/pages/SprintHowItWorks';
+import SprintWinning from '@/pages/SprintWinning';
+import GrowthTracker from '@/pages/GrowthTracker';
 import PayReturn from '@/pages/PayReturn';
 import NotFound from '@/pages/NotFound';
 import Tools from '@/pages/Tools';
@@ -296,6 +298,8 @@ const Index = () => {
             <Route path="notes/:section/:topic" element={<RevisionNotesTopic />} />
             <Route path="founders-circle" element={<FoundersCircle />} />
             <Route path="sprint" element={<SprintHowItWorks />} />
+            <Route path="sprint-winning" element={<SprintWinning />} />
+            <Route path="nikethputtaadmin-growth" element={<GrowthTracker />} />
             <Route path="*" element={<NotFound />} />
           </Route>
         </>

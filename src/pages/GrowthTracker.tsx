@@ -374,7 +374,7 @@ export default function GrowthTracker() {
               <CardContent className="p-6">
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="text-sm font-medium text-slate-500">Monthly Revenue (MRR)</p>
+                    <p className="text-sm font-medium text-slate-500">11+ Monthly Revenue (MRR)</p>
                     <h3 className="text-3xl font-bold text-slate-900 mt-2">
                       £{formatNumber(monthlyRevenue)}
                     </h3>
@@ -393,7 +393,7 @@ export default function GrowthTracker() {
               <CardContent className="p-6">
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="text-sm font-medium text-slate-500">Active Subscribers</p>
+                    <p className="text-sm font-medium text-slate-500">11+ Active Subscribers</p>
                     <h3 className="text-3xl font-bold text-slate-900 mt-2">
                       {formatNumber(premiumConversions)}
                     </h3>
@@ -412,7 +412,7 @@ export default function GrowthTracker() {
               <CardContent className="p-6">
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="text-sm font-medium text-slate-500">Registered Accounts</p>
+                    <p className="text-sm font-medium text-slate-500">11+ Registered Accounts</p>
                     <h3 className="text-3xl font-bold text-slate-900 mt-2">
                       {formatNumber(totalUsers)}
                     </h3>
@@ -422,7 +422,7 @@ export default function GrowthTracker() {
                   </div>
                 </div>
                 <div className="flex items-center gap-1 mt-4 text-sm">
-                  <span className="text-slate-400">Total lifetime sign-ups</span>
+                  <span className="text-slate-400">Total 11+ lifetime sign-ups</span>
                 </div>
               </CardContent>
             </Card>
@@ -434,7 +434,7 @@ export default function GrowthTracker() {
               <CardContent className="p-4 sm:p-6">
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="text-sm font-medium text-slate-500">Site Visitors (14d)</p>
+                    <p className="text-sm font-medium text-slate-500">11+ Visitors (14d)</p>
                     <h3 className="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">{formatNumber(uniqueVisitors)}</h3>
                   </div>
                   <div className="p-2 sm:p-3 bg-sky-50 text-sky-600 rounded-xl">
@@ -442,7 +442,7 @@ export default function GrowthTracker() {
                   </div>
                 </div>
                 <div className="mt-4 text-sm text-slate-400">
-                  Different people visited
+                  Different 11+ users visited
                 </div>
               </CardContent>
             </Card>
@@ -451,7 +451,7 @@ export default function GrowthTracker() {
               <CardContent className="p-4 sm:p-6">
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="text-sm font-medium text-slate-500">Sign-ups (Today)</p>
+                    <p className="text-sm font-medium text-slate-500">11+ Sign-ups (Today)</p>
                     <h3 className="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">{formatNumber(signupsToday)}</h3>
                   </div>
                   <div className="p-2 sm:p-3 bg-indigo-50 text-indigo-600 rounded-xl">
@@ -476,7 +476,7 @@ export default function GrowthTracker() {
               <CardContent className="p-4 sm:p-6">
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="text-sm font-medium text-slate-500">Active Today</p>
+                    <p className="text-sm font-medium text-slate-500">11+ Active Today</p>
                     <h3 className="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">{formatNumber(activeToday)}</h3>
                   </div>
                   <div className="p-2 sm:p-3 bg-slate-100 text-slate-600 rounded-xl">
@@ -501,9 +501,9 @@ export default function GrowthTracker() {
           <Card className="border-slate-200 shadow-sm border-t-4 border-t-blue-500">
             <CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between pb-2 gap-4">
               <div className="space-y-1">
-                <CardTitle>14-Day Growth Trend</CardTitle>
+                <CardTitle>14-Day 11+ Growth Trend</CardTitle>
                 <CardDescription>
-                  Comparing daily active visitors vs new sign-ups over time.
+                  Comparing daily active 11+ visitors vs new 11+ sign-ups over time.
                 </CardDescription>
               </div>
               <div className="flex items-center gap-4 text-sm">
@@ -575,8 +575,8 @@ export default function GrowthTracker() {
 
           <div className="pt-6 pb-12">
             <div className="mb-4">
-               <h2 className="text-xl font-bold tracking-tight text-slate-900">Customer Segmentation</h2>
-               <p className="text-slate-500 text-sm mt-1">Breakdown of users by payment pipeline status.</p>
+               <h2 className="text-xl font-bold tracking-tight text-slate-900">11+ Customer Segmentation</h2>
+               <p className="text-slate-500 text-sm mt-1">Breakdown of 11+ users by payment pipeline status.</p>
             </div>
             <Tabs defaultValue="all" className="w-full space-y-6">
               <TabsList className="grid grid-cols-4 max-w-3xl bg-slate-100/50 p-1.5 rounded-xl h-auto shrink-0 md:flex">
@@ -598,9 +598,9 @@ export default function GrowthTracker() {
                 <TabsContent value="all" className="m-0 fade-in-0 duration-300 border-t-2 border-t-blue-500 rounded-t-xl">
                   <UserTable 
                     users={payingUsers}
-                    title="Bank Details Entered"
-                    description="Everyone who has crossed the paywall and entered valid payment details."
-                    emptyText="No subscriptions on record yet."
+                    title="11+ Bank Details Entered"
+                    description="Everyone who has crossed the 11+ paywall and entered valid payment details."
+                    emptyText="No 11+ subscriptions on record yet."
                     icon={CreditCard}
                     iconColorClass="text-blue-600"
                   />
@@ -608,9 +608,9 @@ export default function GrowthTracker() {
                 <TabsContent value="trial" className="m-0 fade-in-0 duration-300 border-t-2 border-t-amber-500 rounded-t-xl">
                   <UserTable 
                     users={payingUsers.filter(u => isActuallyTrial(u))}
-                    title="Free Trials (Active & Canceled)"
-                    description="People who started a trial and lasted 3 days or less."
-                    emptyText="No users currently match trial duration."
+                    title="11+ Free Trials"
+                    description="11+ users who started a trial and lasted 3 days or less."
+                    emptyText="No 11+ users currently match trial duration."
                     icon={Activity}
                     iconColorClass="text-amber-600"
                   />
@@ -618,9 +618,9 @@ export default function GrowthTracker() {
                 <TabsContent value="active" className="m-0 fade-in-0 duration-300 border-t-2 border-t-emerald-500 rounded-t-xl">
                   <UserTable 
                     users={payingUsers.filter(u => u.status === 'active' && !u.cancel_at_period_end && !isActuallyTrial(u))}
-                    title="Active Paying Customers"
-                    description="Users who securely completed trial and are paying monthly/annually right now."
-                    emptyText="No active paying customers yet."
+                    title="11+ Active Paying"
+                    description="11+ users who securely completed trial and are paying monthly/annually right now."
+                    emptyText="No 11+ active paying customers yet."
                     icon={Crown}
                     iconColorClass="text-emerald-600"
                   />
@@ -628,9 +628,9 @@ export default function GrowthTracker() {
                 <TabsContent value="canceled" className="m-0 fade-in-0 duration-300 border-t-2 border-t-rose-500 rounded-t-xl">
                   <UserTable 
                     users={payingUsers.filter(u => (u.cancel_at_period_end || u.status === 'canceled') && !isActuallyTrial(u))}
-                    title="Canceled Subscribers"
-                    description="Verified paying users who subsequently canceled. Use emails to reach out for feedback."
-                    emptyText="No canceled users."
+                    title="11+ Canceled Subscribers"
+                    description="Verified 11+ paying users who subsequently canceled."
+                    emptyText="No 11+ canceled users."
                     icon={XCircle}
                     iconColorClass="text-rose-600"
                   />

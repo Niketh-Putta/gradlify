@@ -21,7 +21,7 @@ import {
   UserProfile,
   Friendship
 } from "@/lib/connectApi";
-import { Search, Plus, Eye, EyeOff, Users, X, Check, UserPlus } from "lucide-react";
+import { Search, Plus, Eye, EyeOff, Users, X, Check, UserPlus, Trophy, ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -396,6 +396,40 @@ export default function Connect() {
           </div>
         </div>
       </header>
+
+      {/* Sprint CTA Banner - Redesigned for App Aesthetic */}
+      <Link 
+        to="/sprint-winning"
+        className="mb-4 group relative overflow-hidden rounded-2xl p-3.5 bg-white border border-slate-200 shadow-sm transition-all hover:border-primary/50 hover:shadow-md active:scale-[0.98] animate-in slide-in-from-top-4 duration-500"
+      >
+        <div className="relative flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5">
+            <div className={cn(
+              "w-11 h-11 rounded-xl flex items-center justify-center bg-gradient-to-br transition-transform group-hover:scale-105 duration-300 shadow-sm",
+              currentSubject === "english" ? "from-amber-400 to-amber-600" : "from-primary to-blue-600"
+            )}>
+              <Trophy className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h3 className="font-bold text-slate-900 text-[15px] sm:text-base leading-none mb-1.5">Want to win £100?</h3>
+              <div className="flex items-center gap-1.5">
+                <span className={cn(
+                  "text-[9px] font-black uppercase tracking-widest",
+                  currentSubject === "english" ? "text-amber-600" : "text-primary"
+                )}>Join the Gradlify Sprint</span>
+                <span className="w-1 h-1 rounded-full bg-slate-300" />
+                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Limited Time</span>
+              </div>
+            </div>
+          </div>
+          <div className={cn(
+            "w-8 h-8 rounded-full flex items-center justify-center transition-all",
+            currentSubject === "english" ? "bg-amber-50 text-amber-600 group-hover:bg-amber-100" : "bg-primary/5 text-primary group-hover:bg-primary/10"
+          )}>
+            <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+          </div>
+        </div>
+      </Link>
 
       {/* Secondary Actions Row - Compact on mobile */}
       <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3 flex-shrink-0 animate-fade-in flex-wrap w-full" style={{ animationDelay: '0.05s' }}>

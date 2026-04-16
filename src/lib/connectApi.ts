@@ -186,10 +186,7 @@ export async function getLeaderboard(
     ? entries.filter((entry) => !(entry.user_id ?? '').startsWith('bot-'))
     : entries;
   if (scope === 'global') {
-    if (resolvedTrack === 'gcse') {
-      return addSyntheticLearners(filteredEntries, period);
-    }
-    return rankLeaderboardEntries(filteredEntries);
+    return addSyntheticLearners(filteredEntries, period);
   }
   return rankLeaderboardEntries(filteredEntries);
 }
@@ -221,26 +218,50 @@ export async function captureSprintTop10IfDue(sprintId: string): Promise<boolean
 }
 
 const SYNTHETIC_LEARNERS = [
-  "amira.rahman",
-  "niya.girish",
+  "Kavita S.",
+  "ishaan_reddy",
+  "ZoyaKhan",
+  "Dev Patel",
+  "Ananya Gupta",
+  "samuel_okoro",
+  "ElenaV",
+  "Marcus B",
+  "Priyanka N",
+  "omar.h",
+  "RachelGreen",
+  "Arjun Malhotra",
+  "sarah_jones",
+  "Mohammad Ali",
+  "Lara Silva",
+  "nathan-lee",
+  "SophiaChen",
+  "AhmedF",
+  "Clara M",
+  "vikram.singh",
+  "MayaDesai",
+  "Liam Wilson",
+  "Fatima Z",
+  "ethan_walker",
+  "Noah M.",
+  "Amira Rahman",
+  "NiyaGirish",
   "mohammedzuhr",
-  "lara.nascimento",
-  "jaden.ong",
-  "salma.barrientos",
-  "tariq.anas",
-  "keiko.kondo",
-  "aaliyah.shah",
-  "omar.mendez",
-  "rhea.kapoor",
-  "yusuf.tanaka",
-  "matteo.farrell",
-  "isla.muthoni",
-  "qin.zhou",
-  "nayanika.patel",
-  "sergei.ivashkov",
-  "zoe.abboud",
-  "alem.petrovic",
-  "iyano.estrada",
+  "Lara_Nasc",
+  "Salma B",
+  "tariq_anas",
+  "Keiko Kondo",
+  "aaliyah_shah",
+  "Omar Mendez",
+  "Rhea Kapoor",
+  "Yusuf T",
+  "Matteo F",
+  "isla_muthoni",
+  "Qin Zhou",
+  "nayanika_p",
+  "Sergei I.",
+  "Zoe Abboud",
+  "Alem P",
+  "Iyano Estrada",
 ];
 
 const BOT_SCORE_START = 170;
@@ -315,7 +336,13 @@ function getBotBonus(handle: string, index: number) {
 }
 
 const BOT_FIXED_SCORES: Record<string, number> = {
-  "jaden.ong": 2965,
+  "Kavita S.": 150,
+  "ishaan_reddy": 137,
+  "ZoyaKhan": 121,
+  "Dev Patel": 115,
+  "Ananya Gupta": 108,
+  "samuel_okoro": 95,
+  "ElenaV": 88,
 };
 
 function getPeriodScale(period: 'day' | 'week' | 'month') {
@@ -355,21 +382,7 @@ function getSyntheticScore(handle: string, index: number) {
 }
 
 function addSyntheticLearners(existing: LeaderboardEntry[], period: 'day' | 'week' | 'month'): LeaderboardEntry[] {
-  const syntheticEntries = buildSyntheticEntries(period).map((entry) => {
-    if (entry.name === "jaden.ong") {
-      const baseScore = entry.correct_count;
-      const adjustedScore = period === "day"
-        ? baseScore - 700
-        : period === "week"
-          ? baseScore - 54
-          : baseScore;
-      return {
-        ...entry,
-        correct_count: Math.max(0, Math.round(adjustedScore)),
-      };
-    }
-    return entry;
-  });
+  const syntheticEntries = buildSyntheticEntries(period);
 
   const combined = [...existing, ...syntheticEntries];
   combined.sort((a, b) => b.correct_count - a.correct_count);
