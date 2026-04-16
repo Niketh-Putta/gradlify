@@ -214,7 +214,7 @@ export function Navigation({ user, profile, onSettings, onSignOut }: NavigationP
           isMobile 
             ? 'justify-center flex-col gap-0.5 min-h-[42px] py-1 px-0 w-full' 
             : inGrid 
-              ? 'py-2 px-2 gap-2 min-h-[44px] w-full'
+              ? 'py-1.5 px-2.5 gap-2.5 min-h-[38px] w-full'
               : cn('h-11', sidebarHovered ? 'w-full' : 'w-11')
         )
       }
@@ -450,11 +450,11 @@ export function Navigation({ user, profile, onSettings, onSignOut }: NavigationP
           </div>
         </div>
 
-        {/* Mobile Menu Dropdown */}
+        {/* Mobile Menu Dropdown - Refined for partial width/premium feel */}
         {mobileMenuOpen && (
-          <div className="bg-background border-b border-border/40 absolute top-full left-0 right-0 z-50 shadow-lg rounded-b-3xl">
-            <div className="p-4 flex items-center justify-between">
-              <p className="font-medium text-sm whitespace-nowrap overflow-hidden text-ellipsis">
+          <div className="bg-background border border-border/40 absolute top-[calc(100%+8px)] right-4 w-[calc(100vw-2.5rem)] max-w-[280px] z-50 shadow-2xl rounded-2xl animate-in fade-in zoom-in-95 slide-in-from-top-2 duration-200">
+            <div className="p-3 px-4 flex items-center justify-between border-b border-border/40">
+              <p className="font-bold text-[13px] whitespace-nowrap overflow-hidden text-ellipsis text-slate-900">
                 {userName}
               </p>
               <button
@@ -464,7 +464,7 @@ export function Navigation({ user, profile, onSettings, onSignOut }: NavigationP
                 }}
                 className={cn(
                   "group flex items-center shrink-0 overflow-hidden relative rounded-xl transition-all duration-300",
-                  "border shadow-sm h-8 px-3 gap-2",
+                  "border shadow-sm h-7 px-2.5 gap-1.5",
                   currentSubject === 'english'
                     ? "bg-amber-500/5 hover:bg-amber-500/10 border-amber-500/20 text-amber-600 dark:text-amber-500"
                     : "bg-primary/5 hover:bg-primary/10 border-primary/20 text-primary"
@@ -472,41 +472,41 @@ export function Navigation({ user, profile, onSettings, onSignOut }: NavigationP
                 title="Switch Subject"
               >
                 <ArrowLeftRight className={cn(
-                  "h-[13px] w-[13px] shrink-0 transition-transform group-hover:scale-110",
+                  "h-[12px] w-[13px] shrink-0 transition-transform group-hover:scale-110",
                   currentSubject === 'english' ? "text-amber-500" : "text-primary/80"
                 )} />
-                <span className="font-semibold text-[11px] whitespace-nowrap">Switch Subject</span>
+                <span className="font-bold text-[9.5px] whitespace-nowrap">Switch</span>
               </button>
             </div>
-            <nav className="p-2">
-              <div className="grid grid-cols-2 gap-1.5">
+            <nav className="p-2.5">
+              <div className="grid grid-cols-1 gap-0.5">
                 {[...primaryNavigationItems, ...moreNavigationItems].map((item) => (
                   <NavItem key={item.path} item={item} inGrid />
                 ))}
               </div>
               
-              <div className="mt-2 pt-2 space-y-1 border-t border-border/50">
+              <div className="mt-2.5 pt-2.5 space-y-0.5 border-t border-border/50">
                 <Button
                   variant="ghost"
-                  className="w-full justify-start whitespace-nowrap overflow-hidden text-ellipsis h-10 px-3"
+                  className="w-full justify-start whitespace-nowrap overflow-hidden text-ellipsis h-8 px-2.5 rounded-lg text-slate-600"
                   onClick={() => {
                     onSettings();
                     setMobileMenuOpen(false);
                   }}
                 >
-                  <Settings className="h-4 w-4 mr-2 shrink-0" />
-                  <span className="overflow-hidden text-ellipsis text-xs">Settings</span>
+                  <Settings className="h-3.5 w-3.5 mr-3 shrink-0" />
+                  <span className="overflow-hidden text-ellipsis text-xs font-semibold">Settings</span>
                 </Button>
                 <Button
                   variant="ghost"
-                  className="w-full justify-start text-destructive hover:text-destructive whitespace-nowrap overflow-hidden text-ellipsis h-10 px-3"
+                  className="w-full justify-start text-destructive hover:text-destructive whitespace-nowrap overflow-hidden text-ellipsis h-8 px-2.5 rounded-lg"
                   onClick={() => {
                     onSignOut();
                     setMobileMenuOpen(false);
                   }}
                 >
-                  <LogOut className="h-4 w-4 mr-2 shrink-0" />
-                  <span className="overflow-hidden text-ellipsis text-xs">Sign Out</span>
+                  <LogOut className="h-3.5 w-3.5 mr-3 shrink-0" />
+                  <span className="overflow-hidden text-ellipsis text-xs font-semibold">Sign Out</span>
                 </Button>
               </div>
             </nav>

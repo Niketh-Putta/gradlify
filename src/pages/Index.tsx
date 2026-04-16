@@ -1,43 +1,51 @@
-import { useState, useEffect, ReactNode } from 'react';
+import { useState, useEffect, ReactNode, lazy, Suspense } from 'react';
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { AuthComponent } from "@/components/AuthComponent";
 import { AuthModal } from "@/components/AuthModal";
 import { Settings } from "@/components/Settings";
 import { Layout } from "@/components/Layout";
 import { LandingPage } from "@/components/LandingPage";
-import { ElevenPlusLanding } from "@/pages/ElevenPlusLanding";
 import { ForceTheme } from "@/components/ForceTheme";
-import { Home } from "@/pages/Home";
 import { AIUnavailableRedirect } from "@/components/AIUnavailableRedirect";
-import { Readiness } from "@/pages/Readiness";
-import ExamReadiness from "@/pages/ExamReadiness";
 
-import MockExams from "@/pages/MockExams";
-import MockExamPage from "@/pages/MockExamPage";
+// Lazy load all page components
+const ElevenPlusLanding = lazy(() => import("@/pages/ElevenPlusLanding").then(m => ({ default: m.ElevenPlusLanding })));
+const Home = lazy(() => import("@/pages/Home").then(m => ({ default: m.Home })));
+const Readiness = lazy(() => import("@/pages/Readiness").then(m => ({ default: m.Readiness })));
+const ExamReadiness = lazy(() => import("@/pages/ExamReadiness"));
+const MockExams = lazy(() => import("@/pages/MockExams"));
+const MockExamPage = lazy(() => import("@/pages/MockExamPage"));
+const Resources = lazy(() => import("@/pages/Resources"));
+const RevisionNotes = lazy(() => import("@/pages/RevisionNotes"));
+const RevisionNotesSection = lazy(() => import("@/pages/RevisionNotesSection"));
+const RevisionNotesTopic = lazy(() => import("@/pages/RevisionNotesTopic"));
+const Connect = lazy(() => import("@/pages/Connect"));
+const Auth = lazy(() => import("@/pages/Auth"));
+const AuthCallback = lazy(() => import("@/pages/AuthCallback").then(m => ({ default: m.AuthCallback })));
+const EnglishSplitViewDemo = lazy(() => import('@/pages/EnglishSplitViewDemo'));
+const UpdatePassword = lazy(() => import('@/pages/UpdatePassword'));
+const FoundersCircle = lazy(() => import('@/pages/FoundersCircle'));
+const SprintHowItWorks = lazy(() => import('@/pages/SprintHowItWorks').then(m => ({ default: m.SprintHowItWorks })));
+const SprintWinning = lazy(() => import('@/pages/SprintWinning'));
+const GrowthTracker = lazy(() => import('@/pages/GrowthTracker'));
+const PayReturn = lazy(() => import('@/pages/PayReturn'));
+const NotFound = lazy(() => import('@/pages/NotFound'));
+const Tools = lazy(() => import('@/pages/Tools'));
+const SubjectSelection = lazy(() => import('@/pages/SubjectSelection'));
 
-import Resources from "@/pages/Resources";
-import RevisionNotes from "@/pages/RevisionNotes";
-import RevisionNotesSection from "@/pages/RevisionNotesSection";
-import RevisionNotesTopic from "@/pages/RevisionNotesTopic";
-import Connect from "@/pages/Connect";
-import Auth from "@/pages/Auth";
-import { AuthCallback } from "@/pages/AuthCallback";
 import { User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import EnglishSplitViewDemo from '@/pages/EnglishSplitViewDemo';
-import UpdatePassword from '@/pages/UpdatePassword';
-import FoundersCircle from '@/pages/FoundersCircle';
-import { SprintHowItWorks } from '@/pages/SprintHowItWorks';
-import SprintWinning from '@/pages/SprintWinning';
-import GrowthTracker from '@/pages/GrowthTracker';
-import PayReturn from '@/pages/PayReturn';
-import NotFound from '@/pages/NotFound';
-import Tools from '@/pages/Tools';
 import { setPostAuthRedirect } from '@/lib/postAuthRedirect';
 import { AI_FEATURE_ENABLED } from '@/lib/featureFlags';
 import { getDashboardPath, setSignupTrack } from '@/lib/track';
 import { isAbortLikeError } from '@/lib/errors';
-import SubjectSelection from '@/pages/SubjectSelection';
+
+// Loading Fallback Component
+const PageLoading = () => (
+  <div className="flex min-h-[400px] w-full items-center justify-center">
+    <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+  </div>
+);
 
 type AppState = 'app' | 'settings';
 
@@ -248,78 +256,80 @@ const Index = () => {
 
   // Main app routing
   return (
-    <Routes>
-      {/* Auth callback route - accessible to everyone */}
-      <Route path="/auth/callback" element={<AuthCallback />} />
-      <Route path="/pay/success" element={<PayReturn />} />
-      <Route path="/pay/cancelled" element={<PayReturn />} />
-      
-      {/* Redirect authenticated users from landing page to subject selection */}
-      {user ? (
-        <>
-          <Route path="/" element={<Navigate to="/select-subject" replace />} />
-          <Route path="/select-subject" element={<SubjectSelection />} />
-          <Route path="/11-plus" element={<Navigate to="/select-subject" replace />} />
-          <Route path="/tools" element={<Tools />} />
-          <Route path="/free-resources" element={<Tools />} />
-          <Route 
-            path="/*" 
-            element={
-              <Layout 
-                user={user}
-                onSettings={() => {
-                  window.location.hash = 'settings';
-                  setAppState('settings');
-                }}
-                onSignOut={handleSignOut}
-              />
-            }
-          >
-            <Route path="home" element={<Home />} />
-            <Route path="dashboard" element={<Home />} />
-            <Route path="dashboard/gcse" element={<Navigate to="/dashboard" replace />} />
-            <Route path="dashboard/11plus" element={<Navigate to="/dashboard" replace />} />
+    <Suspense fallback={<PageLoading />}>
+      <Routes>
+        {/* Auth callback route - accessible to everyone */}
+        <Route path="/auth/callback" element={<AuthCallback />} />
+        <Route path="/pay/success" element={<PayReturn />} />
+        <Route path="/pay/cancelled" element={<PayReturn />} />
+        
+        {/* Redirect authenticated users from landing page to subject selection */}
+        {user ? (
+          <>
+            <Route path="/" element={<Navigate to="/select-subject" replace />} />
+            <Route path="/select-subject" element={<SubjectSelection />} />
+            <Route path="/11-plus" element={<Navigate to="/select-subject" replace />} />
+            <Route path="/tools" element={<Tools />} />
+            <Route path="/free-resources" element={<Tools />} />
+            <Route 
+              path="/*" 
+              element={
+                <Layout 
+                  user={user}
+                  onSettings={() => {
+                    window.location.hash = 'settings';
+                    setAppState('settings');
+                  }}
+                  onSignOut={handleSignOut}
+                />
+              }
+            >
+              <Route path="home" element={<Home />} />
+              <Route path="dashboard" element={<Home />} />
+              <Route path="dashboard/gcse" element={<Navigate to="/dashboard" replace />} />
+              <Route path="dashboard/11plus" element={<Navigate to="/dashboard" replace />} />
 
-            <Route path="readiness" element={<Readiness />} />
-            <Route path="exam-readiness" element={<ExamReadiness />} />
-            <Route path="connect" element={<Connect />} />
-            
-            <Route path="mocks" element={<MockExams />} />
-            <Route path="mocks/maths" element={<MockExams forcedSubject="maths" />} />
-            <Route path="mocks/english" element={<MockExams forcedSubject="english" />} />
-            <Route path="mock-exam" element={<MockExamPage />} />
-            <Route path="english-demo" element={<EnglishSplitViewDemo />} />
-            <Route path="practice-page" element={<Navigate to="/mocks" replace />} />
-            <Route path="practice/maths" element={<Navigate to="/mocks/maths" replace />} />
-            <Route path="practice/english" element={<Navigate to="/mocks/english" replace />} />
-            <Route path="resources" element={<Resources />} />
-            <Route path="notes" element={<RevisionNotes />} />
-            <Route path="notes/:section" element={<RevisionNotesSection />} />
-            <Route path="notes/:section/:topic" element={<RevisionNotesTopic />} />
-            <Route path="founders-circle" element={<FoundersCircle />} />
-            <Route path="sprint" element={<SprintHowItWorks />} />
-            <Route path="sprint-winning" element={<SprintWinning />} />
-            <Route path="nikethputtaadmin-growth" element={<GrowthTracker />} />
-            <Route path="*" element={<NotFound />} />
-          </Route>
-        </>
-      ) : (
-        <>
-      {/* Routes for non-authenticated users */}
-      <Route path="/" element={<Navigate to="/11-plus" replace />} />
-      <Route path="/11-plus" element={renderElevenPlusLanding()} />
-      <Route path="/tools" element={<Tools />} />
-      <Route path="/free-resources" element={<Tools />} />
-      <Route path="/reset-password" element={renderLanding(<UpdatePassword />)} />
-      <Route path="/founders-circle" element={<FoundersCircle />} />
-      <Route path="/sprint" element={<SprintHowItWorks />} />
-          <Route path="/auth" element={<Auth />} />
-          <Route path="/mocks" element={<MockExams />} />
-          <Route path="/mock-exam" element={<MockExamPage />} />
-          <Route path="*" element={<Navigate to="/11-plus" replace />} />
-        </>
-      )}
-    </Routes>
+              <Route path="readiness" element={<Readiness />} />
+              <Route path="exam-readiness" element={<ExamReadiness />} />
+              <Route path="connect" element={<Connect />} />
+              
+              <Route path="mocks" element={<MockExams />} />
+              <Route path="mocks/maths" element={<MockExams forcedSubject="maths" />} />
+              <Route path="mocks/english" element={<MockExams forcedSubject="english" />} />
+              <Route path="mock-exam" element={<MockExamPage />} />
+              <Route path="english-demo" element={<EnglishSplitViewDemo />} />
+              <Route path="practice-page" element={<Navigate to="/mocks" replace />} />
+              <Route path="practice/maths" element={<Navigate to="/mocks/maths" replace />} />
+              <Route path="practice/english" element={<Navigate to="/mocks/english" replace />} />
+              <Route path="resources" element={<Resources />} />
+              <Route path="notes" element={<RevisionNotes />} />
+              <Route path="notes/:section" element={<RevisionNotesSection />} />
+              <Route path="notes/:section/:topic" element={<RevisionNotesTopic />} />
+              <Route path="founders-circle" element={<FoundersCircle />} />
+              <Route path="sprint" element={<SprintHowItWorks />} />
+              <Route path="sprint-winning" element={<SprintWinning />} />
+              <Route path="nikethputtaadmin-growth" element={<GrowthTracker />} />
+              <Route path="*" element={<NotFound />} />
+            </Route>
+          </>
+        ) : (
+          <>
+        {/* Routes for non-authenticated users */}
+        <Route path="/" element={<Navigate to="/11-plus" replace />} />
+        <Route path="/11-plus" element={renderElevenPlusLanding()} />
+        <Route path="/tools" element={<Tools />} />
+        <Route path="/free-resources" element={<Tools />} />
+        <Route path="/reset-password" element={renderLanding(<UpdatePassword />)} />
+        <Route path="/founders-circle" element={<FoundersCircle />} />
+        <Route path="/sprint" element={<SprintHowItWorks />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/mocks" element={<MockExams />} />
+            <Route path="/mock-exam" element={<MockExamPage />} />
+            <Route path="*" element={<Navigate to="/11-plus" replace />} />
+          </>
+        )}
+      </Routes>
+    </Suspense>
   );
 };
 

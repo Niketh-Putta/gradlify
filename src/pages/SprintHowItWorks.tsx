@@ -432,6 +432,12 @@ export function SprintHowItWorks() {
               </a>
             </div>
           </section>
+
+          <section className="mt-8 rounded-[20px] border-2 border-dashed border-[#4f46e5]/30 bg-[#4f46e5]/5 p-8 text-center">
+            <h2 className="text-2xl font-black tracking-tight text-[#4f46e5]">
+              STARTS MONDAY . WIN FREE MOMEY!
+            </h2>
+          </section>
         </div>
       </div>
     </div>
