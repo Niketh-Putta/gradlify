@@ -13,7 +13,7 @@ export default function SprintWinning() {
     <ForceTheme theme="light">
       <div className="min-h-screen bg-background text-slate-900 selection:bg-indigo-50 font-sans overflow-x-hidden">
         {/* Minimalist Navigation */}
-        <nav className="sticky top-0 z-50 w-full bg-background/60 backdrop-blur-xl border-b border-border/40">
+        <nav className="sticky top-0 z-30 w-full bg-background/60 backdrop-blur-xl border-b border-border/40">
           <div className="mx-auto flex h-12 max-w-5xl items-center justify-between px-6">
             <button
               onClick={() => navigate(-1)}

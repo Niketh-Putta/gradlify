@@ -253,7 +253,7 @@ export function Navigation({ user, profile, onSettings, onSignOut }: NavigationP
       {/* Desktop Sidebar */}
       <aside 
         className={cn(
-          "hidden lg:block lg:fixed lg:inset-y-0 bg-background border-r border-border/40 shadow-card transition-all duration-300 ease-in-out z-50 overflow-hidden whitespace-nowrap",
+          "hidden lg:block lg:fixed lg:inset-y-0 bg-background border-r border-border/40 shadow-card transition-all duration-300 ease-in-out z-[100] overflow-hidden whitespace-nowrap",
           sidebarHovered ? "w-64" : "w-16"
         )}
         onMouseEnter={() => setSidebarHovered(true)}
@@ -414,7 +414,7 @@ export function Navigation({ user, profile, onSettings, onSignOut }: NavigationP
 
       {/* Mobile Header */}
       <header className={cn(
-        "lg:hidden bg-background shadow-card sticky top-0 z-40 transition-transform duration-300 ease-in-out rounded-b-3xl",
+        "lg:hidden bg-background shadow-card sticky top-0 z-[100] transition-transform duration-300 ease-in-out rounded-b-3xl",
         headerHidden ? "-translate-y-full" : "translate-y-0"
       )}>
         <div className="flex items-center justify-between p-4">
