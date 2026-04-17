@@ -21,7 +21,7 @@ export default function SubjectSelection() {
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 sm:p-12 font-sans relative">
       
       {/* Top Right Plan Badge */}
-      <div className="absolute top-6 right-6 sm:top-8 sm:right-8 z-20">
+      <div className="sm:absolute sm:top-8 sm:right-8 z-20 mb-10 sm:mb-0">
         <div className={cn(
           "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border shadow-sm text-xs font-bold uppercase tracking-widest transition-all",
           displayTier === 'Ultra' 
