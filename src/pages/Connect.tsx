@@ -27,6 +27,7 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { useAppContext } from "@/hooks/useAppContext";
 import { resolveUserTrack } from "@/lib/track";
+import { getFoundersSprintInfo } from "@/lib/foundersSprint";
 
 type Period = 'day' | 'week' | 'month';
 type Scope = 'global' | 'friends';
@@ -60,6 +61,7 @@ export default function Connect() {
   const { currentSubject } = useSubject();
   const { profile } = useAppContext();
   const userTrack = resolveUserTrack(profile?.track ?? null);
+  const { isActive } = getFoundersSprintInfo();
   const [period, setPeriod] = useState<Period>('month');
   const [scope, setScope] = useState<Scope>('global');
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
@@ -418,7 +420,9 @@ export default function Connect() {
                   currentSubject === "english" ? "text-amber-600" : "text-primary"
                 )}>Join the Gradlify Sprint</span>
                 <span className="w-1 h-1 rounded-full bg-slate-300" />
-                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Limited Time</span>
+                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                  {isActive ? "Limited Time" : "Starts Soon"}
+                </span>
               </div>
             </div>
           </div>

@@ -3,11 +3,13 @@ import { ForceTheme } from "@/components/ForceTheme";
 import { ArrowRight } from "lucide-react";
 import { useSubject } from "@/contexts/SubjectContext";
 import { cn } from "@/lib/utils";
+import { getFoundersSprintInfo } from "@/lib/foundersSprint";
 
 export default function SprintWinning() {
   const navigate = useNavigate();
   const { currentSubject } = useSubject();
   const isEnglish = currentSubject === "english";
+  const { isActive } = getFoundersSprintInfo();
 
   return (
     <ForceTheme theme="light">
@@ -24,10 +26,12 @@ export default function SprintWinning() {
             </button>
             <div className="flex items-center gap-2.5">
               <div className="relative flex h-1.5 w-1.5">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+                {isActive && <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>}
+                <span className={cn("relative inline-flex h-1.5 w-1.5 rounded-full", isActive ? "bg-emerald-500" : "bg-slate-300")}></span>
               </div>
-              <span className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500">Event Live</span>
+              <span className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500">
+                {isActive ? "Event Live" : "Upcoming"}
+              </span>
             </div>
           </div>
         </nav>
