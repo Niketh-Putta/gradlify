@@ -26,7 +26,8 @@ const EnglishSplitViewDemo = lazy(() => import('@/pages/EnglishSplitViewDemo'));
 const UpdatePassword = lazy(() => import('@/pages/UpdatePassword'));
 const FoundersCircle = lazy(() => import('@/pages/FoundersCircle'));
 const SprintHowItWorks = lazy(() => import('@/pages/SprintHowItWorks').then(m => ({ default: m.SprintHowItWorks })));
-const SprintWinning = lazy(() => import('@/pages/SprintWinning'));
+const SprintDetails = lazy(() => import("./SprintDetails"));
+const SprintWinning = lazy(() => import("./SprintWinning"));
 const GrowthTracker = lazy(() => import('@/pages/GrowthTracker'));
 const PayReturn = lazy(() => import('@/pages/PayReturn'));
 const NotFound = lazy(() => import('@/pages/NotFound'));
@@ -307,6 +308,7 @@ const Index = () => {
               <Route path="notes/:section/:topic" element={<RevisionNotesTopic />} />
               <Route path="founders-circle" element={<FoundersCircle />} />
               <Route path="sprint" element={<SprintHowItWorks />} />
+              <Route path="sprint-details" element={<SprintDetails />} />
               <Route path="sprint-winning" element={<SprintWinning />} />
               <Route path="nikethputtaadmin-growth" element={<GrowthTracker />} />
               <Route path="*" element={<NotFound />} />
@@ -322,6 +324,7 @@ const Index = () => {
         <Route path="/reset-password" element={renderLanding(<UpdatePassword />)} />
         <Route path="/founders-circle" element={<FoundersCircle />} />
         <Route path="/sprint" element={<SprintHowItWorks />} />
+        <Route path="/sprint-details" element={<SprintDetails />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/mocks" element={<MockExams />} />
             <Route path="/mock-exam" element={<MockExamPage />} />

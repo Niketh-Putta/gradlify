@@ -13,6 +13,7 @@ import { DemoQuestion, elevenPlusDemoQuestions, elevenPlusMathsDemoQuestions, mo
 import { ArrowLeft } from "lucide-react";
 
 import { LogoMark } from "@/components/LogoMark";
+import { SprintBanner } from "./SprintBanner";
 import { DiscordFooterEntry } from "@/components/DiscordFooterEntry";
 import { supabase } from "@/integrations/supabase/client";
 import { getSprintUpgradeCopy } from "@/lib/foundersSprint";
@@ -522,6 +523,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
               : "bg-white/80 backdrop-blur-sm border-b border-transparent text-slate-900",
         ].join(" ")}
       >
+        <SprintBanner />
 
         <div className="max-w-7xl mx-auto px-3 pr-4 sm:px-6 sm:pr-6 py-2.5 sm:py-4">
           <div className="flex items-center justify-between gap-3 sm:gap-4">

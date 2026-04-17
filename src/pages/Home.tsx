@@ -38,6 +38,7 @@ import { usePremium } from "@/hooks/usePremium";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { LeaderboardSnapshot } from "@/components/LeaderboardSnapshot";
+import { SprintBanner } from "@/components/SprintBanner";
 import { PremiumUpgradeButton } from "@/components/PremiumUpgradeButton";
 import { useReadinessStore } from "@/lib/stores/useReadinessStore";
 import { PracticeConfirmationModal } from "@/components/readiness/PracticeConfirmationModal";
@@ -388,6 +389,7 @@ export function Home() {
 
   return (
     <div className="min-h-screen bg-background">
+      <SprintBanner className="mb-0" />
       <div className="pt-6 pb-10 sm:pt-8 sm:pb-14 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
 
         <div className="mb-4 flex items-center justify-between">
