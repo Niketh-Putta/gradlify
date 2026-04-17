@@ -885,7 +885,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                       transition={{ duration: 1.0, ease: [0.23, 1, 0.32, 1], delay: 0.4 }}
                       src="/SPaG.png" alt="SPaG Diagnostics" 
                       className={cn(
-                        "transform translate-y-6 scale-[1.12] sm:scale-[1.15] w-[145%] sm:w-[130%] max-w-none h-auto object-cover object-top transition-transform duration-1000 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:translate-y-0 group-hover:scale-[1.05] drop-shadow-2xl border border-b-0 border-border/50 origin-top rounded-[16px]",
+                        "transform translate-y-4 scale-[0.95] sm:scale-[0.95] w-[105%] sm:w-full max-w-none h-auto object-cover object-top transition-transform duration-1000 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:translate-y-0 group-hover:scale-[0.9] drop-shadow-2xl border border-b-0 border-border/50 origin-top rounded-[16px]",
                         isDark && "invert hue-rotate-180 brightness-[0.85] contrast-[1.2] opacity-95"
                       )} 
                     />
