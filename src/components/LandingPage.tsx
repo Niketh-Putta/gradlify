@@ -698,16 +698,16 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                       {/* Left Sidebar (Passage) - High-Fidelity Typesetting */}
                       <div className={cn("w-3/5 border-r p-2.5 sm:p-6 py-3 sm:py-5 select-none", isDark ? "border-white/5" : "border-slate-100")}>
                         <div className={cn("text-[7px] sm:text-[9px] uppercase tracking-[0.25em] font-bold mb-3 sm:mb-6 opacity-40", isDark ? "text-white" : "text-slate-900")}>The Passage • Vol. 12</div>
-                        <div className="space-y-2 sm:space-y-4">
-                           <div className={cn("font-serif text-[10px] sm:text-sm leading-relaxed opacity-90", isDark ? "text-slate-100" : "text-slate-800")}>
-                              The old oak tree stood like a silent sentinel...
+                        <div className="space-y-3 sm:space-y-4">
+                           <div className={cn("font-serif text-[9px] sm:text-[13px] leading-relaxed opacity-90", isDark ? "text-slate-100" : "text-slate-800")}>
+                              The village was peaceful, tucked away in the shadow of the mountains. Nothing moved except for a lone crow circling the church spire.
                            </div>
                            {/* Real-time Evidence Highlight */}
-                           <div className={cn("relative p-2 sm:p-3.5 rounded-lg sm:rounded-xl border group/evidence transition-all duration-300", isDark ? "bg-amber-500/20 border-amber-500/40" : "bg-amber-50/70 border-amber-200/50 shadow-sm")}>
-                              <div className={cn("font-serif text-[10px] sm:text-sm leading-relaxed", isDark ? "text-amber-100" : "text-amber-950 font-medium")}>
-                                 "The old oak tree stood like a <span className="underline decoration-amber-500/50 decoration-2 underline-offset-4">silent sentinel</span>..."
+                           <div className={cn("relative p-2 sm:p-3 rounded-lg sm:rounded-xl border group/evidence transition-all duration-300", isDark ? "bg-amber-500/20 border-amber-500/40" : "bg-amber-50/70 border-amber-200/50 shadow-sm")}>
+                              <div className={cn("font-serif text-[9px] sm:text-[13px] leading-relaxed", isDark ? "text-amber-100" : "text-amber-950 font-medium")}>
+                                 "The old oak tree stood like a <span className="underline decoration-amber-500/50 decoration-2 underline-offset-4 font-bold">silent sentinel</span>, watching over the town."
                               </div>
-                              <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-1.5 h-1.5 sm:w-3 sm:h-3 rounded-full bg-amber-500 shadow-[0_0_12px_rgba(245,158,11,0.6)] animate-pulse" />
+                              <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-1.5 h-1.5 sm:w-2.5 sm:h-2.5 rounded-full bg-amber-500 shadow-[0_0_12px_rgba(245,158,11,0.6)] animate-pulse" />
                            </div>
                         </div>
                       </div>
