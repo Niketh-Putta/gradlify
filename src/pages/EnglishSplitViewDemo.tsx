@@ -1102,40 +1102,39 @@ export function EnglishSplitViewDemo() {
                       };
                       
                       const renderPassageBlock = (p: EnglishPassageBlock, originalIndex: number, isPaywalledBlock: boolean) => {
-                        let isTargetEvidence = false;
-                        const activeQIndex = section.questions.findIndex(q => `${section.sectionId}_${q.id}` === activeQuestionId);
-                        const activeQInfo = activeQIndex !== -1 ? section.questions[activeQIndex] : undefined;
-                        
-                        if (activeQInfo) {
-                          const isQuestionPaywalled = !isPremium && examMode !== 'mock' && activeQIndex >= PAYWALL_THRESHOLD;
-                          if (!isQuestionPaywalled) {
-                            const isGlobal = !activeQInfo.evidenceLine || activeQInfo.evidenceLine === 'global' || activeQInfo.evidenceLine === 'Overall' || activeQInfo.evidenceLine.toLowerCase().includes('overall');
-                            if (activeQInfo.evidenceLine === p.id || isGlobal) {
-                              isTargetEvidence = true;
-                            }
+                      let isTargetEvidence = false;
+                      const activeQIndex = section.questions.findIndex(q => `${section.sectionId}_${q.id}` === activeQuestionId);
+                      const activeQInfo = activeQIndex !== -1 ? section.questions[activeQIndex] : undefined;
+
+                      if (activeQInfo) {
+                        const isQuestionPaywalled = !isPremium && examMode !== 'mock' && activeQIndex >= PAYWALL_THRESHOLD;
+                        if (!isQuestionPaywalled) {
+                          const isGlobal = !activeQInfo.evidenceLine || activeQInfo.evidenceLine === 'global' || activeQInfo.evidenceLine === 'Overall' || activeQInfo.evidenceLine.toLowerCase().includes('overall');
+                          if (activeQInfo.evidenceLine === p.id || isGlobal) {
+                            isTargetEvidence = true;
                           }
                         }
+                      }
 
-                        const showScaffold = isTargetEvidence && !isPaywalledBlock;
-                        const uniqueRefKey = `${section.sectionId}_${p.id}`;
+                      const showScaffold = isTargetEvidence && !isPaywalledBlock;
+                      const uniqueRefKey = `${section.sectionId}_${p.id}`;
 
-                        return (
-                          <div key={p.id} className="relative group scroll-m-[160px]" ref={(el) => { passageLineRefs.current[uniqueRefKey] = el; }}>
-                            {p.text.match(/^\d+/) && (
-                              <div className="absolute -left-10 top-1.5 text-xs text-amber-500/80 font-black select-none pointer-events-none w-8 text-right opacity-0 group-hover:opacity-100 transition-opacity">
-                                ♦
-                              </div>
+                      return (
+                        <div key={p.id} className="relative group scroll-m-[160px]" ref={(el) => { passageLineRefs.current[uniqueRefKey] = el; }}>
+                          {p.text.match(/^\d+/) && (
+                            <div className="absolute -left-10 top-1.5 text-xs text-amber-500/80 font-black select-none pointer-events-none w-8 text-right opacity-0 group-hover:opacity-100 transition-opacity">
+                              ♦
+                            </div>
+                          )}
+                          <p 
+                            className={cn(
+                              "transition-all duration-200 ease-out p-3 sm:p-4 -mx-2 sm:-mx-4 rounded-xl relative border-l-[3px] text-sm sm:text-base",
+                              showScaffold 
+                                ? "bg-amber-50/90 dark:bg-amber-500/10 border-amber-500 shadow-md ring-1 ring-amber-500/30 text-foreground z-10 scale-[1.02]" 
+                                : "border-transparent opacity-75 group-hover:opacity-100 hover:bg-black/5 dark:hover:bg-white/5",
+                              isPaywalledBlock && "blur-[3px] opacity-40 select-none pointer-events-none scale-[0.98]"
                             )}
-                            <p 
-                              className={cn(
-                                "transition-all duration-200 ease-out p-4 -mx-4 rounded-xl relative border-l-[3px]",
-                                showScaffold 
-                                  ? "bg-amber-50/90 dark:bg-amber-500/10 border-amber-500 shadow-md ring-1 ring-amber-500/30 text-foreground z-10 scale-[1.02]" 
-                                  : "border-transparent opacity-75 group-hover:opacity-100 hover:bg-black/5 dark:hover:bg-white/5",
-                                isPaywalledBlock && "blur-[3px] opacity-40 select-none pointer-events-none scale-[0.98]"
-                              )}
-                            >
-                              {showScaffold && (
+                          >                              {showScaffold && (
                                 <div className="absolute -left-1.5 flex items-center justify-center h-full top-0">
                                   <div className="h-2/3 w-[5px] bg-amber-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(245,158,11,0.5)]" />
                                 </div>
@@ -1300,9 +1299,9 @@ export function EnglishSplitViewDemo() {
                               ref={(el) => { questionRefs.current[qKey] = el; }}
                               onClick={() => { if (isPaywalledQuestion) setShowPaywall(true); }}
                               className={cn(
-                                "p-4 sm:p-6 rounded-2xl border transition-all duration-150 ease-out cursor-default scroll-m-24 relative snap-center",
+                                "p-3 sm:p-6 rounded-2xl border transition-all duration-150 ease-out cursor-default scroll-m-24 relative snap-center",
                                 isSelected 
-                                  ? (examMode === 'mock' ? "border-amber-500/30 dark:border-amber-500/40 bg-card shadow-lg ring-1 ring-amber-500/10 scale-[1.02]" : "border-amber-500/50 bg-card shadow-xl ring-4 ring-amber-500/10 scale-[1.02]")
+                                  ? (examMode === 'mock' ? "border-amber-500/30 dark:border-amber-500/40 bg-card shadow-lg ring-1 ring-amber-500/10 scale-[1.01]" : "border-amber-500/50 bg-card shadow-xl ring-4 ring-amber-500/10 scale-[1.01]")
                                   : "border-border/60 dark:border-amber-500/20 bg-card/40 hover:bg-card/80 hover:border-amber-500/30 opacity-60 hover:opacity-100",
                                 isPaywalledQuestion && "blur-[2px] opacity-40 select-none pointer-events-none scale-[0.98]"
                               )}
@@ -1316,19 +1315,19 @@ export function EnglishSplitViewDemo() {
                               </button>
                             )}
 
-                            <div className="flex items-center justify-between mb-4">
-                              <span className="text-xs font-black tracking-widest uppercase text-muted-foreground flex items-center gap-2">
+                            <div className="flex items-center justify-between mb-3 sm:mb-4">
+                              <span className="text-[10px] sm:text-xs font-black tracking-widest uppercase text-muted-foreground flex items-center gap-2">
                                 {examMode === 'mock' ? `Q${originalIndex + 1}` : `Question ${originalIndex + 1}`}
                               </span>
                               <div className={cn(
-                                "px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide border", 
+                                "px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-bold uppercase tracking-wide border", 
                                 q.tagColor || "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20"
                               )}>
                                 {q.tag}
                               </div>
                             </div>
                             
-                            <h3 className="text-sm sm:text-[15px] font-semibold leading-relaxed mb-4 sm:mb-6">
+                            <h3 className="text-[13px] sm:text-[15px] font-semibold leading-relaxed mb-3 sm:mb-6">
                               {q.text}
                             </h3>
 
@@ -1355,7 +1354,7 @@ export function EnglishSplitViewDemo() {
                                         handleSelectAnswer(qKey, opt.id);
                                       }}
                                       className={cn(
-                                        "w-full text-left p-3 sm:p-4 rounded-xl border transition-all duration-200 flex items-center gap-3 sm:gap-4 group",
+                                        "w-full text-left p-2 sm:p-4 rounded-xl border transition-all duration-200 flex items-center gap-2.5 sm:gap-4 group",
                                         selected 
                                           ? ((examMode === 'mock' && !isReviewMode)
                                               ? "border-amber-500 bg-amber-500/5 text-amber-900 dark:text-amber-100 ring-2 ring-amber-500/20" 
@@ -1368,7 +1367,7 @@ export function EnglishSplitViewDemo() {
                                       )}
                                     >
                                       <span className={cn(
-                                        "w-7 h-7 sm:w-8 sm:h-8 shrink-0 rounded-lg flex items-center justify-center text-xs font-bold transition-colors shadow-sm",
+                                        "w-6 h-6 sm:w-8 sm:h-8 shrink-0 rounded-lg flex items-center justify-center text-[10px] sm:text-xs font-bold transition-colors shadow-sm",
                                         selected
                                           ? ((examMode === 'mock' && !isReviewMode) ? "bg-amber-500 text-white shadow-md shadow-amber-500/30" : (opt.correct ? "bg-emerald-500 text-white shadow-md shadow-emerald-500/20" : "bg-rose-500 text-white shadow-md shadow-rose-500/20"))
                                           : (isReviewMode && opt.correct
@@ -1377,7 +1376,7 @@ export function EnglishSplitViewDemo() {
                                       )}>
                                         {opt.id}
                                       </span>
-                                      <span className="flex-1 text-sm sm:text-[15px] font-medium leading-normal">
+                                      <span className="flex-1 text-[13px] sm:text-[15px] font-medium leading-normal">
                                         {opt.text}
                                       </span>
                                       {selected && examMode === 'mock' && <Check className="w-4 h-4 sm:w-5 sm:h-5 shrink-0 text-amber-500 font-bold" />}

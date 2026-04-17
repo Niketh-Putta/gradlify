@@ -382,7 +382,7 @@ export default function RevisionNotes() {
             
             <div className="relative w-full md:w-80 group">
               <Search className={cn(
-                "absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 transition-colors",
+                "absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 transition-colors",
                 currentSubject === "english" ? "text-muted-foreground group-focus-within:text-amber-500" : "text-muted-foreground group-focus-within:text-blue-500"
               )} />
               <Input
@@ -391,7 +391,7 @@ export default function RevisionNotes() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className={cn(
-                  "pl-10 h-11 rounded-xl border-border/60 bg-card text-sm w-full transition-all shadow-sm",
+                  "pl-12 h-11 rounded-xl border-border/60 bg-card text-sm w-full transition-all shadow-sm",
                   currentSubject === "english" ? "focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20" : "focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20"
                 )}
               />

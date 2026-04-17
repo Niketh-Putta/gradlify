@@ -256,14 +256,14 @@ export default function RevisionNotesSection() {
         </div>
 
         {/* Search */}
-        <div className="relative mb-8">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <div className="relative mb-8 group">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-[hsl(var(--notes-accent))]" />
           <Input
             type="text"
             placeholder="Search topics..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-12 h-12 rounded-xl border-border/40 bg-card"
+            className="pl-12 h-12 rounded-xl border-border/40 bg-card focus:ring-1 focus:ring-[hsl(var(--notes-accent))]/20 focus:border-[hsl(var(--notes-accent))]"
           />
         </div>
 
