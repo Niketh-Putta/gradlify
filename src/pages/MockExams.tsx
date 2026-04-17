@@ -330,23 +330,6 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
     }
   };
 
-  const getTotalEstimatedQuestions = () => {
-    if (selectedSubtopics.length > 0) {
-      return selectedSubtopics.reduce((sum, id) => sum + (subtopicCounts[id] ?? 0), 0);
-    }
-    return selectedTopics.reduce((sum, id) => sum + (topicCounts[id] ?? 0), 0);
-  };
-
-  const getModeLabel = () => {
-    if (examMode === 'practice') return 'Practice';
-    if (examMode === 'challenge') return 'Challenge Questions';
-    return 'Mock Exam';
-  };
-
-  const getCalcLabel = () => isElevenPlus ? 'No Calculator' : (calcSelection === 'both' ? 'Adaptive' : (calcSelection === 'calculator' ? 'Calculator' : 'No Calculator'));
-  const getTierLabel = () => isElevenPlus ? elevenPlusDifficulty.charAt(0).toUpperCase() + elevenPlusDifficulty.slice(1) : (tierSelection === 'both' ? 'Mixed' : tierSelection.charAt(0).toUpperCase() + tierSelection.slice(1));
-  const getTopicsLabel = () => selectedTopics.length === 0 ? 'No topics' : (selectedTopics.length === availableSections.length ? 'All Topics' : `${selectedTopics.length} Topics`);
-
   if (loading) return <div className="min-h-screen flex items-center justify-center"><PremiumLoader /></div>;
 
   return (
@@ -425,16 +408,15 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
             {/* Right: CTA & Benefits */}
             {!isPremium && (
               <div className="shrink-0 w-full md:w-auto flex flex-col items-center gap-6">
-                <PremiumUpgradeButton 
+                <PremiumUpgradeButton
                   className={cn(
-                    "w-full md:w-auto px-10 h-13 text-[10px] font-black uppercase tracking-[0.35em] transition-all hover:scale-[1.02] active:scale-[0.98] rounded-2xl border backdrop-blur-xl",
-                    isEnglish 
-                      ? "bg-gradient-to-br from-amber-500/20 to-orange-500/5 border-amber-500/30 text-amber-600 shadow-[0_8px_32px_0_rgba(245,158,11,0.15)] hover:from-amber-500/30 hover:to-orange-500/15" 
+                    "w-full md:w-auto px-10 h-13 text-[10px] font-black uppercase tracking-widest transition-all hover:scale-[1.02] active:scale-[0.98] rounded-2xl border backdrop-blur-xl",
+                    isEnglish
+                      ? "bg-gradient-to-br from-amber-500/20 to-orange-500/5 border-amber-500/30 text-amber-600 shadow-[0_8px_32px_0_rgba(245,158,11,0.15)] hover:from-amber-500/30 hover:to-orange-500/15"
                       : "bg-gradient-to-br from-primary/20 to-indigo-500/5 border-primary/30 text-primary shadow-[0_8px_32px_0_rgba(37,99,235,0.15)] hover:from-primary/30 hover:to-indigo-500/15"
                   )}
                   label="Upgrade to Unlimited"
                 />
-                
                 <div className="flex flex-col items-center gap-4">
                   <div className="flex items-center gap-10">
                     {[
@@ -705,59 +687,6 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
               {selectedSubtopics.length > 0 && <button onClick={() => setSelectedSubtopics([])} className={cn("mt-6 text-[10px] font-bold text-muted-foreground flex items-center gap-1.5", currentSubject === 'english' ? "hover:text-amber-500" : "hover:text-primary")}><X className="h-3 w-3" />Reset filters</button>}
             </section>
           )}
-
-          <div className="fixed bottom-[84px] lg:bottom-6 left-0 lg:left-16 right-0 z-40 flex justify-center pointer-events-none px-4 sm:px-0">
-            <div className={cn("w-full max-w-[600px] pointer-events-auto transition-all duration-500 ease-out", selectedTopics.length > 0 ? "translate-y-0 opacity-100" : "translate-y-14 opacity-0 pointer-events-none")}>
-              <div className="relative">
-              {/* Soft lift shadow that adapts to themes */}
-              <div className="absolute inset-x-10 -bottom-2 h-6 blur-xl rounded-full bg-black/5 dark:bg-black/40" />
-
-              {/* Light frosted glass card replacing muddy inline rgba wrappers */}
-              <div
-                className={cn(
-                  "relative flex items-center gap-4 px-4 py-3 rounded-2xl backdrop-blur-2xl transition-all duration-300",
-                  "bg-white/80 dark:bg-slate-900/70 border-[1.5px]",
-                  isEnglish ? "border-amber-500/30 dark:border-amber-500/20 shadow-[0_8px_30px_-5px_rgba(245,158,11,0.15)] dark:shadow-[0_8px_30px_-5px_rgba(245,158,11,0.1)]" : "border-primary/30 dark:border-primary/20 shadow-[0_8px_30px_-5px_rgba(59,130,246,0.15)] dark:shadow-[0_8px_30px_-5px_rgba(59,130,246,0.1)]"
-                )}
-              >
-                {/* Icon box - tinted intelligently for both modes */}
-                <div
-                  className={cn("shrink-0 w-10 h-10 rounded-xl flex items-center justify-center transition-colors", isEnglish ? "bg-amber-500/10 dark:bg-amber-500/20" : "bg-primary/10 dark:bg-primary/20")}
-                >
-                  <Play className={cn("h-4 w-4 transition-colors", currentSubject === 'english' ? "text-amber-600 dark:text-amber-400" : "text-primary dark:text-blue-400")} />
-                </div>
-
-                {/* Text - Adaptive contrast tokens instead of static slates */}
-                <div className="flex-1 min-w-0">
-                  <p className="text-[13px] font-semibold text-slate-800 dark:text-slate-100 leading-tight truncate">
-                    {getTopicsLabel()} · {currentSubject === 'english' 
-                      ? `~${getTotalEstimatedQuestions()} Passages (${getTotalEstimatedQuestions() * 10} Qs)` 
-                      : `~${getTotalEstimatedQuestions()} questions`}
-                  </p>
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                    {getModeLabel()} &nbsp;·&nbsp; {getTierLabel()} &nbsp;·&nbsp; {getCalcLabel()}
-                  </p>
-                </div>
-
-                {/* Glowing CTA - Elite Button */}
-                <Button
-                   onClick={examMode === 'practice' ? startPractice : startMockExam}
-                  disabled={selectedTopics.length === 0 || loading}
-                  className="shrink-0 h-10 px-5 rounded-xl font-semibold text-[13px] border-0 transition-all duration-200 active:scale-[0.97] text-white"
-                  style={currentSubject === 'english' ? {
-                    background: 'linear-gradient(135deg, #f59e0b, #d97706)',
-                    boxShadow: '0 0 0 1px rgba(245,158,11,0.2), 0 4px 16px rgba(245,158,11,0.3)',
-                  } : {
-                    background: 'linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary) / 0.8))',
-                    boxShadow: '0 0 0 1px hsl(var(--primary) / 0.2), 0 4px 16px hsl(var(--primary) / 0.3)',
-                  }}
-                >
-                  {loading ? 'Starting...' : 'Start Session'}
-                  {!loading && <ArrowRight className="h-3.5 w-3.5 ml-1.5" />}
-                </Button>
-              </div>
-            </div>
-          </div>
         </div>
         </div>
 

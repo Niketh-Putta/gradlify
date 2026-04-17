@@ -77,20 +77,20 @@ export function PremiumUpgradeButton({
           {isLoading ? (
             <>
               <Loader2 className={variant === 'homeBanner' ? "h-4 w-4 animate-spin" : "h-4 w-4 mr-2 animate-spin"} />
-              <span className={variant === 'homeBanner' ? "truncate text-sm font-medium" : "truncate"}>Starting Checkout...</span>
+              <span className={variant === 'homeBanner' ? "text-sm font-medium" : ""}>Starting Checkout...</span>
             </>
           ) : (
             <>
               {variant === 'homeBanner' ? (
                 <>
                   <Trophy className="h-4 w-4" />
-                  <span className="truncate text-sm font-semibold">{label ?? sprintCopy.buttonSecondary}</span>
+                  <span className="text-sm font-semibold">{label ?? sprintCopy.buttonSecondary}</span>
                   <ArrowRight className="h-4 w-4" />
                 </>
               ) : (
                 <>
                   <Crown className="h-4 w-4 mr-2" />
-                  <span className="truncate">{label ?? sprintCopy.buttonPrimary}</span>
+                  <span className="">{label ?? sprintCopy.buttonPrimary}</span>
                 </>
               )}
             </>

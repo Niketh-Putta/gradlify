@@ -53,10 +53,8 @@ interface NavigationProps {
 export function Navigation({ user, profile, onSettings, onSignOut }: NavigationProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [sidebarHovered, setSidebarHovered] = useState(false);
-  const [bottomNavHidden, setBottomNavHidden] = useState(false);
   const [headerHidden, setHeaderHidden] = useState(false);
   const [moreExpanded, setMoreExpanded] = useState(false);
-  const [bottomMoreOpen, setBottomMoreOpen] = useState(false);
   const { currentSubject } = useSubject();
   const lastScrollYRef = useRef(0);
   const scrollTickingRef = useRef(false);
@@ -99,14 +97,11 @@ export function Navigation({ user, profile, onSettings, onSignOut }: NavigationP
 
         if (currentScrollY < 10) {
           setHeaderHidden(false);
-          setBottomNavHidden(false);
         } else if (currentScrollY > lastScrollY && currentScrollY > 80) {
           setHeaderHidden(true);
-          setBottomNavHidden(true);
           setMobileMenuOpen(false);
         } else if (currentScrollY < lastScrollY) {
           setHeaderHidden(false);
-          setBottomNavHidden(false);
         }
 
         lastScrollYRef.current = currentScrollY;
@@ -513,71 +508,6 @@ export function Navigation({ user, profile, onSettings, onSignOut }: NavigationP
           </div>
         )}
       </header>
-
-      {/* Mobile Bottom Navigation - Phone and Tablet */}
-      <nav className={cn(
-        "block lg:hidden fixed bottom-0 left-0 right-0 bg-background border-t border-border/40 shadow-card pb-safe z-[70] transition-transform duration-300 ease-in-out rounded-t-3xl",
-        bottomNavHidden ? "translate-y-full" : "translate-y-0"
-      )}>
-        {/* More Menu Popup */}
-        {bottomMoreOpen && (
-          <>
-            <div 
-              className="fixed inset-0 bg-black/20 z-40" 
-              onClick={() => setBottomMoreOpen(false)} 
-            />
-            <div className="absolute bottom-full right-4 mb-2 bg-card border border-border rounded-2xl shadow-xl p-2 z-50 min-w-[160px]">
-              {moreNavigationItems.map((item) => (
-                <NavLink
-                  key={item.path}
-                  to={item.path}
-                  onClick={() => setBottomMoreOpen(false)}
-                  className={({ isActive }) =>
-                    cn(
-                      "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200",
-                      isActive
-                        ? cn(currentSubject === 'english' ? 'bg-amber-500 text-white' : 'bg-primary text-primary-foreground')
-                        : 'text-muted-foreground hover:text-foreground hover:bg-muted/70'
-                    )
-                  }
-                >
-                  <item.icon className="h-4 w-4 shrink-0" />
-                  <span className="font-medium text-sm">{item.label}</span>
-                </NavLink>
-              ))}
-            </div>
-          </>
-        )}
-        
-        <div className="flex items-center justify-between px-0.5 py-1 w-full gap-0.5">
-          {primaryNavigationItems.map((item) => (
-            <div key={item.path} className="flex-1 min-w-0">
-              <NavItem item={item} isMobile />
-            </div>
-          ))}
-          {/* More Button */}
-          <div className="flex-1 min-w-0">
-            <button
-              onClick={() => setBottomMoreOpen(!bottomMoreOpen)}
-              className={cn(
-                "flex items-center gap-0.5 px-0 py-1 rounded-xl transition-all duration-300 ease-in-out relative w-full",
-                "justify-center flex-col min-h-[42px]",
-                bottomMoreOpen
-                  ? cn(
-                       "font-semibold",
-                       currentSubject === 'english' ? 'bg-amber-500/10 text-amber-500' : 'bg-primary/10 text-primary'
-                    )
-                  : 'text-muted-foreground hover:text-foreground hover:bg-muted/70'
-              )}
-            >
-              <div className="flex items-center justify-center shrink-0 h-3.5 w-full">
-                <MoreHorizontal className="shrink-0 h-[15px] w-[15px] transition-transform duration-300" />
-              </div>
-              <span className="font-medium text-[8.5px] tracking-tighter truncate w-full text-center px-0.5">More</span>
-            </button>
-          </div>
-        </div>
-      </nav>
     </>
   );
 }
