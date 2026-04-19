@@ -686,11 +686,32 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
               </div>
               {selectedSubtopics.length > 0 && <button onClick={() => setSelectedSubtopics([])} className={cn("mt-6 text-[10px] font-bold text-muted-foreground flex items-center gap-1.5", currentSubject === 'english' ? "hover:text-amber-500" : "hover:text-primary")}><X className="h-3 w-3" />Reset filters</button>}
             </section>
-          )}
-        </div>
-        </div>
+            )}
 
-        <Dialog open={showMockDialog} onOpenChange={setShowMockDialog}>
+            {/* Floating Start Bar */}
+            {selectedTopics.length > 0 && (
+            <div className="fixed bottom-0 left-0 right-0 p-4 sm:p-6 bg-gradient-to-t from-background via-background to-transparent z-40 animate-in slide-in-from-bottom-8 duration-500">
+              <div className="max-w-[800px] mx-auto">
+                <Button 
+                  onClick={examMode === 'practice' ? startPractice : startMockExam}
+                  className={cn(
+                    "w-full h-14 sm:h-16 rounded-2xl text-base sm:text-lg font-black shadow-2xl transition-all hover:scale-[1.02] active:scale-[0.98] border-0",
+                    currentSubject === 'english' 
+                      ? "bg-amber-500 hover:bg-amber-600 shadow-amber-500/30 text-white" 
+                      : "bg-primary hover:bg-blue-600 shadow-primary/30 text-white"
+                  )}
+                >
+                  {examMode === 'practice' ? 'Start Practice Session' : 'Start Mock Exam'}
+                  <ArrowRight className="ml-2 h-5 w-5 stroke-[3px]" />
+                </Button>
+              </div>
+            </div>
+            )}
+            </div>
+            </div>
+
+            <Dialog open={showMockDialog} onOpenChange={setShowMockDialog}>
+
           <DialogContent className="max-w-md rounded-[2rem] p-6 sm:p-8 border-white/20 bg-[#F2F2F7] dark:bg-slate-900 backdrop-blur-2xl shadow-2xl overflow-y-auto max-h-[90dvh] md:max-h-[85vh] ring-1 ring-black/5">
             <div className="space-y-6 sm:space-y-8">
               <div>
