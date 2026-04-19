@@ -802,8 +802,6 @@ export function EnglishSplitViewDemo() {
 
   // Compute actual results upon finishing
   const results = useMemo(() => {
-    if (!isFinished) return null;
-    
     let compTotal = 0;
     let compCorrect = 0;
     let spagTotal = 0;
@@ -882,42 +880,9 @@ export function EnglishSplitViewDemo() {
         supabase.from('practice_results').insert(rowsToInsert).then(({ error }) => {
           if (error) console.error("Error saving English results:", error);
         });
-
-        // Also update the mock_attempts if this was a mock exam
-        if (examMode === 'mock' && results) {
-          // Find the most recent in_progress mock-exam for this user
-          supabase
-            .from('mock_attempts')
-            .select('id')
-            .eq('user_id', user.id)
-            .eq('mode', 'mock-exam')
-            .eq('status', 'in_progress')
-            .order('created_at', { ascending: false })
-            .limit(1)
-            .single()
-            .then(({ data: attempt }) => {
-              if (attempt) {
-                supabase
-                  .from('mock_attempts')
-                  .update({
-                    score: results.overallCorrect,
-                    total_marks: results.overallTotal,
-                    status: 'scored'
-                  })
-                  .eq('id', attempt.id)
-                  .then(({ error }) => {
-                    if (error) console.error("Error updating mock attempt:", error);
-                    else {
-                      // Dispatch event so usage state refreshes
-                      window.dispatchEvent(new CustomEvent('mockUsageUpdated'));
-                    }
-                  });
-              }
-            });
-        }
       }
     }
-  }, [isFinished, user, activeSections, selectedAnswers, results, examMode]);
+  }, [isFinished, user, activeSections, selectedAnswers]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -1502,9 +1467,27 @@ export function EnglishSplitViewDemo() {
               <div className="pt-10 border-t border-border/40 mt-12 mb-12 flex justify-end snap-end scroll-m-8">
                 <Button 
                   onClick={() => {
-                    if (isReviewMode) setIsFinished(true); // Return to Results
-                    else if (examMode === 'practice') navigate('/mocks/english'); 
-                    else setIsFinished(true);
+                    if (isReviewMode) {
+                      setIsFinished(true);
+                      return;
+                    }
+                    if (examMode === 'practice') {
+                      navigate('/mocks/english');
+                      return;
+                    }
+                    
+                    // MOCK SUBMIT - Calculate score immediately
+                    if (results && !hasSavedResults.current) {
+                      const amount = results.overallCorrect;
+                      if (amount > 0) {
+                        void supabase.rpc('increment_leaderboard_score', { p_amount: amount }).then(({ error }) => {
+                          if (error) console.error('Failed to increment leaderboard score:', error);
+                          else window.dispatchEvent(new CustomEvent('mockUsageUpdated')); // Force UI refresh
+                        });
+                      }
+                    }
+                    
+                    setIsFinished(true);
                   }} 
                   className="bg-amber-500 hover:bg-amber-600 text-amber-950 font-bold px-8 h-12 rounded-xl text-md shadow-[0_0_20px_rgba(245,158,11,0.3)]">
                   {isReviewMode ? 'Return to Results' : (examMode === 'practice' ? 'Finish' : 'Submit Mock Exam')}

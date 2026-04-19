@@ -613,10 +613,10 @@ export function usePremium(trackOverride?: UserTrack, subject?: 'maths' | 'engli
   const canUse40Questions = isPremium;
   const canUseFullPaper = isPremium;
 
-  const refreshUsage = async () => {
+  const refreshUsage = useCallback(async () => {
     if (!hasUserContext) return;
     await fetchUsageData();
-  };
+  }, [hasUserContext, fetchUsageData]);
 
   const effectiveTier = hasUserContext ? tier : 'free';
   const effectiveFounderTrack = hasUserContext ? founderTrack : null;

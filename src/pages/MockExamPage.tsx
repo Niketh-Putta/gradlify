@@ -161,7 +161,7 @@ export default function MockExamPage() {
   const context = useAppContext();
   const userTrack = resolveUserTrack(context.profile?.track ?? null);
   const user = context?.user || null;
-  const { canStartMockExam, refreshUsage, isLoading: isUsageLoading } = usePremium();
+  const { canStartMockExam, refreshUsage, isLoading: isUsageLoading } = usePremium(userTrack, 'maths');
   const { currentSubject } = useSubject();
   
   // Extract exam parameters from URL
@@ -266,6 +266,7 @@ export default function MockExamPage() {
         difficultyMinParam,
         difficultyMaxParam,
       ].join('|');
+      console.log("[MockExamPage] fetchQuestions starting", { loadKey, isUsageLoading, canStartMockExam, userTrack });
       if (loadKeyRef.current === loadKey) {
         setLoading(false);
         return;
@@ -276,19 +277,23 @@ export default function MockExamPage() {
       try {
         isLoadingRef.current = true;
         setLoading(true);
+        console.log("[MockExamPage] fetching session...");
         const { data: sessionData } = await supabase.auth.getSession();
         let session = sessionData.session;
         if (!session) {
+          console.log("[MockExamPage] refreshing session...");
           const { data: refreshData } = await supabase.auth.refreshSession();
           session = refreshData.session;
         }
         if (!session) {
+          console.log("[MockExamPage] no session found");
           setLoading(false);
           toast.error("Please sign in to start a mock exam.");
           navigate('/auth');
           return;
         }
 
+        console.log("[MockExamPage] checking existing attempt...");
         const startOfDay = new Date();
         startOfDay.setHours(0, 0, 0, 0);
         const { data: existingAttempt } = await supabase
@@ -302,7 +307,10 @@ export default function MockExamPage() {
           .limit(1)
           .maybeSingle();
 
+        console.log("[MockExamPage] existingAttempt:", existingAttempt);
+
         if (!canStartMockExam && !existingAttempt) {
+          console.log("[MockExamPage] daily limit reached and no existing attempt");
           toast.error("Daily mock exam limit reached.");
           setLoading(false);
           navigate('/mocks');
@@ -380,6 +388,7 @@ export default function MockExamPage() {
           const limit = Math.max(take * 4, take);
 
           if (isAuthed) {
+            console.log(`[MockExamPage] calling fetch_exam_questions_v3 for ${tierValue}/${calcValue}, take: ${take}`);
             const { data, error } = await supabase.rpc('fetch_exam_questions_v3' as any, {
               p_tiers: [tierValue],
               p_calculators: [calcValue],
@@ -393,11 +402,16 @@ export default function MockExamPage() {
               p_limit: limit,
             });
 
+            if (error) console.error("[MockExamPage] RPC error:", error);
+
             if (!error && data && (data as any[]).length > 0) {
+              console.log(`[MockExamPage] RPC returned ${(data as any[]).length} questions`);
               return (data as unknown as DbExamQuestionRow[]).slice(0, take);
             }
+            console.log(`[MockExamPage] RPC returned 0 questions or error, trying fallback query`);
           }
 
+          console.log(`[MockExamPage] fallback query for ${tierValue}/${calcValue}, take: ${take}`);
           let query = supabase
             .from('exam_questions')
             .select('id, question, correct_answer, wrong_answers, all_answers, question_type, subtopic, difficulty, marks, estimated_time_sec, tier, calculator, image_url, image_alt, explanation')
@@ -524,7 +538,10 @@ export default function MockExamPage() {
           }
         }
         
+        console.log(`[MockExamPage] total questions fetched: ${allQuestions.length}`);
+
         if (allQuestions.length === 0) {
+          console.log("[MockExamPage] no questions found!");
           toast.error("No questions found for the selected criteria");
           return;
         }
@@ -779,7 +796,7 @@ export default function MockExamPage() {
     };
 
     fetchQuestions();
-  }, [tier, paperType, topics, questionsCount, subtopicParam, difficultyMinParam, difficultyMaxParam, canStartMockExam, isUsageLoading, navigate, refreshUsage]);
+  }, [tier, paperType, topics, questionsCount, subtopicParam, difficultyMinParam, difficultyMaxParam, canStartMockExam, isUsageLoading, userTrack, navigate, refreshUsage]);
 
   const formatTime = (seconds: number) => {
     const totalSeconds = Math.max(0, Math.floor(seconds));
@@ -823,7 +840,12 @@ export default function MockExamPage() {
     });
   };
 
+  const hasSubmittedRef = useRef(false);
+
   const handleSubmit = useCallback(async () => {
+    if (hasSubmittedRef.current) return;
+    hasSubmittedRef.current = true;
+
     let earnedMarks = 0;
     let totalMarks = 0;
     let weightedEarned = 0;
@@ -857,6 +879,14 @@ export default function MockExamPage() {
         topicBreakdown[topic].earned += earned;
       }
     });
+
+    // INCREMENT LEADERBOARD IMMEDIATELY
+    if (earnedMarks > 0) {
+      void supabase.rpc('increment_leaderboard_score', { p_amount: earnedMarks }).then(({ error }) => {
+        if (error) console.error('Failed to increment leaderboard score:', error);
+        else window.dispatchEvent(new CustomEvent('mockUsageUpdated')); // Force UI refresh
+      });
+    }
 
     // Display score percentage from awarded marks, not weighted difficulty.
     const percentage = totalMarks > 0 ? Math.round((earnedMarks / totalMarks) * 100) : 0;
@@ -907,7 +937,7 @@ export default function MockExamPage() {
               duration_minutes: durationMinutes,
               total_marks: totalMarksForAttempt,
               score: earnedMarksForAttempt,
-              status: 'scored'
+              status: 'completed'
             })
             .eq('id', existingAttempt.id)
             .select()
