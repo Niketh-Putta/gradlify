@@ -295,11 +295,24 @@ export function usePremium(trackOverride?: UserTrack, subject?: 'maths' | 'engli
           .single();
 
       let { data, error } = await attemptUsageFetch();
+      
       while (error) {
+        // Handle code 42703 (undefined_column) explicitly
         const missingColumn = getMissingColumnFromError(error);
-        if (!missingColumn) break;
-        markProfileColumnMissing(missingColumn);
-        ({ data, error } = await attemptUsageFetch());
+        if (!missingColumn && error.code !== '42703') break;
+        
+        // If we have a code 42703 but regex failed, we might need a broader approach,
+        // but for now let's trust getMissingColumnFromError which we just improved.
+        if (missingColumn) {
+          markProfileColumnMissing(missingColumn);
+          ({ data, error } = await supabase
+            .from('profiles')
+            .select(profileSelect(requiredColumns, optionalColumns))
+            .eq('user_id', profile.user_id)
+            .single());
+        } else {
+          break;
+        }
       }
       if (error) throw error;
 

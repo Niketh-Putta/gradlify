@@ -625,10 +625,10 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
               <div className="space-y-8">
                 {availableSections.filter(s => selectedTopics.includes(s.id) && s.subtopics.length > 0).map(section => (
                   <div key={section.id} className="space-y-3">
-                    <p className="text-[11px] font-bold text-foreground/70 flex items-center gap-2" style={{ color: section.color }}>
+                    <div className="text-[11px] font-bold text-foreground/70 flex items-center gap-2" style={{ color: section.color }}>
                       <div className="w-1 h-3 rounded-full" style={{ backgroundColor: section.color }} />
                       {section.label}
-                    </p>
+                    </div>
                     <div className="flex flex-wrap gap-2">
                       {section.subtopics.map(st => {
                         const subtopicId = `${section.key}|${st.key}`;
@@ -707,10 +707,10 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
               </div>
             </div>
             )}
-            </div>
-            </div>
+          </section>
+        </div>
 
-            <Dialog open={showMockDialog} onOpenChange={setShowMockDialog}>
+        <Dialog open={showMockDialog} onOpenChange={setShowMockDialog}>
 
           <DialogContent className="max-w-md rounded-[2rem] p-6 sm:p-8 border-white/20 bg-[#F2F2F7] dark:bg-slate-900 backdrop-blur-2xl shadow-2xl overflow-y-auto max-h-[90dvh] md:max-h-[85vh] ring-1 ring-black/5">
             <div className="space-y-6 sm:space-y-8">
