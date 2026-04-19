@@ -593,7 +593,13 @@ export function EnglishSplitViewDemo() {
     // Filter down to the user's requested topics. 
     // They want exactly 1 passage per requested block.
     if (selectedTopics.includes('comprehension') && groups.comprehension.length > 0) finalSections.push(groups.comprehension[0]);
-    if (selectedTopics.includes('spag') && groups.spag.length > 0) finalSections.push(groups.spag[0]);
+    
+    // User requested longer SPaG (10 questions instead of 5). 
+    // Since each section has 5, we take 2 sections if available.
+    if (selectedTopics.includes('spag') && groups.spag.length > 0) {
+        finalSections.push(...groups.spag.slice(0, 2));
+    }
+    
     if (selectedTopics.includes('vocabulary') && groups.vocab.length > 0) finalSections.push(groups.vocab[0]);
     
     // Safety fallback
