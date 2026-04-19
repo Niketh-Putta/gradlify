@@ -167,6 +167,8 @@ export async function getLeaderboard(
       userScores.set(m.user_id, current + (m.score || 0));
     });
 
+    const { data: { user: currentUser } } = await supabase.auth.getUser();
+
     const entries: LeaderboardEntry[] = Array.from(userScores.entries()).map(([uid, score]) => {
       const p = profMap.get(uid);
       return {
@@ -174,7 +176,7 @@ export async function getLeaderboard(
         name: p?.full_name || 'Anonymous',
         avatar_url: p?.avatar_url || null,
         correct_count: score,
-        is_self: uid === (supabase.auth.getUser() as any)?.data?.user?.id,
+        is_self: uid === currentUser?.id,
         rank: 0,
         founder_track: p?.founder_track || null
       };
