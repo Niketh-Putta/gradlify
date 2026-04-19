@@ -561,7 +561,8 @@ export function EnglishSplitViewDemo() {
 
   // 1. FILTERING LOGIC
   const activeSections = useMemo(() => {
-    const sourceData = dbSections.length > 0 ? dbSections : [...TEST_DATA, VOCAB_PRACTICE];
+    // Only use TEST_DATA and VOCAB_PRACTICE to maintain the previous style and prevent flipping
+    const sourceData = [...TEST_DATA, VOCAB_PRACTICE];
     
     // Intelligent exhaustion system:
     let seenPassages: string[] = [];
@@ -612,7 +613,7 @@ export function EnglishSplitViewDemo() {
     }));
 
     return sorted;
-  }, [examMode, selectedTopics, isPremium, dbSections]);
+  }, [examMode, selectedTopics, isPremium]);
 
   // Securely update the historic ledger of what texts have been seen
   useEffect(() => {
