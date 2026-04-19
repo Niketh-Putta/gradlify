@@ -111,22 +111,9 @@ export function FriendsTab() {
     setSendingTo(receiverId);
     // Optimistic update
     setOptimisticRequests(prev => new Set(prev).add(receiverId));
-    const isBotRecipient = receiverId.startsWith("bot-");
-    
-    if (isBotRecipient) {
-      toast({
-        title: "Request sent",
-        description: "Your friend request has been sent successfully",
-      });
-      setSearchResults(prev => prev.filter(u => u.user_id !== receiverId));
-      setSearchQuery("");
-      setSendingTo(null);
-      return;
-    }
 
     try {
       await sendFriendRequest(receiverId);
-      
       toast({
         title: "Request sent",
         description: "Your friend request has been sent successfully",

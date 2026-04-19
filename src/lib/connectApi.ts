@@ -182,13 +182,7 @@ export async function getLeaderboard(
   }
 
   const entries = (data || []).filter((entry) => entry.correct_count > 0);
-  const filteredEntries = resolvedTrack === '11plus'
-    ? entries.filter((entry) => !(entry.user_id ?? '').startsWith('bot-'))
-    : entries;
-  if (scope === 'global') {
-    return addSyntheticLearners(filteredEntries, period);
-  }
-  return rankLeaderboardEntries(filteredEntries);
+  return rankLeaderboardEntries(entries);
 }
 
 export async function getSprintTop10(sprintId: string): Promise<SprintTopEntry[]> {
@@ -217,166 +211,6 @@ export async function captureSprintTop10IfDue(sprintId: string): Promise<boolean
   return Boolean(data);
 }
 
-const SYNTHETIC_LEARNERS = [
-  "Kavita S.",
-  "ishaan_reddy",
-  "ZoyaKhan",
-  "Dev Patel",
-  "Ananya Gupta",
-  "samuel_okoro",
-  "ElenaV",
-  "Marcus B",
-  "Priyanka N",
-  "omar.h",
-  "RachelGreen",
-  "Arjun Malhotra",
-  "sarah_jones",
-  "Mohammad Ali",
-  "Lara Silva",
-  "nathan-lee",
-  "SophiaChen",
-  "AhmedF",
-  "Clara M",
-  "vikram.singh",
-  "MayaDesai",
-  "Liam Wilson",
-  "Fatima Z",
-  "ethan_walker",
-  "Noah M.",
-  "Amira Rahman",
-  "NiyaGirish",
-  "mohammedzuhr",
-  "Lara_Nasc",
-  "Salma B",
-  "tariq_anas",
-  "Keiko Kondo",
-  "aaliyah_shah",
-  "Omar Mendez",
-  "Rhea Kapoor",
-  "Yusuf T",
-  "Matteo F",
-  "isla_muthoni",
-  "Qin Zhou",
-  "nayanika_p",
-  "Sergei I.",
-  "Zoe Abboud",
-  "Alem P",
-  "Iyano Estrada",
-];
-
-const BOT_SCORE_START = 0;
-const BOT_SCORE_STEP = 0;
-const BOT_SCORE_MIN = 0;
-const BOT_SCORE_BONUS_MIN = 0;
-const BOT_SCORE_BONUS_MAX = 0;
-const BOT_RANDOM_POINTS_MIN = 0;
-const BOT_RANDOM_POINTS_MAX = 0;
-// One-time bump applied to each bot (fixed values, generated once).
-const BOT_ONE_TIME_BONUS = [
-  0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0,
-];
-// Extra random bumps for ~half the bots (14-80). Zero means no extra bump.
-const BOT_HALF_RANDOM_BONUS = [
-  0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0,
-];
-
-const BOT_PERIOD_SEED = {
-  day: 13,
-  week: 37,
-  month: 91,
-} as const;
-
-function buildSyntheticEntries(period: 'day' | 'week' | 'month'): LeaderboardEntry[] {
-  const scale = getPeriodScale(period);
-  return SYNTHETIC_LEARNERS.map((handle, index) => {
-    const baseScore = getSyntheticScore(handle, index);
-    const periodRandom = getDeterministicRandom(handle, index, period);
-    const maxAdd = period === 'day'
-      ? Math.round(baseScore * 0.05)
-      : period === 'week'
-        ? Math.round(baseScore * 0.1)
-        : Math.round(baseScore * 0.2);
-    const scaledScore = Math.max(
-      0,
-      Math.min(baseScore, Math.round((baseScore * scale) + Math.min(periodRandom, maxAdd)))
-    );
-    return {
-      rank: 0,
-      user_id: `bot-${handle}`,
-      name: handle,
-      avatar_url: null,
-      correct_count: scaledScore,
-      is_self: false,
-      founder_track: null,
-    };
-  });
-}
-
-const BOT_BASE_SCORES = SYNTHETIC_LEARNERS.map((_, index) => {
-  return 0;
-});
-
-function getBotBonus(handle: string, index: number) {
-  return 0;
-}
-
-const BOT_FIXED_SCORES: Record<string, number> = {
-};
-
-function getPeriodScale(period: 'day' | 'week' | 'month') {
-  if (period === 'day') return 0.12;
-  if (period === 'week') return 0.45;
-  return 1;
-}
-
-function getDeterministicRandom(handle: string, index: number, period: 'day' | 'week' | 'month') {
-  const seedBase = [...handle].reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  const seed = seedBase + (index + 1) * 97 + BOT_PERIOD_SEED[period];
-  const range = BOT_RANDOM_POINTS_MAX - BOT_RANDOM_POINTS_MIN + 1;
-  return BOT_RANDOM_POINTS_MIN + (seed % range);
-}
-
-function getSyntheticScore(handle: string, index: number) {
-  const fixedScore = BOT_FIXED_SCORES[handle];
-  if (typeof fixedScore === "number") {
-    return fixedScore;
-  }
-  const seed = [...handle].reduce((acc, char) => acc + char.charCodeAt(0), index);
-  const variation = (seed % 11) - 5; // range -5..+5
-  const bonus = getBotBonus(handle, index);
-  const oneTimeBonus = BOT_ONE_TIME_BONUS[index] ?? 0;
-  const halfBonus = BOT_HALF_RANDOM_BONUS[index] ?? 0;
-  const randomPoints = BOT_RANDOM_POINTS_MIN + (seed % (BOT_RANDOM_POINTS_MAX - BOT_RANDOM_POINTS_MIN + 1));
-  if (index === 1) {
-    return 207 + bonus + oneTimeBonus + halfBonus + randomPoints;
-  }
-  if (index === 2) {
-    return 176 + bonus + oneTimeBonus + halfBonus + randomPoints;
-  }
-  return Math.max(
-    BOT_SCORE_MIN,
-    (BOT_BASE_SCORES[index] ?? BOT_SCORE_MIN) + variation + bonus + oneTimeBonus + halfBonus + randomPoints
-  );
-}
-
-function addSyntheticLearners(existing: LeaderboardEntry[], period: 'day' | 'week' | 'month'): LeaderboardEntry[] {
-  const syntheticEntries = buildSyntheticEntries(period);
-
-  const combined = [...existing, ...syntheticEntries];
-  combined.sort((a, b) => b.correct_count - a.correct_count);
-
-  return combined.map((entry, index) => ({
-    ...entry,
-    rank: index + 1,
-  }));
-}
-
 function rankLeaderboardEntries(entries: LeaderboardEntry[]): LeaderboardEntry[] {
   const sorted = [...entries].sort((a, b) => {
     if (b.correct_count !== a.correct_count) {
@@ -396,10 +230,6 @@ function rankLeaderboardEntries(entries: LeaderboardEntry[]): LeaderboardEntry[]
     ...entry,
     rank: index + 1,
   }));
-}
-
-export function getSyntheticLeaderboardEntries(period: 'day' | 'week' | 'month'): LeaderboardEntry[] {
-  return buildSyntheticEntries(period);
 }
 
 export async function getMyGlobalOptIn(): Promise<boolean> {
@@ -466,9 +296,6 @@ export async function searchUsers(query: string): Promise<UserProfile[]> {
 }
 
 export async function sendFriendRequest(receiverId: string) {
-  if (receiverId.startsWith("bot-")) {
-    return { id: -1, status: "sent" };
-  }
   const { data, error } = await supabase.rpc('send_friend_request' as never, {
     p_receiver: receiverId
   }) as { data: { id: number; status: string } | null; error: unknown };
