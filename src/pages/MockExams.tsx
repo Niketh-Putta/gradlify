@@ -804,6 +804,5 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
           description="Upgrade to unlock unlimited mock exams, full question sets, and advanced analytics." 
         />
       </div>
-    </div>
   );
 }

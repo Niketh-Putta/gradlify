@@ -264,26 +264,26 @@ const SYNTHETIC_LEARNERS = [
   "Iyano Estrada",
 ];
 
-const BOT_SCORE_START = 170;
-const BOT_SCORE_STEP = 8;
+const BOT_SCORE_START = 0;
+const BOT_SCORE_STEP = 0;
 const BOT_SCORE_MIN = 0;
-const BOT_SCORE_BONUS_MIN = 2;
-const BOT_SCORE_BONUS_MAX = 6;
-const BOT_RANDOM_POINTS_MIN = 14;
-const BOT_RANDOM_POINTS_MAX = 82;
+const BOT_SCORE_BONUS_MIN = 0;
+const BOT_SCORE_BONUS_MAX = 0;
+const BOT_RANDOM_POINTS_MIN = 0;
+const BOT_RANDOM_POINTS_MAX = 0;
 // One-time bump applied to each bot (fixed values, generated once).
 const BOT_ONE_TIME_BONUS = [
-  32, 49, 39, 71, 25,
-  65, 64, 21, 76, 58,
-  37, 60, 29, 45, 43,
-  29, 32, 20, 20, 62,
+  0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0,
 ];
 // Extra random bumps for ~half the bots (14-80). Zero means no extra bump.
 const BOT_HALF_RANDOM_BONUS = [
-  0, 80, 0, 76, 0,
-  0, 65, 0, 80, 0,
-  0, 68, 0, 32, 0,
-  80, 0, 54, 0, 38,
+  0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0,
 ];
 
 const BOT_PERIOD_SEED = {
@@ -319,30 +319,14 @@ function buildSyntheticEntries(period: 'day' | 'week' | 'month'): LeaderboardEnt
 }
 
 const BOT_BASE_SCORES = SYNTHETIC_LEARNERS.map((_, index) => {
-  const base = Math.max(BOT_SCORE_MIN, BOT_SCORE_START - index * BOT_SCORE_STEP);
-  if (index === 0) {
-    return 235;
-  }
-  if (index === 1) {
-    return 230;
-  }
-  return base;
+  return 0;
 });
 
 function getBotBonus(handle: string, index: number) {
-  const seed = [...handle].reduce((acc, char) => acc + char.charCodeAt(0), index);
-  const range = BOT_SCORE_BONUS_MAX - BOT_SCORE_BONUS_MIN + 1;
-  return BOT_SCORE_BONUS_MIN + (seed % range);
+  return 0;
 }
 
 const BOT_FIXED_SCORES: Record<string, number> = {
-  "Kavita S.": 150,
-  "ishaan_reddy": 137,
-  "ZoyaKhan": 121,
-  "Dev Patel": 115,
-  "Ananya Gupta": 108,
-  "samuel_okoro": 95,
-  "ElenaV": 88,
 };
 
 function getPeriodScale(period: 'day' | 'week' | 'month') {

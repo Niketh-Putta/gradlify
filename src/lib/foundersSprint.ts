@@ -4,11 +4,11 @@ import type { UserTrack } from '@/lib/track';
 const SPRINT_LENGTH_DAYS = 7;
 const SPRINT_ANCHOR = new Date('2025-01-01T00:00:00Z');
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
-export const CURRENT_SPRINT_ID = "sprint-20260420";
-const SPRINT_START_AT = new Date('2026-04-20T00:00:00Z');
-const SPRINT_END_AT = new Date('2026-04-26T23:59:59Z');
+export const CURRENT_SPRINT_ID = "april-sprint-2026";
+const SPRINT_START_AT = new Date('2026-04-19T20:00:00Z');
+const SPRINT_END_AT = new Date('2026-04-26T20:00:00Z');
 const NEXT_SPRINT_START_AT = new Date('2026-05-04T00:00:00Z');
-const ELEVEN_PLUS_NEXT_SPRINT_START_AT = new Date('2026-04-20T00:00:00Z');
+const ELEVEN_PLUS_NEXT_SPRINT_START_AT = new Date('2026-04-19T20:00:00Z');
 
 function startOfDay(date: Date) {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate());

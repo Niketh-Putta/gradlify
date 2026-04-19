@@ -44,7 +44,7 @@ export function SprintDetails() {
               <span className={cn(
                 "text-[8px] font-black uppercase tracking-[0.2em]",
                 isEnglish ? "text-amber-600" : "text-primary"
-              )}>Starts 20 April</span>
+              )}>Starts 19 April</span>
             </div>
             <h1 className="mb-6 text-4xl font-extrabold tracking-tight text-slate-900 sm:text-6xl lg:text-7xl">
               Want to <br className="hidden sm:block" />
@@ -137,7 +137,7 @@ export function SprintDetails() {
             <div className="space-y-3">
               <h4 className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-900">Timing Policy</h4>
               <p className="text-base leading-relaxed text-slate-500">
-                Points reset this <span className="text-slate-900 font-semibold underline decoration-slate-200 decoration-2 underline-offset-4">Monday, 20 April at 00:00</span>. Competition window ends Sunday midnight.
+                Points reset this <span className="text-slate-900 font-semibold underline decoration-slate-200 decoration-2 underline-offset-4">Sunday, 19 April at 20:00</span>. Competition window ends next Sunday 8pm.
               </p>
             </div>
             <div className="space-y-3">

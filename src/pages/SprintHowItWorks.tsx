@@ -6,9 +6,9 @@ import { useAppContext } from "@/hooks/useAppContext";
 import { normalizeTrack, resolveUserTrack } from "@/lib/track";
 import { getFoundersSprintInfo, getNextSprintInfo } from "@/lib/foundersSprint";
 
-const START_DATE = new Date("2026-02-23T00:00:00Z");
-const EVENT_END_LABEL = "Sunday 1 March 2026 • 8:00 PM UTC";
-const EVENT_START_LABEL = "Monday 23 February 2026";
+const START_DATE = new Date("2026-04-19T20:00:00Z");
+const EVENT_END_LABEL = "Sunday 26 April 2026 • 8:00 PM UTC";
+const EVENT_START_LABEL = "Sunday 19 April 2026";
 
 const getSprintCountdown = () => {
   const now = new Date();
@@ -435,7 +435,7 @@ export function SprintHowItWorks() {
 
           <section className="mt-8 rounded-[20px] border-2 border-dashed border-[#4f46e5]/30 bg-[#4f46e5]/5 p-8 text-center">
             <h2 className="text-2xl font-black tracking-tight text-[#4f46e5]">
-              STARTS MONDAY . WIN FREE MOMEY!
+              SPRINT IS LIVE . WIN FREE MONEY!
             </h2>
           </section>
         </div>

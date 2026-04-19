@@ -372,7 +372,14 @@ export default function Connect() {
               </span>
             </h1>
             <p className="text-muted-foreground text-[10px] sm:text-xs font-light mt-0.5 truncate">Ranked by correct answers</p>
-            <p className="text-muted-foreground text-[10px] sm:text-xs font-light truncate">{periodDescriptor}</p>
+            <p className="text-muted-foreground text-[10px] sm:text-xs font-light truncate mb-1">{periodDescriptor}</p>
+            <div className={cn(
+              "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border text-[9px] sm:text-[10px] font-bold uppercase tracking-wider animate-pulse",
+              currentSubject === "english" ? "bg-amber-500/10 border-amber-500/20 text-amber-600" : "bg-primary/10 border-primary/20 text-primary"
+            )}>
+              <Trophy className="w-3 h-3" />
+              <span>Sprint: Apr 19 (8pm) - Apr 26 (8pm). Top 3 win cash prizes!</span>
+            </div>
           </div>
 
           {/* Your Position */}
