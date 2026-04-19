@@ -181,7 +181,7 @@ export async function getLeaderboard(
     }
   }
 
-  const entries = (data || []).filter((entry) => entry.correct_count > 0);
+  const entries = data || [];
   return rankLeaderboardEntries(entries);
 }
 
