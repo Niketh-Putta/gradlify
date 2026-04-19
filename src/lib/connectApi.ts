@@ -123,19 +123,68 @@ export async function getLeaderboard(
   const rpcName = scope === 'global' ? 'get_leaderboard_correct_global' : 'get_leaderboard_correct_friends';
   const resolvedTrack = track ?? await getUserTrack();
 
-  const { data, error } = await supabase.rpc(rpcName, { p_period: period }) as {
-    data: LeaderboardEntry[] | null;
-    error: unknown;
-  };
+  try {
+    const { data, error } = await supabase.rpc(rpcName, { p_period: period }) as {
+      data: LeaderboardEntry[] | null;
+      error: unknown;
+    };
 
-  if (error) {
-    if (isAbortLikeError(error)) return [];
-    console.error('Error fetching leaderboard:', error);
-    throw error;
+    if (!error && data) {
+      const entries = normalizeLeaderboardData(data) || [];
+      return rankLeaderboardEntries(entries);
+    }
+    
+    // IF RPC FAILS (likely due to missing migration), FALLBACK TO RAW CALCULATION
+    console.warn('Leaderboard RPC failed, falling back to raw calculation...', error);
+    
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+    // Use April 19 8pm as the start for the sprint if it's the current sprint
+    const sprintStart = new Date('2026-04-19T20:00:00Z');
+    
+    // Fetch all scored mocks since sprint start
+    const { data: mocks, error: mockError } = await supabase
+      .from('mock_attempts')
+      .select('user_id, score, track')
+      .gte('created_at', sprintStart.toISOString())
+      .in('status', ['scored', 'completed', 'submitted'])
+      .eq('track', resolvedTrack);
+
+    if (mockError || !mocks) return [];
+
+    const uids = [...new Set(mocks.map(m => m.user_id))];
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('user_id, full_name, avatar_url, founder_track')
+      .in('user_id', uids);
+
+    const profMap = new Map();
+    profiles?.forEach(p => profMap.set(p.user_id, p));
+
+    const userScores = new Map();
+    mocks.forEach(m => {
+      const current = userScores.get(m.user_id) || 0;
+      userScores.set(m.user_id, current + (m.score || 0));
+    });
+
+    const entries: LeaderboardEntry[] = Array.from(userScores.entries()).map(([uid, score]) => {
+      const p = profMap.get(uid);
+      return {
+        user_id: uid,
+        name: p?.full_name || 'Anonymous',
+        avatar_url: p?.avatar_url || null,
+        correct_count: score,
+        is_self: uid === (supabase.auth.getUser() as any)?.data?.user?.id,
+        rank: 0,
+        founder_track: p?.founder_track || null
+      };
+    }).filter(e => e.correct_count > 0);
+
+    return rankLeaderboardEntries(entries);
+  } catch (err) {
+    console.error('Final fallback error:', err);
+    return [];
   }
-
-  const entries = normalizeLeaderboardData(data) || [];
-  return rankLeaderboardEntries(entries);
 }
 
 export async function getSprintTop10(sprintId: string): Promise<SprintTopEntry[]> {

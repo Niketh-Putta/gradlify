@@ -953,7 +953,7 @@ export default function MockExamPage() {
               duration_minutes: durationMinutes,
               total_marks: totalMarksForAttempt,
               score: earnedMarksForAttempt,
-              status: 'completed'
+              status: 'scored'
             })
             .eq('id', existingAttempt.id)
             .select()

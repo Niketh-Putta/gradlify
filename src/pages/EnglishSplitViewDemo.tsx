@@ -884,6 +884,50 @@ export function EnglishSplitViewDemo() {
         });
       }
 
+      // Also update the mock_attempts if this was a mock exam
+      if (examMode === 'mock' && totalCorrect >= 0) {
+        // Find the most recent in_progress mock-exam for this user
+        supabase
+          .from('mock_attempts')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('mode', 'mock-exam')
+          .in('status', ['in_progress', 'started'])
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle()
+          .then(({ data: attempt }) => {
+            if (attempt) {
+              supabase
+                .from('mock_attempts')
+                .update({
+                  score: totalCorrect,
+                  total_marks: results?.overallTotal || 0,
+                  status: 'scored'
+                })
+                .eq('id', attempt.id)
+                .then(({ error }) => {
+                  if (error) console.error('[English] Error updating mock attempt:', error);
+                  else {
+                    console.log('[English] Mock attempt updated to scored');
+                    window.dispatchEvent(new CustomEvent('mockUsageUpdated'));
+                  }
+                });
+            } else {
+              // Create a new one if not found (fallback)
+              supabase.from('mock_attempts').insert({
+                user_id: user.id,
+                score: totalCorrect,
+                total_marks: results?.overallTotal || 0,
+                status: 'scored',
+                mode: 'mock-exam',
+                track: '11plus',
+                title: 'English Mock Exam'
+              }).then(() => window.dispatchEvent(new CustomEvent('mockUsageUpdated')));
+            }
+          });
+      }
+
       const rowsToInsert = Object.entries(topicAgg)
         .filter(([_, data]) => data.total > 0)
         .map(([topicLabel, data]) => ({
