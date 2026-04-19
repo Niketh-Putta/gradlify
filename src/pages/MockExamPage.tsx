@@ -268,25 +268,40 @@ export default function MockExamPage() {
       ].join('|');
       console.log("[MockExamPage] fetchQuestions starting", { loadKey, isUsageLoading, canStartMockExam, userTrack });
       if (loadKeyRef.current === loadKey) {
+        console.log("[MockExamPage] fetchQuestions: same loadKey, skipping");
         setLoading(false);
         return;
       }
-      if (isUsageLoading) return;
-      if (isLoadingRef.current) return;
+      if (isUsageLoading) {
+        console.log("[MockExamPage] fetchQuestions: usage is loading, waiting...");
+        return;
+      }
+      if (isLoadingRef.current) {
+        console.log("[MockExamPage] fetchQuestions: already loading, skipping");
+        return;
+      }
 
       try {
         isLoadingRef.current = true;
         setLoading(true);
         console.log("[MockExamPage] fetching session...");
-        const { data: sessionData } = await supabase.auth.getSession();
+        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError) {
+          console.error("[MockExamPage] getSession error:", sessionError);
+          throw sessionError;
+        }
         let session = sessionData.session;
         if (!session) {
           console.log("[MockExamPage] refreshing session...");
-          const { data: refreshData } = await supabase.auth.refreshSession();
+          const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+          if (refreshError) {
+             console.error("[MockExamPage] refreshSession error:", refreshError);
+             throw refreshError;
+          }
           session = refreshData.session;
         }
         if (!session) {
-          console.log("[MockExamPage] no session found");
+          console.log("[MockExamPage] no session found after refresh");
           setLoading(false);
           toast.error("Please sign in to start a mock exam.");
           navigate('/auth');
@@ -296,16 +311,20 @@ export default function MockExamPage() {
         console.log("[MockExamPage] checking existing attempt...");
         const startOfDay = new Date();
         startOfDay.setHours(0, 0, 0, 0);
-        const { data: existingAttempt } = await supabase
+        const { data: existingAttempt, error: attemptError } = await supabase
           .from('mock_attempts')
           .select('id')
-          .eq('user_id', user.id)
+          .eq('user_id', session.user.id)
           .eq('mode', mode)
           .in('status', ['started', 'in_progress'])
           .gte('created_at', startOfDay.toISOString())
           .order('created_at', { ascending: false })
           .limit(1)
           .maybeSingle();
+
+        if (attemptError) {
+          console.error("[MockExamPage] fetch existing attempt error:", attemptError);
+        }
 
         console.log("[MockExamPage] existingAttempt:", existingAttempt);
 
@@ -370,6 +389,7 @@ export default function MockExamPage() {
         
         const allQuestions: DbExamQuestionRow[] = [];
         const excludeIds: string[] = [];
+        console.log("[MockExamPage] combo loop starting...");
         
         const difficultyMinRaw = Number.parseInt(difficultyMinParam, 10);
         const difficultyMaxRaw = Number.parseInt(difficultyMaxParam, 10);
@@ -882,9 +902,16 @@ export default function MockExamPage() {
 
     // INCREMENT LEADERBOARD IMMEDIATELY
     if (earnedMarks > 0) {
+      console.log('Incrementing leaderboard by:', earnedMarks);
       void supabase.rpc('increment_leaderboard_score', { p_amount: earnedMarks }).then(({ error }) => {
-        if (error) console.error('Failed to increment leaderboard score:', error);
-        else window.dispatchEvent(new CustomEvent('mockUsageUpdated')); // Force UI refresh
+        if (error) {
+          console.error('Failed to increment leaderboard score:', error);
+          toast.error('Leaderboard update failed: ' + error.message);
+        } else {
+          console.log('Leaderboard updated successfully');
+          toast.success(`+${earnedMarks} points added to Leaderboard!`);
+          window.dispatchEvent(new CustomEvent('mockUsageUpdated')); // Force UI refresh
+        }
       });
     }
 

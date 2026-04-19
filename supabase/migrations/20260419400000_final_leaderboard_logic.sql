@@ -60,7 +60,6 @@ BEGIN
   FROM public.profiles p
   JOIN auth.users u ON u.id = p.user_id
   WHERE COALESCE(p.track, 'gcse'::public.user_track) = v_user_track
-    AND NOT (v_user_track = '11plus'::public.user_track AND lower(u.email) = 'kputtab@gmail.com')
   ORDER BY rank;
 END;
 $$;

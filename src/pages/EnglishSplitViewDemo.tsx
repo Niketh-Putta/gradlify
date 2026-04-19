@@ -1479,10 +1479,17 @@ export function EnglishSplitViewDemo() {
                     // MOCK SUBMIT - Calculate score immediately
                     if (results && !hasSavedResults.current) {
                       const amount = results.overallCorrect;
+                      console.log('Incrementing leaderboard by:', amount);
                       if (amount > 0) {
                         void supabase.rpc('increment_leaderboard_score', { p_amount: amount }).then(({ error }) => {
-                          if (error) console.error('Failed to increment leaderboard score:', error);
-                          else window.dispatchEvent(new CustomEvent('mockUsageUpdated')); // Force UI refresh
+                          if (error) {
+                            console.error('Failed to increment leaderboard score:', error);
+                            toast.error('Leaderboard update failed: ' + error.message);
+                          } else {
+                            console.log('Leaderboard updated successfully');
+                            toast.success(`+${amount} points added to Leaderboard!`);
+                            window.dispatchEvent(new CustomEvent('mockUsageUpdated')); // Force UI refresh
+                          }
                         });
                       }
                     }
