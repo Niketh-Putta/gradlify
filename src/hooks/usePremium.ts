@@ -287,33 +287,19 @@ export function usePremium(trackOverride?: UserTrack, subject?: 'maths' | 'engli
     try {
       const requiredColumns = ['daily_uses', 'daily_reset_at', 'daily_mock_uses', 'daily_mock_reset_at', 'daily_challenge_uses', 'daily_challenge_reset_at', 'founder_track', 'tier', 'plan', 'current_period_end'] as const;
       const optionalColumns = ['premium_track', 'daily_maths_mock_uses', 'daily_maths_mock_reset_at', 'daily_english_mock_uses', 'daily_english_mock_reset_at', 'is_premium', 'premium_until'] as const;
-      
-      const selectStr = profileSelect(requiredColumns, optionalColumns);
-      console.log("[usePremium] selectStr:", selectStr);
-
       const attemptUsageFetch = async () =>
         supabase
           .from('profiles')
-          .select(selectStr)
+          .select(profileSelect(requiredColumns, optionalColumns))
           .eq('user_id', profile.user_id)
           .single();
 
       let { data, error } = await attemptUsageFetch();
-      if (error) {
-        console.error("[usePremium] error fetching profile:", error);
-      }
       while (error) {
         const missingColumn = getMissingColumnFromError(error);
         if (!missingColumn) break;
-        console.warn(`[usePremium] marking column ${missingColumn} as missing`);
         markProfileColumnMissing(missingColumn);
-        const nextSelect = profileSelect(requiredColumns, optionalColumns);
-        console.log("[usePremium] retrying with selectStr:", nextSelect);
-        ({ data, error } = await supabase
-          .from('profiles')
-          .select(nextSelect)
-          .eq('user_id', profile.user_id)
-          .single());
+        ({ data, error } = await attemptUsageFetch());
       }
       if (error) throw error;
 
@@ -627,10 +613,10 @@ export function usePremium(trackOverride?: UserTrack, subject?: 'maths' | 'engli
   const canUse40Questions = isPremium;
   const canUseFullPaper = isPremium;
 
-  const refreshUsage = useCallback(async () => {
+  const refreshUsage = async () => {
     if (!hasUserContext) return;
     await fetchUsageData();
-  }, [hasUserContext, fetchUsageData]);
+  };
 
   const effectiveTier = hasUserContext ? tier : 'free';
   const effectiveFounderTrack = hasUserContext ? founderTrack : null;

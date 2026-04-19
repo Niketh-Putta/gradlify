@@ -161,7 +161,7 @@ export default function MockExamPage() {
   const context = useAppContext();
   const userTrack = resolveUserTrack(context.profile?.track ?? null);
   const user = context?.user || null;
-  const { canStartMockExam, refreshUsage, isLoading: isUsageLoading } = usePremium(userTrack, 'maths');
+  const { canStartMockExam, refreshUsage } = usePremium();
   const { currentSubject } = useSubject();
   
   // Extract exam parameters from URL
@@ -266,22 +266,20 @@ export default function MockExamPage() {
         difficultyMinParam,
         difficultyMaxParam,
       ].join('|');
+      console.log("[MockExamPage] fetchQuestions starting", { loadKey, isUsageLoading, canStartMockExam, userTrack });
       if (loadKeyRef.current === loadKey) {
         setLoading(false);
         return;
       }
-      if (isUsageLoading) return;
       if (isLoadingRef.current) return;
 
       try {
         isLoadingRef.current = true;
         setLoading(true);
-        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-        if (sessionError) throw sessionError;
+        const { data: sessionData } = await supabase.auth.getSession();
         let session = sessionData.session;
         if (!session) {
-          const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
-          if (refreshError) throw refreshError;
+          const { data: refreshData } = await supabase.auth.refreshSession();
           session = refreshData.session;
         }
         if (!session) {
@@ -291,20 +289,7 @@ export default function MockExamPage() {
           return;
         }
 
-        const startOfDay = new Date();
-        startOfDay.setHours(0, 0, 0, 0);
-        const { data: existingAttempt } = await supabase
-          .from('mock_attempts')
-          .select('id')
-          .eq('user_id', session.user.id)
-          .eq('mode', mode)
-          .in('status', ['started', 'in_progress'])
-          .gte('created_at', startOfDay.toISOString())
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .maybeSingle();
-
-        if (!canStartMockExam && !existingAttempt) {
+        if (!canStartMockExam) {
           toast.error("Daily mock exam limit reached.");
           setLoading(false);
           navigate('/mocks');
@@ -364,7 +349,6 @@ export default function MockExamPage() {
         
         const allQuestions: DbExamQuestionRow[] = [];
         const excludeIds: string[] = [];
-        console.log("[MockExamPage] combo loop starting...");
         
         const difficultyMinRaw = Number.parseInt(difficultyMinParam, 10);
         const difficultyMaxRaw = Number.parseInt(difficultyMaxParam, 10);
@@ -388,9 +372,7 @@ export default function MockExamPage() {
               p_calculators: [calcValue],
               p_question_types: questionTypes.length > 0
                 ? questionTypes
-                : (userTrack === '11plus' 
-                    ? ['Number', 'Algebra', 'Geometry & Measures', 'Statistics', 'Problem Solving']
-                    : ['Number', 'Algebra', 'Geometry & Measures', 'Probability', 'Statistics', 'Ratio & Proportion']),
+                : ['Number', 'Algebra', 'Geometry & Measures', 'Probability', 'Statistics', 'Ratio & Proportion'],
               p_subtopics: subtopics,
               p_difficulty_min: difficultyMin,
               p_difficulty_max: difficultyMax,
@@ -408,9 +390,7 @@ export default function MockExamPage() {
             .select('id, question, correct_answer, wrong_answers, all_answers, question_type, subtopic, difficulty, marks, estimated_time_sec, tier, calculator, image_url, image_alt, explanation')
             .in('question_type', questionTypes.length > 0
               ? questionTypes
-              : (userTrack === '11plus' 
-                  ? ['Number', 'Algebra', 'Geometry & Measures', 'Statistics', 'Problem Solving']
-                  : ['Number', 'Algebra', 'Geometry & Measures', 'Probability', 'Statistics', 'Ratio & Proportion']))
+              : ['Number', 'Algebra', 'Geometry & Measures', 'Probability', 'Statistics', 'Ratio & Proportion'])
             .eq('tier', tierValue)
             .eq('calculator', calcValue);
 
@@ -531,10 +511,7 @@ export default function MockExamPage() {
           }
         }
         
-        console.log(`[MockExamPage] total questions fetched: ${allQuestions.length}`);
-
         if (allQuestions.length === 0) {
-          console.log("[MockExamPage] no questions found!");
           toast.error("No questions found for the selected criteria");
           return;
         }
@@ -789,7 +766,7 @@ export default function MockExamPage() {
     };
 
     fetchQuestions();
-  }, [tier, paperType, topics, questionsCount, subtopicParam, difficultyMinParam, difficultyMaxParam, canStartMockExam, isUsageLoading, userTrack, navigate, refreshUsage]);
+  }, [tier, paperType, topics, questionsCount, subtopicParam, difficultyMinParam, difficultyMaxParam, canStartMockExam, navigate, refreshUsage]);
 
   const formatTime = (seconds: number) => {
     const totalSeconds = Math.max(0, Math.floor(seconds));
@@ -833,16 +810,10 @@ export default function MockExamPage() {
     });
   };
 
-  const hasSubmittedRef = useRef(false);
-
   const handleSubmit = useCallback(async () => {
-    if (hasSubmittedRef.current) return;
-    hasSubmittedRef.current = true;
-
     let earnedMarks = 0;
     let totalMarks = 0;
     let correctQuestionsCount = 0;
-    let totalQuestionsCount = 0;
     let weightedEarned = 0;
     let weightedTotal = 0;
     const topicBreakdown: Record<string, { earned: number; total: number }> = {};
@@ -860,13 +831,17 @@ export default function MockExamPage() {
       totalMarks += marks;
       topicBreakdown[topic].total += marks;
 
-      const correctCount = getQuestionCorrectCount(q);
-      correctQuestionsCount += correctCount;
-      totalQuestionsCount += q.multipart ? q.multipart.parts.length : 1;
-
+      const userAnswers = parseAnswerArray(answers[q.id]);
+      const correctCount = getQuestionCorrectCount(q, userAnswers);
       const earned = q.multipart
         ? Math.round((correctCount / q.multipart.parts.length) * marks)
         : correctCount > 0 ? marks : 0;
+
+      if (q.multipart) {
+        if (correctCount === q.multipart.parts.length) correctQuestionsCount++;
+      } else {
+        if (correctCount > 0) correctQuestionsCount++;
+      }
 
       const difficultyWeight = getQuestionDifficultyWeight(q.difficulty);
       weightedTotal += marks * difficultyWeight;
@@ -878,24 +853,8 @@ export default function MockExamPage() {
       }
     });
 
-    // INCREMENT LEADERBOARD IMMEDIATELY - Use correct questions count as requested
-    const pointsToAdd = correctQuestionsCount;
-    if (pointsToAdd > 0) {
-      console.log('Incrementing leaderboard by:', pointsToAdd);
-      void supabase.rpc('increment_leaderboard_score', { p_amount: pointsToAdd }).then(({ error }) => {
-        if (error) {
-          console.error('Failed to increment leaderboard score:', error);
-          toast.error('Leaderboard update failed: ' + error.message);
-        } else {
-          console.log('Leaderboard updated successfully');
-          toast.success(`+${pointsToAdd} points added to Leaderboard!`);
-          window.dispatchEvent(new CustomEvent('mockUsageUpdated')); // Force UI refresh
-        }
-      });
-    }
-
     // Display score percentage from correct questions count as requested.
-    const percentage = totalQuestionsCount > 0 ? Math.round((correctQuestionsCount / totalQuestionsCount) * 100) : 0;
+    const percentage = examQuestions.length > 0 ? Math.round((correctQuestionsCount / examQuestions.length) * 100) : 0;
     let grade = "1";
     if (percentage >= 90) grade = "9";
     else if (percentage >= 80) grade = "8";
@@ -905,76 +864,46 @@ export default function MockExamPage() {
     else if (percentage >= 40) grade = "4";
     else if (percentage >= 30) grade = "3";
     else if (percentage >= 20) grade = "2";
-    
+
     const showGrade = userTrack !== '11plus';
     const avgLevel = totalMarks > 0 ? weightedTotal / totalMarks : 0;
-    setResults({ 
-      score: correctQuestionsCount, 
-      total: totalQuestionsCount, 
+    setResults({
+      score: correctQuestionsCount,
+      total: examQuestions.length,
       correctQuestionsCount,
-      totalQuestionsCount,
-      percentage, 
-      grade, 
-      topicBreakdown, 
-      showGrade, 
-      avgLevel 
+      totalQuestionsCount: examQuestions.length,
+      percentage,
+      grade,
+      topicBreakdown,
+      showGrade,
+      avgLevel
     });
     setView('results');
-    
+
     // Confetti
     confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
 
     // Save to database if authenticated
     if (user) {
       try {
-        const totalMarksForAttempt = totalMarks;
-        const earnedMarksForAttempt = earnedMarks;
-        
-        // Try to update an existing 'started' attempt (created when the mock was launched)
-        const startOfDay = new Date();
-        startOfDay.setHours(0, 0, 0, 0);
-        const { data: existingAttempt } = await supabase
-          .from('mock_attempts')
-          .select('id')
-          .eq('user_id', user.id)
-          .eq('mode', mode)
-          .in('status', ['started', 'in_progress', 'scored'])
-          .gte('created_at', startOfDay.toISOString())
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .single();
+        // User requested using the absolute correct questions count as the leaderboard score
+        // "if i got 7/10, that 7 number should be added to the leaderboard score"
+        const finalScoreForLeaderboard = correctQuestionsCount;
 
-        let attempt: any = null;
-        if (existingAttempt) {
-          // Update the existing 'started' row with final results
-          const { data } = await supabase.from('mock_attempts')
-            .update({
-              title: `${formatTier(tier, userTrack === '11plus')} - ${formatPaperType(paperType, userTrack === '11plus')}`,
-              duration_minutes: durationMinutes,
-              total_marks: totalMarksForAttempt,
-              score: earnedMarksForAttempt,
-              status: 'completed'
-            })
-            .eq('id', existingAttempt.id)
-            .select()
-            .single();
-          attempt = data;
-        } else {
-          // Fallback: insert a new row (e.g. premium users who skip the limit check)
-          const { data } = await supabase.from('mock_attempts').insert({
-            user_id: user.id,
-            track: userTrack,
-            title: `${formatTier(tier, userTrack === '11plus')} - ${formatPaperType(paperType, userTrack === '11plus')}`,
-            mode,
-            duration_minutes: durationMinutes,
-            total_marks: totalMarksForAttempt,
-            score: earnedMarksForAttempt,
-            status: 'completed'
-          }).select().single();
-          attempt = data;
-        }
+        // 1. Create a mock attempt first (Status: completed)
+        const { data: attempt, error: attemptError } = await supabase.from('mock_attempts').insert({
+          user_id: user.id,
+          track: userTrack,
+          title: `${formatTier(tier, userTrack === '11plus')} - ${formatPaperType(paperType, userTrack === '11plus')}`,
+          mode,
+          duration_minutes: durationMinutes,
+          total_marks: examQuestions.length,
+          score: finalScoreForLeaderboard,
+          status: 'completed' // Set to completed so it counts immediately and matches DB constraints        }).select().single();
+        if (attemptError) throw attemptError;
 
         if (attempt) {
+          // 2. Insert mock questions
           const questionsToInsert = examQuestions.map((q, idx) => ({
             attempt_id: attempt.id,
             idx: idx + 1,
@@ -983,7 +912,8 @@ export default function MockExamPage() {
             topic: q.question_type,
             marks: getQuestionMarks(q),
             awarded_marks: (() => {
-              const correctCount = getQuestionCorrectCount(q);
+              const userAnswers = parseAnswerArray(answers[q.id]);
+              const correctCount = getQuestionCorrectCount(q, userAnswers);
               if (q.multipart) {
                 return Math.round((correctCount / q.multipart.parts.length) * getQuestionMarks(q));
               }
@@ -1004,13 +934,28 @@ export default function MockExamPage() {
               : { answer: q.correct_answer }
           }));
 
-          await supabase.from('mock_questions').insert(questionsToInsert);
+          const { error: questionsError } = await supabase.from('mock_questions').insert(questionsToInsert);
+          if (questionsError) throw questionsError;
+
+          // 3. TRIGGER REFRESH via the same logic as English and mock-submit
+          const { data: sprint } = await supabase.from('sprint_windows').select('id, start_at, end_at').eq('is_active', true).maybeSingle();
+          if (sprint) {
+            await supabase.rpc('refresh_sprint_stats', {
+              p_sprint_id: sprint.id,
+              p_start: sprint.start_at,
+              p_end: sprint.end_at
+            });
+            await supabase.rpc('capture_sprint_top10', { p_sprint_id: sprint.id });
+          }
+          
+          console.log("Mock exam saved and leaderboard refreshed.");
         }
       } catch (error) {
         console.error('Error saving attempt:', error);
       }
     }
   }, [
+    answers,
     durationMinutes,
     examQuestions,
     getQuestionCorrectCount,
@@ -1135,6 +1080,9 @@ const questionCalculatorLabel = (() => {
             <Check className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-2xl font-semibold mb-2 text-foreground">Exam Complete</h1>
+          <p className="text-lg font-bold text-primary mb-1">
+            You got {results.correctQuestionsCount}/{results.totalQuestionsCount} questions right.
+          </p>
           <p className="text-sm text-muted-foreground">Here's your performance analysis</p>
         </div>
 
@@ -1437,45 +1385,52 @@ const questionCalculatorLabel = (() => {
   return (
     <div className="max-w-2xl mx-auto px-4 w-full pt-2 pb-8">
       {/* Header */}
-      {!isPractice && (
-        <div className="py-4 fade-up fade-up-1">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-3">
-              <button 
-                onClick={() => setShowExitModal(true)}
-                className="p-1.5 -ml-1.5 rounded-lg transition-all duration-200 hover:bg-muted hover:scale-105 text-muted-foreground"
-              >
-                <X className="w-4 h-4" />
-              </button>
-              <div className="flex items-center gap-1.5">
-                <span className="text-base font-semibold text-foreground">{currentIndex + 1}</span>
-                <span className="text-sm text-muted-foreground">of {examQuestions.length}</span>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className={cn(
-                "flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-all duration-200",
-                flagged.size > 0 ? "bg-amber-500/10 text-amber-500" : "bg-muted text-muted-foreground"
-              )}>
-                <Flag className="w-3.5 h-3.5" fill={flagged.size > 0 ? "currentColor" : "none"} />
-                <span className="text-xs font-medium">{flagged.size} flagged</span>
-              </div>
-              <div className={cn("flex items-center gap-2 px-3 py-1.5 rounded-xl border transition-all", getTimerClass())}>
-                <Clock className="w-4 h-4 text-muted-foreground" />
-                <span className={cn("text-sm font-semibold", timeLeft <= 60 ? "text-red-500" : timeLeft <= 300 ? "text-amber-500" : "text-foreground")}>
-                  {formatTime(timeLeft)}
-                </span>
-              </div>
+      <div className="py-4 fade-up fade-up-1">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => isPractice ? navigate(-1) : setShowExitModal(true)}
+              className="p-1.5 -ml-1.5 rounded-lg transition-all duration-200 hover:bg-muted hover:scale-105 text-muted-foreground flex items-center gap-1.5"
+            >
+              {isPractice ? <ArrowLeft className="w-4 h-4" /> : <X className="w-4 h-4" />}
+              <span className="text-sm font-medium">{isPractice ? "Back" : "Exit"}</span>
+            </button>
+            <div className="flex items-center gap-1.5">
+              <span className="text-base font-semibold text-foreground">{currentIndex + 1}</span>
+              <span className="text-sm text-muted-foreground">of {examQuestions.length}</span>
             </div>
           </div>
-          <div className="h-1.5 rounded-full bg-border overflow-hidden">
-            <div 
-              className="h-full rounded-full bg-gradient-to-r from-primary to-violet-500 transition-all duration-300"
-              style={{ width: `${((currentIndex + 1) / examQuestions.length) * 100}%` }}
-            />
+          <div className="flex items-center gap-2">
+            {!isPractice ? (
+              <>
+                <div className={cn(
+                  "flex items-center gap-1.5 px-2.5 py-1 rounded-lg transition-all duration-200",
+                  flagged.size > 0 ? "bg-amber-500/10 text-amber-500" : "bg-muted text-muted-foreground"
+                )}>
+                  <Flag className="w-3.5 h-3.5" fill={flagged.size > 0 ? "currentColor" : "none"} />
+                  <span className="text-xs font-medium">{flagged.size} flagged</span>
+                </div>
+                <div className={cn("flex items-center gap-2 px-3 py-1.5 rounded-xl border transition-all", getTimerClass())}>
+                  <Clock className="w-4 h-4 text-muted-foreground" />
+                  <span className={cn("text-sm font-semibold", timeLeft <= 60 ? "text-red-500" : timeLeft <= 300 ? "text-amber-500" : "text-foreground")}>
+                    {formatTime(timeLeft)}
+                  </span>
+                </div>
+              </>
+            ) : (
+              <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary/5 text-primary border border-primary/10">
+                <span className="text-xs font-bold uppercase tracking-wider">Practice Mode</span>
+              </div>
+            )}
           </div>
         </div>
-      )}
+        <div className="h-1.5 rounded-full bg-border overflow-hidden">
+          <div 
+            className="h-full rounded-full bg-gradient-to-r from-primary to-violet-500 transition-all duration-300"
+            style={{ width: `${((currentIndex + 1) / (examQuestions.length || 1)) * 100}%` }}
+          />
+        </div>
+      </div>
 
       {/* Question Navigation */}
       {!isPractice && (

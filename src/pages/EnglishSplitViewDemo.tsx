@@ -480,9 +480,9 @@ export function EnglishSplitViewDemo() {
         
         if (data && data.length > 0) {
            const mapped: EnglishSection[] = data.map((row: any) => ({
-             sectionId: row.sectionId || row.subtopic || 'comprehension',
-             subEngine: row.subtopic || row.sectionId || 'fiction',
-             title: row.title || `SECTION: ${String(row.sectionId || 'Paper').toUpperCase()}`,
+             sectionId: row.sectionId,
+             subEngine: row.subtopic,
+             title: row.title || `SECTION: ${row.sectionId.toUpperCase()}`,
              icon: BookOpen,
              desc: row.desc || 'Read the text carefully and answer the following questions.',
              leftTitle: row.title || 'Practice Source',
@@ -523,7 +523,6 @@ export function EnglishSplitViewDemo() {
   );
 
   const [isFinished, setIsFinished] = useState<boolean>(false);
-  const hasSavedResults = useRef(false);
   const [isReviewMode, setIsReviewMode] = useState<boolean>(false);
   const [showPaywall, setShowPaywall] = useState<boolean>(false);
   const [reviewViewedOptions, setReviewViewedOptions] = useState<Record<string, string>>({});
@@ -579,68 +578,26 @@ export function EnglishSplitViewDemo() {
     });
 
     // Group passages aggressively by core engine
-    const groups: Record<string, EnglishSection[]> = { 
-        comprehension: [], 
-        spelling: [], 
-        punctuation: [], 
-        grammar: [], 
-        vocab: [] 
-    };
-
+    const groups: Record<string, EnglishSection[]> = { comprehension: [], spag: [], vocab: [] };
     shuffled.forEach(sec => {
         const id = (sec.sectionId || "").toLowerCase();
         const sub = (sec.subEngine || "").toLowerCase();
-        
-        if (id === 'vocabulary' || sub === 'vocabulary' || id === 'vocab') {
-            groups.vocab.push(sec);
-        } else if (id === 'spelling' || sub === 'spelling') {
-            groups.spelling.push(sec);
-        } else if (id === 'punctuation' || sub === 'punctuation') {
-            groups.punctuation.push(sec);
-        } else if (id === 'grammar' || sub === 'grammar') {
-            groups.grammar.push(sec);
-        } else if (id === 'spag' || sub === 'spag') {
-            // General SPaG - distribute if needed or put in one
-            groups.spelling.push(sec); 
-        } else {
-            groups.comprehension.push(sec);
-        }
+        if (id === 'vocabulary' || sub === 'vocabulary' || id === 'vocab') groups.vocab.push(sec);
+        else if (['spelling', 'punctuation', 'grammar'].includes(sub) || ['spelling', 'punctuation', 'grammar'].includes(id) || id === 'spag') groups.spag.push(sec);
+        else groups.comprehension.push(sec);
     });
 
     let finalSections: EnglishSection[] = [];
 
     // Filter down to the user's requested topics. 
-    if (selectedTopics.includes('comprehension') && groups.comprehension.length > 0) {
-      // In mock mode, we usually want exactly 1 comprehension passage
-      finalSections.push(groups.comprehension[0]);
-    }
-    
-    if (selectedTopics.includes('spag')) {
-      // Return ALL spag sections (Spelling + Punctuation + Grammar)
-      // This will total around 15+15+15 = 45 passages if fully loaded,
-      // but user specifically asked for "the 15 that were there before"
-      // Likely they want all 15 spelling, 15 punctuation, and 15 grammar passages to be available.
-      finalSections.push(...groups.spelling);
-      finalSections.push(...groups.punctuation);
-      finalSections.push(...groups.grammar);
-    } else {
-      // Individual practice selection
-      if (selectedTopics.includes('spelling')) finalSections.push(...groups.spelling);
-      if (selectedTopics.includes('punctuation')) finalSections.push(...groups.punctuation);
-      if (selectedTopics.includes('grammar')) finalSections.push(...groups.grammar);
-    }
-    
-    if (selectedTopics.includes('vocabulary') && groups.vocab.length > 0) {
-      finalSections.push(groups.vocab[0]);
-    }
+    // They want exactly 1 passage per requested block.
+    if (selectedTopics.includes('comprehension') && groups.comprehension.length > 0) finalSections.push(groups.comprehension[0]);
+    if (selectedTopics.includes('spag') && groups.spag.length > 0) finalSections.push(groups.spag[0]);
+    if (selectedTopics.includes('vocabulary') && groups.vocab.length > 0) finalSections.push(groups.vocab[0]);
     
     // Safety fallback
     if (finalSections.length === 0) finalSections = sourceData.slice(0, 1);
 
-    // LIMITATION: If we are in MOCK mode, we probably don't want 45 passages on one screen.
-    // If user says "return the 15", maybe they mean 5 spelling + 5 punct + 5 grammar = 15?
-    // Or just all of them. Let's provide all for now.
-    
     const sorted = finalSections.map(sec => ({
       ...sec,
       questions: [...(sec.questions || [])].sort((a, b) => {
@@ -844,6 +801,8 @@ export function EnglishSplitViewDemo() {
 
   // Compute actual results upon finishing
   const results = useMemo(() => {
+    if (!isFinished) return null;
+    
     let compTotal = 0;
     let compCorrect = 0;
     let spagTotal = 0;
@@ -884,12 +843,9 @@ export function EnglishSplitViewDemo() {
   }, [isFinished, activeSections, selectedAnswers]);
 
   useEffect(() => {
-    if (isFinished && user && activeSections.length > 0 && !hasSavedResults.current) {
-      hasSavedResults.current = true;
+    if (isFinished && user && activeSections.length > 0) {
       const topicAgg: Record<string, { correct: number; total: number }> = {};
       
-      let totalCorrect = 0;
-
       activeSections.forEach(sec => {
         let topicLabel = 'Comprehension';
         const sType = (sec.sectionId + " " + (sec.subEngine || "")).toLowerCase();
@@ -906,69 +862,9 @@ export function EnglishSplitViewDemo() {
           const correctOpt = q.options.find(o => o.correct);
           if (ans && correctOpt && ans === correctOpt.id) {
             topicAgg[topicLabel].correct++;
-            totalCorrect++;
           }
         });
       });
-
-      // INCREMENT LEADERBOARD IMMEDIATELY
-      if (totalCorrect > 0) {
-        console.log('[English] Incrementing leaderboard by:', totalCorrect);
-        void supabase.rpc('increment_leaderboard_score', { p_amount: totalCorrect }).then(({ error }) => {
-          if (error) {
-            console.error('[English] Failed to increment leaderboard score:', error);
-            toast.error('Leaderboard update failed: ' + error.message);
-          } else {
-            console.log('[English] Leaderboard updated successfully');
-            toast.success(`+${totalCorrect} points added to Leaderboard!`);
-            window.dispatchEvent(new CustomEvent('mockUsageUpdated'));
-          }
-        });
-      }
-
-      // Also update the mock_attempts if this was a mock exam
-      if (examMode === 'mock' && totalCorrect >= 0) {
-        // Find the most recent in_progress mock-exam for this user
-        supabase
-          .from('mock_attempts')
-          .select('id')
-          .eq('user_id', user.id)
-          .eq('mode', 'mock-exam')
-          .in('status', ['in_progress', 'started'])
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .maybeSingle()
-          .then(({ data: attempt }) => {
-            if (attempt) {
-              supabase
-                .from('mock_attempts')
-                .update({
-                  score: totalCorrect,
-                  total_marks: results?.overallTotal || 0,
-                  status: 'completed'
-                })
-                .eq('id', attempt.id)
-                .then(({ error }) => {
-                  if (error) console.error('[English] Error updating mock attempt:', error);
-                  else {
-                    console.log('[English] Mock attempt updated to scored');
-                    window.dispatchEvent(new CustomEvent('mockUsageUpdated'));
-                  }
-                });
-            } else {
-              // Create a new one if not found (fallback)
-              supabase.from('mock_attempts').insert({
-                user_id: user.id,
-                score: totalCorrect,
-                total_marks: results?.overallTotal || 0,
-                status: 'completed',
-                mode: 'mock-exam',
-                track: '11plus',
-                title: 'English Mock Exam'
-              }).then(() => window.dispatchEvent(new CustomEvent('mockUsageUpdated')));
-            }
-          });
-      }
 
       const rowsToInsert = Object.entries(topicAgg)
         .filter(([_, data]) => data.total > 0)
@@ -981,9 +877,74 @@ export function EnglishSplitViewDemo() {
         }));
 
       if (rowsToInsert.length > 0) {
-        supabase.from('practice_results').insert(rowsToInsert).then(({ error }) => {
-          if (error) console.error("Error saving English results:", error);
-        });
+        if (examMode === 'mock') {
+          // 1. Create a mock attempt
+          // User requested using the absolute correct count as the leaderboard score
+          const totalCorrect = rowsToInsert.reduce((sum, r) => sum + r.correct, 0);
+          const totalMarks = rowsToInsert.reduce((sum, r) => sum + r.attempts, 0);
+          
+          supabase.from('mock_attempts').insert({
+            user_id: user.id,
+            track: '11plus', // Ensure it's tagged as 11+ for the leaderboard
+            mode: 'full',
+            title: `English Mock: ${activeSections.map(s => s.leftTitle).join(', ')}`,
+            total_marks: totalMarks,
+            score: totalCorrect, // Use absolute count as requested: "if i got 7/10, that 7 number should be added"
+            status: 'completed'
+          }).select().single().then(({ data: attempt, error: attemptError }) => {
+            if (attemptError) {
+              console.error("Error creating English mock attempt:", attemptError);
+              return;
+            }
+
+            // 2. Insert mock questions for record keeping and leaderboard aggregation
+            const mockQuestions = [];
+            activeSections.forEach((sec) => {
+              sec.questions.forEach((q) => {
+                const ans = selectedAnswers[`${sec.sectionId}_${q.id}`];
+                const correctOpt = q.options.find(o => o.correct);
+                const isCorrect = ans && correctOpt && ans === correctOpt.id;
+                
+                mockQuestions.push({
+                  attempt_id: attempt.id,
+                  idx: mockQuestions.length + 1,
+                  topic: sec.sectionId,
+                  subtopic: sec.subEngine || null,
+                  prompt: q.text,
+                  marks: 1,
+                  user_answer: ans || null,
+                  awarded_marks: isCorrect ? 1 : 0,
+                  correct_answer: { answer: correctOpt?.text || '' },
+                  mark_scheme: [correctOpt?.text || '']
+                });
+              });
+            });
+
+            if (mockQuestions.length > 0) {
+              supabase.from('mock_questions').insert(mockQuestions).then(({ error: qError }) => {
+                if (qError) console.error("Error saving English mock questions:", qError);
+                
+                // 3. Trigger leaderboard refresh
+                supabase.from('sprint_windows').select('id, start_at, end_at').eq('is_active', true).maybeSingle().then(({ data: sprint }) => {
+                  if (sprint) {
+                    supabase.rpc('refresh_sprint_stats', {
+                      p_sprint_id: sprint.id,
+                      p_start: sprint.start_at,
+                      p_end: sprint.end_at
+                    }).then(() => {
+                      supabase.rpc('capture_sprint_top10', { p_sprint_id: sprint.id });
+                    });
+                  }
+                });
+              });
+            }
+          });
+        } else {
+          // Normal practice session
+          supabase.from('practice_results').insert(rowsToInsert).then(({ error }) => {
+            if (error) console.error("Error saving English results:", error);
+          });
+        }
       }
     }
   }, [isFinished, user, activeSections, selectedAnswers]);
@@ -1015,15 +976,19 @@ export function EnglishSplitViewDemo() {
                   </div>
                 </div>
                 
-                <p className="text-foreground leading-relaxed mb-6 bg-background rounded-2xl p-5 border border-border/40 font-medium">
+                <p className="text-foreground leading-relaxed mb-6 bg-background rounded-2xl p-5 border border-border/40 font-medium text-center">
                   {results.overallTotal > 0 ? (
-                    results.overallPerc < 50 ? (
-                      <>Keep practicing! Review the concepts and try again. You achieved a <strong>Standardised Exam Score</strong> of <strong className={cn("text-xl font-black", results.sasColor)}>{results.overallPerc}%</strong> across this configuration.</>
-                    ) : results.overallPerc < 80 ? (
-                      <>Good effort! Solid performance, but there is still room for improvement. You achieved a <strong>Standardised Exam Score</strong> of <strong className={cn("text-xl font-black", results.sasColor)}>{results.overallPerc}%</strong> across this configuration.</>
-                    ) : (
-                      <>Excellent work! Based on standard 11+ normalisation limits, you achieved a highly competitive <strong>Standardised Exam Score</strong> of <strong className={cn("text-xl font-black", results.sasColor)}>{results.overallPerc}%</strong> across this rigorous configuration.</>
-                    )
+                    <>
+                      You got <strong className="text-amber-600 text-2xl">{results.overallCorrect}/{results.overallTotal}</strong> questions right.
+                      <br />
+                      {results.overallPerc < 50 ? (
+                        <>Keep practicing! Review the concepts and try again. You achieved a <strong>Standardised Exam Score</strong> of <strong className={cn("text-xl font-black", results.sasColor)}>{results.overallPerc}%</strong> across this configuration.</>
+                      ) : results.overallPerc < 80 ? (
+                        <>Good effort! Solid performance, but there is still room for improvement. You achieved a <strong>Standardised Exam Score</strong> of <strong className={cn("text-xl font-black", results.sasColor)}>{results.overallPerc}%</strong> across this configuration.</>
+                      ) : (
+                        <>Excellent work! Based on standard 11+ normalisation limits, you achieved a highly competitive <strong>Standardised Exam Score</strong> of <strong className={cn("text-xl font-black", results.sasColor)}>{results.overallPerc}%</strong> across this rigorous configuration.</>
+                      )}
+                    </>
                   ) : (
                     <>You did not answer any questions in this session.</>
                   )}
@@ -1062,11 +1027,11 @@ export function EnglishSplitViewDemo() {
                 <div className="absolute inset-0 bg-gradient-to-tr from-amber-500/5 to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
                 
                 <h3 className="text-2xl font-black tracking-tight mb-1 text-foreground">You scored <span className="text-amber-600 dark:text-amber-500">{results?.overallPerc || 0}%</span></h3>
-                <p className="text-sm font-semibold text-muted-foreground uppercase tracking-widest mb-6">({results?.overallCorrect || 0} out of {results?.overallTotal || 0} correct)</p>
+                <p className="text-sm font-semibold text-muted-foreground uppercase tracking-widest mb-6">({results?.overallCorrect || 0}/{results?.overallTotal || 0} right)</p>
                 
                 <div className="bg-amber-50/50 dark:bg-amber-500/5 border border-amber-500/20 rounded-2xl p-5 mb-8 text-sm text-amber-900 dark:text-amber-100/90 leading-relaxed relative isolate">
                   <div className="absolute -inset-px ring-1 ring-amber-500/10 rounded-2xl -z-10" />
-                  You are missing <strong className="font-bold text-amber-600 dark:text-amber-400">over 1500+ English questions</strong> encompassing isolated SPaG passages, Cloze structures, and rigorous full-length exams.
+                  You are missing <strong className="font-bold text-amber-600 dark:text-amber-400">over 1300+ English questions</strong> encompassing isolated SPaG passages, Cloze structures, and rigorous full-length exams.
                 </div>
                 
                 <Button onClick={() => setShowPaywall(true)} className="w-full bg-gradient-to-b from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-amber-950 font-bold shadow-xl shadow-amber-500/25 py-6 rounded-xl text-lg transition-all duration-300 hover:scale-[1.02] border border-amber-400/50">
@@ -1206,39 +1171,40 @@ export function EnglishSplitViewDemo() {
                       };
                       
                       const renderPassageBlock = (p: EnglishPassageBlock, originalIndex: number, isPaywalledBlock: boolean) => {
-                      let isTargetEvidence = false;
-                      const activeQIndex = section.questions.findIndex(q => `${section.sectionId}_${q.id}` === activeQuestionId);
-                      const activeQInfo = activeQIndex !== -1 ? section.questions[activeQIndex] : undefined;
-
-                      if (activeQInfo) {
-                        const isQuestionPaywalled = !isPremium && examMode !== 'mock' && activeQIndex >= PAYWALL_THRESHOLD;
-                        if (!isQuestionPaywalled) {
-                          const isGlobal = !activeQInfo.evidenceLine || activeQInfo.evidenceLine === 'global' || activeQInfo.evidenceLine === 'Overall' || activeQInfo.evidenceLine.toLowerCase().includes('overall');
-                          if (activeQInfo.evidenceLine === p.id || isGlobal) {
-                            isTargetEvidence = true;
+                        let isTargetEvidence = false;
+                        const activeQIndex = section.questions.findIndex(q => `${section.sectionId}_${q.id}` === activeQuestionId);
+                        const activeQInfo = activeQIndex !== -1 ? section.questions[activeQIndex] : undefined;
+                        
+                        if (activeQInfo) {
+                          const isQuestionPaywalled = !isPremium && examMode !== 'mock' && activeQIndex >= PAYWALL_THRESHOLD;
+                          if (!isQuestionPaywalled) {
+                            const isGlobal = !activeQInfo.evidenceLine || activeQInfo.evidenceLine === 'global' || activeQInfo.evidenceLine === 'Overall' || activeQInfo.evidenceLine.toLowerCase().includes('overall');
+                            if (activeQInfo.evidenceLine === p.id || isGlobal) {
+                              isTargetEvidence = true;
+                            }
                           }
                         }
-                      }
 
-                      const showScaffold = isTargetEvidence && !isPaywalledBlock;
-                      const uniqueRefKey = `${section.sectionId}_${p.id}`;
+                        const showScaffold = isTargetEvidence && !isPaywalledBlock;
+                        const uniqueRefKey = `${section.sectionId}_${p.id}`;
 
-                      return (
-                        <div key={p.id} className="relative group scroll-m-[160px]" ref={(el) => { passageLineRefs.current[uniqueRefKey] = el; }}>
-                          {p.text.match(/^\d+/) && (
-                            <div className="absolute -left-10 top-1.5 text-xs text-amber-500/80 font-black select-none pointer-events-none w-8 text-right opacity-0 group-hover:opacity-100 transition-opacity">
-                              ♦
-                            </div>
-                          )}
-                          <p 
-                            className={cn(
-                              "transition-all duration-200 ease-out p-3 sm:p-4 -mx-2 sm:-mx-4 rounded-xl relative border-l-[3px] text-sm sm:text-base",
-                              showScaffold 
-                                ? "bg-amber-50/90 dark:bg-amber-500/10 border-amber-500 shadow-md ring-1 ring-amber-500/30 text-foreground z-10 scale-[1.02]" 
-                                : "border-transparent opacity-75 group-hover:opacity-100 hover:bg-black/5 dark:hover:bg-white/5",
-                              isPaywalledBlock && "blur-[3px] opacity-40 select-none pointer-events-none scale-[0.98]"
+                        return (
+                          <div key={p.id} className="relative group scroll-m-[160px]" ref={(el) => { passageLineRefs.current[uniqueRefKey] = el; }}>
+                            {p.text.match(/^\d+/) && (
+                              <div className="absolute -left-10 top-1.5 text-xs text-amber-500/80 font-black select-none pointer-events-none w-8 text-right opacity-0 group-hover:opacity-100 transition-opacity">
+                                ♦
+                              </div>
                             )}
-                          >                              {showScaffold && (
+                            <p 
+                              className={cn(
+                                "transition-all duration-200 ease-out p-4 -mx-4 rounded-xl relative border-l-[3px]",
+                                showScaffold 
+                                  ? "bg-amber-50/90 dark:bg-amber-500/10 border-amber-500 shadow-md ring-1 ring-amber-500/30 text-foreground z-10 scale-[1.02]" 
+                                  : "border-transparent opacity-75 group-hover:opacity-100 hover:bg-black/5 dark:hover:bg-white/5",
+                                isPaywalledBlock && "blur-[3px] opacity-40 select-none pointer-events-none scale-[0.98]"
+                              )}
+                            >
+                              {showScaffold && (
                                 <div className="absolute -left-1.5 flex items-center justify-center h-full top-0">
                                   <div className="h-2/3 w-[5px] bg-amber-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(245,158,11,0.5)]" />
                                 </div>
@@ -1403,9 +1369,9 @@ export function EnglishSplitViewDemo() {
                               ref={(el) => { questionRefs.current[qKey] = el; }}
                               onClick={() => { if (isPaywalledQuestion) setShowPaywall(true); }}
                               className={cn(
-                                "p-3 sm:p-6 rounded-2xl border transition-all duration-150 ease-out cursor-default scroll-m-24 relative snap-center",
+                                "p-4 sm:p-6 rounded-2xl border transition-all duration-150 ease-out cursor-default scroll-m-24 relative snap-center",
                                 isSelected 
-                                  ? (examMode === 'mock' ? "border-amber-500/30 dark:border-amber-500/40 bg-card shadow-lg ring-1 ring-amber-500/10 scale-[1.01]" : "border-amber-500/50 bg-card shadow-xl ring-4 ring-amber-500/10 scale-[1.01]")
+                                  ? (examMode === 'mock' ? "border-amber-500/30 dark:border-amber-500/40 bg-card shadow-lg ring-1 ring-amber-500/10 scale-[1.02]" : "border-amber-500/50 bg-card shadow-xl ring-4 ring-amber-500/10 scale-[1.02]")
                                   : "border-border/60 dark:border-amber-500/20 bg-card/40 hover:bg-card/80 hover:border-amber-500/30 opacity-60 hover:opacity-100",
                                 isPaywalledQuestion && "blur-[2px] opacity-40 select-none pointer-events-none scale-[0.98]"
                               )}
@@ -1419,19 +1385,19 @@ export function EnglishSplitViewDemo() {
                               </button>
                             )}
 
-                            <div className="flex items-center justify-between mb-3 sm:mb-4">
-                              <span className="text-[10px] sm:text-xs font-black tracking-widest uppercase text-muted-foreground flex items-center gap-2">
+                            <div className="flex items-center justify-between mb-4">
+                              <span className="text-xs font-black tracking-widest uppercase text-muted-foreground flex items-center gap-2">
                                 {examMode === 'mock' ? `Q${originalIndex + 1}` : `Question ${originalIndex + 1}`}
                               </span>
                               <div className={cn(
-                                "px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-bold uppercase tracking-wide border", 
+                                "px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide border", 
                                 q.tagColor || "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20"
                               )}>
                                 {q.tag}
                               </div>
                             </div>
                             
-                            <h3 className="text-[13px] sm:text-[15px] font-semibold leading-relaxed mb-3 sm:mb-6">
+                            <h3 className="text-sm sm:text-[15px] font-semibold leading-relaxed mb-4 sm:mb-6">
                               {q.text}
                             </h3>
 
@@ -1458,7 +1424,7 @@ export function EnglishSplitViewDemo() {
                                         handleSelectAnswer(qKey, opt.id);
                                       }}
                                       className={cn(
-                                        "w-full text-left p-2 sm:p-4 rounded-xl border transition-all duration-200 flex items-center gap-2.5 sm:gap-4 group",
+                                        "w-full text-left p-3 sm:p-4 rounded-xl border transition-all duration-200 flex items-center gap-3 sm:gap-4 group",
                                         selected 
                                           ? ((examMode === 'mock' && !isReviewMode)
                                               ? "border-amber-500 bg-amber-500/5 text-amber-900 dark:text-amber-100 ring-2 ring-amber-500/20" 
@@ -1471,7 +1437,7 @@ export function EnglishSplitViewDemo() {
                                       )}
                                     >
                                       <span className={cn(
-                                        "w-6 h-6 sm:w-8 sm:h-8 shrink-0 rounded-lg flex items-center justify-center text-[10px] sm:text-xs font-bold transition-colors shadow-sm",
+                                        "w-7 h-7 sm:w-8 sm:h-8 shrink-0 rounded-lg flex items-center justify-center text-xs font-bold transition-colors shadow-sm",
                                         selected
                                           ? ((examMode === 'mock' && !isReviewMode) ? "bg-amber-500 text-white shadow-md shadow-amber-500/30" : (opt.correct ? "bg-emerald-500 text-white shadow-md shadow-emerald-500/20" : "bg-rose-500 text-white shadow-md shadow-rose-500/20"))
                                           : (isReviewMode && opt.correct
@@ -1480,7 +1446,7 @@ export function EnglishSplitViewDemo() {
                                       )}>
                                         {opt.id}
                                       </span>
-                                      <span className="flex-1 text-[13px] sm:text-[15px] font-medium leading-normal">
+                                      <span className="flex-1 text-sm sm:text-[15px] font-medium leading-normal">
                                         {opt.text}
                                       </span>
                                       {selected && examMode === 'mock' && <Check className="w-4 h-4 sm:w-5 sm:h-5 shrink-0 text-amber-500 font-bold" />}
@@ -1571,34 +1537,9 @@ export function EnglishSplitViewDemo() {
               <div className="pt-10 border-t border-border/40 mt-12 mb-12 flex justify-end snap-end scroll-m-8">
                 <Button 
                   onClick={() => {
-                    if (isReviewMode) {
-                      setIsFinished(true);
-                      return;
-                    }
-                    if (examMode === 'practice') {
-                      navigate('/mocks/english');
-                      return;
-                    }
-                    
-                    // MOCK SUBMIT - Calculate score immediately
-                    if (results && !hasSavedResults.current) {
-                      const amount = results.overallCorrect;
-                      console.log('Incrementing leaderboard by:', amount);
-                      if (amount > 0) {
-                        void supabase.rpc('increment_leaderboard_score', { p_amount: amount }).then(({ error }) => {
-                          if (error) {
-                            console.error('Failed to increment leaderboard score:', error);
-                            toast.error('Leaderboard update failed: ' + error.message);
-                          } else {
-                            console.log('Leaderboard updated successfully');
-                            toast.success(`+${amount} points added to Leaderboard!`);
-                            window.dispatchEvent(new CustomEvent('mockUsageUpdated')); // Force UI refresh
-                          }
-                        });
-                      }
-                    }
-                    
-                    setIsFinished(true);
+                    if (isReviewMode) setIsFinished(true); // Return to Results
+                    else if (examMode === 'practice') navigate('/mocks/english'); 
+                    else setIsFinished(true);
                   }} 
                   className="bg-amber-500 hover:bg-amber-600 text-amber-950 font-bold px-8 h-12 rounded-xl text-md shadow-[0_0_20px_rgba(245,158,11,0.3)]">
                   {isReviewMode ? 'Return to Results' : (examMode === 'practice' ? 'Finish' : 'Submit Mock Exam')}
