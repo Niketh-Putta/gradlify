@@ -1400,10 +1400,12 @@ const questionCalculatorLabel = (() => {
               {isPractice ? <ArrowLeft className="w-4 h-4" /> : <X className="w-4 h-4" />}
               <span className="text-sm font-medium">{isPractice ? "Back" : "Exit"}</span>
             </button>
-            <div className="flex items-center gap-1.5">
-              <span className="text-base font-semibold text-foreground">{currentIndex + 1}</span>
-              <span className="text-sm text-muted-foreground">of {examQuestions.length}</span>
-            </div>
+            {!isPractice && (
+              <div className="flex items-center gap-1.5">
+                <span className="text-base font-semibold text-foreground">{currentIndex + 1}</span>
+                <span className="text-sm text-muted-foreground">of {examQuestions.length}</span>
+              </div>
+            )}
           </div>
           <div className="flex items-center gap-2">
             {!isPractice ? (
@@ -1423,18 +1425,20 @@ const questionCalculatorLabel = (() => {
                 </div>
               </>
             ) : (
-              <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary/5 text-primary border border-primary/10">
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary/5 text-primary border border-primary/10">
                 <span className="text-xs font-bold uppercase tracking-wider">Practice Mode</span>
               </div>
             )}
           </div>
         </div>
-        <div className="h-1.5 rounded-full bg-border overflow-hidden">
-          <div 
-            className="h-full rounded-full bg-gradient-to-r from-primary to-violet-500 transition-all duration-300"
-            style={{ width: `${((currentIndex + 1) / (examQuestions.length || 1)) * 100}%` }}
-          />
-        </div>
+        {!isPractice && (
+          <div className="h-1.5 rounded-full bg-border overflow-hidden">
+            <div 
+              className="h-full rounded-full bg-gradient-to-r from-primary to-violet-500 transition-all duration-300"
+              style={{ width: `${((currentIndex + 1) / (examQuestions.length || 1)) * 100}%` }}
+            />
+          </div>
+        )}
       </div>
 
       {/* Question Navigation */}
@@ -1475,7 +1479,7 @@ const questionCalculatorLabel = (() => {
           <div className="p-4 sm:p-6">
             <div className="flex flex-wrap items-center justify-between gap-y-2 mb-4">
               <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-                <span className="text-xs sm:text-sm font-semibold text-foreground">Question {currentIndex + 1}</span>
+                <span className="text-xs sm:text-sm font-semibold text-foreground">Question</span>
                 <span className="w-1 h-1 rounded-full bg-muted-foreground"></span>
                 <span className={cn("inline-flex items-center rounded-full border px-1.5 py-0.5 text-[9px] sm:text-xs font-semibold", currentSubject === 'english' ? "border-amber-500/20 bg-amber-500/10 text-amber-500" : "border-primary/20 bg-primary/10 text-primary")}>
                   {currentQuestion ? getQuestionMarks(currentQuestion) : 1} mark{currentQuestion && getQuestionMarks(currentQuestion) === 1 ? "" : "s"}
@@ -1527,7 +1531,7 @@ const questionCalculatorLabel = (() => {
               <div className="mb-5 rounded-xl border border-border/70 bg-muted/30 p-4">
                 <div className="flex items-center justify-between text-xs uppercase tracking-wide text-muted-foreground font-semibold mb-2">
                   <span>{currentPartLabel}</span>
-                  <span>{currentPartIndex + 1}/{currentQuestion.multipart?.parts.length}</span>
+                  {!isPractice && <span>{currentPartIndex + 1}/{currentQuestion.multipart?.parts.length}</span>}
                 </div>
                 <div className="text-sm sm:text-base text-foreground">
                   <RichQuestionContent text={currentPart.prompt} className="space-y-2" />
@@ -1633,11 +1637,15 @@ const questionCalculatorLabel = (() => {
                 setQuestionPartIndex(currentQuestion.id, currentPartIndex + 1);
                 return;
               }
+              if (isPractice) {
+                navigate('/mocks');
+                return;
+              }
               handleSubmit();
             }}
             className="ripple flex-1 py-3 btn-exam-primary rounded-xl font-semibold text-sm flex items-center justify-center gap-2"
           >
-            {hasMoreParts ? "Next Part" : "Submit Exam"}
+            {hasMoreParts ? "Next Part" : isPractice ? "Finish Practice" : "Submit Exam"}
           </button>
         ) : (
           <button 
