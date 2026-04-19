@@ -899,7 +899,8 @@ export default function MockExamPage() {
           duration_minutes: durationMinutes,
           total_marks: examQuestions.length,
           score: finalScoreForLeaderboard,
-          status: 'completed' // Set to completed so it counts immediately and matches DB constraints        }).select().single();
+          status: 'completed' // Set to completed so it counts immediately and matches DB constraints
+        }).select().single();
         if (attemptError) throw attemptError;
 
         if (attempt) {
