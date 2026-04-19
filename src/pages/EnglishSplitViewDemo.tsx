@@ -479,18 +479,43 @@ export function EnglishSplitViewDemo() {
         if (error) throw error;
         
         if (data && data.length > 0) {
-           const mapped: EnglishSection[] = data.map((row: any) => ({
-             sectionId: row.sectionId,
-             subEngine: row.subtopic,
-             title: row.title || `SECTION: ${row.sectionId.toUpperCase()}`,
-             icon: BookOpen,
-             desc: row.desc || 'Read the text carefully and answer the following questions.',
-             leftTitle: row.title || 'Practice Source',
-             tier: row.tier || 'Level Unknown',
-             difficulty: row.difficulty,
-             passageBlocks: row.passageBlocks || [],
-             questions: row.questions || []
-           }));
+           const mapped: EnglishSection[] = data.map((row: any) => {
+             const sId = (row.sectionId || "").toLowerCase();
+             const sub = (row.subtopic || "").toLowerCase();
+             
+             let title = row.title || 'SECTION';
+             let icon = BookOpen;
+             
+             if (sId === 'spag' || sub === 'spelling' || sub === 'punctuation' || sub === 'grammar') {
+                if (sub === 'spelling') { title = 'SECTION B: SPELLING EXERCISES'; icon = SpellCheck; }
+                else if (sub === 'punctuation') { title = 'SECTION C: PUNCTUATION EXERCISES'; icon = TextCursorInput; }
+                else if (sub === 'grammar') { title = 'SECTION D: GRAMMAR CLOZE'; icon = Type; }
+             } else if (sId === 'vocab' || sub === 'vocabulary') {
+                title = 'SECTION E: VOCABULARY SYNONYMS';
+                icon = Languages;
+             } else {
+                title = 'SECTION A: READING COMPREHENSION';
+                icon = BookOpen;
+             }
+
+             return {
+               sectionId: row.sectionId,
+               subEngine: row.subtopic,
+               title: title,
+               icon: icon,
+               desc: row.desc || (
+                 sub === 'spelling' ? 'In these sentences there are some spelling mistakes. Find the group of words with the mistake. If there is no mistake, mark N.' :
+                 sub === 'punctuation' ? 'In this passage there are some punctuation mistakes. Find the group of words with the mistake in it. If there is no mistake, mark N.' :
+                 sub === 'grammar' ? 'Choose the best word to complete each numbered gap so it makes grammatical sense.' :
+                 row.desc || 'Read the text carefully and answer the following questions.'
+               ),
+               leftTitle: row.title || 'Practice Source',
+               tier: row.tier || 'Level Unknown',
+               difficulty: row.difficulty,
+               passageBlocks: row.passageBlocks || [],
+               questions: row.questions || []
+             };
+           });
            setDbSections(mapped);
         }
       } catch (e) {
@@ -559,24 +584,31 @@ export function EnglishSplitViewDemo() {
   const questionRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const lastEvidenceRefKey = useRef<string | null>(null);
 
+  const shuffledRef = useRef<EnglishSection[] | null>(null);
+
   // 1. FILTERING LOGIC
   const activeSections = useMemo(() => {
-    // Only use TEST_DATA and VOCAB_PRACTICE to maintain the previous style and prevent flipping
-    const sourceData = [...TEST_DATA, VOCAB_PRACTICE];
+    // Only use DB data if available, otherwise use TEST_DATA as a silent fallback
+    const sourceData = dbSections.length > 0 ? dbSections : [...TEST_DATA, VOCAB_PRACTICE];
     
-    // Intelligent exhaustion system:
-    let seenPassages: string[] = [];
-    try { seenPassages = JSON.parse(localStorage.getItem('seen_english_passages') || '[]'); } catch(e) { /* intentionally left empty */ }
-    
-    // Forcefully randomize everything to prevent deterministic cycles
-    const shuffled = [...sourceData].sort(() => Math.random() - 0.5);
-    
-    // Bubble up entirely unseen passages to the exact top!
-    shuffled.sort((a, b) => {
-        const aSeen = seenPassages.includes(a.sectionId) ? 1 : 0;
-        const bSeen = seenPassages.includes(b.sectionId) ? 1 : 0;
-        return aSeen - bSeen;
-    });
+    // Lock the shuffled order so it never jumps around during the session
+    if (!shuffledRef.current || (dbSections.length > 0 && shuffledRef.current.length <= TEST_DATA.length)) {
+      // Intelligent exhaustion system:
+      let seenPassages: string[] = [];
+      try { seenPassages = JSON.parse(localStorage.getItem('seen_english_passages') || '[]'); } catch(e) { /* intentionally left empty */ }
+      
+      const shuffled = [...sourceData].sort(() => Math.random() - 0.5);
+      
+      // Bubble up entirely unseen passages to the exact top!
+      shuffled.sort((a, b) => {
+          const aSeen = seenPassages.includes(a.sectionId) ? 1 : 0;
+          const bSeen = seenPassages.includes(b.sectionId) ? 1 : 0;
+          return aSeen - bSeen;
+      });
+      shuffledRef.current = shuffled;
+    }
+
+    const shuffled = shuffledRef.current;
 
     // Group passages aggressively by core engine
     const groups: Record<string, EnglishSection[]> = { comprehension: [], spag: [], vocab: [] };
@@ -591,13 +623,18 @@ export function EnglishSplitViewDemo() {
     let finalSections: EnglishSection[] = [];
 
     // Filter down to the user's requested topics. 
-    // They want exactly 1 passage per requested block.
     if (selectedTopics.includes('comprehension') && groups.comprehension.length > 0) finalSections.push(groups.comprehension[0]);
     
-    // User requested longer SPaG (10 questions instead of 5). 
-    // Since each section has 5, we take 2 sections if available.
+    // Restore 10 questions: 
+    // If the data source has 10 questions (DB), take 1 section.
+    // If it only has 5 (TEST_DATA), take 2 sections to reach 10.
     if (selectedTopics.includes('spag') && groups.spag.length > 0) {
-        finalSections.push(...groups.spag.slice(0, 2));
+        const firstSec = groups.spag[0];
+        if (firstSec.questions && firstSec.questions.length >= 10) {
+            finalSections.push(firstSec);
+        } else {
+            finalSections.push(...groups.spag.slice(0, 2));
+        }
     }
     
     if (selectedTopics.includes('vocabulary') && groups.vocab.length > 0) finalSections.push(groups.vocab[0]);
@@ -612,14 +649,14 @@ export function EnglishSplitViewDemo() {
         const bGlobal = b.evidenceLine === 'global' || b.evidenceLine === 'Overall' || b.evidenceLine?.toLowerCase().includes('overall');
         if (aGlobal && !bGlobal) return 1;
         if (!aGlobal && bGlobal) return -1;
-        const aNum = parseInt(a.evidenceLine.match(/\d+/)?.[0] || '0', 10);
-        const bNum = parseInt(b.evidenceLine.match(/\d+/)?.[0] || '0', 10);
+        const aNum = parseInt(a.evidenceLine?.match(/\d+/)?.[0] || '0', 10);
+        const bNum = parseInt(b.evidenceLine?.match(/\d+/)?.[0] || '0', 10);
         return aNum - bNum;
       })
     }));
 
     return sorted;
-  }, [examMode, selectedTopics, isPremium]);
+  }, [examMode, selectedTopics, isPremium, dbSections]);
 
   // Securely update the historic ledger of what texts have been seen
   useEffect(() => {
