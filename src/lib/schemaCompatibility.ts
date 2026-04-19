@@ -78,13 +78,25 @@ const missingProfileColumns = readStoredMissingProfileColumns();
 let leaderboardRpcMissing = readStoredMissingLeaderboardRpc();
 
 export const getMissingColumnFromError = (error: unknown): string | null => {
-  const message = (error as { message?: string })?.message ?? "";
-  const quotedMatch = message.match(/column ["']?([a-zA-Z0-9_]+)["']? does not exist/i);
+  const err = (error ?? {}) as { message?: string; details?: string; hint?: string; code?: string };
+  const message = err.message ?? "";
+  const details = err.details ?? "";
+  const code = err.code ?? "";
+  
+  const combined = `${message} ${details} ${code}`;
+
+  // Standard Postgres error messages
+  // Captures "column profiles.daily_maths_mock_uses does not exist" -> captures "daily_maths_mock_uses"
+  const quotedMatch = combined.match(/column ["']?(?:[a-zA-Z0-9_]+\.)?([a-zA-Z0-9_]+)["']? does not exist/i);
   if (quotedMatch?.[1]) return quotedMatch[1];
-  const plainMatch = message.match(/column ([a-zA-Z0-9_]+) does not exist/i);
-  if (plainMatch?.[1]) return plainMatch[1];
+  
+  // Postgrest schema cache error: "Could not find the 'column_name' column of 'table_name' in the schema cache"
+  const schemaCacheMatch = combined.match(/Could not find the ['"]?([a-zA-Z0-9_]+)['"]? column/i);
+  if (schemaCacheMatch?.[1]) return schemaCacheMatch[1];
+
   // Postgrest / Postgres "undefined_column" error code 42703
-  const undefinedColumnMatch = message.match(/undefined_column.*column ["']?([a-zA-Z0-9_]+)["']?/i);
+  // Also handles table-prefixed columns in the error string
+  const undefinedColumnMatch = combined.match(/undefined_column.*column ["']?(?:[a-zA-Z0-9_]+\.)?([a-zA-Z0-9_]+)["']?/i);
   return undefinedColumnMatch?.[1] ?? null;
 };
 

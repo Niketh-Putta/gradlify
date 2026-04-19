@@ -554,15 +554,12 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
                   ))}
                 </div>
               </div>
-            )}
-          </section>
+              )}
 
-          <section>
-            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between mb-4">
               <h2 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Topics</h2>
               <button onClick={toggleAllTopics} className={cn("text-[10px] font-bold hover:underline", currentSubject === 'english' ? "text-amber-600" : "text-primary")}>{selectedTopics.length === availableSections.length ? 'Deselect all' : 'Select all'}</button>
-            </div>
-
+              </div>
             {currentSubject === 'english' && (
               <div className="mb-6 p-4 rounded-2xl bg-amber-500/5 border border-amber-500/20 flex items-start gap-3">
                 <Sparkles className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
@@ -707,7 +704,6 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
               </div>
             </div>
             )}
-          </section>
         </div>
 
         <Dialog open={showMockDialog} onOpenChange={setShowMockDialog}>
@@ -825,5 +821,6 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
           description="Upgrade to unlock unlimited mock exams, full question sets, and advanced analytics." 
         />
       </div>
+    </div>
   );
 }

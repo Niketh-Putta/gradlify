@@ -161,7 +161,7 @@ export default function MockExamPage() {
   const context = useAppContext();
   const userTrack = resolveUserTrack(context.profile?.track ?? null);
   const user = context?.user || null;
-  const { canStartMockExam, refreshUsage } = usePremium();
+  const { canStartMockExam, refreshUsage, isLoading: isUsageLoading } = usePremium();
   const { currentSubject } = useSubject();
   
   // Extract exam parameters from URL
@@ -267,6 +267,8 @@ export default function MockExamPage() {
         difficultyMaxParam,
       ].join('|');
       console.log("[MockExamPage] fetchQuestions starting", { loadKey, isUsageLoading, canStartMockExam, userTrack });
+      if (isUsageLoading) return;
+      
       if (loadKeyRef.current === loadKey) {
         setLoading(false);
         return;
