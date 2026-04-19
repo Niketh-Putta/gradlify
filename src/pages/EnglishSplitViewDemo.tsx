@@ -561,19 +561,13 @@ export function EnglishSplitViewDemo() {
 
   // 1. FILTERING LOGIC
   const activeSections = useMemo(() => {
-    // DO NOT show test data if we are waiting for DB. 
-    // This prevents the "flip" the user sees (seeing TEST_DATA for 2s then flipping to DB data)
-    if (isLoadingDb) return [];
-    
-    const sourceData = dbSections.length > 0 ? dbSections : [];
-    if (sourceData.length === 0) return [];
+    const sourceData = dbSections.length > 0 ? dbSections : [...TEST_DATA, VOCAB_PRACTICE];
     
     // Intelligent exhaustion system:
     let seenPassages: string[] = [];
     try { seenPassages = JSON.parse(localStorage.getItem('seen_english_passages') || '[]'); } catch(e) { /* intentionally left empty */ }
     
     // Forcefully randomize everything to prevent deterministic cycles
-    // Note: Since this is in useMemo, it only randomizes once when dbSections changes.
     const shuffled = [...sourceData].sort(() => Math.random() - 0.5);
     
     // Bubble up entirely unseen passages to the exact top!
@@ -601,10 +595,8 @@ export function EnglishSplitViewDemo() {
     if (selectedTopics.includes('spag') && groups.spag.length > 0) finalSections.push(groups.spag[0]);
     if (selectedTopics.includes('vocabulary') && groups.vocab.length > 0) finalSections.push(groups.vocab[0]);
     
-    // Safety fallback if requested topics yielded nothing but we have data
-    if (finalSections.length === 0 && sourceData.length > 0) {
-        finalSections = [sourceData[0]];
-    }
+    // Safety fallback
+    if (finalSections.length === 0) finalSections = sourceData.slice(0, 1);
 
     const sorted = finalSections.map(sec => ({
       ...sec,
@@ -613,24 +605,14 @@ export function EnglishSplitViewDemo() {
         const bGlobal = b.evidenceLine === 'global' || b.evidenceLine === 'Overall' || b.evidenceLine?.toLowerCase().includes('overall');
         if (aGlobal && !bGlobal) return 1;
         if (!aGlobal && bGlobal) return -1;
-        const aNum = parseInt(a.evidenceLine?.match(/\d+/)?.[0] || '0', 10);
-        const bNum = parseInt(b.evidenceLine?.match(/\d+/)?.[0] || '0', 10);
+        const aNum = parseInt(a.evidenceLine.match(/\d+/)?.[0] || '0', 10);
+        const bNum = parseInt(b.evidenceLine.match(/\d+/)?.[0] || '0', 10);
         return aNum - bNum;
       })
     }));
 
     return sorted;
-  }, [selectedTopics, dbSections, isLoadingDb]);
-
-  // Loading Screen for Database Sync
-  if (isLoadingDb) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-background gap-4">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-500"></div>
-        <p className="text-amber-600 font-bold animate-pulse">Syncing Official GL Question Bank...</p>
-      </div>
-    );
-  }
+  }, [examMode, selectedTopics, isPremium, dbSections]);
 
   // Securely update the historic ledger of what texts have been seen
   useEffect(() => {

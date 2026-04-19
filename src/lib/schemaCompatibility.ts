@@ -82,7 +82,10 @@ export const getMissingColumnFromError = (error: unknown): string | null => {
   const quotedMatch = message.match(/column ["']?([a-zA-Z0-9_]+)["']? does not exist/i);
   if (quotedMatch?.[1]) return quotedMatch[1];
   const plainMatch = message.match(/column ([a-zA-Z0-9_]+) does not exist/i);
-  return plainMatch?.[1] ?? null;
+  if (plainMatch?.[1]) return plainMatch[1];
+  // Postgrest / Postgres "undefined_column" error code 42703
+  const undefinedColumnMatch = message.match(/undefined_column.*column ["']?([a-zA-Z0-9_]+)["']?/i);
+  return undefinedColumnMatch?.[1] ?? null;
 };
 
 export const isFunctionMissingError = (error: unknown) => {
