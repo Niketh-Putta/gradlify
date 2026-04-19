@@ -291,7 +291,7 @@ export default function MockExamPage() {
           return;
         }
 
-        if (!canStartMockExam) {
+        if (!isPractice && !canStartMockExam) {
           toast.error("Daily mock exam limit reached.");
           setLoading(false);
           navigate('/mocks');
