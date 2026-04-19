@@ -161,7 +161,7 @@ export default function MockExamPage() {
   const context = useAppContext();
   const userTrack = resolveUserTrack(context.profile?.track ?? null);
   const user = context?.user || null;
-  const { canStartMockExam, refreshUsage } = usePremium();
+  const { canStartMockExam, refreshUsage, isLoading: isUsageLoading } = usePremium();
   const { currentSubject } = useSubject();
   
   // Extract exam parameters from URL
@@ -270,6 +270,7 @@ export default function MockExamPage() {
         setLoading(false);
         return;
       }
+      if (isUsageLoading) return;
       if (isLoadingRef.current) return;
 
       try {
@@ -288,7 +289,20 @@ export default function MockExamPage() {
           return;
         }
 
-        if (!canStartMockExam) {
+        const startOfDay = new Date();
+        startOfDay.setHours(0, 0, 0, 0);
+        const { data: existingAttempt } = await supabase
+          .from('mock_attempts')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('mode', mode)
+          .in('status', ['started', 'in_progress'])
+          .gte('created_at', startOfDay.toISOString())
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (!canStartMockExam && !existingAttempt) {
           toast.error("Daily mock exam limit reached.");
           setLoading(false);
           navigate('/mocks');
@@ -765,7 +779,7 @@ export default function MockExamPage() {
     };
 
     fetchQuestions();
-  }, [tier, paperType, topics, questionsCount, subtopicParam, difficultyMinParam, difficultyMaxParam, canStartMockExam, navigate, refreshUsage]);
+  }, [tier, paperType, topics, questionsCount, subtopicParam, difficultyMinParam, difficultyMaxParam, canStartMockExam, isUsageLoading, navigate, refreshUsage]);
 
   const formatTime = (seconds: number) => {
     const totalSeconds = Math.max(0, Math.floor(seconds));
@@ -878,7 +892,7 @@ export default function MockExamPage() {
           .select('id')
           .eq('user_id', user.id)
           .eq('mode', mode)
-          .eq('status', 'started')
+          .in('status', ['started', 'in_progress', 'scored'])
           .gte('created_at', startOfDay.toISOString())
           .order('created_at', { ascending: false })
           .limit(1)
@@ -893,7 +907,7 @@ export default function MockExamPage() {
               duration_minutes: durationMinutes,
               total_marks: totalMarksForAttempt,
               score: earnedMarksForAttempt,
-              status: 'completed'
+              status: 'scored'
             })
             .eq('id', existingAttempt.id)
             .select()
@@ -909,7 +923,7 @@ export default function MockExamPage() {
             duration_minutes: durationMinutes,
             total_marks: totalMarksForAttempt,
             score: earnedMarksForAttempt,
-            status: 'completed'
+            status: 'scored'
           }).select().single();
           attempt = data;
         }

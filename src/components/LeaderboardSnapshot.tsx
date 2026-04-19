@@ -40,11 +40,6 @@ export function LeaderboardSnapshot() {
       }, 2000);
     };
 
-    const practiceChannel = supabase
-      .channel('practice_snapshot_changes')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'practice_results' }, handleRealtimeUpdate)
-      .subscribe();
-
     const mockChannel = supabase
       .channel('mock_snapshot_changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'mock_attempts' }, handleRealtimeUpdate)
@@ -55,17 +50,10 @@ export function LeaderboardSnapshot() {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'mock_questions' }, handleRealtimeUpdate)
       .subscribe();
 
-    const challengeChannel = supabase
-      .channel('challenge_snapshot_changes')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'extreme_results' }, handleRealtimeUpdate)
-      .subscribe();
-
     return () => {
       clearTimeout(debounceTimer);
-      supabase.removeChannel(practiceChannel);
       supabase.removeChannel(mockChannel);
       supabase.removeChannel(mockQuestionsChannel);
-      supabase.removeChannel(challengeChannel);
     };
   }, []);
 

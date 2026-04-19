@@ -114,7 +114,7 @@ const normalizeLeaderboardData = (rows: unknown): LeaderboardEntry[] => {
   });
 };
 
-// Leaderboard functions - uses correct answers from all sources (practice, mocks, extreme)
+// Leaderboard functions - uses persistent leaderboard_score updated only by mocks
 export async function getLeaderboard(
   period: 'day' | 'week' | 'month',
   scope: 'global' | 'friends',
@@ -123,65 +123,18 @@ export async function getLeaderboard(
   const rpcName = scope === 'global' ? 'get_leaderboard_correct_global' : 'get_leaderboard_correct_friends';
   const resolvedTrack = track ?? await getUserTrack();
 
-  const attempts = [
-    { p_period: period },
-  ] as const;
-
-  let data: LeaderboardEntry[] | null = null;
-  let error: unknown = null;
-  if (!isLeaderboardRpcKnownMissing()) {
-    for (const params of attempts) {
-      const result = await supabase.rpc(rpcName, params) as {
-        data: LeaderboardEntry[] | null;
-        error: unknown;
-      };
-      data = normalizeLeaderboardData(result.data);
-      error = result.error;
-      if (!error) {
-        clearLeaderboardRpcMissing();
-        break;
-      }
-    }
-  } else {
-    const legacy = await supabase.rpc('get_leaderboard', {
-      p_period: period,
-      p_scope: scope,
-    }) as { data: LeaderboardEntry[] | null; error: unknown };
-    data = normalizeLeaderboardData(legacy.data);
-    error = legacy.error;
-    if (!legacy.error) {
-      clearLeaderboardRpcMissing();
-    }
-  }
+  const { data, error } = await supabase.rpc(rpcName, { p_period: period }) as {
+    data: LeaderboardEntry[] | null;
+    error: unknown;
+  };
 
   if (error) {
-    if (isAbortLikeError(error)) {
-      return [];
-    }
-    if (isFunctionMissingError(error)) {
-      markLeaderboardRpcMissing();
-      const legacy = await supabase.rpc('get_leaderboard', {
-        p_period: period,
-        p_scope: scope,
-      }) as { data: LeaderboardEntry[] | null; error: unknown };
-      if (!legacy.error) {
-        data = normalizeLeaderboardData(legacy.data);
-        error = null;
-        clearLeaderboardRpcMissing();
-      } else if (!isFunctionMissingError(legacy.error)) {
-        console.error('Error fetching legacy leaderboard:', legacy.error);
-        throw legacy.error;
-      } else {
-        return [];
-      }
-    }
-    if (error) {
-      console.error('Error fetching leaderboard:', error);
-      throw error;
-    }
+    if (isAbortLikeError(error)) return [];
+    console.error('Error fetching leaderboard:', error);
+    throw error;
   }
 
-  const entries = data || [];
+  const entries = normalizeLeaderboardData(data) || [];
   return rankLeaderboardEntries(entries);
 }
 

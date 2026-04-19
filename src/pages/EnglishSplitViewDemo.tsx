@@ -523,6 +523,7 @@ export function EnglishSplitViewDemo() {
   );
 
   const [isFinished, setIsFinished] = useState<boolean>(false);
+  const hasSavedResults = useRef(false);
   const [isReviewMode, setIsReviewMode] = useState<boolean>(false);
   const [showPaywall, setShowPaywall] = useState<boolean>(false);
   const [reviewViewedOptions, setReviewViewedOptions] = useState<Record<string, string>>({});
@@ -843,7 +844,8 @@ export function EnglishSplitViewDemo() {
   }, [isFinished, activeSections, selectedAnswers]);
 
   useEffect(() => {
-    if (isFinished && user && activeSections.length > 0) {
+    if (isFinished && user && activeSections.length > 0 && !hasSavedResults.current) {
+      hasSavedResults.current = true;
       const topicAgg: Record<string, { correct: number; total: number }> = {};
       
       activeSections.forEach(sec => {
@@ -880,9 +882,42 @@ export function EnglishSplitViewDemo() {
         supabase.from('practice_results').insert(rowsToInsert).then(({ error }) => {
           if (error) console.error("Error saving English results:", error);
         });
+
+        // Also update the mock_attempts if this was a mock exam
+        if (examMode === 'mock' && results) {
+          // Find the most recent in_progress mock-exam for this user
+          supabase
+            .from('mock_attempts')
+            .select('id')
+            .eq('user_id', user.id)
+            .eq('mode', 'mock-exam')
+            .eq('status', 'in_progress')
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single()
+            .then(({ data: attempt }) => {
+              if (attempt) {
+                supabase
+                  .from('mock_attempts')
+                  .update({
+                    score: results.overallCorrect,
+                    total_marks: results.overallTotal,
+                    status: 'scored'
+                  })
+                  .eq('id', attempt.id)
+                  .then(({ error }) => {
+                    if (error) console.error("Error updating mock attempt:", error);
+                    else {
+                      // Dispatch event so usage state refreshes
+                      window.dispatchEvent(new CustomEvent('mockUsageUpdated'));
+                    }
+                  });
+              }
+            });
+        }
       }
     }
-  }, [isFinished, user, activeSections, selectedAnswers]);
+  }, [isFinished, user, activeSections, selectedAnswers, results, examMode]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);

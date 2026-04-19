@@ -247,11 +247,6 @@ export default function Connect() {
       }, 500);
     };
 
-    const practiceChannel = supabase
-      .channel('leaderboard_practice_results')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'practice_results' }, handleRealtimeUpdate)
-      .subscribe();
-
     const mockChannel = supabase
       .channel('leaderboard_mock_attempts')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'mock_attempts' }, handleRealtimeUpdate)
@@ -264,7 +259,6 @@ export default function Connect() {
 
     return () => {
       if (debounceTimer) clearTimeout(debounceTimer);
-      supabase.removeChannel(practiceChannel);
       supabase.removeChannel(mockChannel);
       supabase.removeChannel(friendChannel);
     };
