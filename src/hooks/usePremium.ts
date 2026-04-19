@@ -594,11 +594,11 @@ export function usePremium(trackOverride?: UserTrack, subject?: 'maths' | 'engli
   const dailyLimit = isPremium ? Infinity : 5;
   const remainingUses = isPremium ? Infinity : Math.max(0, dailyLimit - dailyUses);
   const canUseFeature = isPremium || dailyUses < dailyLimit;
-  const canSpendUsage = (cost: number = 1) => {
+  const canSpendUsage = useCallback((cost: number = 1) => {
     if (isPremium) return true;
     const safeCost = Math.max(1, Math.round(cost));
     return dailyUses + safeCost <= dailyLimit;
-  };
+  }, [dailyUses, dailyLimit, isPremium]);
 
   // Mock exam restrictions
   const dailyMockLimit = isPremium ? Infinity : 1;
@@ -613,10 +613,10 @@ export function usePremium(trackOverride?: UserTrack, subject?: 'maths' | 'engli
   const canUse40Questions = isPremium;
   const canUseFullPaper = isPremium;
 
-  const refreshUsage = async () => {
+  const refreshUsage = useCallback(async () => {
     if (!hasUserContext) return;
     await fetchUsageData();
-  };
+  }, [hasUserContext, fetchUsageData]);
 
   const effectiveTier = hasUserContext ? tier : 'free';
   const effectiveFounderTrack = hasUserContext ? founderTrack : null;

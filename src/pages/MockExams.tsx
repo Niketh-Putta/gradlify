@@ -122,7 +122,7 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
   // Always refresh usage data when this page mounts so the 0/1 counter is accurate
   useEffect(() => {
     refreshUsage();
-  }, []);
+  }, [refreshUsage]);
 
   useEffect(() => {
     const fetchSubtopicCounts = async () => {
