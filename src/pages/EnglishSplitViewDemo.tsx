@@ -903,7 +903,7 @@ export function EnglishSplitViewDemo() {
                 .update({
                   score: totalCorrect,
                   total_marks: results?.overallTotal || 0,
-                  status: 'scored'
+                  status: 'completed'
                 })
                 .eq('id', attempt.id)
                 .then(({ error }) => {
@@ -919,7 +919,7 @@ export function EnglishSplitViewDemo() {
                 user_id: user.id,
                 score: totalCorrect,
                 total_marks: results?.overallTotal || 0,
-                status: 'scored',
+                status: 'completed',
                 mode: 'mock-exam',
                 track: '11plus',
                 title: 'English Mock Exam'
