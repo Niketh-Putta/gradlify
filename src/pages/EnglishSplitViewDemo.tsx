@@ -480,9 +480,9 @@ export function EnglishSplitViewDemo() {
         
         if (data && data.length > 0) {
            const mapped: EnglishSection[] = data.map((row: any) => ({
-             sectionId: row.sectionId,
-             subEngine: row.subtopic,
-             title: row.title || `SECTION: ${row.sectionId.toUpperCase()}`,
+             sectionId: row.sectionId || row.subtopic || 'comprehension',
+             subEngine: row.subtopic || row.sectionId || 'fiction',
+             title: row.title || `SECTION: ${String(row.sectionId || 'Paper').toUpperCase()}`,
              icon: BookOpen,
              desc: row.desc || 'Read the text carefully and answer the following questions.',
              leftTitle: row.title || 'Practice Source',
@@ -579,26 +579,68 @@ export function EnglishSplitViewDemo() {
     });
 
     // Group passages aggressively by core engine
-    const groups: Record<string, EnglishSection[]> = { comprehension: [], spag: [], vocab: [] };
+    const groups: Record<string, EnglishSection[]> = { 
+        comprehension: [], 
+        spelling: [], 
+        punctuation: [], 
+        grammar: [], 
+        vocab: [] 
+    };
+
     shuffled.forEach(sec => {
         const id = (sec.sectionId || "").toLowerCase();
         const sub = (sec.subEngine || "").toLowerCase();
-        if (id === 'vocabulary' || sub === 'vocabulary' || id === 'vocab') groups.vocab.push(sec);
-        else if (['spelling', 'punctuation', 'grammar'].includes(sub) || ['spelling', 'punctuation', 'grammar'].includes(id) || id === 'spag') groups.spag.push(sec);
-        else groups.comprehension.push(sec);
+        
+        if (id === 'vocabulary' || sub === 'vocabulary' || id === 'vocab') {
+            groups.vocab.push(sec);
+        } else if (id === 'spelling' || sub === 'spelling') {
+            groups.spelling.push(sec);
+        } else if (id === 'punctuation' || sub === 'punctuation') {
+            groups.punctuation.push(sec);
+        } else if (id === 'grammar' || sub === 'grammar') {
+            groups.grammar.push(sec);
+        } else if (id === 'spag' || sub === 'spag') {
+            // General SPaG - distribute if needed or put in one
+            groups.spelling.push(sec); 
+        } else {
+            groups.comprehension.push(sec);
+        }
     });
 
     let finalSections: EnglishSection[] = [];
 
     // Filter down to the user's requested topics. 
-    // They want exactly 1 passage per requested block.
-    if (selectedTopics.includes('comprehension') && groups.comprehension.length > 0) finalSections.push(groups.comprehension[0]);
-    if (selectedTopics.includes('spag') && groups.spag.length > 0) finalSections.push(groups.spag[0]);
-    if (selectedTopics.includes('vocabulary') && groups.vocab.length > 0) finalSections.push(groups.vocab[0]);
+    if (selectedTopics.includes('comprehension') && groups.comprehension.length > 0) {
+      // In mock mode, we usually want exactly 1 comprehension passage
+      finalSections.push(groups.comprehension[0]);
+    }
+    
+    if (selectedTopics.includes('spag')) {
+      // Return ALL spag sections (Spelling + Punctuation + Grammar)
+      // This will total around 15+15+15 = 45 passages if fully loaded,
+      // but user specifically asked for "the 15 that were there before"
+      // Likely they want all 15 spelling, 15 punctuation, and 15 grammar passages to be available.
+      finalSections.push(...groups.spelling);
+      finalSections.push(...groups.punctuation);
+      finalSections.push(...groups.grammar);
+    } else {
+      // Individual practice selection
+      if (selectedTopics.includes('spelling')) finalSections.push(...groups.spelling);
+      if (selectedTopics.includes('punctuation')) finalSections.push(...groups.punctuation);
+      if (selectedTopics.includes('grammar')) finalSections.push(...groups.grammar);
+    }
+    
+    if (selectedTopics.includes('vocabulary') && groups.vocab.length > 0) {
+      finalSections.push(groups.vocab[0]);
+    }
     
     // Safety fallback
     if (finalSections.length === 0) finalSections = sourceData.slice(0, 1);
 
+    // LIMITATION: If we are in MOCK mode, we probably don't want 45 passages on one screen.
+    // If user says "return the 15", maybe they mean 5 spelling + 5 punct + 5 grammar = 15?
+    // Or just all of them. Let's provide all for now.
+    
     const sorted = finalSections.map(sec => ({
       ...sec,
       questions: [...(sec.questions || [])].sort((a, b) => {
@@ -1024,7 +1066,7 @@ export function EnglishSplitViewDemo() {
                 
                 <div className="bg-amber-50/50 dark:bg-amber-500/5 border border-amber-500/20 rounded-2xl p-5 mb-8 text-sm text-amber-900 dark:text-amber-100/90 leading-relaxed relative isolate">
                   <div className="absolute -inset-px ring-1 ring-amber-500/10 rounded-2xl -z-10" />
-                  You are missing <strong className="font-bold text-amber-600 dark:text-amber-400">over 1300+ English questions</strong> encompassing isolated SPaG passages, Cloze structures, and rigorous full-length exams.
+                  You are missing <strong className="font-bold text-amber-600 dark:text-amber-400">over 1500+ English questions</strong> encompassing isolated SPaG passages, Cloze structures, and rigorous full-length exams.
                 </div>
                 
                 <Button onClick={() => setShowPaywall(true)} className="w-full bg-gradient-to-b from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-amber-950 font-bold shadow-xl shadow-amber-500/25 py-6 rounded-xl text-lg transition-all duration-300 hover:scale-[1.02] border border-amber-400/50">
