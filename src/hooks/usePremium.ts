@@ -257,12 +257,13 @@ export function usePremium(trackOverride?: UserTrack, subject?: 'maths' | 'engli
   }, [activeTrack, profile?.user_id]);
 
   const fetchUsageData = useCallback(async () => {
-    if (!profile?.user_id) return;
+    if (!profile?.user_id) {
+      console.log("[usePremium] fetchUsageData skipped: no profile.user_id");
+      return;
+    }
+    console.log("[usePremium] fetchUsageData starting for", profile.user_id);
 
     // 1) IMMEDIATELY Count today's actual mock attempts for this subject from the database.
-    // This is the single source of truth — no localStorage, no profile counters.
-    // We do this BEFORE the profile query so that if profile schemas are temporarily out-of-sync, 
-    // the UI mock attempt counters still perfectly reflect the truth on initialization.
     if (user?.id) {
       try {
         const startOfDay = new Date();
@@ -280,7 +281,7 @@ export function usePremium(trackOverride?: UserTrack, subject?: 'maths' | 'engli
         
         setDailyMockUses(subjectCount);
       } catch (err) {
-        console.error("Error fetching mock attempts directly:", err);
+        console.error("[usePremium] Error fetching mock attempts directly:", err);
       }
     }
 
@@ -294,28 +295,38 @@ export function usePremium(trackOverride?: UserTrack, subject?: 'maths' | 'engli
           .eq('user_id', profile.user_id)
           .single();
 
+      console.log("[usePremium] Attempting profile fetch...");
       let { data, error } = await attemptUsageFetch();
       
-      while (error) {
+      let safetyCounter = 0;
+      while (error && safetyCounter < 10) {
+        safetyCounter++;
         // Handle code 42703 (undefined_column) explicitly
         const missingColumn = getMissingColumnFromError(error);
-        if (!missingColumn && error.code !== '42703') break;
+        console.warn(`[usePremium] Column fetch error (attempt ${safetyCounter}):`, { code: (error as any).code, message: (error as any).message, identifiedColumn: missingColumn });
         
-        // If we have a code 42703 but regex failed, we might need a broader approach,
-        // but for now let's trust getMissingColumnFromError which we just improved.
+        if (!missingColumn && (error as any).code !== '42703') break;
+        
         if (missingColumn) {
           markProfileColumnMissing(missingColumn);
+          console.log("[usePremium] Retrying after marking column missing:", missingColumn);
           ({ data, error } = await supabase
             .from('profiles')
             .select(profileSelect(requiredColumns, optionalColumns))
             .eq('user_id', profile.user_id)
             .single());
         } else {
+          // If code is 42703 but we couldn't parse the column, we must stop to avoid infinite loop
+          console.error("[usePremium] Undefined column error but could not identify column name. Stopping retry.");
           break;
         }
       }
-      if (error) throw error;
+      if (error) {
+        console.error("[usePremium] Final fetch error:", error);
+        throw error;
+      }
 
+      console.log("[usePremium] Profile fetch success:", !!data);
       if (data) {
         const now = new Date();
         const resetAt = data.daily_reset_at ? new Date(data.daily_reset_at) : null;
@@ -372,6 +383,7 @@ export function usePremium(trackOverride?: UserTrack, subject?: 'maths' | 'engli
   }, [activeTrack, profile?.user_id, user?.id, resetDailyChallengeUsage, resetDailyMockUsage, resetDailyUsage, subject]);
 
   useEffect(() => {
+    console.log("[usePremium] Effect triggered", { hasUserContext, isLoading });
     if (!hasUserContext) {
       setIsLoading(false);
       setIsAdmin(false);
@@ -381,11 +393,13 @@ export function usePremium(trackOverride?: UserTrack, subject?: 'maths' | 'engli
     let isActive = true;
 
     const initializeUserData = async () => {
+      console.log("[usePremium] initializeUserData starting");
       setIsLoading(true);
       const adminStatus = await checkIsAdmin();
       if (!isActive) return;
       setIsAdmin(adminStatus);
       await fetchUsageData();
+      console.log("[usePremium] initializeUserData finished");
     };
     
     void initializeUserData();

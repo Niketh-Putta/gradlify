@@ -555,26 +555,28 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
                 </div>
               </div>
               )}
+              </section>
 
-              <div className="flex items-center justify-between mb-4">
-              <h2 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Topics</h2>
-              <button onClick={toggleAllTopics} className={cn("text-[10px] font-bold hover:underline", currentSubject === 'english' ? "text-amber-600" : "text-primary")}>{selectedTopics.length === availableSections.length ? 'Deselect all' : 'Select all'}</button>
+              {currentSubject === 'english' && (
+              <div className="p-6 rounded-[2rem] bg-amber-500/5 border border-amber-500/10 flex items-start gap-4">
+              <Sparkles className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+              <div className="space-y-1.5">
+                <p className="text-[11px] font-black text-amber-900 dark:text-amber-100 uppercase tracking-widest">Exam Structure</p>
+                <p className="text-sm text-amber-800/70 dark:text-amber-400/70 leading-relaxed font-medium">
+                  English sessions are divided into <strong className="text-amber-600">Passages</strong>. Each passage contains exactly <strong className="text-amber-600">10 sub-questions</strong>.
+                </p>
               </div>
-            {currentSubject === 'english' && (
-              <div className="mb-6 p-4 rounded-2xl bg-amber-500/5 border border-amber-500/20 flex items-start gap-3">
-                <Sparkles className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-                <div className="space-y-1">
-                  <p className="text-[11px] font-bold text-amber-900 dark:text-amber-100 uppercase tracking-wider">Exam Structure</p>
-                  <p className="text-xs text-amber-800/70 dark:text-amber-400/70 leading-relaxed">
-                    English sessions are divided into <strong>Passages</strong>. Each passage contains exactly <strong>10 sub-questions</strong>.
-                  </p>
-                </div>
               </div>
-            )}
+              )}
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {availableSections.map((section) => {
-                const isSelected = selectedTopics.includes(section.id);
+              <section className="space-y-6">
+              <div className="flex items-center justify-between">
+              <h2 className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.3em]">Topics</h2>
+              <button onClick={toggleAllTopics} className={cn("text-[10px] font-black uppercase tracking-widest hover:underline", currentSubject === 'english' ? "text-amber-600" : "text-primary")}>{selectedTopics.length === availableSections.length ? 'Deselect all' : 'Select all'}</button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {availableSections.map((section) => {                const isSelected = selectedTopics.includes(section.id);
                 const count = topicCounts[section.id] ?? 0;
                 const Icon = getTopicIcon(section.id, currentSubject);
                 const color = section.color;

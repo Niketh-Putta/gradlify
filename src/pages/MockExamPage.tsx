@@ -369,20 +369,22 @@ export default function MockExamPage() {
           const limit = Math.max(take * 4, take);
 
           if (isAuthed) {
-            const { data, error } = await supabase.rpc('fetch_exam_questions_v3' as any, {
+            const { data, error } = await supabase.rpc('fetch_exam_questions_v3', {
               p_tiers: [tierValue],
               p_calculators: [calcValue],
               p_question_types: questionTypes.length > 0
                 ? questionTypes
                 : ['Number', 'Algebra', 'Geometry & Measures', 'Probability', 'Statistics', 'Ratio & Proportion'],
-              p_subtopics: subtopics,
+              p_subtopics: subtopics && subtopics.length > 0 ? subtopics : null,
               p_difficulty_min: difficultyMin,
               p_difficulty_max: difficultyMax,
-              p_exclude_ids: excludeIds,
+              p_exclude_ids: excludeIds.length > 0 ? excludeIds : null,
               p_limit: limit,
             });
 
-            if (!error && data && (data as any[]).length > 0) {
+            if (error) {
+              console.error("[MockExamPage] fetch_exam_questions_v3 RPC failed, falling back to direct query:", error);
+            } else if (data && (data as any[]).length > 0) {
               return (data as unknown as DbExamQuestionRow[]).slice(0, take);
             }
           }
@@ -768,7 +770,7 @@ export default function MockExamPage() {
     };
 
     fetchQuestions();
-  }, [tier, paperType, topics, questionsCount, subtopicParam, difficultyMinParam, difficultyMaxParam, canStartMockExam, navigate, refreshUsage]);
+  }, [tier, paperType, topics, questionsCount, subtopicParam, difficultyMinParam, difficultyMaxParam, canStartMockExam, navigate, refreshUsage, isUsageLoading]);
 
   const formatTime = (seconds: number) => {
     const totalSeconds = Math.max(0, Math.floor(seconds));
