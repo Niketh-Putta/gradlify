@@ -846,6 +846,8 @@ export function EnglishSplitViewDemo() {
       hasSavedResults.current = true;
       const topicAgg: Record<string, { correct: number; total: number }> = {};
       
+      let totalCorrect = 0;
+
       activeSections.forEach(sec => {
         let topicLabel = 'Comprehension';
         const sType = (sec.sectionId + " " + (sec.subEngine || "")).toLowerCase();
@@ -862,9 +864,25 @@ export function EnglishSplitViewDemo() {
           const correctOpt = q.options.find(o => o.correct);
           if (ans && correctOpt && ans === correctOpt.id) {
             topicAgg[topicLabel].correct++;
+            totalCorrect++;
           }
         });
       });
+
+      // INCREMENT LEADERBOARD IMMEDIATELY
+      if (totalCorrect > 0) {
+        console.log('[English] Incrementing leaderboard by:', totalCorrect);
+        void supabase.rpc('increment_leaderboard_score', { p_amount: totalCorrect }).then(({ error }) => {
+          if (error) {
+            console.error('[English] Failed to increment leaderboard score:', error);
+            toast.error('Leaderboard update failed: ' + error.message);
+          } else {
+            console.log('[English] Leaderboard updated successfully');
+            toast.success(`+${totalCorrect} points added to Leaderboard!`);
+            window.dispatchEvent(new CustomEvent('mockUsageUpdated'));
+          }
+        });
+      }
 
       const rowsToInsert = Object.entries(topicAgg)
         .filter(([_, data]) => data.total > 0)

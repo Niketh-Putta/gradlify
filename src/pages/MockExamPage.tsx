@@ -266,52 +266,34 @@ export default function MockExamPage() {
         difficultyMinParam,
         difficultyMaxParam,
       ].join('|');
-      console.log("[MockExamPage] fetchQuestions starting", { loadKey, isUsageLoading, canStartMockExam, userTrack });
       if (loadKeyRef.current === loadKey) {
-        console.log("[MockExamPage] fetchQuestions: same loadKey, skipping");
         setLoading(false);
         return;
       }
-      if (isUsageLoading) {
-        console.log("[MockExamPage] fetchQuestions: usage is loading, waiting...");
-        return;
-      }
-      if (isLoadingRef.current) {
-        console.log("[MockExamPage] fetchQuestions: already loading, skipping");
-        return;
-      }
+      if (isUsageLoading) return;
+      if (isLoadingRef.current) return;
 
       try {
         isLoadingRef.current = true;
         setLoading(true);
-        console.log("[MockExamPage] fetching session...");
         const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-        if (sessionError) {
-          console.error("[MockExamPage] getSession error:", sessionError);
-          throw sessionError;
-        }
+        if (sessionError) throw sessionError;
         let session = sessionData.session;
         if (!session) {
-          console.log("[MockExamPage] refreshing session...");
           const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
-          if (refreshError) {
-             console.error("[MockExamPage] refreshSession error:", refreshError);
-             throw refreshError;
-          }
+          if (refreshError) throw refreshError;
           session = refreshData.session;
         }
         if (!session) {
-          console.log("[MockExamPage] no session found after refresh");
           setLoading(false);
           toast.error("Please sign in to start a mock exam.");
           navigate('/auth');
           return;
         }
 
-        console.log("[MockExamPage] checking existing attempt...");
         const startOfDay = new Date();
         startOfDay.setHours(0, 0, 0, 0);
-        const { data: existingAttempt, error: attemptError } = await supabase
+        const { data: existingAttempt } = await supabase
           .from('mock_attempts')
           .select('id')
           .eq('user_id', session.user.id)
@@ -322,14 +304,7 @@ export default function MockExamPage() {
           .limit(1)
           .maybeSingle();
 
-        if (attemptError) {
-          console.error("[MockExamPage] fetch existing attempt error:", attemptError);
-        }
-
-        console.log("[MockExamPage] existingAttempt:", existingAttempt);
-
         if (!canStartMockExam && !existingAttempt) {
-          console.log("[MockExamPage] daily limit reached and no existing attempt");
           toast.error("Daily mock exam limit reached.");
           setLoading(false);
           navigate('/mocks');
@@ -408,13 +383,14 @@ export default function MockExamPage() {
           const limit = Math.max(take * 4, take);
 
           if (isAuthed) {
-            console.log(`[MockExamPage] calling fetch_exam_questions_v3 for ${tierValue}/${calcValue}, take: ${take}`);
             const { data, error } = await supabase.rpc('fetch_exam_questions_v3' as any, {
               p_tiers: [tierValue],
               p_calculators: [calcValue],
               p_question_types: questionTypes.length > 0
                 ? questionTypes
-                : ['Number', 'Algebra', 'Geometry & Measures', 'Probability', 'Statistics', 'Ratio & Proportion'],
+                : (userTrack === '11plus' 
+                    ? ['Number', 'Algebra', 'Geometry & Measures', 'Statistics', 'Problem Solving']
+                    : ['Number', 'Algebra', 'Geometry & Measures', 'Probability', 'Statistics', 'Ratio & Proportion']),
               p_subtopics: subtopics,
               p_difficulty_min: difficultyMin,
               p_difficulty_max: difficultyMax,
@@ -422,22 +398,19 @@ export default function MockExamPage() {
               p_limit: limit,
             });
 
-            if (error) console.error("[MockExamPage] RPC error:", error);
-
             if (!error && data && (data as any[]).length > 0) {
-              console.log(`[MockExamPage] RPC returned ${(data as any[]).length} questions`);
               return (data as unknown as DbExamQuestionRow[]).slice(0, take);
             }
-            console.log(`[MockExamPage] RPC returned 0 questions or error, trying fallback query`);
           }
 
-          console.log(`[MockExamPage] fallback query for ${tierValue}/${calcValue}, take: ${take}`);
           let query = supabase
             .from('exam_questions')
             .select('id, question, correct_answer, wrong_answers, all_answers, question_type, subtopic, difficulty, marks, estimated_time_sec, tier, calculator, image_url, image_alt, explanation')
             .in('question_type', questionTypes.length > 0
               ? questionTypes
-              : ['Number', 'Algebra', 'Geometry & Measures', 'Probability', 'Statistics', 'Ratio & Proportion'])
+              : (userTrack === '11plus' 
+                  ? ['Number', 'Algebra', 'Geometry & Measures', 'Statistics', 'Problem Solving']
+                  : ['Number', 'Algebra', 'Geometry & Measures', 'Probability', 'Statistics', 'Ratio & Proportion']))
             .eq('tier', tierValue)
             .eq('calculator', calcValue);
 
@@ -868,6 +841,8 @@ export default function MockExamPage() {
 
     let earnedMarks = 0;
     let totalMarks = 0;
+    let correctQuestionsCount = 0;
+    let totalQuestionsCount = 0;
     let weightedEarned = 0;
     let weightedTotal = 0;
     const topicBreakdown: Record<string, { earned: number; total: number }> = {};
@@ -886,6 +861,9 @@ export default function MockExamPage() {
       topicBreakdown[topic].total += marks;
 
       const correctCount = getQuestionCorrectCount(q);
+      correctQuestionsCount += correctCount;
+      totalQuestionsCount += q.multipart ? q.multipart.parts.length : 1;
+
       const earned = q.multipart
         ? Math.round((correctCount / q.multipart.parts.length) * marks)
         : correctCount > 0 ? marks : 0;
@@ -900,23 +878,24 @@ export default function MockExamPage() {
       }
     });
 
-    // INCREMENT LEADERBOARD IMMEDIATELY
-    if (earnedMarks > 0) {
-      console.log('Incrementing leaderboard by:', earnedMarks);
-      void supabase.rpc('increment_leaderboard_score', { p_amount: earnedMarks }).then(({ error }) => {
+    // INCREMENT LEADERBOARD IMMEDIATELY - Use correct questions count as requested
+    const pointsToAdd = correctQuestionsCount;
+    if (pointsToAdd > 0) {
+      console.log('Incrementing leaderboard by:', pointsToAdd);
+      void supabase.rpc('increment_leaderboard_score', { p_amount: pointsToAdd }).then(({ error }) => {
         if (error) {
           console.error('Failed to increment leaderboard score:', error);
           toast.error('Leaderboard update failed: ' + error.message);
         } else {
           console.log('Leaderboard updated successfully');
-          toast.success(`+${earnedMarks} points added to Leaderboard!`);
+          toast.success(`+${pointsToAdd} points added to Leaderboard!`);
           window.dispatchEvent(new CustomEvent('mockUsageUpdated')); // Force UI refresh
         }
       });
     }
 
-    // Display score percentage from awarded marks, not weighted difficulty.
-    const percentage = totalMarks > 0 ? Math.round((earnedMarks / totalMarks) * 100) : 0;
+    // Display score percentage from correct questions count as requested.
+    const percentage = totalQuestionsCount > 0 ? Math.round((correctQuestionsCount / totalQuestionsCount) * 100) : 0;
     let grade = "1";
     if (percentage >= 90) grade = "9";
     else if (percentage >= 80) grade = "8";
@@ -929,7 +908,17 @@ export default function MockExamPage() {
     
     const showGrade = userTrack !== '11plus';
     const avgLevel = totalMarks > 0 ? weightedTotal / totalMarks : 0;
-    setResults({ score: earnedMarks, total: totalMarks, percentage, grade, topicBreakdown, showGrade, avgLevel });
+    setResults({ 
+      score: correctQuestionsCount, 
+      total: totalQuestionsCount, 
+      correctQuestionsCount,
+      totalQuestionsCount,
+      percentage, 
+      grade, 
+      topicBreakdown, 
+      showGrade, 
+      avgLevel 
+    });
     setView('results');
     
     // Confetti
@@ -1153,7 +1142,7 @@ const questionCalculatorLabel = (() => {
           <div className="card rounded-2xl p-4 text-center glow-subtle border border-border">
             <p className="badge text-[10px] font-semibold uppercase tracking-wide mb-2 text-muted-foreground">Score</p>
             <p className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-primary to-violet-500 bg-clip-text text-transparent">{results.percentage}%</p>
-            <p className="text-xs mt-1 text-muted-foreground">{results.score} of {results.total} marks</p>
+            <p className="text-xs mt-1 text-muted-foreground">{results.correctQuestionsCount}/{results.totalQuestionsCount} right</p>
           </div>
           {results.showGrade ? (
             <div className="card rounded-2xl p-4 text-center border border-border">
