@@ -780,20 +780,26 @@ export function EnglishSplitViewDemo() {
   useEffect(() => {
     if (isFinished) return;
     const observer = new IntersectionObserver((entries) => {
-      // Find the question that is currently occupying the central band of the viewport
       const visibleEntries = entries.filter(e => e.isIntersecting);
       if (visibleEntries.length > 0) {
-        // Sort by how close they are to the top of the right pane to find the logically "current" one
-        const sorted = visibleEntries.sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
-        const topQ = sorted[0].target.getAttribute('data-qid');
-        if (topQ && topQ !== activeQuestionId) {
-          setActiveQuestionId(topQ);
+        // Find the one whose intersection area is largest OR whose center is closest to viewport center
+        // But simply tightening the rootMargin to a "center line" is usually best
+        const sorted = visibleEntries.sort((a, b) => {
+          const aCenter = a.boundingClientRect.top + a.boundingClientRect.height / 2;
+          const bCenter = b.boundingClientRect.top + b.boundingClientRect.height / 2;
+          const viewportCenter = window.innerHeight / 2;
+          return Math.abs(aCenter - viewportCenter) - Math.abs(bCenter - viewportCenter);
+        });
+        
+        const centerQ = sorted[0].target.getAttribute('data-qid');
+        if (centerQ && centerQ !== activeQuestionId) {
+          setActiveQuestionId(centerQ);
         }
       }
     }, {
       root: rightPaneRef.current,
-      rootMargin: "-25% 0px -25% 0px", // Use a more forgiving central band for detection
-      threshold: 0
+      rootMargin: "-45% 0px -45% 0px", // Tighten to a 10% center band
+      threshold: [0, 0.5, 1.0]
     });
 
     Object.values(questionRefs.current).forEach(node => {
