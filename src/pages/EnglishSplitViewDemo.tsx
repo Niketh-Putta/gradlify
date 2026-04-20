@@ -761,16 +761,9 @@ export function EnglishSplitViewDemo() {
         }
     }
     
-    // Restore 10 questions: 
-    // If the data source has 10 questions (DB), take 1 section.
-    // If it only has 5 (TEST_DATA), take 2 sections to reach 10.
+    // Only show ONE SPaG passage at a time to ensure style consistency
     if (selectedTopics.includes('spag') && groups.spag.length > 0) {
-        const firstSec = groups.spag[0];
-        if (firstSec.questions && firstSec.questions.length >= 10) {
-            finalSections.push(firstSec);
-        } else {
-            finalSections.push(...groups.spag.slice(0, 2));
-        }
+        finalSections.push(groups.spag[0]);
     }
     
     if (selectedTopics.includes('vocabulary') && groups.vocab.length > 0) {
