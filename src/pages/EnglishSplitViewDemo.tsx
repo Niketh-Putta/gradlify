@@ -629,13 +629,14 @@ export function EnglishSplitViewDemo() {
 
     // Filter down to the user's requested topics. 
     if (selectedTopics.includes('comprehension') && groups.comprehension.length > 0) {
-        // If we have many in the bank, we can show multiple if it's a mock, 
-        // but for practice one is enough. However, we must ensure it's a ROTATING one.
-        // The shuffled list already has unseen ones at the top.
-        if (examMode === 'mock') {
-            finalSections.push(...groups.comprehension.slice(0, 2)); // Show 2 for mocks
-        } else {
-            finalSections.push(groups.comprehension[0]); // Show the first (most unseen) one for practice
+        const firstComp = groups.comprehension[0];
+        finalSections.push(firstComp);
+        
+        // Only if it's a mock AND the first passage has very few questions (e.g. 5 in test data)
+        // do we add a second one to reach a standard exam length.
+        // For real DB passages (10 questions each), this will now correctly only show ONE.
+        if (examMode === 'mock' && firstComp.questions.length < 10 && groups.comprehension.length > 1) {
+            finalSections.push(groups.comprehension[1]);
         }
     }
     
@@ -779,17 +780,19 @@ export function EnglishSplitViewDemo() {
   useEffect(() => {
     if (isFinished) return;
     const observer = new IntersectionObserver((entries) => {
-      // Find the question that is currently crossing or occupying the vertical midpoint
+      // Find the question that is currently occupying the central band of the viewport
       const visibleEntries = entries.filter(e => e.isIntersecting);
       if (visibleEntries.length > 0) {
         // Sort by how close they are to the top of the right pane to find the logically "current" one
         const sorted = visibleEntries.sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
         const topQ = sorted[0].target.getAttribute('data-qid');
-        if (topQ) setActiveQuestionId(topQ);
+        if (topQ && topQ !== activeQuestionId) {
+          setActiveQuestionId(topQ);
+        }
       }
     }, {
       root: rightPaneRef.current,
-      rootMargin: "-50% 0px -50% 0px", // Precisely detect when the top of the box touches the vertical midpoint
+      rootMargin: "-25% 0px -25% 0px", // Use a more forgiving central band for detection
       threshold: 0
     });
 
@@ -798,15 +801,13 @@ export function EnglishSplitViewDemo() {
     });
 
     return () => observer.disconnect();
-  }, [activeSections, isFinished, examMode]);
+  }, [activeSections, isFinished, examMode, activeQuestionId]);
 
   // SYNCHRONIZED LEFT PASSAGE SCROLLING
   // When active question changes, firmly snap the left pane to the correct Passage Section!
   useEffect(() => {
     if (!activeQuestionId) return;
     
-    // Respect user autonomy: removed to fix delay bug
-
     let targetSectionId = null;
     let targetEvidenceLine = null;
     
@@ -820,31 +821,38 @@ export function EnglishSplitViewDemo() {
       }
     }
 
-    const isGlobal = !targetEvidenceLine || targetEvidenceLine === 'global' || targetEvidenceLine?.toLowerCase().includes('overall');
+    const isGlobal = !targetEvidenceLine || targetEvidenceLine === 'global' || targetEvidenceLine === 'Overall' || targetEvidenceLine?.toLowerCase().includes('overall');
+    
     if (isGlobal) {
       if (targetSectionId && passageSectionRefs.current[targetSectionId]) {
-        passageSectionRefs.current[targetSectionId]?.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+        passageSectionRefs.current[targetSectionId]?.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'center'
+        });
       }
       return; 
     }
 
     if (targetSectionId && targetEvidenceLine) {
       const uniqueRefKey = `${targetSectionId}_${targetEvidenceLine}`;
-      lastEvidenceRefKey.current = uniqueRefKey;
-
       const targetElement = passageLineRefs.current[uniqueRefKey];
       
       if (targetElement) {
-        // Re-enabled scrollIntoView natively. We use CSS scroll-margin-top on the block
-        // so it won't hide the section title or get stuck under the sticky header.
-        targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // Firmly center the element in the left pane
+        targetElement.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'center' 
+        });
         return;
       }
     }
     
     // Fallback scroll if exact paragraph missing
     if (targetSectionId && passageSectionRefs.current[targetSectionId]) {
-      passageSectionRefs.current[targetSectionId]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      passageSectionRefs.current[targetSectionId]?.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'center' 
+      });
     }
   }, [activeQuestionId, activeSections]);
 
@@ -1253,7 +1261,7 @@ export function EnglishSplitViewDemo() {
                         const uniqueRefKey = `${section.sectionId}_${p.id}`;
 
                         return (
-                          <div key={p.id} className="relative group scroll-m-[160px]" ref={(el) => { passageLineRefs.current[uniqueRefKey] = el; }}>
+                          <div key={p.id} className="relative group scroll-m-20" ref={(el) => { passageLineRefs.current[uniqueRefKey] = el; }}>
                             {p.text.match(/^\d+/) && (
                               <div className="absolute -left-10 top-1.5 text-xs text-amber-500/80 font-black select-none pointer-events-none w-8 text-right opacity-0 group-hover:opacity-100 transition-opacity">
                                 ♦
