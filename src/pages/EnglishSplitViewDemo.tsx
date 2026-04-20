@@ -675,8 +675,8 @@ export function EnglishSplitViewDemo() {
 
   // 1. FILTERING LOGIC
   const activeSections = useMemo(() => {
-    // Source data: Prefer DB sections, fallback to TEST_DATA
-    let sourceData = dbSections.length > 0 ? dbSections : [...TEST_DATA, ...VOCAB_PRACTICE_SET];
+    // Source data: Combine DB sections with built-in Drill/Cloze sets
+    let sourceData = [...dbSections, ...TEST_DATA, ...VOCAB_PRACTICE_SET];
     
     // Explicit subtopic filtering for English
     const currentSubtopicParam = searchParams.get('subtopic') || '';
@@ -719,7 +719,14 @@ export function EnglishSplitViewDemo() {
       shuffled.sort((a, b) => {
           const aSeen = seenPassages.includes(a.sectionId) ? 1 : 0;
           const bSeen = seenPassages.includes(b.sectionId) ? 1 : 0;
-          return aSeen - bSeen;
+          
+          // Secondary Sort: Prioritize "Drill Style" for SPaG sections
+          // Detect if it contains '/' (Fragments) or '[ 1 ]' (Cloze)
+          const aHasDrillPattern = a.passageBlocks?.some(b => b.text.includes('/') || b.text.includes('[ 1 ]')) ? 1 : 0;
+          const bHasDrillPattern = b.passageBlocks?.some(b => b.text.includes('/') || b.text.includes('[ 1 ]')) ? 1 : 0;
+          
+          if (aSeen !== bSeen) return aSeen - bSeen;
+          return bHasDrillPattern - aHasDrillPattern; // Prioritize drill patterns
       });
       shuffledRef.current = shuffled;
     }
