@@ -542,12 +542,20 @@ export function EnglishSplitViewDemo() {
 
         const diffMinParam = searchParams.get('difficultyMin');
         const diffMaxParam = searchParams.get('difficultyMax');
+        const subtopicParam = searchParams.get('subtopic');
 
         if (diffMinParam) {
            query = query.gte('difficulty', parseInt(diffMinParam));
         }
         if (diffMaxParam) {
            query = query.lte('difficulty', parseInt(diffMaxParam));
+        }
+        if (subtopicParam) {
+           // subtopicParam could be a comma-separated list like "poetry,fiction"
+           const subtopics = subtopicParam.split(',').map(s => s.trim().toLowerCase());
+           if (subtopics.length > 0) {
+              query = query.in('subtopic', subtopics);
+           }
         }
 
         const { data, error } = await query;
@@ -660,17 +668,36 @@ export function EnglishSplitViewDemo() {
   const lastEvidenceRefKey = useRef<string | null>(null);
 
   const shuffledRef = useRef<EnglishSection[] | null>(null);
+  const lastSubtopicParam = useRef<string>(searchParams.get('subtopic') || '');
 
   // 1. FILTERING LOGIC
   const activeSections = useMemo(() => {
     // Source data: Prefer DB sections, fallback to TEST_DATA
-    const sourceData = dbSections.length > 0 ? dbSections : [...TEST_DATA, ...VOCAB_PRACTICE_SET];
+    let sourceData = dbSections.length > 0 ? dbSections : [...TEST_DATA, ...VOCAB_PRACTICE_SET];
+    
+    // Explicit subtopic filtering for English
+    const currentSubtopicParam = searchParams.get('subtopic') || '';
+    if (currentSubtopicParam) {
+      const allowedSubtopics = currentSubtopicParam.split(',').map(s => s.trim().toLowerCase());
+      if (allowedSubtopics.length > 0) {
+        sourceData = sourceData.filter(sec => 
+          allowedSubtopics.includes((sec.subEngine || '').toLowerCase()) ||
+          allowedSubtopics.includes((sec.sectionId || '').toLowerCase())
+        );
+      }
+    }
     
     // We re-shuffle if:
     // 1. ShuffledRef hasn't been set yet.
     // 2. We were using TEST_DATA (fallback) but DB data has now arrived.
     const isUsingFallback = shuffledRef.current && shuffledRef.current.some(s => TEST_DATA.some(t => t.sectionId === s.sectionId));
-    const shouldReShuffle = !shuffledRef.current || (isUsingFallback && dbSections.length > 0);
+    
+    let shouldReShuffle = !shuffledRef.current || (isUsingFallback && dbSections.length > 0);
+    
+    if (lastSubtopicParam.current !== currentSubtopicParam) {
+      shouldReShuffle = true;
+      lastSubtopicParam.current = currentSubtopicParam;
+    }
 
     if (shouldReShuffle) {
       // Intelligent exhaustion system:
@@ -728,13 +755,7 @@ export function EnglishSplitViewDemo() {
     }
     
     if (selectedTopics.includes('vocabulary') && groups.vocab.length > 0) {
-        if (examMode === 'mock') {
-            // For a 50-question mock, we need 5 vocab passages (10 Qs each)
-            finalSections.push(...groups.vocab.slice(0, 5));
-        } else {
-            // Standard practice: Just ONE passage as requested by the user
-            finalSections.push(groups.vocab[0]);
-        }
+        finalSections.push(groups.vocab[0]);
     }
     
     // Safety fallback
