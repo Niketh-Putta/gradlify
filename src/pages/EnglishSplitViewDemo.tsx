@@ -742,24 +742,32 @@ export function EnglishSplitViewDemo() {
        if (p) selection.push(subKey.includes('comp') ? { ...p, questions: (p.questions || []).slice(0, 5) } : p);
     }
 
-    // 2. SPAG SELECTION
+    // 2. SPAG SELECTION: Pick ONE random if no sub-filter, or specific ones if requested
     if (selectedTopics.includes('spag')) {
        const hasPunctFilter = subKey.includes('punct');
        const hasSpellFilter = subKey.includes('spell');
        const hasGrammFilter = subKey.includes('gramm');
        const isSpagDrill = hasPunctFilter || hasSpellFilter || hasGrammFilter;
 
-       if (hasSpellFilter || !isSpagDrill) {
-          const s = pickNext(cats.spelling);
-          if (s) selection.push(isSpagDrill ? { ...s, questions: (s.questions || []).slice(0, 5) } : s);
-       }
-       if (hasPunctFilter || !isSpagDrill) {
-          const p = pickNext(cats.punctuation);
-          if (p) selection.push(isSpagDrill ? { ...p, questions: (p.questions || []).slice(0, 5) } : p);
-       }
-       if (hasGrammFilter || !isSpagDrill) {
-          const g = pickNext(cats.grammar);
-          if (g) selection.push(isSpagDrill ? { ...g, questions: (g.questions || []).slice(0, 5) } : g);
+       if (isSpagDrill) {
+          // Explicitly drill the checked subtopics
+          if (hasSpellFilter) {
+             const s = pickNext(cats.spelling);
+             if (s) selection.push({ ...s, questions: (s.questions || []).slice(0, 5) });
+          }
+          if (hasPunctFilter) {
+             const p = pickNext(cats.punctuation);
+             if (p) selection.push({ ...p, questions: (p.questions || []).slice(0, 5) });
+          }
+          if (hasGrammFilter) {
+             const g = pickNext(cats.grammar);
+             if (g) selection.push({ ...g, questions: (g.questions || []).slice(0, 5) });
+          }
+       } else {
+          // GENERAL SPAG: Pick exactly ONE from the combined SPaG 15/15/15 pool
+          const generalPool = [...cats.spelling, ...cats.punctuation, ...cats.grammar];
+          const choice = pickNext(generalPool);
+          if (choice) selection.push(choice);
        }
     }
 
