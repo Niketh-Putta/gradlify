@@ -588,11 +588,16 @@ export function EnglishSplitViewDemo() {
 
   // 1. FILTERING LOGIC
   const activeSections = useMemo(() => {
-    // Only use DB data if available, otherwise use TEST_DATA as a silent fallback
+    // Source data: Prefer DB sections, fallback to TEST_DATA
     const sourceData = dbSections.length > 0 ? dbSections : [...TEST_DATA, VOCAB_PRACTICE];
     
-    // Lock the shuffled order so it never jumps around during the session
-    if (!shuffledRef.current || (dbSections.length > 0 && shuffledRef.current.length <= TEST_DATA.length)) {
+    // We re-shuffle if:
+    // 1. ShuffledRef hasn't been set yet.
+    // 2. We were using TEST_DATA (fallback) but DB data has now arrived.
+    const isUsingFallback = shuffledRef.current && shuffledRef.current.some(s => TEST_DATA.some(t => t.sectionId === s.sectionId));
+    const shouldReShuffle = !shuffledRef.current || (isUsingFallback && dbSections.length > 0);
+
+    if (shouldReShuffle) {
       // Intelligent exhaustion system:
       let seenPassages: string[] = [];
       try { seenPassages = JSON.parse(localStorage.getItem('seen_english_passages') || '[]'); } catch(e) { /* intentionally left empty */ }
