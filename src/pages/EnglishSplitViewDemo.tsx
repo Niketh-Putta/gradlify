@@ -672,6 +672,7 @@ export function EnglishSplitViewDemo() {
 
   const shuffledRef = useRef<EnglishSection[] | null>(null);
   const lastSubtopicParam = useRef<string>(searchParams.get('subtopic') || '');
+  const sessionSeed = useMemo(() => Math.random(), []);
 
   // 1. FILTERING LOGIC
   const activeSections = useMemo(() => {
@@ -787,7 +788,7 @@ export function EnglishSplitViewDemo() {
     }));
 
     return sorted;
-  }, [examMode, selectedTopics, isPremium, dbSections]);
+  }, [examMode, selectedTopics, isPremium, dbSections, sessionSeed]);
 
   // Securely update the historic ledger of what texts have been seen
   useEffect(() => {
