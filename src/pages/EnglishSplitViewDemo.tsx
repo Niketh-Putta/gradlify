@@ -762,13 +762,14 @@ export function EnglishSplitViewDemo() {
         }
     }
     
-    // Only show ONE SPaG passage at a time to ensure style consistency
+    // Show ALL requested SPaG passages
     if (selectedTopics.includes('spag') && groups.spag.length > 0) {
-        finalSections.push(groups.spag[0]);
+        finalSections.push(...groups.spag);
     }
     
+    // Show ALL requested Vocabulary passages
     if (selectedTopics.includes('vocabulary') && groups.vocab.length > 0) {
-        finalSections.push(groups.vocab[0]);
+        finalSections.push(...groups.vocab);
     }
     
     // Safety fallback
@@ -1306,6 +1307,7 @@ export function EnglishSplitViewDemo() {
                   if (isDuplicatePassage) return null;
 
                   const sType = (section.sectionId + " " + (section.subEngine || "")).toLowerCase();
+                  const isPoetry = sType.includes('poetry') || sType.includes('poem');
                 let topicLabel = 'Comprehension';
                 if (sType.includes('vocab')) topicLabel = 'Vocabulary';
                 else if (sType.includes('spag') || sType.includes('spell') || sType.includes('punct') || sType.includes('gramm')) topicLabel = 'SPaG';
@@ -1390,13 +1392,16 @@ export function EnglishSplitViewDemo() {
                                 ♦
                               </div>
                             )}
-                            <p 
+                            <div 
                               className={cn(
-                                "transition-all duration-200 ease-out p-2 sm:p-3 -mx-2 sm:-mx-3 rounded-xl relative border-l-[3px]",
+                                "transition-all duration-300 ease-out p-2 sm:p-4 -mx-2 sm:-mx-4 rounded-2xl relative border-l-[4px] whitespace-pre-wrap",
+                                isPoetry 
+                                  ? "italic pl-8 sm:pl-12 !leading-relaxed text-foreground/80 font-serif border-amber-500/20" 
+                                  : "border-transparent opacity-85 group-hover:opacity-100 hover:bg-black/5 dark:hover:bg-white/5",
                                 showScaffold 
-                                  ? "bg-amber-50/90 dark:bg-amber-500/10 border-amber-500 shadow-md ring-1 ring-amber-500/30 text-foreground z-10 scale-[1.01]" 
-                                  : "border-transparent opacity-75 group-hover:opacity-100 hover:bg-black/5 dark:hover:bg-white/5",
-                                isPaywalledBlock && "blur-[3px] opacity-40 select-none pointer-events-none scale-[0.98]"
+                                  ? "bg-amber-50/90 dark:bg-amber-500/10 border-amber-500 shadow-md ring-1 ring-amber-500/30 text-foreground z-10 scale-[1.01] opacity-100" 
+                                  : "",
+                                isPaywalledBlock && "blur-[4px] opacity-30 select-none pointer-events-none scale-[0.98]"
                               )}
                             >
                               {showScaffold && (
@@ -1404,8 +1409,15 @@ export function EnglishSplitViewDemo() {
                                   <div className="h-2/3 w-[5px] bg-amber-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(245,158,11,0.5)]" />
                                 </div>
                               )}
-                              {renderHighlightedText(p.text)}
-                            </p>
+                              
+                              {/* Explicitly handling newlines for Poetry to ensure stanza-like flow */}
+                              {p.text.split('\n').map((line, lineIdx, arr) => (
+                                <React.Fragment key={lineIdx}>
+                                  {renderHighlightedText(line)}
+                                  {lineIdx < arr.length - 1 && <br />}
+                                </React.Fragment>
+                              ))}
+                            </div>
                           </div>
                         );
                       };
