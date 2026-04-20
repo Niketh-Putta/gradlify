@@ -235,22 +235,25 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
 
           const { count } = await query;
           let finalCount = count || 0;
-          
-          if (isElevenPlus && currentSubject !== 'english') {
-            const hardcodedTotals: Record<string, number> = {
-              "Number & Arithmetic": 800,
-              "Algebra & Ratio": 360,
-              "Geometry & Measures": 500,
-              "Statistics & Data": 300,
-              "Problem Solving": 180
-            };
-            if (hardcodedTotals[s.id]) {
-              finalCount = elevenPlusDifficulty === 'mixed' ? hardcodedTotals[s.id] : Math.floor(hardcodedTotals[s.id] / 3);
+
+          if (isElevenPlus) {
+            if (currentSubject === 'english') {
+              if (s.id === 'Vocabulary') finalCount = 30;
+            } else {
+              const hardcodedTotals: Record<string, number> = {
+                "Number & Arithmetic": 800,
+                "Algebra & Ratio": 360,
+                "Geometry & Measures": 500,
+                "Statistics & Data": 300,
+                "Problem Solving": 180
+              };
+              if (hardcodedTotals[s.id]) {
+                finalCount = elevenPlusDifficulty === 'mixed' ? hardcodedTotals[s.id] : Math.floor(hardcodedTotals[s.id] / 3);
+              }
             }
           }
-          
-          return [s.id, finalCount] as const;
-        }));
+
+          return [s.id, finalCount] as const;        }));
         setTopicCounts(Object.fromEntries(results));
       } catch (e) { /* intentionally left empty */ }
     };

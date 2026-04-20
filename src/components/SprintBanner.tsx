@@ -24,7 +24,7 @@ export function SprintBanner({ className }: SprintBannerProps) {
           
           <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2">
             <span className="text-[12px] sm:text-base font-black tracking-tight uppercase sm:normal-case">
-              Do you want to win £100?
+              Do you want to win £160?
             </span>
             <span className="flex items-center gap-1.5 text-[11px] sm:text-sm font-bold bg-white/20 px-2 py-0.5 rounded-full backdrop-blur-md">
               Click here to see how the Gradlify Sprint works

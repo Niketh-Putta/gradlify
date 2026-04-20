@@ -332,7 +332,7 @@ export default function Connect() {
     return `Daily leaderboard (${formatDate(now)})`;
   }, [period]);
 
-  const displayLeaderboard = filteredLeaderboard;
+  const displayLeaderboard = filteredLeaderboard.slice(0, 100);
 
   return (
     <div className="w-full max-w-2xl mx-auto px-2 sm:px-6 py-3 sm:py-4 h-full flex flex-col overflow-x-hidden">
@@ -372,8 +372,7 @@ export default function Connect() {
               currentSubject === "english" ? "bg-amber-500/10 border-amber-500/20 text-amber-600" : "bg-primary/10 border-primary/20 text-primary"
             )}>
               <Trophy className="w-3 h-3" />
-              <span>Sprint: Apr 19 (8pm) - Apr 26 (8pm). Top 3 win cash prizes!</span>
-            </div>
+              <span>Sprint: Apr 20 (6:30pm) - Apr 27 (6:30pm). Top 3 win cash prizes!</span>            </div>
           </div>
 
           {/* Your Position */}
@@ -414,7 +413,7 @@ export default function Connect() {
               <Trophy className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h3 className="font-bold text-slate-900 text-[15px] sm:text-base leading-none mb-1.5">Want to win £100?</h3>
+              <h3 className="font-bold text-slate-900 text-[15px] sm:text-base leading-none mb-1.5">Want to win £160?</h3>
               <div className="flex items-center gap-1.5">
                 <span className={cn(
                   "text-[9px] font-black uppercase tracking-widest",

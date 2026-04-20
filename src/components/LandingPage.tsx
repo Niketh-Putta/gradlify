@@ -330,6 +330,10 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
         a: "You control the length. Start a short practice session or run a full mock when you have the time.",
       },
       {
+        q: "Who built this platform?",
+        a: "A student at QE Boys, Barnet named Niketh Putta",
+      },
+      {
         q: "Is there a free plan?",
         a: AI_FEATURE_ENABLED
           ? "Yes - start for free, then upgrade when you want deeper analytics and higher AI limits."

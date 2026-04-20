@@ -378,72 +378,147 @@ const TEST_DATA: EnglishSection[] = [
 ];
 
 // Completely Separate module for Vocab Practice (Never in Mock Exams)
-const VOCAB_PRACTICE: EnglishSection = {
-  sectionId: 'vocab',
-  subEngine: 'vocab',
-  title: 'SECTION E: VOCABULARY SYNONYMS',
-  icon: Languages,
-  desc: 'Vocabulary questions test your raw lexical knowledge and ability to infer meaning.',
-  leftTitle: 'Vocabulary Synonyms & Antonyms',
-  passageBlocks: [
-    { id: 'v1', text: "The ancient manor possessed an incredibly scrupulous and meticulous design, ensuring that every stone was perfectly aligned with the cosmos." },
-    { id: 'v2', text: "The wealthy owner was known to be heavily involved in the planning, rejecting any sporadic flashes of inspiration in favor of rigid structure." },
-    { id: 'v3', text: "His lethargic successors failed to maintain the facade, allowing ivy to aggressively pillage the grand stonework." },
-    { id: 'v4', text: "By sunset, the once-imposing edifice became a sinister silhouette, casting an ominous and deleterious shadow over the surrounding valleys." }
-  ],
-  questions: [
-    {
-      id: "v_q1", tag: "Synonym", tagColor: "bg-cyan-500/10 text-cyan-600 border-cyan-500/20",
-      text: "Based on line v1, find the closest synonym to the word 'meticulous'.", evidenceLine: "v1",
-      options: [
-        { id: "A", text: "Careless", trap: "Antonym.", correct: false },
-        { id: "B", text: "Painstaking", trap: null, correct: true },
-        { id: "C", text: "Ancient", trap: "Context word, not a synonym.", correct: false },
-        { id: "D", text: "Grand", trap: "Unrelated meaning.", correct: false }
-      ]
-    },
-    {
-      id: "v_q2", tag: "Antonym", tagColor: "bg-cyan-500/10 text-cyan-600 border-cyan-500/20",
-      text: "Based on line v2, find the closest antonym to the word 'sporadic'.", evidenceLine: "v2",
-      options: [
-        { id: "A", text: "Occasional", trap: "Synonym, not antonym.", correct: false },
-        { id: "B", text: "Sudden", trap: "Similar meaning.", correct: false },
-        { id: "C", text: "Constant", trap: null, correct: true },
-        { id: "D", text: "Erratic", trap: "Synonym.", correct: false }
-      ]
-    },
-    {
-      id: "v_q3", tag: "Synonym", tagColor: "bg-cyan-500/10 text-cyan-600 border-cyan-500/20",
-      text: "Based on line v3, find the closest synonym to the word 'lethargic'.", evidenceLine: "v3",
-      options: [
-        { id: "A", text: "Energetic", trap: "Antonym.", correct: false },
-        { id: "B", text: "Sluggish", trap: null, correct: true },
-        { id: "C", text: "Wealthy", trap: "Refers to the predecessor.", correct: false },
-        { id: "D", text: "Aggressive", trap: "Context word, not synonym.", correct: false }
-      ]
-    },
-    {
-      id: "v_q4", tag: "Synonym", tagColor: "bg-cyan-500/10 text-cyan-600 border-cyan-500/20",
-      text: "Based on line v3, find the closest synonym to the word 'pillage'.", evidenceLine: "v3",
-      options: [
-        { id: "A", text: "Preserve", trap: "Antonym.", correct: false },
-        { id: "B", text: "Decorate", trap: "Incorrect understanding of the ivy's effect.", correct: false },
-        { id: "C", text: "Plunder", trap: null, correct: true },
-        { id: "D", text: "Climb", trap: "Literal action of ivy, not the meaning of 'pillage'.", correct: false }
-      ]
-    },
-    {
-      id: "v_q5", tag: "Antonym", tagColor: "bg-cyan-500/10 text-cyan-600 border-cyan-500/20",
-      text: "Based on line v4, find the closest antonym to the word 'deleterious'.", evidenceLine: "v4",
-      options: [
-        { id: "A", text: "Harmful", trap: "Synonym, not antonym.", correct: false },
-        { id: "B", text: "Sinister", trap: "Context word.", correct: false },
-        { id: "C", text: "Beneficial", trap: null, correct: true },
-        { id: "D", text: "Toxic", trap: "Synonym.", correct: false }
-      ]
-    }
-  ]
-};
+// Completely Separate module for Vocab Practice (Fallback when DB is empty)
+const VOCAB_PRACTICE_SET: EnglishSection[] = [
+  {
+    sectionId: 'vocab_1',
+    subEngine: 'vocab',
+    title: 'SECTION E: VOCABULARY SYNONYMS',
+    icon: Languages,
+    desc: 'Vocabulary questions test your raw lexical knowledge and ability to infer meaning.',
+    leftTitle: 'Vocabulary: The Ancient Manor',
+    passageBlocks: [
+      { id: 'v1', text: "The ancient manor possessed an incredibly scrupulous and meticulous design, ensuring that every stone was perfectly aligned with the cosmos." },
+      { id: 'v2', text: "The wealthy owner was known to be heavily involved in the planning, rejecting any sporadic flashes of inspiration in favor of rigid structure." },
+      { id: 'v3', text: "His lethargic successors failed to maintain the facade, allowing ivy to aggressively pillage the grand stonework." },
+      { id: 'v4', text: "By sunset, the once-imposing edifice became a sinister silhouette, casting an ominous and deleterious shadow over the surrounding valleys." }
+    ],
+    questions: [
+      {
+        id: "v1_q1", tag: "Synonym", tagColor: "bg-cyan-500/10 text-cyan-600 border-cyan-500/20",
+        text: "Based on line v1, find the closest synonym to the word 'meticulous'.", evidenceLine: "v1",
+        options: [
+          { id: "A", text: "Careless", trap: "Antonym.", correct: false },
+          { id: "B", text: "Painstaking", trap: null, correct: true },
+          { id: "C", text: "Ancient", trap: "Context word, not a synonym.", correct: false },
+          { id: "D", text: "Grand", trap: "Unrelated meaning.", correct: false }
+        ]
+      },
+      {
+        id: "v1_q2", tag: "Antonym", tagColor: "bg-cyan-500/10 text-cyan-600 border-cyan-500/20",
+        text: "Based on line v2, find the closest antonym to the word 'sporadic'.", evidenceLine: "v2",
+        options: [
+          { id: "A", text: "Occasional", trap: "Synonym, not antonym.", correct: false },
+          { id: "B", text: "Sudden", trap: "Similar meaning.", correct: false },
+          { id: "C", text: "Constant", trap: null, correct: true },
+          { id: "D", text: "Erratic", trap: "Synonym.", correct: false }
+        ]
+      },
+      {
+        id: "v1_q3", tag: "Synonym", tagColor: "bg-cyan-500/10 text-cyan-600 border-cyan-500/20",
+        text: "Based on line v3, find the closest synonym to the word 'lethargic'.", evidenceLine: "v3",
+        options: [
+          { id: "A", text: "Energetic", trap: "Antonym.", correct: false },
+          { id: "B", text: "Sluggish", trap: null, correct: true },
+          { id: "C", text: "Wealthy", trap: "Refers to the predecessor.", correct: false },
+          { id: "D", text: "Aggressive", trap: "Context word, not synonym.", correct: false }
+        ]
+      },
+      {
+        id: "v1_q4", tag: "Synonym", tagColor: "bg-cyan-500/10 text-cyan-600 border-cyan-500/20",
+        text: "Based on line v3, find the closest synonym to the word 'pillage'.", evidenceLine: "v3",
+        options: [
+          { id: "A", text: "Preserve", trap: "Antonym.", correct: false },
+          { id: "B", text: "Decorate", trap: "Incorrect understanding of the ivy's effect.", correct: false },
+          { id: "C", text: "Plunder", trap: null, correct: true },
+          { id: "D", text: "Climb", trap: "Literal action of ivy, not the meaning of 'pillage'.", correct: false }
+        ]
+      },
+      {
+        id: "v1_q5", tag: "Antonym", tagColor: "bg-cyan-500/10 text-cyan-600 border-cyan-500/20",
+        text: "Based on line v4, find the closest antonym to the word 'deleterious'.", evidenceLine: "v4",
+        options: [
+          { id: "A", text: "Harmful", trap: "Synonym, not antonym.", correct: false },
+          { id: "B", text: "Sinister", trap: "Context word.", correct: false },
+          { id: "C", text: "Beneficial", trap: null, correct: true },
+          { id: "D", text: "Toxic", trap: "Synonym.", correct: false }
+        ]
+      }
+    ]
+  },
+  {
+    sectionId: 'vocab_2',
+    subEngine: 'vocab',
+    title: 'SECTION E: VOCABULARY SYNONYMS',
+    icon: Languages,
+    desc: 'Vocabulary questions test your raw lexical knowledge and ability to infer meaning.',
+    leftTitle: 'Vocabulary: The Hidden Laboratory',
+    passageBlocks: [
+      { id: 'v2_1', text: "Deep within the subterranean chamber, the alchemist labored with fervent intensity, his eyes fixed on the effervescent liquid." },
+      { id: 'v2_2', text: "The atmosphere was thick with the acrid scent of sulfur, yet he remained undeterred by the hazardous environment." },
+      { id: 'v2_3', text: "Suddenly, the mixture began to oscillate violently, threatening to breach the fragile glass vessel." },
+      { id: 'v2_4', text: "With a dexterous flick of his wrist, he added a pinch of cobalt, causing the volatility to subside into a tranquil glow." }
+    ],
+    questions: [
+      {
+        id: "v2_q1", tag: "Synonym", tagColor: "bg-cyan-500/10 text-cyan-600 border-cyan-500/20",
+        text: "Based on line v2_1, find the closest synonym to 'fervent'.", evidenceLine: "v2_1",
+        options: [
+          { id: "A", text: "Apathetic", trap: "Antonym.", correct: false },
+          { id: "B", text: "Passionate", trap: null, correct: true },
+          { id: "C", text: "Quiet", trap: "Unrelated.", correct: false },
+          { id: "D", text: "Subtle", trap: "Opposite of intense.", correct: false }
+        ]
+      },
+      {
+        id: "v2_q2", tag: "Synonym", tagColor: "bg-cyan-500/10 text-cyan-600 border-cyan-500/20",
+        text: "Based on line v2_2, find the closest synonym to 'acrid'.", evidenceLine: "v2_2",
+        options: [
+          { id: "A", text: "Sweet", trap: "Antonym.", correct: false },
+          { id: "B", text: "Pungent", trap: null, correct: true },
+          { id: "C", text: "Floral", trap: "Pleasant scent.", correct: false },
+          { id: "D", text: "Mild", trap: "Opposite of strong/acrid.", correct: false }
+        ]
+      }
+    ]
+  },
+  {
+    sectionId: 'vocab_3',
+    subEngine: 'vocab',
+    title: 'SECTION E: VOCABULARY SYNONYMS',
+    icon: Languages,
+    desc: 'Vocabulary questions test your raw lexical knowledge and ability to infer meaning.',
+    leftTitle: 'Vocabulary: The Arctic Expedition',
+    passageBlocks: [
+      { id: 'v3_1', text: "The explorers faced the desolate tundra, where the permafrost remained an unyielding barrier to their progress." },
+      { id: 'v3_2', text: "Despite their meager rations, the team displayed remarkable fortitude as they navigated the treacherous glaciers." },
+      { id: 'v3_3', text: "The silence was absolute, broken only by the ephemeral howling of a distant wolf." },
+      { id: 'v3_4', text: "They hoped to reach the summit by dawn, but the inclement weather forced them to seek refuge in a shallow cavern." }
+    ],
+    questions: [
+      {
+        id: "v3_q1", tag: "Synonym", tagColor: "bg-cyan-500/10 text-cyan-600 border-cyan-500/20",
+        text: "Based on line v3_1, find the closest synonym to 'desolate'.", evidenceLine: "v3_1",
+        options: [
+          { id: "A", text: "Crowded", trap: "Antonym.", correct: false },
+          { id: "B", text: "Barren", trap: null, correct: true },
+          { id: "C", text: "Tropical", trap: "Opposite climate.", correct: false },
+          { id: "D", text: "Lively", trap: "Opposite mood.", correct: false }
+        ]
+      },
+      {
+        id: "v3_q2", tag: "Synonym", tagColor: "bg-cyan-500/10 text-cyan-600 border-cyan-500/20",
+        text: "Based on line v3_4, find the closest synonym to 'inclement'.", evidenceLine: "v3_4",
+        options: [
+          { id: "A", text: "Sunny", trap: "Antonym.", correct: false },
+          { id: "B", text: "Severe", trap: null, correct: true },
+          { id: "C", text: "Mild", trap: "Opposite of inclement.", correct: false },
+          { id: "D", text: "Pleasant", trap: "Antonym.", correct: false }
+        ]
+      }
+    ]
+  }
+];
 
 export function EnglishSplitViewDemo() {
   const [searchParams] = useSearchParams();
@@ -460,7 +535,7 @@ export function EnglishSplitViewDemo() {
   useEffect(() => {
     const fetchPassages = async () => {
       try {
-        let query = supabase.from('english_passages' as any).select('*');
+        let query = supabase.from('english_passages' as any).select('*').eq('track', '11plus');
         if (diffParam && diffParam !== 'mixed' && diffParam !== 'all') {
            query = query.eq('difficulty', parseInt(diffParam));
         }
@@ -589,7 +664,7 @@ export function EnglishSplitViewDemo() {
   // 1. FILTERING LOGIC
   const activeSections = useMemo(() => {
     // Source data: Prefer DB sections, fallback to TEST_DATA
-    const sourceData = dbSections.length > 0 ? dbSections : [...TEST_DATA, VOCAB_PRACTICE];
+    const sourceData = dbSections.length > 0 ? dbSections : [...TEST_DATA, ...VOCAB_PRACTICE_SET];
     
     // We re-shuffle if:
     // 1. ShuffledRef hasn't been set yet.
@@ -652,7 +727,15 @@ export function EnglishSplitViewDemo() {
         }
     }
     
-    if (selectedTopics.includes('vocabulary') && groups.vocab.length > 0) finalSections.push(groups.vocab[0]);
+    if (selectedTopics.includes('vocabulary') && groups.vocab.length > 0) {
+        if (examMode === 'mock') {
+            // For a 50-question mock, we need 5 vocab passages (10 Qs each)
+            finalSections.push(...groups.vocab.slice(0, 5));
+        } else {
+            // Standard practice: Just ONE passage as requested by the user
+            finalSections.push(groups.vocab[0]);
+        }
+    }
     
     // Safety fallback
     if (finalSections.length === 0) finalSections = sourceData.slice(0, 1);

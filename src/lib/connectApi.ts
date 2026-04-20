@@ -139,7 +139,7 @@ export async function getLeaderboard(
 
   // 2. ALWAYS perform raw calculation as a safety net (since migrations might be pending)
   try {
-    const sprintStart = new Date('2026-04-19T20:00:00Z');
+    const sprintStart = new Date('2026-04-20T17:30:00Z');
     const { data: mocks } = await supabase
       .from('mock_attempts')
       .select('user_id, score, track')
@@ -188,9 +188,8 @@ export async function getLeaderboard(
     console.error('Safety net calculation failed:', e);
   }
 
-  // Filter out zero scores and re-rank
-  const finalEntries = dbEntries.filter(e => Number(e.correct_count) > 0);
-  return rankLeaderboardEntries(finalEntries);
+  // Re-rank all entries
+  return rankLeaderboardEntries(dbEntries);
 }
 
 export async function getSprintTop10(sprintId: string): Promise<SprintTopEntry[]> {

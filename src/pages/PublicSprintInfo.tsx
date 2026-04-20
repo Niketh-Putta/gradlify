@@ -30,7 +30,7 @@ export default function PublicSprintInfo() {
           <h1 className="mb-6 text-4xl font-extrabold tracking-tight text-slate-900 sm:text-7xl">
             Want to <br />
             win <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-700">
-              £100?
+              £160?
             </span>
           </h1>
           <p className="max-w-xl text-lg font-medium leading-relaxed text-slate-400 sm:text-xl">
@@ -63,7 +63,7 @@ export default function PublicSprintInfo() {
         <section className="mb-24">
           <div className="relative overflow-hidden rounded-[32px] border border-slate-200/60 bg-white p-3 shadow-2xl shadow-slate-200/40">
             <img 
-              src="/sprint-prizes.jpg" 
+              src="/sprint-prizes-new.jpeg" 
               alt="Gradlify Sprint Podium" 
               className="rounded-[24px] w-full object-cover"
             />
@@ -75,25 +75,25 @@ export default function PublicSprintInfo() {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div className="rounded-2xl border border-slate-200 bg-white/50 p-6">
               <span className="text-[10px] font-black uppercase tracking-widest text-amber-500">1st Place</span>
+              <div className="mt-1 text-3xl font-bold text-slate-900 font-serif italic">£75</div>
+              <p className="mt-2 text-xs font-medium text-slate-400">Amazon Gift Voucher</p>
+            </div>
+            <div className="rounded-2xl border border-slate-200 bg-white/50 p-6">
+              <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">2nd Place</span>
               <div className="mt-1 text-3xl font-bold text-slate-900 font-serif italic">£50</div>
               <p className="mt-2 text-xs font-medium text-slate-400">Waterstones Gift Card</p>
             </div>
             <div className="rounded-2xl border border-slate-200 bg-white/50 p-6">
-              <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">2nd Place</span>
-              <div className="mt-1 text-3xl font-bold text-slate-900 font-serif italic">£35</div>
-              <p className="mt-2 text-xs font-medium text-slate-400">Waterstones + Amazon</p>
-            </div>
-            <div className="rounded-2xl border border-slate-200 bg-white/50 p-6">
               <span className="text-[10px] font-black uppercase tracking-widest text-orange-700/60">3rd Place</span>
-              <div className="mt-1 text-3xl font-bold text-slate-900 font-serif italic">£25</div>
-              <p className="mt-2 text-xs font-medium text-slate-400">Waterstones Gift Card</p>
+              <div className="mt-1 text-3xl font-bold text-slate-900 font-serif italic">£35</div>
+              <p className="mt-2 text-xs font-medium text-slate-400">£25 Waterstones + £10 Amazon</p>
             </div>
           </div>
         </section>
 
         {/* Meta Info */}
         <footer className="border-t border-slate-200 pt-12 text-center">
-          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-300 mb-4">Starts Monday, 20 April</p>
+          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-300 mb-4">Starts Monday, 20 April • 6:30 PM</p>
           <p className="text-sm font-medium text-slate-400">Join Gradlify today to start your sprint.</p>
           <button 
             onClick={() => navigate("/11-plus")}

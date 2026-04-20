@@ -6,9 +6,9 @@ import { useAppContext } from "@/hooks/useAppContext";
 import { normalizeTrack, resolveUserTrack } from "@/lib/track";
 import { getFoundersSprintInfo, getNextSprintInfo } from "@/lib/foundersSprint";
 
-const START_DATE = new Date("2026-04-19T20:00:00Z");
-const EVENT_END_LABEL = "Sunday 26 April 2026 • 8:00 PM UTC";
-const EVENT_START_LABEL = "Sunday 19 April 2026";
+const START_DATE = new Date("2026-04-20T17:30:00Z");
+const EVENT_END_LABEL = "Monday 27 April 2026 • 6:30 PM UTC";
+const EVENT_START_LABEL = "Monday 20 April 2026";
 
 const getSprintCountdown = () => {
   const now = new Date();
@@ -127,7 +127,7 @@ export function SprintHowItWorks() {
                           11+ Launch Sprint
                         </h1>
                         <p className="mt-3 max-w-[52ch] text-lg text-slate-600 sm:text-xl">
-                          One week. £100 prize pool. 11+ only.
+                          One week. £160 prize pool. 11+ only.
                         </p>
                         <p className="mt-1 text-sm text-slate-500">
                           This sprint is for the 11+ track only. GCSE content and leaderboards remain separate.
@@ -231,19 +231,19 @@ export function SprintHowItWorks() {
                       </div>
                     </div>
                     <div>
-                      <p className="text-lg font-semibold text-slate-900">Total Prize Pool: £100</p>
+                      <p className="text-lg font-semibold text-slate-900">Total Prize Pool: £160</p>
                       <div className="mt-3 space-y-2 text-sm text-slate-600">
                         <div className="flex items-center gap-2">
                           <span className="text-lg">🥇</span>
-                          <span className="font-semibold text-slate-800">1st place - £50</span>
+                          <span className="font-semibold text-slate-800">1st place - £75 Amazon Voucher</span>
                         </div>
                         <div className="flex items-center gap-2">
                           <span className="text-lg">🥈</span>
-                          <span className="font-semibold text-slate-800">2nd place - £30</span>
+                          <span className="font-semibold text-slate-800">2nd place - £50 Waterstones Card</span>
                         </div>
                         <div className="flex items-center gap-2">
                           <span className="text-lg">🥉</span>
-                          <span className="font-semibold text-slate-800">3rd place - £20</span>
+                          <span className="font-semibold text-slate-800">3rd place - £35 (£25 Waterstones + £10 Amazon)</span>
                         </div>
                       </div>
                       <p className="mt-4 text-xs text-slate-500">Digital vouchers distributed within 24 hours of sprint end.</p>

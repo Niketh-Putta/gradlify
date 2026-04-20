@@ -44,12 +44,12 @@ export function SprintDetails() {
               <span className={cn(
                 "text-[8px] font-black uppercase tracking-[0.2em]",
                 isEnglish ? "text-amber-600" : "text-primary"
-              )}>Starts 19 April</span>
+              )}>Starts 20 April</span>
             </div>
             <h1 className="mb-6 text-4xl font-extrabold tracking-tight text-slate-900 sm:text-6xl lg:text-7xl">
               Want to <br className="hidden sm:block" />
               win <span className={cn("text-transparent bg-clip-text bg-gradient-to-r", isEnglish ? "from-amber-500 to-amber-700" : "from-primary to-blue-700")}>
-                £100?
+                £160?
               </span>
             </h1>
             <p className="max-w-xl text-base font-medium leading-relaxed text-slate-400 sm:text-lg italic">
@@ -82,7 +82,7 @@ export function SprintDetails() {
             <div className="relative group mx-auto max-w-4xl overflow-hidden rounded-[32px] bg-white border border-border/40 p-3 sm:p-4 shadow-xl shadow-slate-200/40 transition-all hover:shadow-2xl hover:border-primary/20">
               <div className="aspect-[16/10] sm:aspect-[16/9] w-full overflow-hidden rounded-[24px]">
                 <img 
-                  src="/sprint-prizes.jpg" 
+                  src="/sprint-prizes-new.jpeg" 
                   alt="Gradlify Sprint Podium" 
                   className="h-full w-full object-cover transition-transform duration-1000 group-hover:scale-105"
                 />
@@ -103,9 +103,9 @@ export function SprintDetails() {
                   <span className="text-[10px] font-black uppercase tracking-widest text-amber-500">1st</span>
                   <div className="h-1.5 w-1.5 rounded-full bg-amber-500" />
                 </div>
-                <div className="mb-1 text-4xl font-bold text-slate-900 tracking-tighter font-serif italic">£50</div>
+                <div className="mb-1 text-4xl font-bold text-slate-900 tracking-tighter font-serif italic">£75</div>
                 <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-4">Reward</p>
-                <p className="text-xs font-medium leading-relaxed text-slate-500">Waterstones Gift Card</p>
+                <p className="text-xs font-medium leading-relaxed text-slate-500">Amazon Gift Voucher</p>
               </div>
 
               {/* 2nd Place */}
@@ -114,9 +114,9 @@ export function SprintDetails() {
                   <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">2nd</span>
                   <div className="h-1.5 w-1.5 rounded-full bg-slate-300" />
                 </div>
-                <div className="mb-1 text-4xl font-bold text-slate-900 tracking-tighter font-serif italic">£35</div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-4">Total</p>
-                <p className="text-xs font-medium leading-relaxed text-slate-500">£25 Waterstones + £10 Amazon</p>
+                <div className="mb-1 text-4xl font-bold text-slate-900 tracking-tighter font-serif italic">£50</div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-4">Reward</p>
+                <p className="text-xs font-medium leading-relaxed text-slate-500">Waterstones Gift Card</p>
               </div>
 
               {/* 3rd Place */}
@@ -125,9 +125,9 @@ export function SprintDetails() {
                   <span className="text-[10px] font-black uppercase tracking-widest text-orange-700/60">3rd</span>
                   <div className="h-1.5 w-1.5 rounded-full bg-orange-200" />
                 </div>
-                <div className="mb-1 text-4xl font-bold text-slate-900 tracking-tighter font-serif italic">£25</div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-4">Reward</p>
-                <p className="text-xs font-medium leading-relaxed text-slate-500">Waterstones Gift Card</p>
+                <div className="mb-1 text-4xl font-bold text-slate-900 tracking-tighter font-serif italic">£35</div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-4">Total</p>
+                <p className="text-xs font-medium leading-relaxed text-slate-500">£25 Waterstones + £10 Amazon</p>
               </div>
             </div>
           </section>
@@ -137,7 +137,7 @@ export function SprintDetails() {
             <div className="space-y-3">
               <h4 className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-900">Timing Policy</h4>
               <p className="text-base leading-relaxed text-slate-500">
-                Points reset this <span className="text-slate-900 font-semibold underline decoration-slate-200 decoration-2 underline-offset-4">Sunday, 19 April at 20:00</span>. Competition window ends next Sunday 8pm.
+                Points have been reset on <span className="text-slate-900 font-semibold underline decoration-slate-200 decoration-2 underline-offset-4">Monday, 20 April at 18:30</span>. Competition window ends next Monday 6:30pm.
               </p>
             </div>
             <div className="space-y-3">
