@@ -935,17 +935,16 @@ export function EnglishSplitViewDemo() {
     return () => observer.disconnect();
   }, [activeSections, isFinished, examMode, activeQuestionId]);
 
-  // SYNCHRONIZED LEFT PASSAGE SCROLLING
-  // When active question changes, firmly snap the left pane to the correct Passage Section!
+  // INTELLIZED SYNCHRONIZED SCROLLING
+  // Precisely centers the active evidence/passage block in the left pane
   useEffect(() => {
-    if (!activeQuestionId) return;
+    if (!activeQuestionId || !passageContainerRef.current) return;
     
-    // Debounce to prevent scroll wars while user is actively scrolling the right pane
     const timer = setTimeout(() => {
       let targetSectionId = null;
       let targetEvidenceLine = null;
       
-      // Find who owns this question
+      // 1. Identify which section and evidence line we need to find
       for (const sec of activeSections) {
         const q = sec.questions.find(x => `${sec.uniqueId}_${x.id}` === activeQuestionId);
         if (q) {
@@ -955,41 +954,30 @@ export function EnglishSplitViewDemo() {
         }
       }
 
-      const isGlobal = !targetEvidenceLine || targetEvidenceLine === 'global' || targetEvidenceLine === 'Overall' || targetEvidenceLine?.toLowerCase().includes('overall');
+      // 2. Locate the specific element
+      const targetSec = activeSections.find(s => s.sectionId === targetSectionId);
+      const uniqueRefKey = `${targetSec?.uniqueId || targetSectionId}_${targetEvidenceLine}`;
       
-      if (isGlobal) {
-        if (targetSectionId && passageSectionRefs.current[targetSectionId]) {
-          passageSectionRefs.current[targetSectionId]?.scrollIntoView({ 
-            behavior: 'smooth', 
-            block: 'center'
-          });
-        }
-        return; 
-      }
-
-      if (targetSectionId && targetEvidenceLine) {
-        // Find the absolute uniqueId from the section instance
-        const targetSec = activeSections.find(s => s.sectionId === targetSectionId);
-        const uniqueRefKey = `${targetSec?.uniqueId || targetSectionId}_${targetEvidenceLine}`;
-        const targetElement = passageLineRefs.current[uniqueRefKey];
+      // Try evidence block first, then the whole section as fallback
+      const targetElement = passageLineRefs.current[uniqueRefKey] || passageSectionRefs.current[targetSectionId || ''];
+      
+      if (targetElement && passageContainerRef.current) {
+        const container = passageContainerRef.current;
+        const containerRect = container.getBoundingClientRect();
+        const elementRect = targetElement.getBoundingClientRect();
         
-        if (targetElement) {
-          targetElement.scrollIntoView({ 
-            behavior: 'smooth', 
-            block: 'center' 
-          });
-          return;
-        }
-      }
-      
-      // Fallback scroll if exact paragraph missing
-      if (targetSectionId && passageSectionRefs.current[targetSectionId]) {
-        passageSectionRefs.current[targetSectionId]?.scrollIntoView({ 
-          behavior: 'smooth', 
-          block: 'center' 
+        // Calculate exact distance to bring element's center to container's center
+        const elementCenter = elementRect.top + (elementRect.height / 2);
+        const containerCenter = containerRect.top + (containerRect.height / 2);
+        const scrollDiff = elementCenter - containerCenter;
+
+        // Perform the smooth scroll
+        container.scrollBy({
+          top: scrollDiff,
+          behavior: 'smooth'
         });
       }
-    }, 150);
+    }, 100); // Slightly faster debounce for responsiveness
 
     return () => clearTimeout(timer);
   }, [activeQuestionId, activeSections]);
