@@ -1241,9 +1241,9 @@ export function EnglishSplitViewDemo() {
                             )}
                             <p 
                               className={cn(
-                                "transition-all duration-200 ease-out p-4 -mx-4 rounded-xl relative border-l-[3px]",
+                                "transition-all duration-200 ease-out p-2 sm:p-3 -mx-2 sm:-mx-3 rounded-xl relative border-l-[3px]",
                                 showScaffold 
-                                  ? "bg-amber-50/90 dark:bg-amber-500/10 border-amber-500 shadow-md ring-1 ring-amber-500/30 text-foreground z-10 scale-[1.02]" 
+                                  ? "bg-amber-50/90 dark:bg-amber-500/10 border-amber-500 shadow-md ring-1 ring-amber-500/30 text-foreground z-10 scale-[1.01]" 
                                   : "border-transparent opacity-75 group-hover:opacity-100 hover:bg-black/5 dark:hover:bg-white/5",
                                 isPaywalledBlock && "blur-[3px] opacity-40 select-none pointer-events-none scale-[0.98]"
                               )}
@@ -1376,9 +1376,9 @@ export function EnglishSplitViewDemo() {
                   : (subTopic ? `${subTopic} ${typeNoun}` : `${parentTopic} ${typeNoun}`);
 
                 return (
-                  <div key={section.sectionId} className={cn("mb-16", secIndex === 0 && examMode === 'practice' ? "mt-4" : "")}>
-                    <div className={cn("relative flex flex-col md:flex-row justify-between items-start md:items-end gap-6 w-full border-b border-border/60 pb-5 mb-10", secIndex === 0 ? "mt-4" : "mt-14")}>
-                      <div className="flex flex-col gap-1.5 items-start">
+                  <div key={section.sectionId} className={cn("mb-10", secIndex === 0 && examMode === 'practice' ? "mt-4" : "")}>
+                    <div className={cn("relative flex flex-col md:flex-row justify-between items-start md:items-end gap-4 w-full border-b border-border/60 pb-3 mb-6", secIndex === 0 ? "mt-4" : "mt-8")}>
+                      <div className="flex flex-col gap-1 items-start">
                         <span className="px-2 py-0.5 rounded text-[9px] font-black tracking-[0.15em] uppercase bg-foreground/10 text-foreground/60">{badgeLabel}</span>
                         <span className="text-xl font-bold tracking-tight text-foreground/90">{displayTitle}</span>
                       </div>
@@ -1392,7 +1392,7 @@ export function EnglishSplitViewDemo() {
                         </span>
                       )}
                     </div>
-                    <div className="space-y-12">
+                    <div className="space-y-6">
                       {(() => {
                         const PAYWALL_THRESHOLD = 3;
                         const getIsPaywalledQuestion = (qIndex: number) => {
@@ -1413,9 +1413,9 @@ export function EnglishSplitViewDemo() {
                               ref={(el) => { questionRefs.current[qKey] = el; }}
                               onClick={() => { if (isPaywalledQuestion) setShowPaywall(true); }}
                               className={cn(
-                                "p-4 sm:p-6 rounded-2xl border transition-all duration-150 ease-out cursor-default scroll-m-24 relative snap-center",
+                                "p-3 sm:p-4 rounded-2xl border transition-all duration-150 ease-out cursor-default scroll-m-24 relative snap-center",
                                 isSelected 
-                                  ? (examMode === 'mock' ? "border-amber-500/30 dark:border-amber-500/40 bg-card shadow-lg ring-1 ring-amber-500/10 scale-[1.02]" : "border-amber-500/50 bg-card shadow-xl ring-4 ring-amber-500/10 scale-[1.02]")
+                                  ? (examMode === 'mock' ? "border-amber-500/30 dark:border-amber-500/40 bg-card shadow-lg ring-1 ring-amber-500/10 scale-[1.01]" : "border-amber-500/50 bg-card shadow-xl ring-4 ring-amber-500/10 scale-[1.01]")
                                   : "border-border/60 dark:border-amber-500/20 bg-card/40 hover:bg-card/80 hover:border-amber-500/30 opacity-60 hover:opacity-100",
                                 isPaywalledQuestion && "blur-[2px] opacity-40 select-none pointer-events-none scale-[0.98]"
                               )}
@@ -1441,11 +1441,11 @@ export function EnglishSplitViewDemo() {
                               </div>
                             </div>
                             
-                            <h3 className="text-sm sm:text-[15px] font-semibold leading-relaxed mb-4 sm:mb-6">
+                            <h3 className="text-[13px] sm:text-sm font-semibold leading-relaxed mb-3 sm:mb-4">
                               {q.text}
                             </h3>
 
-                            <div className="space-y-3">
+                            <div className="space-y-2">
                               {q.options.map((opt) => {
                                 const selected = selectedAnswers[qKey] === opt.id;
                                 const isViewedInReview = isReviewMode && reviewViewedOptions[qKey] === opt.id;
@@ -1468,7 +1468,7 @@ export function EnglishSplitViewDemo() {
                                         handleSelectAnswer(qKey, opt.id);
                                       }}
                                       className={cn(
-                                        "w-full text-left p-3 sm:p-4 rounded-xl border transition-all duration-200 flex items-center gap-3 sm:gap-4 group",
+                                        "w-full text-left p-2.5 sm:p-3 rounded-xl border transition-all duration-200 flex items-center gap-2.5 sm:gap-3 group",
                                         selected 
                                           ? ((examMode === 'mock' && !isReviewMode)
                                               ? "border-amber-500 bg-amber-500/5 text-amber-900 dark:text-amber-100 ring-2 ring-amber-500/20" 
@@ -1481,7 +1481,7 @@ export function EnglishSplitViewDemo() {
                                       )}
                                     >
                                       <span className={cn(
-                                        "w-7 h-7 sm:w-8 sm:h-8 shrink-0 rounded-lg flex items-center justify-center text-xs font-bold transition-colors shadow-sm",
+                                        "w-6 h-6 sm:w-7 sm:h-7 shrink-0 rounded-lg flex items-center justify-center text-[11px] font-bold transition-colors shadow-sm",
                                         selected
                                           ? ((examMode === 'mock' && !isReviewMode) ? "bg-amber-500 text-white shadow-md shadow-amber-500/30" : (opt.correct ? "bg-emerald-500 text-white shadow-md shadow-emerald-500/20" : "bg-rose-500 text-white shadow-md shadow-rose-500/20"))
                                           : (isReviewMode && opt.correct
@@ -1490,7 +1490,7 @@ export function EnglishSplitViewDemo() {
                                       )}>
                                         {opt.id}
                                       </span>
-                                      <span className="flex-1 text-sm sm:text-[15px] font-medium leading-normal">
+                                      <span className="flex-1 text-[13px] sm:text-sm font-medium leading-normal">
                                         {opt.text}
                                       </span>
                                       {selected && examMode === 'mock' && <Check className="w-4 h-4 sm:w-5 sm:h-5 shrink-0 text-amber-500 font-bold" />}
