@@ -623,7 +623,16 @@ export function EnglishSplitViewDemo() {
     let finalSections: EnglishSection[] = [];
 
     // Filter down to the user's requested topics. 
-    if (selectedTopics.includes('comprehension') && groups.comprehension.length > 0) finalSections.push(groups.comprehension[0]);
+    if (selectedTopics.includes('comprehension') && groups.comprehension.length > 0) {
+        // If we have many in the bank, we can show multiple if it's a mock, 
+        // but for practice one is enough. However, we must ensure it's a ROTATING one.
+        // The shuffled list already has unseen ones at the top.
+        if (examMode === 'mock') {
+            finalSections.push(...groups.comprehension.slice(0, 2)); // Show 2 for mocks
+        } else {
+            finalSections.push(groups.comprehension[0]); // Show the first (most unseen) one for practice
+        }
+    }
     
     // Restore 10 questions: 
     // If the data source has 10 questions (DB), take 1 section.
