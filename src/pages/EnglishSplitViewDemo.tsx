@@ -718,55 +718,63 @@ export function EnglishSplitViewDemo() {
     const subtopicParam = (searchParams.get('subtopic') || "").toLowerCase();
     const selection: EnglishSection[] = [];
 
-    // Helper: Pick ONE fresh passage from any provided pool
+    // Helper: Pick ONE fresh passage from any provided pool, strictly avoiding 'seen' list if possible
     const pickOne = (pool: EnglishSection[]) => {
       if (pool.length === 0) return null;
-      const unseen = pool.find(p => !seen.includes(p.uniqueId));
-      if (unseen) return unseen;
-      // Restart cycle with random variety if all seen
-      return pool[Math.floor(sessionSeed * 10000) % pool.length];
+      // 1. Try strictly unseen
+      const unseen = pool.filter(p => !seen.includes(p.uniqueId));
+      if (unseen.length > 0) {
+        return unseen[Math.floor(sessionSeed * 777) % unseen.length];
+      }
+      // 2. Fallback to any if all seen, but use a stable random choice
+      return pool[Math.floor(sessionSeed * 123) % pool.length];
     };
 
-    // 1. COMPREHENSION (Exactly 1)
+    // Slot 1: Comprehension (Exactly 1)
     if (selectedTopics.includes('comprehension')) {
       let pool = compPool;
-      // Handle sub-filters (Fiction/Poetry/etc)
       const subFilter = subtopicParam.split(',').find(f => f.includes('comp|') || f.match(/fiction|poetry|non_fiction/));
       if (subFilter) {
-        const type = subFilter.split('|').pop();
-        const filtered = compPool.filter(c => (c.subEngine || "").toLowerCase().includes(type || ""));
+        const type = subFilter.split('|').pop() || subFilter;
+        const filtered = compPool.filter(c => (c.subEngine || "").toLowerCase().includes(type));
         if (filtered.length > 0) pool = filtered;
       }
       const passage = pickOne(pool);
       if (passage) {
-        // Enforce 5-question limit ONLY if a sub-filter was active
-        const finalP = subFilter ? { ...passage, questions: passage.questions.slice(0, 5) } : passage;
-        selection.push(finalP);
+        selection.push(subFilter ? { ...passage, questions: passage.questions.slice(0, 5) } : passage);
       }
     }
 
-    // 2. SPAG (Exactly 1)
+    // Slot 2: SPaG (Exactly 1 per requested sub-topic in Mocks, or 1 total in Practice)
     if (selectedTopics.includes('spag')) {
-      let pool = spagPool;
-      const subFilter = subtopicParam.split(',').find(f => f.match(/spell|punct|gramm/));
-      if (subFilter) {
-        pool = spagPool.filter(s => (s.subEngine || "").toLowerCase().includes(subFilter.split('|').pop() || ""));
-      }
-      const passage = pickOne(pool.length > 0 ? pool : spagPool);
-      if (passage) {
-        // Enforce 5-question limit if sub-filtering is active
-        const finalP = subFilter ? { ...passage, questions: passage.questions.slice(0, 5) } : passage;
-        selection.push(finalP);
+      const activeSubKeys = subtopicParam.split(',').filter(k => k.match(/spell|punct|gramm/));
+      
+      if (examMode === 'mock' && activeSubKeys.length > 0) {
+        // MOCK MODE: Give one for EACH specifically checked subtopic to form a full technical paper
+        activeSubKeys.forEach(k => {
+          const type = k.split('|').pop() || k;
+          const subPool = spagPool.filter(s => (s.subEngine || "").toLowerCase().includes(type));
+          const p = pickOne(subPool);
+          if (p) selection.push({ ...p, questions: p.questions.slice(0, 5) });
+        });
+      } else {
+        // PRACTICE MODE OR GENERAL SPAG: Pick exactly one overall SPaG passage
+        let pool = spagPool;
+        if (activeSubKeys.length > 0) {
+           const type = activeSubKeys[0].split('|').pop() || activeSubKeys[0];
+           const filtered = spagPool.filter(s => (s.subEngine || "").toLowerCase().includes(type));
+           if (filtered.length > 0) pool = filtered;
+        }
+        const choice = pickOne(pool);
+        if (choice) selection.push(choice);
       }
     }
 
-    // 3. VOCABULARY (Exactly 1)
+    // Slot 3: Vocabulary (Exactly 1)
     if (selectedTopics.includes('vocabulary')) {
       const passage = pickOne(vocabPool);
       if (passage) {
-        // Enforce 5-question limit if they went through a subtopic url (though rare for vocab)
-        const finalP = subtopicParam.includes('vocab') ? { ...passage, questions: passage.questions.slice(0, 5) } : passage;
-        selection.push(finalP);
+        selection.push(subtopicParam.includes('vocab') ? { ...passage, questions: passage.questions.slice(0, 5) } : passage);
       }
     }
 
