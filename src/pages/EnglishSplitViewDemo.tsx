@@ -1236,7 +1236,13 @@ export function EnglishSplitViewDemo() {
                         if (activeQInfo) {
                           const isQuestionPaywalled = !isPremium && examMode !== 'mock' && activeQIndex >= PAYWALL_THRESHOLD;
                           if (!isQuestionPaywalled) {
-                            const isGlobal = !activeQInfo.evidenceLine || activeQInfo.evidenceLine === 'global' || activeQInfo.evidenceLine === 'Overall' || activeQInfo.evidenceLine.toLowerCase().includes('overall');
+                            const evidenceLine = (activeQInfo.evidenceLine || "").toLowerCase();
+                            const isGlobal = !evidenceLine || 
+                                             evidenceLine === 'global' || 
+                                             evidenceLine === 'overall' || 
+                                             evidenceLine.includes('passage') || 
+                                             evidenceLine.includes('text') || 
+                                             evidenceLine.includes('entire');
                             if (activeQInfo.evidenceLine === p.id || isGlobal) {
                               isTargetEvidence = true;
                             }
