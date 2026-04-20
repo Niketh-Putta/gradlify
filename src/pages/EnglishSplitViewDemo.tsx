@@ -688,97 +688,92 @@ export function EnglishSplitViewDemo() {
   const sessionSeed = useMemo(() => Math.random(), []);
 
   // 1. SIMPLIFIED SELECTION ENGINE
+  // --- STRIPPED & REBUILT SIMPLIFIED ROTATION ENGINE ---
   const activeSections = useMemo(() => {
-    // ONLY use curated DB passages if they have loaded
     const all = dbSections.length > 0 ? dbSections : [...TEST_DATA, ...VOCAB_PRACTICE_SET];
     if (all.length === 0) return [];
 
     let seen: string[] = [];
     try { seen = JSON.parse(localStorage.getItem('seen_english_passages') || '[]'); } catch(e) {}
 
-    // 1. BRUTE-FORCE CATEGORIZATION: Scan every field for keywords
-    const cats: Record<string, EnglishSection[]> = { comp: [], spelling: [], punctuation: [], grammar: [], vocab: [] };
+    // PARTITION: Sorted buckets for absolute clarity
+    const compPool: EnglishSection[] = [];
+    const spagPool: EnglishSection[] = [];
+    const vocabPool: EnglishSection[] = [];
+
     all.forEach(s => {
       const id = (s.sectionId || "").toLowerCase();
       const sub = (s.subEngine || "").toLowerCase();
       const tit = (s.title || "").toLowerCase();
       
       if (id.includes('vocab') || sub.includes('vocab') || tit.includes('vocab')) {
-        cats.vocab.push(s);
-      } else if (sub.includes('spell') || id.includes('spell') || tit.includes('spell')) {
-        cats.spelling.push(s);
-      } else if (sub.includes('punct') || id.includes('punct') || tit.includes('punct')) {
-        cats.punctuation.push(s);
-      } else if (sub.includes('gramm') || id.includes('gramm') || tit.includes('gramm')) {
-        cats.grammar.push(s);
+        vocabPool.push(s);
+      } else if (id.match(/spag|spell|punct|gramm/) || sub.match(/spell|punct|gramm/)) {
+        spagPool.push(s);
       } else {
-        cats.comp.push(s);
+        compPool.push(s);
       }
     });
 
-    const subtopicParam = searchParams.get('subtopic') || "";
-    const subKey = subtopicParam.toLowerCase();
-    let selection: EnglishSection[] = [];
+    const subtopicParam = (searchParams.get('subtopic') || "").toLowerCase();
+    const selection: EnglishSection[] = [];
 
-    // Helper to get first unseen or fresh random fallback
-    const pickNext = (pool: EnglishSection[]) => {
+    // Helper: Pick ONE fresh passage from any provided pool
+    const pickOne = (pool: EnglishSection[]) => {
       if (pool.length === 0) return null;
-      const nextUnseen = pool.find(p => !seen.includes(p.uniqueId));
-      if (nextUnseen) return nextUnseen;
-      const seedIndex = Math.floor(sessionSeed * 10000) % pool.length;
-      return pool[seedIndex];
+      const unseen = pool.find(p => !seen.includes(p.uniqueId));
+      if (unseen) return unseen;
+      // Restart cycle with random variety if all seen
+      return pool[Math.floor(sessionSeed * 10000) % pool.length];
     };
 
-    // 1. COMPREHENSION SELECTION
+    // 1. COMPREHENSION (Exactly 1)
     if (selectedTopics.includes('comprehension')) {
-       let pool = cats.comp;
-       // If a subfilter exists for fiction/poetry/etc, refine the pool
-       const ref = subKey.split(',').find(k => k.includes('comp|') || k.includes('fiction') || k.includes('poetry') || k.includes('non_fiction'));
-       if (ref) {
-          const type = ref.split('|').pop();
-          pool = cats.comp.filter(c => (c.subEngine || "").toLowerCase().includes(type || ""));
-       }
-       const p = pickNext(pool.length > 0 ? pool : cats.comp);
-       if (p) selection.push(subKey.includes('comp') ? { ...p, questions: (p.questions || []).slice(0, 5) } : p);
+      let pool = compPool;
+      // Handle sub-filters (Fiction/Poetry/etc)
+      const subFilter = subtopicParam.split(',').find(f => f.includes('comp|') || f.match(/fiction|poetry|non_fiction/));
+      if (subFilter) {
+        const type = subFilter.split('|').pop();
+        const filtered = compPool.filter(c => (c.subEngine || "").toLowerCase().includes(type || ""));
+        if (filtered.length > 0) pool = filtered;
+      }
+      const passage = pickOne(pool);
+      if (passage) {
+        // Enforce 5-question limit ONLY if a sub-filter was active
+        const finalP = subFilter ? { ...passage, questions: passage.questions.slice(0, 5) } : passage;
+        selection.push(finalP);
+      }
     }
 
-    // 2. SPAG SELECTION: Pick ONE random if no sub-filter, or specific ones if requested
+    // 2. SPAG (Exactly 1)
     if (selectedTopics.includes('spag')) {
-       const hasPunctFilter = subKey.includes('punct');
-       const hasSpellFilter = subKey.includes('spell');
-       const hasGrammFilter = subKey.includes('gramm');
-       const isSpagDrill = hasPunctFilter || hasSpellFilter || hasGrammFilter;
-
-       if (isSpagDrill) {
-          // Explicitly drill the checked subtopics
-          if (hasSpellFilter) {
-             const s = pickNext(cats.spelling);
-             if (s) selection.push({ ...s, questions: (s.questions || []).slice(0, 5) });
-          }
-          if (hasPunctFilter) {
-             const p = pickNext(cats.punctuation);
-             if (p) selection.push({ ...p, questions: (p.questions || []).slice(0, 5) });
-          }
-          if (hasGrammFilter) {
-             const g = pickNext(cats.grammar);
-             if (g) selection.push({ ...g, questions: (g.questions || []).slice(0, 5) });
-          }
-       } else {
-          // GENERAL SPAG: Pick exactly ONE from the combined SPaG 15/15/15 pool
-          const generalPool = [...cats.spelling, ...cats.punctuation, ...cats.grammar];
-          const choice = pickNext(generalPool);
-          if (choice) selection.push(choice);
-       }
+      let pool = spagPool;
+      const subFilter = subtopicParam.split(',').find(f => f.match(/spell|punct|gramm/));
+      if (subFilter) {
+        pool = spagPool.filter(s => (s.subEngine || "").toLowerCase().includes(subFilter.split('|').pop() || ""));
+      }
+      const passage = pickOne(pool.length > 0 ? pool : spagPool);
+      if (passage) {
+        // Enforce 5-question limit if sub-filtering is active
+        const finalP = subFilter ? { ...passage, questions: passage.questions.slice(0, 5) } : passage;
+        selection.push(finalP);
+      }
     }
 
-    // 3. VOCABULARY SELECTION
+    // 3. VOCABULARY (Exactly 1)
     if (selectedTopics.includes('vocabulary')) {
-       const v = pickNext(cats.vocab);
-       if (v) selection.push(subKey.includes('vocab') ? { ...v, questions: (v.questions || []).slice(0, 5) } : v);
+      const passage = pickOne(vocabPool);
+      if (passage) {
+        // Enforce 5-question limit if they went through a subtopic url (though rare for vocab)
+        const finalP = subtopicParam.includes('vocab') ? { ...passage, questions: passage.questions.slice(0, 5) } : passage;
+        selection.push(finalP);
+      }
     }
 
-    if (selection.length === 0 && all.length > 0) selection = [all[0]];
+    // Safety fallback
+    if (selection.length === 0 && all.length > 0) selection.push(all[0]);
 
+    // Force alphabetical evidence sorting
     return selection.map(sec => ({
       ...sec,
       questions: [...(sec.questions || [])].sort((a, b) => {
