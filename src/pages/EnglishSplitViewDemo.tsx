@@ -701,7 +701,10 @@ export function EnglishSplitViewDemo() {
     // 2. We were using TEST_DATA (fallback) but DB data has now arrived.
     const isUsingFallback = shuffledRef.current && shuffledRef.current.some(s => TEST_DATA.some(t => t.sectionId === s.sectionId));
     
-    let shouldReShuffle = !shuffledRef.current || (isUsingFallback && dbSections.length > 0);
+    // Only re-shuffle if we don't have a shuffle yet, OR if the subtopic changed.
+    // If the DB loads later, it will be picked up on the next session start, 
+    // avoiding the jump mid-session.
+    let shouldReShuffle = !shuffledRef.current;
     
     if (lastSubtopicParam.current !== currentSubtopicParam) {
       shouldReShuffle = true;
@@ -725,8 +728,8 @@ export function EnglishSplitViewDemo() {
           const aHasDrillPattern = a.passageBlocks?.some(b => b.text.includes('/') || b.text.includes('[ 1 ]')) ? 1 : 0;
           const bHasDrillPattern = b.passageBlocks?.some(b => b.text.includes('/') || b.text.includes('[ 1 ]')) ? 1 : 0;
           
-          if (aSeen !== bSeen) return aSeen - bSeen;
-          return bHasDrillPattern - aHasDrillPattern; // Prioritize drill patterns
+          if (aHasDrillPattern !== bHasDrillPattern) return bHasDrillPattern - aHasDrillPattern;
+          return aSeen - bSeen; // Secondary sort: unseen first
       });
       shuffledRef.current = shuffled;
     }
