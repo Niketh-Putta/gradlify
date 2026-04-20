@@ -32,6 +32,7 @@ export interface EnglishPassageBlock {
 
 export interface EnglishSection {
   sectionId: string;
+  uniqueId: string;
   subEngine: string;
   title: string;
   icon: any; // Keep Lucide icon generic for now
@@ -46,6 +47,7 @@ export interface EnglishSection {
 const TEST_DATA: EnglishSection[] = [
   {
     sectionId: 'comprehension',
+    uniqueId: 'comprehension-fallback',
     subEngine: 'comprehension',
     title: 'SECTION A: READING COMPREHENSION',
     icon: BookOpen,
@@ -166,6 +168,7 @@ const TEST_DATA: EnglishSection[] = [
   },
   {
     sectionId: 'spelling',
+    uniqueId: 'spelling-fallback',
     subEngine: 'spelling',
     title: 'SECTION B: SPELLING EXERCISES',
     icon: SpellCheck,
@@ -238,6 +241,7 @@ const TEST_DATA: EnglishSection[] = [
   },
   {
     sectionId: 'punctuation',
+    uniqueId: 'punctuation-fallback',
     subEngine: 'punctuation',
     title: 'SECTION C: PUNCTUATION EXERCISES',
     icon: TextCursorInput,
@@ -310,6 +314,7 @@ const TEST_DATA: EnglishSection[] = [
   },
   {
     sectionId: 'grammar',
+    uniqueId: 'grammar-fallback',
     subEngine: 'grammar',
     title: 'SECTION D: GRAMMAR CLOZE',
     icon: Type,
@@ -382,6 +387,7 @@ const TEST_DATA: EnglishSection[] = [
 const VOCAB_PRACTICE_SET: EnglishSection[] = [
   {
     sectionId: 'vocab_1',
+    uniqueId: 'vocab-fallback-1',
     subEngine: 'vocab',
     title: 'SECTION E: VOCABULARY SYNONYMS',
     icon: Languages,
@@ -448,6 +454,7 @@ const VOCAB_PRACTICE_SET: EnglishSection[] = [
   },
   {
     sectionId: 'vocab_2',
+    uniqueId: 'vocab-fallback-2',
     subEngine: 'vocab',
     title: 'SECTION E: VOCABULARY SYNONYMS',
     icon: Languages,
@@ -484,6 +491,7 @@ const VOCAB_PRACTICE_SET: EnglishSection[] = [
   },
   {
     sectionId: 'vocab_3',
+    uniqueId: 'vocab-fallback-3',
     subEngine: 'vocab',
     title: 'SECTION E: VOCABULARY SYNONYMS',
     icon: Languages,
@@ -535,35 +543,40 @@ export function EnglishSplitViewDemo() {
   useEffect(() => {
     const fetchPassages = async () => {
       try {
+        setIsLoadingDb(true);
+        // 1. BROAD FETCH: Get all passages for all selected topics 
+        // We filter subtopics LATER in memory, keeping the DB results inclusive.
+        const topicsParam = searchParams.get('topics') || "";
+        const selectedTopics = topicsParam.split(',').map(t => t.trim().toLowerCase());
+        
         let query = supabase.from('english_passages' as any).select('*').eq('track', '11plus');
+
+        if (selectedTopics.length > 0 && !selectedTopics.includes('all')) {
+           // If they chose specific top-level topics, restrict query to those
+           query = query.in('sectionId', selectedTopics);
+        }
+        
+        const diffMinParam = searchParams.get('difficultyMin');
+        const diffMaxParam = searchParams.get('difficultyMax');
+        
         if (diffParam && diffParam !== 'mixed' && diffParam !== 'all') {
            query = query.eq('difficulty', parseInt(diffParam));
         }
-
-        const diffMinParam = searchParams.get('difficultyMin');
-        const diffMaxParam = searchParams.get('difficultyMax');
-        const subtopicParam = searchParams.get('subtopic');
-
-        if (diffMinParam) {
-           query = query.gte('difficulty', parseInt(diffMinParam));
-        }
-        if (diffMaxParam) {
-           query = query.lte('difficulty', parseInt(diffMaxParam));
-        }
-        if (subtopicParam) {
-           // subtopicParam could be "spag|spelling,comprehension|poetry"
-           const subtopics = subtopicParam.split(',').map(s => {
-              const parts = s.trim().toLowerCase().split('|');
-              return parts.length > 1 ? parts[1] : parts[0];
-           });
-           if (subtopics.length > 0) {
-              query = query.in('subtopic', subtopics);
-           }
-        }
-
-        const { data, error } = await query;
+        if (diffMinParam) query = query.gte('difficulty', parseInt(diffMinParam));
+        if (diffMaxParam) query = query.lte('difficulty', parseInt(diffMaxParam));
+        
+        let { data, error } = await query;
         if (error) throw error;
         
+        // 2. FALLBACK: If specific topic search failed, widen the net
+        if (!data || data.length === 0) {
+           const { data: allData, error: allErr } = await supabase
+             .from('english_passages' as any)
+             .select('*')
+             .eq('track', '11plus');
+           if (!allErr && allData) data = allData;
+        }
+
         if (data && data.length > 0) {
            const mapped: EnglishSection[] = data.map((row: any) => {
              const sId = (row.sectionId || "").toLowerCase();
@@ -586,6 +599,7 @@ export function EnglishSplitViewDemo() {
 
              return {
                sectionId: row.sectionId,
+               uniqueId: row.id,
                subEngine: row.subtopic,
                title: title,
                icon: icon,
@@ -603,15 +617,19 @@ export function EnglishSplitViewDemo() {
              };
            });
            setDbSections(mapped);
+        } else {
+           // If DB is literally empty (shouldn't happen with 45 rows), use fallbacks
+           setDbSections([]);
         }
       } catch (e) {
-        console.error(e);
+        console.error("DB Fetch Error:", e);
+        setDbSections([]);
       } finally {
         setIsLoadingDb(false);
       }
     };
     fetchPassages();
-  }, [diffParam]);
+  }, [diffParam, searchParams]);
   
   const modeParam = searchParams.get('mode') || 'practice';
   // Topics usually arrives comma separated from MockExams, e.g., "Comprehension,SPaG"
@@ -628,10 +646,7 @@ export function EnglishSplitViewDemo() {
     vocab: selectedTopics.includes('vocabulary')
   };
 
-  const [practiceFocus, setPracticeFocus] = useState<string>(
-    selectedTopics.includes('vocabulary') ? 'vocab' : 
-    (selectedTopics.includes('spag') ? 'spag' : 'comprehension')
-  );
+  const [practiceFocus, setPracticeFocus] = useState<string>('comprehension');
 
   const [isFinished, setIsFinished] = useState<boolean>(false);
   const [isReviewMode, setIsReviewMode] = useState<boolean>(false);
@@ -670,133 +685,121 @@ export function EnglishSplitViewDemo() {
   const questionRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const lastEvidenceRefKey = useRef<string | null>(null);
 
-  const shuffledRef = useRef<EnglishSection[] | null>(null);
-  const lastSubtopicParam = useRef<string>(searchParams.get('subtopic') || '');
   const sessionSeed = useMemo(() => Math.random(), []);
 
-  // 1. FILTERING LOGIC
+  // 1. SIMPLIFIED SELECTION ENGINE
   const activeSections = useMemo(() => {
-    // Source data: Combine DB sections with built-in Drill/Cloze sets
-    let sourceData = [...dbSections, ...TEST_DATA, ...VOCAB_PRACTICE_SET];
-    
-    // Explicit subtopic filtering for English
-    const currentSubtopicParam = searchParams.get('subtopic') || '';
-    if (currentSubtopicParam) {
-      // subtopicParam comes in format "sectionKey|subtopicKey,sectionKey|subtopicKey" 
-      // e.g., "spag|spelling" or "comprehension|poetry"
-      const allowedSubtopics = currentSubtopicParam.split(',').map(s => {
-        const parts = s.trim().toLowerCase().split('|');
-        return parts.length > 1 ? parts[1] : parts[0];
-      });
+    // ONLY use curated DB passages if they have loaded
+    const all = dbSections.length > 0 ? dbSections : [...TEST_DATA, ...VOCAB_PRACTICE_SET];
+    if (all.length === 0) return [];
 
-      if (allowedSubtopics.length > 0) {
-        sourceData = sourceData.filter(sec => 
-          allowedSubtopics.includes((sec.subEngine || '').toLowerCase()) ||
-          allowedSubtopics.includes((sec.sectionId || '').toLowerCase())
-        );
+    let seen: string[] = [];
+    try { seen = JSON.parse(localStorage.getItem('seen_english_passages') || '[]'); } catch(e) {}
+
+    // 1. BRUTE-FORCE CATEGORIZATION: Scan every field for keywords
+    const cats: Record<string, EnglishSection[]> = { comp: [], spelling: [], punctuation: [], grammar: [], vocab: [] };
+    all.forEach(s => {
+      const id = (s.sectionId || "").toLowerCase();
+      const sub = (s.subEngine || "").toLowerCase();
+      const tit = (s.title || "").toLowerCase();
+      
+      if (id.includes('vocab') || sub.includes('vocab') || tit.includes('vocab')) {
+        cats.vocab.push(s);
+      } else if (sub.includes('spell') || id.includes('spell') || tit.includes('spell')) {
+        cats.spelling.push(s);
+      } else if (sub.includes('punct') || id.includes('punct') || tit.includes('punct')) {
+        cats.punctuation.push(s);
+      } else if (sub.includes('gramm') || id.includes('gramm') || tit.includes('gramm')) {
+        cats.grammar.push(s);
+      } else {
+        cats.comp.push(s);
       }
-    }
-    
-    // We re-shuffle if:
-    // 1. ShuffledRef hasn't been set yet.
-    // 2. We were using TEST_DATA (fallback) but DB data has now arrived.
-    const isUsingFallback = shuffledRef.current && shuffledRef.current.some(s => TEST_DATA.some(t => t.sectionId === s.sectionId));
-    
-    // Only re-shuffle if we don't have a shuffle yet, OR if the subtopic changed.
-    // If the DB loads later, it will be picked up on the next session start, 
-    // avoiding the jump mid-session.
-    let shouldReShuffle = !shuffledRef.current;
-    
-    if (lastSubtopicParam.current !== currentSubtopicParam) {
-      shouldReShuffle = true;
-      lastSubtopicParam.current = currentSubtopicParam;
-    }
-
-    if (shouldReShuffle) {
-      // Intelligent exhaustion system:
-      let seenPassages: string[] = [];
-      try { seenPassages = JSON.parse(localStorage.getItem('seen_english_passages') || '[]'); } catch(e) { /* intentionally left empty */ }
-      
-      const shuffled = [...sourceData].sort(() => Math.random() - 0.5);
-      
-      // Bubble up entirely unseen passages to the exact top!
-      shuffled.sort((a, b) => {
-          const aSeen = seenPassages.includes(a.sectionId) ? 1 : 0;
-          const bSeen = seenPassages.includes(b.sectionId) ? 1 : 0;
-          
-          // Secondary Sort: Prioritize "Drill Style" for SPaG sections
-          // Detect if it contains '/' (Fragments) or '[ 1 ]' (Cloze)
-          const aHasDrillPattern = a.passageBlocks?.some(b => b.text.includes('/') || b.text.includes('[ 1 ]')) ? 1 : 0;
-          const bHasDrillPattern = b.passageBlocks?.some(b => b.text.includes('/') || b.text.includes('[ 1 ]')) ? 1 : 0;
-          
-          if (aHasDrillPattern !== bHasDrillPattern) return bHasDrillPattern - aHasDrillPattern;
-          return aSeen - bSeen; // Secondary sort: unseen first
-      });
-      shuffledRef.current = shuffled;
-    }
-
-    const shuffled = shuffledRef.current;
-
-    // Group passages aggressively by core engine
-    const groups: Record<string, EnglishSection[]> = { comprehension: [], spag: [], vocab: [] };
-    shuffled.forEach(sec => {
-        const id = (sec.sectionId || "").toLowerCase();
-        const sub = (sec.subEngine || "").toLowerCase();
-        if (id === 'vocabulary' || sub === 'vocabulary' || id === 'vocab') groups.vocab.push(sec);
-        else if (['spelling', 'punctuation', 'grammar'].includes(sub) || ['spelling', 'punctuation', 'grammar'].includes(id) || id === 'spag') groups.spag.push(sec);
-        else groups.comprehension.push(sec);
     });
 
-    let finalSections: EnglishSection[] = [];
+    const subtopicParam = searchParams.get('subtopic') || "";
+    const subKey = subtopicParam.toLowerCase();
+    let selection: EnglishSection[] = [];
 
-    // Filter down to the user's requested topics. 
-    if (selectedTopics.includes('comprehension') && groups.comprehension.length > 0) {
-        const firstComp = groups.comprehension[0];
-        finalSections.push(firstComp);
-        
-        // Only if it's a mock AND the first passage has very few questions (e.g. 5 in test data)
-        // do we add a second one to reach a standard exam length.
-        // For real DB passages (10 questions each), this will now correctly only show ONE.
-        if (examMode === 'mock' && firstComp.questions.length < 10 && groups.comprehension.length > 1) {
-            finalSections.push(groups.comprehension[1]);
-        }
-    }
-    
-    // Show ALL requested SPaG passages
-    if (selectedTopics.includes('spag') && groups.spag.length > 0) {
-        finalSections.push(...groups.spag);
-    }
-    
-    // Show ALL requested Vocabulary passages
-    if (selectedTopics.includes('vocabulary') && groups.vocab.length > 0) {
-        finalSections.push(...groups.vocab);
-    }
-    
-    // Safety fallback
-    if (finalSections.length === 0) finalSections = sourceData.slice(0, 1);
+    // Helper to get first unseen or fresh random fallback
+    const pickNext = (pool: EnglishSection[]) => {
+      if (pool.length === 0) return null;
+      const nextUnseen = pool.find(p => !seen.includes(p.uniqueId));
+      if (nextUnseen) return nextUnseen;
+      const seedIndex = Math.floor(sessionSeed * 10000) % pool.length;
+      return pool[seedIndex];
+    };
 
-    const sorted = finalSections.map(sec => ({
+    // 1. COMPREHENSION SELECTION
+    if (selectedTopics.includes('comprehension')) {
+       let pool = cats.comp;
+       // If a subfilter exists for fiction/poetry/etc, refine the pool
+       const ref = subKey.split(',').find(k => k.includes('comp|') || k.includes('fiction') || k.includes('poetry') || k.includes('non_fiction'));
+       if (ref) {
+          const type = ref.split('|').pop();
+          pool = cats.comp.filter(c => (c.subEngine || "").toLowerCase().includes(type || ""));
+       }
+       const p = pickNext(pool.length > 0 ? pool : cats.comp);
+       if (p) selection.push(subKey.includes('comp') ? { ...p, questions: (p.questions || []).slice(0, 5) } : p);
+    }
+
+    // 2. SPAG SELECTION
+    if (selectedTopics.includes('spag')) {
+       const hasPunctFilter = subKey.includes('punct');
+       const hasSpellFilter = subKey.includes('spell');
+       const hasGrammFilter = subKey.includes('gramm');
+       const isSpagDrill = hasPunctFilter || hasSpellFilter || hasGrammFilter;
+
+       if (hasSpellFilter || !isSpagDrill) {
+          const s = pickNext(cats.spelling);
+          if (s) selection.push(isSpagDrill ? { ...s, questions: (s.questions || []).slice(0, 5) } : s);
+       }
+       if (hasPunctFilter || !isSpagDrill) {
+          const p = pickNext(cats.punctuation);
+          if (p) selection.push(isSpagDrill ? { ...p, questions: (p.questions || []).slice(0, 5) } : p);
+       }
+       if (hasGrammFilter || !isSpagDrill) {
+          const g = pickNext(cats.grammar);
+          if (g) selection.push(isSpagDrill ? { ...g, questions: (g.questions || []).slice(0, 5) } : g);
+       }
+    }
+
+    // 3. VOCABULARY SELECTION
+    if (selectedTopics.includes('vocabulary')) {
+       const v = pickNext(cats.vocab);
+       if (v) selection.push(subKey.includes('vocab') ? { ...v, questions: (v.questions || []).slice(0, 5) } : v);
+    }
+
+    if (selection.length === 0 && all.length > 0) selection = [all[0]];
+
+    return selection.map(sec => ({
       ...sec,
       questions: [...(sec.questions || [])].sort((a, b) => {
-        const aGlobal = a.evidenceLine === 'global' || a.evidenceLine === 'Overall' || a.evidenceLine?.toLowerCase().includes('overall');
-        const bGlobal = b.evidenceLine === 'global' || b.evidenceLine === 'Overall' || b.evidenceLine?.toLowerCase().includes('overall');
-        if (aGlobal && !bGlobal) return 1;
-        if (!aGlobal && bGlobal) return -1;
         const aNum = parseInt(a.evidenceLine?.match(/\d+/)?.[0] || '0', 10);
         const bNum = parseInt(b.evidenceLine?.match(/\d+/)?.[0] || '0', 10);
         return aNum - bNum;
       })
     }));
+  }, [dbSections, selectedTopics, searchParams, sessionSeed]);
 
-    return sorted;
-  }, [examMode, selectedTopics, isPremium, dbSections, sessionSeed]);
+  // Sync focus header with active content automatically for accurate UI titles
+  useEffect(() => {
+    if (activeSections.length > 0) {
+      const mainSec = activeSections[0];
+      const sId = (mainSec.sectionId || "").toLowerCase();
+      const sub = (mainSec.subEngine || "").toLowerCase();
+      
+      if (sId.includes('vocab') || sub.includes('vocab')) setPracticeFocus('vocab');
+      else if (sId.includes('spag') || ['spell', 'punct', 'gramm'].some(k => sub.includes(k))) setPracticeFocus('spag');
+      else setPracticeFocus('comprehension');
+    }
+  }, [activeSections]);
 
   // Securely update the historic ledger of what texts have been seen
   useEffect(() => {
     if (activeSections.length > 0) {
       try {
         let seen = JSON.parse(localStorage.getItem('seen_english_passages') || '[]');
-        const newIds = activeSections.map(s => s.sectionId);
+        const newIds = activeSections.map(s => s.uniqueId);
         seen = [...new Set([...seen, ...newIds])];
         
         // If they have naturally exhausted almost the entire bank, reset the loop back to zero (minus current load)
@@ -821,24 +824,26 @@ export function EnglishSplitViewDemo() {
     
     let totalSeconds = 0;
     activeSections.forEach(sec => {
-      const isComp = sec.sectionId.toLowerCase() === 'comprehension' || (sec.subEngine || '').toLowerCase() === 'comprehension';
+      const isComp = (sec.sectionId || '').toLowerCase() === 'comprehension' || (sec.subEngine || '').toLowerCase() === 'comprehension';
       
       let secTime = 0;
+      const qCount = sec.questions?.length || 0;
+      
       if (sec.difficulty === 1) {
         // Level 1: Standard (Fast)
         const reading = isComp ? 150 : 0; // 2.5 mins
         const perQ = isComp ? 45 : 30;
-        secTime = reading + (sec.questions.length * perQ);
+        secTime = reading + (qCount * perQ);
       } else if (sec.difficulty === 2) {
         // Level 2: Intermediate
         const reading = isComp ? 180 : 0; // 3.0 mins
         const perQ = isComp ? 55 : 40;
-        secTime = reading + (sec.questions.length * perQ);
+        secTime = reading + (qCount * perQ);
       } else {
         // Level 3: Elite / Advanced (Heavy)
         const reading = isComp ? 240 : 0; // 4.0 mins
         const perQ = isComp ? 75 : 55;
-        secTime = reading + (sec.questions.length * perQ);
+        secTime = reading + (qCount * perQ);
       }
       
       totalSeconds += secTime;
@@ -916,7 +921,7 @@ export function EnglishSplitViewDemo() {
       }
     }, {
       root: rightPaneRef.current,
-      rootMargin: "-45% 0px -45% 0px", // Tighten to a 10% center band
+      rootMargin: "-50% 0px -50% 0px", // Exact center line intersection
       threshold: [0, 0.5, 1.0]
     });
 
@@ -932,52 +937,58 @@ export function EnglishSplitViewDemo() {
   useEffect(() => {
     if (!activeQuestionId) return;
     
-    let targetSectionId = null;
-    let targetEvidenceLine = null;
-    
-    // Find who owns this question
-    for (const sec of activeSections) {
-      const q = sec.questions.find(x => `${sec.sectionId}_${x.id}` === activeQuestionId);
-      if (q) {
-        targetSectionId = sec.sectionId;
-        targetEvidenceLine = q.evidenceLine;
-        break;
+    // Debounce to prevent scroll wars while user is actively scrolling the right pane
+    const timer = setTimeout(() => {
+      let targetSectionId = null;
+      let targetEvidenceLine = null;
+      
+      // Find who owns this question
+      for (const sec of activeSections) {
+        const q = sec.questions.find(x => `${sec.uniqueId}_${x.id}` === activeQuestionId);
+        if (q) {
+          targetSectionId = sec.sectionId;
+          targetEvidenceLine = q.evidenceLine;
+          break;
+        }
       }
-    }
 
-    const isGlobal = !targetEvidenceLine || targetEvidenceLine === 'global' || targetEvidenceLine === 'Overall' || targetEvidenceLine?.toLowerCase().includes('overall');
-    
-    if (isGlobal) {
+      const isGlobal = !targetEvidenceLine || targetEvidenceLine === 'global' || targetEvidenceLine === 'Overall' || targetEvidenceLine?.toLowerCase().includes('overall');
+      
+      if (isGlobal) {
+        if (targetSectionId && passageSectionRefs.current[targetSectionId]) {
+          passageSectionRefs.current[targetSectionId]?.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center'
+          });
+        }
+        return; 
+      }
+
+      if (targetSectionId && targetEvidenceLine) {
+        // Find the absolute uniqueId from the section instance
+        const targetSec = activeSections.find(s => s.sectionId === targetSectionId);
+        const uniqueRefKey = `${targetSec?.uniqueId || targetSectionId}_${targetEvidenceLine}`;
+        const targetElement = passageLineRefs.current[uniqueRefKey];
+        
+        if (targetElement) {
+          targetElement.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center' 
+          });
+          return;
+        }
+      }
+      
+      // Fallback scroll if exact paragraph missing
       if (targetSectionId && passageSectionRefs.current[targetSectionId]) {
         passageSectionRefs.current[targetSectionId]?.scrollIntoView({ 
           behavior: 'smooth', 
-          block: 'center'
-        });
-      }
-      return; 
-    }
-
-    if (targetSectionId && targetEvidenceLine) {
-      const uniqueRefKey = `${targetSectionId}_${targetEvidenceLine}`;
-      const targetElement = passageLineRefs.current[uniqueRefKey];
-      
-      if (targetElement) {
-        // Firmly center the element in the left pane
-        targetElement.scrollIntoView({ 
-          behavior: 'smooth', 
           block: 'center' 
         });
-        return;
       }
-    }
-    
-    // Fallback scroll if exact paragraph missing
-    if (targetSectionId && passageSectionRefs.current[targetSectionId]) {
-      passageSectionRefs.current[targetSectionId]?.scrollIntoView({ 
-        behavior: 'smooth', 
-        block: 'center' 
-      });
-    }
+    }, 150);
+
+    return () => clearTimeout(timer);
   }, [activeQuestionId, activeSections]);
 
   // Keep active dot visible in the floating pill
@@ -999,14 +1010,16 @@ export function EnglishSplitViewDemo() {
     let spagCorrect = 0;
 
     activeSections.forEach(sec => {
-      const isComp = sec.sectionId === 'comprehension' || sec.sectionId === 'vocab';
+      const sId = (sec.sectionId || "").toLowerCase();
+      const sub = (sec.subEngine || "").toLowerCase();
+      const isComp = sId === 'comprehension' || sId.includes('vocab') || sub.includes('vocab') || sub === 'comprehension';
       const visibleQuestions = (!isPremium && examMode !== 'mock') ? sec.questions.slice(0, 3) : sec.questions;
       
       visibleQuestions.forEach(q => {
         if (isComp) compTotal++;
         else spagTotal++;
         
-        const ans = selectedAnswers[`${sec.sectionId}_${q.id}`];
+        const ans = selectedAnswers[`${sec.uniqueId}_${q.id}`];
         const correctOpt = q.options.find(o => o.correct);
         if (ans && correctOpt && ans === correctOpt.id) {
           if (isComp) compCorrect++;
@@ -1030,7 +1043,7 @@ export function EnglishSplitViewDemo() {
     else if (sas < 120) sasColor = "text-amber-500";
     
     return { compTotal, compPerc, spagTotal, spagPerc, overallTotal, overallCorrect, overallPerc, displaySAS: sas, sasColor };
-  }, [isFinished, activeSections, selectedAnswers]);
+  }, [isFinished, activeSections, selectedAnswers, examMode, isPremium]);
 
   useEffect(() => {
     if (isFinished && user && activeSections.length > 0) {
@@ -1048,7 +1061,7 @@ export function EnglishSplitViewDemo() {
         
         sec.questions.forEach(q => {
           topicAgg[topicLabel].total++;
-          const ans = selectedAnswers[`${sec.sectionId}_${q.id}`];
+          const ans = selectedAnswers[`${sec.uniqueId}_${q.id}`];
           const correctOpt = q.options.find(o => o.correct);
           if (ans && correctOpt && ans === correctOpt.id) {
             topicAgg[topicLabel].correct++;
@@ -1091,7 +1104,7 @@ export function EnglishSplitViewDemo() {
             const mockQuestions = [];
             activeSections.forEach((sec) => {
               sec.questions.forEach((q) => {
-                const ans = selectedAnswers[`${sec.sectionId}_${q.id}`];
+                const ans = selectedAnswers[`${sec.uniqueId}_${q.id}`];
                 const correctOpt = q.options.find(o => o.correct);
                 const isCorrect = ans && correctOpt && ans === correctOpt.id;
                 
@@ -1137,7 +1150,7 @@ export function EnglishSplitViewDemo() {
         }
       }
     }
-  }, [isFinished, user, activeSections, selectedAnswers]);
+  }, [isFinished, user, activeSections, selectedAnswers, examMode]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -1363,7 +1376,7 @@ export function EnglishSplitViewDemo() {
                       
                       const renderPassageBlock = (p: EnglishPassageBlock, originalIndex: number, isPaywalledBlock: boolean) => {
                         let isTargetEvidence = false;
-                        const activeQIndex = section.questions.findIndex(q => `${section.sectionId}_${q.id}` === activeQuestionId);
+                        const activeQIndex = (section.questions || []).findIndex(q => `${section.uniqueId}_${q.id}` === activeQuestionId);
                         const activeQInfo = activeQIndex !== -1 ? section.questions[activeQIndex] : undefined;
                         
                         if (activeQInfo) {
@@ -1383,7 +1396,7 @@ export function EnglishSplitViewDemo() {
                         }
 
                         const showScaffold = isTargetEvidence && !isPaywalledBlock;
-                        const uniqueRefKey = `${section.sectionId}_${p.id}`;
+                        const uniqueRefKey = `${section.uniqueId}_${p.id}`;
 
                         return (
                           <div key={p.id} className="relative group scroll-m-20" ref={(el) => { passageLineRefs.current[uniqueRefKey] = el; }}>
@@ -1513,7 +1526,9 @@ export function EnglishSplitViewDemo() {
               <div className="text-center p-12 border border-border border-dashed rounded-3xl text-muted-foreground font-medium">
                 No sections selected or configured.
               </div>
-            )}            {activeSections.map((section, secIndex) => {
+            )}
+            
+            {activeSections.map((section, secIndex) => {
               const PAYWALL_THRESHOLD = 3;
                 const sType = (section.sectionId + " " + (section.subEngine || "")).toLowerCase();
                 let parentTopic = 'Comprehension';
@@ -1565,7 +1580,7 @@ export function EnglishSplitViewDemo() {
                         };
 
                         const renderQuestion = (q: EnglishQuestion, originalIndex: number, isPaywalledQuestion: boolean) => {
-                          const qKey = `${section.sectionId}_${q.id}`;
+                          const qKey = `${section.uniqueId}_${q.id}`;
                           const isSelected = activeQuestionId === qKey;
                           const isFlagged = flaggedQuestions[qKey];
                           
@@ -1574,7 +1589,13 @@ export function EnglishSplitViewDemo() {
                               key={qKey}
                               data-qid={qKey}
                               ref={(el) => { questionRefs.current[qKey] = el; }}
-                              onClick={() => { if (isPaywalledQuestion) setShowPaywall(true); }}
+                              onClick={() => { 
+                                if (isPaywalledQuestion) {
+                                  setShowPaywall(true);
+                                } else {
+                                  setActiveQuestionId(qKey);
+                                }
+                              }}
                               className={cn(
                                 "p-3 sm:p-4 rounded-2xl border transition-all duration-150 ease-out cursor-default scroll-m-24 relative snap-center",
                                 isSelected 

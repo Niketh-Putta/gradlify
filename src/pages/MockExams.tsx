@@ -152,6 +152,23 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
   }, [refreshUsage]);
 
   useEffect(() => {
+    // Sync subtopics: If a main topic is deselected, its subtopics must be cleared
+    setSelectedSubtopics(prev => {
+      const activeSectionKeys = availableSections
+        .filter(s => selectedTopics.includes(s.id))
+        .map(s => s.key);
+      
+      const filtered = prev.filter(stId => {
+        const [sectionKey] = stId.split('|');
+        return activeSectionKeys.includes(sectionKey);
+      });
+
+      if (filtered.length !== prev.length) return filtered;
+      return prev;
+    });
+  }, [selectedTopics, availableSections]);
+
+  useEffect(() => {
     const fetchSubtopicCounts = async () => {
       if (selectedTopics.length === 0) {
         setSubtopicCounts({});
