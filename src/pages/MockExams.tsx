@@ -87,26 +87,53 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
   const { isPremium, canStartMockExam, canStartChallengeSession, dailyMockUses, dailyMockLimit, dailyChallengeUses, dailyChallengeLimit, refreshUsage, canUse10Questions, canUse20Questions, canUse30Questions, canUse40Questions, canUseFullPaper, incrementMockUsage } = usePremium(userTrack, currentSubject);
   const challengeLimitForDisplay = dailyChallengeLimit ?? FREE_CHALLENGE_LIMIT;
 
-  const [examMode, setExamMode] = useState<ExamMode>('practice');
-  const [tierSelection, setTierSelection] = useState<'foundation' | 'higher' | 'both'>('both');
-  const [calcSelection, setCalcSelection] = useState<'calculator' | 'non-calculator' | 'both'>('both');
-  const [elevenPlusDifficulty, setElevenPlusDifficulty] = useState<'fluency' | 'application' | 'reasoning' | 'mixed'>('mixed');
-  const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
-  const [selectedSubtopics, setSelectedSubtopics] = useState<string[]>([]);
+  const storageKey = `mock_settings_${currentSubject}`;
+  const getSaved = (key: string, fallback: any) => {
+    try {
+      const saved = localStorage.getItem(storageKey);
+      if (!saved) return fallback;
+      const parsed = JSON.parse(saved);
+      return parsed[key] !== undefined ? parsed[key] : fallback;
+    } catch { return fallback; }
+  };
+
+  const [examMode, setExamMode] = useState<ExamMode>(() => getSaved('examMode', 'practice'));
+  const [tierSelection, setTierSelection] = useState<'foundation' | 'higher' | 'both'>(() => getSaved('tierSelection', 'both'));
+  const [calcSelection, setCalcSelection] = useState<'calculator' | 'non-calculator' | 'both'>(() => getSaved('calcSelection', 'both'));
+  const [elevenPlusDifficulty, setElevenPlusDifficulty] = useState<'fluency' | 'application' | 'reasoning' | 'mixed'>(() => getSaved('elevenPlusDifficulty', 'mixed'));
+  const [selectedTopics, setSelectedTopics] = useState<string[]>(() => getSaved('selectedTopics', []));
+  const [selectedSubtopics, setSelectedSubtopics] = useState<string[]>(() => getSaved('selectedSubtopics', []));
   const [subtopicCounts, setSubtopicCounts] = useState<Record<string, number>>({});
   const [subtopicsLoading, setSubtopicsLoading] = useState(false);
   const [topicCounts, setTopicCounts] = useState<Record<string, number>>({});
   const [showMockDialog, setShowMockDialog] = useState(false);
   const [showPaywall, setShowPaywall] = useState(false);
 
-  const [selectedQuestionCount, setSelectedQuestionCount] = useState<10 | 20 | 30 | 40 | 50>(10);
+  const [selectedQuestionCount, setSelectedQuestionCount] = useState<10 | 20 | 30 | 40 | 50>(() => getSaved('selectedQuestionCount', 10));
   const [loading, setLoading] = useState(false);
 
+  // Persist settings whenever they change
   useEffect(() => {
-    if (availableSections.length > 0) {
-      setSelectedTopics([availableSections[0].id]);
+    const settings = {
+      examMode,
+      tierSelection,
+      calcSelection,
+      elevenPlusDifficulty,
+      selectedTopics,
+      selectedSubtopics,
+      selectedQuestionCount
+    };
+    localStorage.setItem(storageKey, JSON.stringify(settings));
+  }, [examMode, tierSelection, calcSelection, elevenPlusDifficulty, selectedTopics, selectedSubtopics, selectedQuestionCount, storageKey]);
+
+  useEffect(() => {
+    if (availableSections.length > 0 && selectedTopics.length === 0) {
+      const saved = getSaved('selectedTopics', []);
+      if (saved.length === 0) {
+        setSelectedTopics([availableSections[0].id]);
+      }
     }
-  }, [availableSections]);
+  }, [availableSections, selectedTopics.length]);
 
   useEffect(() => {
     if (currentSubject === 'english' && examMode === 'challenge') {
