@@ -551,8 +551,11 @@ export function EnglishSplitViewDemo() {
            query = query.lte('difficulty', parseInt(diffMaxParam));
         }
         if (subtopicParam) {
-           // subtopicParam could be a comma-separated list like "poetry,fiction"
-           const subtopics = subtopicParam.split(',').map(s => s.trim().toLowerCase());
+           // subtopicParam could be "spag|spelling,comprehension|poetry"
+           const subtopics = subtopicParam.split(',').map(s => {
+              const parts = s.trim().toLowerCase().split('|');
+              return parts.length > 1 ? parts[1] : parts[0];
+           });
            if (subtopics.length > 0) {
               query = query.in('subtopic', subtopics);
            }
@@ -678,7 +681,13 @@ export function EnglishSplitViewDemo() {
     // Explicit subtopic filtering for English
     const currentSubtopicParam = searchParams.get('subtopic') || '';
     if (currentSubtopicParam) {
-      const allowedSubtopics = currentSubtopicParam.split(',').map(s => s.trim().toLowerCase());
+      // subtopicParam comes in format "sectionKey|subtopicKey,sectionKey|subtopicKey" 
+      // e.g., "spag|spelling" or "comprehension|poetry"
+      const allowedSubtopics = currentSubtopicParam.split(',').map(s => {
+        const parts = s.trim().toLowerCase().split('|');
+        return parts.length > 1 ? parts[1] : parts[0];
+      });
+
       if (allowedSubtopics.length > 0) {
         sourceData = sourceData.filter(sec => 
           allowedSubtopics.includes((sec.subEngine || '').toLowerCase()) ||
