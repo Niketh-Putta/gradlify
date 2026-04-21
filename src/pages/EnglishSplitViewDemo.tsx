@@ -1481,7 +1481,7 @@ export function EnglishSplitViewDemo() {
         </div>
 
         {/* ---------------- RIGHT PANE: QUESTIONS ---------------- */}
-        <div className="flex-1 overflow-y-auto bg-background lg:bg-background/50 flex flex-col relative snap-y snap-proximity shadow-[0_-10px_30px_rgba(0,0,0,0.05)] lg:shadow-none" ref={rightPaneRef}>
+        <div className="flex-1 overflow-y-auto bg-background lg:bg-background/50 flex flex-col relative snap-y snap-mandatory shadow-[0_-10px_30px_rgba(0,0,0,0.05)] lg:shadow-none" ref={rightPaneRef}>
           
           {examMode === 'mock' && (
             <div className="sticky top-0 z-20 bg-card/80 backdrop-blur-md border-b border-border/60 px-6 py-3 flex items-center justify-between shadow-sm">
@@ -1597,7 +1597,7 @@ export function EnglishSplitViewDemo() {
                                 }
                               }}
                               className={cn(
-                                "p-2.5 sm:p-4 rounded-xl sm:rounded-2xl border transition-all duration-150 ease-out cursor-default scroll-m-24 relative snap-center",
+                                "p-2.5 sm:p-4 rounded-xl sm:rounded-2xl border transition-all duration-150 ease-out cursor-default scroll-m-12 sm:scroll-m-24 relative snap-start",
                                 isSelected 
                                   ? (examMode === 'mock' ? "border-amber-500/30 dark:border-amber-500/40 bg-card shadow-lg ring-1 ring-amber-500/10 scale-[1.01]" : "border-amber-500/50 bg-card shadow-xl ring-4 ring-amber-500/10 scale-[1.01]")
                                   : "border-border/60 dark:border-amber-500/20 bg-card/40 hover:bg-card/80 hover:border-amber-500/30 opacity-60 hover:opacity-100",
