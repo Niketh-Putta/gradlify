@@ -1509,13 +1509,13 @@ export function EnglishSplitViewDemo() {
             </div>
           )}
 
-          <div className="max-w-xl mx-auto w-full p-4 sm:p-6 md:p-8 pb-48">
-            <div className="mb-8 md:mb-10 flex items-start justify-between gap-4 snap-start scroll-m-24">
+          <div className="max-w-xl mx-auto w-full p-3 sm:p-6 md:p-8 pb-48">
+            <div className="mb-4 md:mb-10 flex items-start justify-between gap-2 sm:gap-4 snap-start scroll-m-24">
               <div>
-                <h1 className="text-2xl font-bold tracking-tight mb-2">
+                <h1 className="text-xl sm:text-2xl font-bold tracking-tight mb-1 sm:mb-2">
                   {examMode === 'mock' ? 'Mock Exam' : (activeSections.length > 1 ? 'MIXED TOPIC DRILLS' : `${practiceFocus.toUpperCase()} DRILLS`)}
                 </h1>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-[11px] sm:text-sm text-muted-foreground">
                   {examMode === 'mock' ? 'You have configured a custom Mock Exam mixing multiple passages.' : 'Answer the questions based on the source texts strictly.'}
                 </p>
               </div>
@@ -1554,23 +1554,23 @@ export function EnglishSplitViewDemo() {
                   : (subTopic ? `${subTopic} ${typeNoun}` : `${parentTopic} ${typeNoun}`);
 
                 return (
-                  <div key={section.sectionId} className={cn("mb-10", secIndex === 0 && examMode === 'practice' ? "mt-4" : "")}>
-                    <div className={cn("relative flex flex-col md:flex-row justify-between items-start md:items-end gap-4 w-full border-b border-border/60 pb-3 mb-6", secIndex === 0 ? "mt-4" : "mt-8")}>
-                      <div className="flex flex-col gap-1 items-start">
-                        <span className="px-2 py-0.5 rounded text-[9px] font-black tracking-[0.15em] uppercase bg-foreground/10 text-foreground/60">{badgeLabel}</span>
-                        <span className="text-xl font-bold tracking-tight text-foreground/90">{displayTitle}</span>
+                  <div key={section.sectionId} className={cn("mb-6 sm:mb-10", secIndex === 0 && examMode === 'practice' ? "mt-2 sm:mt-4" : "")}>
+                    <div className={cn("relative flex flex-col md:flex-row justify-between items-start md:items-end gap-2 sm:gap-4 w-full border-b border-border/60 pb-2 sm:pb-3 mb-4 sm:mb-6", secIndex === 0 ? "mt-2 sm:mt-4" : "mt-6 sm:mt-8")}>
+                      <div className="flex flex-col gap-0.5 sm:gap-1 items-start">
+                        <span className="px-1.5 py-0.5 rounded text-[8px] font-black tracking-[0.1em] uppercase bg-foreground/10 text-foreground/60">{badgeLabel}</span>
+                        <span className="text-lg sm:text-xl font-bold tracking-tight text-foreground/90">{displayTitle}</span>
                       </div>
 
                       {section.tier && (
-                        <span className="mb-1 relative bg-amber-500/10 border border-amber-500/20 px-3 py-1 rounded-full shadow-sm flex items-center gap-1.5 cursor-default shrink-0 transition-transform hover:scale-105">
-                          <Sparkles className="w-3 h-3 text-amber-500" />
-                          <span className="text-[10px] font-black tracking-widest text-amber-600 uppercase pt-0.5">
+                        <span className="mb-0.5 sm:mb-1 relative bg-amber-500/10 border border-amber-500/20 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full shadow-sm flex items-center gap-1 sm:gap-1.5 cursor-default shrink-0 transition-transform hover:scale-105">
+                          <Sparkles className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-amber-500" />
+                          <span className="text-[9px] font-black tracking-widest text-amber-600 uppercase pt-0.5">
                             {section.difficulty ? `LEVEL ${section.difficulty}` : (section.tier.match(/(Level\s*\d+)/i)?.[1] || section.tier.split(/[(:-]/)[0].trim())}
                           </span>
                         </span>
                       )}
                     </div>
-                    <div className="space-y-6">
+                    <div className="space-y-4 sm:space-y-6">
                       {(() => {
                         const PAYWALL_THRESHOLD = 3;
                         const getIsPaywalledQuestion = (qIndex: number) => {
@@ -1597,7 +1597,7 @@ export function EnglishSplitViewDemo() {
                                 }
                               }}
                               className={cn(
-                                "p-3 sm:p-4 rounded-2xl border transition-all duration-150 ease-out cursor-default scroll-m-24 relative snap-center",
+                                "p-2.5 sm:p-4 rounded-xl sm:rounded-2xl border transition-all duration-150 ease-out cursor-default scroll-m-24 relative snap-center",
                                 isSelected 
                                   ? (examMode === 'mock' ? "border-amber-500/30 dark:border-amber-500/40 bg-card shadow-lg ring-1 ring-amber-500/10 scale-[1.01]" : "border-amber-500/50 bg-card shadow-xl ring-4 ring-amber-500/10 scale-[1.01]")
                                   : "border-border/60 dark:border-amber-500/20 bg-card/40 hover:bg-card/80 hover:border-amber-500/30 opacity-60 hover:opacity-100",
@@ -1607,29 +1607,29 @@ export function EnglishSplitViewDemo() {
                             {examMode === 'mock' && (
                               <button 
                                 onClick={(e) => toggleFlag(qKey, e)}
-                                className={cn("absolute -top-3 -right-3 p-2 rounded-full border shadow-sm bg-card transition-colors z-10 hover:bg-muted", isFlagged ? "text-rose-500 border-rose-500/50" : "text-muted-foreground border-border")}
+                                className={cn("absolute -top-2 -right-2 p-1.5 rounded-full border shadow-sm bg-card transition-colors z-10 hover:bg-muted", isFlagged ? "text-rose-500 border-rose-500/50" : "text-muted-foreground border-border")}
                               >
-                                <Flag className={cn("w-4 h-4", isFlagged && "fill-rose-500 text-rose-500")} />
+                                <Flag className={cn("w-3.5 h-3.5", isFlagged && "fill-rose-500 text-rose-500")} />
                               </button>
                             )}
 
-                            <div className="flex items-center justify-between mb-4">
-                              <span className="text-xs font-black tracking-widest uppercase text-muted-foreground flex items-center gap-2">
+                            <div className="flex items-center justify-between mb-2 sm:mb-4">
+                              <span className="text-[10px] font-black tracking-widest uppercase text-muted-foreground flex items-center gap-1.5 sm:gap-2">
                                 {examMode === 'mock' ? `Q${originalIndex + 1}` : `Question ${originalIndex + 1}`}
                               </span>
                               <div className={cn(
-                                "px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide border", 
+                                "px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wide border", 
                                 q.tagColor || "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20"
                               )}>
                                 {q.tag}
                               </div>
                             </div>
                             
-                            <h3 className="text-[13px] sm:text-sm font-semibold leading-relaxed mb-3 sm:mb-4">
+                            <h3 className="text-xs sm:text-sm font-semibold leading-relaxed mb-2.5 sm:mb-4">
                               {q.text}
                             </h3>
 
-                            <div className="space-y-2">
+                            <div className="space-y-1.5 sm:space-y-2">
                               {q.options.map((opt) => {
                                 const selected = selectedAnswers[qKey] === opt.id;
                                 const isViewedInReview = isReviewMode && reviewViewedOptions[qKey] === opt.id;
@@ -1652,7 +1652,7 @@ export function EnglishSplitViewDemo() {
                                         handleSelectAnswer(qKey, opt.id);
                                       }}
                                       className={cn(
-                                        "w-full text-left p-2.5 sm:p-3 rounded-xl border transition-all duration-200 flex items-center gap-2.5 sm:gap-3 group",
+                                        "w-full text-left p-2 sm:p-3 rounded-lg sm:rounded-xl border transition-all duration-200 flex items-center gap-2 sm:gap-3 group",
                                         selected 
                                           ? ((examMode === 'mock' && !isReviewMode)
                                               ? "border-amber-500 bg-amber-500/5 text-amber-900 dark:text-amber-100 ring-2 ring-amber-500/20" 
@@ -1665,7 +1665,7 @@ export function EnglishSplitViewDemo() {
                                       )}
                                     >
                                       <span className={cn(
-                                        "w-6 h-6 sm:w-7 sm:h-7 shrink-0 rounded-lg flex items-center justify-center text-[11px] font-bold transition-colors shadow-sm",
+                                        "w-5 h-5 sm:w-7 sm:h-7 shrink-0 rounded sm:rounded-lg flex items-center justify-center text-[10px] sm:text-[11px] font-bold transition-colors shadow-sm",
                                         selected
                                           ? ((examMode === 'mock' && !isReviewMode) ? "bg-amber-500 text-white shadow-md shadow-amber-500/30" : (opt.correct ? "bg-emerald-500 text-white shadow-md shadow-emerald-500/20" : "bg-rose-500 text-white shadow-md shadow-rose-500/20"))
                                           : (isReviewMode && opt.correct
@@ -1674,10 +1674,10 @@ export function EnglishSplitViewDemo() {
                                       )}>
                                         {opt.id}
                                       </span>
-                                      <span className="flex-1 text-[13px] sm:text-sm font-medium leading-normal">
+                                      <span className="flex-1 text-[12px] sm:text-sm font-medium leading-tight sm:leading-normal">
                                         {opt.text}
                                       </span>
-                                      {selected && examMode === 'mock' && <Check className="w-4 h-4 sm:w-5 sm:h-5 shrink-0 text-amber-500 font-bold" />}
+                                      {selected && examMode === 'mock' && <Check className="w-3.5 h-3.5 sm:w-5 sm:h-5 shrink-0 text-amber-500 font-bold" />}
                                     </button>
 
                                     {showDistractor && opt.correct === false && (
