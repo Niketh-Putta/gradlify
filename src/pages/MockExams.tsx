@@ -737,17 +737,16 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
             {/* Floating Start Bar */}
             {selectedTopics.length > 0 && (
             <div className="fixed bottom-10 left-0 right-0 px-4 z-40 animate-in slide-in-from-bottom-8 duration-500 flex justify-center pointer-events-none">
-              <div className="max-w-[420px] w-full p-2.5 rounded-[2.5rem] bg-white/30 dark:bg-slate-900/40 backdrop-blur-2xl border border-white/40 dark:border-white/10 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] pointer-events-auto ring-1 ring-black/5">
-                <Button 
+              <div className="max-w-[420px] w-full p-2.5 rounded-3xl bg-white/30 dark:bg-slate-900/40 backdrop-blur-2xl border border-white/40 dark:border-white/10 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] pointer-events-auto ring-1 ring-black/5">
+                <Button
                   onClick={examMode === 'practice' ? startPractice : startMockExam}
                   className={cn(
-                    "w-full h-14 sm:h-16 rounded-[2rem] text-base sm:text-lg font-black shadow-xl transition-all hover:scale-[1.02] active:scale-[0.98] border-0",
-                    currentSubject === 'english' 
-                      ? "bg-amber-500 hover:bg-amber-600 shadow-amber-500/30 text-white" 
+                    "w-full h-14 sm:h-16 rounded-2xl text-base sm:text-lg font-black shadow-xl transition-all hover:scale-[1.02] active:scale-[0.98] border-0",
+                    currentSubject === 'english'
+                      ? "bg-amber-500 hover:bg-amber-600 shadow-amber-500/30 text-white"
                       : "bg-primary hover:bg-blue-600 shadow-primary/30 text-white"
                   )}
-                >
-                  {examMode === 'practice' ? 'Start Practice Session' : 'Start Mock Exam'}
+                >                  {examMode === 'practice' ? 'Start Practice Session' : 'Start Mock Exam'}
                   <ArrowRight className="ml-2 h-5 w-5 stroke-[3px]" />
                 </Button>
               </div>
