@@ -1542,7 +1542,7 @@ export function EnglishSplitViewDemo() {
                    else if (sType.includes('punct')) subTopic = 'Punctuation';
                    else if (sType.includes('gramm')) subTopic = 'Grammar';
                 } else {
-                   if (sType.includes('non-fiction') || sType.includes('nonfiction')) subTopic = 'Non-Fiction';
+                   if (sType.includes('non-fiction') || sType.includes('non_fiction') || sType.includes('nonfiction')) subTopic = 'Non-Fiction';
                    else if (sType.includes('fiction')) subTopic = 'Fiction';
                    else if (sType.includes('poetry') || sType.includes('poem')) subTopic = 'Poetry';
                 }
