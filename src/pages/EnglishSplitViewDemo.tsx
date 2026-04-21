@@ -755,7 +755,7 @@ export function EnglishSplitViewDemo() {
           const type = k.split('|').pop() || k;
           const subPool = spagPool.filter(s => (s.subEngine || "").toLowerCase().includes(type));
           const p = pickOne(subPool);
-          if (p) selection.push({ ...p, questions: p.questions.slice(0, 5) });
+          if (p) selection.push({ ...p, questions: p.questions.slice(0, 10) });
         });
       } else {
         // PRACTICE MODE OR GENERAL SPAG: Pick exactly one overall SPaG passage
@@ -766,7 +766,7 @@ export function EnglishSplitViewDemo() {
            if (filtered.length > 0) pool = filtered;
         }
         const choice = pickOne(pool);
-        if (choice) selection.push(choice);
+        if (choice) selection.push({ ...choice, questions: choice.questions.slice(0, 10) });
       }
     }
 
@@ -774,7 +774,7 @@ export function EnglishSplitViewDemo() {
     if (selectedTopics.includes('vocabulary')) {
       const passage = pickOne(vocabPool);
       if (passage) {
-        selection.push(subtopicParam.includes('vocab') ? { ...passage, questions: passage.questions.slice(0, 5) } : passage);
+        selection.push(subtopicParam.includes('vocab') ? { ...passage, questions: passage.questions.slice(0, 10) } : passage);
       }
     }
 
@@ -949,6 +949,7 @@ export function EnglishSplitViewDemo() {
     if (!activeQuestionId || !passageContainerRef.current) return;
     
     const timer = setTimeout(() => {
+      let targetUniqueId = null;
       let targetSectionId = null;
       let targetEvidenceLine = null;
       
@@ -956,6 +957,7 @@ export function EnglishSplitViewDemo() {
       for (const sec of activeSections) {
         const q = sec.questions.find(x => `${sec.uniqueId}_${x.id}` === activeQuestionId);
         if (q) {
+          targetUniqueId = sec.uniqueId;
           targetSectionId = sec.sectionId;
           targetEvidenceLine = q.evidenceLine;
           break;
@@ -963,8 +965,7 @@ export function EnglishSplitViewDemo() {
       }
 
       // 2. Locate the specific element
-      const targetSec = activeSections.find(s => s.sectionId === targetSectionId);
-      const uniqueRefKey = `${targetSec?.uniqueId || targetSectionId}_${targetEvidenceLine}`;
+      const uniqueRefKey = `${targetUniqueId}_${targetEvidenceLine}`;
       
       // Try evidence block first, then the whole section as fallback
       const targetElement = passageLineRefs.current[uniqueRefKey] || passageSectionRefs.current[targetSectionId || ''];
