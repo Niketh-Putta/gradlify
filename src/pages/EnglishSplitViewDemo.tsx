@@ -741,7 +741,7 @@ export function EnglishSplitViewDemo() {
       }
       const passage = pickOne(pool);
       if (passage) {
-        selection.push(subFilter ? { ...passage, questions: passage.questions.slice(0, 5) } : passage);
+        selection.push({ ...passage, questions: passage.questions.slice(0, 10) });
       }
     }
 
@@ -774,7 +774,7 @@ export function EnglishSplitViewDemo() {
     if (selectedTopics.includes('vocabulary')) {
       const passage = pickOne(vocabPool);
       if (passage) {
-        selection.push(subtopicParam.includes('vocab') ? { ...passage, questions: passage.questions.slice(0, 10) } : passage);
+        selection.push({ ...passage, questions: passage.questions.slice(0, 10) });
       }
     }
 
