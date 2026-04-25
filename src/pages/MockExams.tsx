@@ -108,6 +108,8 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
   const [topicCounts, setTopicCounts] = useState<Record<string, number>>({});
   const [showMockDialog, setShowMockDialog] = useState(false);
   const [showPaywall, setShowPaywall] = useState(false);
+  const [paywallTitle, setPaywallTitle] = useState("Daily Limit Reached");
+  const [paywallDesc, setPaywallDesc] = useState("Upgrade to unlock unlimited mock exams, full question sets, and advanced analytics.");
 
   const [selectedQuestionCount, setSelectedQuestionCount] = useState<10 | 20 | 30 | 40 | 50>(() => getSaved('selectedQuestionCount', 10));
   const [loading, setLoading] = useState(false);
@@ -310,13 +312,15 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
 
   const startMockExam = () => {
     if (!isPremium && selectedTopics.length > 1) {
-      toast.error('Free mock exams are restricted to a single topic. Upgrade to access full multi-section exams.');
+      setPaywallTitle("Single Topic Limit");
+      setPaywallDesc("Upgrade to Premium to do mocks with multiple sections. Free users are limited to 1 topic per mock exam.");
       setShowPaywall(true);
       return;
     }
 
     if (!canStartMockExam) {
-      toast.error('You have reached the limit for the free version. Upgrade for more.');
+      setPaywallTitle("Daily Limit Reached");
+      setPaywallDesc("Upgrade to unlock unlimited mock exams, full question sets, and advanced analytics.");
       setShowPaywall(true);
       return;
     }
@@ -865,8 +869,8 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
         <PremiumPaywall 
           open={showPaywall} 
           onOpenChange={setShowPaywall} 
-          title="Daily Limit Reached" 
-          description="Upgrade to unlock unlimited mock exams, full question sets, and advanced analytics." 
+          title={paywallTitle} 
+          description={paywallDesc} 
         />
       </div>
     </div>
