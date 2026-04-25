@@ -161,8 +161,10 @@ export default function MockExamPage() {
   const context = useAppContext();
   const userTrack = resolveUserTrack(context.profile?.track ?? null);
   const user = context?.user || null;
-  const { canStartMockExam, refreshUsage, isLoading: isUsageLoading } = usePremium();
-  const { currentSubject } = useSubject();
+  const { currentSubject: contextSubject } = useSubject();
+  const subjectParam = searchParams.get('subject') as 'maths' | 'english' | null;
+  const currentSubject = subjectParam || contextSubject;
+  const { canStartMockExam, refreshUsage, isLoading: isUsageLoading } = usePremium(userTrack, currentSubject as any);
   
   // Extract exam parameters from URL
   const tier = searchParams.get('tier') || 'higher';
@@ -288,13 +290,6 @@ export default function MockExamPage() {
           setLoading(false);
           toast.error("Please sign in to start a mock exam.");
           navigate('/auth');
-          return;
-        }
-
-        if (!isPractice && !canStartMockExam) {
-          toast.error("Daily mock exam limit reached.");
-          setLoading(false);
-          navigate('/mocks');
           return;
         }
         
