@@ -340,7 +340,6 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
         const result = await incrementMockUsage(10);
         
         if (!result.allowed) {
-          toast.error(result.message || "Usage limit reached.");
           setShowPaywall(true);
           setLoading(false);
           return;

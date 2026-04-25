@@ -192,7 +192,6 @@ export default function MockExamSessionNew({ onBack, settings }: MockExamSession
   const startExam = useCallback(async () => {
     try {
       if (!canStartMockExam) {
-        toast.error("Daily mock exam limit reached.");
         onBack();
         return;
       }
