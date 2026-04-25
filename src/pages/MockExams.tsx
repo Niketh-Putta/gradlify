@@ -415,7 +415,7 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
                 </button>
               </DialogTrigger>
               <DialogContent className="max-w-2xl max-h-[85vh]">
-                <DialogHeader><DialogTitle>Session History</DialogTitle></DialogHeader>
+                <DialogHeader className="pt-6"><DialogTitle>Session History</DialogTitle></DialogHeader>
                 <MockExamHistory userId={user.id} />
               </DialogContent>
             </Dialog>

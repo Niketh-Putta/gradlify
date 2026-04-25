@@ -91,7 +91,7 @@ export function MockExamHistory({ userId }: MockExamHistoryProps) {
 
   return (
     <ScrollArea className="h-[40vh] sm:h-[50vh] pr-3">
-      <div className="space-y-4">
+      <div className="space-y-4 pt-1">
         {attempts.map((attempt) => {
           const percentage = getScorePercentage(attempt.score, attempt.total_marks);
           
