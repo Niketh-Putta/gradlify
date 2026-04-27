@@ -42,7 +42,7 @@ export default function SprintMysterySpin() {
               <span className={cn(
                 "text-[8px] font-black uppercase tracking-[0.2em]",
                 isEnglish ? "text-amber-600" : "text-primary"
-              )}>Starts Tuesday 18:30</span>
+              )}>Starts 28 April</span>
             </div>
             <h1 className="mb-6 text-4xl font-extrabold tracking-tight text-slate-900 sm:text-6xl lg:text-7xl">
               Mystery <br className="hidden sm:block" />
@@ -122,7 +122,7 @@ export default function SprintMysterySpin() {
             <div className="space-y-3">
               <h4 className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-900">Event Window</h4>
               <p className="text-base leading-relaxed text-slate-500">
-                Qualifying starts <span className="text-slate-900 font-semibold underline decoration-slate-200 decoration-2 underline-offset-4">Tuesday at 18:30</span> and ends the following Tuesday at 18:30.
+                Qualifying starts <span className="text-slate-900 font-semibold underline decoration-slate-200 decoration-2 underline-offset-4">Tuesday, 28 April at 18:30</span> and ends Tuesday, 5 May at 18:30.
               </p>
             </div>
             <div className="space-y-3">
