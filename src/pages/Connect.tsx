@@ -741,8 +741,9 @@ export default function Connect() {
 
         {hasEnded && (
           <div className="absolute inset-0 z-30 flex items-center justify-center overflow-hidden pointer-events-none">
-            <div className="bg-red-600/90 text-white font-black text-xl sm:text-2xl py-4 sm:py-6 w-[150%] -rotate-12 shadow-[0_0_40px_rgba(220,38,38,0.5)] flex items-center justify-center tracking-[0.2em] uppercase border-y-4 border-white/20 backdrop-blur-sm">
-              Sprint has ended!!
+            <div className="bg-red-600/90 text-white py-4 sm:py-6 w-[150%] -rotate-12 shadow-[0_0_40px_rgba(220,38,38,0.5)] flex flex-col items-center justify-center border-y-4 border-white/20 backdrop-blur-sm">
+              <span className="font-black text-xl sm:text-2xl tracking-[0.2em] uppercase">Sprint has ended!!</span>
+              <span className="font-bold text-[10px] sm:text-xs tracking-[0.1em] uppercase opacity-90 mt-1">check your emails if you think you've won!!</span>
             </div>
           </div>
         )}
