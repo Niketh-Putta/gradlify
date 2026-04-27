@@ -51,7 +51,7 @@ export default function SprintMysterySpin() {
               </span>
             </h1>
             <p className="max-w-xl text-base font-medium leading-relaxed text-slate-400 sm:text-lg italic">
-              Gain 50 points this week to enter our Mystery Spin. Multiple winners will be selected for Gradlify Premium!
+              Gain 50 points this week to enter our Mystery Spin. Multiple winners will be selected for Gradlify Premium for 3 months!
             </p>
           </header>
 
@@ -69,7 +69,7 @@ export default function SprintMysterySpin() {
                 <span className="absolute -top-2.5 left-0 bg-background pr-3 text-[9px] font-black uppercase tracking-[0.3em] text-slate-300">Rule 02</span>
                 <h3 className="mb-3 text-lg font-bold tracking-tight text-slate-900">Mystery Spin</h3>
                 <p className="text-base leading-relaxed text-slate-500">
-                  All qualifying students are entered into a live draw. If your name is picked, you win Premium access.
+                  All qualifying students are entered into a live draw. If your name is picked, you win Gradlify Premium for 3 months.
                 </p>
               </div>
             </div>
@@ -84,7 +84,7 @@ export default function SprintMysterySpin() {
                     <Sparkles className="h-10 w-10 text-amber-400" />
                   </div>
                   <h3 className="text-2xl font-bold text-white tracking-tight uppercase">Mystery Spin Entry</h3>
-                  <p className="mt-2 text-slate-400 text-sm font-medium">Unlock Premium Access</p>
+                  <p className="mt-2 text-slate-400 text-sm font-medium">Unlock 3 Months of Premium</p>
                 </div>
               </div>
               <div className="absolute inset-0 rounded-[32px] ring-1 ring-inset ring-black/5" />
@@ -102,7 +102,7 @@ export default function SprintMysterySpin() {
                   <span className="text-[10px] font-black uppercase tracking-widest text-primary">Premium</span>
                   <Crown className="h-5 w-5 text-amber-500" />
                 </div>
-                <div className="mb-2 text-4xl font-bold text-slate-900 tracking-tighter">1 Month Free</div>
+                <div className="mb-2 text-4xl font-bold text-slate-900 tracking-tighter">3 Months Free</div>
                 <p className="text-xs font-medium leading-relaxed text-slate-500">Unlock all AI questions, full mock exams, and personalized readiness plans.</p>
               </div>
 
