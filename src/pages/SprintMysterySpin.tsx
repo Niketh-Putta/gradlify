@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { ForceTheme } from "@/components/ForceTheme";
-import { ArrowRight, Crown, Sparkles } from "lucide-react";
+import { ArrowRight, Crown, Sparkles, Users } from "lucide-react";
 import { useSubject } from "@/contexts/SubjectContext";
 import { cn } from "@/lib/utils";
 import { getFoundersSprintInfo } from "@/lib/foundersSprint";
@@ -51,7 +51,7 @@ export default function SprintMysterySpin() {
               </span>
             </h1>
             <p className="max-w-xl text-base font-medium leading-relaxed text-slate-400 sm:text-lg italic">
-              Gain 50 points this week to enter our Mystery Spin. Multiple winners will be selected for Gradlify Premium for 3 months!
+              Gain 50 points this week to enter our Mystery Spin. Exactly 3 winners will be selected for Gradlify Premium for 3 months!
             </p>
           </header>
 
@@ -110,9 +110,15 @@ export default function SprintMysterySpin() {
                   <h3 className="text-4xl sm:text-6xl font-bold tracking-tight text-slate-900 mb-6">
                     3 Months <span className={cn("text-transparent bg-clip-text bg-gradient-to-r", isEnglish ? "from-amber-500 to-amber-700" : "from-primary to-blue-700")}>Free</span>
                   </h3>
-                  <p className="text-lg sm:text-xl font-medium text-slate-500 max-w-lg mx-auto leading-relaxed">
-                    You get Gradlify Premium for free for <span className="text-slate-900 underline decoration-slate-200 underline-offset-8">3 whole months</span>.
-                  </p>
+                  <div className="flex flex-col items-center gap-4 mb-8">
+                    <p className="text-lg sm:text-xl font-medium text-slate-500 max-w-lg mx-auto leading-relaxed">
+                      You get Gradlify Premium for free for <span className="text-slate-900 underline decoration-slate-200 underline-offset-8">3 whole months</span>.
+                    </p>
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-[10px] font-bold uppercase tracking-wider text-slate-600 border border-slate-200">
+                      <Users className="w-3 h-3" />
+                      Limited to 3 Students
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -129,7 +135,7 @@ export default function SprintMysterySpin() {
             <div className="space-y-3">
               <h4 className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-900">Selection Process</h4>
               <p className="text-sm leading-relaxed text-slate-500">
-                Winners will be selected randomly from the pool of all students who reached 50 points. Winners will be announced via the Gradlify dashboard.
+                Exactly <span className="text-slate-900 font-bold">3 students</span> will be selected randomly from the pool of all learners who reached 50 points. Winners will be announced via the Gradlify dashboard.
               </p>
             </div>
           </footer>
