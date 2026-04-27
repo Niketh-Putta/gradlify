@@ -11,7 +11,7 @@ export function SprintBanner({ className }: SprintBannerProps) {
   const { hasEnded } = getFoundersSprintInfo();
   return (
     <Link 
-      to="/sprint-details" 
+      to={hasEnded ? "/mystery-spin" : "/sprint-details"} 
       className={cn(
         "group relative block w-full overflow-hidden transition-all hover:brightness-105",
         hasEnded ? "bg-slate-800" : "bg-gradient-to-r from-[#DF3526] via-[#F17E31] to-[#FAD446]",
@@ -26,10 +26,10 @@ export function SprintBanner({ className }: SprintBannerProps) {
           
           <div className="flex flex-col sm:flex-row items-center gap-1 sm:gap-2">
             <span className="text-[12px] sm:text-base font-black tracking-tight uppercase sm:normal-case">
-              {hasEnded ? "Sprint has ended - Results coming soon!" : "Do you want to win £160?"}
+              {hasEnded ? "Want free Gradlify Premium?" : "Do you want to win £160?"}
             </span>
             <span className="flex items-center gap-1.5 text-[11px] sm:text-sm font-bold bg-white/20 px-2 py-0.5 rounded-full backdrop-blur-md">
-              {hasEnded ? "Review your final standings" : "Click here to see how the Gradlify Sprint works"}
+              {hasEnded ? "Click here to join the Mystery Spin" : "Click here to see how the Gradlify Sprint works"}
               <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
             </span>
           </div>
