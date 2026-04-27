@@ -78,14 +78,12 @@ export default function SprintMysterySpin() {
           {/* Featured Visual Section */}
           <section className="mb-16 sm:mb-24">
             <div className="relative group mx-auto max-w-4xl overflow-hidden rounded-[32px] bg-white border border-border/40 p-3 sm:p-4 shadow-xl shadow-slate-200/40 transition-all hover:shadow-2xl hover:border-primary/20">
-              <div className="aspect-[16/10] sm:aspect-[16/9] w-full overflow-hidden rounded-[24px] bg-gradient-to-br from-slate-900 to-slate-800 flex items-center justify-center p-12">
-                <div className="text-center">
-                  <div className="mb-6 inline-flex h-20 w-20 items-center justify-center rounded-full bg-white/10 backdrop-blur-xl border border-white/20">
-                    <Sparkles className="h-10 w-10 text-amber-400" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-white tracking-tight uppercase">Mystery Spin Entry</h3>
-                  <p className="mt-2 text-slate-400 text-sm font-medium">Unlock 3 Months of Premium</p>
-                </div>
+              <div className="aspect-[16/10] sm:aspect-[16/9] w-full overflow-hidden rounded-[24px]">
+                <img 
+                  src="/Premium_spin.jpeg" 
+                  alt="Mystery Spin Win Premium" 
+                  className="h-full w-full object-cover transition-transform duration-1000 group-hover:scale-105"
+                />
               </div>
               <div className="absolute inset-0 rounded-[32px] ring-1 ring-inset ring-black/5" />
             </div>
