@@ -29,7 +29,7 @@ export function SprintBanner({ className }: SprintBannerProps) {
               {hasEnded ? "Want free Gradlify Premium?" : "Do you want to win £160?"}
             </span>
             <span className="flex items-center gap-1.5 text-[11px] sm:text-sm font-bold bg-white/20 px-2 py-0.5 rounded-full backdrop-blur-md">
-              {hasEnded ? "Click here to join the Mystery Spin" : "Click here to see how the Gradlify Sprint works"}
+              {hasEnded ? "Learn more" : "Click here to see how the Gradlify Sprint works"}
               <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
             </span>
           </div>

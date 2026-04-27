@@ -375,7 +375,7 @@ export default function Connect() {
                 : (currentSubject === "english" ? "bg-amber-500/10 border-amber-500/20 text-amber-600" : "bg-primary/10 border-primary/20 text-primary")
             )}>
               <Trophy className="w-3 h-3" />
-              <span>{hasEnded ? "Sprint has ended - Mystery Spin Starts Tuesday 18:30" : "Sprint: Apr 20 (6:30pm) - Apr 27 (6:30pm). Top 3 win cash prizes!"}</span>            </div>
+              <span>{hasEnded ? "Mystery spin competition starts Tuesday 28th April at 18:30" : "Sprint: Apr 20 (6:30pm) - Apr 27 (6:30pm). Top 3 win cash prizes!"}</span>            </div>
           </div>
 
           {/* Your Position */}
@@ -416,15 +416,14 @@ export default function Connect() {
               <Sparkles className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h3 className="font-bold text-slate-900 text-[15px] sm:text-base leading-none mb-1.5">Win Gradlify Premium?</h3>
-              <div className="flex items-center gap-1.5">
+              <h3 className="font-bold text-slate-900 text-[15px] sm:text-base leading-none mb-1.5">Want free Gradlify Premium? (worth £240 a year)</h3>              <div className="flex items-center gap-1.5">
                 <span className={cn(
                   "text-[9px] font-black uppercase tracking-widest",
                   currentSubject === "english" ? "text-amber-600" : "text-primary"
                 )}>Join the Mystery Spin</span>
                 <span className="w-1 h-1 rounded-full bg-slate-300" />
                 <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
-                  Starts Tuesday
+                  Starts Tuesday 28th April
                 </span>
               </div>
             </div>

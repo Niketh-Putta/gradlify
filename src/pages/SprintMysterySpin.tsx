@@ -77,15 +77,15 @@ export default function SprintMysterySpin() {
 
           {/* Featured Visual Section */}
           <section className="mb-16 sm:mb-24">
-            <div className="relative group mx-auto max-w-4xl overflow-hidden rounded-[32px] bg-white border border-border/40 p-3 sm:p-4 shadow-xl shadow-slate-200/40 transition-all hover:shadow-2xl hover:border-primary/20">
-              <div className="aspect-[16/10] sm:aspect-[16/9] w-full overflow-hidden rounded-[24px]">
+            <div className="relative group mx-auto max-w-4xl overflow-hidden rounded-[32px] bg-white border border-border/40 p-1 shadow-xl shadow-slate-200/40 transition-all hover:shadow-2xl hover:border-primary/20">
+              <div className="w-full overflow-hidden rounded-[28px]">
                 <img 
                   src="/Premium_spin.jpeg" 
                   alt="Mystery Spin Win Premium" 
-                  className="h-full w-full object-cover transition-transform duration-1000 group-hover:scale-105"
+                  className="w-full h-auto block transition-transform duration-1000 group-hover:scale-105"
                 />
               </div>
-              <div className="absolute inset-0 rounded-[32px] ring-1 ring-inset ring-black/5" />
+              <div className="absolute inset-0 rounded-[32px] ring-1 ring-inset ring-black/5 pointer-events-none" />
             </div>
           </section>
 
@@ -112,8 +112,13 @@ export default function SprintMysterySpin() {
                     <p className="text-lg sm:text-xl font-medium text-slate-500 max-w-lg mx-auto leading-relaxed">
                       You get Gradlify Premium for free for <span className="text-slate-900 underline decoration-slate-200 underline-offset-8">3 whole months</span>.
                     </p>
-                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-[10px] font-bold uppercase tracking-wider text-slate-600 border border-slate-200">
-                      <Users className="w-3 h-3" />
+                    <div className={cn(
+                      "inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.15em] border transition-all duration-300",
+                      isEnglish 
+                        ? "bg-amber-50 text-amber-700 border-amber-200/50 shadow-sm shadow-amber-100/50" 
+                        : "bg-indigo-50 text-primary border-primary/10 shadow-sm shadow-indigo-100/50"
+                    )}>
+                      <Users className="w-3.5 h-3.5" />
                       Limited to 3 Students
                     </div>
                   </div>
@@ -140,26 +145,12 @@ export default function SprintMysterySpin() {
 
           {/* Fixed Bottom Action */}
           <div className="flex flex-col items-center justify-center text-center">
-            <button
-              onClick={() => navigate("/connect")}
-              className={cn(
-                "group relative flex items-center gap-3 rounded-2xl px-12 py-5 text-base font-bold transition-all duration-300 hover:-translate-y-1 active:scale-[0.98] shadow-2xl overflow-hidden text-white",
-                isEnglish 
-                  ? "bg-amber-500 shadow-amber-500/30 hover:bg-amber-600" 
-                  : "bg-primary shadow-primary/30"
-              )}
-            >
-              <div className="absolute top-0 left-0 right-0 h-[1px] bg-white/20" />
-              <span className="relative z-10">Check qualifying points</span>
-              <ArrowRight className="relative z-10 h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
-            </button>
             <div className="mt-12 flex items-center gap-4">
               <div className="h-px w-8 bg-border" />
               <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">WIN PREMIUM ACCESS</span>
               <div className="h-px w-8 bg-border" />
             </div>
-          </div>
-        </div>
+          </div>        </div>
       </div>
     </ForceTheme>
   );
