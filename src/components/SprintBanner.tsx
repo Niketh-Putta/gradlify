@@ -14,7 +14,7 @@ export function SprintBanner({ className }: SprintBannerProps) {
       to={hasEnded ? "/mystery-spin" : "/sprint-details"} 
       className={cn(
         "group relative block w-full overflow-hidden transition-all hover:brightness-105",
-        hasEnded ? "bg-slate-800" : "bg-gradient-to-r from-[#DF3526] via-[#F17E31] to-[#FAD446]",
+        "bg-gradient-to-r from-[#DF3526] via-[#F17E31] to-[#FAD446]",
         className
       )}
     >
