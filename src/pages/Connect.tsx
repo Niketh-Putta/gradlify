@@ -21,7 +21,7 @@ import {
   UserProfile,
   Friendship
 } from "@/lib/connectApi";
-import { Search, Plus, Eye, EyeOff, Users, X, Check, UserPlus, Trophy, ArrowRight } from "lucide-react";
+import { Search, Plus, Eye, EyeOff, Users, X, Check, UserPlus, Trophy, ArrowRight, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -375,7 +375,7 @@ export default function Connect() {
                 : (currentSubject === "english" ? "bg-amber-500/10 border-amber-500/20 text-amber-600" : "bg-primary/10 border-primary/20 text-primary")
             )}>
               <Trophy className="w-3 h-3" />
-              <span>{hasEnded ? "Sprint has ended" : "Sprint: Apr 20 (6:30pm) - Apr 27 (6:30pm). Top 3 win cash prizes!"}</span>            </div>
+              <span>{hasEnded ? "Sprint has ended - Mystery Spin Starts Tuesday 18:30" : "Sprint: Apr 20 (6:30pm) - Apr 27 (6:30pm). Top 3 win cash prizes!"}</span>            </div>
           </div>
 
           {/* Your Position */}
@@ -404,7 +404,7 @@ export default function Connect() {
 
       {/* Sprint CTA Banner - Redesigned for App Aesthetic */}
       <Link 
-        to="/sprint-winning"
+        to="/mystery-spin"
         className="mb-4 group relative overflow-hidden rounded-2xl p-3.5 bg-white border border-slate-200 shadow-sm transition-all hover:border-primary/50 hover:shadow-md active:scale-[0.98] animate-in slide-in-from-top-4 duration-500"
       >
         <div className="relative flex items-center justify-between gap-4">
@@ -413,20 +413,18 @@ export default function Connect() {
               "w-11 h-11 rounded-xl flex items-center justify-center bg-gradient-to-br transition-transform group-hover:scale-105 duration-300 shadow-sm",
               currentSubject === "english" ? "from-amber-400 to-amber-600" : "from-primary to-blue-600"
             )}>
-              <Trophy className="w-5 h-5 text-white" />
+              <Sparkles className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h3 className="font-bold text-slate-900 text-[15px] sm:text-base leading-none mb-1.5">
-                {hasEnded ? "Sprint results coming soon!" : "Want to win £160?"}
-              </h3>
+              <h3 className="font-bold text-slate-900 text-[15px] sm:text-base leading-none mb-1.5">Win Gradlify Premium?</h3>
               <div className="flex items-center gap-1.5">
                 <span className={cn(
                   "text-[9px] font-black uppercase tracking-widest",
                   currentSubject === "english" ? "text-amber-600" : "text-primary"
-                )}>{hasEnded ? "Review Sprint Details" : "Join the Gradlify Sprint"}</span>
+                )}>Join the Mystery Spin</span>
                 <span className="w-1 h-1 rounded-full bg-slate-300" />
                 <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
-                  {isActive ? "Limited Time" : hasEnded ? "Sprint Ended" : "Starts Soon"}
+                  Starts Tuesday
                 </span>
               </div>
             </div>
