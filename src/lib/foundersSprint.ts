@@ -30,11 +30,13 @@ export function getFoundersSprintInfo(referenceDate: Date = new Date()) {
   const remainingMs = endDate.getTime() - referenceDate.getTime();
   const daysLeft = Math.max(0, Math.ceil(Math.max(0, remainingMs) / MS_PER_DAY));
   const isActive = referenceDate >= startDate && referenceDate <= endDate;
+  const hasEnded = referenceDate > endDate;
 
   return {
     sprintId: CURRENT_SPRINT_ID,
     daysLeft,
     isActive,
+    hasEnded,
     sprintLengthDays: SPRINT_LENGTH_DAYS,
     startDate,
     endDate,
@@ -129,29 +131,34 @@ export function getTrackNextSprintLabel(track: UserTrack | undefined, referenceD
 }
 
 export const getSprintUpgradeCopy = () => {
-  const { isActive, daysLeft } = getFoundersSprintInfo();
+  const { isActive, hasEnded, daysLeft } = getFoundersSprintInfo();
   const dayLabel = daysLeft === 1 ? "day" : "days";
   const countdown = `${daysLeft} ${dayLabel} left`;
 
   return {
     isActive,
-    bannerTitle: isActive ? `Sprint live - ${countdown}` : "Gradlify Premium\nStart Your 3 Day Free Trial",
+    hasEnded,
+    bannerTitle: isActive ? `Sprint live - ${countdown}` : hasEnded ? "Sprint has ended" : "Gradlify Premium\nStart Your 3 Day Free Trial",
     bannerSubtitle: isActive
       ? "Mocks + Challenge only. Every correct answer counts. Climb the leaderboard now."
-      : AI_FEATURE_ENABLED
-        ? "Get unlimited AI questions, full mock exams, and personalised revision plans."
-        : "Get unlimited questions, full mock exams, and personalised revision plans.",
-    buttonPrimary: isActive ? "Unlock more sprint attempts" : "Start Your 3 Day Free Trial",
+      : hasEnded 
+        ? "Results are being verified. Final standings will be announced shortly."
+        : AI_FEATURE_ENABLED
+          ? "Get unlimited AI questions, full mock exams, and personalised revision plans."
+          : "Get unlimited questions, full mock exams, and personalised revision plans.",
+    buttonPrimary: isActive ? "Unlock more sprint attempts" : (hasEnded ? "View Sprint Results" : "Start Your 3 Day Free Trial"),
     buttonSecondary: isActive ? "Sprint leaderboard live" : "Start Your 3 Day Free Trial",
     buttonTertiary: isActive ? "Remove sprint limits" : "Start Your 3 Day Free Trial",
     listTitle: isActive ? "Sprint upgrade perks:" : "Start Your 3 Day Free Trial for:",
     settingsTitle: isActive ? "Sprint live: unlock more attempts" : "Gradlify Premium\nStart Your 3 Day Free Trial",
     settingsDescription: isActive
       ? `Sprint is live - ${countdown}. Unlock unlimited mock and challenge attempts.`
-      : AI_FEATURE_ENABLED
-        ? "Get unlimited access to AI-powered study assistance, advanced mock exams, personalised study plans, and premium resources."
-        : "Get unlimited access to personalised study assistance, advanced mock exams, personalised study plans, and premium resources.",
-    limitTitle: isActive ? "Sprint limit reached" : "Daily limit reached",
-    limitHint: isActive ? "Sprint is live - unlock more attempts" : "Resets tomorrow or start your 3 Day Free Trial",
+      : hasEnded
+        ? "The April Sprint has concluded. Final results are being verified."
+        : AI_FEATURE_ENABLED
+          ? "Get unlimited access to AI-powered study assistance, advanced mock exams, personalised study plans, and premium resources."
+          : "Get unlimited access to personalised study assistance, advanced mock exams, personalised study plans, and premium resources.",
+    limitTitle: isActive ? "Sprint limit reached" : (hasEnded ? "Sprint has ended" : "Daily limit reached"),
+    limitHint: isActive ? "Sprint is live - unlock more attempts" : (hasEnded ? "The competition phase is now closed." : "Resets tomorrow or start your 3 Day Free Trial"),
   };
 };

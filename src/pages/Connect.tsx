@@ -61,7 +61,7 @@ export default function Connect() {
   const { currentSubject } = useSubject();
   const { profile } = useAppContext();
   const userTrack = resolveUserTrack(profile?.track ?? null);
-  const { isActive } = getFoundersSprintInfo();
+  const { isActive, hasEnded } = getFoundersSprintInfo();
   const [period, setPeriod] = useState<Period>('month');
   const [scope, setScope] = useState<Scope>('global');
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
@@ -368,11 +368,14 @@ export default function Connect() {
             <p className="text-muted-foreground text-[10px] sm:text-xs font-light mt-0.5 truncate">Ranked by correct answers</p>
             <p className="text-muted-foreground text-[10px] sm:text-xs font-light truncate mb-1">{periodDescriptor}</p>
             <div className={cn(
-              "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border text-[9px] sm:text-[10px] font-bold uppercase tracking-wider animate-pulse",
-              currentSubject === "english" ? "bg-amber-500/10 border-amber-500/20 text-amber-600" : "bg-primary/10 border-primary/20 text-primary"
+              "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border text-[9px] sm:text-[10px] font-bold uppercase tracking-wider",
+              !hasEnded && "animate-pulse",
+              hasEnded 
+                ? "bg-slate-100 border-slate-200 text-slate-600 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-400"
+                : (currentSubject === "english" ? "bg-amber-500/10 border-amber-500/20 text-amber-600" : "bg-primary/10 border-primary/20 text-primary")
             )}>
               <Trophy className="w-3 h-3" />
-              <span>Sprint: Apr 20 (6:30pm) - Apr 27 (6:30pm). Top 3 win cash prizes!</span>            </div>
+              <span>{hasEnded ? "Sprint has ended" : "Sprint: Apr 20 (6:30pm) - Apr 27 (6:30pm). Top 3 win cash prizes!"}</span>            </div>
           </div>
 
           {/* Your Position */}
@@ -413,15 +416,17 @@ export default function Connect() {
               <Trophy className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h3 className="font-bold text-slate-900 text-[15px] sm:text-base leading-none mb-1.5">Want to win £160?</h3>
+              <h3 className="font-bold text-slate-900 text-[15px] sm:text-base leading-none mb-1.5">
+                {hasEnded ? "Sprint results coming soon!" : "Want to win £160?"}
+              </h3>
               <div className="flex items-center gap-1.5">
                 <span className={cn(
                   "text-[9px] font-black uppercase tracking-widest",
                   currentSubject === "english" ? "text-amber-600" : "text-primary"
-                )}>Join the Gradlify Sprint</span>
+                )}>{hasEnded ? "Review Sprint Details" : "Join the Gradlify Sprint"}</span>
                 <span className="w-1 h-1 rounded-full bg-slate-300" />
                 <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
-                  {isActive ? "Limited Time" : "Starts Soon"}
+                  {isActive ? "Limited Time" : hasEnded ? "Sprint Ended" : "Starts Soon"}
                 </span>
               </div>
             </div>
@@ -614,124 +619,137 @@ export default function Connect() {
       </div>
 
       {/* Leaderboard */}
-      <section
-        className="overflow-y-auto leaderboard-scroll animate-fade-in h-[560px]"
-        style={{ animationDelay: '0.12s' }}
-      >
-        {loading ? (
-          <div className="space-y-2">
-            {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="flex items-center gap-3 py-2.5 px-2.5">
-                <Skeleton className="w-6 h-4" />
-                <Skeleton className="w-8 h-8 rounded-full" />
-                <Skeleton className="flex-1 h-4" />
-                <Skeleton className="w-10 h-4" />
-              </div>
-            ))}
-          </div>
-        ) : displayLeaderboard.length === 0 ? (
-          <div className="text-center py-8">
-            <p className="text-muted-foreground text-xs">No results found</p>
-          </div>
-        ) : (
-          displayLeaderboard.map((entry, index) => {
-            const isTopThree = entry.rank <= 3;
-            const isYou = entry.is_self;
-            const entryIsFriend = isFriend(entry.user_id);
-            const canRemoveFriend = scope === 'friends' && entryIsFriend && !isYou;
+      <div className="relative flex-1 min-h-0">
+        <section
+          className={cn(
+            "overflow-y-auto leaderboard-scroll animate-fade-in h-[560px]",
+            hasEnded && "blur-[3px] pointer-events-none select-none opacity-80 transition-all duration-700"
+          )}
+          style={{ animationDelay: '0.12s' }}
+        >
+          {loading ? (
+            <div className="space-y-2">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div key={i} className="flex items-center gap-3 py-2.5 px-2.5">
+                  <Skeleton className="w-6 h-4" />
+                  <Skeleton className="w-8 h-8 rounded-full" />
+                  <Skeleton className="flex-1 h-4" />
+                  <Skeleton className="w-10 h-4" />
+                </div>
+              ))}
+            </div>
+          ) : displayLeaderboard.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-muted-foreground text-xs">No results found</p>
+            </div>
+          ) : (
+            displayLeaderboard.map((entry, index) => {
+              const isTopThree = entry.rank <= 3;
+              const isYou = entry.is_self;
+              const entryIsFriend = isFriend(entry.user_id);
+              const canRemoveFriend = scope === 'friends' && entryIsFriend && !isYou;
 
-            return (
-              <div
-                key={entry.user_id}
-                className={cn(
-                  "leaderboard-row py-2 mx-0 px-2 rounded-xl transition-colors group",
-                  entry.rank <= 10 && (currentSubject === "english" ? "top-ten-highlight-english" : "top-ten-highlight"),
-                  index > 0 && "border-t border-border/50",
-                  isYou && (currentSubject === "english" ? "bg-amber-500/10 border-l-2 border-l-amber-500 pl-2" : "bg-primary/5 border-l-2 border-l-primary pl-2"),
-                  canRemoveFriend && "cursor-pointer"
-                )}
-                onDoubleClick={() => {
-                  if (!canRemoveFriend) return;
-                  void handleRemoveFriendByUserId(entry.user_id, entry.name);
-                }}
-                onContextMenu={(e) => {
-                  if (!canRemoveFriend) return;
-                  e.preventDefault();
-                  void handleRemoveFriendByUserId(entry.user_id, entry.name);
-                }}
-              >
-                <div className="flex items-center gap-2">
-                  {/* Rank */}
-                  <div className="w-5 text-right flex-shrink-0">
-                    <span className={cn(
-                      "text-xs tabular-nums tracking-tight",
-                      getRankColor(entry.rank),
-                      isTopThree ? "font-semibold" : "font-normal"
-                    )}>
-                      {entry.rank}
-                    </span>
-                  </div>
-
-                  {/* Avatar & Name */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <Avatar className={cn(
-                        "w-7 h-7 flex-shrink-0",
-                        isYou && (currentSubject === "english" ? "bg-gradient-to-br from-amber-400 to-amber-600" : "bg-gradient-to-br from-primary to-blue-600"),
-                        entryIsFriend && !isYou && (currentSubject === "english" ? "ring-2 ring-offset-2 ring-offset-background ring-amber-400" : "ring-2 ring-offset-2 ring-offset-background ring-blue-400")
+              return (
+                <div
+                  key={entry.user_id}
+                  className={cn(
+                    "leaderboard-row py-2 mx-0 px-2 rounded-xl transition-colors group",
+                    entry.rank <= 10 && (currentSubject === "english" ? "top-ten-highlight-english" : "top-ten-highlight"),
+                    index > 0 && "border-t border-border/50",
+                    isYou && (currentSubject === "english" ? "bg-amber-500/10 border-l-2 border-l-amber-500 pl-2" : "bg-primary/5 border-l-2 border-l-primary pl-2"),
+                    canRemoveFriend && "cursor-pointer"
+                  )}
+                  onDoubleClick={() => {
+                    if (!canRemoveFriend) return;
+                    void handleRemoveFriendByUserId(entry.user_id, entry.name);
+                  }}
+                  onContextMenu={(e) => {
+                    if (!canRemoveFriend) return;
+                    e.preventDefault();
+                    void handleRemoveFriendByUserId(entry.user_id, entry.name);
+                  }}
+                >
+                  <div className="flex items-center gap-2">
+                    {/* Rank */}
+                    <div className="w-5 text-right flex-shrink-0">
+                      <span className={cn(
+                        "text-xs tabular-nums tracking-tight",
+                        getRankColor(entry.rank),
+                        isTopThree ? "font-semibold" : "font-normal"
                       )}>
-                        {isYou ? (
-                          <AvatarFallback className={cn(
-                            "text-white text-[11px] font-medium bg-gradient-to-br",
-                            currentSubject === "english" ? "from-amber-400 to-amber-600" : "from-primary to-blue-600"
-                          )}>
-                            You
-                          </AvatarFallback>
-                        ) : (
-                          <>
-                            <AvatarImage src={entry.avatar_url || undefined} />
-                            <AvatarFallback className="text-[11px] font-medium bg-muted text-muted-foreground">
-                              {getInitials(entry.name)}
+                        {entry.rank}
+                      </span>
+                    </div>
+
+                    {/* Avatar & Name */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <Avatar className={cn(
+                          "w-7 h-7 flex-shrink-0",
+                          isYou && (currentSubject === "english" ? "bg-gradient-to-br from-amber-400 to-amber-600" : "bg-gradient-to-br from-primary to-blue-600"),
+                          entryIsFriend && !isYou && (currentSubject === "english" ? "ring-2 ring-offset-2 ring-offset-background ring-amber-400" : "ring-2 ring-offset-2 ring-offset-background ring-blue-400")
+                        )}>
+                          {isYou ? (
+                            <AvatarFallback className={cn(
+                              "text-white text-[11px] font-medium bg-gradient-to-br",
+                              currentSubject === "english" ? "from-amber-400 to-amber-600" : "from-primary to-blue-600"
+                            )}>
+                              You
                             </AvatarFallback>
-                          </>
-                        )}
-                      </Avatar>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2 min-w-0">
-                          <span className={cn("text-sm truncate min-w-0", isYou && "font-medium")}>
-                            {isYou ? 'You' : entry.name}
-                          </span>
+                          ) : (
+                            <>
+                              <AvatarImage src={entry.avatar_url || undefined} />
+                              <AvatarFallback className="text-[11px] font-medium bg-muted text-muted-foreground">
+                                {getInitials(entry.name)}
+                              </AvatarFallback>
+                            </>
+                          )}
+                        </Avatar>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <span className={cn("text-sm truncate min-w-0", isYou && "font-medium")}>
+                              {isYou ? 'You' : entry.name}
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Questions Count */}
-                  <div className="text-right flex items-center gap-2 flex-shrink-0">
-                    {!entryIsFriend && !isYou && (
-                      <button
-                        onClick={() => handleSendRequest(entry.user_id)}
-                        disabled={sendingTo === entry.user_id}
-                        className={cn("opacity-0 group-hover:opacity-100 text-[10px] font-medium hover:underline transition-opacity", currentSubject === "english" ? "text-amber-500" : "text-primary")}
-                      >
-                        + Add
-                      </button>
-                    )}
-                    <div className="w-10 text-right">
-                      <span className={cn(
-                        "text-xs tabular-nums tracking-tight",
-                        (isTopThree || isYou) ? "font-semibold" : "text-muted-foreground"
-                      )}>
-                        {entry.correct_count.toLocaleString()}
-                      </span>
+                    {/* Questions Count */}
+                    <div className="text-right flex items-center gap-2 flex-shrink-0">
+                      {!entryIsFriend && !isYou && (
+                        <button
+                          onClick={() => handleSendRequest(entry.user_id)}
+                          disabled={sendingTo === entry.user_id}
+                          className={cn("opacity-0 group-hover:opacity-100 text-[10px] font-medium hover:underline transition-opacity", currentSubject === "english" ? "text-amber-500" : "text-primary")}
+                        >
+                          + Add
+                        </button>
+                      )}
+                      <div className="w-10 text-right">
+                        <span className={cn(
+                          "text-xs tabular-nums tracking-tight",
+                          (isTopThree || isYou) ? "font-semibold" : "text-muted-foreground"
+                        )}>
+                          {entry.correct_count.toLocaleString()}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            );
-          })
+              );
+            })
+          )}
+        </section>
+
+        {hasEnded && (
+          <div className="absolute inset-0 z-30 flex items-center justify-center overflow-hidden pointer-events-none">
+            <div className="bg-red-600/90 text-white font-black text-xl sm:text-2xl py-4 sm:py-6 w-[150%] -rotate-12 shadow-[0_0_40px_rgba(220,38,38,0.5)] flex items-center justify-center tracking-[0.2em] uppercase border-y-4 border-white/20 backdrop-blur-sm">
+              Sprint has ended!!
+            </div>
+          </div>
         )}
-      </section>
+      </div>
 
       {/* Add Friend Modal */}
       <Dialog open={addFriendOpen} onOpenChange={setAddFriendOpen}>
