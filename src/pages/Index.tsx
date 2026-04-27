@@ -273,6 +273,11 @@ const Index = () => {
             <Route path="/11-plus" element={<Navigate to="/select-subject" replace />} />
             <Route path="/tools" element={<Tools />} />
             <Route path="/free-resources" element={<Tools />} />
+            <Route path="/sprint" element={<SprintHowItWorks />} />
+            <Route path="/sprint-details" element={<SprintDetails />} />
+            <Route path="/sprint-winning" element={<SprintWinning />} />
+            <Route path="/mystery-spin" element={<SprintMysterySpin />} />
+            <Route path="/founders-circle" element={<FoundersCircle />} />
             <Route 
               path="/*" 
               element={
@@ -307,11 +312,6 @@ const Index = () => {
               <Route path="notes" element={<RevisionNotes />} />
               <Route path="notes/:section" element={<RevisionNotesSection />} />
               <Route path="notes/:section/:topic" element={<RevisionNotesTopic />} />
-              <Route path="founders-circle" element={<FoundersCircle />} />
-              <Route path="sprint" element={<SprintHowItWorks />} />
-              <Route path="sprint-details" element={<SprintDetails />} />
-              <Route path="sprint-winning" element={<SprintWinning />} />
-              <Route path="mystery-spin" element={<SprintMysterySpin />} />
               <Route path="nikethputtaadmin-growth" element={<GrowthTracker />} />
               <Route path="*" element={<NotFound />} />
             </Route>
@@ -327,6 +327,8 @@ const Index = () => {
         <Route path="/founders-circle" element={<FoundersCircle />} />
         <Route path="/sprint" element={<SprintHowItWorks />} />
         <Route path="/sprint-details" element={<SprintDetails />} />
+        <Route path="/sprint-winning" element={<SprintWinning />} />
+        <Route path="/mystery-spin" element={<SprintMysterySpin />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/mocks" element={<MockExams />} />
             <Route path="/mock-exam" element={<MockExamPage />} />
