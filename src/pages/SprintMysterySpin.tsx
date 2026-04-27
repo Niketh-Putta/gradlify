@@ -91,28 +91,29 @@ export default function SprintMysterySpin() {
             </div>
           </section>
 
-          {/* Prize Breakdown */}
-          <section className="mb-16 sm:mb-24">
-            <div className="mb-10 text-center">
-              <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-300">The Rewards</h2>
+          {/* Prize Breakdown - Redesigned for Premium Minimalist Aesthetic */}
+          <section className="mb-24 sm:mb-32">
+            <div className="mb-12 text-center">
+              <h2 className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-300">The Reward</h2>
             </div>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div className="group rounded-2xl border border-border/40 bg-white/50 p-8 transition-all hover:bg-white hover:shadow-lg">
-                <div className="mb-6 flex items-center justify-between">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-primary">Premium</span>
-                  <Crown className="h-5 w-5 text-amber-500" />
+            <div className="flex flex-col items-center justify-center space-y-8">
+              <div className="relative group">
+                <div className={cn(
+                  "absolute inset-0 blur-3xl opacity-20 transition-opacity group-hover:opacity-30",
+                  isEnglish ? "bg-amber-500" : "bg-primary"
+                )} />
+                <div className="relative text-center px-4">
+                  <div className="inline-flex items-center gap-2 mb-6 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
+                    <Crown className={cn("h-3 w-3", isEnglish ? "text-amber-500" : "text-primary")} />
+                    Grand Prize
+                  </div>
+                  <h3 className="text-4xl sm:text-6xl font-bold tracking-tight text-slate-900 mb-6">
+                    3 Months <span className={cn("text-transparent bg-clip-text bg-gradient-to-r", isEnglish ? "from-amber-500 to-amber-700" : "from-primary to-blue-700")}>Free</span>
+                  </h3>
+                  <p className="text-lg sm:text-xl font-medium text-slate-500 max-w-lg mx-auto leading-relaxed">
+                    You get Gradlify Premium for free for <span className="text-slate-900 underline decoration-slate-200 underline-offset-8">3 whole months</span>.
+                  </p>
                 </div>
-                <div className="mb-2 text-4xl font-bold text-slate-900 tracking-tighter">3 Months Free</div>
-                <p className="text-xs font-medium leading-relaxed text-slate-500">Unlock all AI questions, full mock exams, and personalized readiness plans.</p>
-              </div>
-
-              <div className="group rounded-2xl border border-border/40 bg-white/50 p-8 transition-all hover:bg-white hover:shadow-lg">
-                <div className="mb-6 flex items-center justify-between">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-primary">Exclusive</span>
-                  <Sparkles className="h-5 w-5 text-blue-500" />
-                </div>
-                <div className="mb-2 text-4xl font-bold text-slate-900 tracking-tighter">Full Access</div>
-                <p className="text-xs font-medium leading-relaxed text-slate-500">Automatic entry into the next Sprint with 0 limits from day one.</p>
               </div>
             </div>
           </section>
