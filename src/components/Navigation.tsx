@@ -144,8 +144,8 @@ export function Navigation({ user, profile, onSettings, onSignOut }: NavigationP
       !premiumUntil || new Date(premiumUntil).getTime() > Date.now();
     const isPlanActive = hasPlan && hasActivePeriod;
     const isPremiumFlag = Boolean(profile.is_premium) && hasActivePeriod;
-    const isPremium = profile.tier === 'premium' || isPlanActive || isPremiumFlag;
-    const isUltra = profile.plan === 'ultra';
+    const isUltra = membership.isUltra || profile.plan === 'ultra' || profile.plan === 'ultra_annual';
+    const isPremium = isUltra || profile.tier === 'premium' || isPlanActive || isPremiumFlag;
     const founderTrack = profile.founder_track ?? null;
 
     return { isPremium, isUltra, founderTrack };

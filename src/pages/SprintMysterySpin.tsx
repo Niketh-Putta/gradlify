@@ -132,7 +132,7 @@ export default function SprintMysterySpin() {
             <div className="space-y-3">
               <h4 className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-900">Event Window</h4>
               <p className="text-base leading-relaxed text-slate-500">
-                Qualifying starts <span className="text-slate-900 font-semibold underline decoration-slate-200 decoration-2 underline-offset-4">Tuesday, 28 April at 18:30</span> and ends Tuesday, 5 May at 18:30.
+                Qualifying starts <span className="text-slate-900 font-semibold underline decoration-slate-200 decoration-2 underline-offset-4">Wednesday, 29 April at 18:30</span> and ends Wednesday, 6 May at 18:30.
               </p>
             </div>
             <div className="space-y-3">

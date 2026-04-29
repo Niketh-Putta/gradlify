@@ -1,0 +1,1 @@
+-- Remote migration placeholder to align local migration history.

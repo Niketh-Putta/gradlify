@@ -59,7 +59,7 @@ export function useMembership() {
             track: premiumStatus.track ?? null,
             hasPremiumSubscription: premiumStatus.hasPremiumSubscription,
             hasTrackPremium: premiumStatus.hasTrackPremium,
-            isUltra: premiumStatus.plan === 'ultra',
+            isUltra: premiumStatus.isUltra ?? false,
             subscription: premiumStatus.billingCycle,
             subscription_status: premiumStatus.subscriptionStatus || null,
             current_period_end: premiumStatus.currentPeriodEnd || null,

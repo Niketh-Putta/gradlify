@@ -80,7 +80,7 @@ export default function Connect() {
   const { toast } = useToast();
 
   // Get current user's entry
-  const myEntry = leaderboard.find(e => e.is_self);
+  const myEntry = leaderboard.find((entry) => entry.is_self);
 
   // Load all data
   const loadData = useCallback(async () => {
@@ -266,7 +266,7 @@ export default function Connect() {
 
   // Filter leaderboard by search
   const filteredLeaderboard = searchQuery
-    ? leaderboard.filter(e => e.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    ? leaderboard.filter((entry) => entry.name.toLowerCase().includes(searchQuery.toLowerCase()))
     : leaderboard;
 
   const periodLabels: Record<Period, string> = {
@@ -332,7 +332,7 @@ export default function Connect() {
     return `Daily leaderboard (${formatDate(now)})`;
   }, [period]);
 
-  const displayLeaderboard = filteredLeaderboard.slice(0, 100);
+  const visibleLeaderboard = filteredLeaderboard.slice(0, 100);
 
   return (
     <div className="w-full max-w-2xl mx-auto px-2 sm:px-6 py-3 sm:py-4 h-full flex flex-col overflow-x-hidden">
@@ -375,7 +375,7 @@ export default function Connect() {
                 : (currentSubject === "english" ? "bg-amber-500/10 border-amber-500/20 text-amber-600" : "bg-primary/10 border-primary/20 text-primary")
             )}>
               <Trophy className="w-3 h-3" />
-              <span>{hasEnded ? "Mystery spin competition starts Tuesday 28th April at 18:30" : "Sprint: Apr 20 (6:30pm) - Apr 27 (6:30pm). Top 3 win cash prizes!"}</span>            </div>
+              <span>{hasEnded ? "Mystery spin competition starts Wednesday 29th April at 18:30" : "Sprint: Apr 20 (6:30pm) - Apr 27 (6:30pm). Top 3 win cash prizes!"}</span>            </div>
           </div>
 
           {/* Your Position */}
@@ -423,7 +423,7 @@ export default function Connect() {
                 )}>Join the Mystery Spin</span>
                 <span className="w-1 h-1 rounded-full bg-slate-300" />
                 <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
-                  Starts Tuesday 28th April
+                  Starts Wednesday 29th April
                 </span>
               </div>
             </div>
@@ -619,8 +619,7 @@ export default function Connect() {
       <div className="relative flex-1 min-h-0">
         <section
           className={cn(
-            "overflow-y-auto leaderboard-scroll animate-fade-in h-[560px]",
-            hasEnded && "blur-[3px] pointer-events-none select-none opacity-80 transition-all duration-700"
+            "overflow-y-auto leaderboard-scroll animate-fade-in h-[560px]"
           )}
           style={{ animationDelay: '0.12s' }}
         >
@@ -635,12 +634,12 @@ export default function Connect() {
                 </div>
               ))}
             </div>
-          ) : displayLeaderboard.length === 0 ? (
+          ) : visibleLeaderboard.length === 0 ? (
             <div className="text-center py-8">
               <p className="text-muted-foreground text-xs">No results found</p>
             </div>
           ) : (
-            displayLeaderboard.map((entry, index) => {
+            visibleLeaderboard.map((entry, index) => {
               const isTopThree = entry.rank <= 3;
               const isYou = entry.is_self;
               const entryIsFriend = isFriend(entry.user_id);
@@ -739,14 +738,6 @@ export default function Connect() {
           )}
         </section>
 
-        {hasEnded && (
-          <div className="absolute inset-0 z-30 flex items-center justify-center overflow-hidden pointer-events-none">
-            <div className="bg-red-600/90 text-white py-4 sm:py-6 w-[150%] -rotate-12 shadow-[0_0_40px_rgba(220,38,38,0.5)] flex flex-col items-center justify-center border-y-4 border-white/20 backdrop-blur-sm">
-              <span className="font-black text-xl sm:text-2xl tracking-[0.2em] uppercase">Sprint has ended!!</span>
-              <span className="font-bold text-[10px] sm:text-xs tracking-[0.1em] uppercase opacity-90 mt-1">check your emails if you think you've won!!</span>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Add Friend Modal */}
