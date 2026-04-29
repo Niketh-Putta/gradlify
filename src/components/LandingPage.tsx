@@ -1033,18 +1033,23 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                 <h2 className={`mt-3 text-2xl sm:text-4xl font-semibold tracking-tight ${primaryText}`}>
                   Real students. Real prizes.
                 </h2>
-                <div className="mt-4 flex justify-center">
-                  <div className={cn(
-                    "inline-flex items-center gap-2 rounded-full border px-4 py-2.5 text-[12px] sm:text-sm font-medium shadow-sm backdrop-blur-md",
-                    isDark
-                      ? "border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.03))] text-slate-100 shadow-[0_16px_40px_-24px_rgba(0,0,0,0.55)]"
-                      : "border-slate-200/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,250,252,0.92))] text-slate-700 shadow-[0_16px_40px_-24px_rgba(15,23,42,0.18)]"
-                  )}>
-                    <span className={cn(
-                      "h-2 w-2 rounded-full",
-                      isDark ? "bg-amber-300 shadow-[0_0_14px_rgba(252,211,77,0.75)]" : "bg-amber-500 shadow-[0_0_12px_rgba(245,158,11,0.35)]"
-                    )} />
-                    Compete in weekly competitions for free and win prizes for practicing frequently!
+                <div className="mt-5 flex justify-center">
+                  <div className="w-full max-w-2xl rounded-[24px] border border-slate-200/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,250,252,0.94))] p-[1px] shadow-[0_22px_48px_-28px_rgba(15,23,42,0.22)]">
+                    <div className="rounded-[23px] bg-[radial-gradient(circle_at_top_left,rgba(245,158,11,0.12),transparent_34%),linear-gradient(180deg,rgba(255,255,255,0.96),rgba(248,250,252,0.96))] px-4 py-3.5 sm:px-5 sm:py-4">
+                      <div className="flex items-start gap-3 text-left">
+                        <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-amber-200/70 bg-amber-50/90 text-amber-600 shadow-[inset_0_1px_0_rgba(255,255,255,0.85)]">
+                          <Trophy className="h-4.5 w-4.5" />
+                        </div>
+                        <div className="min-w-0">
+                          <div className="text-[10px] font-semibold uppercase tracking-[0.26em] text-slate-400">
+                            Weekly Prize Competitions
+                          </div>
+                          <p className="mt-1 text-sm font-medium leading-relaxed text-slate-600 sm:text-[15px]">
+                            Compete for free each week and win prizes for consistent practice.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </motion.div>
