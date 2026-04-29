@@ -30,7 +30,7 @@ export default function SprintWinning() {
                 <span className={cn("relative inline-flex h-1.5 w-1.5 rounded-full", isActive ? "bg-emerald-500" : "bg-slate-300")}></span>
               </div>
               <span className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500">
-                {isActive ? "Event Live" : "Upcoming"}
+                Live
               </span>
             </div>
           </div>

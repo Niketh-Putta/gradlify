@@ -29,7 +29,7 @@ export default function SprintMysterySpin() {
                 <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-slate-300"></span>
               </div>
               <span className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500">
-                Upcoming Event
+                Live
               </span>
             </div>
           </div>
