@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion, useReducedMotion } from "framer-motion";
-import { ArrowRight, CheckCircle, ShieldCheck, Sparkles, Moon, Sun, MousePointer2, Compass, Layers, SlidersHorizontal, AlertTriangle } from "lucide-react";
+import { ArrowRight, CheckCircle, ShieldCheck, Sparkles, MousePointer2, Compass, Layers, SlidersHorizontal, AlertTriangle, Trophy, Volume2, VolumeX, Pause } from "lucide-react";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
@@ -114,6 +114,13 @@ interface LandingPageProps {
 }
 
 type FeedbackType = "support" | "suggestion";
+type WinnerShowcaseItem = {
+  name: string;
+  mediaSrc: string;
+  mediaType: "video" | "image";
+  prizeLabel: string;
+};
+
 function ResourceScrollCard({ 
   title, 
   description, 
@@ -220,7 +227,7 @@ function ResourceScrollCard({
 
 export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, variant = "11plus" }: LandingPageProps) {
   const motionCfg = useLandingMotion();
-  const isDark = theme === "dark";
+  const isDark = false;
   const isElevenPlus = true;
   const trackTitle = "11+";
   const trackShort = "11+";
@@ -439,6 +446,15 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
     { name: "Eton College", domain: "etoncollege.com" },
   ];
 
+  const winnerShowcase: WinnerShowcaseItem[] = [
+    {
+      name: "Vivaan",
+      mediaSrc: "/Vivaan_winner.mp4",
+      mediaType: "video",
+      prizeLabel: "2nd Place · £50 Waterstones Gift Card",
+    },
+  ];
+
   const showcaseRows = useMemo(
     () => [
       {
@@ -541,30 +557,15 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
               </div>
             </a>
 
-            <div className="flex items-center gap-2.5 sm:gap-6 text-[10px] sm:text-sm font-medium">
+            <div className="hidden sm:flex items-center gap-6 text-sm font-medium">
               <Link to="/11-plus" className={navLinkClass}>11+</Link>
               <a href="#pricing" className={navLinkClass}>Pricing</a>
               <a href="/free-resources" className={navLinkClass}>
-                <span className="hidden sm:inline">Free </span>Resources
+                Free Resources
               </a>
             </div>
 
             <div className="flex items-center gap-1 sm:gap-2">
-              {onThemeToggle && (
-                <button
-                  type="button"
-                  onClick={onThemeToggle}
-                  className={`inline-flex items-center gap-1.5 rounded-full border px-2 py-1 text-[10px] font-semibold transition-colors sm:gap-2 sm:px-3 sm:py-2 sm:text-xs ${
-                    isDark
-                      ? "border-white/10 text-slate-200 hover:text-white hover:border-white/30"
-                      : "border-slate-200 text-slate-600 hover:text-slate-900 hover:border-slate-400"
-                  }`}
-                  aria-label="Toggle landing page theme"
-                >
-                  {isDark ? <Sun className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> : <Moon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />}
-                  <span className="hidden sm:inline">{isDark ? "Light mode" : "Dark mode"}</span>
-                </button>
-              )}
             <Button
               variant="ghost"
               onClick={() => onAuthAction("login")}
@@ -795,11 +796,11 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
         </section>
 
         {/* Bento Box Features */}
-        <section id="features" className={`relative py-12 sm:py-24 lg:py-32 ${sectionSurface}`}>
+        <section id="features" className={`relative py-10 sm:py-18 lg:py-24 ${sectionSurface}`}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 relative">
             <motion.div initial="hidden" whileInView="show" viewport={motionCfg.viewport} variants={motionCfg.stagger}>
               
-              <div className="text-center max-w-3xl mx-auto mb-16 lg:mb-24">
+              <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-12 lg:mb-16">
 
                 <h2 className={`text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight ${primaryText}`}>
                   See what you're getting
@@ -807,15 +808,15 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
               </div>
 
               {/* Bento Grid layout */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5 auto-rows-auto">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 auto-rows-auto">
                 {/* Tile 1: English Split-View (Large, spans 2 columns) */}
                 <motion.div initial={{ x: -80, opacity: 0 }} whileInView={{ x: 0, opacity: 1 }} viewport={{ once: true, margin: "-50px" }} transition={{ duration: 1, ease: [0.23, 1, 0.32, 1], delay: 0 }} className={`md:col-span-2 rounded-[24px] sm:rounded-[32px] overflow-hidden ${cardSurface} border shadow-xl flex flex-col group relative hover:border-orange-500/30 hover:shadow-orange-500/10 transition-colors duration-500`}>
                   <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 via-amber-500/5 to-transparent dark:from-orange-500/10 dark:via-amber-500/5 dark:to-transparent z-0 pointer-events-none" />
-                  <div className="p-6 sm:p-10 pb-0 z-10">
-                    <h3 className={`text-xl sm:text-3xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#DF3526] via-[#F17E31] to-[#FAD446] mb-2 sm:mb-3`}>English Comprehension Engine</h3>
-                    <p className={`${mutedText} max-w-lg font-medium leading-relaxed text-sm sm:text-lg`}>Master comprehension with side-by-side passage and question rendering. Eliminate context-switching fatigue and visually isolate literary devices within the text.</p>
+                  <div className="p-5 sm:p-7 pb-0 z-10">
+                    <h3 className={`text-lg sm:text-2xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#DF3526] via-[#F17E31] to-[#FAD446] mb-2`}>English Comprehension Engine</h3>
+                    <p className={`${mutedText} max-w-lg font-medium leading-relaxed text-sm sm:text-base`}>Master comprehension with side-by-side passage and question rendering. Eliminate context-switching fatigue and visually isolate literary devices within the text.</p>
                   </div>
-                  <div className="mt-4 sm:mt-6 flex-1 relative w-[calc(100%-1.25rem)] sm:w-[calc(100%-2.5rem)] rounded-tl-[24px] sm:rounded-tl-[40px] border-t border-l border-border/50 shadow-[inset_0_2px_20px_rgba(0,0,0,0.03)] bg-slate-50 dark:bg-[#0f172a] ml-5 sm:ml-10 overflow-hidden group/img p-3 sm:p-6 pb-0 sm:pb-0 flex flex-col justify-end">
+                  <div className="mt-3 sm:mt-4 flex-1 relative w-[calc(100%-1rem)] sm:w-[calc(100%-1.75rem)] rounded-tl-[24px] sm:rounded-tl-[34px] border-t border-l border-border/50 shadow-[inset_0_2px_20px_rgba(0,0,0,0.03)] bg-slate-50 dark:bg-[#0f172a] ml-4 sm:ml-7 overflow-hidden group/img p-2 sm:p-4 pb-0 flex flex-col justify-end min-h-[190px] sm:min-h-[240px]">
                     <motion.img 
                       initial={{ y: 30, opacity: 0 }}
                       whileInView={{ y: 0, opacity: 1 }}
@@ -833,11 +834,11 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                 {/* Tile 2: Mathematical Agility (Tall, spans 1 column) */}
                 <motion.div initial={{ x: 80, opacity: 0 }} whileInView={{ x: 0, opacity: 1 }} viewport={{ once: true, margin: "-50px" }} transition={{ duration: 1, ease: [0.23, 1, 0.32, 1], delay: 0.1 }} className={`rounded-[24px] sm:rounded-[32px] overflow-hidden ${cardSurface} border shadow-xl flex flex-col group relative hover:border-orange-500/30 hover:shadow-orange-500/10 transition-colors duration-500`}>
                   <div className="absolute inset-0 bg-gradient-to-b from-orange-500/5 via-amber-500/5 to-transparent dark:from-orange-500/10 dark:via-amber-500/5 dark:to-transparent z-0 pointer-events-none" />
-                  <div className="p-6 sm:p-8 pb-3 z-10">
-                    <h3 className={`text-xl sm:text-3xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#DF3526] via-[#F17E31] to-[#FAD446] mb-2`}>Mathematical Agility</h3>
+                  <div className="p-5 sm:p-6 pb-2 z-10">
+                    <h3 className={`text-lg sm:text-2xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#DF3526] via-[#F17E31] to-[#FAD446] mb-2`}>Mathematical Agility</h3>
                     <p className={`${mutedText} text-xs sm:text-sm font-medium leading-relaxed`}>Multi-step reasoning environments built specifically for rigorous GL & CEM selective formatting.</p>
                   </div>
-                  <div className="flex-1 relative overflow-hidden z-10 flex flex-col items-center justify-end mt-3 sm:mt-5 mx-4 sm:mx-8 rounded-t-[24px] sm:rounded-t-[32px] border-t border-x border-border/50 shadow-[inset_0_2px_20px_rgba(0,0,0,0.03)] bg-slate-50 dark:bg-[#0f172a] px-1 sm:px-4 pt-4 sm:pt-8 min-h-[160px]">
+                  <div className="flex-1 relative overflow-hidden z-10 flex flex-col items-center justify-end mt-2 sm:mt-3 mx-3 sm:mx-5 rounded-t-[24px] sm:rounded-t-[28px] border-t border-x border-border/50 shadow-[inset_0_2px_20px_rgba(0,0,0,0.03)] bg-slate-50 dark:bg-[#0f172a] px-1 sm:px-3 pt-3 sm:pt-5 min-h-[130px] sm:min-h-[180px]">
                     <motion.img 
                       initial={{ y: 30, opacity: 0 }}
                       whileInView={{ y: 0, opacity: 1 }}
@@ -853,13 +854,13 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                 </motion.div>
 
                 {/* Tile 3: Leaderboard (Wide bottom, spans 2 columns) */}
-                <motion.div initial={{ x: -80, opacity: 0 }} whileInView={{ x: 0, opacity: 1 }} viewport={{ once: true, margin: "-50px" }} transition={{ duration: 1, ease: [0.23, 1, 0.32, 1], delay: 0.2 }} className={`md:col-span-2 rounded-[24px] sm:rounded-[32px] overflow-hidden ${cardSurface} border shadow-xl flex flex-col sm:flex-row items-center group relative md:h-[320px] lg:h-[340px] hover:border-orange-500/30 hover:shadow-orange-500/10 transition-colors duration-500`}>
+                <motion.div initial={{ x: -80, opacity: 0 }} whileInView={{ x: 0, opacity: 1 }} viewport={{ once: true, margin: "-50px" }} transition={{ duration: 1, ease: [0.23, 1, 0.32, 1], delay: 0.2 }} className={`md:col-span-2 rounded-[24px] sm:rounded-[32px] overflow-hidden ${cardSurface} border shadow-xl flex flex-col sm:flex-row items-center group relative md:h-[270px] lg:h-[290px] hover:border-orange-500/30 hover:shadow-orange-500/10 transition-colors duration-500`}>
                   <div className="absolute inset-0 bg-gradient-to-r from-orange-500/5 via-amber-500/5 to-transparent dark:from-orange-500/10 dark:via-amber-500/5 dark:to-transparent z-0 pointer-events-none" />
-                  <div className="p-6 sm:p-8 sm:w-[45%] z-10 sm:py-6 self-start sm:self-center">
-                    <h3 className={`text-xl sm:text-3xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#DF3526] via-[#F17E31] to-[#FAD446] mb-2`}>Leaderboard</h3>
+                  <div className="p-5 sm:p-6 sm:w-[44%] z-10 sm:py-5 self-start sm:self-center">
+                    <h3 className={`text-lg sm:text-2xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#DF3526] via-[#F17E31] to-[#FAD446] mb-2`}>Leaderboard</h3>
                     <p className={`${mutedText} text-xs sm:text-sm font-medium leading-relaxed`}>Build momentum consistently with healthy, optional competition rooted purely in live practice metrics.</p>
                   </div>
-                  <div className="sm:w-[55%] h-full w-[calc(100%-2.5rem)] sm:w-full relative bg-slate-50 dark:bg-[#0f172a] sm:border-y border-t border-x sm:border-r-0 border-border/50 rounded-t-[24px] sm:rounded-t-none sm:rounded-l-[40px] mx-5 sm:ml-10 sm:mr-0 mt-5 sm:mt-0 flex flex-col items-center justify-center overflow-hidden shadow-[inset_0_2px_20px_rgba(0,0,0,0.03)] group/img p-4 sm:p-8">
+                  <div className="sm:w-[56%] h-full w-[calc(100%-1.5rem)] sm:w-full relative bg-slate-50 dark:bg-[#0f172a] sm:border-y border-t border-x sm:border-r-0 border-border/50 rounded-t-[24px] sm:rounded-t-none sm:rounded-l-[34px] mx-3 sm:ml-6 sm:mr-0 mt-3 sm:mt-0 flex flex-col items-center justify-center overflow-hidden shadow-[inset_0_2px_20px_rgba(0,0,0,0.03)] group/img p-3 sm:p-5">
                     <motion.img 
                       initial={{ x: 30, opacity: 0 }}
                       whileInView={{ x: 0, opacity: 1 }}
@@ -867,7 +868,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                       transition={{ duration: 1.0, ease: [0.23, 1, 0.32, 1], delay: 0.3 }}
                       src="/Leaderboard.png" alt="Leaderboard Activity" 
                       className={cn(
-                        "w-[115%] sm:w-[110%] max-w-none h-auto object-contain transition-transform duration-1000 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:-translate-x-3 group-hover:-translate-y-2 transform scale-[1.1] sm:scale-[1.15] drop-shadow-2xl border border-slate-200/70 dark:border-white/10 rounded-xl sm:rounded-2xl",
+                        "w-[112%] sm:w-[108%] max-w-none h-auto object-contain transition-transform duration-1000 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:-translate-x-3 group-hover:-translate-y-2 transform scale-[1.04] sm:scale-[1.08] drop-shadow-2xl border border-slate-200/70 dark:border-white/10 rounded-xl sm:rounded-2xl",
                         isDark && "invert hue-rotate-180 brightness-[0.85] contrast-[1.2] opacity-95"
                       )} 
                     />
@@ -875,13 +876,13 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                 </motion.div>
 
                 {/* Tile 4: SPaG Toolkit (Square, spans 1 column) */}
-                <motion.div initial={{ x: 80, opacity: 0 }} whileInView={{ x: 0, opacity: 1 }} viewport={{ once: true, margin: "-50px" }} transition={{ duration: 1, ease: [0.23, 1, 0.32, 1], delay: 0.3 }} className={`rounded-[32px] overflow-hidden ${cardSurface} border shadow-xl flex flex-col group relative md:h-[320px] lg:h-[340px] hover:border-orange-500/30 hover:shadow-orange-500/10 transition-colors duration-500`}>
+                <motion.div initial={{ x: 80, opacity: 0 }} whileInView={{ x: 0, opacity: 1 }} viewport={{ once: true, margin: "-50px" }} transition={{ duration: 1, ease: [0.23, 1, 0.32, 1], delay: 0.3 }} className={`rounded-[32px] overflow-hidden ${cardSurface} border shadow-xl flex flex-col group relative md:h-[270px] lg:h-[290px] hover:border-orange-500/30 hover:shadow-orange-500/10 transition-colors duration-500`}>
                   <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 via-amber-500/5 to-transparent dark:from-orange-500/10 dark:via-amber-500/5 dark:to-transparent z-0 pointer-events-none" />
-                  <div className="p-8 pb-4 z-10 text-center">
-                    <h3 className={`text-xl sm:text-3xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#DF3526] via-[#F17E31] to-[#FAD446] mb-2`}>SPaG Toolkit</h3>
-                    <p className={`${mutedText} text-sm font-medium`}>Instantly reference grammatical architecture to secure SPaG marks.</p>
+                  <div className="p-5 sm:p-6 pb-3 z-10 text-center">
+                    <h3 className={`text-lg sm:text-2xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#DF3526] via-[#F17E31] to-[#FAD446] mb-2`}>SPaG Toolkit</h3>
+                    <p className={`${mutedText} text-xs sm:text-sm font-medium`}>Instantly reference grammatical architecture to secure SPaG marks.</p>
                   </div>
-                  <div className="flex-1 relative overflow-hidden z-10 flex items-start justify-center mt-4 sm:mt-6 mx-5 sm:mx-10 rounded-t-[32px] border-t border-x border-border/50 bg-slate-100 dark:bg-[#0f172a] pt-6 sm:pt-8 px-0 sm:px-2">
+                  <div className="flex-1 relative overflow-hidden z-10 flex items-start justify-center mt-2 sm:mt-3 mx-3 sm:mx-5 rounded-t-[28px] border-t border-x border-border/50 bg-slate-100 dark:bg-[#0f172a] pt-4 sm:pt-5 px-0 sm:px-2">
                     <motion.img 
                       initial={{ y: 30, opacity: 0 }}
                       whileInView={{ y: 0, opacity: 1 }}
@@ -1010,6 +1011,57 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                <div className="mt-6 flex justify-center">
                  <HoverFact tone={theme}>Instant feedback appears after every answer.</HoverFact>
                </div>
+              </motion.div>
+            </motion.div>
+          </div>
+        </section>
+
+        <section className={`relative py-12 sm:py-16 lg:py-20 ${sectionSurface}`}>
+          {ambientEffectsEnabled && (
+            <div
+              className={`absolute inset-0 pointer-events-none ${
+                isDark
+                  ? "bg-[radial-gradient(620px_320px_at_20%_25%,rgba(245,158,11,0.12),transparent_65%)]"
+                  : "bg-[radial-gradient(620px_320px_at_20%_25%,rgba(245,158,11,0.08),transparent_65%)]"
+              }`}
+            />
+          )}
+          <div className="max-w-7xl mx-auto px-4 sm:px-6">
+            <motion.div initial="hidden" whileInView="show" viewport={motionCfg.viewport} variants={motionCfg.stagger}>
+              <motion.div variants={motionCfg.fadeUp} className="max-w-3xl mx-auto text-center">
+                <div className={`text-sm font-semibold ${accentText}`}>Past Winners</div>
+                <h2 className={`mt-3 text-2xl sm:text-4xl font-semibold tracking-tight ${primaryText}`}>
+                  Real students. Real prizes.
+                </h2>
+                <div className="mt-4 flex justify-center">
+                  <div className={cn(
+                    "inline-flex items-center gap-2 rounded-full border px-4 py-2.5 text-[12px] sm:text-sm font-medium shadow-sm backdrop-blur-md",
+                    isDark
+                      ? "border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.03))] text-slate-100 shadow-[0_16px_40px_-24px_rgba(0,0,0,0.55)]"
+                      : "border-slate-200/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,250,252,0.92))] text-slate-700 shadow-[0_16px_40px_-24px_rgba(15,23,42,0.18)]"
+                  )}>
+                    <span className={cn(
+                      "h-2 w-2 rounded-full",
+                      isDark ? "bg-amber-300 shadow-[0_0_14px_rgba(252,211,77,0.75)]" : "bg-amber-500 shadow-[0_0_12px_rgba(245,158,11,0.35)]"
+                    )} />
+                    Compete in weekly competitions for free and win prizes for practicing frequently!
+                  </div>
+                </div>
+              </motion.div>
+
+              <motion.div variants={motionCfg.fadeUp} className="mt-8 sm:mt-10">
+                <div className="flex justify-center pb-3">
+                  {winnerShowcase.map((winner) => (
+                    <WinnerShowcaseCard
+                      key={winner.name}
+                      winner={winner}
+                      isDark={isDark}
+                      cardSurface={cardSurface}
+                      primaryText={primaryText}
+                      mutedText={mutedText}
+                    />
+                  ))}
+                </div>
               </motion.div>
             </motion.div>
           </div>
@@ -1733,6 +1785,201 @@ function MediaFrame({
         }`}
       />
       <div className={`relative ${aspectClassName} ${isDark ? "bg-slate-950/60" : "bg-slate-50"}`}>{children}</div>
+    </div>
+  );
+}
+
+function WinnerShowcaseCard({
+  winner,
+  isDark,
+  cardSurface,
+  primaryText,
+  mutedText,
+}: {
+  winner: WinnerShowcaseItem;
+  isDark: boolean;
+  cardSurface: string;
+  primaryText: string;
+  mutedText: string;
+}) {
+  const [isMuted, setIsMuted] = useState(true);
+  const [isPaused, setIsPaused] = useState(false);
+  const [hasEnteredViewport, setHasEnteredViewport] = useState(false);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const mediaFrameRef = useRef<HTMLDivElement | null>(null);
+  const [rankLabel, prizeDetail] = winner.prizeLabel.split("·").map((part) => part.trim());
+
+  const toggleMute = useCallback(() => {
+    const nextMuted = !isMuted;
+    setIsMuted(nextMuted);
+    if (videoRef.current) {
+      videoRef.current.muted = nextMuted;
+      if (videoRef.current.paused) {
+        videoRef.current.play().catch(() => undefined);
+      }
+    }
+  }, [isMuted]);
+
+  const togglePlayback = useCallback(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    if (video.paused) {
+      video.play().catch(() => undefined);
+    } else {
+      video.pause();
+    }
+  }, []);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const handlePlay = () => setIsPaused(false);
+    const handlePause = () => setIsPaused(true);
+
+    video.addEventListener("play", handlePlay);
+    video.addEventListener("pause", handlePause);
+
+    return () => {
+      video.removeEventListener("play", handlePlay);
+      video.removeEventListener("pause", handlePause);
+    };
+  }, []);
+
+  useEffect(() => {
+    const frame = mediaFrameRef.current;
+    if (!frame || hasEnteredViewport) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        setHasEnteredViewport(true);
+        observer.disconnect();
+      },
+      { threshold: 0.45 }
+    );
+
+    observer.observe(frame);
+
+    return () => observer.disconnect();
+  }, [hasEnteredViewport]);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !hasEnteredViewport || isPaused) return;
+    video.play().catch(() => undefined);
+  }, [hasEnteredViewport, isPaused]);
+
+  return (
+    <div
+      className={cn(
+        "flex-none w-[84vw] max-w-[360px] sm:w-full sm:max-w-[420px] rounded-[24px] sm:rounded-[28px] border shadow-xl overflow-hidden",
+        cardSurface
+      )}
+    >
+      <div className="relative p-3 sm:p-4">
+        <div className="absolute inset-0 bg-[radial-gradient(280px_180px_at_20%_0%,rgba(245,158,11,0.10),transparent_72%)] pointer-events-none" />
+        <div className="relative flex items-center justify-between gap-3 pb-3">
+          <div className={cn(
+            "inline-flex items-center rounded-full px-3 py-1 text-[11px] font-semibold tracking-wide",
+            isDark ? "bg-white/10 text-white" : "bg-slate-100 text-slate-700"
+          )}>
+            {winner.name}
+          </div>
+          <div className={cn("text-[11px] font-medium", mutedText)}>Gradlify Sprint Winner</div>
+        </div>
+
+        <div className={cn(
+          "relative overflow-hidden rounded-[20px] border",
+          isDark ? "border-white/10 bg-black/30" : "border-slate-200 bg-slate-50"
+        )} ref={mediaFrameRef}>
+          <div className="aspect-[4/5] w-full">
+            {winner.mediaType === "video" ? (
+              <>
+                <video
+                  ref={videoRef}
+                  src={winner.mediaSrc}
+                  className="h-full w-full object-cover"
+                  autoPlay={hasEnteredViewport}
+                  muted={isMuted}
+                  loop
+                  playsInline
+                  preload="metadata"
+                  onClick={togglePlayback}
+                />
+                {isPaused && (
+                  <div className="pointer-events-none absolute left-1/2 top-1/2 flex h-8 w-8 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-white/45 bg-black/20 text-white shadow-lg backdrop-blur-sm">
+                    <Pause className="h-3.5 w-3.5" />
+                  </div>
+                )}
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-black/45 via-black/10 to-transparent" />
+                  <button
+                  type="button"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    toggleMute();
+                  }}
+                  className={cn(
+                    "absolute right-4 top-4 flex h-11 w-11 items-center justify-center rounded-full text-white shadow-xl backdrop-blur-md transition-all duration-300 hover:scale-[1.03]",
+                    isDark ? "bg-black/40 hover:bg-black/55" : "bg-black/45 hover:bg-black/60"
+                  )}
+                  aria-label={isMuted ? `Unmute ${winner.name} winner video` : `Mute ${winner.name} winner video`}
+                >
+                  {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+                </button>
+              </>
+            ) : (
+              <img
+                src={winner.mediaSrc}
+                alt={`${winner.name} winner showcase`}
+                className="h-full w-full object-cover"
+                loading="lazy"
+              />
+            )}
+          </div>
+        </div>
+
+        <div className={cn(
+          "mt-3 overflow-hidden rounded-[22px] border",
+          isDark ? "border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02))]" : "border-slate-200 bg-[linear-gradient(180deg,#ffffff,#f8fafc)]"
+        )}>
+          <div className="relative p-4 sm:p-5">
+            <div className="absolute inset-0 bg-[radial-gradient(240px_140px_at_0%_0%,rgba(245,158,11,0.10),transparent_72%)] pointer-events-none" />
+            <div className="relative flex items-start justify-between gap-4">
+              <div className="min-w-0">
+                <div className={cn("text-[10px] font-semibold uppercase tracking-[0.22em]", mutedText)}>Prize Won</div>
+                <div className={cn("mt-2 text-lg font-semibold tracking-tight sm:text-xl", primaryText)}>
+                  {prizeDetail ?? winner.prizeLabel}
+                </div>
+                {prizeDetail && (
+                  <div className={cn("mt-1 text-[13px] leading-relaxed sm:text-sm", mutedText)}>
+                    {rankLabel}
+                  </div>
+                )}
+              </div>
+              <div className={cn(
+                "flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border shadow-sm",
+                isDark ? "border-amber-300/20 bg-amber-300/10 text-amber-200" : "border-amber-200 bg-amber-50 text-amber-600"
+              )}>
+                <Trophy className="h-4.5 w-4.5" />
+              </div>
+            </div>
+            <div className={cn(
+              "relative mt-4 flex items-center justify-between gap-3 rounded-2xl border px-3.5 py-2.5 text-[12px] font-medium sm:text-[13px]",
+              isDark ? "border-white/10 bg-black/15 text-slate-200" : "border-slate-200/80 bg-white/80 text-slate-700"
+            )}>
+              <span className="truncate">Gradlify Sprint Result</span>
+              <span className={cn(
+                "shrink-0 rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em]",
+                isDark ? "bg-white/8 text-amber-200" : "bg-slate-100 text-amber-700"
+              )}>
+                {rankLabel ?? "Winner"}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

@@ -158,22 +158,21 @@ const Index = () => {
   };
 
   const renderLanding = (overlay?: ReactNode) => (
-    <ForceTheme theme={landingTheme}>
+    <ForceTheme theme="light">
       <>
         <LandingPage
           onAuthAction={(action) => {
             setAuthMode(action);
             setShowAuthModal(true);
           }}
-          theme={landingTheme}
-          onThemeToggle={() => setLandingTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))}
+          theme="light"
         />
         <AuthModal
           isOpen={showAuthModal}
           onClose={() => setShowAuthModal(false)}
           onAuthSuccess={handleAuthSuccess}
           initialMode={authMode}
-          tone={landingTheme}
+          tone="light"
         />
         {overlay}
       </>
@@ -181,22 +180,21 @@ const Index = () => {
   );
 
   const renderElevenPlusLanding = (overlay?: ReactNode) => (
-    <ForceTheme theme={landingTheme}>
+    <ForceTheme theme="light">
       <>
         <ElevenPlusLanding
           onAuthAction={(action) => {
             setAuthMode(action);
             setShowAuthModal(true);
           }}
-          theme={landingTheme}
-          onThemeToggle={() => setLandingTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))}
+          theme="light"
         />
         <AuthModal
           isOpen={showAuthModal}
           onClose={() => setShowAuthModal(false)}
           onAuthSuccess={handleAuthSuccess}
           initialMode={authMode}
-          tone={landingTheme}
+          tone="light"
         />
         {overlay}
       </>
