@@ -44,6 +44,35 @@ const normalizeEnv = (raw: string) => {
   return "test";
 };
 
+const customerHasUsedTrial = async (stripe: Stripe, customerId: string) => {
+  let startingAfter: string | undefined;
+
+  while (true) {
+    const subscriptions = await stripe.subscriptions.list({
+      customer: customerId,
+      status: "all",
+      limit: 100,
+      ...(startingAfter ? { starting_after: startingAfter } : {}),
+    });
+
+    const usedTrial = subscriptions.data.some((subscription) => {
+      const trialStart = subscription.trial_start ?? null;
+      const trialEnd = subscription.trial_end ?? null;
+      return trialStart !== null || trialEnd !== null;
+    });
+
+    if (usedTrial) {
+      return true;
+    }
+
+    if (!subscriptions.has_more || subscriptions.data.length === 0) {
+      return false;
+    }
+
+    startingAfter = subscriptions.data[subscriptions.data.length - 1].id;
+  }
+};
+
 const getStripeConfig = () => {
   const envRaw = readEnv("ENVIRONMENT") || "test";
   const preferred = normalizeEnv(envRaw);
@@ -221,6 +250,9 @@ serve(async (req) => {
 
     }
 
+    const hasUsedTrial = await customerHasUsedTrial(stripe, customerId);
+    logStep("Resolved trial eligibility", { customerId, hasUsedTrial });
+
     if (supabaseAdmin) {
       const { error: updateError } = await supabaseAdmin
         .from("profiles")
@@ -308,12 +340,12 @@ serve(async (req) => {
       payment_method_collection: "always",
       custom_text: {
         submit: {
-          message: "Start Your 3 Day Free Trial",
+          message: hasUsedTrial ? "Continue to Premium" : "Start Your 3 Day Free Trial",
         },
       },
       client_reference_id: user.id,
       subscription_data: {
-        trial_period_days: 3,
+        ...(hasUsedTrial ? {} : { trial_period_days: 3 }),
         metadata: {
           userId: user.id,
           user_id: user.id,
@@ -321,6 +353,7 @@ serve(async (req) => {
           plan_interval: normalizedPlan,
           premium_track: checkoutTrack,
           client_reference_id: user.id,
+          has_used_trial: hasUsedTrial ? "true" : "false",
         },
       },
       metadata: {
@@ -329,6 +362,7 @@ serve(async (req) => {
         supabase_user_id: user.id,
         plan_interval: normalizedPlan,
         premium_track: checkoutTrack,
+        has_used_trial: hasUsedTrial ? "true" : "false",
       },
       success_url: `${baseUrl}/pay/success?session_id={CHECKOUT_SESSION_ID}&returnTo=${encodedReturnTo}`,
       cancel_url: `${baseUrl}/pay/cancelled?returnTo=${encodedReturnTo}`,
