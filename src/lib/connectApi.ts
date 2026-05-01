@@ -127,75 +127,34 @@ export async function getLeaderboard(
   scope: 'global' | 'friends',
   track?: 'gcse' | '11plus'
 ): Promise<LeaderboardEntry[]> {
-  const rpcName = scope === 'global' ? 'get_leaderboard_correct_global' : 'get_leaderboard_correct_friends';
   const resolvedTrack = track ?? await getUserTrack();
+  const rpcName = scope === 'global' ? 'get_leaderboard_correct_global_for_track' : 'get_leaderboard_correct_friends';
 
-  // 1. Try RPC first
   let dbEntries: LeaderboardEntry[] = [];
   try {
-    const { data, error } = await supabase.rpc(rpcName, { p_period: period }) as {
+    const args = scope === 'global'
+      ? { p_period: period, p_track: resolvedTrack === '11plus' ? '11plus' : 'gcse' }
+      : { p_period: period };
+    const { data, error } = await supabase.rpc(rpcName, args) as {
       data: any[] | null;
       error: unknown;
     };
     if (!error && data) {
       dbEntries = normalizeLeaderboardData(data) || [];
+    } else if (scope === 'global' && isFunctionMissingError(error)) {
+      const fallback = await supabase.rpc('get_leaderboard_correct_global', { p_period: period }) as {
+        data: any[] | null;
+        error: unknown;
+      };
+      if (!fallback.error && fallback.data) {
+        dbEntries = normalizeLeaderboardData(fallback.data) || [];
+      }
     }
   } catch (e) {
     console.warn('Leaderboard RPC failed:', e);
   }
 
-  // 2. ALWAYS perform raw calculation as a safety net (since migrations might be pending)
-  try {
-    const sprintStart = new Date('2026-04-20T17:30:00Z');
-    const { data: mocks } = await supabase
-      .from('mock_attempts')
-      .select('user_id, score, track')
-      .gte('created_at', sprintStart.toISOString())
-      .in('status', ['scored', 'completed', 'submitted'])
-      .eq('track', resolvedTrack);
-
-    if (mocks && mocks.length > 0) {
-      const { data: { user: currentUser } } = await supabase.auth.getUser();
-      const uids = [...new Set(mocks.map(m => m.user_id))];
-      
-      const { data: profiles } = await supabase
-        .from('profiles')
-        .select('user_id, full_name, avatar_url, founder_track')
-        .in('user_id', uids);
-
-      const profMap = new Map();
-      profiles?.forEach(p => profMap.set(p.user_id, p));
-
-      const rawScores = new Map();
-      mocks.forEach(m => {
-        const current = rawScores.get(m.user_id) || 0;
-        rawScores.set(m.user_id, current + (m.score || 0));
-      });
-
-      // Merge raw scores into dbEntries or create new entries
-      rawScores.forEach((score, uid) => {
-        const existing = dbEntries.find(e => e.user_id === uid);
-        if (existing) {
-          existing.correct_count = Math.max(Number(existing.correct_count), score);
-        } else {
-          const p = profMap.get(uid);
-          dbEntries.push({
-            user_id: uid,
-            name: p?.full_name || 'Anonymous',
-            avatar_url: p?.avatar_url || null,
-            correct_count: score,
-            is_self: uid === currentUser?.id,
-            rank: 0,
-            founder_track: p?.founder_track || null
-          });
-        }
-      });
-    }
-  } catch (e) {
-    console.error('Safety net calculation failed:', e);
-  }
-
-  let rankedEntries = rankLeaderboardEntries(dbEntries);
+  let rankedEntries = rankLeaderboardEntries(dbEntries.filter((entry) => Number(entry.correct_count) > 0));
 
   if (scope === 'global' && rankedEntries.length < 100) {
     try {

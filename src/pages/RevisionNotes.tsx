@@ -73,7 +73,7 @@ const sectionConfig: Record<string, {
   },
   "Comprehension": {
     abbr: "C",
-    desc: "Master reading speed, factual retrieval, and advanced inference techniques for 11+ GL texts."
+    desc: "Master reading speed, factual retrieval, and advanced inference techniques for all major 11+ comprehension styles."
   },
   "Vocabulary": {
     abbr: "V",
@@ -94,7 +94,7 @@ const elevenPlusSectionDescriptions: Record<string, string> = {
   "Algebra & Ratio": "Ratio, proportion, algebra basics, solving equations, and sequences.",
   "Geometry & Measures": "2D/3D shape properties, angles, perimeter/area/volume, measures/time, coordinates and transformations.",
   "Statistics & Data": "Averages, charts, and probability fundamentals.",
-  "Comprehension": "Master reading speed, factual retrieval, and advanced inference techniques for 11+ GL texts.",
+  "Comprehension": "Master reading speed, factual retrieval, and advanced inference techniques for all major 11+ comprehension styles.",
   "Vocabulary": "Synonyms, antonyms, prefixes, suffixes, and cloze passage mastery to boost your verbal score.",
   "SPaG": "Perfect your punctuation, word classes, and technical accuracy for the SPaG section.",
   "Writing": "Story planning, descriptive techniques, figurative language, sentence rhythm, and narrative voice.",

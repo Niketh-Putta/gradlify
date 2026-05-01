@@ -322,11 +322,11 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
     () => [
       {
         q: "Which 11+ formats does Gradlify support?",
-        a: "11+ Maths and English preparation with exam-style question formats and readiness tracking for GL, CEM, and ISEB.",
+        a: "11+ Maths and English preparation for all major exam styles, including GL, CEM, ISEB, and independent-school formats.",
       },
       {
         q: "Can I practise mixed 11+ question styles?",
-        a: "Yes. You can practise varied 11+ style questions with structured progression across all major 11+ boards.",
+        a: "Yes. You can practise varied 11+ question styles with structured progression across all major 11+ exam formats.",
       },
       {
         q: "Can I practise on mobile or tablet?",
@@ -508,7 +508,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
         key: "mock",
         label: "Priority 04",
         title: "Full Mock Exams. Built for extreme realism.",
-        body: "Timed, high-pressure environments that mirror the GL and CEM formats. Detailed post-exam reports show exactly where time was lost.",
+        body: "Timed, high-pressure environments built for all major 11+ exam styles, including GL, CEM, ISEB, and independent-school formats. Detailed post-exam reports show exactly where time was lost.",
         badge: "Realistic Mocks",
         hoverFact: "Timed conditions build critical exam stamina.",
         media: <MockBuilderPreview tone={theme} />,
@@ -836,7 +836,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                   <div className="absolute inset-0 bg-gradient-to-b from-orange-500/5 via-amber-500/5 to-transparent dark:from-orange-500/10 dark:via-amber-500/5 dark:to-transparent z-0 pointer-events-none" />
                   <div className="p-5 sm:p-6 pb-2 z-10">
                     <h3 className={`text-lg sm:text-2xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#DF3526] via-[#F17E31] to-[#FAD446] mb-2`}>Mathematical Agility</h3>
-                    <p className={`${mutedText} text-xs sm:text-sm font-medium leading-relaxed`}>Multi-step reasoning environments built specifically for rigorous GL & CEM selective formatting.</p>
+                    <p className={`${mutedText} text-xs sm:text-sm font-medium leading-relaxed`}>Multi-step reasoning environments built for GL, CEM, ISEB, and broader selective-school formats.</p>
                   </div>
                   <div className="flex-1 relative overflow-hidden z-10 flex flex-col items-center justify-end mt-2 sm:mt-3 mx-3 sm:mx-5 rounded-t-[24px] sm:rounded-t-[28px] border-t border-x border-border/50 shadow-[inset_0_2px_20px_rgba(0,0,0,0.03)] bg-slate-50 dark:bg-[#0f172a] px-1 sm:px-3 pt-3 sm:pt-5 min-h-[130px] sm:min-h-[180px]">
                     <motion.img 
@@ -2149,7 +2149,7 @@ function MockBuilderPreview({ tone }: { tone: "dark" | "light" }) {
           <div className={`text-[9px] sm:text-[10px] uppercase font-bold tracking-[0.2em] px-2 py-0.5 rounded-full ${isDark ? "bg-white/10 text-slate-400" : "bg-slate-100 text-slate-500"}`}>Step 2</div>
         </div>
         <div className="flex flex-wrap gap-2 text-xs">
-          {["Adaptive", "GL", "CEM", "Mixed"].map((item, index) => (
+          {["Adaptive", "GL", "CEM", "ISEB", "Mixed"].map((item, index) => (
             <span
               key={item}
               className={`rounded-full px-3.5 py-1.5 text-[11px] sm:text-[12px] font-medium transition-all duration-300 ${

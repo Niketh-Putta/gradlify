@@ -442,7 +442,7 @@ export function OnboardingModal({ isOpen, userId, tier, premiumTrack, founderTra
         { title: 'Unlimited 11+ mock exams', desc: 'for sustained exam practice' },
         { title: 'Unlimited 11+ challenge sessions', desc: 'to build speed and confidence' },
         { title: 'Targeted 11+ weak-area drills', desc: 'based on your hardest topics' },
-        { title: 'School-style question coverage', desc: 'across key GL/CEM formats' },
+        { title: 'School-style question coverage', desc: 'across GL, CEM, ISEB and mixed 11+ formats' },
         { title: 'Sprint leaderboard advantage', desc: 'more attempts means more scoring chances' },
         { title: 'Clear readiness tracking', desc: 'so you know what to fix next' },
         { title: 'Structured weekly study plan', desc: 'aligned to your 11+ goals' },

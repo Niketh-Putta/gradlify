@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { useSubject } from "@/contexts/SubjectContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -8,8 +8,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   getLeaderboard,
-  getMyGlobalOptIn,
-  setGlobalOptIn,
   getFriends,
   getPendingRequests,
   searchUsers,
@@ -21,7 +19,7 @@ import {
   UserProfile,
   Friendship
 } from "@/lib/connectApi";
-import { Search, Plus, Eye, EyeOff, Users, X, Check, UserPlus, Trophy, ArrowRight, Sparkles } from "lucide-react";
+import { Search, Plus, Users, X, Check, UserPlus, Trophy, ArrowRight, Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -29,45 +27,16 @@ import { useAppContext } from "@/hooks/useAppContext";
 import { resolveUserTrack } from "@/lib/track";
 import { getFoundersSprintInfo } from "@/lib/foundersSprint";
 
-type Period = 'day' | 'week' | 'month';
 type Scope = 'global' | 'friends';
-
-const formatDate = (date: Date) =>
-  new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short' }).format(date);
-
-const getWeekRange = () => {
-  const now = new Date();
-  const monday = new Date(now);
-  const day = now.getDay();
-  const diff = (day + 6) % 7;
-  monday.setDate(now.getDate() - diff);
-  monday.setHours(0, 0, 0, 0);
-  const sunday = new Date(monday);
-  sunday.setDate(monday.getDate() + 6);
-  sunday.setHours(23, 59, 59, 999);
-  return { start: monday, end: sunday };
-};
-
-const getMonthRange = () => {
-  const now = new Date();
-  const start = new Date(now.getFullYear(), now.getMonth(), 1);
-  const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-  return { start, end };
-};
-
-const padTime = (value: number) => String(value).padStart(2, "0");
 
 export default function Connect() {
   const { currentSubject } = useSubject();
   const { profile } = useAppContext();
   const userTrack = resolveUserTrack(profile?.track ?? null);
   const { isActive, hasEnded } = getFoundersSprintInfo();
-  const [period, setPeriod] = useState<Period>('month');
   const [scope, setScope] = useState<Scope>('global');
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
-  const [globalOptIn, setGlobalOptInState] = useState(true);
-  const [optInLoading, setOptInLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [pendingRequests, setPendingRequests] = useState<PendingFriendRequest[]>([]);
   const [friends, setFriends] = useState<Friendship[]>([]);
@@ -85,14 +54,12 @@ export default function Connect() {
   // Load all data
   const loadData = useCallback(async () => {
     try {
-      const [friendsData, requestsData, optIn] = await Promise.all([
+      const [friendsData, requestsData] = await Promise.all([
         getFriends(),
         getPendingRequests(),
-        getMyGlobalOptIn()
       ]);
       setFriends(friendsData);
       setPendingRequests(requestsData);
-      setGlobalOptInState(optIn);
     } catch (error) {
       console.error('Failed to load data:', error);
     }
@@ -103,7 +70,7 @@ export default function Connect() {
       setLoading(true);
     }
     try {
-      const data = await getLeaderboard(period, scope, userTrack);
+      const data = await getLeaderboard('month', scope, userTrack);
       setLeaderboard(data);
     } catch (error) {
       console.error('Failed to load leaderboard:', error);
@@ -112,7 +79,7 @@ export default function Connect() {
         setLoading(false);
       }
     }
-  }, [period, scope, userTrack]);
+  }, [scope, userTrack]);
 
   const handleFriendSearch = useCallback(async () => {
     setSearching(true);
@@ -153,41 +120,6 @@ export default function Connect() {
     }, 300);
     return () => clearTimeout(timeoutId);
   }, [friendSearchQuery, handleFriendSearch]);
-
-  const loadGlobalOptIn = async () => {
-    try {
-      const optIn = await getMyGlobalOptIn();
-      setGlobalOptInState(optIn);
-    } catch (error) {
-      console.error('Failed to load global opt-in status:', error);
-    }
-  };
-
-  const handleGlobalOptInToggle = async () => {
-    const newValue = !globalOptIn;
-    setOptInLoading(true);
-    try {
-      await setGlobalOptIn(newValue);
-      setGlobalOptInState(newValue);
-      toast({
-        title: newValue ? "Visible on leaderboard" : "Hidden from leaderboard",
-        description: newValue
-          ? "Your correct answers are now visible to everyone."
-          : "Your correct answers are now only visible to friends.",
-      });
-      if (scope === 'global') {
-        await loadLeaderboard({ silent: true });
-      }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to update privacy settings.",
-        variant: "destructive",
-      });
-    } finally {
-      setOptInLoading(false);
-    }
-  };
 
   const handleSendRequest = async (receiverId: string) => {
     setSendingTo(receiverId);
@@ -269,12 +201,6 @@ export default function Connect() {
     ? leaderboard.filter((entry) => entry.name.toLowerCase().includes(searchQuery.toLowerCase()))
     : leaderboard;
 
-  const periodLabels: Record<Period, string> = {
-    day: 'today',
-    week: 'this week',
-    month: 'this month',
-  };
-
   const getRankColor = (rank: number) => {
     if (rank === 1) return 'text-connect-gold';
     if (rank === 2) return 'text-connect-silver';
@@ -319,19 +245,6 @@ export default function Connect() {
     }
   };
 
-  const periodDescriptor = useMemo(() => {
-    const now = new Date();
-    if (period === "week") {
-      const { start, end } = getWeekRange();
-      return `Weekly leaderboard (Mon-Sun ${formatDate(start)} - ${formatDate(end)})`;
-    }
-    if (period === "month") {
-      const { start, end } = getMonthRange();
-      return `Monthly leaderboard: ${formatDate(start)} - ${formatDate(end)}`;
-    }
-    return `Daily leaderboard (${formatDate(now)})`;
-  }, [period]);
-
   const visibleLeaderboard = filteredLeaderboard.slice(0, 100);
 
   return (
@@ -366,7 +279,7 @@ export default function Connect() {
               </span>
             </h1>
             <p className="text-muted-foreground text-[10px] sm:text-xs font-light mt-0.5 truncate">Ranked by correct answers</p>
-            <p className="text-muted-foreground text-[10px] sm:text-xs font-light truncate mb-1">{periodDescriptor}</p>
+            <p className="text-muted-foreground text-[10px] sm:text-xs font-light truncate mb-1">Scores since Wednesday 29 April at 18:30</p>
             <div className={cn(
               "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border text-[9px] sm:text-[10px] font-bold uppercase tracking-wider",
               !hasEnded && "animate-pulse",
@@ -387,10 +300,10 @@ export default function Connect() {
                   "text-lg sm:text-xl font-semibold bg-clip-text text-transparent bg-gradient-to-r",
                   currentSubject === "english" ? "from-amber-400 to-amber-600" : "from-primary to-blue-600"
                 )}>
-                  {globalOptIn && myEntry ? myEntry.rank : ' - '}
+                  {myEntry ? myEntry.rank : ' - '}
                 </span>
               </div>
-              <div className="text-[9px] sm:text-[10px] text-muted-foreground">{periodLabels[period]}</div>
+              <div className="text-[9px] sm:text-[10px] text-muted-foreground">live</div>
             </div>
             <div className={cn(
               "w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center text-white text-[10px] sm:text-xs font-medium flex-shrink-0 bg-gradient-to-br",
@@ -439,34 +352,6 @@ export default function Connect() {
 
       {/* Secondary Actions Row - Compact on mobile */}
       <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3 flex-shrink-0 animate-fade-in flex-wrap w-full" style={{ animationDelay: '0.05s' }}>
-        {/* Visibility Toggle */}
-        <button
-          onClick={handleGlobalOptInToggle}
-          disabled={optInLoading}
-          className="flex items-center gap-1.5 py-1 sm:py-1.5 px-2 sm:px-2.5 rounded-lg text-xs bg-muted/60"
-        >
-          {globalOptIn ? (
-            <Eye className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-muted-foreground" />
-          ) : (
-            <EyeOff className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-muted-foreground" />
-          )}
-          <div 
-            className={cn(
-              "w-6 h-3.5 sm:w-7 sm:h-4 rounded-full relative transition-colors flex-shrink-0",
-              globalOptIn 
-                ? (currentSubject === "english" ? "bg-gradient-to-r from-amber-400 to-amber-600" : "bg-gradient-to-r from-primary to-blue-600")
-                : "bg-border"
-            )}
-          >
-            <div 
-              className={cn(
-                "absolute w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-white top-0.5 transition-transform shadow-sm",
-                globalOptIn ? "translate-x-3 sm:translate-x-3.5" : "translate-x-0.5"
-              )}
-            />
-          </div>
-        </button>
-
         {/* Your Correct Answers */}
         <div className="flex items-center gap-1 py-1 sm:py-1.5 px-2 sm:px-2.5 rounded-lg text-xs bg-muted/60">
           <span className="font-medium text-[10px] sm:text-[11px]">{myEntry?.correct_count || 0}</span>
@@ -570,24 +455,6 @@ export default function Connect() {
         </nav>
 
         <div className="flex-1" />
-
-        {/* Time Period Filters */}
-        <div className="flex items-center p-0.5 rounded-xl sm:rounded-2xl bg-muted/60">
-          {(['day', 'week', 'month'] as Period[]).map((p) => (
-            <button
-              key={p}
-              onClick={() => setPeriod(p)}
-              className={cn(
-                "px-2 py-0.5 sm:px-2.5 sm:py-1 text-[10px] sm:text-[11px] font-medium rounded-lg sm:rounded-xl transition-all",
-                period === p
-                  ? cn("text-white shadow-sm", currentSubject === "english" ? "bg-gradient-to-r from-amber-400 to-amber-600" : "bg-gradient-to-r from-primary to-blue-600")
-                  : "text-muted-foreground hover:text-foreground"
-              )}
-            >
-              {p === 'day' ? 'D' : p === 'week' ? 'W' : 'M'}
-            </button>
-          ))}
-        </div>
 
         {/* Search - Icon only on mobile */}
         <div className="relative">
