@@ -448,6 +448,12 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
 
   const winnerShowcase: WinnerShowcaseItem[] = [
     {
+      name: "Srinika",
+      mediaSrc: "/Srinika_winner.mov",
+      mediaType: "video",
+      prizeLabel: "Winner · £75 Amazon Gift Card",
+    },
+    {
       name: "Vivaan",
       mediaSrc: "/Vivaan_winner.mp4",
       mediaType: "video",
@@ -1055,17 +1061,31 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
               </motion.div>
 
               <motion.div variants={motionCfg.fadeUp} className="mt-8 sm:mt-10">
-                <div className="flex justify-center pb-3">
-                  {winnerShowcase.map((winner) => (
-                    <WinnerShowcaseCard
-                      key={winner.name}
-                      winner={winner}
-                      isDark={isDark}
-                      cardSurface={cardSurface}
-                      primaryText={primaryText}
-                      mutedText={mutedText}
-                    />
-                  ))}
+                <div className="relative -mx-4 sm:mx-0">
+                  <div
+                    className={cn(
+                      "pointer-events-none absolute inset-y-0 left-0 z-10 w-8 sm:hidden",
+                      isDark ? "bg-gradient-to-r from-slate-950 to-transparent" : "bg-gradient-to-r from-slate-50 to-transparent"
+                    )}
+                  />
+                  <div
+                    className={cn(
+                      "pointer-events-none absolute inset-y-0 right-0 z-10 w-8 sm:hidden",
+                      isDark ? "bg-gradient-to-l from-slate-950 to-transparent" : "bg-gradient-to-l from-slate-50 to-transparent"
+                    )}
+                  />
+                  <div className="no-scrollbar flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth px-4 pb-6 pt-1 [scroll-padding-inline:1rem] md:justify-center md:gap-5 md:overflow-visible md:px-0 lg:gap-6">
+                    {winnerShowcase.map((winner) => (
+                      <WinnerShowcaseCard
+                        key={winner.name}
+                        winner={winner}
+                        isDark={isDark}
+                        cardSurface={cardSurface}
+                        primaryText={primaryText}
+                        mutedText={mutedText}
+                      />
+                    ))}
+                  </div>
                 </div>
               </motion.div>
             </motion.div>
@@ -1879,25 +1899,25 @@ function WinnerShowcaseCard({
   return (
     <div
       className={cn(
-        "flex-none w-[84vw] max-w-[360px] sm:w-full sm:max-w-[420px] rounded-[24px] sm:rounded-[28px] border shadow-xl overflow-hidden",
+        "snap-center flex-none w-[84vw] max-w-[340px] scroll-mx-4 rounded-[24px] border shadow-xl overflow-hidden transition-transform duration-300 md:w-[330px] md:max-w-none md:rounded-[26px] md:hover:-translate-y-1 lg:w-[350px]",
         cardSurface
       )}
     >
       <div className="relative p-3 sm:p-4">
         <div className="absolute inset-0 bg-[radial-gradient(280px_180px_at_20%_0%,rgba(245,158,11,0.10),transparent_72%)] pointer-events-none" />
-        <div className="relative flex items-center justify-between gap-3 pb-3">
+        <div className="relative flex min-w-0 items-center justify-between gap-3 pb-3">
           <div className={cn(
-            "inline-flex items-center rounded-full px-3 py-1 text-[11px] font-semibold tracking-wide",
+            "inline-flex min-w-0 shrink-0 items-center rounded-full px-3 py-1 text-[11px] font-semibold tracking-wide",
             isDark ? "bg-white/10 text-white" : "bg-slate-100 text-slate-700"
           )}>
             {winner.name}
           </div>
-          <div className={cn("text-[11px] font-medium", mutedText)}>Gradlify Sprint Winner</div>
+          <div className={cn("min-w-0 truncate text-right text-[10px] font-medium sm:text-[11px]", mutedText)}>Gradlify Sprint Winner</div>
         </div>
 
         <div className={cn(
           "relative overflow-hidden rounded-[20px] border",
-          isDark ? "border-white/10 bg-black/30" : "border-slate-200 bg-slate-50"
+          isDark ? "border-white/10 bg-black/40" : "border-slate-200 bg-slate-100"
         )} ref={mediaFrameRef}>
           <div className="aspect-[4/5] w-full">
             {winner.mediaType === "video" ? (
@@ -1926,7 +1946,7 @@ function WinnerShowcaseCard({
                     toggleMute();
                   }}
                   className={cn(
-                    "absolute right-4 top-4 flex h-11 w-11 items-center justify-center rounded-full text-white shadow-xl backdrop-blur-md transition-all duration-300 hover:scale-[1.03]",
+                    "absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-full text-white shadow-xl backdrop-blur-md transition-all duration-300 hover:scale-[1.03]",
                     isDark ? "bg-black/40 hover:bg-black/55" : "bg-black/45 hover:bg-black/60"
                   )}
                   aria-label={isMuted ? `Unmute ${winner.name} winner video` : `Mute ${winner.name} winner video`}
@@ -1949,12 +1969,12 @@ function WinnerShowcaseCard({
           "mt-3 overflow-hidden rounded-[22px] border",
           isDark ? "border-white/10 bg-[linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02))]" : "border-slate-200 bg-[linear-gradient(180deg,#ffffff,#f8fafc)]"
         )}>
-          <div className="relative p-4 sm:p-5">
+          <div className="relative p-3.5 sm:p-4">
             <div className="absolute inset-0 bg-[radial-gradient(240px_140px_at_0%_0%,rgba(245,158,11,0.10),transparent_72%)] pointer-events-none" />
             <div className="relative flex items-start justify-between gap-4">
               <div className="min-w-0">
                 <div className={cn("text-[10px] font-semibold uppercase tracking-[0.22em]", mutedText)}>Prize Won</div>
-                <div className={cn("mt-2 text-lg font-semibold tracking-tight sm:text-xl", primaryText)}>
+                <div className={cn("mt-2 text-base font-semibold leading-snug tracking-tight sm:text-lg", primaryText)}>
                   {prizeDetail ?? winner.prizeLabel}
                 </div>
                 {prizeDetail && (
@@ -1964,14 +1984,14 @@ function WinnerShowcaseCard({
                 )}
               </div>
               <div className={cn(
-                "flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border shadow-sm",
+                "flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border shadow-sm",
                 isDark ? "border-amber-300/20 bg-amber-300/10 text-amber-200" : "border-amber-200 bg-amber-50 text-amber-600"
               )}>
                 <Trophy className="h-4.5 w-4.5" />
               </div>
             </div>
             <div className={cn(
-              "relative mt-4 flex items-center justify-between gap-3 rounded-2xl border px-3.5 py-2.5 text-[12px] font-medium sm:text-[13px]",
+              "relative mt-3 flex items-center justify-between gap-3 rounded-2xl border px-3 py-2.5 text-[12px] font-medium sm:text-[13px]",
               isDark ? "border-white/10 bg-black/15 text-slate-200" : "border-slate-200/80 bg-white/80 text-slate-700"
             )}>
               <span className="truncate">Gradlify Sprint Result</span>
