@@ -362,15 +362,12 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
 
     setFeedbackSubmitting(true);
     try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
-      const { error } = await supabase.from("support_requests").insert({
-        kind: feedbackType,
-        message: trimmedMessage,
-        email: trimmedEmail || null,
-        user_id: session?.user?.id ?? null,
+      const { error } = await supabase.functions.invoke("support-request", {
+        body: {
+          kind: feedbackType,
+          message: trimmedMessage,
+          email: trimmedEmail || null,
+        },
       });
 
       if (error) throw error;

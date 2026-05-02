@@ -56,3 +56,6 @@ verify_jwt = false
 
 [functions.record-visit]
 verify_jwt = false
+
+[functions.support-request]
+verify_jwt = false
