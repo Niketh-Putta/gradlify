@@ -46,6 +46,7 @@ const sendSupportEmail = async (args: {
   const replyTo = args.email || SUPPORT_INBOX;
   const submittedBy = args.email || 'No email provided';
   const userId = args.userId || 'Anonymous visitor';
+  const messagePreview = args.message.replace(/\s+/g, ' ').slice(0, 90);
 
   const response = await fetch('https://api.resend.com/emails', {
     method: 'POST',
@@ -57,23 +58,27 @@ const sendSupportEmail = async (args: {
       from,
       to: SUPPORT_INBOX,
       reply_to: replyTo,
-      subject: `[Gradlify] ${subjectPrefix}`,
+      subject: `[Gradlify] ${subjectPrefix}: ${messagePreview}`,
       text: [
+        'Message:',
+        args.message,
+        '',
+        'Details:',
         `Type: ${args.kind}`,
         `From: ${submittedBy}`,
         `User ID: ${userId}`,
         `Request ID: ${args.requestId}`,
-        '',
-        args.message,
       ].join('\n'),
       html: `
+        <div style="display:none;max-height:0;overflow:hidden;">${escapeHtml(args.message)}</div>
         <h2>${escapeHtml(subjectPrefix)}</h2>
+        <h3 style="margin-bottom: 8px;">Message</h3>
+        <div style="white-space: pre-wrap; font-size: 18px; line-height: 1.5; padding: 16px; border: 1px solid #e5e7eb; border-radius: 10px; background: #f9fafb;">${escapeHtml(args.message)}</div>
+        <h3 style="margin-top: 24px; margin-bottom: 8px;">Details</h3>
         <p><strong>Type:</strong> ${escapeHtml(args.kind)}</p>
         <p><strong>From:</strong> ${escapeHtml(submittedBy)}</p>
         <p><strong>User ID:</strong> ${escapeHtml(userId)}</p>
         <p><strong>Request ID:</strong> ${escapeHtml(args.requestId)}</p>
-        <hr />
-        <p style="white-space: pre-wrap;">${escapeHtml(args.message)}</p>
       `,
     }),
   });
