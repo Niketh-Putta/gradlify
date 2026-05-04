@@ -594,9 +594,9 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
         </div>
       </nav>
 
-      <main className="pt-24 sm:pt-28 lg:pt-0">
-        {/* Hero */}
-        <section className="relative pt-28 sm:pt-34 lg:pt-36 pb-12 sm:pb-18 lg:pb-20 overflow-hidden">
+      <main className="pt-24 sm:pt-28 lg:pt-8">
+        {/* Hero — lg top padding accounts for fixed Sprint + Live Mock banners + nav (replaces invalid sm:pt-34) */}
+        <section className="relative pt-28 sm:pt-32 lg:pt-40 pb-12 sm:pb-18 lg:pb-20 overflow-hidden">
           {ambientEffectsEnabled && (
             <div className="absolute inset-0 pointer-events-none">
               {isDark ? (
