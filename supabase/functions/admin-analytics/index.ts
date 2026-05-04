@@ -16,7 +16,29 @@ type TimelinePoint = {
   minutes: number;
 };
 
+type ActivityRow = {
+  activity_date?: string | null;
+  minutes?: number | string | null;
+  user_id?: string | null;
+  visitor_id?: string | null;
+  created_at?: string | null;
+};
+
+type SignupRow = {
+  created_at?: string | null;
+};
+
+type PracticeRow = {
+  attempts?: number | string | null;
+  correct?: number | string | null;
+};
+
+type QuestionEventRow = {
+  question_count?: number | string | null;
+};
+
 const PAGE_SIZE = 1000;
+const STRIPE_PAGE_SIZE = 100;
 
 const clampDays = (value: unknown) => {
   const parsed = Number(value);
@@ -36,7 +58,7 @@ const daysAgoIsoDate = (days: number) => {
 };
 
 async function fetchAllRows<T>(
-  queryFactory: (from: number, to: number) => Promise<{ data: T[] | null; error: unknown }>,
+  queryFactory: (from: number, to: number) => unknown,
   maxPages = 25,
 ) {
   const rows: T[] = [];
@@ -44,7 +66,7 @@ async function fetchAllRows<T>(
   for (let page = 0; page < maxPages; page += 1) {
     const from = page * PAGE_SIZE;
     const to = from + PAGE_SIZE - 1;
-    const { data, error } = await queryFactory(from, to);
+    const { data, error } = await (queryFactory(from, to) as PromiseLike<{ data: T[] | null; error: unknown }>);
     if (error) throw error;
     const batch = data ?? [];
     rows.push(...batch);
@@ -53,6 +75,99 @@ async function fetchAllRows<T>(
 
   return rows;
 }
+
+const toIsoFromStripeSeconds = (value?: number | null) =>
+  value ? new Date(value * 1000).toISOString() : null;
+
+const hasDefaultPaymentMethod = (subscription: Stripe.Subscription) => {
+  if (subscription.default_payment_method) return true;
+  const customer = subscription.customer as Stripe.Customer | string | null;
+  return typeof customer !== 'string' && Boolean(customer?.invoice_settings?.default_payment_method);
+};
+
+const describePaymentMethod = (subscription: Stripe.Subscription) => {
+  const method =
+    typeof subscription.default_payment_method !== 'string'
+      ? subscription.default_payment_method
+      : null;
+
+  if (method?.type === 'card' && method.card?.last4) {
+    const brand = method.card.brand ? method.card.brand.replace(/_/g, ' ') : 'Card';
+    return `${brand} •••• ${method.card.last4}`;
+  }
+
+  if (method?.type === 'link') return 'Link';
+  if (method?.type === 'bacs_debit') return 'Bacs debit';
+  if (method?.type === 'sepa_debit') return 'SEPA debit';
+  if (method?.type === 'us_bank_account') return 'Bank account';
+  if (method?.type) return method.type.replace(/_/g, ' ');
+
+  return hasDefaultPaymentMethod(subscription) ? 'Payment method saved' : 'Unknown';
+};
+
+const getCustomerEmail = (subscription: Stripe.Subscription) => {
+  const customer = subscription.customer as Stripe.Customer | string | null;
+  return typeof customer !== 'string' ? customer?.email ?? null : null;
+};
+
+const getCustomerName = (subscription: Stripe.Subscription) => {
+  const customer = subscription.customer as Stripe.Customer | string | null;
+  return typeof customer !== 'string' ? customer?.name ?? null : null;
+};
+
+const getProfileName = (profile: { full_name?: string | null; onboarding?: Record<string, unknown> | null } | null | undefined) => {
+  const onboarding = profile?.onboarding ?? {};
+  const preferredName = typeof onboarding.preferredName === 'string' ? onboarding.preferredName.trim() : '';
+  const onboardingName = typeof onboarding.name === 'string' ? onboarding.name.trim() : '';
+  return profile?.full_name?.trim() || preferredName || onboardingName || null;
+};
+
+const getAuthUserName = (user: { user_metadata?: Record<string, unknown> } | null | undefined) => {
+  const metadata = user?.user_metadata ?? {};
+  for (const key of ['full_name', 'name', 'preferredName']) {
+    const value = metadata[key];
+    if (typeof value === 'string' && value.trim()) return value.trim();
+  }
+  return null;
+};
+
+const nameFromEmail = (email: string | null | undefined) => {
+  const localPart = email?.split('@')[0]?.trim();
+  if (!localPart) return 'Unknown';
+  const cleaned = localPart
+    .replace(/[0-9]+/g, ' ')
+    .replace(/[._-]+/g, ' ')
+    .trim();
+  if (!cleaned) return 'Unknown';
+  return cleaned
+    .split(/\s+/)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+    .join(' ');
+};
+
+const fetchElevenPlusStripeSubscriptions = async (stripe: Stripe, elevenPlusPrices: string[]) => {
+  const rows: Stripe.Subscription[] = [];
+  let startingAfter: string | undefined;
+
+  for (let page = 0; page < 20; page += 1) {
+    const subscriptions = await stripe.subscriptions.list({
+      limit: STRIPE_PAGE_SIZE,
+      status: 'all',
+      ...(startingAfter ? { starting_after: startingAfter } : {}),
+      expand: ['data.customer', 'data.default_payment_method', 'data.items.data.price'],
+    });
+
+    const matched = subscriptions.data.filter((subscription: Stripe.Subscription) =>
+      subscription.items.data.some((item: Stripe.SubscriptionItem) => elevenPlusPrices.includes(item.price.id))
+    );
+    rows.push(...matched);
+
+    if (!subscriptions.has_more || subscriptions.data.length === 0) break;
+    startingAfter = subscriptions.data[subscriptions.data.length - 1].id;
+  }
+
+  return rows;
+};
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -86,6 +201,7 @@ Deno.serve(async (req) => {
     const [
       profileSummary,
       premiumSummary,
+      allElevenPlusProfiles,
       sessionSummary,
       mockSummary,
       signup14dCount,
@@ -103,9 +219,10 @@ Deno.serve(async (req) => {
       priceResponse,
     ] = await Promise.all([
       supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('track', '11plus'),
-      supabase.from('profiles').select('id, full_name, plan, premium_track, onboarding, created_at, stripe_subscription_id_live, stripe_subscription_status, cancel_at_period_end, current_period_end', { count: 'exact' })
+      supabase.from('profiles').select('id, user_id, full_name, plan, premium_track, onboarding, created_at, stripe_customer_id_live, stripe_subscription_id_live, stripe_subscription_status, cancel_at_period_end, current_period_end', { count: 'exact' })
         .not('stripe_subscription_id_live', 'is', null)
         .in('premium_track', ['eleven_plus', '11plus']),
+      supabase.from('profiles').select('id, user_id, full_name, onboarding, created_at, stripe_customer_id_live, stripe_customer_id_test, premium_track, track').eq('track', '11plus').limit(2000),
       supabase.from('study_sessions').select('id, profiles!inner(track)', { count: 'exact', head: true }).eq('profiles.track', '11plus'),
       supabase.from('mock_attempts').select('id', { count: 'exact', head: true }).eq('status', 'completed').eq('track', '11plus'),
       supabase.from('profiles').select('id', { count: 'exact', head: true }).gte('created_at', start14dIso).eq('track', '11plus'),
@@ -124,7 +241,7 @@ Deno.serve(async (req) => {
     ]);
 
     const [activityRows, signupRows, practiceRows, questionEvents] = await Promise.all([
-      fetchAllRows(
+      fetchAllRows<ActivityRow>(
         (from, to) =>
           supabase
             .from('study_activity')
@@ -134,7 +251,7 @@ Deno.serve(async (req) => {
             .range(from, to),
         50,
       ),
-      fetchAllRows(
+      fetchAllRows<SignupRow>(
         (from, to) =>
           supabase
             .from('profiles')
@@ -145,7 +262,7 @@ Deno.serve(async (req) => {
             .range(from, to),
         50,
         ),
-      fetchAllRows(
+      fetchAllRows<PracticeRow>(
         (from, to) =>
           supabase
             .from('practice_results')
@@ -156,7 +273,7 @@ Deno.serve(async (req) => {
             .range(from, to),
         50,
       ),
-      fetchAllRows(
+      fetchAllRows<QuestionEventRow>(
         (from, to) =>
           supabase
             .from('question_events_all')
@@ -253,13 +370,12 @@ Deno.serve(async (req) => {
     const minutes7d = last7.reduce((sum, point) => sum + point.minutes, 0);
     const minutesPrev7d = prev7.reduce((sum, point) => sum + point.minutes, 0);
 
-    const stripeEmails = new Map<string, string>();
+    const stripeSubscriptionsById = new Map<string, Stripe.Subscription>();
     let exactMrr = 0;
     try {
       const stripeSecret = Deno.env.get('STRIPE_SECRET_KEY_LIVE') || Deno.env.get('STRIPE_SECRET_KEY');
       if (stripeSecret) {
         const stripe = new Stripe(stripeSecret, { httpClient: Stripe.createFetchHttpClient() });
-        const subs = await stripe.subscriptions.list({ limit: 100, status: 'all', expand: ['data.customer'] });
         const mode = getStripeModeFromLivemode(stripeSecret.startsWith('sk_live_'));
         const priceIds = getStripeTrackPriceIdsForMode(mode);
         const elevenPlusPrices = [
@@ -267,17 +383,16 @@ Deno.serve(async (req) => {
           priceIds.eleven_plus.annual,
           priceIds.eleven_plus.ultra,
           priceIds.eleven_plus.ultra_annual
-        ].filter(Boolean);
+        ].filter((priceId): priceId is string => Boolean(priceId));
+        const subs = await fetchElevenPlusStripeSubscriptions(stripe, elevenPlusPrices);
 
-        subs.data.forEach(sub => {
+        subs.forEach(sub => {
+          stripeSubscriptionsById.set(sub.id, sub);
           if (sub.status === 'active' && !sub.cancel_at_period_end && sub.items.data.length > 0) {
             const priceId = sub.items.data[0].price.id;
             if (elevenPlusPrices.includes(priceId)) {
               exactMrr += (sub.items.data[0].price.unit_amount || 0) / 100;
             }
-          }
-          if (sub.customer && typeof sub.customer !== 'string' && sub.customer.email) {
-             stripeEmails.set(sub.id, sub.customer.email);
           }
         });
       }
@@ -285,13 +400,41 @@ Deno.serve(async (req) => {
       console.error('Stripe exact MRR match failed', err);
     }
 
-    const payingUsersDetails = await Promise.all((premiumSummary.data ?? []).map(async (p) => {
+    const profileRows = premiumSummary.data ?? [];
+    const allProfileRows = allElevenPlusProfiles.data ?? [];
+    const { data: authUsersPage } = await supabase.auth.admin.listUsers({ page: 1, perPage: 2000 });
+    const authUsers = authUsersPage?.users ?? [];
+    const authUserById = new Map(authUsers.map((user) => [user.id, user]));
+    const authUserByEmail = new Map(
+      authUsers
+        .filter((user) => user.email)
+        .map((user) => [user.email!.toLowerCase(), user])
+    );
+    const profileByUserId = new Map(allProfileRows.map((profile) => [profile.user_id, profile]));
+    const profileByCustomerId = new Map(
+      allProfileRows
+        .flatMap((profile) => [profile.stripe_customer_id_live, profile.stripe_customer_id_test].map((customerId) => ({ customerId, profile })))
+        .filter((entry) => entry.customerId)
+        .map((entry) => [entry.customerId!, entry.profile])
+    );
+
+    const profileBySubscriptionId = new Map(
+      profileRows
+        .filter((profile) => profile.stripe_subscription_id_live)
+        .map((profile) => [profile.stripe_subscription_id_live, profile])
+    );
+
+    const profileDetails = await Promise.all(profileRows.map(async (p) => {
       let email = "unknown";
-      if (p.stripe_subscription_id_live && stripeEmails.has(p.stripe_subscription_id_live)) {
-         email = stripeEmails.get(p.stripe_subscription_id_live)!;
+      const stripeSubscription = p.stripe_subscription_id_live
+        ? stripeSubscriptionsById.get(p.stripe_subscription_id_live)
+        : null;
+      const stripeEmail = stripeSubscription ? getCustomerEmail(stripeSubscription) : null;
+      if (stripeEmail) {
+         email = stripeEmail;
       } else {
         try {
-          const uId = p.user_id || p.id;
+          const uId = p.user_id;
           if (uId) {
             const { data: userData } = await supabase.auth.admin.getUserById(uId);
             if (userData?.user?.email) email = userData.user.email;
@@ -301,17 +444,61 @@ Deno.serve(async (req) => {
       
       return {
         id: p.id,
-        name: p.full_name || p.onboarding?.preferredName || "Unknown",
+        name: getProfileName(p) || getAuthUserName(authUserById.get(p.user_id)) || nameFromEmail(email),
         email,
         plan: p.plan || "premium",
         track: p.premium_track || "unknown",
         created_at: p.created_at,
         subscription_id: p.stripe_subscription_id_live,
-        status: p.stripe_subscription_status || 'unknown',
-        cancel_at_period_end: p.cancel_at_period_end || false,
-        current_period_end: p.current_period_end || null
+        status: stripeSubscription?.status || p.stripe_subscription_status || 'unknown',
+        cancel_at_period_end: stripeSubscription?.cancel_at_period_end || p.cancel_at_period_end || false,
+        current_period_end: toIsoFromStripeSeconds(stripeSubscription?.current_period_end) || p.current_period_end || null,
+        payment_method: stripeSubscription ? describePaymentMethod(stripeSubscription) : 'Saved in Stripe',
+        stripe_customer_id: stripeSubscription
+          ? (typeof stripeSubscription.customer === 'string' ? stripeSubscription.customer : stripeSubscription.customer?.id ?? null)
+          : p.stripe_customer_id_live,
+        source: 'profile'
       };
     }));
+
+    const stripeOnlyDetails = Array.from(stripeSubscriptionsById.values())
+      .filter((subscription) => !profileBySubscriptionId.has(subscription.id))
+      .filter((subscription) => hasDefaultPaymentMethod(subscription))
+      .map((subscription) => {
+        const price = subscription.items.data[0]?.price;
+        const interval = price?.recurring?.interval === 'year' ? 'annual' : 'monthly';
+        const customer = subscription.customer as Stripe.Customer | string | null;
+        const customerId = typeof customer === 'string' ? customer : customer?.id ?? null;
+        const email = getCustomerEmail(subscription);
+        const authUser = email ? authUserByEmail.get(email.toLowerCase()) : null;
+        const matchedProfile =
+          (customerId ? profileByCustomerId.get(customerId) : null) ||
+          (authUser ? profileByUserId.get(authUser.id) : null) ||
+          null;
+
+        return {
+          id: subscription.id,
+          name: getCustomerName(subscription) || getProfileName(matchedProfile) || getAuthUserName(authUser) || nameFromEmail(email),
+          email: email || "unknown",
+          plan: price?.metadata?.plan || (interval === 'annual' ? 'premium annual' : 'premium'),
+          track: 'eleven_plus',
+          created_at: toIsoFromStripeSeconds(subscription.start_date) || toIsoFromStripeSeconds(subscription.created) || new Date().toISOString(),
+          subscription_id: subscription.id,
+          status: subscription.status || 'unknown',
+          cancel_at_period_end: subscription.cancel_at_period_end || false,
+          current_period_end: toIsoFromStripeSeconds(subscription.current_period_end),
+          payment_method: describePaymentMethod(subscription),
+          stripe_customer_id: customerId,
+          source: 'stripe'
+        };
+      });
+
+    const payingUsersDetails = [...profileDetails, ...stripeOnlyDetails].sort(
+      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    );
+    const activeElevenPlusSubscribers = payingUsersDetails.filter(
+      (user) => user.status === 'active' && !user.cancel_at_period_end
+    ).length;
 
     return new Response(
       JSON.stringify({
@@ -329,7 +516,7 @@ Deno.serve(async (req) => {
             },
             signups: {
               total: profileSummary.count ?? 0,
-              premiumTotal: premiumSummary.count ?? 0,
+              premiumTotal: payingUsersDetails.length,
               last14d: signup14dCount.count ?? 0,
               last7d: signup7dCount.count ?? 0,
               last30d: signup30dCount.count ?? 0,
@@ -378,7 +565,7 @@ Deno.serve(async (req) => {
           },
           totals: {
             totalSignups: profileSummary.count ?? 0,
-            premiumSignups: premiumSummary.count ?? 0,
+            premiumSignups: activeElevenPlusSubscribers,
             sessionCount: sessionSummary.count ?? 0,
             mockAttempts: mockSummary.count ?? 0,
           },

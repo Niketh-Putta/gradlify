@@ -682,9 +682,6 @@ export default function MockExamPage() {
 
             mixedQuestions = combined;
 
-            if (coverageOrder.length > questionsCount) {
-              toast.message('Session too short to include every mini subtopic; showing the widest spread possible.');
-            }
           }
         }
 

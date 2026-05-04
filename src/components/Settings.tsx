@@ -61,6 +61,7 @@ import { AI_FEATURE_ENABLED } from "@/lib/featureFlags";
 import { UserTrack } from "@/lib/track";
 import { getTrackCopy } from "@/lib/trackContent";
 import { isAbortLikeError } from "@/lib/errors";
+import { ReferralCard } from "@/components/ReferralCard";
 
 interface Profile {
   id: string;
@@ -752,6 +753,8 @@ export function Settings({ user, onBackToChat, onSignOut }: SettingsProps) {
                 </div>
               </div>
             </section>
+
+            <ReferralCard />
 
             {/* Security */}
             <section className="space-y-4">

@@ -6,6 +6,7 @@ import { LogoMark } from '@/components/LogoMark';
 import { toast } from 'sonner';
 import { consumePostAuthRedirect } from '@/lib/postAuthRedirect';
 import { applySignupTrack, getDashboardPath } from '@/lib/track';
+import { claimStoredReferral } from '@/lib/referrals';
 
 export function AuthCallback() {
   const navigate = useNavigate();
@@ -78,6 +79,11 @@ export function AuthCallback() {
           }
 
           await applySignupTrack(data.session.user.id);
+          try {
+            await claimStoredReferral(data.session.user.created_at);
+          } catch (referralError) {
+            console.error('Referral claim failed:', referralError);
+          }
 
           toast.success('Successfully signed in!');
           if (!redirectAfterAuth()) {

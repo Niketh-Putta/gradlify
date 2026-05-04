@@ -11,7 +11,6 @@ import {
   BookOpen,
   Calendar,
   FileText,
-  Library,
   BookMarked,
   Settings,
   LogOut,
@@ -171,7 +170,7 @@ export function Navigation({ user, profile, onSettings, onSignOut }: NavigationP
   const moreNavigationItems = [
     ...(AI_FEATURE_ENABLED ? [{ path: '/chat', icon: MessageSquare, label: 'AI Chat' }] : []),
     { path: '/connect', icon: Users, label: 'Leaderboard' },
-    { path: '/resources', icon: Library, label: 'Resources' },
+    { path: '/live-mock-exams', icon: Calendar, label: 'Live Mock Exams' },
   ];
 
   const getTierDisplay = () => {

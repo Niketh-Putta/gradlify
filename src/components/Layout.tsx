@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Outlet, useLocation } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Navigation } from '@/components/Navigation';
-import { OnboardingModal } from '@/components/OnboardingModal';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from "sonner";
@@ -62,6 +61,7 @@ export function Layout({ user, onSettings, onSignOut }: LayoutProps) {
   const [loading, setLoading] = useState(true);
   const [hasProgress, setHasProgress] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const onboardingCompletionWrite = useRef(false);
   const abortRetryRef = useRef(0);
   const retryScheduledRef = useRef(false);
@@ -332,6 +332,18 @@ export function Layout({ user, onSettings, onSignOut }: LayoutProps) {
     };
   }, [fetchProfile, user.id]);
 
+  const onboardingComplete = profile
+    ? Boolean(profile.onboarding_completed_at) ||
+      hasCompletedOnboarding(profile.onboarding) ||
+      hasExistingProgress(profile) ||
+      hasProgress
+    : false;
+
+  useEffect(() => {
+    if (loading || !profile || onboardingComplete) return;
+    navigate('/select-subject', { replace: true });
+  }, [loading, navigate, onboardingComplete, profile]);
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -353,11 +365,16 @@ export function Layout({ user, onSettings, onSignOut }: LayoutProps) {
     );
   }
 
-  const onboardingComplete =
-    Boolean(profile.onboarding_completed_at) ||
-    hasCompletedOnboarding(profile.onboarding) ||
-    hasExistingProgress(profile) ||
-    hasProgress;
+  if (!onboardingComplete) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p>Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={isChatRoute ? "h-screen h-[100dvh] overflow-hidden bg-background" : "min-h-screen bg-background"}>
@@ -368,16 +385,6 @@ export function Layout({ user, onSettings, onSignOut }: LayoutProps) {
         onSignOut={onSignOut}
       />
 
-      <OnboardingModal
-        isOpen={Boolean(profile && !onboardingComplete)}
-        userId={user.id}
-        tier={profile?.tier}
-        premiumTrack={profile?.premium_track ?? null}
-        founderTrack={profile?.founder_track ?? null}
-        initialAnswers={profile?.onboarding ?? {}}
-        onCompleted={fetchProfile}
-      />
-      
       {/* Main Content */}
       <main
         className={

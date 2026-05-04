@@ -1,18 +1,24 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
-import { PremiumUpgradeButton } from '@/components/PremiumUpgradeButton';
+import { LogoMark } from '@/components/LogoMark';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
-import { Check, Sparkles, X } from 'lucide-react';
-import { getSprintUpgradeCopy } from '@/lib/foundersSprint';
+import { ArrowRight, Check, ChevronDown, Loader2, Sparkles, X } from 'lucide-react';
 import { AI_FEATURE_ENABLED } from '@/lib/featureFlags';
 import { UK_SECONDARY_SCHOOLS } from '@/lib/schools';
 import { useNavigate } from 'react-router-dom';
+import { startPremiumCheckout } from '@/lib/checkout';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 type OnboardingAnswers = {
   preferredTrack?: string;
@@ -207,6 +213,7 @@ interface OnboardingModalProps {
   founderTrack?: 'competitor' | 'founder' | null;
   initialAnswers?: Partial<OnboardingAnswers>;
   onCompleted: () => void;
+  continuePath?: string;
 }
 
 type Phase = 'questions' | 'generating' | 'upsell';
@@ -239,7 +246,90 @@ const shuffle = <T,>(arr: T[]) => {
   return copy;
 };
 
-export function OnboardingModal({ isOpen, userId, tier, premiumTrack, founderTrack, initialAnswers, onCompleted }: OnboardingModalProps) {
+type CheckoutPlan = 'monthly' | 'annual' | 'ultra' | 'ultra_annual';
+
+function PlanCheckoutButton({
+  planType,
+  className,
+  children,
+}: {
+  planType: 'premium' | 'ultra';
+  className?: string;
+  children: ReactNode;
+}) {
+  const [loadingPlan, setLoadingPlan] = useState<CheckoutPlan | null>(null);
+
+  const handleCheckout = async (plan: CheckoutPlan) => {
+    try {
+      setLoadingPlan(plan);
+      await startPremiumCheckout(plan);
+    } catch (error) {
+      console.error('Error creating checkout:', error);
+      const message = error instanceof Error ? error.message : 'Failed to start checkout. Please try again.';
+      toast.error(message);
+    } finally {
+      setLoadingPlan(null);
+    }
+  };
+
+  const isLoading = Boolean(loadingPlan);
+  const annualPlan = planType === 'premium' ? 'annual' : 'ultra_annual';
+  const monthlyPlan = planType === 'premium' ? 'monthly' : 'ultra';
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          type="button"
+          disabled={isLoading}
+          className={className}
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Starting checkout...
+            </>
+          ) : (
+            <>
+              {children}
+              <ChevronDown className="h-4 w-4" />
+            </>
+          )}
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="center" sideOffset={8} className="w-72 rounded-2xl p-2">
+        <DropdownMenuItem
+          onClick={() => handleCheckout(annualPlan)}
+          className="cursor-pointer rounded-xl p-3"
+        >
+          <div className="flex w-full flex-col">
+            <span className="font-semibold">
+              {planType === 'premium' ? 'Premium Annual' : 'Ultra Annual'}
+            </span>
+            <span className="text-xs text-muted-foreground">
+              {planType === 'premium' ? '3 Day Free Trial, then £149.99/year' : 'Best value for serious selective prep'}
+            </span>
+          </div>
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={() => handleCheckout(monthlyPlan)}
+          className="cursor-pointer rounded-xl p-3"
+        >
+          <div className="flex w-full flex-col">
+            <span className="font-semibold">
+              {planType === 'premium' ? 'Premium Monthly' : 'Ultra Monthly'}
+            </span>
+            <span className="text-xs text-muted-foreground">
+              {planType === 'premium' ? '3 Day Free Trial, then £19.99/month' : '£99.99/month'}
+            </span>
+          </div>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+export function OnboardingModal({ isOpen, userId, tier, premiumTrack, founderTrack, initialAnswers, onCompleted, continuePath = '/home' }: OnboardingModalProps) {
   const navigate = useNavigate();
   const [stepIndex, setStepIndex] = useState(0);
   const [answers, setAnswers] = useState<OnboardingAnswers>({ ...(initialAnswers || {}) });
@@ -248,7 +338,6 @@ export function OnboardingModal({ isOpen, userId, tier, premiumTrack, founderTra
   const [phase, setPhase] = useState<Phase>('questions');
   const [generatingChecklist, setGeneratingChecklist] = useState<string[]>([]);
   const [generatingCheckedCount, setGeneratingCheckedCount] = useState(0);
-  const sprintCopy = getSprintUpgradeCopy();
 
   // Keep the dialog open through the generating/upsell phases even if the profile
   // updates in realtime (e.g. onboarding_completed_at gets set).
@@ -399,10 +488,7 @@ export function OnboardingModal({ isOpen, userId, tier, premiumTrack, founderTra
       if (error) throw error;
 
       toast.success('All set! Your study plan is ready.');
-      setPhase('questions');
-      setStepIndex(0);
-      onCompleted();
-      navigate('/select-subject', { replace: true });
+      setPhase('upsell');
       return;
     } catch (err) {
       console.error('Onboarding save failed:', err);
@@ -428,6 +514,7 @@ export function OnboardingModal({ isOpen, userId, tier, premiumTrack, founderTra
       setPhase('questions');
       setStepIndex(0);
       onCompleted();
+      navigate(continuePath, { replace: true });
     } catch (err) {
       console.error('Onboarding completion failed:', err);
       toast.error('Could not finish setup. Please try again.');
@@ -437,27 +524,6 @@ export function OnboardingModal({ isOpen, userId, tier, premiumTrack, founderTra
   };
 
   const isUpsell = phase === 'upsell';
-  const premiumBenefits = selectedTrack === '11plus'
-    ? [
-        { title: 'Unlimited 11+ mock exams', desc: 'for sustained exam practice' },
-        { title: 'Unlimited 11+ challenge sessions', desc: 'to build speed and confidence' },
-        { title: 'Targeted 11+ weak-area drills', desc: 'based on your hardest topics' },
-        { title: 'School-style question coverage', desc: 'across GL, CEM, ISEB and mixed 11+ formats' },
-        { title: 'Sprint leaderboard advantage', desc: 'more attempts means more scoring chances' },
-        { title: 'Clear readiness tracking', desc: 'so you know what to fix next' },
-        { title: 'Structured weekly study plan', desc: 'aligned to your 11+ goals' },
-        { title: 'Priority access to new 11+ tools', desc: 'as Gradlify keeps improving' },
-      ]
-    : [
-        { title: 'Real exam-style mocks', desc: 'with timed conditions' },
-        { title: "Know what’s holding you back", desc: 'with targeted insights' },
-        { title: 'A daily revision plan', desc: 'focused on weak areas' },
-        { title: 'Topic-by-topic breakdown', desc: 'to fix your weaknesses' },
-        { title: "Know when you’re exam-ready", desc: 'and what to do next' },
-        { title: 'Exam-ready notes', desc: 'with visual memory cues' },
-        { title: 'Performance analytics', desc: 'to track real progress' },
-        { title: 'Early access to new tools', desc: 'as Gradlify improves' },
-      ];
 
   return (
     <DialogPrimitive.Root open={dialogOpen}>
@@ -473,10 +539,10 @@ export function OnboardingModal({ isOpen, userId, tier, premiumTrack, founderTra
         <DialogPrimitive.Content
           className={cn(
             'fixed left-[50%] top-[50%] z-50 grid w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4',
-            isUpsell ? 'max-w-2xl sm:max-w-3xl' : 'max-w-lg',
+            isUpsell ? 'max-w-5xl' : 'max-w-lg',
             isUpsell ? 'p-0' : 'p-4 sm:p-6',
-            'border bg-background shadow-lg rounded-2xl sm:w-full',
-            isUpsell ? 'h-[min(760px,92dvh)] overflow-hidden' : 'max-h-[90vh] overflow-y-auto overflow-x-hidden',
+            'border bg-background shadow-lg sm:w-full',
+            isUpsell ? 'h-[min(680px,96dvh)] overflow-hidden rounded-[1.5rem] sm:rounded-[1.75rem]' : 'max-h-[90vh] overflow-y-auto overflow-x-hidden rounded-2xl',
             'data-[state=open]:animate-in data-[state=closed]:animate-out',
             'data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
             'data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95'
@@ -681,7 +747,7 @@ export function OnboardingModal({ isOpen, userId, tier, premiumTrack, founderTra
                     </div>
                   </div>
                   <h2 className="mt-2 text-xl sm:text-2xl font-bold tracking-tight">
-                    Generating your personalised maths study recommendations
+                    Generating your personalised maths and english study recommendations
                   </h2>
                   <p className="mt-2 text-sm text-muted-foreground">
                     {AI_FEATURE_ENABLED
@@ -805,115 +871,156 @@ export function OnboardingModal({ isOpen, userId, tier, premiumTrack, founderTra
 
           {phase === 'upsell' && (
             <div key="upsell" className="h-full animate-in fade-in-0 slide-in-from-bottom-2 duration-300">
-              <div className="relative h-full overflow-y-auto overscroll-contain rounded-2xl bg-gradient-card">
+              <div className="relative h-full overflow-hidden rounded-[1.5rem] bg-[#fffdf7] sm:rounded-[1.75rem]">
                 <div
-                  className="absolute inset-0"
+                  className="absolute inset-0 pointer-events-none"
                   style={{
                     background:
-                      'radial-gradient(circle at 18% 20%, rgba(110, 129, 255, 0.18) 0%, rgba(110, 129, 255, 0) 45%), radial-gradient(circle at 82% 32%, rgba(167, 97, 255, 0.14) 0%, rgba(167, 97, 255, 0) 52%), radial-gradient(circle at 50% 85%, rgba(110, 129, 255, 0.12) 0%, rgba(110, 129, 255, 0) 55%)',
+                      'radial-gradient(circle at 14% 12%, rgba(37,99,235,0.10) 0%, rgba(37,99,235,0) 38%), radial-gradient(circle at 90% 22%, rgba(245,158,11,0.12) 0%, rgba(245,158,11,0) 42%), linear-gradient(180deg, rgba(255,255,255,0.72), rgba(255,253,247,0))',
                   }}
                   aria-hidden="true"
                 />
 
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  onClick={dismissUpsell}
-                  aria-label="Close"
-                  className="absolute right-4 top-4 z-10 text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-
-                <div className="relative min-h-full p-3 sm:p-7 flex flex-col">
-                  <div className="flex items-start justify-between gap-3 sm:gap-6">
-                    <div className="pr-20 sm:pr-40">
-                      <DialogTitle className="text-xl sm:text-4xl font-bold tracking-tight text-primary leading-tight">
-                        {selectedTrack === '11plus'
-                          ? "Boost your 11+ performance"
-                          : sprintCopy.isActive
-                            ? "Stay competitive this sprint"
-                            : "Boost your exam grades"}
-                        <br />
-                        with Gradlify Premium
+                <div className="relative flex h-full min-h-0 flex-col gap-3 p-3 sm:gap-4 sm:p-5 lg:p-6">
+                  <div className="flex shrink-0 flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                    <div className="max-w-2xl">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <div className="flex items-center gap-2">
+                          <LogoMark size={28} variant="light" />
+                          <span className="text-base font-semibold text-slate-950">Gradlify</span>
+                        </div>
+                        <span className="rounded-full border border-blue-200 bg-blue-50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-blue-700">
+                          Trusted by hundreds
+                        </span>
+                      </div>
+                      <DialogTitle className="mt-3 max-w-2xl font-gradlify text-xl font-medium leading-tight text-slate-950 sm:text-3xl lg:text-4xl">
+                        Your personalised study plan is ready
                       </DialogTitle>
-                      <DialogDescription className="mt-1.5 text-xs sm:text-base text-muted-foreground">
-                        {selectedTrack === '11plus'
-                          ? 'Your 11+ recommendations are ready. Unlock Premium to action them with unlimited practice.'
-                          : AI_FEATURE_ENABLED
-                            ? 'Gradlify AI has generated your maths AI study recommendations.'
-                            : 'Gradlify has generated your maths study recommendations.'}
+                      <DialogDescription className="mt-2 max-w-2xl text-xs leading-5 text-slate-600 sm:text-sm">
+                        Unlock more mocks, deeper analytics, higher limits, and live support when you are ready.
                       </DialogDescription>
                     </div>
-
-                    <div
-                      className="absolute right-3 top-3 sm:right-6 sm:top-6 pointer-events-none select-none"
-                      aria-hidden="true"
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={dismissUpsell}
+                      disabled={saving}
+                      className="h-8 shrink-0 self-start rounded-full px-3 text-xs font-medium text-blue-700 hover:bg-blue-50 hover:text-blue-800 sm:self-auto"
                     >
-                      <div className="relative overflow-hidden rounded-2xl">
-                        <img
-                          src="/rocket.png"
-                          alt=""
-                          className="h-14 w-14 sm:h-36 sm:w-36 object-contain opacity-95"
-                        />
-                        {/* Fade edges so it blends into the header */}
-                        <div className="absolute inset-0 bg-gradient-to-l from-background/40 via-transparent to-transparent" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-background/25 via-transparent to-transparent" />
-                      </div>
-                    </div>
+                      {saving ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Continuing...
+                        </>
+                      ) : (
+                        <>
+                          Continue for now
+                          <ArrowRight className="h-4 w-4" />
+                        </>
+                      )}
+                    </Button>
                   </div>
 
-                  <div className="mt-3 rounded-2xl bg-primary/10 border border-border/40 p-2 sm:p-5 flex flex-col">
-                    <div className="pr-1">
-                      <div className="text-xs sm:text-sm font-semibold text-foreground">
-                        {selectedTrack === '11plus' ? 'Your 11+ premium advantages:' : sprintCopy.listTitle}
-                      </div>
-
-                      <div className="mt-2 flex items-start gap-2 sm:gap-3 text-xs sm:text-sm text-foreground">
-                        <span
-                          className="mt-0.5 flex h-6 w-6 sm:h-7 sm:w-7 items-center justify-center rounded-full bg-primary/10 border border-primary/20"
-                          aria-hidden="true"
-                        >
-                          <Check className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" />
+                  <div className="grid min-h-0 flex-1 grid-cols-2 gap-2 sm:gap-3 lg:gap-4">
+                    <section className="relative flex min-h-0 flex-col overflow-hidden rounded-[1.25rem] border border-amber-400/40 bg-[#0c0d14] p-2 text-white shadow-[0_18px_42px_rgba(15,23,42,0.18)] sm:p-4">
+                      <div
+                        className="absolute inset-0 pointer-events-none"
+                        style={{
+                          background:
+                            'radial-gradient(circle at 84% 8%, rgba(126,34,206,0.28), transparent 34%), radial-gradient(circle at 12% 92%, rgba(245,158,11,0.18), transparent 38%)',
+                        }}
+                        aria-hidden="true"
+                      />
+                      <div className="relative z-10 flex items-start justify-between gap-3">
+                        <h3 className="font-gradlify text-lg font-medium text-amber-200 sm:text-3xl">Ultra</h3>
+                        <span className="rounded-full border border-amber-400/60 bg-amber-400/10 px-2 py-1 text-[10px] font-medium text-amber-200 sm:px-3 sm:py-1.5 sm:text-xs">
+                          1-to-1 Live
                         </span>
-                        <div className="font-medium leading-tight">
-                          {selectedTrack === '11plus'
-                            ? 'Unlimited 11+ practice tailored to your selected goals'
-                            : AI_FEATURE_ENABLED
-                              ? 'Unlimited AI practice tailored to your exam board'
-                              : 'Unlimited practice tailored to your exam board'}
-                        </div>
                       </div>
 
-                      <div className="mt-2 grid gap-2 sm:grid-cols-2">
-                        {premiumBenefits.map((f) => (
-                          <div
-                            key={f.title}
-                            className="flex flex-row items-start gap-2 sm:gap-3 rounded-xl border border-border/40 bg-background/70 p-2 sm:p-3 w-full"
-                          >
-                            <span
-                              className="mt-0.5 flex h-6 w-6 sm:h-8 sm:w-8 items-center justify-center rounded-full bg-primary/10 border border-primary/20 shrink-0"
-                              aria-hidden="true"
-                            >
-                              <Check className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" />
+                      <div className="relative z-10 mt-5 sm:mt-6">
+                        <div className="flex items-end gap-2">
+                          <span className="font-gradlify text-3xl font-semibold text-white sm:text-5xl lg:text-6xl">£99.99</span>
+                          <span className="pb-1 text-[10px] font-medium text-amber-100/70 sm:pb-1.5 sm:text-base">/month</span>
+                        </div>
+                        <p className="mt-2 max-w-md text-[11px] font-medium leading-4 text-amber-50/80 sm:mt-3 sm:text-base sm:leading-6">
+                          Everything in Premium <span className="text-amber-300">+</span> weekly live human tutoring.
+                        </p>
+                      </div>
+
+                      <div className="relative z-10 mt-5 space-y-2.5 sm:mt-6 sm:space-y-3">
+                        {[
+                          'All Premium features unlocked',
+                          'Weekly live 1-to-1 tutoring sessions',
+                          'Personalised Sprint Plans',
+                          'Direct access to Founders & Tutors',
+                        ].map((feature) => (
+                          <div key={feature} className="flex items-start gap-1.5 text-[10px] font-medium text-stone-100 sm:gap-2.5 sm:text-sm">
+                            <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-amber-300 text-amber-300 sm:h-6 sm:w-6">
+                              <Check className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                             </span>
-                            <div className="min-w-0 w-full">
-                              <div className="text-[11px] sm:text-sm font-semibold text-foreground leading-snug">{f.title}</div>
-                              <div className="mt-0.5 text-[10px] sm:text-xs text-muted-foreground leading-snug hidden sm:block">{f.desc}</div>
-                            </div>
+                            <span className="leading-5 sm:leading-6">{feature}</span>
                           </div>
                         ))}
                       </div>
-                    </div>
 
-                    <div className="sticky bottom-0 z-20 mt-2 shrink-0 bg-gradient-to-t from-background/90 via-background/65 to-transparent px-1 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
-                      <div className="w-full flex justify-center">
-                        <div className="w-full max-w-xs">
-                          <PremiumUpgradeButton size="compact" />
-                        </div>
+                      <div className="relative z-10 mt-auto pt-4">
+                        <PlanCheckoutButton
+                          planType="ultra"
+                          className="h-9 w-full rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 text-[10px] font-semibold text-slate-950 shadow-[0_14px_30px_rgba(245,158,11,0.22)] hover:from-amber-300 hover:to-orange-400 sm:h-11 sm:text-sm"
+                        >
+                          Start your Ultra trial
+                          <ArrowRight className="h-4 w-4" />
+                        </PlanCheckoutButton>
+                        <p className="mt-2 text-center text-xs font-medium text-amber-100/55">Cancel anytime</p>
                       </div>
-                    </div>
+                    </section>
+
+                    <section className="relative flex min-h-0 flex-col overflow-hidden rounded-[1.25rem] border border-orange-400/70 bg-gradient-to-br from-red-600 via-orange-500 to-yellow-400 p-2 text-white shadow-[0_18px_42px_rgba(248,113,22,0.18)] sm:p-4">
+                      <div className="relative z-10 flex items-start justify-between gap-3">
+                        <h3 className="font-gradlify text-lg font-medium sm:text-3xl">Premium</h3>
+                        <span className="rounded-full border border-white/45 bg-white/10 px-2 py-1 text-[10px] font-medium sm:px-3 sm:py-1.5 sm:text-xs">
+                          Best for exams
+                        </span>
+                      </div>
+
+                      <div className="relative z-10 mt-5 sm:mt-6">
+                        <div className="flex items-end gap-2">
+                          <span className="font-gradlify text-3xl font-semibold sm:text-5xl lg:text-6xl">£19.99</span>
+                          <span className="pb-1 text-[10px] font-medium text-white/90 sm:pb-1.5 sm:text-base">/month</span>
+                        </div>
+                        <p className="mt-2 max-w-md text-[11px] font-medium leading-4 text-white/90 sm:mt-3 sm:text-base sm:leading-6">
+                          More mocks, deeper analytics, higher limits.
+                        </p>
+                      </div>
+
+                      <div className="relative z-10 mt-5 space-y-2.5 sm:mt-6 sm:space-y-3">
+                        {[
+                          'Full timed mock exams',
+                          'Deeper readiness analytics',
+                          'Higher explanation limits',
+                          'Priority support',
+                        ].map((feature) => (
+                          <div key={feature} className="flex items-start gap-1.5 text-[10px] font-medium sm:gap-2.5 sm:text-sm">
+                            <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-white text-white sm:h-6 sm:w-6">
+                              <Check className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+                            </span>
+                            <span className="leading-5 sm:leading-6">{feature}</span>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="relative z-10 mt-auto pt-4">
+                        <PlanCheckoutButton
+                          planType="premium"
+                          className="h-9 w-full rounded-full bg-white text-[10px] font-semibold text-orange-700 shadow-[0_14px_30px_rgba(194,65,12,0.16)] hover:bg-white/92 sm:h-11 sm:text-sm"
+                        >
+                          Start Your 3 Day Free Trial
+                          <ArrowRight className="h-4 w-4" />
+                        </PlanCheckoutButton>
+                        <p className="mt-2 text-center text-xs font-medium text-white/75">Cancel anytime</p>
+                      </div>
+                    </section>
                   </div>
                 </div>
               </div>

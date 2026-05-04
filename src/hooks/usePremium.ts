@@ -99,6 +99,7 @@ export function usePremium(trackOverride?: UserTrack, subject?: 'maths' | 'engli
   const [isLoading, setIsLoading] = useState(hasUserContext);
   const [dailyUses, setDailyUses] = useState(0);
   const [dailyMockUses, setDailyMockUses] = useState(0);
+  const [bonusMockCredits, setBonusMockCredits] = useState(0);
   const [dailyChallengeUses, setDailyChallengeUses] = useState(0);
   const [tier, setTier] = useState<string>(profile?.tier ?? 'free');
   const [plan, setPlan] = useState<string>(profile?.plan ?? 'free');
@@ -279,7 +280,7 @@ export function usePremium(trackOverride?: UserTrack, subject?: 'maths' | 'engli
           ? (todayMocks || []).filter(m => m.mode === 'mock-exam').length
           : (todayMocks || []).filter(m => m.mode === 'mock').length;
         
-        setDailyMockUses(subjectCount);
+        setDailyMockUses(Math.min(subjectCount, 1));
       } catch (err) {
         console.error("[usePremium] Error fetching mock attempts directly:", err);
       }
@@ -328,6 +329,15 @@ export function usePremium(trackOverride?: UserTrack, subject?: 'maths' | 'engli
 
       console.log("[usePremium] Profile fetch success:", !!data);
       if (data) {
+        try {
+          const { data: creditBalance, error: creditError } = await (supabase as any).rpc('get_mock_credit_balance');
+          if (!creditError) {
+            setBonusMockCredits(Number(creditBalance ?? 0));
+          }
+        } catch (creditError) {
+          console.warn("[usePremium] Could not fetch referral mock credits:", creditError);
+        }
+
         const now = new Date();
         const resetAt = data.daily_reset_at ? new Date(data.daily_reset_at) : null;
         
@@ -543,44 +553,32 @@ export function usePremium(trackOverride?: UserTrack, subject?: 'maths' | 'engli
     if (isAdmin) return { allowed: true, uses: dailyMockUses, limit: Infinity, message: '' };
     if (isPremium) return { allowed: true, uses: dailyMockUses, limit: Infinity, message: '' };
 
-    // Fresh count from DB to decide if the user can start a mock
     try {
-      const startOfDay = new Date();
-      startOfDay.setHours(0, 0, 0, 0);
-      const { data: todayMocks } = await supabase
-        .from('mock_attempts')
-        .select('id, mode')
-        .eq('user_id', user!.id)
-        .gte('created_at', startOfDay.toISOString())
-        .in('mode', ['mock', 'mock-exam']);
-
-      const subjectCount = subject === 'english'
-        ? (todayMocks || []).filter(m => m.mode === 'mock-exam').length
-        : (todayMocks || []).filter(m => m.mode === 'mock').length;
-
-      if (subjectCount >= 1) {
-        if (dailyMockUses !== subjectCount) {
-          setDailyMockUses(subjectCount);
-          emitMockUsageUpdate();
-        }
-        return { allowed: false, uses: subjectCount, limit: 1, message: 'You have already used your free mock exam for this subject today.' };
-      }
-      // Allowed — insert a mock_attempts row RIGHT NOW to consume the limit immediately.
-      // Even if the user backs out, the attempt is used up.
-      const mockMode = subject === 'english' ? 'mock-exam' : 'mock';
-      const { error } = await supabase.from('mock_attempts').insert({
-        user_id: user!.id,
-        title: `${subject === 'english' ? 'English' : 'Maths'} Mock Exam`,
-        mode: mockMode,
-        total_marks: 0,
-        status: 'in_progress'
+      const activeSubject = subject === 'english' ? 'english' : 'maths';
+      const { data, error } = await (supabase as any).rpc('consume_mock_start', {
+        p_subject: activeSubject,
+        p_question_count: questionCount,
+        p_title: `${activeSubject === 'english' ? 'English' : 'Maths'} Mock Exam`,
       });
-      
+
       if (error) throw error;
 
-      setDailyMockUses(1);
+      const allowed = Boolean(data?.allowed);
+      const uses = Math.min(Number(data?.daily_mock_uses ?? dailyMockUses), 1);
+      const credits = Number(data?.bonus_mock_credits ?? bonusMockCredits);
+      const limit = data?.daily_mock_limit === 'unlimited' ? Infinity : Number(data?.daily_mock_limit ?? 1);
+
+      setDailyMockUses(Number.isFinite(uses) ? uses : dailyMockUses);
+      setBonusMockCredits(Number.isFinite(credits) ? credits : bonusMockCredits);
       emitMockUsageUpdate();
-      return { allowed: true, uses: 1, limit: 1, message: '' };
+      return {
+        allowed,
+        uses: Number.isFinite(uses) ? uses : dailyMockUses,
+        limit,
+        message: allowed ? '' : (data?.message || 'Daily limit reached.'),
+        source: data?.source,
+        bonusMockCredits: Number.isFinite(credits) ? credits : bonusMockCredits,
+      };
     } catch (error) {
       console.error('Error in incrementMockUsage:', error);
       return { allowed: false, uses: dailyMockUses, limit: 1, message: 'Error checking mock limit.' };
@@ -629,8 +627,8 @@ export function usePremium(trackOverride?: UserTrack, subject?: 'maths' | 'engli
 
   // Mock exam restrictions
   const dailyMockLimit = isPremium ? Infinity : 1;
-  const remainingMockUses = isPremium ? Infinity : Math.max(0, dailyMockLimit - dailyMockUses);
-  const canStartMockExam = isPremium || dailyMockUses < dailyMockLimit;
+  const remainingMockUses = isPremium ? Infinity : Math.max(0, dailyMockLimit - dailyMockUses) + bonusMockCredits;
+  const canStartMockExam = isPremium || dailyMockUses < dailyMockLimit || bonusMockCredits > 0;
   const dailyChallengeLimit = isPremium ? Infinity : FREE_CHALLENGE_LIMIT;
   const remainingChallengeUses = isPremium ? Infinity : Math.max(0, dailyChallengeLimit - dailyChallengeUses);
   const canStartChallengeSession = isPremium || dailyChallengeUses < dailyChallengeLimit;
@@ -652,6 +650,7 @@ export function usePremium(trackOverride?: UserTrack, subject?: 'maths' | 'engli
   const effectiveRemainingUses = hasUserContext ? remainingUses : 5;
   const effectiveDailyMockLimit = hasUserContext ? dailyMockLimit : 1;
   const effectiveDailyMockUses = hasUserContext ? dailyMockUses : guestMockUses;
+  const effectiveBonusMockCredits = hasUserContext ? bonusMockCredits : 0;
   const effectiveRemainingMockUses = hasUserContext
     ? remainingMockUses
     : Math.max(0, effectiveDailyMockLimit - guestMockUses);
@@ -685,6 +684,7 @@ export function usePremium(trackOverride?: UserTrack, subject?: 'maths' | 'engli
     remainingUses: effectiveRemainingUses,
     dailyMockUses: effectiveDailyMockUses,
     dailyMockLimit: effectiveDailyMockLimit,
+    bonusMockCredits: effectiveBonusMockCredits,
     remainingMockUses: effectiveRemainingMockUses,
     dailyChallengeUses: effectiveDailyChallengeUses,
     dailyChallengeLimit: effectiveDailyChallengeLimit,

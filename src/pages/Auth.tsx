@@ -13,6 +13,7 @@ import { consumePostAuthRedirect, getPostAuthRedirect, setPostAuthRedirect } fro
 import { AI_FEATURE_ENABLED } from "@/lib/featureFlags";
 import { applySignupTrack, clearSignupTrack, getDashboardPath, getSignupTrack, setSignupTrack } from "@/lib/track";
 import { GoogleLogin } from '@react-oauth/google';
+import { captureReferralFromSearch, claimStoredReferral } from "@/lib/referrals";
 
 // Safe check for the built app environment
 const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
@@ -76,6 +77,7 @@ export default function Auth() {
       const track = params.get("track");
       const redirect = params.get("redirect");
       const message = params.get("message");
+      captureReferralFromSearch(window.location.search);
       if (mode === "signin" || mode === "signup") setActiveTab(mode);
       if (typeof urlEmail === "string" && urlEmail.trim()) setEmail(urlEmail);
       if (track === "11plus") setSignupTrack("11plus");
@@ -154,6 +156,11 @@ export default function Auth() {
       if (data?.session) {
         toast.success("Account created! You're signed in.");
         await applySignupTrack(data.session.user.id);
+        try {
+          await claimStoredReferral(data.session.user.created_at);
+        } catch (referralError) {
+          console.error("Referral claim failed:", referralError);
+        }
         await navigateAfterAuth(data.session.user.id);
         return;
       }
@@ -373,7 +380,6 @@ export default function Auth() {
                        onError={() => {
                          toast.error('Login Failed via Google overlay. Please try again or use standard sign-in.');
                        }}
-                       useOneTap
                        theme="outline"
                        text="continue_with"
                        shape="circle"

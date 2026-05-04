@@ -565,7 +565,9 @@ export function EnglishSplitViewDemo() {
         if (diffMinParam) query = query.gte('difficulty', parseInt(diffMinParam));
         if (diffMaxParam) query = query.lte('difficulty', parseInt(diffMaxParam));
         
-        let { data, error } = await query;
+        const passageResult = await query;
+        let { data } = passageResult;
+        const { error } = passageResult;
         if (error) throw error;
         
         // 2. FALLBACK: If specific topic search failed, widen the net
@@ -694,7 +696,11 @@ export function EnglishSplitViewDemo() {
     if (all.length === 0) return [];
 
     let seen: string[] = [];
-    try { seen = JSON.parse(localStorage.getItem('seen_english_passages') || '[]'); } catch(e) {}
+    try {
+      seen = JSON.parse(localStorage.getItem('seen_english_passages') || '[]');
+    } catch {
+      seen = [];
+    }
 
     // PARTITION: Sorted buckets for absolute clarity
     const compPool: EnglishSection[] = [];

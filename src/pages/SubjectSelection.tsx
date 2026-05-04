@@ -1,19 +1,121 @@
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSubject } from "@/contexts/SubjectContext";
 import { useMembership } from "@/hooks/useMembership";
+import { OnboardingModal } from "@/components/OnboardingModal";
+import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
 import { BookOpen, Calculator, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+interface Profile {
+  user_id: string;
+  founder_track?: 'competitor' | 'founder' | null;
+  track?: 'gcse' | '11plus' | null;
+  premium_track?: 'gcse' | '11plus' | 'eleven_plus' | null;
+  tier?: string;
+  onboarding?: Record<string, unknown>;
+  onboarding_completed_at?: string | null;
+  daily_uses?: number | null;
+  daily_mock_uses?: number | null;
+  exam_readiness?: number | null;
+}
+
+const hasCompletedOnboarding = (onboarding?: Record<string, unknown>) => {
+  const requiredKeys = [
+    'preferredName',
+    'examBoard',
+    'yearGroup',
+    'studyTime',
+    'currentGrade',
+    'targetGrade',
+  ];
+  return requiredKeys.every((key) => {
+    const value = onboarding?.[key];
+    return typeof value === 'string' && value.trim().length > 0;
+  });
+};
+
+const hasExistingProgress = (profile?: Profile | null) =>
+  Boolean(
+    profile &&
+      ((profile.daily_uses ?? 0) > 0 ||
+        (profile.daily_mock_uses ?? 0) > 0 ||
+        profile.exam_readiness !== null)
+  );
 
 export default function SubjectSelection() {
   const navigate = useNavigate();
   const { setSubject } = useSubject();
   const { isUltra, isPremium } = useMembership();
+  const [userId, setUserId] = useState<string | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [profileLoading, setProfileLoading] = useState(true);
+  const [showOnboarding, setShowOnboarding] = useState(false);
   
   const displayTier = isUltra ? 'Ultra' : isPremium ? 'Premium' : 'Free';
 
+  const fetchProfile = useCallback(async () => {
+    setProfileLoading(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const currentUserId = session?.user?.id ?? null;
+      setUserId(currentUserId);
+      if (!currentUserId) {
+        setProfile(null);
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('user_id, founder_track, track, premium_track, tier, onboarding, onboarding_completed_at, daily_uses, daily_mock_uses, exam_readiness')
+        .eq('user_id', currentUserId)
+        .maybeSingle();
+
+      if (error) throw error;
+
+      if (!data) {
+        const { data: inserted, error: insertError } = await supabase
+          .from('profiles')
+          .insert({ user_id: currentUserId })
+          .select('user_id, founder_track, track, premium_track, tier, onboarding, onboarding_completed_at, daily_uses, daily_mock_uses, exam_readiness')
+          .single();
+
+        if (insertError) throw insertError;
+        setProfile(inserted as Profile);
+        return;
+      }
+
+      setProfile(data as Profile);
+    } catch (error) {
+      console.error('Failed to load subject selection profile:', error);
+      setProfile(null);
+    } finally {
+      setProfileLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void fetchProfile();
+  }, [fetchProfile]);
+
+  const onboardingComplete =
+    Boolean(profile?.onboarding_completed_at) ||
+    hasCompletedOnboarding(profile?.onboarding) ||
+    hasExistingProgress(profile);
+
+  useEffect(() => {
+    if (profileLoading || !userId || onboardingComplete) return;
+    setShowOnboarding(true);
+  }, [onboardingComplete, profileLoading, userId]);
+
   const handleSelect = (subject: 'maths' | 'english') => {
     setSubject(subject);
+    if (profileLoading) return;
+    if (userId && !onboardingComplete) {
+      setShowOnboarding(true);
+      return;
+    }
     navigate("/home");
   };
 
@@ -99,6 +201,21 @@ export default function SubjectSelection() {
           </button>
         </div>
       </motion.div>
+
+      {userId ? (
+        <OnboardingModal
+          isOpen={showOnboarding}
+          userId={userId}
+          tier={profile?.tier}
+          premiumTrack={profile?.premium_track ?? null}
+          founderTrack={profile?.founder_track ?? null}
+          initialAnswers={profile?.onboarding ?? {}}
+          onCompleted={() => {
+            setShowOnboarding(false);
+            void fetchProfile();
+          }}
+        />
+      ) : null}
     </div>
   );
 }

@@ -14,6 +14,7 @@ import { ArrowLeft } from "lucide-react";
 
 import { LogoMark } from "@/components/LogoMark";
 import { SprintBanner } from "./SprintBanner";
+import { LiveMockExamBanner } from "@/components/LiveMockExamBanner";
 import { DiscordFooterEntry } from "@/components/DiscordFooterEntry";
 import { supabase } from "@/integrations/supabase/client";
 import { getSprintUpgradeCopy } from "@/lib/foundersSprint";
@@ -547,6 +548,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
         ].join(" ")}
       >
         <SprintBanner />
+        <LiveMockExamBanner mode="button" onClick={handleSignup} />
 
         <div className="max-w-7xl mx-auto px-3 pr-4 sm:px-6 sm:pr-6 py-2.5 sm:py-4">
           <div className="flex items-center justify-between gap-3 sm:gap-4">
@@ -592,9 +594,9 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
         </div>
       </nav>
 
-      <main className="pt-16 sm:pt-0">
+      <main className="pt-24 sm:pt-28 lg:pt-0">
         {/* Hero */}
-        <section className="relative pt-24 sm:pt-32 lg:pt-36 pb-12 sm:pb-18 lg:pb-20 overflow-hidden">
+        <section className="relative pt-28 sm:pt-34 lg:pt-36 pb-12 sm:pb-18 lg:pb-20 overflow-hidden">
           {ambientEffectsEnabled && (
             <div className="absolute inset-0 pointer-events-none">
               {isDark ? (

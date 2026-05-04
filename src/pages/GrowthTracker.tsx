@@ -19,7 +19,7 @@ import {
   YAxis,
   ResponsiveContainer,
 } from "recharts";
-import { Users, UserPlus, Activity, Crown, TrendingUp, TrendingDown, Loader2, PoundSterling, CreditCard, XCircle } from "lucide-react";
+import { Users, UserPlus, Activity, Crown, TrendingUp, TrendingDown, Loader2, PoundSterling, CreditCard, XCircle, type LucideIcon } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const DAYS_LOOKBACK = 14;
@@ -42,7 +42,7 @@ type ApiKpis = {
     monthly: number;
     currency: string;
   };
-  [key: string]: any;
+  [key: string]: unknown;
 };
 
 type ApiTotals = {
@@ -78,6 +78,9 @@ export type PayingUser = {
   status?: string;
   cancel_at_period_end?: boolean;
   current_period_end?: string | null;
+  payment_method?: string | null;
+  stripe_customer_id?: string | null;
+  source?: "profile" | "stripe";
 };
 
 const isActuallyTrial = (user: PayingUser) => {
@@ -125,18 +128,26 @@ const UserRow = ({ user }: { user: PayingUser }) => {
             {isCanceled && user.plan === 'free' ? 'Premium (Canceled)' : user.plan} · {user.track === 'gcse' ? 'GCSE' : '11+'}
           </span>
         </td>
+        <td className="px-6 py-4 text-slate-700">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-700">
+            <CreditCard className="h-3.5 w-3.5 text-blue-600" />
+            {user.payment_method || 'Saved in Stripe'}
+          </span>
+        </td>
         <td className="px-6 py-4 whitespace-nowrap text-slate-500">
           {new Date(user.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
         </td>
       </tr>
       {expanded && (
         <tr className="bg-slate-50/80 border-b border-slate-100 last:border-0">
-          <td colSpan={4} className="px-6 py-4">
+          <td colSpan={5} className="px-6 py-4">
             <div className="text-sm text-slate-600 grid grid-cols-1 md:grid-cols-2 gap-4 rounded-lg bg-white p-4 border border-slate-200">
               <div>
                 <p className="font-semibold text-slate-900 mb-1">Subscription Details</p>
                 <p><span className="text-slate-400">ID:</span> <span className="font-mono text-xs">{user.subscription_id || 'N/A'}</span></p>
+                <p><span className="text-slate-400">Stripe Customer:</span> <span className="font-mono text-xs">{user.stripe_customer_id || 'N/A'}</span></p>
                 <p><span className="text-slate-400">Status:</span> <span className="capitalize">{user.status || 'Active'}</span></p>
+                <p><span className="text-slate-400">Payment Method:</span> {user.payment_method || 'Saved in Stripe'}</p>
                 <p><span className="text-slate-400">Next Payment / End Date:</span> {user.current_period_end ? new Date(user.current_period_end).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Unknown'}</p>
               </div>
               <div>
@@ -148,6 +159,9 @@ const UserRow = ({ user }: { user: PayingUser }) => {
                  ) : (
                    <p className="text-emerald-600">This is a verified recurring subscriber making active payments.</p>
                  )}
+                 {user.source === 'stripe' && (
+                   <p className="text-slate-500 mt-2">This row came directly from Stripe because the customer has saved payment details but was not linked to a local profile subscription row.</p>
+                 )}
               </div>
             </div>
           </td>
@@ -157,7 +171,7 @@ const UserRow = ({ user }: { user: PayingUser }) => {
   );
 };
 
-const UserTable = ({ users, title, description, emptyText, icon: Icon, iconColorClass }: { users: PayingUser[], title: string, description: string, emptyText: string, icon: any, iconColorClass: string }) => (
+const UserTable = ({ users, title, description, emptyText, icon: Icon, iconColorClass }: { users: PayingUser[], title: string, description: string, emptyText: string, icon: LucideIcon, iconColorClass: string }) => (
   <Card className={`border-slate-200 shadow-sm overflow-hidden`}>
     <CardHeader className="bg-slate-50/50 border-b border-slate-100">
       <CardTitle className="flex items-center gap-2 text-lg">
@@ -177,6 +191,7 @@ const UserTable = ({ users, title, description, emptyText, icon: Icon, iconColor
                 <th className="px-6 py-4 font-medium">User Profile</th>
                 <th className="px-6 py-4 font-medium">Email Address</th>
                 <th className="px-6 py-4 font-medium">Subscription Type</th>
+                <th className="px-6 py-4 font-medium">Payment Method</th>
                 <th className="px-6 py-4 font-medium">Since Date</th>
               </tr>
             </thead>

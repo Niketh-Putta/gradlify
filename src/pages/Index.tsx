@@ -15,7 +15,7 @@ const Readiness = lazy(() => import("@/pages/Readiness").then(m => ({ default: m
 const ExamReadiness = lazy(() => import("@/pages/ExamReadiness"));
 const MockExams = lazy(() => import("@/pages/MockExams"));
 const MockExamPage = lazy(() => import("@/pages/MockExamPage"));
-const Resources = lazy(() => import("@/pages/Resources"));
+const LiveMockExams = lazy(() => import("@/pages/LiveMockExams"));
 const RevisionNotes = lazy(() => import("@/pages/RevisionNotes"));
 const RevisionNotesSection = lazy(() => import("@/pages/RevisionNotesSection"));
 const RevisionNotesTopic = lazy(() => import("@/pages/RevisionNotesTopic"));
@@ -41,6 +41,7 @@ import { setPostAuthRedirect } from '@/lib/postAuthRedirect';
 import { AI_FEATURE_ENABLED } from '@/lib/featureFlags';
 import { getDashboardPath, setSignupTrack } from '@/lib/track';
 import { isAbortLikeError } from '@/lib/errors';
+import { captureReferralFromSearch } from '@/lib/referrals';
 
 // Loading Fallback Component
 const PageLoading = () => (
@@ -62,7 +63,7 @@ const protectedRoutes = [
   '/readiness',
   '/mocks',
   '/mock-exam',
-  '/resources',
+  '/live-mock-exams',
   '/connect',
   '/notes',
   '/revision-guides',
@@ -135,6 +136,10 @@ const Index = () => {
     }
   }, [location.hash]);
   useEffect(() => {
+    captureReferralFromSearch(location.search);
+  }, [location.search]);
+
+  useEffect(() => {
     if (user) return;
     if (!["/", "/11-plus"].includes(location.pathname)) return;
     const params = new URLSearchParams(location.search);
@@ -146,8 +151,10 @@ const Index = () => {
     setAuthMode(auth);
     setShowAuthModal(true);
     params.delete("auth");
+    params.delete("ref");
+    params.delete("r");
     const nextSearch = params.toString();
-    const nextPath = nextSearch ? `/?${nextSearch}` : "/";
+    const nextPath = `${location.pathname}${nextSearch ? `?${nextSearch}` : ""}`;
     navigate(nextPath, { replace: true });
   }, [location.pathname, location.search, navigate, user]);
 
@@ -306,7 +313,7 @@ const Index = () => {
               <Route path="practice-page" element={<Navigate to="/mocks" replace />} />
               <Route path="practice/maths" element={<Navigate to="/mocks/maths" replace />} />
               <Route path="practice/english" element={<Navigate to="/mocks/english" replace />} />
-              <Route path="resources" element={<Resources />} />
+              <Route path="live-mock-exams" element={<LiveMockExams />} />
               <Route path="notes" element={<RevisionNotes />} />
               <Route path="notes/:section" element={<RevisionNotesSection />} />
               <Route path="notes/:section/:topic" element={<RevisionNotesTopic />} />

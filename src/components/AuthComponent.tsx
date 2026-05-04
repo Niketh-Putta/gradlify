@@ -13,6 +13,7 @@ import { ResetPasswordForm } from "@/components/ResetPasswordForm";
 import { AI_FEATURE_ENABLED } from "@/lib/featureFlags";
 import { clearSignupTrack, getSignupTrack } from "@/lib/track";
 import { GoogleLogin } from '@react-oauth/google';
+import { claimStoredReferral } from '@/lib/referrals';
 
 // Safe check for the built app environment
 const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
@@ -80,6 +81,9 @@ export const AuthComponent = ({ onAuthSuccess, onBack, initialMode = 'login' }: 
           // Ensure profile exists with defaults
           setTimeout(() => {
             ensureProfile(session.user);
+            claimStoredReferral(session.user.created_at).catch((error) => {
+              console.error('Referral claim failed:', error);
+            });
           }, 100);
           onAuthSuccess(session.user);
         }
@@ -220,6 +224,11 @@ export const AuthComponent = ({ onAuthSuccess, onBack, initialMode = 'login' }: 
           await initializeSubtopicProgress(data.user.id);
 
           if (data.session) {
+            try {
+              await claimStoredReferral(data.session.user.created_at);
+            } catch (referralError) {
+              console.error('Referral claim failed:', referralError);
+            }
             toast.success("Account created! You're signed in.");
           } else {
             try {
@@ -413,7 +422,6 @@ export const AuthComponent = ({ onAuthSuccess, onBack, initialMode = 'login' }: 
                    onError={() => {
                      toast.error('Login Failed via Google overlay. Please try again or use standard sign-in.');
                    }}
-                   useOneTap
                    theme="outline"
                    text="continue_with"
                    shape="circle"

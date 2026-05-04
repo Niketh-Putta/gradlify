@@ -39,6 +39,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { LeaderboardSnapshot } from "@/components/LeaderboardSnapshot";
 import { SprintBanner } from "@/components/SprintBanner";
+import { LiveMockExamBanner } from "@/components/LiveMockExamBanner";
 import { PremiumUpgradeButton } from "@/components/PremiumUpgradeButton";
 import { useReadinessStore } from "@/lib/stores/useReadinessStore";
 import { PracticeConfirmationModal } from "@/components/readiness/PracticeConfirmationModal";
@@ -50,6 +51,7 @@ import { resolveUserTrack, UserTrack } from "@/lib/track";
 import { isAbortLikeError } from "@/lib/errors";
 import { buildTrackReadinessRows, getTrackLabel, getTrackReadinessSummaryLabel, getTrackReadinessSections } from "@/lib/trackCurriculum";
 import { isForcedStarterUser } from "@/lib/starterOverrides";
+import { ReferralInviteDialog } from "@/components/ReferralInviteDialog";
 
 const TOPIC_ICONS = {
   number: Calculator,
@@ -390,6 +392,7 @@ export function Home() {
   return (
     <div className="min-h-screen bg-background">
       <SprintBanner className="mb-0" />
+      <LiveMockExamBanner />
       <div className="pt-6 pb-10 sm:pt-8 sm:pb-14 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
 
         <div className="mb-4 flex items-center justify-between">
@@ -489,6 +492,12 @@ export function Home() {
             </div>
           </div>
         </div>
+
+        {!isPremium && (
+          <div className="mb-8">
+            <ReferralInviteDialog accent={currentSubject === 'english' ? 'english' : 'maths'} />
+          </div>
+        )}
 
         {/* Stats Cards Row */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
