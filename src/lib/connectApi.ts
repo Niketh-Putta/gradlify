@@ -93,13 +93,6 @@ type PendingRequestRow = {
   [key: string]: unknown;
 };
 
-type LeaderboardProfileRow = {
-  user_id: string;
-  name: string;
-  avatar_url: string | null;
-  founder_track?: 'competitor' | 'founder' | null;
-};
-
 const normalizeLeaderboardData = (rows: unknown): LeaderboardEntry[] => {
   if (!Array.isArray(rows)) return [];
   return rows.map((row, index) => {
@@ -155,38 +148,6 @@ export async function getLeaderboard(
   }
 
   let rankedEntries = rankLeaderboardEntries(dbEntries.filter((entry) => Number(entry.correct_count) > 0));
-
-  if (scope === 'global' && rankedEntries.length < 100) {
-    try {
-      const { data: { user: currentUser } } = await supabase.auth.getUser();
-      const existingIds = new Set(rankedEntries.map((entry) => entry.user_id));
-      const { data: profiles } = await supabase
-        .rpc('get_leaderboard_filler_profiles', {
-          p_track: resolvedTrack,
-          p_limit: 300,
-        }) as { data: LeaderboardProfileRow[] | null; error: unknown };
-
-      const fillerEntries = (profiles ?? [])
-        .filter((profile) => !existingIds.has(profile.user_id))
-        .slice(0, 100 - rankedEntries.length)
-        .map((profile) => ({
-          rank: 0,
-          user_id: profile.user_id,
-          name: profile.name,
-          avatar_url: profile.avatar_url ?? null,
-          correct_count: 0,
-          is_self: profile.user_id === currentUser?.id,
-          founder_track: profile.founder_track ?? null,
-        }));
-
-      rankedEntries = [...rankedEntries, ...fillerEntries].map((entry, index) => ({
-        ...entry,
-        rank: index + 1,
-      }));
-    } catch (e) {
-      console.error('Failed to append filler leaderboard profiles:', e);
-    }
-  }
 
   return rankedEntries;
 }
