@@ -8,14 +8,16 @@ import { PremiumLoader } from "@/components/PremiumLoader";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { getLeaderboard, getMyGlobalOptIn, setGlobalOptIn, LeaderboardEntry } from "@/lib/connectApi";
-import { Globe, Users, Target, Eye, EyeOff } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { Globe, Users, Target, Eye, EyeOff, Sparkles, ArrowRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useMembership } from "@/hooks/useMembership";
 import { useAppContext } from "@/hooks/useAppContext";
 import { resolveUserTrack } from "@/lib/track";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 export function LeaderboardTab() {
+  const navigate = useNavigate();
   const [period, setPeriod] = useState<'day' | 'week' | 'month'>('day');
   const [scope, setScope] = useState<'global' | 'friends'>('global');
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
@@ -53,12 +55,49 @@ export function LeaderboardTab() {
     void loadGlobalOptIn();
   }, [loadGlobalOptIn, loadLeaderboard]);
 
-  // Poll leaderboard every 10s to keep sprint scores fresh.
   useEffect(() => {
     const intervalId = setInterval(() => {
       void loadLeaderboard();
-    }, 10000);
+    }, 30000);
     return () => clearInterval(intervalId);
+  }, [loadLeaderboard]);
+
+  useEffect(() => {
+    let debounceTimer: ReturnType<typeof setTimeout> | undefined;
+    const handleRealtimeUpdate = () => {
+      if (debounceTimer) clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        void loadLeaderboard();
+      }, 500);
+    };
+
+    const practiceChannel = supabase
+      .channel('leaderboard_tab_practice_results')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'practice_results' }, handleRealtimeUpdate)
+      .subscribe();
+
+    const mockAttemptsChannel = supabase
+      .channel('leaderboard_tab_mock_attempts')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'mock_attempts' }, handleRealtimeUpdate)
+      .subscribe();
+
+    const mockQuestionsChannel = supabase
+      .channel('leaderboard_tab_mock_questions')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'mock_questions' }, handleRealtimeUpdate)
+      .subscribe();
+
+    const challengeChannel = supabase
+      .channel('leaderboard_tab_extreme_results')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'extreme_results' }, handleRealtimeUpdate)
+      .subscribe();
+
+    return () => {
+      if (debounceTimer) clearTimeout(debounceTimer);
+      supabase.removeChannel(practiceChannel);
+      supabase.removeChannel(mockAttemptsChannel);
+      supabase.removeChannel(mockQuestionsChannel);
+      supabase.removeChannel(challengeChannel);
+    };
   }, [loadLeaderboard]);
 
   const handleGlobalOptInToggle = async (checked: boolean) => {
@@ -87,84 +126,42 @@ export function LeaderboardTab() {
     }
   };
 
-  // Realtime updates - subscribe to practice, mock, and challenge events
-  useEffect(() => {
-    let debounceTimer: ReturnType<typeof setTimeout> | undefined;
-
-    const handleRealtimeUpdate = () => {
-      // Debounce refetch - shorter delay for faster updates
-      if (debounceTimer) clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(() => {
-        void loadLeaderboard();
-      }, 500);
-    };
-
-    const practiceChannel = supabase
-      .channel('leaderboard_practice_results')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'practice_results'
-        },
-        handleRealtimeUpdate
-      )
-      .subscribe();
-
-    const mockChannel = supabase
-      .channel('leaderboard_mock_attempts')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'mock_attempts'
-        },
-        handleRealtimeUpdate
-      )
-      .subscribe();
-
-    // Also listen to mock_questions for when answers are graded
-    const mockQuestionsChannel = supabase
-      .channel('leaderboard_mock_questions')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'mock_questions'
-        },
-        handleRealtimeUpdate
-      )
-      .subscribe();
-
-    const challengeChannel = supabase
-      .channel('leaderboard_extreme_results')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'extreme_results'
-        },
-        handleRealtimeUpdate
-      )
-      .subscribe();
-
-    return () => {
-      if (debounceTimer) clearTimeout(debounceTimer);
-      supabase.removeChannel(practiceChannel);
-      supabase.removeChannel(mockChannel);
-      supabase.removeChannel(mockQuestionsChannel);
-      supabase.removeChannel(challengeChannel);
-    };
-  }, [loadLeaderboard]);
-
   const maxQuestions = leaderboard[0]?.correct_count || 1;
 
   return (
     <div className="space-y-6">
+      <Card
+        className="group cursor-pointer border-slate-200 bg-white text-slate-950 shadow-sm transition-all duration-300 hover:border-primary/30 hover:shadow-md"
+        role="button"
+        tabIndex={0}
+        onClick={() => navigate("/mystery-spin")}
+        onKeyDown={(event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            navigate("/mystery-spin");
+          }
+        }}
+      >
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-blue-600 text-white shadow-sm">
+                <Sparkles className="h-5 w-5" />
+              </div>
+              <div className="min-w-0">
+                <p className="truncate text-sm font-bold leading-5 text-slate-950">
+                  See who won the free Gradlify Premium!
+                </p>
+                <p className="text-[11px] font-black uppercase text-slate-400">
+                  Mystery Spin results
+                </p>
+              </div>
+            </div>
+            <ArrowRight className="h-4 w-4 shrink-0 text-slate-300 transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
+          </div>
+        </CardContent>
+      </Card>
+
       <div className="flex flex-col gap-4">
         <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
           <Tabs

@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from "react";
-import { Link } from "react-router-dom";
 import { useSubject } from "@/contexts/SubjectContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
@@ -19,21 +18,21 @@ import {
   UserProfile,
   Friendship
 } from "@/lib/connectApi";
-import { Search, Plus, Users, X, Check, UserPlus, Trophy, ArrowRight, Sparkles } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { Search, Plus, Users, X, Check, UserPlus, Trophy, Sparkles, ArrowRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { useAppContext } from "@/hooks/useAppContext";
 import { resolveUserTrack } from "@/lib/track";
-import { getFoundersSprintInfo } from "@/lib/foundersSprint";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 type Scope = 'global' | 'friends';
 
 export default function Connect() {
   const { currentSubject } = useSubject();
   const { profile } = useAppContext();
+  const navigate = useNavigate();
   const userTrack = resolveUserTrack(profile?.track ?? null);
-  const { isActive, hasEnded } = getFoundersSprintInfo();
   const [scope, setScope] = useState<Scope>('global');
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -101,13 +100,48 @@ export default function Connect() {
     void loadLeaderboard();
   }, [loadLeaderboard]);
 
-  // Poll leaderboard every 60s to keep scores fresh without UI flicker.
+  // Keep leaderboard scores moving after new mock answers are recorded.
   useEffect(() => {
     const intervalId = setInterval(() => {
       void loadLeaderboard({ silent: true });
-    }, 60000);
+    }, 30000);
     return () => clearInterval(intervalId);
   }, [loadLeaderboard]);
+
+  useEffect(() => {
+    let debounceTimer: ReturnType<typeof setTimeout> | undefined;
+    const handleRealtimeUpdate = () => {
+      if (debounceTimer) clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        void loadLeaderboard({ silent: true });
+      }, 500);
+    };
+
+    const mockAttemptsChannel = supabase
+      .channel('connect_leaderboard_mock_attempts')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'mock_attempts' }, handleRealtimeUpdate)
+      .subscribe();
+
+    const mockQuestionsChannel = supabase
+      .channel('connect_leaderboard_mock_questions')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'mock_questions' }, handleRealtimeUpdate)
+      .subscribe();
+
+    const friendChannel = supabase
+      .channel('connect_friendships_changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'friendships' }, () => {
+        void loadData();
+        handleRealtimeUpdate();
+      })
+      .subscribe();
+
+    return () => {
+      if (debounceTimer) clearTimeout(debounceTimer);
+      supabase.removeChannel(mockAttemptsChannel);
+      supabase.removeChannel(mockQuestionsChannel);
+      supabase.removeChannel(friendChannel);
+    };
+  }, [loadData, loadLeaderboard]);
 
   // Debounced friend search
   useEffect(() => {
@@ -168,33 +202,6 @@ export default function Connect() {
       setRespondingTo(null);
     }
   };
-
-  // Realtime updates
-  useEffect(() => {
-    let debounceTimer: ReturnType<typeof setTimeout> | undefined;
-    const handleRealtimeUpdate = () => {
-      if (debounceTimer) clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(() => {
-        void loadLeaderboard({ silent: true });
-      }, 500);
-    };
-
-    const mockChannel = supabase
-      .channel('leaderboard_mock_attempts')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'mock_attempts' }, handleRealtimeUpdate)
-      .subscribe();
-
-    const friendChannel = supabase
-      .channel('friendships-changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'friendships' }, () => loadData())
-      .subscribe();
-
-    return () => {
-      if (debounceTimer) clearTimeout(debounceTimer);
-      supabase.removeChannel(mockChannel);
-      supabase.removeChannel(friendChannel);
-    };
-  }, [loadData, loadLeaderboard]);
 
   // Filter leaderboard by search
   const filteredLeaderboard = searchQuery
@@ -282,13 +289,11 @@ export default function Connect() {
             <p className="text-muted-foreground text-[10px] sm:text-xs font-light truncate mb-1">Scores since Wednesday 29 April at 18:30</p>
             <div className={cn(
               "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border text-[9px] sm:text-[10px] font-bold uppercase tracking-wider",
-              !hasEnded && "animate-pulse",
-              hasEnded 
-                ? "bg-slate-100 border-slate-200 text-slate-600 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-400"
-                : (currentSubject === "english" ? "bg-amber-500/10 border-amber-500/20 text-amber-600" : "bg-primary/10 border-primary/20 text-primary")
+              currentSubject === "english" ? "bg-amber-500/10 border-amber-500/20 text-amber-600" : "bg-primary/10 border-primary/20 text-primary"
             )}>
               <Trophy className="w-3 h-3" />
-              <span>{hasEnded ? "Mystery spin competition starts Wednesday 29th April at 18:30" : "Sprint: Apr 20 (6:30pm) - Apr 27 (6:30pm). Top 3 win cash prizes!"}</span>            </div>
+              <span>Live leaderboard</span>
+            </div>
           </div>
 
           {/* Your Position */}
@@ -315,40 +320,31 @@ export default function Connect() {
         </div>
       </header>
 
-      {/* Sprint CTA Banner - Redesigned for App Aesthetic */}
-      <Link 
-        to="/mystery-spin"
-        className="mb-4 group relative overflow-hidden rounded-2xl p-3.5 bg-white border border-slate-200 shadow-sm transition-all hover:border-primary/50 hover:shadow-md active:scale-[0.98] animate-in slide-in-from-top-4 duration-500"
+      <button
+        type="button"
+        onClick={() => navigate("/mystery-spin")}
+        className="group mb-4 w-full rounded-2xl border border-slate-200 bg-white p-3.5 text-left shadow-sm transition-all duration-300 animate-in slide-in-from-top-4 hover:border-primary/30 hover:shadow-md active:scale-[0.99]"
       >
-        <div className="relative flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3.5">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-3">
             <div className={cn(
-              "w-11 h-11 rounded-xl flex items-center justify-center bg-gradient-to-br transition-transform group-hover:scale-105 duration-300 shadow-sm",
+              "flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br text-white shadow-sm",
               currentSubject === "english" ? "from-amber-400 to-amber-600" : "from-primary to-blue-600"
             )}>
-              <Sparkles className="w-5 h-5 text-white" />
+              <Sparkles className="h-5 w-5" />
             </div>
-            <div>
-              <h3 className="font-bold text-slate-900 text-[15px] sm:text-base leading-none mb-1.5">Want free Gradlify Premium? (worth £240 a year)</h3>              <div className="flex items-center gap-1.5">
-                <span className={cn(
-                  "text-[9px] font-black uppercase tracking-widest",
-                  currentSubject === "english" ? "text-amber-600" : "text-primary"
-                )}>Join the Mystery Spin</span>
-                <span className="w-1 h-1 rounded-full bg-slate-300" />
-                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
-                  Starts Wednesday 29th April
-                </span>
-              </div>
+            <div className="min-w-0">
+              <p className="truncate text-[13px] font-bold leading-5 text-slate-950 sm:text-sm">
+                See who won the free Gradlify Premium!
+              </p>
+              <p className="text-[10px] font-black uppercase text-slate-400 sm:text-[11px]">
+                Mystery Spin results
+              </p>
             </div>
           </div>
-          <div className={cn(
-            "w-8 h-8 rounded-full flex items-center justify-center transition-all",
-            currentSubject === "english" ? "bg-amber-50 text-amber-600 group-hover:bg-amber-100" : "bg-primary/5 text-primary group-hover:bg-primary/10"
-          )}>
-            <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-          </div>
+          <ArrowRight className="h-4 w-4 flex-shrink-0 text-slate-300 transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
         </div>
-      </Link>
+      </button>
 
       {/* Secondary Actions Row - Compact on mobile */}
       <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3 flex-shrink-0 animate-fade-in flex-wrap w-full" style={{ animationDelay: '0.05s' }}>
