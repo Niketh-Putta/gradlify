@@ -1587,7 +1587,8 @@ export function EnglishSplitViewDemo() {
                           return qIndex >= PAYWALL_THRESHOLD;
                         };
 
-                        const isGrammarSection = (section.subEngine || '').toLowerCase().includes('grammar');
+                        const sectionMeta = `${section.subEngine || ''} ${section.sectionId || ''} ${section.title || ''}`.toLowerCase();
+                        const isGrammarSection = sectionMeta.includes('grammar');
                         const renderQuestion = (q: EnglishQuestion, originalIndex: number, isPaywalledQuestion: boolean) => {
                           const qKey = `${section.uniqueId}_${q.id}`;
                           const isSelected = activeQuestionId === qKey;
@@ -1635,7 +1636,7 @@ export function EnglishSplitViewDemo() {
                             </div>
                             
                             <h3 className="text-xs sm:text-sm font-semibold leading-relaxed mb-2.5 sm:mb-4">
-                              {isGrammarSection ? 'Choose the correct option to fill the gap' : q.text}
+                              {(isGrammarSection || (q.tag || '').toLowerCase().includes('grammar')) ? 'Choose the correct option to fill the gap' : q.text}
                             </h3>
 
                             <div className="space-y-1.5 sm:space-y-2">
