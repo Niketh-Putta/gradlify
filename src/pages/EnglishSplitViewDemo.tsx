@@ -653,6 +653,8 @@ export function EnglishSplitViewDemo() {
   const [isFinished, setIsFinished] = useState<boolean>(false);
   const [isReviewMode, setIsReviewMode] = useState<boolean>(false);
   const [showPaywall, setShowPaywall] = useState<boolean>(false);
+  const [showEndConfirm, setShowEndConfirm] = useState<boolean>(false);
+  const [showCompletedModal, setShowCompletedModal] = useState<boolean>(false);
   const [reviewViewedOptions, setReviewViewedOptions] = useState<Record<string, string>>({});
 
   const [activeQuestionId, setActiveQuestionId] = useState<string | null>(null);
@@ -1585,6 +1587,7 @@ export function EnglishSplitViewDemo() {
                           return qIndex >= PAYWALL_THRESHOLD;
                         };
 
+                        const isGrammarSection = (section.subEngine || '').toLowerCase().includes('grammar');
                         const renderQuestion = (q: EnglishQuestion, originalIndex: number, isPaywalledQuestion: boolean) => {
                           const qKey = `${section.uniqueId}_${q.id}`;
                           const isSelected = activeQuestionId === qKey;
@@ -1632,7 +1635,7 @@ export function EnglishSplitViewDemo() {
                             </div>
                             
                             <h3 className="text-xs sm:text-sm font-semibold leading-relaxed mb-2.5 sm:mb-4">
-                              {q.text}
+                              {isGrammarSection ? 'Choose the correct option to fill the gap' : q.text}
                             </h3>
 
                             <div className="space-y-1.5 sm:space-y-2">
@@ -1769,26 +1772,71 @@ export function EnglishSplitViewDemo() {
 
             {activeSections.length > 0 && (
               <div className="pt-10 border-t border-border/40 mt-12 mb-12 flex justify-end snap-end scroll-m-8">
-                <Button 
+                <Button
                   onClick={() => {
-                    if (isReviewMode) setIsFinished(true); // Return to Results
-                    else if (examMode === 'practice') navigate('/mocks/english'); 
-                    else setIsFinished(true);
-                  }} 
+                    if (isReviewMode) setIsFinished(true);
+                    else if (examMode === 'practice') navigate('/mocks/english');
+                    else setShowEndConfirm(true);
+                  }}
                   className="bg-amber-500 hover:bg-amber-600 text-amber-950 font-bold px-8 h-12 rounded-xl text-md shadow-[0_0_20px_rgba(245,158,11,0.3)]">
-                  {isReviewMode ? 'Return to Results' : (examMode === 'practice' ? 'Finish' : 'Submit Mock Exam')}
+                  {isReviewMode ? 'Return to Results' : (examMode === 'practice' ? 'Finish' : 'End mock')}
                 </Button>
               </div>
             )}
           </div>
         </div>
         {/* Paywall Modal */}
-        <PremiumPaywall 
-          open={showPaywall} 
+        <PremiumPaywall
+          open={showPaywall}
           onOpenChange={setShowPaywall}
           title="Unlock Full Exam"
-          description="Gain access to all questions, full rationales, and advanced scoring." 
+          description="Gain access to all questions, full rationales, and advanced scoring."
         />
+
+        {/* End mock confirmation */}
+        {showEndConfirm && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowEndConfirm(false)} />
+            <div className="relative bg-card border border-border rounded-2xl p-6 max-w-sm w-full shadow-xl z-10">
+              <h3 className="text-lg font-semibold mb-2 text-foreground">Are you sure you want to finish your mock?</h3>
+              <p className="text-sm text-muted-foreground mb-6">You won't be able to change your answers after submitting.</p>
+              <div className="grid grid-cols-2 gap-3">
+                <Button variant="outline" onClick={() => setShowEndConfirm(false)} className="h-11 rounded-xl font-semibold">
+                  Continue
+                </Button>
+                <Button
+                  onClick={() => {
+                    setShowEndConfirm(false);
+                    setIsFinished(true);
+                    setShowCompletedModal(true);
+                  }}
+                  className="h-11 rounded-xl bg-amber-500 hover:bg-amber-600 text-amber-950 font-bold"
+                >
+                  Finish mock
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Mock completed modal */}
+        {showCompletedModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90">
+            <div className="bg-card border border-border rounded-2xl p-8 max-w-sm w-full text-center shadow-2xl">
+              <div className="w-14 h-14 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mx-auto mb-5">
+                <CheckCircle className="w-7 h-7 text-amber-500" />
+              </div>
+              <h2 className="text-2xl font-bold tracking-tight mb-2 text-foreground">Mock exam completed</h2>
+              <p className="text-sm text-muted-foreground mb-8">Well done for completing the exam.</p>
+              <Button
+                onClick={() => navigate('/mocks/english')}
+                className="w-full h-12 rounded-xl bg-amber-500 hover:bg-amber-600 text-amber-950 font-bold text-sm"
+              >
+                Practice more exam styled questions
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
