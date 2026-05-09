@@ -917,31 +917,32 @@ export function EnglishSplitViewDemo() {
     setFlaggedQuestions(prev => ({ ...prev, [qId]: !prev[qId] }));
   };
 
-  // MACRO SCROLL INTELLIGENCE: 
-  // Track which question is dominant in the right pane
+  // Keep a ref of activeQuestionId so the observer callback stays stable
+  const activeQuestionIdRef = useRef<string | null>(null);
+  useEffect(() => { activeQuestionIdRef.current = activeQuestionId; }, [activeQuestionId]);
+
+  // Track which question is dominant in the right pane (observer stable — no activeQuestionId dep)
   useEffect(() => {
     if (isFinished) return;
     const observer = new IntersectionObserver((entries) => {
       const visibleEntries = entries.filter(e => e.isIntersecting);
-      if (visibleEntries.length > 0) {
-        // Find the one whose intersection area is largest OR whose center is closest to viewport center
-        // But simply tightening the rootMargin to a "center line" is usually best
-        const sorted = visibleEntries.sort((a, b) => {
-          const aCenter = a.boundingClientRect.top + a.boundingClientRect.height / 2;
-          const bCenter = b.boundingClientRect.top + b.boundingClientRect.height / 2;
-          const viewportCenter = window.innerHeight / 2;
-          return Math.abs(aCenter - viewportCenter) - Math.abs(bCenter - viewportCenter);
-        });
-        
-        const centerQ = sorted[0].target.getAttribute('data-qid');
-        if (centerQ && centerQ !== activeQuestionId) {
-          setActiveQuestionId(centerQ);
-        }
+      if (visibleEntries.length === 0) return;
+
+      const sorted = visibleEntries.sort((a, b) => {
+        const aCenter = a.boundingClientRect.top + a.boundingClientRect.height / 2;
+        const bCenter = b.boundingClientRect.top + b.boundingClientRect.height / 2;
+        const viewportCenter = window.innerHeight / 2;
+        return Math.abs(aCenter - viewportCenter) - Math.abs(bCenter - viewportCenter);
+      });
+
+      const centerQ = sorted[0].target.getAttribute('data-qid');
+      if (centerQ && centerQ !== activeQuestionIdRef.current) {
+        setActiveQuestionId(centerQ);
       }
     }, {
       root: rightPaneRef.current,
-      rootMargin: "-50% 0px -50% 0px", // Exact center line intersection
-      threshold: [0, 0.5, 1.0]
+      rootMargin: "-40% 0px -40% 0px",
+      threshold: 0,
     });
 
     Object.values(questionRefs.current).forEach(node => {
@@ -949,19 +950,17 @@ export function EnglishSplitViewDemo() {
     });
 
     return () => observer.disconnect();
-  }, [activeSections, isFinished, examMode, activeQuestionId]);
+  }, [activeSections, isFinished, examMode]);
 
-  // INTELLIZED SYNCHRONIZED SCROLLING
-  // Precisely centers the active evidence/passage block in the left pane
+  // Synchronized scrolling — centers the active evidence block in the left pane
   useEffect(() => {
     if (!activeQuestionId || !passageContainerRef.current) return;
-    
+
     const timer = setTimeout(() => {
-      let targetUniqueId = null;
-      let targetSectionId = null;
-      let targetEvidenceLine = null;
-      
-      // 1. Identify which section and evidence line we need to find
+      let targetUniqueId: string | null = null;
+      let targetSectionId: string | null = null;
+      let targetEvidenceLine: string | null = null;
+
       for (const sec of activeSections) {
         const q = sec.questions.find(x => `${sec.uniqueId}_${x.id}` === activeQuestionId);
         if (q) {
@@ -972,29 +971,28 @@ export function EnglishSplitViewDemo() {
         }
       }
 
-      // 2. Locate the specific element
       const uniqueRefKey = `${targetUniqueId}_${targetEvidenceLine}`;
-      
-      // Try evidence block first, then the whole section as fallback
+
+      // Skip if already scrolled to this element
+      if (uniqueRefKey === lastEvidenceRefKey.current) return;
+      lastEvidenceRefKey.current = uniqueRefKey;
+
       const targetElement = passageLineRefs.current[uniqueRefKey] || passageSectionRefs.current[targetSectionId || ''];
-      
+
       if (targetElement && passageContainerRef.current) {
         const container = passageContainerRef.current;
         const containerRect = container.getBoundingClientRect();
         const elementRect = targetElement.getBoundingClientRect();
-        
-        // Calculate exact distance to bring element's center to container's center
-        const elementCenter = elementRect.top + (elementRect.height / 2);
-        const containerCenter = containerRect.top + (containerRect.height / 2);
-        const scrollDiff = elementCenter - containerCenter;
 
-        // Perform the smooth scroll
-        container.scrollBy({
-          top: scrollDiff,
-          behavior: 'smooth'
-        });
+        // Absolute scrollTo avoids accumulation errors from scrollBy
+        const absoluteTargetTop =
+          elementRect.top - containerRect.top + container.scrollTop
+          - container.clientHeight / 2
+          + elementRect.height / 2;
+
+        container.scrollTo({ top: absoluteTargetTop, behavior: 'smooth' });
       }
-    }, 100); // Slightly faster debounce for responsiveness
+    }, 250);
 
     return () => clearTimeout(timer);
   }, [activeQuestionId, activeSections]);
