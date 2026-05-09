@@ -286,7 +286,7 @@ export default function Auth() {
           </div>
           <h1 className="text-3xl font-bold font-gradlify bg-gradient-gradlify bg-clip-text text-transparent mb-2">Gradlify</h1>
           <p className="text-gray-600 text-base">
-            {AI_FEATURE_ENABLED ? 'The AI platform for exam success' : 'The platform for exam success'}
+            {AI_FEATURE_ENABLED ? 'The AI platform for 11+ success' : 'The platform for 11+ success'}
           </p>
         </div>
 

@@ -443,7 +443,7 @@ export const AuthModal = ({
               Gradlify
             </h2>
             <p className={`${subtleText} text-xs sm:text-sm`}>
-              {AI_FEATURE_ENABLED ? 'The AI platform for exam success' : 'The platform for exam success'}
+              {AI_FEATURE_ENABLED ? 'The AI platform for 11+ success' : 'The platform for 11+ success'}
             </p>
           </div>
         </div>

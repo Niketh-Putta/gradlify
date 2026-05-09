@@ -16,6 +16,7 @@ const ExamReadiness = lazy(() => import("@/pages/ExamReadiness"));
 const MockExams = lazy(() => import("@/pages/MockExams"));
 const MockExamPage = lazy(() => import("@/pages/MockExamPage"));
 const LiveMockExams = lazy(() => import("@/pages/LiveMockExams"));
+const LiveMockAnalytics = lazy(() => import("@/pages/LiveMockAnalytics"));
 const RevisionNotes = lazy(() => import("@/pages/RevisionNotes"));
 const RevisionNotesSection = lazy(() => import("@/pages/RevisionNotesSection"));
 const RevisionNotesTopic = lazy(() => import("@/pages/RevisionNotesTopic"));
@@ -310,6 +311,8 @@ const Index = () => {
               <Route path="mocks/english" element={<MockExams forcedSubject="english" />} />
               <Route path="mock-exam" element={<MockExamPage />} />
               <Route path="english-demo" element={<EnglishSplitViewDemo />} />
+              <Route path="live-mock-exams/session" element={<EnglishSplitViewDemo />} />
+              <Route path="live-mock-exams/analytics" element={<LiveMockAnalytics />} />
               <Route path="practice-page" element={<Navigate to="/mocks" replace />} />
               <Route path="practice/maths" element={<Navigate to="/mocks/maths" replace />} />
               <Route path="practice/english" element={<Navigate to="/mocks/english" replace />} />

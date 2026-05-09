@@ -1,5 +1,16 @@
 import { useEffect, useState } from "react";
-import { ArrowRight, CalendarDays, Check, Clock3, FileText, Hourglass, Loader2, Mail } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import {
+  ArrowRight,
+  CalendarDays,
+  CheckCircle2,
+  Clock3,
+  FileText,
+  Hourglass,
+  Loader2,
+  ShieldCheck,
+  ClipboardCheck,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -11,6 +22,8 @@ const LIVE_MOCK = {
   startsAtIso: "2026-05-09T16:00:00.000Z",
   displayDate: "Saturday 9 May 2026",
   displayTime: "5:00 PM BST",
+  durationMinutes: 50,
+  questions: 70,
 };
 
 type SignupRow = {
@@ -18,55 +31,92 @@ type SignupRow = {
   registered_at: string;
 };
 
+type LiveMockAttemptStatus = "none" | "in_progress" | "submitted";
+
+function buildLiveMockSessionSearchParams(): URLSearchParams {
+  return new URLSearchParams({
+    track: "11plus",
+    subject: "english",
+    topics: "Comprehension,SPaG",
+    mode: "mock-exam",
+    questions: String(LIVE_MOCK.questions),
+    duration: String(LIVE_MOCK.durationMinutes),
+    liveMockSlug: LIVE_MOCK.slug,
+  });
+}
+
 export default function LiveMockExams() {
+  const navigate = useNavigate();
   const { user } = useAppContext();
   const [loading, setLoading] = useState(true);
-  const [signingUp, setSigningUp] = useState(false);
+  const [starting, setStarting] = useState(false);
   const [signup, setSignup] = useState<SignupRow | null>(null);
+  /** Locks "Start" once an attempt row exists (created on first Start click). */
+  const [attemptStatus, setAttemptStatus] = useState<LiveMockAttemptStatus>("none");
 
   useEffect(() => {
     let cancelled = false;
 
-    const loadSignup = async () => {
+    const loadSignupAndAttempt = async () => {
       if (!user?.id) {
+        setAttemptStatus("none");
         setLoading(false);
         return;
       }
 
       setLoading(true);
-      const { data, error } = await supabase
-        .from("live_mock_exam_signups" as never)
-        .select("id, registered_at")
-        .eq("user_id", user.id)
-        .eq("mock_slug", LIVE_MOCK.slug)
-        .maybeSingle();
+
+      const [{ data: paper }, signupResult] = await Promise.all([
+        supabase.from("live_mock_papers" as never).select("id").eq("slug", LIVE_MOCK.slug).maybeSingle(),
+        supabase
+          .from("live_mock_exam_signups" as never)
+          .select("id, registered_at")
+          .eq("user_id", user.id)
+          .eq("mock_slug", LIVE_MOCK.slug)
+          .maybeSingle(),
+      ]);
 
       if (cancelled) return;
 
-      if (error) {
-        console.error("Failed to load live mock signup", error);
+      const paperId = (paper as { id?: string } | null)?.id;
+      if (paperId) {
+        const { data: attempt } = await supabase
+          .from("live_mock_attempts" as never)
+          .select("status")
+          .eq("paper_id", paperId)
+          .eq("user_id", user.id)
+          .maybeSingle();
+        const status = (attempt as { status?: string } | null)?.status;
+        if (status === "submitted") setAttemptStatus("submitted");
+        else if (status === "in_progress") setAttemptStatus("in_progress");
+        else setAttemptStatus("none");
       } else {
-        setSignup((data as SignupRow | null) ?? null);
+        setAttemptStatus("none");
       }
+
+      if (signupResult.error) {
+        console.error("Failed to load live mock signup", signupResult.error);
+      } else {
+        setSignup((signupResult.data as SignupRow | null) ?? null);
+      }
+
       setLoading(false);
     };
 
-    void loadSignup();
+    void loadSignupAndAttempt();
 
     return () => {
       cancelled = true;
     };
   }, [user?.id]);
 
-  const handleSignup = async () => {
-    const email = user.email?.trim().toLowerCase();
+  const navigateToSession = () => {
+    navigate(`/live-mock-exams/session?${buildLiveMockSessionSearchParams().toString()}`);
+  };
 
-    if (!user.id || !email) {
-      toast.error("We could not find an email for this account.");
-      return;
-    }
-
-    setSigningUp(true);
+  const recordSignupIfNeeded = async () => {
+    const email = user?.email?.trim().toLowerCase();
+    if (!email || !user?.id) return;
     const { data, error } = await supabase
       .from("live_mock_exam_signups" as never)
       .upsert(
@@ -82,107 +132,235 @@ export default function LiveMockExams() {
       .select("id, registered_at")
       .single();
 
-    setSigningUp(false);
-
     if (error) {
-      console.error("Failed to sign up for live mock", error);
-      toast.error("Could not sign you up. Please try again.");
+      console.error("Failed to record live mock signup", error);
+    } else {
+      setSignup(data as SignupRow);
+    }
+  };
+
+  const handleStartMockExam = async () => {
+    if (!user?.id) {
+      toast.error("Please sign in to start this mock exam.");
       return;
     }
 
-    setSignup(data as SignupRow);
-    toast.success("You are signed up for the live mock exam.");
+    if (attemptStatus === "submitted") {
+      toast.error("You have already completed this mock exam.");
+      return;
+    }
+
+    // Resume without creating a new attempt
+    if (attemptStatus === "in_progress") {
+      setStarting(true);
+      try {
+        await recordSignupIfNeeded();
+        navigateToSession();
+      } finally {
+        setStarting(false);
+      }
+      return;
+    }
+
+    setStarting(true);
+    try {
+      const { data: paper, error: paperError } = await supabase
+        .from("live_mock_papers" as never)
+        .select("id, question_count")
+        .eq("slug", LIVE_MOCK.slug)
+        .maybeSingle();
+
+      if (paperError || !paper) {
+        toast.error("Could not load this mock paper. Please try again.");
+        return;
+      }
+
+      const paperRow = paper as { id: string; question_count?: number };
+      const qc =
+        typeof paperRow.question_count === "number" && paperRow.question_count > 0
+          ? paperRow.question_count
+          : LIVE_MOCK.questions;
+
+      const { error: insertError } = await supabase.from("live_mock_attempts" as never).insert({
+        paper_id: paperRow.id,
+        user_id: user.id,
+        status: "in_progress",
+        question_count: qc,
+        answered_count: 0,
+      });
+
+      if (insertError) {
+        // Race: another tab already created the row — reload status and send user to session if in progress
+        const { data: existing } = await supabase
+          .from("live_mock_attempts" as never)
+          .select("status")
+          .eq("paper_id", paperRow.id)
+          .eq("user_id", user.id)
+          .maybeSingle();
+        const st = (existing as { status?: string } | null)?.status;
+        if (st === "submitted") {
+          toast.error("You have already completed this mock exam.");
+          setAttemptStatus("submitted");
+          return;
+        }
+        if (st === "in_progress") {
+          setAttemptStatus("in_progress");
+          await recordSignupIfNeeded();
+          navigateToSession();
+          return;
+        }
+        console.error("Failed to start live mock attempt", insertError);
+        toast.error("Could not start the mock exam. Please try again.");
+        return;
+      }
+
+      setAttemptStatus("in_progress");
+      await recordSignupIfNeeded();
+      navigateToSession();
+    } finally {
+      setStarting(false);
+    }
   };
 
-  const isSignedUp = Boolean(signup);
   const detailRows = [
     { label: "Date", value: LIVE_MOCK.displayDate, icon: CalendarDays },
     { label: "Start", value: LIVE_MOCK.displayTime, icon: Clock3 },
-    { label: "Duration", value: "60 minutes", icon: Hourglass },
-    { label: "Questions", value: "60", icon: FileText },
+    { label: "Duration", value: `${LIVE_MOCK.durationMinutes} minutes`, icon: Hourglass },
+    { label: "Questions", value: String(LIVE_MOCK.questions), icon: FileText },
   ];
 
   return (
-    <main className="min-h-screen bg-[#fbfaf6] px-3 py-4 text-slate-950 sm:px-5 sm:py-5">
-      <section className="mx-auto w-full max-w-3xl rounded-[22px] border border-slate-200/85 bg-[linear-gradient(135deg,#ffffff_0%,#fbfdff_52%,#fffdf8_100%)] px-4 py-4 shadow-[0_18px_52px_rgba(15,23,42,0.07)] sm:px-6 sm:py-5">
-        <div className="flex items-center justify-end border-b border-slate-200 pb-4">
-          <span className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-blue-700 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
-            <span className="h-2.5 w-2.5 rounded-full bg-blue-600 shadow-[0_0_12px_rgba(37,99,235,0.55)]" />
-            Live mock
-          </span>
-        </div>
-
-        <div className="pt-5">
-          <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-amber-700">
-            QE Boys / Henrietta Barnett style
-          </p>
-          <h1 className="mt-3 font-gradlify text-3xl font-semibold leading-none text-slate-950 sm:text-4xl">
-            11+ English mock exam
-          </h1>
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">
-            A 60-minute selective English paper covering comprehension and SPaG.
-          </p>
-        </div>
-
-        <div className="mt-5 rounded-[18px] border border-slate-200 bg-white/72 p-3 shadow-[0_12px_34px_rgba(15,23,42,0.045)]">
-          <div className="grid gap-2 sm:grid-cols-2">
-            {detailRows.map((item) => (
-              <div key={item.label} className="flex items-center gap-3 rounded-xl bg-[linear-gradient(90deg,#f9fbff_0%,#ffffff_100%)] px-3 py-3">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-blue-600 shadow-[0_8px_18px_rgba(37,99,235,0.07)]">
-                  <item.icon className="h-5 w-5 stroke-[2.4]" />
-                </div>
-                <div className="min-w-0">
-                  <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-blue-700">
-                    {item.label}
-                  </div>
-                  <div className="mt-1 truncate font-gradlify text-lg font-semibold leading-none text-slate-950 sm:text-xl">
-                    {item.value}
-                  </div>
-                </div>
-              </div>
-            ))}
+    <main className="min-h-screen bg-[#faf9f4] px-3 py-3 text-slate-950 sm:px-4 sm:py-4">
+      <section className="mx-auto w-full max-w-5xl">
+        <div className="rounded-[16px] border border-slate-200/80 bg-[linear-gradient(135deg,#ffffff_0%,#fbfdff_58%,#fffdf8_100%)] px-3 py-3 shadow-[0_14px_34px_rgba(15,23,42,0.05)] sm:px-4">
+          <div className="flex items-center justify-end border-b border-slate-200/90 pb-2">
+            <span className="inline-flex items-center gap-2 rounded-full bg-blue-50/95 px-3 py-1 text-[9px] font-black uppercase tracking-[0.16em] text-blue-700 shadow-[inset_0_1px_0_rgba(255,255,255,0.95)]">
+              <span className="h-2.5 w-2.5 rounded-full bg-blue-600 shadow-[0_0_10px_rgba(37,99,235,0.4)]" />
+              Live mock
+            </span>
           </div>
-        </div>
 
-        <div className="mt-4 rounded-[18px] border border-slate-200 bg-[linear-gradient(135deg,#fbfdff_0%,#ffffff_56%,#f8fbff_100%)] px-4 py-4 shadow-[0_10px_30px_rgba(15,23,42,0.045)]">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-blue-600 shadow-[0_10px_24px_rgba(37,99,235,0.08)]">
-                {isSignedUp ? <Check className="h-5 w-5" /> : <Mail className="h-5 w-5" />}
-              </div>
-              <div>
-                <h2 className="font-gradlify text-xl font-semibold leading-tight text-slate-950 sm:text-2xl">
-                  {isSignedUp ? "You are signed up" : "Reserve your place"}
-                </h2>
-                <p className="mt-0.5 text-sm text-slate-500">
-                  {isSignedUp ? "You are registered for this mock." : "We will use your account email."}
-                </p>
+          <div className="grid gap-3 pt-3 lg:grid-cols-[1.15fr_1fr] lg:items-stretch">
+            <div className="min-w-0">
+              <p className="text-[9px] font-black uppercase tracking-[0.16em] text-amber-700">
+                QE Boys / Henrietta Barnett style
+              </p>
+              <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-950 sm:text-[32px]">
+                11+ English complete mock exam
+              </h1>
+              <p className="mt-1 max-w-xl text-xs leading-5 text-slate-500 sm:text-sm">
+                A {LIVE_MOCK.durationMinutes}-minute selective English paper covering comprehension and SPaG.
+              </p>
+
+              <div className="mt-3 rounded-[12px] border border-slate-200 bg-white/85 p-2.5 shadow-[0_8px_18px_rgba(15,23,42,0.035)]">
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {detailRows.map((item) => (
+                    <div key={item.label} className="flex items-center gap-2 rounded-lg bg-slate-50/65 px-2 py-2">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] border border-slate-200 bg-white text-blue-600">
+                        <item.icon className="h-4 w-4 stroke-[2.2]" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="text-[8px] font-black uppercase tracking-[0.13em] text-blue-700">
+                          {item.label}
+                        </div>
+                        <div className="mt-0.5 truncate text-sm font-semibold tracking-tight text-slate-950 sm:text-base">
+                          {item.value}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
 
-            <Button
-              type="button"
-              onClick={handleSignup}
-              disabled={loading || signingUp || isSignedUp}
-              className="h-11 w-full rounded-full bg-blue-600 px-7 text-sm font-semibold text-white shadow-[0_12px_26px_rgba(37,99,235,0.18)] hover:bg-blue-700 disabled:opacity-75 sm:w-[220px]"
-            >
-              {loading || signingUp ? (
-                <span className="inline-flex items-center gap-2">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  {loading ? "Checking..." : "Signing up..."}
+            <div className="rounded-[12px] border border-slate-200 bg-[linear-gradient(135deg,#fbfdff_0%,#ffffff_55%,#f8fbff_100%)] p-3 shadow-[0_8px_18px_rgba(15,23,42,0.035)]">
+              <div className="flex items-start gap-3">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-blue-100 bg-[radial-gradient(circle_at_center,#ffffff_0%,#f5f9ff_60%,#eef4ff_100%)] text-blue-600 shadow-[0_0_0_6px_rgba(37,99,235,0.035)]">
+                  <ClipboardCheck className="h-6 w-6 stroke-[2.1]" />
+                </div>
+
+                <div className="min-w-0 flex-1">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-2 py-0.5 text-[8px] font-black uppercase tracking-[0.14em] text-blue-700">
+                    <span className="h-1.5 w-1.5 rounded-full bg-blue-600" />
+                    Live mock
+                  </span>
+                  <h2 className="mt-1.5 text-lg font-bold tracking-tight text-slate-950 sm:text-xl">
+                    Ready to begin?
+                  </h2>
+                  <p className="mt-1 text-xs leading-5 text-slate-500 sm:text-sm">
+                    Your {LIVE_MOCK.durationMinutes}-minute mock begins immediately once started.
+                  </p>
+                  <div className="mt-2 flex items-start gap-1.5 text-[11px] text-slate-400 sm:text-xs">
+                    <ShieldCheck className="mt-0.5 h-3 w-3 shrink-0 text-slate-400" />
+                    <span>Use a quiet environment before continuing.</span>
+                  </div>
+                </div>
+              </div>
+
+              {attemptStatus === "submitted" ? (
+                <p className="mt-3 rounded-[10px] border border-amber-200 bg-amber-50 px-3 py-2.5 text-xs font-medium leading-relaxed text-amber-950">
+                  You have already completed this live mock. Each account may sit this paper only once.
+                </p>
+              ) : attemptStatus === "in_progress" ? (
+                <p className="mt-3 rounded-[10px] border border-blue-200 bg-blue-50/90 px-3 py-2.5 text-xs font-medium leading-relaxed text-blue-950">
+                  You have already started this mock. Continue to resume — you cannot restart a fresh attempt.
+                </p>
+              ) : null}
+
+              <Button
+                type="button"
+                onClick={handleStartMockExam}
+                disabled={loading || starting || attemptStatus === "submitted"}
+                className="mt-3 h-10 w-full rounded-[10px] bg-[linear-gradient(90deg,#2563eb_0%,#2456f5_55%,#2553ea_100%)] px-4 text-sm font-semibold text-white shadow-[0_10px_20px_rgba(37,99,235,0.18)] hover:brightness-105 disabled:opacity-75"
+              >
+                {starting ? (
+                  <span className="inline-flex items-center gap-2">
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    {attemptStatus === "in_progress" ? "Opening mock…" : "Starting mock exam"}
+                  </span>
+                ) : loading ? (
+                  <span className="inline-flex items-center gap-2">
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    Checking access
+                  </span>
+                ) : attemptStatus === "submitted" ? (
+                  <span>Mock already completed</span>
+                ) : attemptStatus === "in_progress" ? (
+                  <span className="inline-flex items-center gap-2">
+                    Continue mock exam
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-2">
+                    Start mock exam
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </span>
+                )}
+              </Button>
+
+              <div className="mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] font-medium text-slate-400 sm:text-[11px]">
+                <span className="inline-flex items-center gap-1.5">
+                  <CheckCircle2 className="h-3 w-3 text-slate-400" />
+                  {LIVE_MOCK.questions} Questions
                 </span>
-  ) : isSignedUp ? (
-    <span className="inline-flex items-center gap-2">
-      You are signed up
-      <Check className="h-4 w-4" />
-    </span>
-  ) : (
-                <span className="inline-flex items-center gap-2">
-                  Sign up
-                  <ArrowRight className="h-4 w-4" />
+                <span className="hidden text-slate-300 sm:inline">•</span>
+                <span className="inline-flex items-center gap-1.5">
+                  <Clock3 className="h-3 w-3 text-slate-400" />
+                  {LIVE_MOCK.durationMinutes} minutes
                 </span>
-              )}
-            </Button>
+                <span className="hidden text-slate-300 sm:inline">•</span>
+                <span className="inline-flex items-center gap-1.5">
+                  <ShieldCheck className="h-3 w-3 text-slate-400" />
+                  Auto-submitted
+                </span>
+              </div>
+
+              {signup ? (
+                <p className="mt-2 text-[10px] font-medium text-slate-400">
+                  Registration recorded for this account.
+                </p>
+              ) : null}
+            </div>
           </div>
         </div>
       </section>

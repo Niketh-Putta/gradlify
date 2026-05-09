@@ -364,7 +364,7 @@ export const AuthComponent = ({ onAuthSuccess, onBack, initialMode = 'login' }: 
               Gradlify
             </CardTitle>
             <p className="text-gray-600">
-              {AI_FEATURE_ENABLED ? 'The AI platform for exam success' : 'The platform for exam success'}
+              {AI_FEATURE_ENABLED ? 'The AI platform for 11+ success' : 'The platform for 11+ success'}
             </p>
           </div>
         </CardHeader>

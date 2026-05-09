@@ -1,12 +1,22 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, BookOpen, AlertTriangle, Lock, Search, Highlighter, MapPin, Sparkles, ChevronRight, Flag, Timer, Zap, Trophy, ShieldAlert, Check, Type, SpellCheck, TextCursorInput, ListChecks, Languages, CheckCircle } from 'lucide-react';
+import { ArrowLeft, BookOpen, AlertTriangle, Lock, Search, Highlighter, MapPin, Sparkles, ChevronRight, Flag, Timer, Zap, Trophy, ShieldAlert, Check, Type, SpellCheck, TextCursorInput, ListChecks, Languages, CheckCircle, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { usePremium } from '@/hooks/usePremium';
 import { PremiumPaywall } from '@/components/PremiumPaywall';
 import { useAppContext } from '@/hooks/useAppContext';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 // --- DATA ARCHITECTURE DEFINITION ---
 export interface EnglishOption {
   id: string;
@@ -17,9 +27,12 @@ export interface EnglishOption {
 
 export interface EnglishQuestion {
   id: string;
+  dbQuestionId?: string;
   tag: string;
   tagColor: string;
   text: string;
+  /** Full stem from DB (live mock); used for analytics snapshots when `text` is a shortened UI label */
+  stemSnapshot?: string;
   evidenceLine: string | 'global';
   options: EnglishOption[];
   explanation?: string;
@@ -33,6 +46,9 @@ export interface EnglishPassageBlock {
 export interface EnglishSection {
   sectionId: string;
   uniqueId: string;
+  dbPaperId?: string;
+  /** Section key from live_mock_sections (for analytics) */
+  sectionKey?: string;
   subEngine: string;
   title: string;
   icon: any; // Keep Lucide icon generic for now
@@ -536,12 +552,37 @@ export function EnglishSplitViewDemo() {
   const mockConsumedRef = useRef(false);
   
   const diffParam = searchParams.get('difficulty');
+  const modeParam = searchParams.get('mode') || 'practice';
+  const liveMockSlug = searchParams.get('liveMockSlug') || '';
+  const isLiveMock = Boolean(liveMockSlug);
+  const isTargetLiveMock = liveMockSlug === 'live-11plus-english-mock-2026-05-09-1700';
+  const forceFullComprehensionHighlight =
+    isLiveMock && isTargetLiveMock;
+  // Topics usually arrives comma separated from MockExams, e.g., "Comprehension,SPaG"
+  const rawTopics = searchParams.get('topics') || 'Comprehension';
+  const selectedTopics = rawTopics.toLowerCase();
+  
+  const examMode = modeParam === 'mock-exam' ? 'mock' : 'practice';
   
   const [dbSections, setDbSections] = useState<EnglishSection[]>([]);
   const [isLoadingDb, setIsLoadingDb] = useState<boolean>(true);
+  const [liveMockPaperId, setLiveMockPaperId] = useState<string | null>(null);
+  const [liveMockSections, setLiveMockSections] = useState<EnglishSection[]>([]);
+  /** Authoritative duration from `live_mock_papers.duration_minutes` (e.g. 50). */
+  const [liveMockDurationMinutes, setLiveMockDurationMinutes] = useState(50);
+  /** From `live_mock_papers.question_count` for attempt rows */
+  const [liveMockPaperQuestionCount, setLiveMockPaperQuestionCount] = useState(70);
+  const [isLoadingLiveMock, setIsLoadingLiveMock] = useState<boolean>(false);
+  const [isSubmittingLiveMock, setIsSubmittingLiveMock] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchPassages = async () => {
+      if (isLiveMock) {
+        setDbSections([]);
+        setIsLoadingDb(false);
+        return;
+      }
+
       try {
         setIsLoadingDb(true);
         // 1. BROAD FETCH: Get all passages for all selected topics 
@@ -631,14 +672,174 @@ export function EnglishSplitViewDemo() {
       }
     };
     fetchPassages();
-  }, [diffParam, searchParams]);
-  
-  const modeParam = searchParams.get('mode') || 'practice';
-  // Topics usually arrives comma separated from MockExams, e.g., "Comprehension,SPaG"
-  const rawTopics = searchParams.get('topics') || 'Comprehension';
-  const selectedTopics = rawTopics.toLowerCase();
-  
-  const examMode = modeParam === 'mock-exam' ? 'mock' : 'practice';
+  }, [diffParam, searchParams, isLiveMock]);
+
+  useEffect(() => {
+    const fetchLiveMockPaper = async () => {
+      if (!isLiveMock || !liveMockSlug) {
+        setLiveMockPaperId(null);
+        setLiveMockSections([]);
+        setLiveMockDurationMinutes(50);
+        setLiveMockPaperQuestionCount(70);
+        setIsLoadingLiveMock(false);
+        return;
+      }
+
+      try {
+        setIsLoadingLiveMock(true);
+
+        const { data: paper, error: paperError } = await supabase
+          .from('live_mock_papers' as any)
+          .select('id, slug, title, duration_minutes, question_count, status')
+          .eq('slug', liveMockSlug)
+          .maybeSingle();
+
+        if (paperError) throw paperError;
+        if (!paper) {
+          setLiveMockPaperId(null);
+          setLiveMockSections([]);
+          setLiveMockDurationMinutes(50);
+          setLiveMockPaperQuestionCount(70);
+          return;
+        }
+
+        const dm = Number((paper as { duration_minutes?: number }).duration_minutes);
+        setLiveMockDurationMinutes(Number.isFinite(dm) && dm > 0 ? dm : 50);
+        const qcn = Number((paper as { question_count?: number }).question_count);
+        setLiveMockPaperQuestionCount(Number.isFinite(qcn) && qcn > 0 ? qcn : 70);
+
+        const [{ data: sections, error: sectionsError }, { data: questions, error: questionsError }] = await Promise.all([
+          supabase
+            .from('live_mock_sections' as any)
+            .select('id, section_order, section_key, title, instructions, passage_title, passage_blocks')
+            .eq('paper_id', paper.id)
+            .order('section_order', { ascending: true }),
+          supabase
+            .from('live_mock_questions' as any)
+            .select('id, section_id, question_number, question_type, stem, options, explanation, topic, subtopic, difficulty')
+            .eq('paper_id', paper.id)
+            .order('question_number', { ascending: true })
+        ]);
+
+        if (sectionsError) throw sectionsError;
+        if (questionsError) throw questionsError;
+
+        const questionsBySection = new Map<string, any[]>();
+        (questions || []).forEach((question: any) => {
+          const list = questionsBySection.get(question.section_id) || [];
+          list.push(question);
+          questionsBySection.set(question.section_id, list);
+        });
+
+        const tagColorByType: Record<string, string> = {
+          comprehension: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+          spelling: "bg-violet-500/10 text-violet-600 border-violet-500/20",
+          punctuation: "bg-pink-500/10 text-pink-600 border-pink-500/20",
+          grammar: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
+        };
+
+        const mapped: EnglishSection[] = (sections || []).map((section: any) => {
+          const sectionKey = String(section.section_key || '').toLowerCase();
+          const qType = sectionKey.includes('spell')
+            ? 'spelling'
+            : sectionKey.includes('punct')
+              ? 'punctuation'
+              : sectionKey.includes('grammar')
+                ? 'grammar'
+                : 'comprehension';
+          const icon = qType === 'spelling'
+            ? SpellCheck
+            : qType === 'punctuation'
+              ? TextCursorInput
+              : qType === 'grammar'
+                ? Type
+                : BookOpen;
+          const sectionQuestions = questionsBySection.get(section.id) || [];
+          const isTargetSpagSection = isTargetLiveMock && (qType === 'spelling' || qType === 'punctuation' || qType === 'grammar');
+          const formatSpagSentenceLine = (stem: string): string =>
+            stem
+              .replace(/^Question\s*\d+\s*:\s*/i, '')
+              .replace(
+                /^Identify\s+the\s+section\s+with\s+the\s+(spelling|punctuation|grammar)\s+mistake,\s*or\s*choose\s*N\s*if\s*there\s*is\s*no\s*mistake\.\s*/i,
+                ''
+              )
+              .replace(/\b([A-DN])\s*:\s*/g, '')
+              .replace(/\s*\/\s*/g, ' | ')
+              .replace(/\s{2,}/g, ' ')
+              .trim();
+          const rawPassageBlocks = Array.isArray(section.passage_blocks) ? section.passage_blocks : [];
+          const passageBlocks = isTargetSpagSection
+            ? sectionQuestions.map((question: any) => ({
+                id: `q-${String(question.question_number)}`,
+                text: `${String(question.question_number)}. ${formatSpagSentenceLine(String(question.stem || ''))}`,
+              }))
+            : rawPassageBlocks.length > 0
+              ? rawPassageBlocks
+              : [{ id: `${section.section_key}-instructions`, text: section.instructions || section.title }];
+          const normalizedSectionTitle = isTargetSpagSection
+            ? qType === 'spelling'
+              ? 'Spelling Questions'
+              : qType === 'punctuation'
+                ? 'Punctuation Questions'
+                : 'Grammar Questions'
+            : section.title;
+          const normalizedLeftTitle = isTargetSpagSection
+            ? normalizedSectionTitle
+            : (section.passage_title || section.title);
+
+          return {
+            sectionId: qType === 'comprehension' ? 'comprehension' : 'spag',
+            uniqueId: section.id,
+            dbPaperId: paper.id,
+            sectionKey: String(section.section_key || ''),
+            subEngine: qType,
+            title: normalizedSectionTitle,
+            icon,
+            desc: section.instructions || '',
+            leftTitle: normalizedLeftTitle,
+            tier: 'Live mock',
+            difficulty: null,
+            passageBlocks,
+            questions: sectionQuestions.map((question: any) => ({
+              id: String(question.question_number),
+              dbQuestionId: question.id,
+              stemSnapshot: String(question.stem || ''),
+              tag: question.question_type || question.subtopic || 'Question',
+              tagColor: tagColorByType[String(question.question_type || '').toLowerCase()] || tagColorByType.comprehension,
+              text: isTargetSpagSection
+                ? qType === 'grammar'
+                  ? 'Choose the correct option to fill the gap'
+                  : 'Select the part of the sentence with the mistake'
+                : question.stem,
+              evidenceLine: isTargetSpagSection
+                ? `q-${String(question.question_number)}`
+                : (passageBlocks[0]?.id || 'global'),
+              explanation: question.explanation || undefined,
+              options: (Array.isArray(question.options) ? question.options : []).map((option: any) => ({
+                id: String(option.id),
+                text: String(option.text),
+                trap: option.trap ?? null,
+                correct: Boolean(option.correct)
+              }))
+            }))
+          };
+        });
+
+        setLiveMockPaperId(paper.id);
+        setLiveMockSections(mapped);
+      } catch (error) {
+        console.error('Live mock fetch error:', error);
+        setLiveMockPaperId(null);
+        setLiveMockSections([]);
+        setLiveMockDurationMinutes(50);
+        setLiveMockPaperQuestionCount(70);
+      } finally {
+        setIsLoadingLiveMock(false);
+      }
+    };
+
+    fetchLiveMockPaper();
+  }, [isLiveMock, liveMockSlug]);
 
   const mockConfig: Record<string, boolean> = {
     comprehension: selectedTopics.includes('comprehension'),
@@ -653,6 +854,9 @@ export function EnglishSplitViewDemo() {
   const [isFinished, setIsFinished] = useState<boolean>(false);
   const [isReviewMode, setIsReviewMode] = useState<boolean>(false);
   const [showPaywall, setShowPaywall] = useState<boolean>(false);
+  const [endMockConfirmOpen, setEndMockConfirmOpen] = useState(false);
+  const [liveMockSubmittedBlocked, setLiveMockSubmittedBlocked] = useState(false);
+  const [liveMockGateResolved, setLiveMockGateResolved] = useState(() => !isLiveMock);
   const [reviewViewedOptions, setReviewViewedOptions] = useState<Record<string, string>>({});
 
   const [activeQuestionId, setActiveQuestionId] = useState<string | null>(null);
@@ -661,7 +865,9 @@ export function EnglishSplitViewDemo() {
   const [showTrap, setShowTrap] = useState<string | null>(null);
   
   // Storage key based on mode and topics
-  const highlightsStorageKey = `gradlify_highlights_${examMode}_${selectedTopics}`;
+  const highlightsStorageKey = isLiveMock
+    ? `gradlify_highlights_live_mock_${liveMockSlug}_${selectedTopics}`
+    : `gradlify_highlights_${examMode}_${selectedTopics}`;
   const [highlights, setHighlights] = useState<string[]>(() => {
     try {
       const saved = localStorage.getItem(highlightsStorageKey);
@@ -692,6 +898,9 @@ export function EnglishSplitViewDemo() {
   // 1. SIMPLIFIED SELECTION ENGINE
   // --- STRIPPED & REBUILT SIMPLIFIED ROTATION ENGINE ---
   const activeSections = useMemo(() => {
+    // Live mock papers are one-off authored tests. Do not pull rotating practice/mock content here.
+    if (isLiveMock) return liveMockSections;
+
     const all = dbSections.length > 0 ? dbSections : [...TEST_DATA, ...VOCAB_PRACTICE_SET];
     if (all.length === 0) return [];
 
@@ -796,7 +1005,7 @@ export function EnglishSplitViewDemo() {
         return aNum - bNum;
       })
     }));
-  }, [dbSections, selectedTopics, searchParams, sessionSeed]);
+  }, [dbSections, selectedTopics, searchParams, sessionSeed, isLiveMock, liveMockSections]);
 
   // Sync focus header with active content automatically for accurate UI titles
   useEffect(() => {
@@ -829,15 +1038,33 @@ export function EnglishSplitViewDemo() {
     }
   }, [activeSections, dbSections.length]);
 
+  /** URL `duration` overrides DB paper length for live mock only (defaults to published paper minutes, e.g. 50). */
+  const liveMockEffectiveDurationMinutes = useMemo(() => {
+    const urlDur = Number(searchParams.get('duration'));
+    if (Number.isFinite(urlDur) && urlDur > 0) return urlDur;
+    return liveMockDurationMinutes;
+  }, [searchParams, liveMockDurationMinutes]);
+
   const timerInitialized = useRef<string>("");
+  /** Prevents double auto-submit when `timeLeft` hits 0; reset when the mock timer is recalibrated. */
+  const mockTimerExpiredHandledRef = useRef(false);
+  const submitLiveMockRef = useRef<() => Promise<void>>(async () => {});
 
   // Dynamically calibrate Mock Timer based on Passage Loads, Pedagogy, and 11+ Recommended Norms
   useEffect(() => {
     if (examMode !== 'mock' || activeSections.length === 0) return;
-    
-    // Create a unique fingerprint of the active passages to detect if we generated a NEW mock exam
-    const bundleSignature = activeSections.map(s => s.title).join('|');
+
+    const bundleSignature = isLiveMock
+      ? `${liveMockSlug}|${activeSections.map(s => s.title).join('|')}|m=${liveMockEffectiveDurationMinutes}`
+      : activeSections.map(s => s.title).join('|');
     if (timerInitialized.current === bundleSignature) return; // Do not hard-reset if it's the same bundle
+
+    if (isLiveMock) {
+      setTimeLeft(Math.round(liveMockEffectiveDurationMinutes * 60));
+      mockTimerExpiredHandledRef.current = false;
+      timerInitialized.current = bundleSignature;
+      return;
+    }
     
     let totalSeconds = 0;
     activeSections.forEach(sec => {
@@ -868,9 +1095,10 @@ export function EnglishSplitViewDemo() {
     
     if (totalSeconds > 0) {
       setTimeLeft(totalSeconds);
+      mockTimerExpiredHandledRef.current = false;
       timerInitialized.current = bundleSignature;
     }
-  }, [activeSections, examMode]);
+  }, [activeSections, examMode, isLiveMock, liveMockSlug, liveMockEffectiveDurationMinutes]);
 
   // Timer logic for Mock Mode
   useEffect(() => {
@@ -949,44 +1177,42 @@ export function EnglishSplitViewDemo() {
     return () => observer.disconnect();
   }, [activeSections, isFinished, examMode, activeQuestionId]);
 
-  // INTELLIZED SYNCHRONIZED SCROLLING
-  // Precisely centers the active evidence/passage block in the left pane
+  // Section-aware synchronized scrolling:
+  // auto-scroll the left pane only when the active question moves to a different section.
   useEffect(() => {
     if (!activeQuestionId || !passageContainerRef.current) return;
     
     const timer = setTimeout(() => {
       let targetUniqueId = null;
-      let targetSectionId = null;
-      let targetEvidenceLine = null;
       
-      // 1. Identify which section and evidence line we need to find
+      // 1. Identify which section contains the active question
       for (const sec of activeSections) {
         const q = sec.questions.find(x => `${sec.uniqueId}_${x.id}` === activeQuestionId);
         if (q) {
           targetUniqueId = sec.uniqueId;
-          targetSectionId = sec.sectionId;
-          targetEvidenceLine = q.evidenceLine;
           break;
         }
       }
 
-      // 2. Locate the specific element
-      const uniqueRefKey = `${targetUniqueId}_${targetEvidenceLine}`;
-      
-      // Try evidence block first, then the whole section as fallback
-      const targetElement = passageLineRefs.current[uniqueRefKey] || passageSectionRefs.current[targetSectionId || ''];
+      if (!targetUniqueId) return;
+
+      // Prevent repeated re-scrolling while navigating within the same section.
+      if (lastEvidenceRefKey.current === targetUniqueId) return;
+      lastEvidenceRefKey.current = targetUniqueId;
+
+      // On section switch (e.g. Passage 1 -> Passage 2 -> SPaG), scroll to that section.
+      const targetElement = passageSectionRefs.current[targetUniqueId];
       
       if (targetElement && passageContainerRef.current) {
         const container = passageContainerRef.current;
         const containerRect = container.getBoundingClientRect();
         const elementRect = targetElement.getBoundingClientRect();
         
-        // Calculate exact distance to bring element's center to container's center
-        const elementCenter = elementRect.top + (elementRect.height / 2);
-        const containerCenter = containerRect.top + (containerRect.height / 2);
+        // Vertically centre the highlighted section within the passage scroll area.
+        const elementCenter = elementRect.top + elementRect.height / 2;
+        const containerCenter = containerRect.top + containerRect.height / 2;
         const scrollDiff = elementCenter - containerCenter;
 
-        // Perform the smooth scroll
         container.scrollBy({
           top: scrollDiff,
           behavior: 'smooth'
@@ -1005,6 +1231,110 @@ export function EnglishSplitViewDemo() {
       dotElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
   }, [activeQuestionId]);
+
+  // Centre the active question card vertically in the questions pane.
+  useEffect(() => {
+    if (!activeQuestionId || !rightPaneRef.current) return;
+    const targetQuestion = questionRefs.current[activeQuestionId];
+    if (!targetQuestion) return;
+
+    const container = rightPaneRef.current;
+    const containerRect = container.getBoundingClientRect();
+    const questionRect = targetQuestion.getBoundingClientRect();
+    const questionCenter = questionRect.top + questionRect.height / 2;
+    const containerCenter = containerRect.top + containerRect.height / 2;
+    const scrollDiff = questionCenter - containerCenter;
+
+    if (Math.abs(scrollDiff) < 6) return;
+
+    container.scrollBy({
+      top: scrollDiff,
+      behavior: 'smooth',
+    });
+  }, [activeQuestionId]);
+
+  // First visit to session (including deep links): ensure an in_progress attempt exists so the hub page can lock "Start".
+  useEffect(() => {
+    if (!isLiveMock || !liveMockPaperId || !user?.id || isLoadingLiveMock) return;
+
+    let cancelled = false;
+
+    void (async () => {
+      const { data: existing, error: selErr } = await supabase
+        .from('live_mock_attempts' as never)
+        .select('id')
+        .eq('paper_id', liveMockPaperId)
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (cancelled || selErr || existing) return;
+
+      const { error: insErr } = await supabase.from('live_mock_attempts' as never).insert({
+        paper_id: liveMockPaperId,
+        user_id: user.id,
+        status: 'in_progress',
+        question_count: liveMockPaperQuestionCount,
+        answered_count: 0,
+      });
+
+      const code = insErr && typeof insErr === 'object' && 'code' in insErr ? String((insErr as { code?: string }).code) : '';
+      if (insErr && code !== '23505') {
+        console.error('Live mock: could not create in-progress attempt', insErr);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isLiveMock, liveMockPaperId, user?.id, isLoadingLiveMock, liveMockPaperQuestionCount]);
+
+  // Live mock: one submission per user per paper — block session URL if already submitted.
+  useEffect(() => {
+    if (!isLiveMock) {
+      setLiveMockSubmittedBlocked(false);
+      setLiveMockGateResolved(true);
+      return;
+    }
+    if (!user?.id) {
+      setLiveMockSubmittedBlocked(false);
+      setLiveMockGateResolved(true);
+      return;
+    }
+    if (isLoadingLiveMock) {
+      setLiveMockGateResolved(false);
+      return;
+    }
+    if (!liveMockPaperId) {
+      setLiveMockSubmittedBlocked(false);
+      setLiveMockGateResolved(true);
+      return;
+    }
+
+    let cancelled = false;
+    setLiveMockGateResolved(false);
+
+    void supabase
+      .from('live_mock_attempts' as never)
+      .select('status')
+      .eq('paper_id', liveMockPaperId)
+      .eq('user_id', user.id)
+      .maybeSingle()
+      .then(({ data, error }) => {
+        if (cancelled) return;
+        if (error) {
+          console.error('Live mock attempt check failed:', error);
+          setLiveMockSubmittedBlocked(false);
+        } else {
+          const row = data as { status?: string } | null;
+          setLiveMockSubmittedBlocked(row?.status === 'submitted');
+        }
+        setLiveMockGateResolved(true);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isLiveMock, liveMockPaperId, user?.id, isLoadingLiveMock]);
 
   // Compute actual results upon finishing
   const results = useMemo(() => {
@@ -1086,7 +1416,7 @@ export function EnglishSplitViewDemo() {
         }));
 
       if (rowsToInsert.length > 0) {
-        if (examMode === 'mock') {
+        if (examMode === 'mock' && !isLiveMock) {
           // 1. Create a mock attempt
           // User requested using the absolute correct count as the leaderboard score
           const totalCorrect = rowsToInsert.reduce((sum, r) => sum + r.correct, 0);
@@ -1148,7 +1478,7 @@ export function EnglishSplitViewDemo() {
               });
             }
           });
-        } else {
+        } else if (!isLiveMock) {
           // Normal practice session
           supabase.from('practice_results').insert(rowsToInsert).then(({ error }) => {
             if (error) console.error("Error saving English results:", error);
@@ -1156,7 +1486,7 @@ export function EnglishSplitViewDemo() {
         }
       }
     }
-  }, [isFinished, user, activeSections, selectedAnswers, examMode]);
+  }, [isFinished, user, activeSections, selectedAnswers, examMode, isLiveMock]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -1164,7 +1494,164 @@ export function EnglishSplitViewDemo() {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  if (isFinished) {
+  const submitLiveMock = useCallback(async () => {
+    if (!isLiveMock) {
+      setIsFinished(true);
+      return;
+    }
+
+    if (isSubmittingLiveMock) return;
+
+    try {
+      setIsSubmittingLiveMock(true);
+
+      if (user && liveMockPaperId && activeSections.length > 0) {
+        const userEmail =
+          typeof user.email === 'string' && user.email.trim().length > 0 ? user.email.trim() : null;
+
+        const allQuestions = activeSections.flatMap(section =>
+          section.questions.map(question => {
+            const qKey = `${section.uniqueId}_${question.id}`;
+            const selectedOption = selectedAnswers[qKey] || null;
+            const correctOption = question.options.find(option => option.correct);
+            const selectedChoice = selectedOption
+              ? question.options.find(option => option.id === selectedOption)
+              : undefined;
+            return {
+              sectionKey: section.sectionKey ?? null,
+              question,
+              selectedOption,
+              selectedOptionLabel: selectedChoice?.text ?? null,
+              correctOptionId: correctOption?.id ?? null,
+              correctOptionLabel: correctOption?.text ?? null,
+              isCorrect: Boolean(selectedOption && correctOption && selectedOption === correctOption.id)
+            };
+          })
+        );
+
+        const answeredCount = allQuestions.filter(item => item.selectedOption).length;
+        const totalSecondsAllocated = Math.round(liveMockEffectiveDurationMinutes * 60);
+        const elapsedSeconds = Math.max(0, totalSecondsAllocated - timeLeft);
+
+        const { data: attempt, error: attemptError } = await supabase
+          .from('live_mock_attempts' as any)
+          .upsert({
+            paper_id: liveMockPaperId,
+            user_id: user.id,
+            user_email: userEmail,
+            status: 'submitted',
+            submitted_at: new Date().toISOString(),
+            duration_seconds: elapsedSeconds,
+            question_count: allQuestions.length,
+            answered_count: answeredCount
+          }, { onConflict: 'paper_id,user_id' })
+          .select('id')
+          .single();
+
+        if (attemptError) throw attemptError;
+
+        const optionsPayload = (opts: EnglishOption[]) =>
+          opts.map(o => ({ id: o.id, text: o.text, correct: o.correct }));
+
+        const answerRows = allQuestions
+          .filter(item => {
+            if (!item.question.dbQuestionId) {
+              console.warn('Live mock submit: missing dbQuestionId for question', item.question.id);
+              return false;
+            }
+            return true;
+          })
+          .map(item => {
+            const qn = parseInt(item.question.id, 10);
+            const stemForAnalytics = item.question.stemSnapshot?.trim()
+              ? item.question.stemSnapshot
+              : item.question.text;
+            return {
+              attempt_id: attempt.id,
+              paper_id: liveMockPaperId,
+              question_id: item.question.dbQuestionId,
+              user_id: user.id,
+              question_number: Number.isFinite(qn) ? qn : null,
+              section_key: item.sectionKey,
+              question_type: item.question.tag,
+              stem_snapshot: stemForAnalytics,
+              correct_option_id: item.correctOptionId,
+              correct_option_label: item.correctOptionLabel,
+              selected_option: item.selectedOption,
+              selected_option_label: item.selectedOptionLabel,
+              options_snapshot: optionsPayload(item.question.options),
+              is_correct: item.selectedOption ? item.isCorrect : null,
+              answered_at: new Date().toISOString()
+            };
+          });
+
+        if (answerRows.length > 0) {
+          const { error: answersError } = await supabase
+            .from('live_mock_answers' as any)
+            .upsert(answerRows, { onConflict: 'attempt_id,question_id' });
+
+          if (answersError) throw answersError;
+        }
+      }
+    } catch (error) {
+      console.error('Live mock submit error:', error);
+    } finally {
+      setIsSubmittingLiveMock(false);
+      setIsFinished(true);
+    }
+  }, [
+    isLiveMock,
+    isSubmittingLiveMock,
+    user,
+    liveMockPaperId,
+    activeSections,
+    selectedAnswers,
+    liveMockEffectiveDurationMinutes,
+    timeLeft
+  ]);
+
+  submitLiveMockRef.current = submitLiveMock;
+
+  useEffect(() => {
+    if (examMode !== 'mock' || isFinished || isReviewMode || timeLeft > 0) return;
+    if (mockTimerExpiredHandledRef.current) return;
+    mockTimerExpiredHandledRef.current = true;
+
+    if (isLiveMock) {
+      void submitLiveMockRef.current();
+    } else {
+      setIsFinished(true);
+    }
+  }, [examMode, isFinished, isReviewMode, timeLeft, isLiveMock]);
+
+  if (isLiveMock && user?.id && !liveMockGateResolved) {
+    return (
+      <div className="flex min-h-[calc(100vh-80px)] flex-col items-center justify-center gap-4 bg-background p-6">
+        <Loader2 className="h-10 w-10 animate-spin text-amber-500" aria-hidden />
+        <p className="text-sm text-muted-foreground">Checking mock access…</p>
+      </div>
+    );
+  }
+
+  if (isLiveMock && liveMockSubmittedBlocked) {
+    return (
+      <div className="flex min-h-[calc(100vh-80px)] items-center justify-center bg-background p-6">
+        <div className="w-full max-w-md rounded-2xl border border-border bg-card p-8 text-center shadow-lg">
+          <h2 className="text-xl font-bold tracking-tight text-foreground">Mock already completed</h2>
+          <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+            You have already submitted this live mock. Each account may complete it only once.
+          </p>
+          <Link to="/live-mock-exams" className="mt-6 block">
+            <Button type="button" variant="outline" className="w-full rounded-xl">
+              Back to Live Mock page
+            </Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (isFinished && !isLiveMock) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[calc(100vh-80px)] bg-background p-6" style={{ '--primary': '43 96% 56%', '--primary-glow': '43 96% 66%' } as React.CSSProperties}>
         <div className="max-w-2xl w-full bg-card border border-border/80 shadow-xl rounded-[2rem] p-10 text-center relative overflow-hidden">
@@ -1222,9 +1709,9 @@ export function EnglishSplitViewDemo() {
                 <Button onClick={() => { setIsFinished(false); setIsReviewMode(true); }} variant="outline" className="w-full h-12 rounded-xl font-bold">
                   Review Paper Details & Tutor Notes
                 </Button>
-                <Link to={examMode === 'mock' ? "/mocks/english" : "/practice/english"}>
+                <Link to={isLiveMock ? "/live-mock-exams" : examMode === 'mock' ? "/mocks/english" : "/practice/english"}>
                   <Button variant="ghost" className="w-full h-12 rounded-xl text-muted-foreground hover:bg-muted font-semibold">
-                    Return to {examMode === 'mock' ? 'Mock' : 'Practice'} Dashboard
+                    Return to {isLiveMock ? 'Live Mock' : examMode === 'mock' ? 'Mock' : 'Practice'} Dashboard
                   </Button>
                 </Link>
               </div>
@@ -1253,7 +1740,7 @@ export function EnglishSplitViewDemo() {
                 <Button onClick={() => { setIsFinished(false); setIsReviewMode(true); }} variant="outline" className="w-full h-14 rounded-[1rem] font-bold text-foreground bg-card border-border/80 shadow-sm hover:bg-accent transition-all">
                   Review Answers
                 </Button>
-                <Link to="/mocks/english" className="block w-full">
+                <Link to={isLiveMock ? "/live-mock-exams" : "/mocks/english"} className="block w-full">
                   <Button variant="ghost" className="w-full h-14 rounded-[1rem] text-muted-foreground hover:text-foreground font-semibold hover:bg-muted/80 transition-all group/back">
                     <ArrowLeft className="w-4 h-4 mr-2 transition-transform group-hover/back:-translate-x-1" />
                     Return to Dashboard
@@ -1280,7 +1767,7 @@ export function EnglishSplitViewDemo() {
           <div className="px-5 lg:px-6 py-3 lg:py-4 border-b border-border flex items-center justify-between bg-card shrink-0 z-10 sticky top-0 shadow-sm">
             <div className="flex items-center gap-4">
               <button 
-                onClick={() => navigate(examMode === 'mock' ? '/mocks/english' : '/practice/english')}
+                onClick={() => navigate(isLiveMock ? '/live-mock-exams' : examMode === 'mock' ? '/mocks/english' : '/practice/english')}
                 className="p-2 -ml-2 hover:bg-muted rounded-full transition-colors text-muted-foreground hover:text-foreground group"
                 title="Back to Selection"
               >
@@ -1289,7 +1776,7 @@ export function EnglishSplitViewDemo() {
               <div className="flex items-center gap-2">
                 <BookOpen className="w-4 h-4 text-amber-500" />
                 <span className="font-serif font-bold tracking-tight text-foreground line-clamp-1">
-                  {examMode === 'mock' ? 'Full Mock Examination Paper' : `Practice Source: ${activeSections[0]?.leftTitle}`}
+                  {isLiveMock ? '11+ English Complete Mock Exam' : examMode === 'mock' ? 'Full Mock Examination Paper' : `Practice Source: ${activeSections[0]?.leftTitle}`}
                 </span>
               </div>
             </div>
@@ -1329,11 +1816,15 @@ export function EnglishSplitViewDemo() {
                   const isPoetry = sType.includes('poetry') || sType.includes('poem');
                 let topicLabel = 'Comprehension';
                 if (sType.includes('vocab')) topicLabel = 'Vocabulary';
-                else if (sType.includes('spag') || sType.includes('spell') || sType.includes('punct') || sType.includes('gramm')) topicLabel = 'SPaG';
+                else if (sType.includes('spell')) topicLabel = 'Spelling';
+                else if (sType.includes('punct')) topicLabel = 'Punctuation';
+                else if (sType.includes('gramm')) topicLabel = 'Grammar';
+                else if (sType.includes('spag')) topicLabel = 'SPaG';
                 
-                const typeNoun = topicLabel === 'Comprehension' ? 'Passage' : 'Questions';
-                const displayTitle = topicLabel === 'Comprehension' ? section.leftTitle : `${topicLabel} ${typeNoun}`;
-                const cleanDisplayTitle = topicLabel === 'Comprehension' ? `${topicLabel} ${typeNoun} - ${displayTitle}` : displayTitle;
+                const isComprehensionSection = topicLabel === 'Comprehension';
+                const typeNoun = isComprehensionSection ? 'Passage' : 'Questions';
+                const displayTitle = isComprehensionSection ? section.leftTitle : `${topicLabel} ${typeNoun}`;
+                const cleanDisplayTitle = isComprehensionSection ? `${topicLabel} ${typeNoun} - ${displayTitle}` : displayTitle;
 
                 const PAYWALL_THRESHOLD = 3;
                 let lastAllowedEvidenceIndex = -1;
@@ -1358,8 +1849,8 @@ export function EnglishSplitViewDemo() {
 
                 return (
                  <div 
-                  key={section.sectionId} 
-                  ref={(el) => { passageSectionRefs.current[section.sectionId] = el; }}
+                  key={section.uniqueId} 
+                  ref={(el) => { passageSectionRefs.current[section.uniqueId] = el; }}
                   className="scroll-m-8 border-b border-border/40 pb-12 last:border-0"
                  >
                   <div className="mb-6 font-sans font-bold text-lg text-foreground/80 tracking-tight flex items-center justify-between">
@@ -1395,7 +1886,11 @@ export function EnglishSplitViewDemo() {
                                              evidenceLine.includes('passage') || 
                                              evidenceLine.includes('text') || 
                                              evidenceLine.includes('entire');
-                            if (activeQInfo.evidenceLine === p.id || isGlobal) {
+                            if (
+                              (forceFullComprehensionHighlight && isComprehensionSection) ||
+                              activeQInfo.evidenceLine === p.id ||
+                              isGlobal
+                            ) {
                               isTargetEvidence = true;
                             }
                           }
@@ -1519,10 +2014,10 @@ export function EnglishSplitViewDemo() {
             <div className="mb-4 md:mb-10 flex items-start justify-between gap-2 sm:gap-4 snap-start scroll-m-24">
               <div>
                 <h1 className="text-xl sm:text-2xl font-bold tracking-tight mb-1 sm:mb-2">
-                  {examMode === 'mock' ? 'Mock Exam' : (activeSections.length > 1 ? 'MIXED TOPIC DRILLS' : `${practiceFocus.toUpperCase()} DRILLS`)}
+                  {isLiveMock ? '11+ English Complete Mock Exam' : examMode === 'mock' ? 'Mock Exam' : (activeSections.length > 1 ? 'MIXED TOPIC DRILLS' : `${practiceFocus.toUpperCase()} DRILLS`)}
                 </h1>
                 <p className="text-[11px] sm:text-sm text-muted-foreground">
-                  {examMode === 'mock' ? 'You have configured a custom Mock Exam mixing multiple passages.' : 'Answer the questions based on the source texts strictly.'}
+                  {isLiveMock ? 'This one-off live mock uses the scheduled paper only and is separate from regular mocks. Your attempt is saved for cohort analytics when you finish or when time runs out.' : examMode === 'mock' ? 'You have configured a custom Mock Exam mixing multiple passages.' : 'Answer the questions based on the source texts strictly.'}
                 </p>
               </div>
             </div>
@@ -1530,7 +2025,22 @@ export function EnglishSplitViewDemo() {
             {/* Render all the loaded sections linearly */}
             {activeSections.length === 0 && (
               <div className="text-center p-12 border border-border border-dashed rounded-3xl text-muted-foreground font-medium">
-                No sections selected or configured.
+                <p>
+                  {isLiveMock && isLoadingLiveMock
+                    ? "Loading the one-off live mock paper..."
+                    : isLiveMock
+                      ? "This live mock is waiting for its exact 70-question paper. No practice or rotating mock content is loaded here."
+                    : "No sections selected or configured."}
+                </p>
+                {isLiveMock && (
+                  <Button
+                    type="button"
+                    onClick={() => navigate("/live-mock-exams/analytics")}
+                    className="mt-6 h-11 rounded-xl bg-amber-500 px-6 font-bold text-amber-950 hover:bg-amber-600"
+                  >
+                    End mock
+                  </Button>
+                )}
               </div>
             )}
             
@@ -1560,7 +2070,7 @@ export function EnglishSplitViewDemo() {
                   : (subTopic ? `${subTopic} ${typeNoun}` : `${parentTopic} ${typeNoun}`);
 
                 return (
-                  <div key={section.sectionId} className={cn("mb-6 sm:mb-10", secIndex === 0 && examMode === 'practice' ? "mt-2 sm:mt-4" : "")}>
+                  <div key={section.uniqueId} className={cn("mb-6 sm:mb-10", secIndex === 0 && examMode === 'practice' ? "mt-2 sm:mt-4" : "")}>
                     <div className={cn("relative flex flex-col md:flex-row justify-between items-start md:items-end gap-2 sm:gap-4 w-full border-b border-border/60 pb-2 sm:pb-3 mb-4 sm:mb-6", secIndex === 0 ? "mt-2 sm:mt-4" : "mt-6 sm:mt-8")}>
                       <div className="flex flex-col gap-0.5 sm:gap-1 items-start">
                         <span className="px-1.5 py-0.5 rounded text-[8px] font-black tracking-[0.1em] uppercase bg-foreground/10 text-foreground/60">{badgeLabel}</span>
@@ -1621,7 +2131,7 @@ export function EnglishSplitViewDemo() {
 
                             <div className="flex items-center justify-between mb-2 sm:mb-4">
                               <span className="text-[10px] font-black tracking-widest uppercase text-muted-foreground flex items-center gap-1.5 sm:gap-2">
-                                {examMode === 'mock' ? `Q${originalIndex + 1}` : `Question ${originalIndex + 1}`}
+                                {isLiveMock ? `Q${q.id}` : examMode === 'mock' ? `Q${originalIndex + 1}` : `Question ${originalIndex + 1}`}
                               </span>
                               <div className={cn(
                                 "px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wide border", 
@@ -1771,12 +2281,17 @@ export function EnglishSplitViewDemo() {
               <div className="pt-10 border-t border-border/40 mt-12 mb-12 flex justify-end snap-end scroll-m-8">
                 <Button 
                   onClick={() => {
+                    if (isLiveMock) {
+                      setEndMockConfirmOpen(true);
+                      return;
+                    }
                     if (isReviewMode) setIsFinished(true); // Return to Results
                     else if (examMode === 'practice') navigate('/mocks/english'); 
                     else setIsFinished(true);
                   }} 
+                  disabled={isSubmittingLiveMock}
                   className="bg-amber-500 hover:bg-amber-600 text-amber-950 font-bold px-8 h-12 rounded-xl text-md shadow-[0_0_20px_rgba(245,158,11,0.3)]">
-                  {isReviewMode ? 'Return to Results' : (examMode === 'practice' ? 'Finish' : 'Submit Mock Exam')}
+                  {isLiveMock ? (isSubmittingLiveMock ? 'Ending mock...' : 'End mock') : isReviewMode ? 'Return to Results' : (examMode === 'practice' ? 'Finish' : 'Submit Mock Exam')}
                 </Button>
               </div>
             )}
@@ -1789,6 +2304,49 @@ export function EnglishSplitViewDemo() {
           title="Unlock Full Exam"
           description="Gain access to all questions, full rationales, and advanced scoring." 
         />
+
+        <AlertDialog open={endMockConfirmOpen} onOpenChange={setEndMockConfirmOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Finish mock?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure to finish your mock?
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-amber-500 text-amber-950 hover:bg-amber-600"
+                onClick={() => {
+                  void submitLiveMock();
+                }}
+              >
+                Yes, finish mock
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {isFinished && isLiveMock && (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black px-4">
+            <div className="w-full max-w-md rounded-2xl border border-white/10 bg-card p-8 text-center shadow-2xl">
+              <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-600">
+                <CheckCircle className="h-8 w-8" />
+              </div>
+              <h2 className="font-serif text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+                Mock exam completed
+              </h2>
+              <p className="mt-3 text-sm text-muted-foreground">
+                Your answers have been saved. Full analytics will be available after the live window closes.
+              </p>
+              <Link to="/mocks/english" className="mt-8 block">
+                <Button className="h-12 w-full rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-sm font-bold text-amber-950 hover:brightness-105">
+                  Practice more exam styled questions
+                </Button>
+              </Link>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

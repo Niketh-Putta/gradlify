@@ -68,6 +68,8 @@ export function Layout({ user, onSettings, onSignOut }: LayoutProps) {
   const profileFetchInFlightRef = useRef(false);
 
   const isChatRoute = location.pathname.startsWith('/chat');
+  /** Live mock list + session must work without forcing subject onboarding first */
+  const allowWithoutFullOnboarding = location.pathname.startsWith('/live-mock-exams');
   const isFreeToolsRoute =
     location.pathname.startsWith('/tools') ||
     location.pathname.startsWith('/free-resources') ||
@@ -341,8 +343,9 @@ export function Layout({ user, onSettings, onSignOut }: LayoutProps) {
 
   useEffect(() => {
     if (loading || !profile || onboardingComplete) return;
+    if (allowWithoutFullOnboarding) return;
     navigate('/select-subject', { replace: true });
-  }, [loading, navigate, onboardingComplete, profile]);
+  }, [loading, navigate, onboardingComplete, profile, allowWithoutFullOnboarding]);
 
   if (loading) {
     return (
@@ -365,7 +368,7 @@ export function Layout({ user, onSettings, onSignOut }: LayoutProps) {
     );
   }
 
-  if (!onboardingComplete) {
+  if (!onboardingComplete && !allowWithoutFullOnboarding) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">

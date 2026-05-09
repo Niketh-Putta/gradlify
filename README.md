@@ -24,6 +24,26 @@ When you run `npm run dev`, the Vite server (usually at `http://127.0.0.1:5173`)
 3. Always open the Vite URL in your browser or the VS Code preview—if a tab tries to open `https://gradlify.com`, close it and continue on `http://127.0.0.1:5173`.
 4. If you accidentally land on `gradlify.com` after auth, copy the cookies/local storage back to the dev tab by reloading the Vite URL; the app uses the same Supabase session, so it will recognize you immediately.
 
+## UI density
+
+When designing screens in this app, default to a compact layout sized around one-third of the visible screen:
+
+- Keep primary cards, setup panels, and action blocks visually within roughly the top third of the viewport on desktop whenever the workflow allows it.
+- Keep cards, sections, and controls tight. Prefer smaller paddings, gaps, icon containers, and radii unless the feature clearly needs more breathing room.
+- Avoid oversized headings, badges, and CTA buttons on app screens. Prioritize dense, scan-friendly layouts over presentation-style spacing.
+- Fit the important content above the fold where possible, especially on dashboard, exam, and setup screens. Use side-by-side layouts on desktop before adding vertical stacking.
+
+## Live mock analytics
+
+The live mock exam is a one-off authored paper, separate from normal practice and mock exams. After completion, students should only see a submitted state until results are released. The later analytics release should feel like a professional cohort report:
+
+- Overall result: raw score, percentage, percentile, rank band, cohort mean, median, top quartile, and standard deviation.
+- Section breakdown: comprehension, SPaG, vocabulary, timing, accuracy, unanswered questions, and strongest/weakest skill areas.
+- Question review: every wrong question, the student's answer, the correct answer, explanation, topic tag, difficulty, and how many students missed the same question.
+- Cohort comparison: distribution chart, percentile curve, average score by section, hardest/easiest questions, and common distractors.
+- Readiness summary: school-style benchmark bands, target-school competitiveness, recommended next revision actions, and priority topics.
+- Admin view: participation count, completion rate, suspiciously fast attempts, question-level item analysis, discrimination index, and exportable CSV.
+
 ## Tech stack
 
 - Vite
