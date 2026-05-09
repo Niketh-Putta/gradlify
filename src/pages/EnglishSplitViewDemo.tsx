@@ -27,6 +27,8 @@ export interface EnglishOption {
 
 export interface EnglishQuestion {
   id: string;
+  /** Paper question index from DB (live mock analytics). Prefer over parsing `id`. */
+  questionNumber?: number;
   dbQuestionId?: string;
   tag: string;
   tagColor: string;
@@ -802,6 +804,10 @@ export function EnglishSplitViewDemo() {
             passageBlocks,
             questions: sectionQuestions.map((question: any) => ({
               id: String(question.question_number),
+              questionNumber:
+                typeof question.question_number === "number" && Number.isFinite(question.question_number)
+                  ? question.question_number
+                  : parseInt(String(question.question_number ?? ""), 10) || undefined,
               dbQuestionId: question.id,
               stemSnapshot: String(question.stem || ''),
               tag: question.question_type || question.subtopic || 'Question',
@@ -891,7 +897,6 @@ export function EnglishSplitViewDemo() {
   const passageLineRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const rightPaneRef = useRef<HTMLDivElement>(null);
   const questionRefs = useRef<Record<string, HTMLDivElement | null>>({});
-  const lastEvidenceRefKey = useRef<string | null>(null);
 
   const sessionSeed = useMemo(() => Math.random(), []);
 
@@ -1176,82 +1181,6 @@ export function EnglishSplitViewDemo() {
 
     return () => observer.disconnect();
   }, [activeSections, isFinished, examMode, activeQuestionId]);
-
-  // Section-aware synchronized scrolling:
-  // auto-scroll the left pane only when the active question moves to a different section.
-  useEffect(() => {
-    if (!activeQuestionId || !passageContainerRef.current) return;
-    
-    const timer = setTimeout(() => {
-      let targetUniqueId = null;
-      
-      // 1. Identify which section contains the active question
-      for (const sec of activeSections) {
-        const q = sec.questions.find(x => `${sec.uniqueId}_${x.id}` === activeQuestionId);
-        if (q) {
-          targetUniqueId = sec.uniqueId;
-          break;
-        }
-      }
-
-      if (!targetUniqueId) return;
-
-      // Prevent repeated re-scrolling while navigating within the same section.
-      if (lastEvidenceRefKey.current === targetUniqueId) return;
-      lastEvidenceRefKey.current = targetUniqueId;
-
-      // On section switch (e.g. Passage 1 -> Passage 2 -> SPaG), scroll to that section.
-      const targetElement = passageSectionRefs.current[targetUniqueId];
-      
-      if (targetElement && passageContainerRef.current) {
-        const container = passageContainerRef.current;
-        const containerRect = container.getBoundingClientRect();
-        const elementRect = targetElement.getBoundingClientRect();
-        
-        // Vertically centre the highlighted section within the passage scroll area.
-        const elementCenter = elementRect.top + elementRect.height / 2;
-        const containerCenter = containerRect.top + containerRect.height / 2;
-        const scrollDiff = elementCenter - containerCenter;
-
-        container.scrollBy({
-          top: scrollDiff,
-          behavior: 'smooth'
-        });
-      }
-    }, 100); // Slightly faster debounce for responsiveness
-
-    return () => clearTimeout(timer);
-  }, [activeQuestionId, activeSections]);
-
-  // Keep active dot visible in the floating pill
-  useEffect(() => {
-    if (!activeQuestionId) return;
-    const dotElement = document.getElementById(`pill-dot-${activeQuestionId}`);
-    if (dotElement) {
-      dotElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }
-  }, [activeQuestionId]);
-
-  // Centre the active question card vertically in the questions pane.
-  useEffect(() => {
-    if (!activeQuestionId || !rightPaneRef.current) return;
-    const targetQuestion = questionRefs.current[activeQuestionId];
-    if (!targetQuestion) return;
-
-    const container = rightPaneRef.current;
-    const containerRect = container.getBoundingClientRect();
-    const questionRect = targetQuestion.getBoundingClientRect();
-    const questionCenter = questionRect.top + questionRect.height / 2;
-    const containerCenter = containerRect.top + containerRect.height / 2;
-    const scrollDiff = questionCenter - containerCenter;
-
-    if (Math.abs(scrollDiff) < 6) return;
-
-    container.scrollBy({
-      top: scrollDiff,
-      behavior: 'smooth',
-    });
-  }, [activeQuestionId]);
 
   // First visit to session (including deep links): ensure an in_progress attempt exists so the hub page can lock "Start".
   useEffect(() => {
@@ -1562,7 +1491,10 @@ export function EnglishSplitViewDemo() {
             return true;
           })
           .map(item => {
-            const qn = parseInt(item.question.id, 10);
+            const qn =
+              typeof item.question.questionNumber === "number" && Number.isFinite(item.question.questionNumber)
+                ? item.question.questionNumber
+                : parseInt(String(item.question.id).replace(/^q-/i, ""), 10);
             const stemForAnalytics = item.question.stemSnapshot?.trim()
               ? item.question.stemSnapshot
               : item.question.text;

@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useCallback, useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowRight,
   CalendarDays,
@@ -54,61 +54,62 @@ export default function LiveMockExams() {
   /** Locks "Start" once an attempt row exists (created on first Start click). */
   const [attemptStatus, setAttemptStatus] = useState<LiveMockAttemptStatus>("none");
 
-  useEffect(() => {
-    let cancelled = false;
-
-    const loadSignupAndAttempt = async () => {
-      if (!user?.id) {
-        setAttemptStatus("none");
-        setLoading(false);
-        return;
-      }
-
-      setLoading(true);
-
-      const [{ data: paper }, signupResult] = await Promise.all([
-        supabase.from("live_mock_papers" as never).select("id").eq("slug", LIVE_MOCK.slug).maybeSingle(),
-        supabase
-          .from("live_mock_exam_signups" as never)
-          .select("id, registered_at")
-          .eq("user_id", user.id)
-          .eq("mock_slug", LIVE_MOCK.slug)
-          .maybeSingle(),
-      ]);
-
-      if (cancelled) return;
-
-      const paperId = (paper as { id?: string } | null)?.id;
-      if (paperId) {
-        const { data: attempt } = await supabase
-          .from("live_mock_attempts" as never)
-          .select("status")
-          .eq("paper_id", paperId)
-          .eq("user_id", user.id)
-          .maybeSingle();
-        const status = (attempt as { status?: string } | null)?.status;
-        if (status === "submitted") setAttemptStatus("submitted");
-        else if (status === "in_progress") setAttemptStatus("in_progress");
-        else setAttemptStatus("none");
-      } else {
-        setAttemptStatus("none");
-      }
-
-      if (signupResult.error) {
-        console.error("Failed to load live mock signup", signupResult.error);
-      } else {
-        setSignup((signupResult.data as SignupRow | null) ?? null);
-      }
-
+  const loadSignupAndAttempt = useCallback(async () => {
+    if (!user?.id) {
+      setAttemptStatus("none");
       setLoading(false);
-    };
+      return;
+    }
 
-    void loadSignupAndAttempt();
+    setLoading(true);
 
-    return () => {
-      cancelled = true;
-    };
+    const [{ data: paper }, signupResult] = await Promise.all([
+      supabase.from("live_mock_papers" as never).select("id").eq("slug", LIVE_MOCK.slug).maybeSingle(),
+      supabase
+        .from("live_mock_exam_signups" as never)
+        .select("id, registered_at")
+        .eq("user_id", user.id)
+        .eq("mock_slug", LIVE_MOCK.slug)
+        .maybeSingle(),
+    ]);
+
+    const paperId = (paper as { id?: string } | null)?.id;
+    if (paperId) {
+      const { data: attempt } = await supabase
+        .from("live_mock_attempts" as never)
+        .select("status")
+        .eq("paper_id", paperId)
+        .eq("user_id", user.id)
+        .maybeSingle();
+      const status = (attempt as { status?: string } | null)?.status;
+      if (status === "submitted") setAttemptStatus("submitted");
+      else if (status === "in_progress") setAttemptStatus("in_progress");
+      else setAttemptStatus("none");
+    } else {
+      setAttemptStatus("none");
+    }
+
+    if (signupResult.error) {
+      console.error("Failed to load live mock signup", signupResult.error);
+    } else {
+      setSignup((signupResult.data as SignupRow | null) ?? null);
+    }
+
+    setLoading(false);
   }, [user?.id]);
+
+  useEffect(() => {
+    void loadSignupAndAttempt();
+  }, [loadSignupAndAttempt]);
+
+  /** After submitting in another tab or returning from the session, pick up status === submitted. */
+  useEffect(() => {
+    const onVisible = () => {
+      if (document.visibilityState === "visible" && user?.id) void loadSignupAndAttempt();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => document.removeEventListener("visibilitychange", onVisible);
+  }, [loadSignupAndAttempt, user?.id]);
 
   const navigateToSession = () => {
     navigate(`/live-mock-exams/session?${buildLiveMockSessionSearchParams().toString()}`);
@@ -230,8 +231,8 @@ export default function LiveMockExams() {
   ];
 
   return (
-    <main className="min-h-screen bg-[#faf9f4] px-3 py-3 text-slate-950 sm:px-4 sm:py-4">
-      <section className="mx-auto w-full max-w-5xl">
+    <main className="min-h-screen overflow-x-hidden bg-[#faf9f4] px-3 py-3 text-slate-950 sm:px-4 sm:py-4">
+      <section className="mx-auto w-full min-w-0 max-w-5xl">
         <div className="rounded-[16px] border border-slate-200/80 bg-[linear-gradient(135deg,#ffffff_0%,#fbfdff_58%,#fffdf8_100%)] px-3 py-3 shadow-[0_14px_34px_rgba(15,23,42,0.05)] sm:px-4">
           <div className="flex items-center justify-end border-b border-slate-200/90 pb-2">
             <span className="inline-flex items-center gap-2 rounded-full bg-blue-50/95 px-3 py-1 text-[9px] font-black uppercase tracking-[0.16em] text-blue-700 shadow-[inset_0_1px_0_rgba(255,255,255,0.95)]">
@@ -240,16 +241,21 @@ export default function LiveMockExams() {
             </span>
           </div>
 
-          <div className="grid gap-3 pt-3 lg:grid-cols-[1.15fr_1fr] lg:items-stretch">
+          <div className="grid min-w-0 gap-3 pt-3 lg:grid-cols-[1.15fr_1fr] lg:items-stretch">
             <div className="min-w-0">
               <p className="text-[9px] font-black uppercase tracking-[0.16em] text-amber-700">
                 QE Boys / Henrietta Barnett style
               </p>
-              <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-950 sm:text-[32px]">
+              <h1 className="mt-1 break-words text-2xl font-bold tracking-tight text-slate-950 sm:text-[32px]">
                 11+ English complete mock exam
               </h1>
               <p className="mt-1 max-w-xl text-xs leading-5 text-slate-500 sm:text-sm">
                 A {LIVE_MOCK.durationMinutes}-minute selective English paper covering comprehension and SPaG.
+              </p>
+
+              <p className="mt-3 max-w-xl border-l-2 border-amber-200/90 pl-3 text-xs leading-relaxed text-slate-600 sm:text-sm">
+                This was undoubtedly a very difficult exam. Do not be disheartened if you have gotten lower than
+                expected. But remember to keep practising and revising with exam-style questions until your real exam.
               </p>
 
               <div className="mt-3 rounded-[12px] border border-slate-200 bg-white/85 p-2.5 shadow-[0_8px_18px_rgba(15,23,42,0.035)]">
@@ -273,7 +279,7 @@ export default function LiveMockExams() {
               </div>
             </div>
 
-            <div className="rounded-[12px] border border-slate-200 bg-[linear-gradient(135deg,#fbfdff_0%,#ffffff_55%,#f8fbff_100%)] p-3 shadow-[0_8px_18px_rgba(15,23,42,0.035)]">
+            <div className="min-w-0 rounded-[12px] border border-slate-200 bg-[linear-gradient(135deg,#fbfdff_0%,#ffffff_55%,#f8fbff_100%)] p-3 shadow-[0_8px_18px_rgba(15,23,42,0.035)]">
               <div className="flex items-start gap-3">
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-blue-100 bg-[radial-gradient(circle_at_center,#ffffff_0%,#f5f9ff_60%,#eef4ff_100%)] text-blue-600 shadow-[0_0_0_6px_rgba(37,99,235,0.035)]">
                   <ClipboardCheck className="h-6 w-6 stroke-[2.1]" />
@@ -285,10 +291,18 @@ export default function LiveMockExams() {
                     Live mock
                   </span>
                   <h2 className="mt-1.5 text-lg font-bold tracking-tight text-slate-950 sm:text-xl">
-                    Ready to begin?
+                    {attemptStatus === "submitted"
+                      ? "You're all done"
+                      : attemptStatus === "in_progress"
+                        ? "Continue where you left off"
+                        : "Ready to begin?"}
                   </h2>
                   <p className="mt-1 text-xs leading-5 text-slate-500 sm:text-sm">
-                    Your {LIVE_MOCK.durationMinutes}-minute mock begins immediately once started.
+                    {attemptStatus === "submitted"
+                      ? "Open your personalised breakdown: score, placement, and question-by-question review."
+                      : attemptStatus === "in_progress"
+                        ? "Resume your attempt. The timer and answers are saved on your account."
+                        : `Your ${LIVE_MOCK.durationMinutes}-minute mock begins immediately once started.`}
                   </p>
                   <div className="mt-2 flex items-start gap-1.5 text-[11px] text-slate-400 sm:text-xs">
                     <ShieldCheck className="mt-0.5 h-3 w-3 shrink-0 text-slate-400" />
@@ -298,45 +312,55 @@ export default function LiveMockExams() {
               </div>
 
               {attemptStatus === "submitted" ? (
-                <p className="mt-3 rounded-[10px] border border-amber-200 bg-amber-50 px-3 py-2.5 text-xs font-medium leading-relaxed text-amber-950">
-                  You have already completed this live mock. Each account may sit this paper only once.
+                <p className="mt-3 rounded-[10px] border border-emerald-200 bg-emerald-50/90 px-3 py-2.5 text-xs font-medium leading-relaxed text-emerald-950">
+                  You&apos;ve submitted this mock. Each account may sit this paper only once. View your full results below.
                 </p>
               ) : attemptStatus === "in_progress" ? (
                 <p className="mt-3 rounded-[10px] border border-blue-200 bg-blue-50/90 px-3 py-2.5 text-xs font-medium leading-relaxed text-blue-950">
-                  You have already started this mock. Continue to resume — you cannot restart a fresh attempt.
+                  You have already started this mock. Continue to resume: you cannot restart a fresh attempt.
                 </p>
               ) : null}
 
-              <Button
-                type="button"
-                onClick={handleStartMockExam}
-                disabled={loading || starting || attemptStatus === "submitted"}
-                className="mt-3 h-10 w-full rounded-[10px] bg-[linear-gradient(90deg,#2563eb_0%,#2456f5_55%,#2553ea_100%)] px-4 text-sm font-semibold text-white shadow-[0_10px_20px_rgba(37,99,235,0.18)] hover:brightness-105 disabled:opacity-75"
-              >
-                {starting ? (
-                  <span className="inline-flex items-center gap-2">
-                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                    {attemptStatus === "in_progress" ? "Opening mock…" : "Starting mock exam"}
-                  </span>
-                ) : loading ? (
-                  <span className="inline-flex items-center gap-2">
-                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                    Checking access
-                  </span>
-                ) : attemptStatus === "submitted" ? (
-                  <span>Mock already completed</span>
-                ) : attemptStatus === "in_progress" ? (
-                  <span className="inline-flex items-center gap-2">
-                    Continue mock exam
+              {attemptStatus === "submitted" ? (
+                <Button
+                  asChild
+                  className="mt-3 h-10 w-full rounded-[10px] bg-[linear-gradient(90deg,#2563eb_0%,#2456f5_55%,#2553ea_100%)] px-4 text-sm font-semibold text-white shadow-[0_10px_20px_rgba(37,99,235,0.18)] hover:brightness-105"
+                >
+                  <Link to="/live-mock-exams/analytics" className="inline-flex items-center justify-center gap-2">
+                    See how you did in the mock
                     <ArrowRight className="h-3.5 w-3.5" />
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center gap-2">
-                    Start mock exam
-                    <ArrowRight className="h-3.5 w-3.5" />
-                  </span>
-                )}
-              </Button>
+                  </Link>
+                </Button>
+              ) : (
+                <Button
+                  type="button"
+                  onClick={() => void handleStartMockExam()}
+                  disabled={loading || starting}
+                  className="mt-3 h-10 w-full rounded-[10px] bg-[linear-gradient(90deg,#2563eb_0%,#2456f5_55%,#2553ea_100%)] px-4 text-sm font-semibold text-white shadow-[0_10px_20px_rgba(37,99,235,0.18)] hover:brightness-105 disabled:opacity-75"
+                >
+                  {starting ? (
+                    <span className="inline-flex items-center gap-2">
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      {attemptStatus === "in_progress" ? "Opening mock…" : "Starting mock exam"}
+                    </span>
+                  ) : loading ? (
+                    <span className="inline-flex items-center gap-2">
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      Checking access
+                    </span>
+                  ) : attemptStatus === "in_progress" ? (
+                    <span className="inline-flex items-center gap-2">
+                      Continue mock exam
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-2">
+                      Start mock exam
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </span>
+                  )}
+                </Button>
+              )}
 
               <div className="mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] font-medium text-slate-400 sm:text-[11px]">
                 <span className="inline-flex items-center gap-1.5">
