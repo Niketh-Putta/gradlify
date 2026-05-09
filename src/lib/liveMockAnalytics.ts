@@ -99,6 +99,8 @@ export type LiveMockAnswerDetail = {
   is_correct: boolean | null;
   /** JSON array of `{ id, text, correct }` at submit time. */
   options_snapshot: unknown;
+  /** Question bank explanation (joined in enrich); shown in analytics review modal. */
+  explanation?: string | null;
 };
 
 export function parseLiveMockOptionsSnapshot(raw: unknown): LiveMockOptionSnapshot[] {
@@ -176,18 +178,20 @@ export async function getLiveMockPassageContextForQuestion(
 /** When snapshots were missing on older rows, show bank stem/options in the review modal. */
 export async function getLiveMockQuestionStemOptionsFallback(
   questionId: string,
-): Promise<{ stem: string; options: LiveMockOptionSnapshot[] } | null> {
+): Promise<{ stem: string; options: LiveMockOptionSnapshot[]; explanation: string | null } | null> {
   const { data, error } = await supabase
     .from("live_mock_questions" as never)
-    .select("stem, options")
+    .select("stem, options, explanation")
     .eq("id", questionId)
     .maybeSingle();
 
   if (error || !data) return null;
-  const row = data as { stem: string; options: unknown };
+  const row = data as { stem: string; options: unknown; explanation?: string | null };
+  const exp = row.explanation != null ? String(row.explanation).trim() : "";
   return {
     stem: row.stem,
     options: parseLiveMockOptionsSnapshot(row.options),
+    explanation: exp || null,
   };
 }
 
@@ -252,12 +256,13 @@ export async function enrichLiveMockAnswerDetails(
     question_number: number | null;
     question_type: string | null;
     section_id: string;
+    explanation: string | null;
   };
   let qMeta: QRow[] = [];
   if (ids.length > 0) {
     const { data, error } = await supabase
       .from("live_mock_questions" as never)
-      .select("id, question_number, question_type, section_id")
+      .select("id, question_number, question_type, section_id, explanation")
       .in("id", ids);
     if (error) console.error("enrichLiveMockAnswerDetails questions", error);
     else qMeta = (data as QRow[]) ?? [];
@@ -291,6 +296,10 @@ export async function enrichLiveMockAnswerDetails(
       if (!(next.section_key || "").trim() && q.section_id) {
         const sk = secMap.get(q.section_id);
         if (sk) next = { ...next, section_key: sk };
+      }
+      const exp = q.explanation?.trim();
+      if (exp && !(next.explanation || "").trim()) {
+        next = { ...next, explanation: exp };
       }
     }
     return next;

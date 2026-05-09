@@ -91,12 +91,24 @@ export function LeaderboardTab() {
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'extreme_results' }, handleRealtimeUpdate)
       .subscribe();
 
+    const liveMockAttemptsChannel = supabase
+      .channel('leaderboard_tab_live_mock_attempts')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'live_mock_attempts' }, handleRealtimeUpdate)
+      .subscribe();
+
+    const liveMockAnswersChannel = supabase
+      .channel('leaderboard_tab_live_mock_answers')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'live_mock_answers' }, handleRealtimeUpdate)
+      .subscribe();
+
     return () => {
       if (debounceTimer) clearTimeout(debounceTimer);
       supabase.removeChannel(practiceChannel);
       supabase.removeChannel(mockAttemptsChannel);
       supabase.removeChannel(mockQuestionsChannel);
       supabase.removeChannel(challengeChannel);
+      supabase.removeChannel(liveMockAttemptsChannel);
+      supabase.removeChannel(liveMockAnswersChannel);
     };
   }, [loadLeaderboard]);
 

@@ -127,6 +127,16 @@ export default function Connect() {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'mock_questions' }, handleRealtimeUpdate)
       .subscribe();
 
+    const liveMockAttemptsChannel = supabase
+      .channel('connect_leaderboard_live_mock_attempts')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'live_mock_attempts' }, handleRealtimeUpdate)
+      .subscribe();
+
+    const liveMockAnswersChannel = supabase
+      .channel('connect_leaderboard_live_mock_answers')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'live_mock_answers' }, handleRealtimeUpdate)
+      .subscribe();
+
     const friendChannel = supabase
       .channel('connect_friendships_changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'friendships' }, () => {
@@ -139,6 +149,8 @@ export default function Connect() {
       if (debounceTimer) clearTimeout(debounceTimer);
       supabase.removeChannel(mockAttemptsChannel);
       supabase.removeChannel(mockQuestionsChannel);
+      supabase.removeChannel(liveMockAttemptsChannel);
+      supabase.removeChannel(liveMockAnswersChannel);
       supabase.removeChannel(friendChannel);
     };
   }, [loadData, loadLeaderboard]);

@@ -74,18 +74,20 @@ export function normalizeNewlines(text: string): string {
 
   // Split multiple-choice options A) through E) onto separate lines.
   // We handle both missing-space scenarios (e.g., "4D)") and space scenarios.
-  normalized = normalized.replace(/([^ \n])([A-E]\)\s)/g, "$1\n$2");
+  // Do not split "(A)" style references (grammar/comprehension parenthetical options).
+  normalized = normalized.replace(/([^ (\n])([A-E]\)\s)/g, "$1\n$2");
   normalized = normalized.replace(/([ \t]+)([A-E]\)\s)/g, "\n$2");
 
   // Ensure step-by-step explanations appear on their own lines for readability.
-  // Example: "Step 1: ... Step 2: ... Final answer: ..."
+  // Example: "Step 1: ... Step 2: ... Final Answer: ..."
+  // Use case-sensitive "Answer" only so phrases like "wrong answer" are not split into "wrong" + "answer".
   normalized = normalized
     .replace(/(\S)\s*(Step\s*\d+\s*[:).-]?)/gi, "$1\n\n$2")
-    .replace(/(\S)\s*((?:Final\s*)?Answer\s*[:).-]?)/gi, "$1\n\n$2")
+    .replace(/(\S)\s*((?:Final\s+)?Answer\s*[:).-])/g, "$1\n\n$2")
     // Force step labels into their own block but KEEP content on the same line if concise, or let user formatting handle it
     .replace(/\s*(Step\s*\d+\s*[:).-]?)\s*/gi, "\n\n$1 ")
     // Force final answer labels onto their own block.
-    .replace(/\s*((?:Final\s*)?Answer)\s*[:).-]?\s*/gi, "\n\n$1: ")
+    .replace(/\s*((?:Final\s+)?Answer)\s*[:).-]*\s*/g, "\n\n$1: ")
     // Collapse excessive blank lines introduced by splitting.
     .replace(/\n{3,}/g, "\n\n")
     .trim();

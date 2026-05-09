@@ -16,6 +16,8 @@ import {
   Users,
 } from "lucide-react";
 
+import RichQuestionContent from "@/components/RichQuestionContent";
+import { formatExplanation } from "@/lib/formatExplanation";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -195,6 +197,7 @@ export default function LiveMockAnalytics() {
   const [fallbackEnrich, setFallbackEnrich] = useState<{
     stem: string;
     options: LiveMockOptionSnapshot[];
+    explanation?: string | null;
   } | null>(null);
   const [reviewLoading, setReviewLoading] = useState(false);
 
@@ -245,6 +248,13 @@ export default function LiveMockAnalytics() {
     const snap = parseLiveMockOptionsSnapshot(reviewDetail.options_snapshot);
     if (snap.length > 0) return snap;
     return fallbackEnrich?.options ?? [];
+  }, [reviewDetail, fallbackEnrich]);
+
+  const reviewExplanation = useMemo(() => {
+    if (!reviewDetail) return "";
+    const fromAnswer = reviewDetail.explanation?.trim();
+    if (fromAnswer) return fromAnswer;
+    return fallbackEnrich?.explanation?.trim() || "";
   }, [reviewDetail, fallbackEnrich]);
 
   const placementDisplay = useMemo(() => {
@@ -780,6 +790,24 @@ export default function LiveMockAnalytics() {
                           <p className="mt-2 text-xs text-slate-500">Option text could not be loaded for this row.</p>
                         ) : null}
                       </div>
+
+                      {reviewExplanation ? (
+                        <div className="rounded-xl border border-amber-200/90 bg-amber-50/95 p-3 dark:border-amber-900/50 dark:bg-amber-950/35">
+                          <p className="text-[10px] font-black uppercase tracking-wide text-amber-900 dark:text-amber-100">
+                            Explanation
+                          </p>
+                          <div className="mt-2 text-[13px] leading-relaxed text-slate-900 dark:text-slate-100">
+                            <RichQuestionContent
+                              text={formatExplanation(reviewExplanation)}
+                              className="space-y-2"
+                            />
+                          </div>
+                        </div>
+                      ) : reviewDetail.is_correct !== true ? (
+                        <p className="text-xs text-slate-500">
+                          No explanation has been added for this question in the bank yet.
+                        </p>
+                      ) : null}
                     </div>
 
                     <div className="border-t border-slate-100 px-4 py-3 sm:px-5">

@@ -50,10 +50,22 @@ export function LeaderboardSnapshot() {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'mock_questions' }, handleRealtimeUpdate)
       .subscribe();
 
+    const liveMockAttemptsChannel = supabase
+      .channel('live_mock_attempts_snapshot_changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'live_mock_attempts' }, handleRealtimeUpdate)
+      .subscribe();
+
+    const liveMockAnswersChannel = supabase
+      .channel('live_mock_answers_snapshot_changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'live_mock_answers' }, handleRealtimeUpdate)
+      .subscribe();
+
     return () => {
       clearTimeout(debounceTimer);
       supabase.removeChannel(mockChannel);
       supabase.removeChannel(mockQuestionsChannel);
+      supabase.removeChannel(liveMockAttemptsChannel);
+      supabase.removeChannel(liveMockAnswersChannel);
     };
   }, []);
 

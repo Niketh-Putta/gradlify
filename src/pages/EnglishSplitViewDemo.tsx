@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, BookOpen, AlertTriangle, Lock, Search, Highlighter, MapPin, Sparkles, ChevronRight, Flag, Timer, Zap, Trophy, ShieldAlert, Check, Type, SpellCheck, TextCursorInput, ListChecks, Languages, CheckCircle, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import RichQuestionContent from '@/components/RichQuestionContent';
+import { formatExplanation } from '@/lib/formatExplanation';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { usePremium } from '@/hooks/usePremium';
@@ -1524,6 +1526,21 @@ export function EnglishSplitViewDemo() {
 
           if (answersError) throw answersError;
         }
+
+        const { data: sprint } = await supabase
+          .from('sprint_windows')
+          .select('id, start_at, end_at')
+          .eq('is_active', true)
+          .maybeSingle();
+
+        if (sprint) {
+          await supabase.rpc('refresh_sprint_stats', {
+            p_sprint_id: sprint.id,
+            p_start: sprint.start_at,
+            p_end: sprint.end_at
+          });
+          await supabase.rpc('capture_sprint_top10', { p_sprint_id: sprint.id });
+        }
       }
     } catch (error) {
       console.error('Live mock submit error:', error);
@@ -2031,7 +2048,15 @@ export function EnglishSplitViewDemo() {
                           const qKey = `${section.uniqueId}_${q.id}`;
                           const isSelected = activeQuestionId === qKey;
                           const isFlagged = flaggedQuestions[qKey];
-                          
+                          const selectedAnswerId = selectedAnswers[qKey];
+                          const correctAnswerOpt = q.options.find((o) => o.correct);
+                          const showMissedExplanation =
+                            isLiveMock &&
+                            isReviewMode &&
+                            Boolean(correctAnswerOpt) &&
+                            (!selectedAnswerId || selectedAnswerId !== correctAnswerOpt.id) &&
+                            Boolean(q.explanation?.trim());
+
                           return (
                             <div 
                               key={qKey}
@@ -2134,15 +2159,29 @@ export function EnglishSplitViewDemo() {
                                           <div className="mt-0.5 p-1 rounded-full bg-rose-500/20 text-rose-600">
                                             <AlertTriangle className="w-3.5 h-3.5" />
                                           </div>
-                                          <div>
-                                            <div className="text-xs font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wide mb-1 flex items-center gap-2">
-                                              Evidence Check
-                                              <ChevronRight className="w-3 h-3 text-rose-500/50" />
-                                              Tutor Note
+                                          <div className="min-w-0 flex-1 space-y-3">
+                                            <div>
+                                              <div className="text-xs font-bold text-rose-600 dark:text-rose-400 uppercase tracking-wide mb-1 flex items-center gap-2">
+                                                Evidence Check
+                                                <ChevronRight className="w-3 h-3 text-rose-500/50" />
+                                                Tutor Note
+                                              </div>
+                                              {isLiveMock ? (
+                                                opt.trap?.trim() ? (
+                                                  <p className="text-sm font-medium text-foreground/80 leading-relaxed">
+                                                    {opt.trap}
+                                                  </p>
+                                                ) : (
+                                                  <p className="text-sm font-medium text-foreground/80 leading-relaxed">
+                                                    Review the passage carefully to see why this option is unsupported.
+                                                  </p>
+                                                )
+                                              ) : (
+                                                <p className="text-sm font-medium text-foreground/80 leading-relaxed">
+                                                  {opt.trap || q.explanation || "Review the passage carefully to see why this option is unsupported."}
+                                                </p>
+                                              )}
                                             </div>
-                                            <p className="text-sm font-medium text-foreground/80 leading-relaxed">
-                                              {opt.trap || q.explanation || "Review the passage carefully to see why this option is unsupported."}
-                                            </p>
                                           </div>
                                         </div>
                                       </div>
@@ -2170,6 +2209,20 @@ export function EnglishSplitViewDemo() {
                                 );
                               })}
                             </div>
+
+                            {showMissedExplanation && (
+                              <div className="mt-4 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 dark:bg-amber-950/30">
+                                <p className="text-xs uppercase tracking-wide font-semibold text-amber-900 dark:text-amber-100 mb-2">
+                                  Explanation
+                                </p>
+                                <div className="text-sm leading-relaxed text-foreground break-words">
+                                  <RichQuestionContent
+                                    text={formatExplanation(q.explanation)}
+                                    className="space-y-2"
+                                  />
+                                </div>
+                              </div>
+                            )}
                           </div>
                           );
                         };
