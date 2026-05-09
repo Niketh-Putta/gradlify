@@ -1430,7 +1430,7 @@ export function EnglishSplitViewDemo() {
                               )}
                               
                               {/* Explicitly handling newlines for Poetry to ensure stanza-like flow */}
-                              {p.text.split('\n').map((line, lineIdx, arr) => (
+                              {p.text.replace(/—/g, '').split('\n').map((line, lineIdx, arr) => (
                                 <React.Fragment key={lineIdx}>
                                   {renderHighlightedText(line)}
                                   {lineIdx < arr.length - 1 && <br />}
