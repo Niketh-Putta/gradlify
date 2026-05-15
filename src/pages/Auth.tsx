@@ -12,7 +12,7 @@ import { ResetPasswordForm } from "@/components/ResetPasswordForm";
 import { consumePostAuthRedirect, getPostAuthRedirect, setPostAuthRedirect } from "@/lib/postAuthRedirect";
 import { AI_FEATURE_ENABLED } from "@/lib/featureFlags";
 import { applySignupTrack, clearSignupTrack, getDashboardPath, getSignupTrack, setSignupTrack } from "@/lib/track";
-import { GoogleOAuthRedirectButton } from "@/components/GoogleOAuthRedirectButton";
+import { GoogleSignInButton } from "@/components/GoogleSignInButton";
 import { captureReferralFromSearch, claimStoredReferral } from "@/lib/referrals";
 
 type MessageStatusLikeError = {
@@ -212,40 +212,6 @@ export default function Auth() {
     }
   };
 
-  const handleGoogleSignIn = async () => {
-    if (isLoading) return;
-    
-    setIsLoading(true);
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback`
-        }
-      });
-      
-      if (error) throw error;
-    } catch (error: unknown) {
-      const maybeErr = error as MessageStatusLikeError;
-      const msg =
-        typeof maybeErr?.message === "string"
-          ? maybeErr.message
-          : error instanceof Error
-            ? error.message
-            : String(error);
-      toast.error(msg || 'Failed to sign in with Google');
-      // If provider endpoint not found, open manual authorize URL to help debug
-      try {
-        const { openManualOAuth } = await import('@/lib/supabaseAuthHelpers');
-        if (msg && msg.includes('NOT_FOUND')) openManualOAuth('google');
-      } catch (e) {
-        void e;
-      }
-      setIsLoading(false);
-    }
-  };
-
-
   return (
     <div className="!light min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
@@ -341,10 +307,12 @@ export default function Auth() {
             ) : (
               <>
                 {/* Google Sign In Button */}
-                <GoogleOAuthRedirectButton
-                  onClick={handleGoogleSignIn}
+                <GoogleSignInButton
                   disabled={isLoading}
+                  width={340}
                   className="mb-4 h-12 w-full rounded-full border border-gray-300 bg-white text-sm font-medium hover:bg-gray-50"
+                  onSignInStart={() => setIsLoading(true)}
+                  onSignInEnd={() => setIsLoading(false)}
                 />
                 
                 <div className="relative mb-4">

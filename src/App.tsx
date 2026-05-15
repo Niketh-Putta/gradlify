@@ -6,6 +6,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { SubjectProvider } from "@/contexts/SubjectContext";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
+import { GoogleOAuthProvider } from "@react-oauth/google";
+
+const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
 
 // Eagerly load the main landing page to prevent a flash of loading state on first visit
 import Index from "./pages/Index";
@@ -78,6 +81,15 @@ const AppContent = () => (
   </QueryClientProvider>
 );
 
-const App = () => <AppContent />;
+const App = () => {
+  if (googleClientId) {
+    return (
+      <GoogleOAuthProvider clientId={googleClientId}>
+        <AppContent />
+      </GoogleOAuthProvider>
+    );
+  }
+  return <AppContent />;
+};
 
 export default App;

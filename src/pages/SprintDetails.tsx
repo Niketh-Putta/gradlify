@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigateBackOrHome } from "@/hooks/useNavigateBackOrHome";
 import { ForceTheme } from "@/components/ForceTheme";
 import { ArrowRight, Trophy } from "lucide-react";
 import { useSubject } from "@/contexts/SubjectContext";
@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { getFoundersSprintInfo, getSprintEventDisplayLabels } from "@/lib/foundersSprint";
 
 export function SprintDetails() {
-  const navigate = useNavigate();
+  const goBackOrHome = useNavigateBackOrHome();
   const subjectContext = useSubject();
   const currentSubject = subjectContext?.currentSubject ?? "maths";
   const isEnglish = currentSubject === "english";
@@ -22,7 +22,7 @@ export function SprintDetails() {
           <div className="mx-auto flex h-12 max-w-5xl items-center justify-between px-6">
             <button
               type="button"
-              onClick={() => navigate(-1)}
+              onClick={goBackOrHome}
               className="group flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 transition-colors hover:text-slate-900"
             >
               <ArrowRight className="h-3 w-3 rotate-180 transition-transform group-hover:-translate-x-0.5" />

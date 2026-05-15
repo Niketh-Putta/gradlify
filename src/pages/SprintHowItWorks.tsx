@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigateBackOrHome } from "@/hooks/useNavigateBackOrHome";
 import { ForceTheme } from "@/components/ForceTheme";
 import { supabase } from "@/integrations/supabase/client";
 import { useAppContext } from "@/hooks/useAppContext";
@@ -34,6 +35,7 @@ const getCountdownToStart = () => {
 
 export function SprintHowItWorks() {
   const navigate = useNavigate();
+  const goBackOrHome = useNavigateBackOrHome();
   const [searchParams] = useSearchParams();
   const queryTrackParam = searchParams.get("track");
 
@@ -106,7 +108,7 @@ export function SprintHowItWorks() {
           <div className="relative mx-auto max-w-[980px] px-4 pb-14 pt-10 sm:px-6">
             <button
               type="button"
-              onClick={() => navigate(-1)}
+              onClick={goBackOrHome}
               className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#E6E8F0] bg-white/80 px-3 py-1.5 text-xs font-semibold text-slate-600 shadow-sm transition hover:-translate-y-0.5 hover:text-slate-900"
             >
               <span aria-hidden="true">&larr;</span>
@@ -262,7 +264,7 @@ export function SprintHowItWorks() {
         <div className="relative mx-auto max-w-[980px] px-4 pb-14 pt-10 sm:px-6">
           <button
             type="button"
-            onClick={() => navigate(-1)}
+            onClick={goBackOrHome}
             className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#E6E8F0] bg-white/80 px-3 py-1.5 text-xs font-semibold text-slate-600 shadow-sm transition hover:-translate-y-0.5 hover:text-slate-900"
           >
             <span aria-hidden="true">&larr;</span>

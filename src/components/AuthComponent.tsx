@@ -12,7 +12,7 @@ import { User, Session } from '@supabase/supabase-js';
 import { ResetPasswordForm } from "@/components/ResetPasswordForm";
 import { AI_FEATURE_ENABLED } from "@/lib/featureFlags";
 import { clearSignupTrack, getSignupTrack } from "@/lib/track";
-import { GoogleOAuthRedirectButton } from "@/components/GoogleOAuthRedirectButton";
+import { GoogleSignInButton } from "@/components/GoogleSignInButton";
 import { claimStoredReferral } from '@/lib/referrals';
 import { isAbortLikeError } from '@/lib/errors';
 
@@ -277,32 +277,6 @@ export const AuthComponent = ({ onAuthSuccess, onBack, initialMode = 'login' }: 
     }
   };
 
-  const handleGoogleSignIn = async () => {
-    if (loading) return;
-    
-    setLoading(true);
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback`
-        }
-      });
-      
-      if (error) throw error;
-    } catch (error: unknown) {
-      const maybeErr = error as MessageStatusLikeError;
-      const msg =
-        typeof maybeErr?.message === 'string'
-          ? maybeErr.message
-          : error instanceof Error
-            ? error.message
-            : 'Failed to sign in with Google';
-      toast.error(msg);
-      setLoading(false);
-    }
-  };
-
   // Initialize subtopic progress for new users
   const initializeSubtopicProgress = async (userId: string) => {
     try {
@@ -398,10 +372,12 @@ export const AuthComponent = ({ onAuthSuccess, onBack, initialMode = 'login' }: 
           ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Google Sign In Button */}
-            <GoogleOAuthRedirectButton
-              onClick={handleGoogleSignIn}
+            <GoogleSignInButton
               disabled={loading}
+              width={380}
               className="h-10 w-full rounded-full border border-gray-300 bg-white text-xs font-medium hover:bg-gray-50 sm:h-11 sm:text-sm"
+              onSignInStart={() => setLoading(true)}
+              onSignInEnd={() => setLoading(false)}
             />
             
             <div className="relative my-6">

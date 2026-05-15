@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useNavigateBackOrHome } from "@/hooks/useNavigateBackOrHome";
 import { ForceTheme } from "@/components/ForceTheme";
 import {
   ArrowRight,
@@ -19,6 +20,7 @@ const PRIZE_PHRASE = "100 pound Amazon gift card";
 
 export default function SprintMysterySpin() {
   const navigate = useNavigate();
+  const goBackOrHome = useNavigateBackOrHome();
   const { currentSubject } = useSubject();
   const isEnglish = currentSubject === "english";
 
@@ -68,7 +70,7 @@ export default function SprintMysterySpin() {
           <div className="mx-auto flex h-12 max-w-6xl items-center justify-between px-5 sm:px-8">
             <button
               type="button"
-              onClick={() => navigate(-1)}
+              onClick={goBackOrHome}
               className="group flex items-center gap-2 text-[10px] font-black uppercase text-slate-400 transition-colors hover:text-slate-900"
             >
               <ArrowRight className="h-3 w-3 rotate-180 transition-transform group-hover:-translate-x-0.5" />

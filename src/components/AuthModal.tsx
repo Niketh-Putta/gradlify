@@ -10,7 +10,7 @@ import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { ResetPasswordForm } from '@/components/ResetPasswordForm';
 import { AI_FEATURE_ENABLED } from '@/lib/featureFlags';
 import { clearSignupTrack, getSignupTrack } from '@/lib/track';
-import { GoogleOAuthRedirectButton } from "@/components/GoogleOAuthRedirectButton";
+import { GoogleSignInButton } from "@/components/GoogleSignInButton";
 import { claimStoredReferral } from "@/lib/referrals";
 
 type MessageStatusLikeError = {
@@ -289,38 +289,6 @@ export const AuthModal = ({
     }
   };
 
-  const handleGoogleSignIn = async () => {
-    if (loading) return;
-    
-    setLoading(true);
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback`
-        }
-      });
-      
-      if (error) throw error;
-    } catch (error: unknown) {
-      const maybeErr = error as MessageStatusLikeError;
-      const msg =
-        typeof maybeErr?.message === 'string'
-          ? maybeErr.message
-          : error instanceof Error
-            ? error.message
-            : String(error);
-      toast.error(msg || 'Failed to sign in with Google');
-      try {
-        const { openManualOAuth } = await import('@/lib/supabaseAuthHelpers');
-        if (msg && msg.includes('NOT_FOUND')) openManualOAuth('google');
-      } catch (e) {
-        void e;
-      }
-      setLoading(false);
-    }
-  };
-
   // Initialize subtopic progress for new users
   const initializeSubtopicProgress = async (userId: string) => {
     try {
@@ -450,10 +418,12 @@ export const AuthModal = ({
           {view === 'auth' ? (
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Google Sign In Button */}
-            <GoogleOAuthRedirectButton
-              onClick={handleGoogleSignIn}
+            <GoogleSignInButton
               disabled={loading}
+              width={340}
               className={`w-full h-11 rounded-full ${outlineButtonClass} text-sm transition-all`}
+              onSignInStart={() => setLoading(true)}
+              onSignInEnd={() => setLoading(false)}
             />
             
             {/* Divider */}
