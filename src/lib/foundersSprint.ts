@@ -1,17 +1,86 @@
 import { AI_FEATURE_ENABLED } from '@/lib/featureFlags';
 import type { UserTrack } from '@/lib/track';
 
-const SPRINT_LENGTH_DAYS = 7;
-const SPRINT_ANCHOR = new Date('2025-01-01T00:00:00Z');
+const SPRINT_LENGTH_DAYS = 30;
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
-export const CURRENT_SPRINT_ID = "april-sprint-2026";
-const SPRINT_START_AT = new Date('2026-04-20T17:30:00Z');
-const SPRINT_END_AT = new Date('2026-04-27T17:30:00Z');
-const NEXT_SPRINT_START_AT = new Date('2026-05-04T17:30:00Z');
-const ELEVEN_PLUS_NEXT_SPRINT_START_AT = new Date('2026-04-20T17:30:00Z');
+export const CURRENT_SPRINT_ID = "monthly-sprint-may-2026";
 
-function startOfDay(date: Date) {
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+const envStartIso = typeof import.meta.env.VITE_SPRINT_START_ISO === 'string' ? import.meta.env.VITE_SPRINT_START_ISO : '';
+const envEndIso = typeof import.meta.env.VITE_SPRINT_END_ISO === 'string' ? import.meta.env.VITE_SPRINT_END_ISO : '';
+
+/** Instant when the sprint opens (absolute instant; labels use each viewer’s local time). Override with VITE_SPRINT_START_ISO. */
+function computeDefaultStart(): Date {
+  if (envStartIso) return new Date(envStartIso);
+  return new Date('2026-05-14T19:30:00Z');
+}
+
+/** Instant when the sprint closes (30 days after start at 17:30 UTC / 18:30 UK in BST). Override with VITE_SPRINT_END_ISO. */
+function computeDefaultEnd(start: Date): Date {
+  if (envEndIso) return new Date(envEndIso);
+  const d = new Date(start);
+  d.setUTCDate(d.getUTCDate() + SPRINT_LENGTH_DAYS);
+  d.setUTCHours(17, 30, 0, 0);
+  return d;
+}
+
+/** Canonical UK/London zone for server-side or explicit UK copy (display uses viewer local time). */
+export const SPRINT_UK_TIMEZONE = 'Europe/London' as const;
+
+export const SPRINT_START_AT = computeDefaultStart();
+export const SPRINT_END_AT = computeDefaultEnd(SPRINT_START_AT);
+
+const NEXT_SPRINT_START_AT = new Date(SPRINT_END_AT.getTime() + 14 * MS_PER_DAY);
+export const ELEVEN_PLUS_NEXT_SPRINT_START_AT = new Date(SPRINT_START_AT);
+
+/** IANA timezone used for sprint date labels on this device (e.g. Europe/London). */
+export function getSprintDisplayTimeZoneId(): string {
+  return Intl.DateTimeFormat().resolvedOptions().timeZone ?? "";
+}
+
+function localTimeZoneShort(d: Date): string {
+  const v = new Intl.DateTimeFormat("en-GB", { timeZoneName: "short" })
+    .formatToParts(d)
+    .find((p) => p.type === "timeZoneName")?.value;
+  return (v ?? "").trim();
+}
+
+/** Date + compact time in the viewer’s local timezone (e.g. "Thursday, 14 May 2026 · 8:30pm BST"). */
+export function getSprintEventDisplayLabels() {
+  const datePart = new Intl.DateTimeFormat("en-GB", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+
+  const compactTime = (d: Date) => {
+    const parts = new Intl.DateTimeFormat("en-GB", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    }).formatToParts(d);
+    const hour = parts.find((p) => p.type === "hour")?.value ?? "";
+    const minute = parts.find((p) => p.type === "minute")?.value ?? "";
+    const dayPeriod = (parts.find((p) => p.type === "dayPeriod")?.value ?? "").replace(/\s+/g, "").toLowerCase();
+    const tzShort = localTimeZoneShort(d);
+    const time = `${hour}:${minute}${dayPeriod}`;
+    return tzShort ? `${time} ${tzShort}` : time;
+  };
+
+  const line = (d: Date) => `${datePart.format(d)} · ${compactTime(d)}`;
+  const shortStart = localTimeZoneShort(SPRINT_START_AT);
+  const shortEnd = localTimeZoneShort(SPRINT_END_AT);
+  const viewerTimeZoneShort =
+    shortStart && shortEnd && shortStart !== shortEnd ? `${shortStart} → ${shortEnd}` : shortStart || shortEnd || "";
+
+  return {
+    startLabel: line(SPRINT_START_AT),
+    endLabel: line(SPRINT_END_AT),
+    endDateOnly: datePart.format(SPRINT_END_AT),
+    localTimeZoneId: getSprintDisplayTimeZoneId(),
+    /** Short zone name(s) for the viewer’s locale (e.g. BST, GMT, EST). */
+    localTimeZoneShort: viewerTimeZoneShort,
+  };
 }
 
 function formatOrdinalDay(day: number) {
@@ -43,22 +112,35 @@ export function getFoundersSprintInfo(referenceDate: Date = new Date()) {
   };
 }
 
-const MONTH_FORMATTER = new Intl.DateTimeFormat('en-GB', { month: 'short' });
-const TIME_FORMATTER = new Intl.DateTimeFormat('en-GB', { hour: 'numeric', minute: '2-digit', hour12: true });
-const WEEKDAY_FORMATTER = new Intl.DateTimeFormat('en-GB', { weekday: 'long' });
-
-function isSameDay(a: Date, b: Date) {
-  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+function localCalendarKey(d: Date): string {
+  return new Intl.DateTimeFormat("en-CA", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(d);
 }
 
 function formatSprintEnd(endDate: Date, referenceDate: Date) {
-  const endMoment = new Date(endDate);
+  const parts = new Intl.DateTimeFormat('en-GB', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'short',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  }).formatToParts(endDate);
+  const val = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find((p) => p.type === type)?.value ?? '';
+  const dayNum = parseInt(val('day'), 10);
+  const day = formatOrdinalDay(dayNum);
+  const month = val('month');
+  const weekday = val('weekday');
+  const hour = val('hour');
+  const minute = val('minute');
+  const dayPeriod = val('dayPeriod');
+  const time = `${hour}:${minute} ${dayPeriod}`.replace(/\s+/g, ' ').trim();
 
-  const day = formatOrdinalDay(endMoment.getDate());
-  const month = MONTH_FORMATTER.format(endMoment);
-  const weekday = WEEKDAY_FORMATTER.format(endMoment);
-  const time = TIME_FORMATTER.format(endMoment).replace(/\s+/g, " ").trim();
-  if (isSameDay(endMoment, referenceDate)) {
+  if (localCalendarKey(endDate) === localCalendarKey(referenceDate)) {
     return `${day} ${month}, today ${time}`;
   }
   return `${weekday} ${day} ${month} ${time}`;
@@ -81,10 +163,13 @@ export function getSprintEndDateText(referenceDate: Date = new Date()) {
 }
 
 function formatSprintStart(startDate: Date) {
-  const startMoment = new Date(startDate);
-  const day = formatOrdinalDay(startMoment.getDate());
-  const month = MONTH_FORMATTER.format(startMoment);
-  return `${day} ${month}`;
+  const parts = new Intl.DateTimeFormat('en-GB', {
+    day: 'numeric',
+    month: 'short',
+  }).formatToParts(startDate);
+  const dayNum = parseInt(parts.find((p) => p.type === 'day')?.value ?? '0', 10);
+  const month = parts.find((p) => p.type === 'month')?.value ?? '';
+  return `${formatOrdinalDay(dayNum)} ${month}`;
 }
 
 function getDaysToGo(referenceDate: Date, startDate: Date) {
@@ -140,9 +225,9 @@ export const getSprintUpgradeCopy = () => {
     hasEnded,
     bannerTitle: isActive ? `Sprint live - ${countdown}` : hasEnded ? "Sprint has ended" : "Gradlify Premium\nStart Your 3 Day Free Trial",
     bannerSubtitle: isActive
-      ? "Mocks + Challenge only. Every correct answer counts. Climb the leaderboard now."
+      ? "Only full mock exams count: correct answers in mocks move the leaderboard; practice does not. After one month, the highest score wins."
       : hasEnded 
-        ? "Results are being verified. Final standings will be announced shortly."
+        ? "Results are being verified. The winner will be announced shortly."
         : AI_FEATURE_ENABLED
           ? "Get unlimited AI questions, full mock exams, and personalised revision plans."
           : "Get unlimited questions, full mock exams, and personalised revision plans.",
@@ -152,9 +237,9 @@ export const getSprintUpgradeCopy = () => {
     listTitle: isActive ? "Sprint upgrade perks:" : "Start Your 3 Day Free Trial for:",
     settingsTitle: isActive ? "Sprint live: unlock more attempts" : "Gradlify Premium\nStart Your 3 Day Free Trial",
     settingsDescription: isActive
-      ? `Sprint is live - ${countdown}. Unlock unlimited mock and challenge attempts.`
+      ? `Sprint is live - ${countdown}. Unlock more mock attempts so every correct answer in a full mock can count toward your score.`
       : hasEnded
-        ? "The April Sprint has concluded. Final results are being verified."
+        ? "The monthly competition has concluded. Final results are being verified."
         : AI_FEATURE_ENABLED
           ? "Get unlimited access to AI-powered study assistance, advanced mock exams, personalised study plans, and premium resources."
           : "Get unlimited access to personalised study assistance, advanced mock exams, personalised study plans, and premium resources.",

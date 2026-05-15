@@ -13,7 +13,7 @@ import { DemoQuestion, elevenPlusDemoQuestions, elevenPlusMathsDemoQuestions, mo
 import { ArrowLeft } from "lucide-react";
 
 import { LogoMark } from "@/components/LogoMark";
-import { LiveMockExamBanner } from "@/components/LiveMockExamBanner";
+import { SprintBanner } from "@/components/SprintBanner";
 import { DiscordFooterEntry } from "@/components/DiscordFooterEntry";
 import { supabase } from "@/integrations/supabase/client";
 import { getSprintUpgradeCopy } from "@/lib/foundersSprint";
@@ -546,8 +546,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
               : "bg-white/80 backdrop-blur-sm border-b border-transparent text-slate-900",
         ].join(" ")}
       >
-        <LiveMockExamBanner mode="button" onClick={handleSignup} />
-
+        {isElevenPlus && <SprintBanner />}
         <div className="max-w-7xl mx-auto px-3 pr-4 sm:px-6 sm:pr-6 py-2.5 sm:py-4">
           <div className="flex items-center justify-between gap-3 sm:gap-4">
             <a href="#" className="flex items-center gap-3">
@@ -592,8 +591,13 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
         </div>
       </nav>
 
-      <main className="pt-24 sm:pt-28 lg:pt-8">
-        {/* Hero — lg top padding accounts for fixed Sprint + Live Mock banners + nav (replaces invalid sm:pt-34) */}
+      <main
+        className={cn(
+          "pt-24 sm:pt-28 lg:pt-8",
+          isElevenPlus && "pt-[6.75rem] sm:pt-[7.5rem]"
+        )}
+      >
+        {/* Hero: top padding accounts for fixed nav + sprint strip (11+) */}
         <section className="relative pt-28 sm:pt-32 lg:pt-40 pb-12 sm:pb-18 lg:pb-20 overflow-hidden">
           {ambientEffectsEnabled && (
             <div className="absolute inset-0 pointer-events-none">
@@ -1038,20 +1042,48 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                 </h2>
                 <div className="mt-5 flex justify-center">
                   <div className="w-full max-w-2xl rounded-[24px] border border-slate-200/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,250,252,0.94))] p-[1px] shadow-[0_22px_48px_-28px_rgba(15,23,42,0.22)]">
-                    <div className="rounded-[23px] bg-[radial-gradient(circle_at_top_left,rgba(245,158,11,0.12),transparent_34%),linear-gradient(180deg,rgba(255,255,255,0.96),rgba(248,250,252,0.96))] px-4 py-3.5 sm:px-5 sm:py-4">
-                      <div className="flex items-start gap-3 text-left">
-                        <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-amber-200/70 bg-amber-50/90 text-amber-600 shadow-[inset_0_1px_0_rgba(255,255,255,0.85)]">
-                          <Trophy className="h-4.5 w-4.5" />
-                        </div>
-                        <div className="min-w-0">
-                          <div className="text-[10px] font-semibold uppercase tracking-[0.26em] text-slate-400">
-                            Weekly Prize Competitions
-                          </div>
-                          <p className="mt-1 text-sm font-medium leading-relaxed text-slate-600 sm:text-[15px]">
-                            Compete for free each week and win prizes for consistent practice.
-                          </p>
-                        </div>
+                    <div
+                      className={cn(
+                        "rounded-[23px] px-6 py-8 text-center sm:px-10 sm:py-10",
+                        isDark
+                          ? "border border-white/10 bg-[radial-gradient(ellipse_at_50%_0%,rgba(99,102,241,0.2),transparent_55%),linear-gradient(180deg,rgba(15,23,42,0.95),rgba(15,23,42,0.88))]"
+                          : "border border-slate-100/80 bg-[radial-gradient(ellipse_at_50%_0%,rgba(59,130,246,0.08),transparent_50%),linear-gradient(180deg,rgba(255,255,255,0.98),rgba(250,250,249,0.98))]"
+                      )}
+                    >
+                      <div
+                        className={cn(
+                          "mx-auto mb-5 inline-flex items-center gap-2 rounded-full border px-3 py-1.5 shadow-sm",
+                          isDark
+                            ? "border-sky-500/35 bg-slate-900/60 text-sky-100"
+                            : "border-sky-300/70 bg-white/90 text-slate-800"
+                        )}
+                      >
+                        <ShieldCheck className={cn("h-4 w-4 shrink-0", isDark ? "text-sky-400" : "text-blue-600")} />
+                        <span className="text-[10px] font-bold uppercase tracking-[0.2em] sm:text-[11px]">
+                          £100 Amazon gift card
+                        </span>
                       </div>
+                      <h3
+                        className={cn(
+                          "font-serif font-black leading-[0.92] tracking-tight text-transparent bg-clip-text",
+                          "text-[clamp(2.35rem,7vw,4.75rem)]",
+                          "bg-[linear-gradient(128deg,#2563eb_0%,#3730a3_10%,#4f46e5_22%,#6366f1_34%,#7c3aed_46%,#9333ea_56%,#a855f7_66%,#7e22ce_76%,#9f1239_84%,#c2410c_91%,#ea580c_96%,#fb923c_100%)]",
+                          isDark &&
+                            "bg-[linear-gradient(128deg,#60a5fa_0%,#818cf8_14%,#a78bfa_30%,#c084fc_44%,#e879f9_58%,#c026d3_70%,#f97316_86%,#fb923c_100%)]"
+                        )}
+                      >
+                        <span className="block">£100</span>
+                        <span className="block">Amazon</span>
+                        <span className="block">gift card</span>
+                      </h3>
+                      <p
+                        className={cn(
+                          "mx-auto mt-5 max-w-lg text-sm font-medium leading-relaxed sm:text-[15px]",
+                          isDark ? "text-slate-300" : "text-slate-600"
+                        )}
+                      >
+                        Compete for free across 30 days. When the month ends, the highest leaderboard score wins the cash prize. Only correct answers from full mock exams count; practice questions do not.
+                      </p>
                     </div>
                   </div>
                 </div>

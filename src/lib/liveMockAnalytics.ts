@@ -245,6 +245,36 @@ function snapshotDerivedLabels(row: LiveMockAnswerDetail): Partial<LiveMockAnswe
   return out;
 }
 
+/** When snapshot/columns omit correct flags, use authoritative `live_mock_questions.correct_answer` + bank `options`. */
+function deriveLabelsFromQuestionBank(
+  row: LiveMockAnswerDetail,
+  bank: { correct_answer?: string | null; options?: unknown },
+): Partial<LiveMockAnswerDetail> {
+  const opts = parseLiveMockOptionsSnapshot(bank.options);
+  if (opts.length === 0) return {};
+
+  const out: Partial<LiveMockAnswerDetail> = {};
+  const needCorrectLabel = !row.correct_option_label?.trim();
+  const needCorrectId = !row.correct_option_id?.trim();
+
+  if (needCorrectLabel || needCorrectId) {
+    const letter = bank.correct_answer != null ? String(bank.correct_answer).trim() : "";
+    let c = letter ? opts.find((o) => o.id === letter) : undefined;
+    if (!c) c = opts.find((o) => o.correct);
+    if (c) {
+      if (needCorrectLabel && c.text?.trim()) out.correct_option_label = c.text.trim();
+      if (needCorrectId && c.id) out.correct_option_id = c.id;
+    }
+  }
+
+  if (!row.selected_option_label?.trim() && row.selected_option) {
+    const s = opts.find((o) => o.id === row.selected_option);
+    if (s?.text?.trim()) out.selected_option_label = s.text.trim();
+  }
+
+  return out;
+}
+
 export async function enrichLiveMockAnswerDetails(
   rows: LiveMockAnswerDetail[],
 ): Promise<LiveMockAnswerDetail[]> {
@@ -257,12 +287,14 @@ export async function enrichLiveMockAnswerDetails(
     question_type: string | null;
     section_id: string;
     explanation: string | null;
+    correct_answer: string | null;
+    options: unknown;
   };
   let qMeta: QRow[] = [];
   if (ids.length > 0) {
     const { data, error } = await supabase
       .from("live_mock_questions" as never)
-      .select("id, question_number, question_type, section_id, explanation")
+      .select("id, question_number, question_type, section_id, explanation, correct_answer, options")
       .in("id", ids);
     if (error) console.error("enrichLiveMockAnswerDetails questions", error);
     else qMeta = (data as QRow[]) ?? [];
@@ -301,6 +333,8 @@ export async function enrichLiveMockAnswerDetails(
       if (exp && !(next.explanation || "").trim()) {
         next = { ...next, explanation: exp };
       }
+      const bankPatch = deriveLabelsFromQuestionBank(next, q);
+      next = { ...next, ...bankPatch };
     }
     return next;
   });

@@ -23,6 +23,18 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { useAppContext } from "@/hooks/useAppContext";
 import { resolveUserTrack } from "@/lib/track";
+import { SPRINT_START_AT } from "@/lib/foundersSprint";
+
+const LEADERBOARD_SCORES_SINCE = new Intl.DateTimeFormat("en-GB", {
+  weekday: "long",
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+  hour: "numeric",
+  minute: "2-digit",
+  hour12: true,
+  timeZone: "Europe/London",
+}).format(SPRINT_START_AT);
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -297,8 +309,8 @@ export default function Connect() {
                 Leaderboard
               </span>
             </h1>
-            <p className="text-muted-foreground text-[10px] sm:text-xs font-light mt-0.5 truncate">Ranked by correct answers</p>
-            <p className="text-muted-foreground text-[10px] sm:text-xs font-light truncate mb-1">Scores since Wednesday 29 April at 18:30</p>
+            <p className="text-muted-foreground text-[10px] sm:text-xs font-light mt-0.5 truncate">Sprint: ranked by correct mock-exam answers only</p>
+            <p className="text-muted-foreground text-[10px] sm:text-xs font-light truncate mb-1">Scores since {LEADERBOARD_SCORES_SINCE} (UK)</p>
             <div className={cn(
               "inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md border text-[9px] sm:text-[10px] font-bold uppercase tracking-wider",
               currentSubject === "english" ? "bg-amber-500/10 border-amber-500/20 text-amber-600" : "bg-primary/10 border-primary/20 text-primary"
@@ -334,7 +346,7 @@ export default function Connect() {
 
       <button
         type="button"
-        onClick={() => navigate("/mystery-spin")}
+        onClick={() => navigate("/sprint-details")}
         className="group mb-4 w-full rounded-2xl border border-slate-200 bg-white p-3.5 text-left shadow-sm transition-all duration-300 animate-in slide-in-from-top-4 hover:border-primary/30 hover:shadow-md active:scale-[0.99]"
       >
         <div className="flex items-center justify-between gap-3">
@@ -347,10 +359,10 @@ export default function Connect() {
             </div>
             <div className="min-w-0">
               <p className="truncate text-[13px] font-bold leading-5 text-slate-950 sm:text-sm">
-                See who won the free Gradlify Premium!
+                100 pound Amazon gift card
               </p>
               <p className="text-[10px] font-black uppercase text-slate-400 sm:text-[11px]">
-                Mystery Spin results
+                Prize details &amp; rules
               </p>
             </div>
           </div>

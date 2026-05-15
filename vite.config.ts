@@ -4,9 +4,11 @@ import path from "path";
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   server: {
-    host: true,
+    // Bind explicitly so http://127.0.0.1:5173/ always works (avoids IPv6-only localhost quirks).
+    host: "127.0.0.1",
     port: 5173,
-    strictPort: false,
+    strictPort: true,
+    open: true,
   },
   plugins: [
     react(),

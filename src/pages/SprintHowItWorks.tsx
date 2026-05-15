@@ -4,11 +4,11 @@ import { ForceTheme } from "@/components/ForceTheme";
 import { supabase } from "@/integrations/supabase/client";
 import { useAppContext } from "@/hooks/useAppContext";
 import { normalizeTrack, resolveUserTrack } from "@/lib/track";
-import { getFoundersSprintInfo, getNextSprintInfo } from "@/lib/foundersSprint";
+import { getFoundersSprintInfo, getNextSprintInfo, SPRINT_START_AT, getSprintEventDisplayLabels } from "@/lib/foundersSprint";
 
-const START_DATE = new Date("2026-04-20T17:30:00Z");
-const EVENT_END_LABEL = "Monday 27 April 2026 • 6:30 PM UTC";
-const EVENT_START_LABEL = "Monday 20 April 2026";
+const SPRINT_EVENT_LABELS = getSprintEventDisplayLabels();
+const EVENT_START_LABEL = SPRINT_EVENT_LABELS.startLabel;
+const EVENT_END_LABEL = SPRINT_EVENT_LABELS.endLabel;
 
 const getSprintCountdown = () => {
   const now = new Date();
@@ -24,7 +24,7 @@ const getSprintCountdown = () => {
 
 const getCountdownToStart = () => {
   const now = new Date();
-  const diffMs = Math.max(0, START_DATE.getTime() - now.getTime());
+  const diffMs = Math.max(0, SPRINT_START_AT.getTime() - now.getTime());
   const totalMinutes = Math.floor(diffMs / 60000);
   const days = Math.floor(totalMinutes / (60 * 24));
   const hours = Math.floor((totalMinutes % (60 * 24)) / 60);
@@ -119,7 +119,7 @@ export function SprintHowItWorks() {
                     <div className="space-y-4">
                       <div>
                         <p className="inline-flex items-center rounded-full border border-primary-200 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-primary-600">
-                          Limited event - Final Week of February
+                          Limited event: one month
                         </p>
                       </div>
                       <div>
@@ -127,7 +127,7 @@ export function SprintHowItWorks() {
                           11+ Launch Sprint
                         </h1>
                         <p className="mt-3 max-w-[52ch] text-lg text-slate-600 sm:text-xl">
-                          One week. £160 prize pool. 11+ only.
+                          One cash prize: a £100 Amazon gift card, awarded after 30 days to whoever has the highest leaderboard score. Only correct answers from full mock exams count; practice does not. Live now. 11+ only.
                         </p>
                         <p className="mt-1 text-sm text-slate-500">
                           This sprint is for the 11+ track only. GCSE content and leaderboards remain separate.
@@ -180,23 +180,23 @@ export function SprintHowItWorks() {
                     <div className="space-y-3 text-sm text-slate-600">
                       <div className="flex items-start gap-2">
                         <span className="mt-1 h-2 w-2 flex-shrink-0 rounded-full bg-primary-500" />
-                        <span>Only Mock Exams and Challenge sessions earn sprint points.</span>
+                        <span>Only correct answers in full mock exams count toward your sprint leaderboard score.</span>
                       </div>
                       <div className="flex items-start gap-2">
                         <span className="mt-1 h-2 w-2 flex-shrink-0 rounded-full bg-primary-500" />
-                        <span>Practice mode does <span className="font-semibold text-slate-900">NOT</span> count toward sprint rankings.</span>
+                        <span>Correct answers from practice questions do <span className="font-semibold text-slate-900">not</span> count. Use practice to learn; only mocks move your score.</span>
                       </div>
                       <div className="flex items-start gap-2">
                         <span className="mt-1 h-2 w-2 flex-shrink-0 rounded-full bg-primary-500" />
-                        <span>Highest total points in the 7-day window wins.</span>
+                        <span>After the 30-day window ends, whoever has the highest leaderboard score wins the cash prize (subject to verification).</span>
                       </div>
                       <div className="flex items-start gap-2">
                         <span className="mt-1 h-2 w-2 flex-shrink-0 rounded-full bg-primary-500" />
-                        <span>Premium users can attempt unlimited sprint sessions per day.</span>
+                        <span>Premium users can run more full mock exams per day.</span>
                       </div>
                       <div className="flex items-start gap-2">
                         <span className="mt-1 h-2 w-2 flex-shrink-0 rounded-full bg-primary-500" />
-                        <span>Accuracy and consistency matter.</span>
+                        <span>Accuracy and consistency in mocks matter.</span>
                       </div>
                     </div>
                     <p className="mt-4 text-xs text-slate-500">
@@ -209,10 +209,10 @@ export function SprintHowItWorks() {
                   <h2 className="text-sm font-semibold text-slate-700">How to compete</h2>
                   <div className="rounded-[16px] border border-[#E6E8F0] bg-gradient-to-br from-white via-white to-[#f0f1ff] p-5 shadow-[0_16px_30px_-22px_rgba(79,70,229,0.3)]">
                     <ol className="list-decimal space-y-2 pl-5 text-sm text-slate-600">
-                      <li>Answer questions from mock exams or challenge questions during the sprint week.</li>
-                      <li>Correct answers contribute to your sprint score.</li>
-                      <li>Watch yourself climb the leaderboard.</li>
-                      <li>Top 3 win prizes!!</li>
+                      <li>Sit full mock exams during the 30-day window.</li>
+                      <li>Only correct answers in those mocks add to your leaderboard score.</li>
+                      <li>Practice never counts toward the sprint leaderboard. Use it to prepare, then prove it in mocks.</li>
+                      <li>When the month ends, the highest score wins the £100 Amazon cash prize (after verification).</li>
                     </ol>
                   </div>
                 </section>
@@ -224,29 +224,18 @@ export function SprintHowItWorks() {
                       <div className="relative w-full">
                         <img
                           src="/prizes-11plus.png"
-                          alt="11+ Launch Sprint prizes"
+                          alt="11+ sprint prize, £100 Amazon gift card"
                           className="w-full max-h-[520px] min-h-[320px] object-contain"
                           loading="lazy"
                         />
                       </div>
                     </div>
                     <div>
-                      <p className="text-lg font-semibold text-slate-900">Total Prize Pool: £160</p>
-                      <div className="mt-3 space-y-2 text-sm text-slate-600">
-                        <div className="flex items-center gap-2">
-                          <span className="text-lg">🥇</span>
-                          <span className="font-semibold text-slate-800">1st place - £75 Amazon Voucher</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-lg">🥈</span>
-                          <span className="font-semibold text-slate-800">2nd place - £50 Waterstones Card</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-lg">🥉</span>
-                          <span className="font-semibold text-slate-800">3rd place - £35 (£25 Waterstones + £10 Amazon)</span>
-                        </div>
-                      </div>
-                      <p className="mt-4 text-xs text-slate-500">Digital vouchers distributed within 24 hours of sprint end.</p>
+                      <p className="text-lg font-semibold text-slate-900">One cash prize: £100 Amazon gift card</p>
+                      <p className="mt-2 text-sm text-slate-600">
+                        One cash prize. After the month closes, the student with the highest mock-only leaderboard score wins (verified by Gradlify).
+                      </p>
+                      <p className="mt-4 text-xs text-slate-500">Digital gift card sent within 24 hours of sprint end, after verification.</p>
                     </div>
                   </div>
                 </section>
@@ -292,7 +281,7 @@ export function SprintHowItWorks() {
                           {isActive ? "LIVE" : "STARTING SOON"}
                         </span>
                         <span className="inline-flex h-7 items-center rounded-full border border-[#E6E8F0] bg-white px-3 text-[11px] font-semibold uppercase tracking-wide text-slate-600">
-                          7 DAYS
+                          30 DAYS
                         </span>
                         <span className="inline-flex h-7 items-center rounded-full border border-[#E6E8F0] bg-white px-3 text-[11px] font-semibold uppercase tracking-wide text-slate-600">
                           FREE TO ENTER
@@ -305,8 +294,8 @@ export function SprintHowItWorks() {
                       </h1>
                       <p className="mt-4 max-w-[52ch] text-base text-slate-600 sm:text-lg">
                         {isActive
-                          ? "Sprint is live. Answer GCSE questions, stack points, and climb the leaderboard."
-                          : "Sprint starting soon. Gear up with GCSE practice, then stack points when we kick off."}
+                          ? "Sprint is live. Sit full mocks. Only correct mock answers move the GCSE sprint leaderboard."
+                          : "Sprint starting soon. Use practice to prepare; when we’re live, only full mocks will change your sprint score."}
                       </p>
                       <p className="text-xs text-slate-500">
                         This GCSE sprint is separate from the 11+ Launch Sprint.
@@ -321,7 +310,7 @@ export function SprintHowItWorks() {
                           <span className="font-bold">{endLabel}</span>
                         </div>
                         <p className="text-xs text-slate-400">
-                          Runs for 7 days • Free to enter • Daily limits apply across each sprint day.
+                          Runs for 30 days • Free to enter • Daily limits apply throughout the sprint.
                         </p>
                       </div>
                     </div>
@@ -359,12 +348,12 @@ export function SprintHowItWorks() {
             <h2 className="text-sm font-semibold text-slate-700">How it works</h2>
             <div className="rounded-[16px] border border-[#E6E8F0] bg-gradient-to-br from-white via-white to-[#f0f1ff] p-5 shadow-[0_16px_30px_-22px_rgba(79,70,229,0.3)]">
               <p className="text-sm leading-relaxed text-slate-600">
-                Sprint points are earned through Mock Exams and Challenge sessions. Practice mode is for learning and does not contribute to sprint rankings.
+                Your sprint leaderboard score comes only from correct answers in completed full mock exams. Practice mode never contributes. After 30 days, the highest score wins the cash prize.
               </p>
               <div className="mt-4 space-y-3">
                 <div className="flex items-center gap-2 text-sm text-slate-600">
                   <span className="h-2 w-2 rounded-full bg-primary-500" />
-                  <span>Correct answers in sprint sessions earn points.</span>
+                  <span>Correct answers in mocks earn leaderboard points; practice questions do not.</span>
                 </div>
                 <div className="flex items-center gap-2 border-t border-slate-200 pt-3 text-sm text-slate-600">
                   <span className="h-2 w-2 rounded-full bg-primary-500" />
@@ -372,11 +361,11 @@ export function SprintHowItWorks() {
                 </div>
                 <div className="flex items-center gap-2 border-t border-slate-200 pt-3 text-sm text-slate-600">
                   <span className="h-2 w-2 rounded-full bg-primary-500" />
-                  <span>Premium users can attempt more mock exams per day, increasing their opportunity to earn sprint points.</span>
+                  <span>Premium users can attempt more mock exams per day, so more correct mock answers can count.</span>
                 </div>
                 <div className="flex items-center gap-2 border-t border-slate-200 pt-3 text-sm text-slate-600">
                   <span className="h-2 w-2 rounded-full bg-primary-500" />
-                  <span>Highest total by the end of the sprint wins.</span>
+                  <span>When the sprint ends, the highest mock-based leaderboard score wins.</span>
                 </div>
               </div>
                     <p className="mt-4 text-xs text-slate-500">
@@ -389,25 +378,31 @@ export function SprintHowItWorks() {
                   <h2 className="text-sm font-semibold text-slate-700">How to compete</h2>
                   <div className="rounded-[16px] border border-[#E6E8F0] bg-gradient-to-br from-white via-white to-[#f0f1ff] p-5 shadow-[0_16px_30px_-22px_rgba(79,70,229,0.3)]">
                     <ol className="list-decimal space-y-2 pl-5 text-sm text-slate-600">
-                      <li>Answer questions from mock exams or challenge questions during the sprint week.</li>
-                      <li>Correct answers contribute to your sprint score.</li>
-                      <li>Watch yourself climb the leaderboard.</li>
-                      <li>Top 3 win prizes!!</li>
+                      <li>Sit full mock exams during the 30-day window.</li>
+                      <li>Only correct answers in those mocks add to your leaderboard score.</li>
+                      <li>Practice never counts toward the sprint leaderboard. Use it to prepare, then prove it in mocks.</li>
+                      <li>When the month ends, the highest score wins the £100 Amazon cash prize (after verification).</li>
                     </ol>
                   </div>
                 </section>
 
           <section id="prizes" className="space-y-4">
             <h2 className="text-sm font-semibold text-slate-700">Prizes</h2>
-            <div className="rounded-[20px] border border-[#E6E8F0] bg-gradient-to-br from-[#f2f0ff] via-white to-[#eef0ff] p-6 shadow-[0_18px_40px_-26px_rgba(79,70,229,0.35)]">
+            <div className="rounded-[20px] border border-[#E6E8F0] bg-gradient-to-br from-[#f2f0ff] via-white to-[#eef0ff] p-6 shadow-[0_18px_40px_-26px_rgba(79,70,229,0.35)] space-y-4">
               <div className="overflow-hidden rounded-[16px] border border-[#E6E8F0]">
                 <img
                   src="/prizes.png"
-                  alt="Sprint prize podium"
+                  alt="Sprint prize, £100 Amazon gift card"
                   className="h-full w-full object-cover"
                 />
               </div>
-
+              <div>
+                <p className="text-lg font-semibold text-slate-900">One cash prize: £100 Amazon gift card</p>
+                <p className="mt-2 text-sm text-slate-600">
+                  After 30 days, the highest mock-only leaderboard score wins. Only correct answers from full mock exams count; practice does not.
+                </p>
+                <p className="mt-3 text-xs text-slate-500">Same month-long window as the 11+ sprint; leaderboards stay separate by track.</p>
+              </div>
             </div>
           </section>
 
@@ -416,7 +411,7 @@ export function SprintHowItWorks() {
               <div>
                 <h3 className="text-sm font-semibold text-slate-700">Beyond the Sprint: Founders' Circle</h3>
                 <p className="text-xs text-slate-500">Top consistent performers may be invited.</p>
-                <p className="mt-2 text-xs text-slate-500">Consistency during sprint weeks is a key signal for invitations.</p>
+                <p className="mt-2 text-xs text-slate-500">Consistency during the sprint month is a key signal for invitations.</p>
                 <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-slate-600">Circle members get</p>
                 <ul className="mt-2 list-disc space-y-1 pl-4 text-xs text-slate-500 marker:text-primary-500">
                   <li>Discounted premium access</li>
@@ -435,7 +430,7 @@ export function SprintHowItWorks() {
 
           <section className="mt-8 rounded-[20px] border-2 border-dashed border-[#4f46e5]/30 bg-[#4f46e5]/5 p-8 text-center">
             <h2 className="text-2xl font-black tracking-tight text-[#4f46e5]">
-              SPRINT IS LIVE . WIN FREE MONEY!
+              Monthly sprint: £100 Amazon gift card. Highest mock-only score wins.
             </h2>
           </section>
         </div>

@@ -146,11 +146,11 @@ export function LeaderboardTab() {
         className="group cursor-pointer border-slate-200 bg-white text-slate-950 shadow-sm transition-all duration-300 hover:border-primary/30 hover:shadow-md"
         role="button"
         tabIndex={0}
-        onClick={() => navigate("/mystery-spin")}
+        onClick={() => navigate("/sprint-details")}
         onKeyDown={(event) => {
           if (event.key === "Enter" || event.key === " ") {
             event.preventDefault();
-            navigate("/mystery-spin");
+            navigate("/sprint-details");
           }
         }}
       >
@@ -162,10 +162,10 @@ export function LeaderboardTab() {
               </div>
               <div className="min-w-0">
                 <p className="truncate text-sm font-bold leading-5 text-slate-950">
-                  See who won the free Gradlify Premium!
+                  100 pound Amazon gift card
                 </p>
                 <p className="text-[11px] font-black uppercase text-slate-400">
-                  Mystery Spin results
+                  Prize details &amp; rules
                 </p>
               </div>
             </div>

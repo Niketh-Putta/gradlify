@@ -7,8 +7,6 @@ import { SubjectProvider } from "@/contexts/SubjectContext";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 
-import { GoogleOAuthProvider } from '@react-oauth/google';
-
 // Eagerly load the main landing page to prevent a flash of loading state on first visit
 import Index from "./pages/Index";
 
@@ -41,8 +39,6 @@ const PageLoading = () => (
   </div>
 );
 
-const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
-
 const AppContent = () => (
   <QueryClientProvider client={queryClient}>
     <SubjectProvider>
@@ -55,7 +51,6 @@ const AppContent = () => (
               <Routes>
                 <Route path="/tools" element={<Tools />} />
                 <Route path="/free-resources" element={<Tools />} />
-                <Route path="/*" element={<Index />} />
                 <Route path="/privacy" element={<Privacy />} />
                 <Route path="/terms" element={<Terms />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
@@ -71,6 +66,8 @@ const AppContent = () => (
                   path="/nikethputtaadmin-growth"
                   element={<GrowthTracker />}
                 />
+                {/* Catch-all app shell last so standalone routes above always win */}
+                <Route path="/*" element={<Index />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
@@ -81,15 +78,6 @@ const AppContent = () => (
   </QueryClientProvider>
 );
 
-const App = () => {
-  if (googleClientId) {
-    return (
-      <GoogleOAuthProvider clientId={googleClientId}>
-        <AppContent />
-      </GoogleOAuthProvider>
-    );
-  }
-  return <AppContent />;
-};
+const App = () => <AppContent />;
 
 export default App;

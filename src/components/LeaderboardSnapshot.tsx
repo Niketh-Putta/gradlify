@@ -176,9 +176,9 @@ export function LeaderboardSnapshot() {
             <Button
               variant="outline"
               className="w-full"
-              onClick={() => navigate('/connect')}
+              onClick={() => navigate("/sprint-details")}
             >
-              View Full Leaderboard
+              Sprint details &amp; rules
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </>
