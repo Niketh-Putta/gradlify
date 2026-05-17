@@ -1089,51 +1089,40 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                 <p className={`mt-4 ${mutedText} leading-relaxed`}>Honest pricing, cancel anytime.</p>
               </motion.div>
 
-              <div className="mt-8 sm:mt-10 grid lg:grid-cols-3 md:grid-cols-2 gap-4 sm:gap-5 max-w-6xl mx-auto flex-col-reverse md:flex-row">
-                {/* Ultra Tier */}
-                <motion.div variants={motionCfg.fadeUp} className={`font-sans rounded-[20px] sm:rounded-[22px] ${isDark ? 'bg-gradient-to-br from-indigo-300 via-purple-500 to-indigo-600 shadow-[0_0_60px_-10px_rgba(124,58,237,0.55)]' : 'bg-gradient-to-br from-[#1a1c29] via-[#241e16] to-[#1a1c29] border border-amber-500/30 shadow-2xl'} p-[2px] scale-100 lg:scale-110 z-30 flex flex-col order-1 relative overflow-hidden group`}>
-                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(124,58,237,0.35),transparent_60%)] rounded-[20px]"></div>
-                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(99,102,241,0.35),transparent_60%)] rounded-[20px]"></div>
-                  <div className={`h-full rounded-[18px] sm:rounded-[20px] bg-black/60 backdrop-blur-xl p-5 sm:p-7 flex flex-col relative z-10`}>
-                    <div>
-                      <div className="flex items-center justify-between gap-3">
-                        <div className="text-lg sm:text-xl font-gradlify font-bold bg-clip-text text-transparent bg-gradient-to-r from-amber-200 via-amber-400 to-amber-200 tracking-tight">Ultra</div>
-                        <div className="rounded-full border border-amber-400/50 bg-amber-500/20 px-3 py-1 text-[10px] sm:text-xs font-semibold text-amber-300 backdrop-blur-sm shadow-[0_0_15px_rgba(245,158,11,0.3)]">
-                          1-to-1 Live
+              <motion.div variants={motionCfg.fadeUp} className="mt-8 sm:mt-10 grid lg:grid-cols-3 md:grid-cols-2 gap-4 sm:gap-5 max-w-6xl mx-auto">
+                {/* Free Tier */}
+                <motion.div variants={motionCfg.fadeUp} className={`rounded-[20px] sm:rounded-[22px] border p-5 sm:p-7 shadow-sm flex flex-col ${cardSurface} order-1`}>
+                  <div>
+                    <div className={`text-lg sm:text-xl font-gradlify font-bold tracking-tight ${primaryText}`}>Free</div>
+                    <div className="mt-4 flex items-end gap-2">
+                      <div className={`text-3xl sm:text-4xl font-semibold ${primaryText}`}>£0</div>
+                      <div className={`text-sm ${subtleText} pb-1`}>/month</div>
+                    </div>
+                    <div className={`mt-5 sm:mt-6 space-y-3 text-[13px] sm:text-sm ${mutedText}`}>
+                      {[
+                        "Topic practice questions",
+                        "Mini mocks",
+                        AI_FEATURE_ENABLED ? "Daily AI help limit" : "Daily help limit",
+                        "Basic progress tracking",
+                      ].map((line) => (
+                        <div key={line} className="flex items-start gap-3">
+                          <CheckCircle className={`mt-0.5 h-5 w-5 ${accentText}`} />
+                          <span>{line}</span>
                         </div>
-                      </div>
-                      <div className="mt-4 flex items-end gap-2">
-                        <div className="text-3xl sm:text-4xl font-semibold text-white tracking-tight">£99.99</div>
-                        <div className="text-sm text-amber-200/60 pb-1">/month</div>
-                      </div>
-                      <p className="mt-4 text-[13px] sm:text-sm text-amber-100/80 leading-relaxed">
-                        Everything in Premium <span className="text-amber-400 font-semibold">+</span> weekly live human tutoring.
-                      </p>
-                      <div className="mt-6 sm:mt-8 space-y-4 text-[13px] sm:text-sm text-amber-50/90">
-                        {[
-                          "All Premium features unlocked",
-                          "Weekly live 1-to-1 tutoring sessions",
-                          "Personalised Sprint Plans",
-                          "Direct access to Founders & Tutors",
-                        ].map((line) => (
-                          <div key={line} className="flex items-start gap-3">
-                            <CheckCircle className="mt-[2px] h-5 w-5 text-amber-400 shrink-0 filter drop-shadow-[0_0_8px_rgba(251,191,36,0.5)]" />
-                            <span className="font-normal">{line}</span>
-                          </div>
-                        ))}
-                      </div>
+                      ))}
                     </div>
-                    <div className="mt-auto pt-8 sm:pt-10 w-full relative">
-                      <div className="absolute inset-x-0 -top-px h-px bg-gradient-to-r from-transparent via-amber-500/20 to-transparent"></div>
-                      <Button
-                        onClick={handleSignup}
-                        className="w-full rounded-xl font-semibold py-5 sm:py-6 border-0 bg-gradient-to-r from-amber-500 hover:from-amber-400 via-amber-400 hover:via-amber-300 to-amber-600 hover:to-amber-500 text-slate-900 shadow-[0_0_20px_rgba(245,158,11,0.3)] hover:shadow-[0_0_30px_rgba(245,158,11,0.5)] transition-all duration-300"
-                      >
-                        Start your Ultra trial
-                        <ArrowRight className="ml-2 h-5 w-5" />
-                      </Button>
-                      <div className="mt-3 sm:mt-4 text-[11px] sm:text-xs text-center text-amber-200/50">Cancel anytime</div>
-                    </div>
+                  </div>
+                  <div className="mt-auto pt-6 sm:pt-8 w-full">
+                    <Button
+                      onClick={handleSignup}
+                      className={`w-full rounded-full font-semibold py-4 sm:py-6 ${
+                        isDark ? "bg-white text-slate-900 hover:bg-white" : "bg-slate-900 text-white hover:bg-slate-900"
+                      }`}
+                    >
+                      Start practising free
+                      <ArrowRight className="ml-2 h-5 w-5" />
+                    </Button>
+                    <div className={`mt-2 sm:mt-3 text-[11px] sm:text-xs text-center ${subtleText}`}>Free forever plan available</div>
                   </div>
                 </motion.div>
 
@@ -1179,42 +1168,54 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                   </div>
                 </motion.div>
 
-                {/* Free Tier */}
-                <motion.div variants={motionCfg.fadeUp} className={`rounded-[20px] sm:rounded-[22px] border p-5 sm:p-7 shadow-sm flex flex-col ${cardSurface} order-3`}>
-                  <div>
-                    <div className={`text-lg sm:text-xl font-gradlify font-bold tracking-tight ${primaryText}`}>Free</div>
-                    <div className="mt-4 flex items-end gap-2">
-                      <div className={`text-3xl sm:text-4xl font-semibold ${primaryText}`}>£0</div>
-                      <div className={`text-sm ${subtleText} pb-1`}>/month</div>
-                    </div>
-                    <div className={`mt-5 sm:mt-6 space-y-3 text-[13px] sm:text-sm ${mutedText}`}>
-                      {[
-                        "Topic practice questions",
-                        "Mini mocks",
-                        AI_FEATURE_ENABLED ? "Daily AI help limit" : "Daily help limit",
-                        "Basic progress tracking",
-                      ].map((line) => (
-                        <div key={line} className="flex items-start gap-3">
-                          <CheckCircle className={`mt-0.5 h-5 w-5 ${accentText}`} />
-                          <span>{line}</span>
+                {/* Ultra Tier */}
+                <motion.div variants={motionCfg.fadeUp} className={`font-sans rounded-[20px] sm:rounded-[22px] ${isDark ? 'bg-gradient-to-br from-indigo-300 via-purple-500 to-indigo-600 shadow-[0_0_60px_-10px_rgba(124,58,237,0.55)]' : 'bg-gradient-to-br from-[#1a1c29] via-[#241e16] to-[#1a1c29] border border-amber-500/30 shadow-2xl'} p-[2px] scale-100 lg:scale-110 z-30 flex flex-col order-3 relative overflow-hidden group`}>
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(124,58,237,0.35),transparent_60%)] rounded-[20px]"></div>
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(99,102,241,0.35),transparent_60%)] rounded-[20px]"></div>
+                  <div className={`h-full rounded-[18px] sm:rounded-[20px] bg-black/60 backdrop-blur-xl p-5 sm:p-7 flex flex-col relative z-10`}>
+                    <div>
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="text-lg sm:text-xl font-gradlify font-bold bg-clip-text text-transparent bg-gradient-to-r from-amber-200 via-amber-400 to-amber-200 tracking-tight">Ultra</div>
+                        <div className="rounded-full border border-amber-400/50 bg-amber-500/20 px-3 py-1 text-[10px] sm:text-xs font-semibold text-amber-300 backdrop-blur-sm shadow-[0_0_15px_rgba(245,158,11,0.3)]">
+                          1-to-1 Live
                         </div>
-                      ))}
+                      </div>
+                      <div className="mt-4 flex items-end gap-2">
+                        <div className="text-3xl sm:text-4xl font-semibold text-white tracking-tight">£99.99</div>
+                        <div className="text-sm text-amber-200/60 pb-1">/month</div>
+                      </div>
+                      <p className="mt-4 text-[13px] sm:text-sm text-amber-100/80 leading-relaxed">
+                        Everything in Premium <span className="text-amber-400 font-semibold">+</span> weekly live human tutoring.
+                      </p>
+                      <div className="mt-6 sm:mt-8 space-y-4 text-[13px] sm:text-sm text-amber-50/90">
+                        {[
+                          "All Premium features unlocked",
+                          "Weekly live 1-to-1 tutoring sessions",
+                          "Personalised Sprint Plans",
+                          "Direct access to Founders & Tutors",
+                        ].map((line) => (
+                          <div key={line} className="flex items-start gap-3">
+                            <CheckCircle className="mt-[2px] h-5 w-5 text-amber-400 shrink-0 filter drop-shadow-[0_0_8px_rgba(251,191,36,0.5)]" />
+                            <span className="font-normal">{line}</span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                  <div className="mt-auto pt-6 sm:pt-8 w-full">
-                    <Button
-                      onClick={handleSignup}
-                      className={`w-full rounded-full font-semibold py-4 sm:py-6 ${
-                        isDark ? "bg-white text-slate-900 hover:bg-white" : "bg-slate-900 text-white hover:bg-slate-900"
-                      }`}
-                    >
-                      Start practising free
-                      <ArrowRight className="ml-2 h-5 w-5" />
-                    </Button>
-                    <div className={`mt-2 sm:mt-3 text-[11px] sm:text-xs text-center ${subtleText}`}>Free forever plan available</div>
+                    <div className="mt-auto pt-8 sm:pt-10 w-full relative">
+                      <div className="absolute inset-x-0 -top-px h-px bg-gradient-to-r from-transparent via-amber-500/20 to-transparent"></div>
+                      <Button
+                        onClick={handleSignup}
+                        className="w-full rounded-xl font-semibold py-5 sm:py-6 border-0 bg-gradient-to-r from-amber-500 hover:from-amber-400 via-amber-400 hover:via-amber-300 to-amber-600 hover:to-amber-500 text-slate-900 shadow-[0_0_20px_rgba(245,158,11,0.3)] hover:shadow-[0_0_30px_rgba(245,158,11,0.5)] transition-all duration-300"
+                      >
+                        Start your Ultra trial
+                        <ArrowRight className="ml-2 h-5 w-5" />
+                      </Button>
+                      <div className="mt-3 sm:mt-4 text-[11px] sm:text-xs text-center text-amber-200/50">Cancel anytime</div>
+                    </div>
                   </div>
                 </motion.div>
-              </div>
+
+              </motion.div>
 
               <motion.div variants={motionCfg.fadeUp} className={`mt-6 sm:mt-8 flex items-center gap-3 text-[13px] sm:text-sm ${mutedText}`}>
                 <ShieldCheck className={`h-4 w-4 ${accentText}`} />
