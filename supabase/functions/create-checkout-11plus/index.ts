@@ -73,6 +73,7 @@ const customerHasUsedTrial = async (stripe: Stripe, customerId: string) => {
   }
 };
 
+// Checkout uses STRIPE_PRICE_11PLUS_MONTHLY_* / ANNUAL_* (and ultra variants) from edge-function secrets.
 const getStripeConfig = () => {
   const envRaw = readEnv("ENVIRONMENT") || "test";
   const preferred = normalizeEnv(envRaw);
@@ -334,9 +335,7 @@ serve(async (req) => {
         },
       ],
       mode: "subscription",
-      automatic_tax: { enabled: true },
-      customer_update: { address: 'auto' },
-      billing_address_collection: 'required',
+      automatic_tax: { enabled: false },
       payment_method_collection: "always",
       custom_text: {
         submit: {

@@ -60,7 +60,7 @@ const newBlock = `            {/* Subscription Options */}
                           <p className="text-xs text-slate-400 mt-1">Foundational mastery and readiness tools.</p>
                         </div>
                         <div className="text-right">
-                          <span className="text-lg font-bold">£19.99</span>
+                          <span className="text-lg font-bold">£24.99</span>
                           <span className="text-[10px] text-slate-400 block">/month</span>
                         </div>
                       </div>
@@ -93,7 +93,7 @@ const newBlock = `            {/* Subscription Options */}
                           <p className="text-xs text-slate-300 mt-1">Ultimate preparation and insight.</p>
                         </div>
                         <div className="text-right">
-                          <span className="text-lg font-bold text-indigo-300">£149.99</span>
+                          <span className="text-lg font-bold text-indigo-300">£249.99</span>
                           <span className="text-[10px] text-indigo-300/60 block">/year</span>
                         </div>
                       </div>

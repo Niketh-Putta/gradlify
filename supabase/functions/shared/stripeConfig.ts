@@ -74,6 +74,8 @@ export interface StripePriceIds {
   ultra_annual?: string;
 }
 
+// Price IDs come from Supabase/Deno env (STRIPE_PRICE_*). Amounts live in Stripe — create new Prices to change billing.
+// 11+ Premium annual: £249.99/yr (24999 pence) as of May 2026 — update STRIPE_PRICE_11PLUS_ANNUAL_* and STRIPE_PRICE_ANNUAL_* secrets after creating a new Stripe Price.
 export const getStripePriceIdsForMode = (mode: StripeMode): StripePriceIds => ({
   monthly: requireEnvVar(`STRIPE_PRICE_MONTHLY_${mode}`),
   annual: requireEnvVar(`STRIPE_PRICE_ANNUAL_${mode}`),

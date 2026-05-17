@@ -903,7 +903,7 @@ export function Settings({ user, onBackToChat, onSignOut }: SettingsProps) {
                           <p className="text-xs text-slate-400 mt-1">Foundational mastery and readiness tools.</p>
                         </div>
                         <div className="text-right">
-                          <span className="text-lg font-bold">£19.99</span>
+                          <span className="text-lg font-bold">£24.99</span>
                           <span className="text-[10px] text-slate-400 block">/month</span>
                         </div>
                       </div>
@@ -1014,7 +1014,7 @@ export function Settings({ user, onBackToChat, onSignOut }: SettingsProps) {
           <DialogHeader>
             <DialogTitle>Choose Your Premium Plan</DialogTitle>
             <DialogDescription>
-              Select the billing cycle that works best for you. Save 35% with the annual plan!
+              Select the billing cycle that works best for you. Save 17% with the annual plan!
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4 mt-2">
@@ -1023,16 +1023,16 @@ export function Settings({ user, onBackToChat, onSignOut }: SettingsProps) {
               className="group cursor-pointer rounded-2xl border-2 border-primary/20 hover:border-primary p-4 transition-all relative overflow-hidden"
             >
               <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-[10px] font-bold px-2 py-1 rounded-bl-xl z-10">
-                SAVE 35%
+                SAVE 17%
               </div>
               <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="relative z-10">
                 <h4 className="font-bold text-lg mb-1">Annual Billing</h4>
                 <div className="flex items-baseline gap-2 mb-1">
-                  <span className="text-2xl font-bold text-foreground">£149.99</span>
+                  <span className="text-2xl font-bold text-foreground">£249.99</span>
                   <span className="text-sm text-muted-foreground">/year</span>
                 </div>
-                <p className="text-xs font-medium text-primary">Equals just £12.49 per month!</p>
+                <p className="text-xs font-medium text-primary">Equals just £20.83 per month!</p>
               </div>
             </div>
 
@@ -1042,7 +1042,7 @@ export function Settings({ user, onBackToChat, onSignOut }: SettingsProps) {
             >
               <h4 className="font-semibold text-base mb-1">Monthly Billing</h4>
               <div className="flex items-baseline gap-2">
-                <span className="text-xl font-bold text-foreground">£19.99</span>
+                <span className="text-xl font-bold text-foreground">£24.99</span>
                 <span className="text-sm text-muted-foreground">/month</span>
               </div>
               <p className="text-xs text-muted-foreground mt-1">Pay as you go, cancel anytime.</p>

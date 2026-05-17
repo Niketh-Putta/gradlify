@@ -101,13 +101,13 @@ export function PremiumUpgradeButton({
         <DropdownMenuItem onClick={() => handleUpgrade('annual')}>
           <div className="flex flex-col">
             <span className="font-medium">Premium (Annual)</span>
-            <span className="text-sm text-muted-foreground">3 Day Free Trial, then £149.99/year</span>
+            <span className="text-sm text-muted-foreground">3 Day Free Trial, then £249.99/year</span>
           </div>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => handleUpgrade('monthly')}>
           <div className="flex flex-col">
             <span className="font-medium">Premium (Monthly)</span>
-            <span className="text-sm text-muted-foreground">3 Day Free Trial, then £19.99/month</span>
+            <span className="text-sm text-muted-foreground">3 Day Free Trial, then £24.99/month</span>
           </div>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => handleUpgrade('ultra_annual')}>

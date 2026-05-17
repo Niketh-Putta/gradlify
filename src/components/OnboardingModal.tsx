@@ -307,7 +307,7 @@ function PlanCheckoutButton({
               {planType === 'premium' ? 'Premium Annual' : 'Ultra Annual'}
             </span>
             <span className="text-xs text-muted-foreground">
-              {planType === 'premium' ? '3 Day Free Trial, then £149.99/year' : 'Best value for serious selective prep'}
+              {planType === 'premium' ? '3 Day Free Trial, then £249.99/year' : 'Best value for serious selective prep'}
             </span>
           </div>
         </DropdownMenuItem>
@@ -320,7 +320,7 @@ function PlanCheckoutButton({
               {planType === 'premium' ? 'Premium Monthly' : 'Ultra Monthly'}
             </span>
             <span className="text-xs text-muted-foreground">
-              {planType === 'premium' ? '3 Day Free Trial, then £19.99/month' : '£99.99/month'}
+              {planType === 'premium' ? '3 Day Free Trial, then £24.99/month' : '£99.99/month'}
             </span>
           </div>
         </DropdownMenuItem>
@@ -986,7 +986,7 @@ export function OnboardingModal({ isOpen, userId, tier, premiumTrack, founderTra
 
                       <div className="relative z-10 mt-5 sm:mt-6">
                         <div className="flex items-end gap-2">
-                          <span className="font-gradlify text-3xl font-semibold sm:text-5xl lg:text-6xl">£19.99</span>
+                          <span className="font-gradlify text-3xl font-semibold sm:text-5xl lg:text-6xl">£24.99</span>
                           <span className="pb-1 text-[10px] font-medium text-white/90 sm:pb-1.5 sm:text-base">/month</span>
                         </div>
                         <p className="mt-2 max-w-md text-[11px] font-medium leading-4 text-white/90 sm:mt-3 sm:text-base sm:leading-6">

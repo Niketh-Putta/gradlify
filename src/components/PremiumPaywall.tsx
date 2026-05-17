@@ -101,7 +101,7 @@ export function PremiumPaywall({
                 )}
               >
                 Annual
-                <span className="bg-emerald-50 text-emerald-600 px-1.5 py-0.5 rounded text-[8px] font-black">SAVE 35%</span>
+                <span className="bg-emerald-50 text-emerald-600 px-1.5 py-0.5 rounded text-[8px] font-black">SAVE 17%</span>
               </button>
             </div>
           </div>
@@ -123,12 +123,12 @@ export function PremiumPaywall({
                 <div className="flex flex-col">
                   <div className="flex items-baseline gap-1 flex-wrap">
                     <span className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
-                      £{billingCycle === 'monthly' ? '19.99' : '12.50'}
+                      £{billingCycle === 'monthly' ? '24.99' : '20.83'}
                     </span>
                     <span className="text-[10px] sm:text-xs font-bold text-slate-300 tracking-tight shrink-0">/mo</span>
                   </div>
                   {billingCycle === 'annual' && (
-                    <p className="text-[8px] md:text-[9px] font-black text-slate-300 uppercase tracking-widest mt-1">Billed as £149.99 annually</p>
+                    <p className="text-[8px] md:text-[9px] font-black text-slate-300 uppercase tracking-widest mt-1">Billed as £249.99 annually</p>
                   )}
                 </div>
                 <div className="h-px w-full bg-slate-50 dark:bg-slate-800" />

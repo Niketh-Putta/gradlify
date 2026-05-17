@@ -113,7 +113,7 @@ export function PremiumUpgradeCard() {
 
             <div className="flex items-baseline gap-2 mb-3">
               <span className={`text-responsive-xl font-bold ${selectedPlan === 'ultra' ? 'text-white' : 'text-foreground'}`}>
-                {selectedPlan === 'monthly' ? '£19.99' : selectedPlan === 'annual' ? '£149.99' : '£99.99'}
+                {selectedPlan === 'monthly' ? '£24.99' : selectedPlan === 'annual' ? '£249.99' : '£99.99'}
               </span>
               <span className={`text-responsive-sm ${selectedPlan === 'ultra' ? 'text-amber-200/60' : 'text-muted-foreground'}`}>
                 /{selectedPlan === 'annual' ? 'year' : 'month'}
