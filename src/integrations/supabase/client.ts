@@ -3,8 +3,19 @@ import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 import { isAbortLikeError } from '@/lib/errors';
 
-export const SUPABASE_URL = (import.meta.env.VITE_SUPABASE_URL as string) ?? "https://gknnfbalijxykqycopic.supabase.co";
-export const SUPABASE_PUBLISHABLE_KEY = (import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string) ?? "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdrbm5mYmFsaWp4eWtxeWNvcGljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2MzgxMzEsImV4cCI6MjA3MjIxNDEzMX0.nbJ6GgZmJ5ZPiTkYa_Y5C2G6Sep9IF8juXv4uU_CMDU";
+/** Defaults when `VITE_SUPABASE_*` are unset (same as previous inline fallbacks). Prefer env in deployment. */
+const DEFAULT_SUPABASE_URL = "https://gknnfbalijxykqycopic.supabase.co";
+const DEFAULT_SUPABASE_PUBLISHABLE_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdrbm5mYmFsaWp4eWtxeWNvcGljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2MzgxMzEsImV4cCI6MjA3MjIxNDEzMX0.nbJ6GgZmJ5ZPiTkYa_Y5C2G6Sep9IF8juXv4uU_CMDU";
+
+const envUrl = typeof import.meta.env.VITE_SUPABASE_URL === "string" ? import.meta.env.VITE_SUPABASE_URL.trim() : "";
+const envKey =
+  typeof import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY === "string"
+    ? import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY.trim()
+    : "";
+
+export const SUPABASE_URL = envUrl || DEFAULT_SUPABASE_URL;
+export const SUPABASE_PUBLISHABLE_KEY = envKey || DEFAULT_SUPABASE_PUBLISHABLE_KEY;
 
 const fetchWithRetry: typeof fetch = async (input, init) => {
   const maxRetries = 5;

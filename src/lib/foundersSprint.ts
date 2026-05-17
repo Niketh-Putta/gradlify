@@ -11,7 +11,8 @@ const envEndIso = typeof import.meta.env.VITE_SPRINT_END_ISO === 'string' ? impo
 /** Instant when the sprint opens (absolute instant; labels use each viewer’s local time). Override with VITE_SPRINT_START_ISO. */
 function computeDefaultStart(): Date {
   if (envStartIso) return new Date(envStartIso);
-  return new Date('2026-05-14T19:30:00Z');
+  // 08:30 Europe/London (BST) on 14 May 2026 — keep in sync with leaderboard_config.effective_start
+  return new Date('2026-05-14T07:30:00Z');
 }
 
 /** Instant when the sprint closes (30 days after start at 17:30 UTC / 18:30 UK in BST). Override with VITE_SPRINT_END_ISO. */

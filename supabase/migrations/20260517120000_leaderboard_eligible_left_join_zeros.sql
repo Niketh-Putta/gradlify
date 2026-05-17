@@ -1,0 +1,89 @@
+-- Fix global leaderboard: include opted-in track users with 0 correct since sprint window.
+-- Safe to run if 20260516120000 was already applied with the inner-join-only version.
+
+CREATE OR REPLACE FUNCTION public.get_leaderboard_correct_global_for_track(
+  p_period text,
+  p_track public.user_track
+)
+RETURNS TABLE(
+  rank bigint,
+  user_id uuid,
+  name text,
+  avatar_url text,
+  correct_count bigint,
+  is_self boolean,
+  founder_track text
+)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path TO 'public'
+AS $$
+DECLARE
+  effective_start timestamptz;
+  period_start timestamptz;
+  window_start timestamptz;
+  v_user_id uuid;
+  v_track public.user_track;
+BEGIN
+  SELECT lc.effective_start
+  INTO effective_start
+  FROM public.leaderboard_config lc
+  WHERE lc.id = 1;
+
+  effective_start := COALESCE(
+    effective_start,
+    TIMESTAMPTZ '2026-05-14 08:30:00 Europe/London'
+  );
+
+  v_user_id := auth.uid();
+  v_track := COALESCE(p_track, '11plus'::public.user_track);
+
+  CASE lower(coalesce(p_period, 'month'))
+    WHEN 'day' THEN period_start := date_trunc('day', now() AT TIME ZONE 'UTC');
+    WHEN 'week' THEN period_start := date_trunc('week', now() AT TIME ZONE 'UTC');
+    WHEN 'month' THEN period_start := date_trunc('month', now() AT TIME ZONE 'UTC');
+    ELSE period_start := date_trunc('month', now() AT TIME ZONE 'UTC');
+  END CASE;
+
+  window_start := GREATEST(effective_start, period_start);
+
+  RETURN QUERY
+  WITH eligible_users AS (
+    SELECT p.user_id
+    FROM public.profiles p
+    LEFT JOIN public.user_settings us ON us.user_id = p.user_id
+    WHERE COALESCE(p.track, 'gcse'::public.user_track) = v_track
+      AND COALESCE(us.show_on_global_leaderboard, true)
+  ),
+  correct_totals AS (
+    SELECT
+      ca.user_id,
+      SUM(ca.correct_count)::bigint AS total_correct
+    FROM public.correct_answers_all ca
+    JOIN public.profiles p ON p.user_id = ca.user_id
+    JOIN eligible_users eu ON eu.user_id = ca.user_id
+    WHERE ca.created_at >= window_start
+      AND COALESCE(ca.track, COALESCE(p.track, 'gcse'::public.user_track)) = v_track
+    GROUP BY ca.user_id
+  )
+  SELECT
+    ROW_NUMBER() OVER (
+      ORDER BY COALESCE(ct.total_correct, 0) DESC,
+               COALESCE(p.full_name, split_part(u.email, '@', 1), 'Anonymous'),
+               eu.user_id
+    ) AS rank,
+    eu.user_id,
+    COALESCE(p.full_name, split_part(u.email, '@', 1), 'Anonymous') AS name,
+    p.avatar_url,
+    COALESCE(ct.total_correct, 0)::bigint AS correct_count,
+    (eu.user_id = v_user_id) AS is_self,
+    p.founder_track
+  FROM eligible_users eu
+  JOIN public.profiles p ON p.user_id = eu.user_id
+  JOIN auth.users u ON u.id = eu.user_id
+  LEFT JOIN correct_totals ct ON ct.user_id = eu.user_id
+  ORDER BY rank;
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.get_leaderboard_correct_global_for_track(text, public.user_track) TO authenticated;

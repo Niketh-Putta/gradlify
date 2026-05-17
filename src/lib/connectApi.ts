@@ -114,6 +114,73 @@ const normalizeLeaderboardData = (rows: unknown): LeaderboardEntry[] => {
   });
 };
 
+async function fetchGlobalLeaderboardEntries(
+  period: "day" | "week" | "month",
+  track: "gcse" | "11plus",
+): Promise<LeaderboardEntry[]> {
+  const trackArg = track === "11plus" ? "11plus" : "gcse";
+
+  const { data, error } = (await supabase.rpc("get_leaderboard_correct_global_for_track", {
+    p_period: period,
+    p_track: trackArg,
+  })) as { data: unknown; error: unknown };
+
+  if (!error && data) {
+    return normalizeLeaderboardData(data);
+  }
+
+  if (!isFunctionMissingError(error)) {
+    console.warn("Global leaderboard (for_track) failed:", error);
+  }
+
+  return [];
+}
+
+async function mergeFriendsWithZeroScores(entries: LeaderboardEntry[]): Promise<LeaderboardEntry[]> {
+  const userId = await getSessionUserId();
+  const friendships = await getFriends();
+  const byUserId = new Map(entries.map((entry) => [entry.user_id, entry]));
+
+  const addIfMissing = (friendId: string, name: string, avatar_url: string | null) => {
+    if (!friendId || byUserId.has(friendId)) return;
+    byUserId.set(friendId, {
+      rank: 0,
+      user_id: friendId,
+      name,
+      avatar_url,
+      correct_count: 0,
+      is_self: friendId === userId,
+      founder_track: null,
+    });
+  };
+
+  addIfMissing(userId, "You", null);
+
+  for (const friendship of friendships) {
+    const friendId = friendship.requester === userId ? friendship.receiver : friendship.requester;
+    const profile =
+      friendship.requester === userId ? friendship.receiver_profile : friendship.requester_profile;
+    addIfMissing(friendId, profile?.full_name || "Learner", profile?.avatar_url ?? null);
+  }
+
+  return rankLeaderboardEntries(Array.from(byUserId.values()));
+}
+
+async function fetchFriendsLeaderboardEntries(period: "day" | "week" | "month"): Promise<LeaderboardEntry[]> {
+  const { data, error } = (await supabase.rpc("get_leaderboard_correct_friends", {
+    p_period: period,
+  })) as { data: unknown; error: unknown };
+
+  let entries = !error && data ? normalizeLeaderboardData(data) : [];
+
+  if (error && !isFunctionMissingError(error)) {
+    console.warn("Friends leaderboard failed:", error);
+  }
+
+  entries = await mergeFriendsWithZeroScores(entries);
+  return entries;
+}
+
 // Leaderboard functions - uses persistent leaderboard_score with raw calculation fallback
 export async function getLeaderboard(
   period: 'day' | 'week' | 'month',
@@ -121,35 +188,18 @@ export async function getLeaderboard(
   track?: 'gcse' | '11plus'
 ): Promise<LeaderboardEntry[]> {
   const resolvedTrack = track ?? await getUserTrack();
-  const rpcName = scope === 'global' ? 'get_leaderboard_correct_global_for_track' : 'get_leaderboard_correct_friends';
 
   let dbEntries: LeaderboardEntry[] = [];
   try {
-    const args = scope === 'global'
-      ? { p_period: period, p_track: resolvedTrack === '11plus' ? '11plus' : 'gcse' }
-      : { p_period: period };
-    const { data, error } = await supabase.rpc(rpcName, args) as {
-      data: any[] | null;
-      error: unknown;
-    };
-    if (!error && data) {
-      dbEntries = normalizeLeaderboardData(data) || [];
-    } else if (scope === 'global' && isFunctionMissingError(error)) {
-      const fallback = await supabase.rpc('get_leaderboard_correct_global', { p_period: period }) as {
-        data: any[] | null;
-        error: unknown;
-      };
-      if (!fallback.error && fallback.data) {
-        dbEntries = normalizeLeaderboardData(fallback.data) || [];
-      }
-    }
+    dbEntries =
+      scope === "global"
+        ? await fetchGlobalLeaderboardEntries(period, resolvedTrack)
+        : await fetchFriendsLeaderboardEntries(period);
   } catch (e) {
     console.warn('Leaderboard RPC failed:', e);
   }
 
-  let rankedEntries = rankLeaderboardEntries(dbEntries.filter((entry) => Number(entry.correct_count) > 0));
-
-  return rankedEntries;
+  return rankLeaderboardEntries(dbEntries);
 }
 
 export async function getSprintTop10(sprintId: string): Promise<SprintTopEntry[]> {

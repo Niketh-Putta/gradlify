@@ -276,7 +276,7 @@ export default function Connect() {
     }
   };
 
-  const visibleLeaderboard = filteredLeaderboard.slice(0, 100);
+  const visibleLeaderboard = filteredLeaderboard;
 
   return (
     <div className="w-full max-w-2xl mx-auto px-2 sm:px-6 py-3 sm:py-4 h-full flex flex-col overflow-x-hidden">
