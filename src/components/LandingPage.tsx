@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion, type Variants } from "framer-motion";
 import { ArrowRight, CheckCircle, ShieldCheck, Sparkles, MousePointer2, Compass, Layers, SlidersHorizontal, AlertTriangle, Trophy, Volume2, VolumeX, Pause } from "lucide-react";
 import { toast } from "sonner";
 
@@ -19,10 +19,18 @@ import { supabase } from "@/integrations/supabase/client";
 import { getSprintUpgradeCopy } from "@/lib/foundersSprint";
 import { AI_FEATURE_ENABLED } from "@/lib/featureFlags";
 import { getDashboardPath, setSignupTrack } from "@/lib/track";
-import { is11Plus, isGCSE } from "@/lib/track-config";
-import readinessVideo from "@/assets/exam-readiness.mov";
-import practiceVideo from "@/assets/practice-question.mov";
-import homeScreenVideo from "@/assets/Home screen.mov";
+
+/** Same clips as in `src/assets/`, but loaded from `/public` so they are not embedded in the JS bundle. */
+const READINESS_SHOWCASE_VIDEO = "/videos/exam-readiness.mov";
+const PRACTICE_SHOWCASE_VIDEO = "/videos/practice-question.mov";
+
+const HEAT_GRADIENT = {
+  tailwind: "from-red-600 via-orange-400 to-amber-300",
+  inline: "linear-gradient(135deg, #991B1B, #F97316, #FCD34D)",
+  from: "from-red-600",
+  via: "via-orange-400",
+  to: "to-amber-300",
+} as const;
 
 const LANDING_EASING: [number, number, number, number] = [0.16, 1, 0.3, 1];
 
@@ -347,7 +355,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
           : "Yes - start for free, then upgrade when you want deeper analytics and higher limits.",
       },
     ],
-    [isElevenPlus]
+    []
   );
 
   const handleSubmitFeedback = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -410,28 +418,14 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
   const panelSurface = isDark
     ? "border-white/10 bg-white/5 backdrop-blur-md"
     : "border-slate-200/80 bg-slate-50";
-  const heatGradient = {
-    tailwind: "from-red-600 via-orange-400 to-amber-300",
-    inline: "linear-gradient(135deg, #991B1B, #F97316, #FCD34D)",
-    from: "from-red-600",
-    via: "via-orange-400",
-    to: "to-amber-300"
-  };
-  const indigoGradient = {
-    tailwind: "from-orange-500 via-blue-500 to-red-500",
-    inline: "linear-gradient(90deg, #f97316 0%, #2563eb 50%, #7c3aed 100%)",
-    from: "from-orange-500",
-    via: "via-blue-500",
-    to: "to-red-500"
-  };
-  const accentGradient = heatGradient;
-  const heroGradient = accentGradient.tailwind;
   const premiumCardGradient = "bg-gradient-to-br from-red-600 via-orange-500 to-amber-400 border border-red-500/70 text-white";
   const feedbackButtonGradient = "bg-gradient-to-r from-red-600 via-orange-500 to-amber-400";
   const supportButtonActiveClass = `rounded-full px-4 py-2 sm:px-5 sm:py-2.5 ${feedbackButtonGradient} text-white hover:brightness-95`;
   const outlineButtonClass = isDark
     ? "border-white/20 text-white bg-white/10 hover:bg-white/20 hover:text-white"
     : "border-slate-200 text-slate-900 bg-white hover:bg-slate-100";
+
+  const accentGradient = HEAT_GRADIENT;
 
   const schoolLogos = [
     { name: "QE Boys", domain: "qebarnet.co.uk" },
@@ -469,11 +463,11 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
         hoverFact: "Evidence highlights automatically as you read questions.",
         media: (
           <HoverVideo
-            src={practiceVideo}
+            src={PRACTICE_SHOWCASE_VIDEO}
             className="h-full w-full object-containScale"
             playOnHover
             tone={theme}
-            accentGradient={isElevenPlus ? heatGradient : undefined}
+            accentGradient={isElevenPlus ? HEAT_GRADIENT : undefined}
           />
         ),
         mediaAspect: "aspect-[5/8] sm:aspect-[4/5] lg:aspect-[3/4]",
@@ -488,11 +482,11 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
         hoverFact: "Proprietary algorithm mimics actual 11+ grading.",
         media: (
           <HoverVideo
-            src={readinessVideo}
+            src={READINESS_SHOWCASE_VIDEO}
             className="h-full w-full object-cover"
             playOnHover
             tone={theme}
-            accentGradient={isElevenPlus ? heatGradient : undefined}
+            accentGradient={isElevenPlus ? HEAT_GRADIENT : undefined}
           />
         ),
         mediaAspect: "aspect-[5/8] sm:aspect-[4/5] lg:aspect-[3/4]",
@@ -1040,53 +1034,6 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                 <h2 className={`mt-3 text-2xl sm:text-4xl font-semibold tracking-tight ${primaryText}`}>
                   Real students. Real prizes.
                 </h2>
-                <div className="mt-5 flex justify-center">
-                  <div className="w-full max-w-2xl rounded-[24px] border border-slate-200/80 bg-[linear-gradient(180deg,rgba(255,255,255,0.98),rgba(248,250,252,0.94))] p-[1px] shadow-[0_22px_48px_-28px_rgba(15,23,42,0.22)]">
-                    <div
-                      className={cn(
-                        "rounded-[23px] px-6 py-8 text-center sm:px-10 sm:py-10",
-                        isDark
-                          ? "border border-white/10 bg-[radial-gradient(ellipse_at_50%_0%,rgba(99,102,241,0.2),transparent_55%),linear-gradient(180deg,rgba(15,23,42,0.95),rgba(15,23,42,0.88))]"
-                          : "border border-slate-100/80 bg-[radial-gradient(ellipse_at_50%_0%,rgba(59,130,246,0.08),transparent_50%),linear-gradient(180deg,rgba(255,255,255,0.98),rgba(250,250,249,0.98))]"
-                      )}
-                    >
-                      <div
-                        className={cn(
-                          "mx-auto mb-5 inline-flex items-center gap-2 rounded-full border px-3 py-1.5 shadow-sm",
-                          isDark
-                            ? "border-sky-500/35 bg-slate-900/60 text-sky-100"
-                            : "border-sky-300/70 bg-white/90 text-slate-800"
-                        )}
-                      >
-                        <ShieldCheck className={cn("h-4 w-4 shrink-0", isDark ? "text-sky-400" : "text-blue-600")} />
-                        <span className="text-[10px] font-bold uppercase tracking-[0.2em] sm:text-[11px]">
-                          £100 Amazon gift card
-                        </span>
-                      </div>
-                      <h3
-                        className={cn(
-                          "font-serif font-black leading-[0.92] tracking-tight text-transparent bg-clip-text",
-                          "text-[clamp(2.35rem,7vw,4.75rem)]",
-                          "bg-[linear-gradient(128deg,#2563eb_0%,#3730a3_10%,#4f46e5_22%,#6366f1_34%,#7c3aed_46%,#9333ea_56%,#a855f7_66%,#7e22ce_76%,#9f1239_84%,#c2410c_91%,#ea580c_96%,#fb923c_100%)]",
-                          isDark &&
-                            "bg-[linear-gradient(128deg,#60a5fa_0%,#818cf8_14%,#a78bfa_30%,#c084fc_44%,#e879f9_58%,#c026d3_70%,#f97316_86%,#fb923c_100%)]"
-                        )}
-                      >
-                        <span className="block">£100</span>
-                        <span className="block">Amazon</span>
-                        <span className="block">gift card</span>
-                      </h3>
-                      <p
-                        className={cn(
-                          "mx-auto mt-5 max-w-lg text-sm font-medium leading-relaxed sm:text-[15px]",
-                          isDark ? "text-slate-300" : "text-slate-600"
-                        )}
-                      >
-                        Compete for free across 30 days. When the month ends, the highest leaderboard score wins the cash prize. Only correct answers from full mock exams count; practice questions do not.
-                      </p>
-                    </div>
-                  </div>
-                </div>
               </motion.div>
 
               <motion.div variants={motionCfg.fadeUp} className="mt-8 sm:mt-10">
@@ -1200,7 +1147,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                       </div>
                     </div>
                     <div className="mt-4 flex items-end gap-2">
-                      <div className="text-3xl sm:text-4xl font-semibold">£19.99</div>
+                      <div className="text-3xl sm:text-4xl font-semibold">£24.99</div>
                       <div className="text-sm text-white/80 pb-1">/month</div>
                     </div>
                     <p className="mt-3 text-[13px] sm:text-sm text-white/80">
@@ -1772,7 +1719,7 @@ function ShowcaseRow({
     frameClassName?: string;
     reverse?: boolean;
   };
-  variants: any;
+  variants: Variants;
   tone: "dark" | "light";
 }) {
   const isDark = tone === "dark";
