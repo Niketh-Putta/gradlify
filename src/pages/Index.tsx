@@ -43,6 +43,9 @@ import { AI_FEATURE_ENABLED } from '@/lib/featureFlags';
 import { getDashboardPath, setSignupTrack } from '@/lib/track';
 import { isAbortLikeError } from '@/lib/errors';
 import { captureReferralFromSearch } from '@/lib/referrals';
+import { PaymentFailedGate } from '@/components/PaymentFailedGate';
+import { usePaymentFailedBlock } from '@/hooks/usePaymentFailedBlock';
+import { isPaymentGateExemptPath } from '@/lib/paymentBlocklist';
 
 // Loading Fallback Component
 const PageLoading = () => (
@@ -85,6 +88,8 @@ const Index = () => {
   const [landingTheme, setLandingTheme] = useState<'dark' | 'light'>('light');
 
   const [loading, setLoading] = useState(true);
+  const { checking: checkingPaymentBlock, isBlocked: paymentBlocked } =
+    usePaymentFailedBlock(user);
 
   // Central auth guard - runs on load and when path changes
   useEffect(() => {
@@ -235,6 +240,26 @@ const Index = () => {
     }
   };
 
+  // Show loading while checking auth
+  if (loading || (user && checkingPaymentBlock)) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p>Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (
+    user &&
+    paymentBlocked &&
+    !isPaymentGateExemptPath(location.pathname)
+  ) {
+    return <PaymentFailedGate user={user} onSignOut={handleSignOut} />;
+  }
+
   // Settings view
   if (appState === 'settings') {
     if (!user) return <AuthComponent onAuthSuccess={handleAuthSuccess} />;
@@ -247,18 +272,6 @@ const Index = () => {
         }}
         onSignOut={handleSignOut}
       />
-    );
-  }
-
-  // Show loading while checking auth
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p>Loading...</p>
-        </div>
-      </div>
     );
   }
 
