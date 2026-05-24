@@ -299,12 +299,12 @@ serve(async (req) => {
     if (normalizedPlan === "annual") {
         priceId = trackPrices?.annual;
     } else if (normalizedPlan === "ultra") {
-        priceId = (trackPrices as any)?.ultra;
+        priceId = trackPrices?.ultra;
         if (!priceId) {
             throw new Error(`Ultra pricing not configured for track: ${checkoutTrack}`);
         }
     } else if (normalizedPlan === "ultra_annual") {
-        priceId = (trackPrices as any)?.ultra_annual;
+        priceId = trackPrices?.ultra_annual;
         if (!priceId) {
             throw new Error(`Ultra Annual pricing not configured for track: ${checkoutTrack}`);
         }

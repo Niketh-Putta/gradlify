@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, FileText } from "lucide-react";
 import { Link } from "react-router-dom";
 import { AI_FEATURE_ENABLED } from "@/lib/featureFlags";
+import { PREMIUM_PRICING, ULTRA_PRICING } from "@/lib/pricing";
 
 export default function Terms() {
   return (
@@ -85,12 +86,20 @@ export default function Terms() {
                   </ul>
                 </div>
                 <div className="bg-primary/10 rounded-lg p-4">
-                  <h4 className="font-semibold mb-2">Premium Plan (£7.99/month):</h4>
+                  <h4 className="font-semibold mb-2">Premium Plan (£{PREMIUM_PRICING.monthly}/month or £{PREMIUM_PRICING.annual}/year):</h4>
                   <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
                     <li>{AI_FEATURE_ENABLED ? '100 AI questions per day' : '100 questions per day'}</li>
                     <li>Detailed explanations and working</li>
                     <li>Advanced exam readiness tracking</li>
                     <li>Priority support</li>
+                  </ul>
+                </div>
+                <div className="bg-amber-500/10 rounded-lg p-4">
+                  <h4 className="font-semibold mb-2">Ultra Plan (£{ULTRA_PRICING.monthly}/month or £{ULTRA_PRICING.annual}/year):</h4>
+                  <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
+                    <li>Everything in Premium</li>
+                    <li>Weekly live 1-to-1 tutoring sessions</li>
+                    <li>Personalised sprint plans and founder access</li>
                   </ul>
                 </div>
               </section>

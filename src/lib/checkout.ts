@@ -42,7 +42,7 @@ export async function startPremiumCheckout(
     throw new Error(`Failed to load user track: ${profileError.message}`);
   }
 
-  const activeTrack = resolveUserTrack((profile as any)?.track ?? null) === "11plus" ? "eleven_plus" : "gcse";
+  const activeTrack = resolveUserTrack(profile?.track ?? null) === "11plus" ? "eleven_plus" : "gcse";
   const requestedTrack = premiumTrack ?? activeTrack;
   if (requestedTrack !== activeTrack) {
     throw new Error(

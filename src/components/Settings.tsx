@@ -904,7 +904,7 @@ export function Settings({ user, onBackToChat, onSignOut }: SettingsProps) {
                           <p className="text-xs text-slate-400 mt-1">Foundational mastery and readiness tools.</p>
                         </div>
                         <div className="text-right">
-                          <span className="text-lg font-bold">£24.99</span>
+                          <span className="text-lg font-bold">£{PREMIUM_PRICING.monthly}</span>
                           <span className="text-[10px] text-slate-400 block">/month</span>
                         </div>
                       </div>
@@ -1030,10 +1030,10 @@ export function Settings({ user, onBackToChat, onSignOut }: SettingsProps) {
               <div className="relative z-10">
                 <h4 className="font-bold text-lg mb-1">Annual Billing</h4>
                 <div className="flex items-baseline gap-2 mb-1">
-                  <span className="text-2xl font-bold text-foreground">£249.99</span>
+                  <span className="text-2xl font-bold text-foreground">£{PREMIUM_PRICING.annual}</span>
                   <span className="text-sm text-muted-foreground">/year</span>
                 </div>
-                <p className="text-xs font-medium text-primary">Equals just £20.83 per month!</p>
+                <p className="text-xs font-medium text-primary">Equals just £{PREMIUM_PRICING.annualPerMonth} per month!</p>
               </div>
             </div>
 
@@ -1043,7 +1043,7 @@ export function Settings({ user, onBackToChat, onSignOut }: SettingsProps) {
             >
               <h4 className="font-semibold text-base mb-1">Monthly Billing</h4>
               <div className="flex items-baseline gap-2">
-                <span className="text-xl font-bold text-foreground">£24.99</span>
+                <span className="text-xl font-bold text-foreground">£{PREMIUM_PRICING.monthly}</span>
                 <span className="text-sm text-muted-foreground">/month</span>
               </div>
               <p className="text-xs text-muted-foreground mt-1">Pay as you go, cancel anytime.</p>

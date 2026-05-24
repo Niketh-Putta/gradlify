@@ -19,7 +19,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { getSprintUpgradeCopy } from "@/lib/foundersSprint";
 import { AI_FEATURE_ENABLED } from "@/lib/featureFlags";
 import { getDashboardPath, setSignupTrack } from "@/lib/track";
-import { ULTRA_PRICING } from "@/lib/pricing";
+import { ULTRA_PRICING, PREMIUM_PRICING } from "@/lib/pricing";
 
 /** Same clips as in `src/assets/`, but loaded from `/public` so they are not embedded in the JS bundle. */
 const READINESS_SHOWCASE_VIDEO = "/videos/exam-readiness.mov";
@@ -1137,7 +1137,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                       </div>
                     </div>
                     <div className="mt-4 flex items-end gap-2">
-                      <div className="text-3xl sm:text-4xl font-semibold">£24.99</div>
+                      <div className="text-3xl sm:text-4xl font-semibold">£{PREMIUM_PRICING.monthly}</div>
                       <div className="text-sm text-white/80 pb-1">/month</div>
                     </div>
                     <p className="mt-3 text-[13px] sm:text-sm text-white/80">
