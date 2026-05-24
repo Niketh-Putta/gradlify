@@ -11,7 +11,10 @@
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "supabase:setup": "node scripts/setup-supabase-connection.mjs",
+    "stripe:ultra-prices": "node scripts/create-ultra-stripe-prices.mjs",
+    "stripe:sync-secrets": "./scripts/sync-ultra-stripe-secrets.sh"
   },
   "reactSnap": {
     "source": "dist",

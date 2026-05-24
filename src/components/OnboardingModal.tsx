@@ -13,6 +13,7 @@ import { AI_FEATURE_ENABLED } from '@/lib/featureFlags';
 import { UK_SECONDARY_SCHOOLS } from '@/lib/schools';
 import { useNavigate } from 'react-router-dom';
 import { startPremiumCheckout } from '@/lib/checkout';
+import { PREMIUM_PRICING, ULTRA_PRICING } from '@/lib/pricing';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -320,7 +321,9 @@ function PlanCheckoutButton({
               {planType === 'premium' ? 'Premium Monthly' : 'Ultra Monthly'}
             </span>
             <span className="text-xs text-muted-foreground">
-              {planType === 'premium' ? '3 Day Free Trial, then £24.99/month' : '£99.99/month'}
+              {planType === 'premium'
+                ? `3 Day Free Trial, then £${PREMIUM_PRICING.monthly}/month`
+                : `£${ULTRA_PRICING.monthly}/month`}
             </span>
           </div>
         </DropdownMenuItem>
@@ -940,7 +943,7 @@ export function OnboardingModal({ isOpen, userId, tier, premiumTrack, founderTra
 
                       <div className="relative z-10 mt-5 sm:mt-6">
                         <div className="flex items-end gap-2">
-                          <span className="font-gradlify text-3xl font-semibold text-white sm:text-5xl lg:text-6xl">£99.99</span>
+                          <span className="font-gradlify text-3xl font-semibold text-white sm:text-5xl lg:text-6xl">£{ULTRA_PRICING.monthly}</span>
                           <span className="pb-1 text-[10px] font-medium text-amber-100/70 sm:pb-1.5 sm:text-base">/month</span>
                         </div>
                         <p className="mt-2 max-w-md text-[11px] font-medium leading-4 text-amber-50/80 sm:mt-3 sm:text-base sm:leading-6">

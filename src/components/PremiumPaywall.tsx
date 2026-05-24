@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { startPremiumCheckout } from "@/lib/checkout";
 import { useMembership } from "@/hooks/useMembership";
 import { cn } from "@/lib/utils";
+import { ULTRA_PRICING } from "@/lib/pricing";
 
 interface PaywallProps {
   open: boolean;
@@ -164,12 +165,12 @@ export function PremiumPaywall({
                 <div className="flex flex-col">
                   <div className="flex items-baseline gap-1 flex-wrap">
                     <span className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
-                      £{billingCycle === 'monthly' ? '99.99' : '83.33'}
+                      £{billingCycle === 'monthly' ? ULTRA_PRICING.monthly : ULTRA_PRICING.annualPerMonth}
                     </span>
                     <span className="text-[10px] sm:text-xs font-bold text-slate-300 tracking-tight shrink-0">/mo</span>
                   </div>
                   {billingCycle === 'annual' && (
-                    <p className="text-[8px] md:text-[9px] font-black text-slate-300 uppercase tracking-widest mt-1">Billed as £999.99 annually</p>
+                    <p className="text-[8px] md:text-[9px] font-black text-slate-300 uppercase tracking-widest mt-1">Billed as £{ULTRA_PRICING.annual} annually</p>
                   )}
                 </div>
                 <div className="h-px w-full bg-slate-50 dark:bg-slate-800" />

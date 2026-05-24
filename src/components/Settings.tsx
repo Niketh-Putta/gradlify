@@ -57,6 +57,7 @@ const EditOnboardingDetailsModal = React.lazy(() =>
 );
 
 import { startPremiumCheckout } from "@/lib/checkout";
+import { PREMIUM_PRICING, ULTRA_PRICING } from "@/lib/pricing";
 import { AI_FEATURE_ENABLED } from "@/lib/featureFlags";
 import { UserTrack } from "@/lib/track";
 import { getTrackCopy } from "@/lib/trackContent";
@@ -936,7 +937,7 @@ export function Settings({ user, onBackToChat, onSignOut }: SettingsProps) {
                           <p className="text-xs text-slate-300 mt-1">Ultimate preparation and insight.</p>
                         </div>
                         <div className="text-right mt-1">
-                          <span className="text-xl font-bold text-indigo-200 drop-shadow-sm">£99.99</span>
+                          <span className="text-xl font-bold text-indigo-200 drop-shadow-sm">£{ULTRA_PRICING.monthly}</span>
                           <span className="text-[10px] text-indigo-300/60 block mt-0.5 font-medium tracking-wide">/month</span>
                         </div>
                       </div>
@@ -1059,7 +1060,7 @@ export function Settings({ user, onBackToChat, onSignOut }: SettingsProps) {
               <Sparkles className="h-5 w-5 text-indigo-400 drop-shadow-[0_0_8px_rgba(129,140,248,0.8)]" fill="currentColor" /> Ultra Status
             </DialogTitle>
             <DialogDescription className="text-slate-300">
-              Select your mastery timeline. Save £200 with the annual commitment!
+              Select your mastery timeline. Save £{ULTRA_PRICING.annualSavings} with the annual commitment!
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4 mt-2 relative z-10 text-slate-900">
@@ -1068,13 +1069,13 @@ export function Settings({ user, onBackToChat, onSignOut }: SettingsProps) {
               className="group cursor-pointer rounded-2xl border-2 border-indigo-400/50 hover:border-indigo-400 p-4 transition-all relative overflow-hidden bg-white/95"
             >
               <div className="absolute top-0 right-0 bg-indigo-500 text-white text-[10px] font-bold px-3 py-1 pb-1.5 rounded-bl-[14px] z-10 shadow-sm flex items-center gap-1 uppercase tracking-widest">
-                <Crown className="w-3 h-3" /> Save £200
+                <Crown className="w-3 h-3" /> Save £{ULTRA_PRICING.annualSavings}
               </div>
               <div className="absolute inset-0 bg-indigo-50/50 opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="relative z-10">
                 <h4 className="font-bold text-lg mb-1 text-slate-800">The Mastery Timeline (Annual)</h4>
                 <div className="flex items-baseline gap-2 mb-1">
-                  <span className="text-2xl font-bold text-indigo-600">£999.00</span>
+                  <span className="text-2xl font-bold text-indigo-600">£{ULTRA_PRICING.annual}</span>
                   <span className="text-sm font-medium text-slate-500">/year</span>
                 </div>
                 <p className="text-xs font-semibold text-indigo-500 bg-indigo-50 inline-flex px-2 py-0.5 rounded-md mt-1 border border-indigo-100">Guarantees consistent 1-on-1 progress</p>
@@ -1087,7 +1088,7 @@ export function Settings({ user, onBackToChat, onSignOut }: SettingsProps) {
             >
               <h4 className="font-semibold text-base mb-1 text-slate-700">Flexible Access (Monthly)</h4>
               <div className="flex items-baseline gap-2">
-                <span className="text-xl font-bold text-slate-800">£99.99</span>
+                <span className="text-xl font-bold text-slate-800">£{ULTRA_PRICING.monthly}</span>
                 <span className="text-sm text-slate-500">/month</span>
               </div>
               <p className="text-xs font-medium text-slate-500 mt-1">Pay as you go, cancel anytime.</p>

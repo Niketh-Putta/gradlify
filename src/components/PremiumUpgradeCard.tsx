@@ -9,6 +9,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getSprintUpgradeCopy } from '@/lib/foundersSprint';
 import { startPremiumCheckout } from "@/lib/checkout";
 import { AI_FEATURE_ENABLED } from "@/lib/featureFlags";
+import { PREMIUM_PRICING, ULTRA_PRICING } from "@/lib/pricing";
 
 export function PremiumUpgradeCard() {
   const [isLoading, setIsLoading] = useState(false);
@@ -113,7 +114,11 @@ export function PremiumUpgradeCard() {
 
             <div className="flex items-baseline gap-2 mb-3">
               <span className={`text-responsive-xl font-bold ${selectedPlan === 'ultra' ? 'text-white' : 'text-foreground'}`}>
-                {selectedPlan === 'monthly' ? '£24.99' : selectedPlan === 'annual' ? '£249.99' : '£99.99'}
+                {selectedPlan === 'monthly'
+                  ? `£${PREMIUM_PRICING.monthly}`
+                  : selectedPlan === 'annual'
+                    ? `£${PREMIUM_PRICING.annual}`
+                    : `£${ULTRA_PRICING.monthly}`}
               </span>
               <span className={`text-responsive-sm ${selectedPlan === 'ultra' ? 'text-amber-200/60' : 'text-muted-foreground'}`}>
                 /{selectedPlan === 'annual' ? 'year' : 'month'}

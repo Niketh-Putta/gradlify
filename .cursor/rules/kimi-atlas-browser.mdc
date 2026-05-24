@@ -1,0 +1,42 @@
+---
+description: Use Kimi WebBridge + Atlas browser for all web browsing tasks
+alwaysApply: true
+---
+
+# Browser: Kimi WebBridge + Atlas (always)
+
+For **any** task that needs a browser (navigate, click, fill forms, screenshots, scrape, sign in, shop, etc.):
+
+1. **Do NOT** use `cursor-ide-browser` unless Kimi WebBridge is unavailable.
+2. **Always** use **Kimi WebBridge** first — it controls the user's real browser (Atlas) with their logins via the extension.
+
+## Health check (run first)
+
+```bash
+~/.kimi-webbridge/bin/kimi-webbridge status
+```
+
+Require `running: true` and `extension_connected: true`. If unhealthy, read `~/.codex/skills/kimi-webbridge/references/operations.md`.
+
+## How to call
+
+```bash
+curl -s -X POST http://127.0.0.1:10086/command \
+  -H 'Content-Type: application/json' \
+  -d '{"action":"<action>","args":{...},"session":"gradlify"}'
+```
+
+Actions: `navigate`, `find_tab`, `snapshot`, `click`, `fill`, `evaluate`, `screenshot`, `list_tabs`, `close_tab`, `close_session`.
+
+- Use `newTab: true` on first `navigate` for a task.
+- Use `find_tab` with `active: true` when the user says to use their already-open tab.
+- Prefer `snapshot` + `@e` refs over CSS selectors.
+- Session name: `gradlify` (or a distinct name per parallel task).
+
+## Atlas-specific
+
+If the user asks to focus/switch Atlas tabs without navigating, use the Atlas skill CLI (`~/.codex/skills/atlas/scripts/atlas_cli.py`) only when WebBridge cannot reach the page.
+
+## End of task
+
+Call `close_session` when the browser task is fully done.
