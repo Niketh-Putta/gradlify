@@ -39,7 +39,7 @@ const SubjectSelection = lazy(() => import('@/pages/SubjectSelection'));
 import { User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { setPostAuthRedirect } from '@/lib/postAuthRedirect';
-import { AI_FEATURE_ENABLED } from '@/lib/featureFlags';
+import { AI_FEATURE_ENABLED, EXAM_READINESS_ENABLED } from '@/lib/featureFlags';
 import { getDashboardPath, setSignupTrack } from '@/lib/track';
 import { isAbortLikeError } from '@/lib/errors';
 import { captureReferralFromSearch } from '@/lib/referrals';
@@ -315,8 +315,14 @@ const Index = () => {
               <Route path="dashboard/gcse" element={<Navigate to="/dashboard" replace />} />
               <Route path="dashboard/11plus" element={<Navigate to="/dashboard" replace />} />
 
-              <Route path="readiness" element={<Readiness />} />
-              <Route path="exam-readiness" element={<ExamReadiness />} />
+              <Route
+                path="readiness"
+                element={EXAM_READINESS_ENABLED ? <Readiness /> : <Navigate to="/dashboard" replace />}
+              />
+              <Route
+                path="exam-readiness"
+                element={EXAM_READINESS_ENABLED ? <ExamReadiness /> : <Navigate to="/dashboard" replace />}
+              />
               <Route path="connect" element={<Connect />} />
               
               <Route path="mocks" element={<MockExams />} />

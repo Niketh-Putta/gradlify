@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { getPremiumStatus } from '@/lib/premiumStatus';
 import { syncBillingStatus } from '@/lib/billingSync';
 import { isAbortLikeError } from '@/lib/errors';
+import { ULTRA_PLAN_ENABLED } from '@/lib/featureFlags';
 
 interface MembershipData {
   tier: string;
@@ -51,15 +52,19 @@ export function useMembership() {
 
         const premiumStatus = await getPremiumStatus(user.id);
         if (mounted) {
+          const displayedPlan =
+            !ULTRA_PLAN_ENABLED && (premiumStatus.plan === 'ultra' || premiumStatus.plan === 'ultra_annual')
+              ? 'premium'
+              : premiumStatus.plan;
           const membershipData: MembershipData = {
             tier: premiumStatus.isPremium ? 'premium' : 'free',
-            plan: premiumStatus.plan,
+            plan: displayedPlan,
             founderTrack: premiumStatus.founderTrack ?? null,
             premiumTrack: premiumStatus.premiumTrack ?? null,
             track: premiumStatus.track ?? null,
             hasPremiumSubscription: premiumStatus.hasPremiumSubscription,
             hasTrackPremium: premiumStatus.hasTrackPremium,
-            isUltra: premiumStatus.isUltra ?? false,
+            isUltra: ULTRA_PLAN_ENABLED && (premiumStatus.isUltra ?? false),
             subscription: premiumStatus.billingCycle,
             subscription_status: premiumStatus.subscriptionStatus || null,
             current_period_end: premiumStatus.currentPeriodEnd || null,
@@ -126,7 +131,7 @@ export function useMembership() {
     founderTrack: data?.founderTrack ?? null,
     isFounder: data?.founderTrack === 'founder',
     isPremium: data?.hasPremiumSubscription ?? false,
-    isUltra: data?.isUltra ?? false,
-    statusLabel: data?.founderTrack === 'founder' ? 'Founder' : data?.isUltra ? 'Ultra' : data?.hasPremiumSubscription ? 'Premium' : 'Free'
+    isUltra: ULTRA_PLAN_ENABLED && (data?.isUltra ?? false),
+    statusLabel: data?.founderTrack === 'founder' ? 'Founder' : (ULTRA_PLAN_ENABLED && data?.isUltra) ? 'Ultra' : data?.hasPremiumSubscription ? 'Premium' : 'Free'
   };
 }

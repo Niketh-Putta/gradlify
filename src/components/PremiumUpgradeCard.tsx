@@ -8,12 +8,12 @@ import { useMembership } from '@/hooks/useMembership';
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getSprintUpgradeCopy } from '@/lib/foundersSprint';
 import { startPremiumCheckout } from "@/lib/checkout";
-import { AI_FEATURE_ENABLED } from "@/lib/featureFlags";
+import { AI_FEATURE_ENABLED, ULTRA_PLAN_ENABLED } from "@/lib/featureFlags";
 import { PREMIUM_PRICING, ULTRA_PRICING } from "@/lib/pricing";
 
 export function PremiumUpgradeCard() {
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'annual' | 'ultra'>('ultra');
+  const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'annual' | 'ultra'>(ULTRA_PLAN_ENABLED ? 'ultra' : 'monthly');
   const { tier, isPremium, isUltra, isFounder } = useMembership();
   const sprintCopy = getSprintUpgradeCopy();
 
@@ -106,9 +106,11 @@ export function PremiumUpgradeCard() {
                 <TabsTrigger value="annual" className={`text-foreground data-[state=active]:bg-white data-[state=active]:text-primary ${selectedPlan === 'ultra' ? 'text-amber-100 hover:text-amber-50 data-[state=active]:bg-transparent data-[state=active]:text-amber-300' : ''}`}>
                   Annual
                 </TabsTrigger>
-                <TabsTrigger value="ultra" className={`text-foreground flex items-center gap-1 data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-400 data-[state=active]:to-amber-600 data-[state=active]:text-slate-900 font-bold ${selectedPlan !== 'ultra' ? 'hover:text-amber-300 text-amber-200' : ''}`}>
-                  ULTRA <Crown className="w-3 h-3" />
-                </TabsTrigger>
+                {ULTRA_PLAN_ENABLED && (
+                  <TabsTrigger value="ultra" className={`text-foreground flex items-center gap-1 data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-400 data-[state=active]:to-amber-600 data-[state=active]:text-slate-900 font-bold ${selectedPlan !== 'ultra' ? 'hover:text-amber-300 text-amber-200' : ''}`}>
+                    ULTRA <Crown className="w-3 h-3" />
+                  </TabsTrigger>
+                )}
               </TabsList>
             </Tabs>
 

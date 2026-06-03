@@ -43,7 +43,7 @@ import { useReadinessStore } from "@/lib/stores/useReadinessStore";
 import { PracticeConfirmationModal } from "@/components/readiness/PracticeConfirmationModal";
 
 import { DiscordFooterEntry } from "@/components/DiscordFooterEntry";
-import { AI_FEATURE_ENABLED } from "@/lib/featureFlags";
+import { AI_FEATURE_ENABLED, EXAM_READINESS_ENABLED } from "@/lib/featureFlags";
 import { getTrackCopy } from "@/lib/trackContent";
 import { resolveUserTrack, UserTrack } from "@/lib/track";
 import { isAbortLikeError } from "@/lib/errors";
@@ -498,22 +498,24 @@ export function Home() {
         )}
 
         {/* Stats Cards Row */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className={cn("grid grid-cols-1 gap-6 mb-8", EXAM_READINESS_ENABLED ? "md:grid-cols-3" : "md:grid-cols-2")}>
           {/* Overall Readiness Card */}
-          <div 
-            className="delay-100"
-          >
-            <OverallReadinessCard
-              userId={user?.id}
-              trackKey={userTrack}
-              overallOverride={overallReadiness}
-              loadingOverride={readinessLoading}
-              currentGrade={computedGrades?.displayCurrentGrade}
-              targetGrade={computedGrades?.displayPotentialGrade}
-              className="h-full"
-              onClick={() => navigate('/readiness')}
-            />
-          </div>
+          {EXAM_READINESS_ENABLED && (
+            <div 
+              className="delay-100"
+            >
+              <OverallReadinessCard
+                userId={user?.id}
+                trackKey={userTrack}
+                overallOverride={overallReadiness}
+                loadingOverride={readinessLoading}
+                currentGrade={computedGrades?.displayCurrentGrade}
+                targetGrade={computedGrades?.displayPotentialGrade}
+                className="h-full"
+                onClick={() => navigate('/readiness')}
+              />
+            </div>
+          )}
 
           {/* Notes Progress Card */}
           <div 
@@ -700,97 +702,99 @@ export function Home() {
         </div>
 
         {/* Topic Breakdown Section */}
-        <div 
-          className="mb-8 delay-250"
-        >
-          <Card>
-            <CardHeader className="pb-2">
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle>{currentSubject === 'english' ? 'English Progress' : 'Topic Progress'}</CardTitle>
-                  <CardDescription>
-                    {currentSubject === 'english' ? 'Your readiness across the curriculum' : getTrackReadinessSummaryLabel(userTrack)}
-                  </CardDescription>
+        {EXAM_READINESS_ENABLED && (
+          <div 
+            className="mb-8 delay-250"
+          >
+            <Card>
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>{currentSubject === 'english' ? 'English Progress' : 'Topic Progress'}</CardTitle>
+                    <CardDescription>
+                      {currentSubject === 'english' ? 'Your readiness across the curriculum' : getTrackReadinessSummaryLabel(userTrack)}
+                    </CardDescription>
+                  </div>
+                  <Button 
+                    variant="ghost" 
+                    onClick={() => navigate('/readiness')}
+                    className={currentSubject === 'english' ? "text-amber-500 hover:text-amber-500/80" : "text-primary hover:text-primary/80"}
+                  >
+                    View Details
+                    <ArrowRight className="h-4 w-4 ml-1" />
+                  </Button>
                 </div>
-                <Button 
-                  variant="ghost" 
-                  onClick={() => navigate('/readiness')}
-                  className={currentSubject === 'english' ? "text-amber-500 hover:text-amber-500/80" : "text-primary hover:text-primary/80"}
-                >
-                  View Details
-                  <ArrowRight className="h-4 w-4 ml-1" />
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent className="pt-4">
-              {topicLoading ? (
-                <div className={`grid sm:grid-cols-2 ${isElevenPlus ? 'lg:grid-cols-2' : 'lg:grid-cols-3'} gap-4`}>
-                  {[...Array(isElevenPlus ? 4 : 6)].map((_, i) => (
-                    <div key={i} className="animate-pulse p-4 rounded-xl bg-muted">
+              </CardHeader>
+              <CardContent className="pt-4">
+                {topicLoading ? (
+                  <div className={`grid sm:grid-cols-2 ${isElevenPlus ? 'lg:grid-cols-2' : 'lg:grid-cols-3'} gap-4`}>
+                    {[...Array(isElevenPlus ? 4 : 6)].map((_, i) => (
+                      <div key={i} className="animate-pulse p-4 rounded-xl bg-muted">
+                        <div className="flex items-center gap-3 mb-3">
+                          <div className="w-10 h-10 bg-muted-foreground/20 rounded-xl"></div>
+                          <div className="flex-1">
+                            <div className="h-4 w-24 bg-muted-foreground/20 rounded mb-2"></div>
+                            <div className="h-3 w-16 bg-muted-foreground/20 rounded"></div>
+                          </div>
+                        </div>
+                        <div className="h-2 bg-muted-foreground/20 rounded-full"></div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className={`grid sm:grid-cols-2 ${currentSubject === 'english' ? 'lg:grid-cols-3' : isElevenPlus ? 'lg:grid-cols-2' : 'lg:grid-cols-3'} gap-4`}>
+                    {topicData.map((topic) => {
+                        const isEnglish = currentSubject === 'english';
+                        return (
+                      <div 
+                        key={topic.key} 
+                        className={cn(
+                          "group p-4 rounded-xl border border-border/60 bg-card hover:shadow-md cursor-pointer transition-all duration-300 hover:-translate-y-0.5",
+                          isEnglish ? "hover:border-amber-500/30" : "hover:border-primary/30"
+                        )}
+                        onClick={() => navigate('/readiness')}
+                      >
                       <div className="flex items-center gap-3 mb-3">
-                        <div className="w-10 h-10 bg-muted-foreground/20 rounded-xl"></div>
-                        <div className="flex-1">
-                          <div className="h-4 w-24 bg-muted-foreground/20 rounded mb-2"></div>
-                          <div className="h-3 w-16 bg-muted-foreground/20 rounded"></div>
+                          <div 
+                            className={cn(
+                              "w-10 h-10 rounded-xl flex items-center justify-center text-white font-black text-base shadow-sm",
+                              isEnglish ? "bg-amber-500 shadow-amber-500/10" : "bg-primary shadow-primary/10"
+                            )}
+                          >
+                            {topic.name.charAt(0).toUpperCase()}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-medium text-foreground text-sm">{topic.name}</h4>
+                            <p className="text-xs text-muted-foreground">{topic.score}% ready</p>
+                          </div>
+                          <span className={cn(
+                            "text-lg font-semibold",
+                            isEnglish ? "text-amber-600 dark:text-amber-400" : "text-primary dark:text-blue-400"
+                          )}>
+                            {topic.score}%
+                          </span>
                         </div>
+                        <Progress 
+                          value={topic.score} 
+                          indicatorClassName={isEnglish ? "bg-amber-500" : "bg-primary"}
+                          className="h-2"
+                        />
                       </div>
-                      <div className="h-2 bg-muted-foreground/20 rounded-full"></div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className={`grid sm:grid-cols-2 ${currentSubject === 'english' ? 'lg:grid-cols-3' : isElevenPlus ? 'lg:grid-cols-2' : 'lg:grid-cols-3'} gap-4`}>
-                  {topicData.map((topic) => {
-                      const isEnglish = currentSubject === 'english';
-                      return (
-                    <div 
-                      key={topic.key} 
-                      className={cn(
-                        "group p-4 rounded-xl border border-border/60 bg-card hover:shadow-md cursor-pointer transition-all duration-300 hover:-translate-y-0.5",
-                        isEnglish ? "hover:border-amber-500/30" : "hover:border-primary/30"
-                      )}
-                      onClick={() => navigate('/readiness')}
-                    >
-                    <div className="flex items-center gap-3 mb-3">
-                        <div 
-                          className={cn(
-                            "w-10 h-10 rounded-xl flex items-center justify-center text-white font-black text-base shadow-sm",
-                            isEnglish ? "bg-amber-500 shadow-amber-500/10" : "bg-primary shadow-primary/10"
-                          )}
-                        >
-                          {topic.name.charAt(0).toUpperCase()}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-medium text-foreground text-sm">{topic.name}</h4>
-                          <p className="text-xs text-muted-foreground">{topic.score}% ready</p>
-                        </div>
-                        <span className={cn(
-                          "text-lg font-semibold",
-                          isEnglish ? "text-amber-600 dark:text-amber-400" : "text-primary dark:text-blue-400"
-                        )}>
-                          {topic.score}%
-                        </span>
-                      </div>
-                      <Progress 
-                        value={topic.score} 
-                        indicatorClassName={isEnglish ? "bg-amber-500" : "bg-primary"}
-                        className="h-2"
-                      />
-                    </div>
-                      );
-                  })}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+                        );
+                    })}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
         {/* Quick Actions */}
         <div 
           className="mb-8 delay-300"
         >
           <h2 className="text-lg font-semibold text-foreground mb-4">Quick Actions</h2>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className={cn("grid sm:grid-cols-2 gap-4", EXAM_READINESS_ENABLED ? "lg:grid-cols-4" : "lg:grid-cols-3")}>
             <button
               onClick={() => navigate('/mocks')}
               className={cn(
@@ -808,22 +812,24 @@ export function Home() {
               <p className="text-sm text-muted-foreground">Test your knowledge with exam-style questions</p>
             </button>
 
-            <button
-              onClick={() => navigate('/readiness')}
-              className={cn(
-                 "group p-5 rounded-xl bg-card border transition-all duration-200 text-left hover:shadow-sm",
-                 currentSubject === 'english' ? "border-border hover:border-amber-500/30" : "border-border hover:border-primary/30"
-              )}
-            >
-              <div className={cn(
-                 "p-3 rounded-xl w-fit mb-3 group-hover:scale-105 transition-transform duration-200",
-                 currentSubject === 'english' ? "bg-amber-500/10" : "bg-primary/10"
-              )}>
-                <Gauge className={cn("h-5 w-5", currentSubject === 'english' ? "text-amber-500" : "text-primary")} />
-              </div>
-              <h3 className="font-medium text-foreground mb-1">Exam Readiness</h3>
-              <p className="text-sm text-muted-foreground">Track your progress across all topics</p>
-            </button>
+            {EXAM_READINESS_ENABLED && (
+              <button
+                onClick={() => navigate('/readiness')}
+                className={cn(
+                   "group p-5 rounded-xl bg-card border transition-all duration-200 text-left hover:shadow-sm",
+                   currentSubject === 'english' ? "border-border hover:border-amber-500/30" : "border-border hover:border-primary/30"
+                )}
+              >
+                <div className={cn(
+                   "p-3 rounded-xl w-fit mb-3 group-hover:scale-105 transition-transform duration-200",
+                   currentSubject === 'english' ? "bg-amber-500/10" : "bg-primary/10"
+                )}>
+                  <Gauge className={cn("h-5 w-5", currentSubject === 'english' ? "text-amber-500" : "text-primary")} />
+                </div>
+                <h3 className="font-medium text-foreground mb-1">Exam Readiness</h3>
+                <p className="text-sm text-muted-foreground">Track your progress across all topics</p>
+              </button>
+            )}
 
             {AI_FEATURE_ENABLED && (
               <button

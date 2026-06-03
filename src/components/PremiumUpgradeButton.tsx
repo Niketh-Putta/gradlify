@@ -6,7 +6,7 @@ import { useMembership } from '@/hooks/useMembership';
 import { getSprintUpgradeCopy } from '@/lib/foundersSprint';
 import { startPremiumCheckout } from "@/lib/checkout";
 import { PREMIUM_PRICING, ULTRA_PRICING } from "@/lib/pricing";
-import { AI_FEATURE_ENABLED } from "@/lib/featureFlags";
+import { AI_FEATURE_ENABLED, ULTRA_PLAN_ENABLED } from "@/lib/featureFlags";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -111,18 +111,22 @@ export function PremiumUpgradeButton({
             <span className="text-sm text-muted-foreground">3 Day Free Trial, then £{PREMIUM_PRICING.monthly}/month</span>
           </div>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => handleUpgrade('ultra_annual')}>
-          <div className="flex flex-col">
-            <span className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-amber-700">Ultra (Annual) - Save £{ULTRA_PRICING.annualSavings}</span>
-            <span className="text-sm font-medium text-amber-700/80">The ultimate mastery timeline</span>
-          </div>
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => handleUpgrade('ultra')}>
-          <div className="flex flex-col">
-            <span className="font-medium text-indigo-600">Ultra (Monthly)</span>
-            <span className="text-sm text-muted-foreground">Elite preparation, £{ULTRA_PRICING.monthly}/mo</span>
-          </div>
-        </DropdownMenuItem>
+        {ULTRA_PLAN_ENABLED && (
+          <>
+            <DropdownMenuItem onClick={() => handleUpgrade('ultra_annual')}>
+              <div className="flex flex-col">
+                <span className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-amber-700">Ultra (Annual) - Save £{ULTRA_PRICING.annualSavings}</span>
+                <span className="text-sm font-medium text-amber-700/80">The ultimate mastery timeline</span>
+              </div>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleUpgrade('ultra')}>
+              <div className="flex flex-col">
+                <span className="font-medium text-indigo-600">Ultra (Monthly)</span>
+                <span className="text-sm text-muted-foreground">Elite preparation, £{ULTRA_PRICING.monthly}/mo</span>
+              </div>
+            </DropdownMenuItem>
+          </>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );

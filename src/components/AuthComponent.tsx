@@ -15,6 +15,7 @@ import { clearSignupTrack, getSignupTrack } from "@/lib/track";
 import { GoogleSignInButton } from "@/components/GoogleSignInButton";
 import { claimStoredReferral } from '@/lib/referrals';
 import { isAbortLikeError } from '@/lib/errors';
+import { buildEmailRedirectTo, isEmailNotConfirmedError, resendSignupConfirmation } from '@/lib/authEmailConfirmation';
 
 type MessageStatusLikeError = {
   message?: unknown;
@@ -180,7 +181,7 @@ export const AuthComponent = ({ onAuthSuccess, onBack, initialMode = 'login' }: 
       cleanupAuthState();
       
       if (isSignUp) {
-        const emailRedirectTo = `${window.location.origin}/auth/callback`;
+        const emailRedirectTo = buildEmailRedirectTo();
         const { data, error } = await withAuthTimeout(
           supabase.auth.signUp({
             email,
@@ -229,11 +230,7 @@ export const AuthComponent = ({ onAuthSuccess, onBack, initialMode = 'login' }: 
             toast.success("Account created! You're signed in.");
           } else {
             try {
-              await supabase.auth.resend({
-                type: 'signup',
-                email,
-                options: { emailRedirectTo },
-              });
+              await resendSignupConfirmation(email);
             } catch (resendError) {
               void resendError;
             }
@@ -269,6 +266,13 @@ export const AuthComponent = ({ onAuthSuccess, onBack, initialMode = 'login' }: 
         toast.error('An account with this email already exists. Please Sign In instead.');
         clearSignupTrack();
         setIsSignUp(false);
+      } else if (isEmailNotConfirmedError(error)) {
+        try {
+          await resendSignupConfirmation(email);
+          toast.error('Your email still needs confirming. We sent you a fresh verification link.');
+        } catch {
+          toast.error('Your email still needs confirming. Please use the latest verification email or request a new one.');
+        }
       } else {
         toast.error(msg || 'Authentication failed');
       }

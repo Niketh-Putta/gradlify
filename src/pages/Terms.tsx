@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, FileText } from "lucide-react";
 import { Link } from "react-router-dom";
 import { AI_FEATURE_ENABLED } from "@/lib/featureFlags";
-import { PREMIUM_PRICING, ULTRA_PRICING } from "@/lib/pricing";
+import { PREMIUM_PRICING } from "@/lib/pricing";
 
 export default function Terms() {
   return (
@@ -92,14 +92,6 @@ export default function Terms() {
                     <li>Detailed explanations and working</li>
                     <li>Advanced exam readiness tracking</li>
                     <li>Priority support</li>
-                  </ul>
-                </div>
-                <div className="bg-amber-500/10 rounded-lg p-4">
-                  <h4 className="font-semibold mb-2">Ultra Plan (£{ULTRA_PRICING.monthly}/month or £{ULTRA_PRICING.annual}/year):</h4>
-                  <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
-                    <li>Everything in Premium</li>
-                    <li>Weekly live 1-to-1 tutoring sessions</li>
-                    <li>Personalised sprint plans and founder access</li>
                   </ul>
                 </div>
               </section>

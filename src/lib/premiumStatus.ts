@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { getMissingColumnFromError, markProfileColumnMissing, profileSelect } from "@/lib/schemaCompatibility";
+import { ULTRA_PLAN_ENABLED } from "@/lib/featureFlags";
 
 export type PremiumStatus = {
   isPremium: boolean;
@@ -78,7 +79,8 @@ export async function getPremiumStatus(userId: string): Promise<PremiumStatus> {
   const isActiveTrialing = isTrialing;
   const hasPremiumSubscription = isPremiumTier || isActiveTrialing || (hasPaidPlan && hasActivePeriod) || isPremiumFlag;
   const isPremium = isFounder || hasPremiumSubscription;
-  const isUltra = pData?.plan === 'ultra' || pData?.plan === 'ultra_annual';
+  const isLegacyUltra = pData?.plan === 'ultra' || pData?.plan === 'ultra_annual';
+  const isUltra = ULTRA_PLAN_ENABLED && isLegacyUltra;
 
   return {
     isPremium,

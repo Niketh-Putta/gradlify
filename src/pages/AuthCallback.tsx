@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { consumePostAuthRedirect } from '@/lib/postAuthRedirect';
 import { applySignupTrack, getDashboardPath } from '@/lib/track';
 import { claimStoredReferral } from '@/lib/referrals';
+import type { EmailOtpType } from '@supabase/supabase-js';
 
 export function AuthCallback() {
   const navigate = useNavigate();
@@ -25,8 +26,39 @@ export function AuthCallback() {
       try {
         const url = new URL(window.location.href);
         const code = url.searchParams.get('code');
+        const tokenHash = url.searchParams.get('token_hash');
+        const type = url.searchParams.get('type') as EmailOtpType | null;
         const errorParam = url.searchParams.get('error');
         const errorDescription = url.searchParams.get('error_description');
+
+        if (tokenHash && type) {
+          const { data, error } = await supabase.auth.verifyOtp({
+            token_hash: tokenHash,
+            type,
+          });
+
+          if (error) {
+            console.error('Auth callback OTP verification error:', error);
+            toast.error('Verification failed. Please request a fresh link and try again.');
+            navigate('/auth?mode=signin', { replace: true });
+            return;
+          }
+
+          if (data.session) {
+            await applySignupTrack(data.session.user.id);
+            try {
+              await claimStoredReferral(data.session.user.created_at);
+            } catch (referralError) {
+              console.error('Referral claim failed:', referralError);
+            }
+
+            toast.success('Email verified successfully!');
+            if (!redirectAfterAuth()) {
+              navigate(getDashboardPath(), { replace: true });
+            }
+            return;
+          }
+        }
 
         // If there's no OAuth code, just route based on current session state.
         if (!code) {

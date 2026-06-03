@@ -20,6 +20,15 @@ const sanitizeReturnPath = (raw?: string) => {
   return raw;
 };
 
+const isLocalBaseUrl = (value: string) => {
+  try {
+    const hostname = new URL(value).hostname.toLowerCase();
+    return hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1";
+  } catch {
+    return false;
+  }
+};
+
 const jsonResponse = (body: Record<string, unknown>, status = 200) =>
   new Response(JSON.stringify(body), {
     status,
@@ -293,6 +302,10 @@ serve(async (req) => {
       : plan === "ultra"
       ? "ultra"
       : "monthly";
+    if (normalizedPlan === "ultra" || normalizedPlan === "ultra_annual") {
+      throw new Error("This plan is not currently available.");
+    }
+
     const checkoutTrack = "eleven_plus";
     const trackPrices = config.prices[checkoutTrack as keyof typeof config.prices];
     let priceId = trackPrices?.monthly;
@@ -315,12 +328,14 @@ serve(async (req) => {
     }
     logStep("Creating checkout with plan", { plan: normalizedPlan, track: checkoutTrack, priceId: priceId.slice(0, 8) });
 
-    const baseUrl =
+    const candidateBaseUrl =
       clientBaseUrl ||
       req.headers.get("origin") ||
       req.headers.get("referer")?.split("/").slice(0, 3).join("/") ||
       readEnv("APP_BASE_URL") ||
       "";
+    const appBaseUrl = readEnv("APP_BASE_URL");
+    const baseUrl = config.isLive && isLocalBaseUrl(candidateBaseUrl) ? appBaseUrl : candidateBaseUrl;
     if (!baseUrl) {
       throw new Error("Missing APP_BASE_URL");
     }

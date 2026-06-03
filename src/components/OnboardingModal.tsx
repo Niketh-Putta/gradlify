@@ -9,7 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { ArrowRight, Check, ChevronDown, Loader2, Sparkles, X } from 'lucide-react';
-import { AI_FEATURE_ENABLED } from '@/lib/featureFlags';
+import { AI_FEATURE_ENABLED, EXAM_READINESS_ENABLED, ULTRA_PLAN_ENABLED } from '@/lib/featureFlags';
 import { UK_SECONDARY_SCHOOLS } from '@/lib/schools';
 import { useNavigate } from 'react-router-dom';
 import { startPremiumCheckout } from '@/lib/checkout';
@@ -924,7 +924,8 @@ export function OnboardingModal({ isOpen, userId, tier, premiumTrack, founderTra
                     </Button>
                   </div>
 
-                  <div className="grid min-h-0 flex-1 grid-cols-2 gap-2 sm:gap-3 lg:gap-4">
+                  <div className={cn("grid min-h-0 flex-1 gap-2 sm:gap-3 lg:gap-4", ULTRA_PLAN_ENABLED ? "grid-cols-2" : "grid-cols-1")}>
+                    {ULTRA_PLAN_ENABLED && (
                     <section className="relative flex min-h-0 flex-col overflow-hidden rounded-[1.25rem] border border-amber-400/40 bg-[#0c0d14] p-2 text-white shadow-[0_18px_42px_rgba(15,23,42,0.18)] sm:p-4">
                       <div
                         className="absolute inset-0 pointer-events-none"
@@ -978,6 +979,7 @@ export function OnboardingModal({ isOpen, userId, tier, premiumTrack, founderTra
                         <p className="mt-2 text-center text-xs font-medium text-amber-100/55">Cancel anytime</p>
                       </div>
                     </section>
+                    )}
 
                     <section className="relative flex min-h-0 flex-col overflow-hidden rounded-[1.25rem] border border-orange-400/70 bg-gradient-to-br from-red-600 via-orange-500 to-yellow-400 p-2 text-white shadow-[0_18px_42px_rgba(248,113,22,0.18)] sm:p-4">
                       <div className="relative z-10 flex items-start justify-between gap-3">
@@ -1000,7 +1002,7 @@ export function OnboardingModal({ isOpen, userId, tier, premiumTrack, founderTra
                       <div className="relative z-10 mt-5 space-y-2.5 sm:mt-6 sm:space-y-3">
                         {[
                           'Full timed mock exams',
-                          'Deeper readiness analytics',
+                          EXAM_READINESS_ENABLED ? 'Deeper readiness analytics' : 'Detailed mock analytics',
                           'Higher explanation limits',
                           'Priority support',
                         ].map((feature) => (

@@ -18,7 +18,7 @@ const freeFeatures = [
 const premiumFeatures = [
   "Unlimited challenge questions",
   "Priority access to new challenge material",
-  "Deep readiness analytics",
+  "Detailed mock analytics",
 ];
 
 export function ChallengeLimitModal({

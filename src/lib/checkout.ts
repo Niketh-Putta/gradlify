@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { ULTRA_PLAN_ENABLED } from "@/lib/featureFlags";
 import { resolveUserTrack } from "@/lib/track";
 
 type PremiumTrack = "gcse" | "eleven_plus";
@@ -14,6 +15,10 @@ export async function startPremiumCheckout(
   plan: "monthly" | "annual" | "ultra" | "ultra_annual" = "monthly",
   premiumTrack?: PremiumTrack,
 ) {
+  if (!ULTRA_PLAN_ENABLED && (plan === "ultra" || plan === "ultra_annual")) {
+    throw new Error("This plan is not currently available.");
+  }
+
   if (typeof window === "undefined") {
     throw new Error("Premium checkout must be initiated from a browser context.");
   }

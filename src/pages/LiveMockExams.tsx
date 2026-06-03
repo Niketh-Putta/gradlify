@@ -5,17 +5,20 @@ import {
   CalendarDays,
   CheckCircle2,
   Clock3,
+  CreditCard,
   FileText,
   Hourglass,
   Loader2,
   ShieldCheck,
   ClipboardCheck,
+  Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAppContext } from "@/hooks/useAppContext";
+import { useMembership } from "@/hooks/useMembership";
 
 const LIVE_MOCK = {
   slug: "live-11plus-english-mock-2026-05-09-1700",
@@ -24,6 +27,11 @@ const LIVE_MOCK = {
   displayTime: "5:00 PM BST",
   durationMinutes: 50,
   questions: 70,
+};
+
+const BOTH_SUBJECTS_LIVE_MOCK = {
+  slug: "both_subjects_live_mock",
+  title: "Maths and English Mock",
 };
 
 type SignupRow = {
@@ -48,28 +56,41 @@ function buildLiveMockSessionSearchParams(): URLSearchParams {
 export default function LiveMockExams() {
   const navigate = useNavigate();
   const { user } = useAppContext();
+  const { isPremium, isFounder } = useMembership();
+  const hasPremiumLiveMockAccess = isPremium || isFounder;
   const [loading, setLoading] = useState(true);
   const [starting, setStarting] = useState(false);
+  const [registeringBothSubjects, setRegisteringBothSubjects] = useState(false);
+  const [finalizingBothSubjectsPayment, setFinalizingBothSubjectsPayment] = useState(false);
   const [signup, setSignup] = useState<SignupRow | null>(null);
+  const [bothSubjectsSignup, setBothSubjectsSignup] = useState<SignupRow | null>(null);
   /** Locks "Start" once an attempt row exists (created on first Start click). */
   const [attemptStatus, setAttemptStatus] = useState<LiveMockAttemptStatus>("none");
 
   const loadSignupAndAttempt = useCallback(async () => {
     if (!user?.id) {
       setAttemptStatus("none");
+      setSignup(null);
+      setBothSubjectsSignup(null);
       setLoading(false);
       return;
     }
 
     setLoading(true);
 
-    const [{ data: paper }, signupResult] = await Promise.all([
+    const [{ data: paper }, signupResult, bothSubjectsSignupResult] = await Promise.all([
       supabase.from("live_mock_papers" as never).select("id").eq("slug", LIVE_MOCK.slug).maybeSingle(),
       supabase
         .from("live_mock_exam_signups" as never)
         .select("id, registered_at")
         .eq("user_id", user.id)
         .eq("mock_slug", LIVE_MOCK.slug)
+        .maybeSingle(),
+      supabase
+        .from("live_mock_exam_signups" as never)
+        .select("id, registered_at")
+        .eq("user_id", user.id)
+        .eq("mock_slug", BOTH_SUBJECTS_LIVE_MOCK.slug)
         .maybeSingle(),
     ]);
 
@@ -95,12 +116,63 @@ export default function LiveMockExams() {
       setSignup((signupResult.data as SignupRow | null) ?? null);
     }
 
+    if (bothSubjectsSignupResult.error) {
+      console.error("Failed to load both-subjects live mock signup", bothSubjectsSignupResult.error);
+    } else {
+      setBothSubjectsSignup((bothSubjectsSignupResult.data as SignupRow | null) ?? null);
+    }
+
     setLoading(false);
   }, [user?.id]);
 
   useEffect(() => {
     void loadSignupAndAttempt();
   }, [loadSignupAndAttempt]);
+
+  useEffect(() => {
+    if (!user?.id || bothSubjectsSignup) return;
+
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("upgraded") !== "true") return;
+
+    let cancelled = false;
+    let attempt = 0;
+    setFinalizingBothSubjectsPayment(true);
+
+    const pollSignup = async () => {
+      attempt += 1;
+      const { data, error } = await supabase
+        .from("live_mock_exam_signups" as never)
+        .select("id, registered_at")
+        .eq("user_id", user.id)
+        .eq("mock_slug", BOTH_SUBJECTS_LIVE_MOCK.slug)
+        .maybeSingle();
+
+      if (cancelled) return;
+
+      if (!error && data) {
+        setBothSubjectsSignup(data as SignupRow);
+        setFinalizingBothSubjectsPayment(false);
+        toast.success("You're registered for the Maths and English mock.");
+        window.history.replaceState({}, "", window.location.pathname);
+        return;
+      }
+
+      if (attempt < 12) {
+        window.setTimeout(pollSignup, 1000);
+        return;
+      }
+
+      setFinalizingBothSubjectsPayment(false);
+      void loadSignupAndAttempt();
+    };
+
+    void pollSignup();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [bothSubjectsSignup, loadSignupAndAttempt, user?.id]);
 
   /** After submitting in another tab or returning from the session, pick up status === submitted. */
   useEffect(() => {
@@ -138,6 +210,35 @@ export default function LiveMockExams() {
     } else {
       setSignup(data as SignupRow);
     }
+  };
+
+  const recordBothSubjectsSignup = async () => {
+    const email = user?.email?.trim().toLowerCase();
+    if (!email || !user?.id) {
+      throw new Error("Please sign in before registering.");
+    }
+
+    const { data, error } = await supabase
+      .from("live_mock_exam_signups" as never)
+      .upsert(
+        {
+          user_id: user.id,
+          email,
+          mock_slug: BOTH_SUBJECTS_LIVE_MOCK.slug,
+          mock_starts_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "mock_slug,user_id" },
+      )
+      .select("id, registered_at")
+      .single();
+
+    if (error) {
+      console.error("Failed to record both-subjects live mock signup", error);
+      throw new Error("Could not record your registration. Please try again.");
+    }
+
+    setBothSubjectsSignup(data as SignupRow);
   };
 
   const handleStartMockExam = async () => {
@@ -223,6 +324,42 @@ export default function LiveMockExams() {
     }
   };
 
+  const handleBothSubjectsRegistration = async () => {
+    if (!user?.id) {
+      toast.error("Please sign in to register for this mock.");
+      return;
+    }
+
+    setRegisteringBothSubjects(true);
+    try {
+      if (hasPremiumLiveMockAccess) {
+        await recordBothSubjectsSignup();
+        toast.success("You're registered for the both-subjects live mock.");
+        return;
+      }
+
+      const returnTo = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+      const { data, error } = await supabase.functions.invoke("create-live-mock-payment", {
+        body: {
+          returnTo,
+          baseUrl: window.location.origin,
+        },
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      if (!data?.url) throw new Error("Registration checkout URL was not returned.");
+
+      window.location.href = data.url;
+    } catch (error) {
+      console.error("Failed to start both-subjects live mock payment", error);
+      const message = error instanceof Error ? error.message : "Could not open registration checkout.";
+      toast.error(message);
+    } finally {
+      setRegisteringBothSubjects(false);
+    }
+  };
+
   const detailRows = [
     { label: "Date", value: LIVE_MOCK.displayDate, icon: CalendarDays },
     { label: "Start", value: LIVE_MOCK.displayTime, icon: Clock3 },
@@ -230,9 +367,95 @@ export default function LiveMockExams() {
     { label: "Questions", value: String(LIVE_MOCK.questions), icon: FileText },
   ];
 
+  const bothSubjectsRegistrationCard = (
+    <div className="mb-3 rounded-[16px] border border-amber-200/80 bg-[linear-gradient(135deg,#fffaf0_0%,#ffffff_52%,#f8fbff_100%)] px-3 py-3 shadow-[0_14px_34px_rgba(146,64,14,0.07)] sm:px-4">
+      <div className="grid min-w-0 gap-3 lg:grid-cols-[1fr_0.9fr] lg:items-center">
+        <div className="min-w-0">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100/90 px-2.5 py-1 text-[8px] font-black uppercase tracking-[0.14em] text-amber-800">
+            <Sparkles className="h-3 w-3" />
+            New registration
+          </span>
+          <h2 className="mt-2 break-words text-xl font-bold tracking-tight text-slate-950 sm:text-2xl">
+            {BOTH_SUBJECTS_LIVE_MOCK.title}
+          </h2>
+          <p className="mt-1 max-w-2xl text-xs leading-5 text-slate-600 sm:text-sm">
+            This Maths and English mock is on Sunday 14 June 2026. It is guided and built alongside real GL exam
+            creators for top-school preparation. Premium members get it free; otherwise registration is one upfront
+            £9.99 payment.
+          </p>
+          <div className="mt-3 flex flex-wrap items-center gap-2 text-[10px] font-semibold text-slate-500 sm:text-xs">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-white/70 px-2.5 py-1">
+              <CheckCircle2 className="h-3.5 w-3.5 text-amber-600" />
+              Maths + English
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-100 bg-white/70 px-2.5 py-1">
+              <ShieldCheck className="h-3.5 w-3.5 text-blue-600" />
+              GL-style paper
+            </span>
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-100 bg-white/70 px-2.5 py-1">
+              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+              Free for Premium
+            </span>
+          </div>
+        </div>
+
+        <div className="rounded-[12px] border border-slate-200 bg-white/85 p-3 shadow-[0_8px_18px_rgba(15,23,42,0.035)]">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <div className="text-[8px] font-black uppercase tracking-[0.14em] text-slate-400">
+                {hasPremiumLiveMockAccess ? "Premium registration" : "Upfront registration"}
+              </div>
+              <div className="mt-1 text-2xl font-bold tracking-tight text-slate-950">
+                {hasPremiumLiveMockAccess ? "Free" : "£9.99"}
+              </div>
+            </div>
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-amber-50 text-amber-700">
+              <CreditCard className="h-5 w-5" />
+            </div>
+          </div>
+
+          <Button
+            type="button"
+            onClick={() => void handleBothSubjectsRegistration()}
+            disabled={registeringBothSubjects || finalizingBothSubjectsPayment || Boolean(bothSubjectsSignup)}
+            className="mt-3 h-10 w-full rounded-[10px] bg-[linear-gradient(90deg,#f59e0b_0%,#ea580c_100%)] px-4 text-sm font-semibold text-white shadow-[0_10px_20px_rgba(234,88,12,0.18)] hover:brightness-105 disabled:opacity-75"
+          >
+            {bothSubjectsSignup ? (
+              <span className="inline-flex items-center gap-2">
+                <CheckCircle2 className="h-3.5 w-3.5" />
+                Registered for this mock
+              </span>
+            ) : registeringBothSubjects || finalizingBothSubjectsPayment ? (
+              <span className="inline-flex items-center gap-2">
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                {finalizingBothSubjectsPayment
+                  ? "Finalising registration"
+                  : hasPremiumLiveMockAccess
+                    ? "Recording registration"
+                    : "Opening checkout"}
+              </span>
+            ) : hasPremiumLiveMockAccess ? (
+              <span className="inline-flex items-center gap-2">
+                Register free with Premium
+                <ArrowRight className="h-3.5 w-3.5" />
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-2">
+                Register and pay £9.99
+                <ArrowRight className="h-3.5 w-3.5" />
+              </span>
+            )}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <main className="min-h-screen overflow-x-hidden bg-[#faf9f4] px-3 py-3 text-slate-950 sm:px-4 sm:py-4">
       <section className="mx-auto w-full min-w-0 max-w-5xl">
+        {bothSubjectsRegistrationCard}
+
         <div className="rounded-[16px] border border-slate-200/80 bg-[linear-gradient(135deg,#ffffff_0%,#fbfdff_58%,#fffdf8_100%)] px-3 py-3 shadow-[0_14px_34px_rgba(15,23,42,0.05)] sm:px-4">
           <div className="flex items-center justify-end border-b border-slate-200/90 pb-2">
             <span className="inline-flex items-center gap-2 rounded-full bg-blue-50/95 px-3 py-1 text-[9px] font-black uppercase tracking-[0.16em] text-blue-700 shadow-[inset_0_1px_0_rgba(255,255,255,0.95)]">
@@ -387,6 +610,7 @@ export default function LiveMockExams() {
             </div>
           </div>
         </div>
+
       </section>
     </main>
   );

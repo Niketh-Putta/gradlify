@@ -85,7 +85,7 @@ serve(async (req) => {
     
     // Return fallback price data based on the requested plan
     const fallbackData = {
-      unit_amount: plan === 'yearly' ? 24999 : 2499, // GBP pence fallback when Stripe env/retrieve fails (£24.99/mo, £249.99/yr base)
+      unit_amount: plan === 'yearly' ? 24999 : 1999, // GBP pence fallback when Stripe env/retrieve fails (£19.99/mo, £249.99/yr base)
       currency: 'gbp',
       interval: plan === 'yearly' ? 'year' : 'month',
     };

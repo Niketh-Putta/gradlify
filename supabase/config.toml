@@ -48,6 +48,9 @@ verify_jwt = true
 [functions.create-portal-session]
 verify_jwt = true
 
+[functions.create-live-mock-payment]
+verify_jwt = true
+
 [functions.generate-questions]
 verify_jwt = true
 

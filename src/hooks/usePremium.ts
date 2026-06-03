@@ -608,7 +608,7 @@ export function usePremium(trackOverride?: UserTrack, subject?: 'maths' | 'engli
     isPlanActive(profilePlan || 'free', profilePeriodEnd) ||
     isPremiumFlag;
 
-  const isUltra = plan === 'ultra' || profilePlan === 'ultra';
+  const isUltra = false;
   
   // Since there is only one gradlify product, any valid premium/ultra subscription opens all modules.
   const isPremium =

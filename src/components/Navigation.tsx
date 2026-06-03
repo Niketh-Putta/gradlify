@@ -26,7 +26,7 @@ import { User } from '@supabase/supabase-js';
 import { cn } from "@/lib/utils";
 import { useMembership } from '@/hooks/useMembership';
 import { useSubject } from '@/contexts/SubjectContext';
-import { AI_FEATURE_ENABLED } from "@/lib/featureFlags";
+import { AI_FEATURE_ENABLED, EXAM_READINESS_ENABLED, ULTRA_PLAN_ENABLED } from "@/lib/featureFlags";
 import { resolveUserTrack } from '@/lib/track';
 import { getTrackLabel } from '@/lib/trackCurriculum';
 
@@ -143,7 +143,7 @@ export function Navigation({ user, profile, onSettings, onSignOut }: NavigationP
       !premiumUntil || new Date(premiumUntil).getTime() > Date.now();
     const isPlanActive = hasPlan && hasActivePeriod;
     const isPremiumFlag = Boolean(profile.is_premium) && hasActivePeriod;
-    const isUltra = membership.isUltra || profile.plan === 'ultra' || profile.plan === 'ultra_annual';
+    const isUltra = ULTRA_PLAN_ENABLED && (membership.isUltra || profile.plan === 'ultra' || profile.plan === 'ultra_annual');
     const isPremium = isUltra || profile.tier === 'premium' || isPlanActive || isPremiumFlag;
     const founderTrack = profile.founder_track ?? null;
 
@@ -162,7 +162,7 @@ export function Navigation({ user, profile, onSettings, onSignOut }: NavigationP
 
   const primaryNavigationItems = [
     { path: homePath, icon: Home, label: 'Home' },
-    { path: '/readiness', icon: BarChart2, label: 'Exam Readiness' },
+    ...(EXAM_READINESS_ENABLED ? [{ path: '/readiness', icon: BarChart2, label: 'Exam Readiness' }] : []),
     { path: '/notes', icon: BookMarked, label: 'Notes' },
     { path: `/mocks/${currentSubject}`, icon: FileText, label: 'Practice' },
   ];

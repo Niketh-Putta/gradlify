@@ -7,6 +7,7 @@ import { startPremiumCheckout } from "@/lib/checkout";
 import { useMembership } from "@/hooks/useMembership";
 import { cn } from "@/lib/utils";
 import { PREMIUM_PRICING, ULTRA_PRICING } from "@/lib/pricing";
+import { ULTRA_PLAN_ENABLED } from "@/lib/featureFlags";
 
 interface PaywallProps {
   open: boolean;
@@ -107,7 +108,7 @@ export function PremiumPaywall({
             </div>
           </div>
 
-          <div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2">
+          <div className={cn("grid gap-4 sm:gap-6 grid-cols-1", ULTRA_PLAN_ENABLED && "md:grid-cols-2")}>
             {/* Premium Plan (Blue) */}
             <button
               onClick={() => setSelectedTier('premium')}
@@ -149,7 +150,7 @@ export function PremiumPaywall({
               </div>
             </button>
 
-            {/* Ultra Plan (Amber) */}
+            {ULTRA_PLAN_ENABLED && (
             <button
               onClick={() => setSelectedTier('ultra')}
               className={cn(
@@ -188,6 +189,7 @@ export function PremiumPaywall({
                 </ul>
               </div>
             </button>
+            )}
           </div>
 
           <div className="mt-8 sm:mt-10 flex flex-col items-center space-y-4 sm:space-y-5">

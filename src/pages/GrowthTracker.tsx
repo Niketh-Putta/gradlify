@@ -83,6 +83,9 @@ export type PayingUser = {
   source?: "profile" | "stripe";
 };
 
+const displaySubscriptionPlan = (plan: string) =>
+  plan === 'ultra' || plan === 'ultra_annual' ? 'Premium' : plan;
+
 const isActuallyTrial = (user: PayingUser) => {
   if (user.status === 'trialing') return true;
   // If their current period end is within 4 days of their account creation, 
@@ -125,7 +128,7 @@ const UserRow = ({ user }: { user: PayingUser }) => {
         <td className="px-6 py-4">{user.email}</td>
         <td className="px-6 py-4">
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-50 text-purple-700 border border-purple-100">
-            {isCanceled && user.plan === 'free' ? 'Premium (Canceled)' : user.plan} · {user.track === 'gcse' ? 'GCSE' : '11+'}
+            {isCanceled && user.plan === 'free' ? 'Premium (Canceled)' : displaySubscriptionPlan(user.plan)} · {user.track === 'gcse' ? 'GCSE' : '11+'}
           </span>
         </td>
         <td className="px-6 py-4 text-slate-700">

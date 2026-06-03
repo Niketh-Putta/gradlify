@@ -833,7 +833,7 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
                 )}>
                   <div className="flex items-center gap-2 mb-2">
                     <Crown className={cn("h-4 w-4", currentSubject === 'english' ? "text-amber-600" : "text-primary")} />
-                    <p className={cn("text-[10px] font-black uppercase tracking-widest", currentSubject === 'english' ? "text-amber-600" : "text-primary")}>Ultra Feature</p>
+                    <p className={cn("text-[10px] font-black uppercase tracking-widest", currentSubject === 'english' ? "text-amber-600" : "text-primary")}>Premium Feature</p>
                   </div>
                   <p className="text-[11px] text-foreground/60 leading-relaxed font-bold mb-4">Upgrade for full 50-question paper sessions.</p>
                   <PremiumUpgradeButton className="w-full h-10 rounded-xl text-xs font-black shadow-none" />

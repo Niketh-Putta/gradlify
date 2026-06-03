@@ -58,7 +58,7 @@ const EditOnboardingDetailsModal = React.lazy(() =>
 
 import { startPremiumCheckout } from "@/lib/checkout";
 import { PREMIUM_PRICING, ULTRA_PRICING } from "@/lib/pricing";
-import { AI_FEATURE_ENABLED } from "@/lib/featureFlags";
+import { AI_FEATURE_ENABLED, ULTRA_PLAN_ENABLED } from "@/lib/featureFlags";
 import { UserTrack } from "@/lib/track";
 import { getTrackCopy } from "@/lib/trackContent";
 import { isAbortLikeError } from "@/lib/errors";
@@ -925,7 +925,7 @@ export function Settings({ user, onBackToChat, onSignOut }: SettingsProps) {
                     </div>
                   </div>
 
-                  {/* Ultra Plan Box */}
+                  {ULTRA_PLAN_ENABLED && (
                   <div className="bg-gradient-to-br from-indigo-950/90 to-slate-900 rounded-2xl p-5 border border-indigo-500/30 shadow-xl text-white relative overflow-hidden">
                     <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(99,102,241,0.15),transparent_50%)] pointer-events-none" />
                     <div className="relative z-10">
@@ -957,6 +957,7 @@ export function Settings({ user, onBackToChat, onSignOut }: SettingsProps) {
                       </Button>
                     </div>
                   </div>
+                  )}
                 </div>
               ) : (
                 <div className="bg-card rounded-2xl p-6 border border-primary/20 shadow-sm relative overflow-hidden group hover:border-primary/30 transition-colors">
@@ -1052,6 +1053,7 @@ export function Settings({ user, onBackToChat, onSignOut }: SettingsProps) {
         </DialogContent>
       </Dialog>
 
+      {ULTRA_PLAN_ENABLED && (
       <Dialog open={showUltraOptions} onOpenChange={setShowUltraOptions}>
         <DialogContent className="sm:max-w-[425px] rounded-2xl bg-gradient-to-br from-indigo-950/90 to-slate-900 border-indigo-500/30 text-white shadow-xl overflow-hidden">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(99,102,241,0.15),transparent_50%)] pointer-events-none" />
@@ -1096,6 +1098,7 @@ export function Settings({ user, onBackToChat, onSignOut }: SettingsProps) {
           </div>
         </DialogContent>
       </Dialog>
+      )}
 
       {isEditingStudyProfile && (
         <Suspense fallback={null}>

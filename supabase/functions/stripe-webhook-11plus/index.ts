@@ -83,6 +83,50 @@ const resolveCustomerId = (
   customer: string | Stripe.Customer | null | undefined
 ) => (typeof customer === 'string' ? customer : customer?.id ?? null);
 
+const recordPaidLiveMockSignup = async (session: Stripe.Checkout.Session) => {
+  const userId =
+    session.metadata?.user_id ??
+    session.metadata?.userId ??
+    session.metadata?.supabase_user_id ??
+    session.client_reference_id ??
+    null;
+  const email = session.customer_details?.email ?? session.customer_email ?? null;
+  const mockSlug = session.metadata?.mock_slug ?? session.metadata?.mock_type ?? 'both_subjects_live_mock';
+  const mockStartsAt = session.metadata?.mock_starts_at ?? new Date().toISOString();
+  if (!userId || !email) {
+    logStep('Live mock payment missing signup identity', {
+      sessionId: session.id,
+      hasUserId: Boolean(userId),
+      hasEmail: Boolean(email),
+    });
+    return { success: true, ignored: true };
+  }
+
+  const { error } = await getSupabaseClient()
+    .from('live_mock_exam_signups')
+    .upsert(
+      {
+        user_id: userId,
+        email: email.trim().toLowerCase(),
+        mock_slug: mockSlug,
+        mock_starts_at: mockStartsAt,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: 'mock_slug,user_id' },
+    );
+
+  if (error) {
+    throw error;
+  }
+
+  logStep('Recorded paid live mock signup', {
+    sessionId: session.id,
+    userId,
+    mockSlug,
+  });
+  return { success: true, ignored: false };
+};
+
 const determineBillingInterval = (
   subscription: Stripe.Subscription,
   priceIds: StripePriceIds
@@ -320,6 +364,15 @@ serve(async (req: Request): Promise<Response> => {
       switch (event.type) {
         case 'checkout.session.completed': {
           const session = event.data.object as Stripe.Checkout.Session;
+          if (
+            session.mode === 'payment' &&
+            (session.metadata?.mock_slug === 'both_subjects_live_mock' ||
+              session.metadata?.mock_type === 'both_subjects_live_mock')
+          ) {
+            result = await recordPaidLiveMockSignup(session);
+            break;
+          }
+
           const subscriptionId = session.subscription as string | null;
           const customerId = resolveCustomerId(session.customer);
           const metadataUserId =

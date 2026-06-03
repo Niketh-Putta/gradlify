@@ -17,12 +17,11 @@ import { SprintBanner } from "@/components/SprintBanner";
 import { DiscordFooterEntry } from "@/components/DiscordFooterEntry";
 import { supabase } from "@/integrations/supabase/client";
 import { getSprintUpgradeCopy } from "@/lib/foundersSprint";
-import { AI_FEATURE_ENABLED } from "@/lib/featureFlags";
+import { AI_FEATURE_ENABLED, EXAM_READINESS_ENABLED, ULTRA_PLAN_ENABLED } from "@/lib/featureFlags";
 import { getDashboardPath, setSignupTrack } from "@/lib/track";
 import { ULTRA_PRICING, PREMIUM_PRICING } from "@/lib/pricing";
 
 /** Same clips as in `src/assets/`, but loaded from `/public` so they are not embedded in the JS bundle. */
-const READINESS_SHOWCASE_VIDEO = "/videos/exam-readiness.mov";
 const PRACTICE_SHOWCASE_VIDEO = "/videos/practice-question.mov";
 
 const HEAT_GRADIENT = {
@@ -477,13 +476,19 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
       {
         key: "feedback",
         label: "Priority 02",
-        title: "Readiness Tracking. Know exactly when they are ready.",
-        body: "Stop guessing. Our dashboard aggregates every session into a real-time 'Readiness Score'. See subtopic mastery across Maths and English at a single glance.",
-        badge: "Readiness Dashboard",
-        hoverFact: "Proprietary algorithm mimics actual 11+ grading.",
+        title: EXAM_READINESS_ENABLED
+          ? "Readiness Tracking. Know exactly when they are ready."
+          : "Mock Analytics. Review every paper with clarity.",
+        body: EXAM_READINESS_ENABLED
+          ? "Stop guessing. Our dashboard aggregates every session into a real-time 'Readiness Score'. See subtopic mastery across Maths and English at a single glance."
+          : "Review mock performance, spot repeated mistakes, and build stronger exam habits across Maths and English.",
+        badge: EXAM_READINESS_ENABLED ? "Readiness Dashboard" : "Mock Analytics",
+        hoverFact: EXAM_READINESS_ENABLED
+          ? "Proprietary algorithm mimics actual 11+ grading."
+          : "Detailed review helps every completed mock become the next practice plan.",
         media: (
           <HoverVideo
-            src={READINESS_SHOWCASE_VIDEO}
+            src={PRACTICE_SHOWCASE_VIDEO}
             className="h-full w-full object-cover"
             playOnHover
             tone={theme}
@@ -634,7 +639,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                   "mt-4 sm:mt-8 text-lg sm:text-xl font-medium max-w-lg leading-[1.6]",
                   isDark ? "text-slate-300" : "text-[#334155]"
                 )}>
-                  The definitive system behind top 11+ results. Master both Maths & English with our intelligent Split-View practice and elite Readiness Tracking.
+                  The definitive system behind top 11+ results. Master both Maths & English with intelligent Split-View practice and full mock exams.
                 </p>
 
 
@@ -654,20 +659,21 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
               <motion.div variants={motionCfg.fadeUp} className="lg:col-span-7 relative mt-6 lg:mt-8 h-[460px] lg:h-[520px] w-full max-w-[600px] mx-auto lg:ml-auto">
                 {/* 3D Stacked Deck - True Product Surface Overhaul */}
                 
-                {/* Card 1: TRUE Exam Readiness (Back Left) */}
-                <div className={cn(
-                  "absolute top-10 left-[-15px] sm:left-[-20px] w-[250px] sm:w-[380px] rounded-[24px] sm:rounded-[32px] border shadow-2xl transition-all duration-700 ease-out pointer-events-none block",
-                  "transform origin-bottom-left -rotate-[10deg] sm:-rotate-[12deg] scale-[0.85] sm:scale-[0.9] -translate-x-4 sm:-translate-x-16 -translate-y-8 sm:-translate-y-12 opacity-90 sm:opacity-100",
-                  isDark ? "bg-[radial-gradient(100%_100%_at_0%_0%,#1e293b,#0a0a0a)] border-white/10" : "bg-[radial-gradient(100%_100%_at_0%_0%,#f8fafc,#ffffff)] border-slate-200"
-                )}>
-                  <div className={cn("h-[200px] sm:h-[280px] w-full p-0 flex flex-col rounded-[24px] sm:rounded-[32px] overflow-hidden shadow-2xl transition-colors duration-700", isDark ? "bg-[#0B1528]" : "bg-white")}>
-                    <img 
-                      src="/hero-analytics.png" 
-                      alt="Cognitive Readiness Profile" 
-                      className={cn("w-full h-full object-cover object-left-top transition-all duration-700", isDark && "invert hue-rotate-180 brightness-95 contrast-[1.15] opacity-90")} 
-                    />
+                {EXAM_READINESS_ENABLED && (
+                  <div className={cn(
+                    "absolute top-10 left-[-15px] sm:left-[-20px] w-[250px] sm:w-[380px] rounded-[24px] sm:rounded-[32px] border shadow-2xl transition-all duration-700 ease-out pointer-events-none block",
+                    "transform origin-bottom-left -rotate-[10deg] sm:-rotate-[12deg] scale-[0.85] sm:scale-[0.9] -translate-x-4 sm:-translate-x-16 -translate-y-8 sm:-translate-y-12 opacity-90 sm:opacity-100",
+                    isDark ? "bg-[radial-gradient(100%_100%_at_0%_0%,#1e293b,#0a0a0a)] border-white/10" : "bg-[radial-gradient(100%_100%_at_0%_0%,#f8fafc,#ffffff)] border-slate-200"
+                  )}>
+                    <div className={cn("h-[200px] sm:h-[280px] w-full p-0 flex flex-col rounded-[24px] sm:rounded-[32px] overflow-hidden shadow-2xl transition-colors duration-700", isDark ? "bg-[#0B1528]" : "bg-white")}>
+                      <img 
+                        src="/hero-analytics.png" 
+                        alt="Progress analytics dashboard" 
+                        className={cn("w-full h-full object-cover object-left-top transition-all duration-700", isDark && "invert hue-rotate-180 brightness-95 contrast-[1.15] opacity-90")} 
+                      />
+                    </div>
                   </div>
-                </div>
+                )}
 
                 {/* Card 2: TRUE Revision Notes (Back Right) */}
                 <div className={cn(
@@ -1146,7 +1152,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                     <div className="mt-5 sm:mt-6 space-y-3 text-[13px] sm:text-sm text-white/90">
                       {[
                         "Full timed mock exams",
-                        "Deeper readiness analytics",
+                        EXAM_READINESS_ENABLED ? "Deeper readiness analytics" : "Detailed mock analytics",
                         AI_FEATURE_ENABLED ? "Higher AI explanation limits" : "Higher explanation limits",
                         "Priority support",
                       ].map((line) => (
@@ -1169,7 +1175,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                   </div>
                 </motion.div>
 
-                {/* Ultra Tier */}
+                {ULTRA_PLAN_ENABLED && (
                 <motion.div variants={motionCfg.fadeUp} className={`font-sans rounded-[20px] sm:rounded-[22px] ${isDark ? 'bg-gradient-to-br from-indigo-300 via-purple-500 to-indigo-600 shadow-[0_0_60px_-10px_rgba(124,58,237,0.55)]' : 'bg-gradient-to-br from-[#1a1c29] via-[#241e16] to-[#1a1c29] border border-amber-500/30 shadow-2xl'} p-[2px] scale-100 lg:scale-110 z-30 flex flex-col order-3 relative overflow-hidden group`}>
                   <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(124,58,237,0.35),transparent_60%)] rounded-[20px]"></div>
                   <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(99,102,241,0.35),transparent_60%)] rounded-[20px]"></div>
@@ -1215,6 +1221,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                     </div>
                   </div>
                 </motion.div>
+                )}
 
               </motion.div>
 

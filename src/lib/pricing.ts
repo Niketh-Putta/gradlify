@@ -1,7 +1,7 @@
 /** Display amounts for Gradlify 11+ plans (GBP). Checkout uses Stripe Price IDs from env. */
 
 export const PREMIUM_PRICING = {
-  monthly: 24.99,
+  monthly: 19.99,
   annual: 249.99,
   annualPerMonth: 20.83,
 } as const;
