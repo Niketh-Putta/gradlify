@@ -2,8 +2,11 @@
 
 export const PREMIUM_PRICING = {
   monthly: 19.99,
-  annual: 249.99,
-  annualPerMonth: 20.83,
+  monthlyOriginal: 39.99,
+  annual: 199.99,
+  annualOriginal: 399.99,
+  annualPerMonth: 16.67,
+  annualSavings: 200,
 } as const;
 
 export const ULTRA_PRICING = {

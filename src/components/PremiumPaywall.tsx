@@ -8,7 +8,7 @@ import { useMembership } from "@/hooks/useMembership";
 import { cn } from "@/lib/utils";
 import { PREMIUM_PRICING, ULTRA_PRICING } from "@/lib/pricing";
 import { ULTRA_PLAN_ENABLED } from "@/lib/featureFlags";
-import { OfferPrice } from "@/components/OfferPrice";
+import { AnnualOfferPrice, OfferPrice } from "@/components/OfferPrice";
 
 interface PaywallProps {
   open: boolean;
@@ -104,7 +104,7 @@ export function PremiumPaywall({
                 )}
               >
                 Annual
-                <span className="bg-emerald-50 text-emerald-600 px-1.5 py-0.5 rounded text-[8px] font-black">SAVE 17%</span>
+                <span className="bg-red-50 text-red-600 px-1.5 py-0.5 rounded text-[8px] font-black">SAVE £{PREMIUM_PRICING.annualSavings}</span>
               </button>
             </div>
           </div>
@@ -132,15 +132,15 @@ export function PremiumPaywall({
                       labelClassName="tracking-[0.1em]"
                     />
                   ) : (
-                    <div className="flex items-baseline gap-1 flex-wrap">
-                      <span className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
-                        £{PREMIUM_PRICING.annualPerMonth}
-                      </span>
-                      <span className="text-[10px] sm:text-xs font-bold text-slate-300 tracking-tight shrink-0">/mo</span>
-                    </div>
+                    <AnnualOfferPrice
+                      compact
+                      showPerMonth
+                      currentClassName="text-2xl sm:text-3xl text-slate-900 dark:text-white"
+                      labelClassName="tracking-[0.1em]"
+                    />
                   )}
                   {billingCycle === 'annual' && (
-                    <p className="text-[8px] md:text-[9px] font-black text-slate-300 uppercase tracking-widest mt-1">Billed as £{PREMIUM_PRICING.annual} annually</p>
+                    <p className="text-[8px] md:text-[9px] font-black text-slate-300 uppercase tracking-widest mt-1">Billed yearly at the limited time price.</p>
                   )}
                 </div>
                 <div className="h-px w-full bg-slate-50 dark:bg-slate-800" />

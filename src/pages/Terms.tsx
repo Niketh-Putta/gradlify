@@ -92,7 +92,9 @@ export default function Terms() {
                     <DiagonalStrikePrice className="text-sm text-muted-foreground" />
                     <span>£{PREMIUM_PRICING.monthly}/month</span>
                     <span className="rounded-full bg-red-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-red-600">limited time offer</span>
-                    <span>or £{PREMIUM_PRICING.annual}/year):</span>
+                    <span>or annual was</span>
+                    <DiagonalStrikePrice amount={PREMIUM_PRICING.annualOriginal} className="text-sm text-muted-foreground" />
+                    <span>now £{PREMIUM_PRICING.annual}/year, limited time offer just for you):</span>
                   </h4>
                   <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
                     <li>{AI_FEATURE_ENABLED ? '100 AI questions per day' : '100 questions per day'}</li>

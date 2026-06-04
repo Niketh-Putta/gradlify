@@ -13,7 +13,7 @@ type OfferPriceProps = {
 };
 
 export function DiagonalStrikePrice({
-  amount = 39.99,
+  amount = PREMIUM_PRICING.monthlyOriginal,
   className,
 }: {
   amount?: number;
@@ -27,6 +27,83 @@ export function DiagonalStrikePrice({
         aria-hidden="true"
       />
     </span>
+  );
+}
+
+type AnnualOfferPriceProps = {
+  className?: string;
+  currentClassName?: string;
+  originalClassName?: string;
+  labelClassName?: string;
+  suffix?: string;
+  compact?: boolean;
+  align?: "left" | "right" | "center";
+  tone?: "light" | "dark";
+  showPerMonth?: boolean;
+};
+
+export function AnnualOfferPrice({
+  className,
+  currentClassName,
+  originalClassName,
+  labelClassName,
+  suffix = "/year",
+  compact = false,
+  align = "left",
+  tone = "light",
+  showPerMonth = false,
+}: AnnualOfferPriceProps) {
+  return (
+    <div
+      className={cn(
+        "flex flex-col gap-2",
+        align === "right" && "items-end text-right",
+        align === "center" && "items-center text-center",
+        className
+      )}
+    >
+      <div className={cn("flex flex-wrap items-center gap-2.5", align === "right" && "justify-end", align === "center" && "justify-center")}>
+        <span
+          className={cn(
+            "text-[10px] font-black uppercase tracking-[0.18em]",
+            tone === "dark" ? "text-white/80" : "text-red-600"
+          )}
+        >
+          Was
+        </span>
+        <DiagonalStrikePrice
+          amount={PREMIUM_PRICING.annualOriginal}
+          className={cn(
+            compact ? "text-lg font-black sm:text-xl" : "text-2xl font-black sm:text-3xl",
+            tone === "dark" ? "text-white drop-shadow-[0_1px_4px_rgba(0,0,0,0.28)]" : "text-slate-800",
+            originalClassName
+          )}
+        />
+        <span
+          className={cn(
+            "rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.14em] shadow-sm",
+            tone === "dark" ? "border-white/35 bg-white/20 text-white" : "border-red-200 bg-red-50 text-red-600",
+            labelClassName
+          )}
+        >
+          Limited time offer
+        </span>
+      </div>
+      <div className="flex flex-wrap items-baseline gap-2">
+        <span className={cn(compact ? "text-xl font-black" : "text-3xl font-semibold sm:text-4xl", currentClassName)}>
+          {formatGbp(PREMIUM_PRICING.annual)}
+        </span>
+        {suffix && <span className={cn("text-sm", tone === "dark" ? "text-white/80" : "text-muted-foreground")}>{suffix}</span>}
+        <span className={cn("text-xs font-bold", tone === "dark" ? "text-white/80" : "text-red-600")}>
+          just for you
+        </span>
+      </div>
+      {showPerMonth && (
+        <p className={cn("text-xs font-semibold", tone === "dark" ? "text-white/70" : "text-muted-foreground")}>
+          Only {formatGbp(PREMIUM_PRICING.annualPerMonth)}/month when billed yearly.
+        </p>
+      )}
+    </div>
   );
 }
 

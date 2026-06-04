@@ -305,13 +305,22 @@ function PlanCheckoutButton({
           onClick={() => handleCheckout(annualPlan)}
           className="cursor-pointer rounded-xl p-3"
         >
-          <div className="flex w-full flex-col">
+          <div className="flex w-full flex-col gap-1">
             <span className="font-semibold">
               {planType === 'premium' ? 'Premium Annual' : 'Ultra Annual'}
             </span>
-            <span className="text-xs text-muted-foreground">
-              {planType === 'premium' ? `3 Day Free Trial, then £${PREMIUM_PRICING.annual}/year` : `Best value — £${ULTRA_PRICING.annual}/year`}
-            </span>
+            {planType === 'premium' ? (
+              <>
+                <span className="flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
+                  3 Day Free Trial, then was
+                  <DiagonalStrikePrice amount={PREMIUM_PRICING.annualOriginal} className="font-semibold text-slate-400" />
+                  now <span className="font-semibold text-slate-900">£{PREMIUM_PRICING.annual}/year</span>
+                </span>
+                <span className="text-xs font-semibold text-red-600">Limited time offer just for you.</span>
+              </>
+            ) : (
+              <span className="text-xs text-muted-foreground">Best value — £{ULTRA_PRICING.annual}/year</span>
+            )}
           </div>
         </DropdownMenuItem>
         <DropdownMenuItem

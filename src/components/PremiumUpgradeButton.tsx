@@ -99,11 +99,16 @@ export function PremiumUpgradeButton({
           )}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-56">
+      <DropdownMenuContent align="start" className="w-72">
         <DropdownMenuItem onClick={() => handleUpgrade('annual')}>
-          <div className="flex flex-col">
+          <div className="flex flex-col gap-1">
             <span className="font-medium">Premium (Annual)</span>
-            <span className="text-sm text-muted-foreground">3 Day Free Trial, then £{PREMIUM_PRICING.annual}/year</span>
+            <span className="flex flex-wrap items-center gap-1 text-sm text-muted-foreground">
+              3 Day Free Trial, then was
+              <DiagonalStrikePrice amount={PREMIUM_PRICING.annualOriginal} className="font-semibold text-slate-400" />
+              now <span className="font-semibold text-slate-900">£{PREMIUM_PRICING.annual}/year</span>
+            </span>
+            <span className="text-xs font-semibold text-red-600">Limited time offer just for you.</span>
           </div>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => handleUpgrade('monthly')}>

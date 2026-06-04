@@ -75,16 +75,9 @@ export interface StripePriceIds {
 }
 
 // Price IDs come from Supabase/Deno env (STRIPE_PRICE_*). Amounts live in Stripe — create new Prices to change billing.
-// Premium monthly: £19.99/mo (1999 pence). 11+ Premium annual: £249.99/yr (24999 pence).
+// Premium monthly: £19.99/mo (1999 pence). 11+ Premium annual offer: £199.99/yr (19999 pence).
 // Ultra: £249.99/mo (24999 pence), £2499.99/yr (249999 pence) as of May 2026.
-// After creating new Stripe Prices, update STRIPE_PRICE_11PLUS_ULTRA_* (and Supabase edge-function secrets).
-export const getStripePriceIdsForMode = (mode: StripeMode): StripePriceIds => ({
-  monthly: requireEnvVar(`STRIPE_PRICE_MONTHLY_${mode}`),
-  annual: requireEnvVar(`STRIPE_PRICE_ANNUAL_${mode}`),
-  ultra: readEnv(`STRIPE_PRICE_ULTRA_MONTHLY_${mode}`) || undefined,
-  ultra_annual: readEnv(`STRIPE_PRICE_ULTRA_ANNUAL_${mode}`) || undefined,
-});
-
+// After creating new Stripe Prices, update STRIPE_PRICE_11PLUS_* (and Supabase edge-function secrets).
 export type PremiumTrack = 'gcse' | 'eleven_plus';
 
 export interface StripeTrackPriceIds {
@@ -94,6 +87,18 @@ export interface StripeTrackPriceIds {
 
 const readModeAware = (base: string, mode: StripeMode) =>
   readEnv(`${base}_${mode}`) || readEnv(base);
+
+const PREMIUM_ANNUAL_OFFER_PRICE_IDS: Record<StripeMode, string> = {
+  LIVE: "price_1TeW1iQYWoowhxMZ7f3MlPcR",
+  TEST: "price_1TeW1jHZeiDDkqObqPFnObVn",
+};
+
+export const getStripePriceIdsForMode = (mode: StripeMode): StripePriceIds => ({
+  monthly: requireEnvVar(`STRIPE_PRICE_MONTHLY_${mode}`),
+  annual: PREMIUM_ANNUAL_OFFER_PRICE_IDS[mode],
+  ultra: readEnv(`STRIPE_PRICE_ULTRA_MONTHLY_${mode}`) || undefined,
+  ultra_annual: readEnv(`STRIPE_PRICE_ULTRA_ANNUAL_${mode}`) || undefined,
+});
 
 export const normalizePremiumTrack = (value: string | null | undefined): PremiumTrack | null => {
   const normalized = (value ?? '').trim().toLowerCase();
@@ -106,12 +111,14 @@ export const normalizePremiumTrack = (value: string | null | undefined): Premium
 };
 
 export const getStripeTrackPriceIdsForMode = (mode: StripeMode): StripeTrackPriceIds => {
+  const premiumAnnualOfferPriceId = PREMIUM_ANNUAL_OFFER_PRICE_IDS[mode];
   const gcseMonthly = readModeAware('STRIPE_PRICE_MONTHLY', mode);
-  const gcseAnnual = readModeAware('STRIPE_PRICE_ANNUAL', mode);
+  const gcseAnnual = premiumAnnualOfferPriceId || readModeAware('STRIPE_PRICE_ANNUAL', mode);
   const elevenPlusMonthly =
     readModeAware('STRIPE_PRICE_11PLUS_MONTHLY', mode) ||
     readModeAware('STRIPE_PRICE_ELEVEN_PLUS_MONTHLY', mode);
   const elevenPlusAnnual =
+    premiumAnnualOfferPriceId ||
     readModeAware('STRIPE_PRICE_11PLUS_ANNUAL', mode) ||
     readModeAware('STRIPE_PRICE_ELEVEN_PLUS_ANNUAL', mode);
   const elevenPlusUltra =
@@ -214,6 +221,7 @@ export const getStripeConfig = (): StripeConfig => {
     readEnv(`STRIPE_PRICE_MONTHLY_${resolvedMode}`) ||
     readEnv('STRIPE_PRICE_MONTHLY');
   const annualPriceId =
+    PREMIUM_ANNUAL_OFFER_PRICE_IDS[resolvedMode] ||
     readEnv(`STRIPE_PRICE_ANNUAL_${resolvedMode}`) ||
     readEnv('STRIPE_PRICE_ANNUAL');
   const webhookSecret =

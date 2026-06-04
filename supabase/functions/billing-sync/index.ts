@@ -15,6 +15,11 @@ const jsonResponse = (body: Record<string, unknown>, status = 200) =>
 
 const readEnv = (name: string) => Deno.env.get(name)?.trim() ?? "";
 
+const PREMIUM_ANNUAL_OFFER_PRICE_IDS: Record<string, string> = {
+  live: "price_1TeW1iQYWoowhxMZ7f3MlPcR",
+  test: "price_1TeW1jHZeiDDkqObqPFnObVn",
+};
+
 const stripeKeyPrefix = (key: string) =>
   key.startsWith("sk_live_") ? "sk_live" : key.startsWith("sk_test_") ? "sk_test" : "unknown";
 
@@ -52,15 +57,16 @@ const getTrackPriceIds = (environment: string) => {
   const suffix = environment === 'live' ? 'LIVE' : environment === 'test' ? 'TEST' : '';
   const read = (base: string) =>
     suffix ? readEnv(`${base}_${suffix}`) || readEnv(base) : readEnv(base);
+  const premiumAnnualOfferPriceId = PREMIUM_ANNUAL_OFFER_PRICE_IDS[environment] || '';
 
   return {
     gcse: {
       monthly: read('STRIPE_PRICE_MONTHLY'),
-      annual: read('STRIPE_PRICE_ANNUAL'),
+      annual: premiumAnnualOfferPriceId || read('STRIPE_PRICE_ANNUAL'),
     },
     eleven_plus: {
       monthly: read('STRIPE_PRICE_11PLUS_MONTHLY') || read('STRIPE_PRICE_ELEVEN_PLUS_MONTHLY'),
-      annual: read('STRIPE_PRICE_11PLUS_ANNUAL') || read('STRIPE_PRICE_ELEVEN_PLUS_ANNUAL'),
+      annual: premiumAnnualOfferPriceId || read('STRIPE_PRICE_11PLUS_ANNUAL') || read('STRIPE_PRICE_ELEVEN_PLUS_ANNUAL'),
     },
   };
 };

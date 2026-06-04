@@ -53,7 +53,7 @@ assert('ultra live annual (249999 pence)', la.unit_amount === 249999, String(la.
 assert('ultra test monthly', tm.unit_amount === 24999, String(tm.unit_amount));
 assert('ultra test annual', ta.unit_amount === 249999, String(ta.unit_amount));
 assert('premium live monthly', pm.unit_amount === 1999, String(pm.unit_amount));
-assert('premium live annual', pa.unit_amount === 24999, String(pa.unit_amount));
+assert('premium live annual', pa.unit_amount === 19999, String(pa.unit_amount));
 
 for (const file of ['Srinika_winner.mov', 'Vivaan_winner.mp4', 'videos/exam-readiness.mov']) {
   assert(`public/${file}`, fs.existsSync(path.join(root, 'public', file)));
@@ -65,7 +65,7 @@ const anon = env.VITE_SUPABASE_ANON_KEY;
 const base = env.VITE_SUPABASE_URL;
 for (const [plan, expected] of [
   ['monthly', 1999],
-  ['yearly', 24999],
+  ['yearly', 19999],
 ]) {
   const res = await fetch(`${base}/functions/v1/stripe-price?plan=${plan}`, {
     headers: { Authorization: `Bearer ${anon}`, apikey: anon },
@@ -75,7 +75,8 @@ for (const [plan, expected] of [
 }
 
 const landing = fs.readFileSync(path.join(root, 'src/components/LandingPage.tsx'), 'utf8');
-assert('LandingPage uses pricing constants', landing.includes('ULTRA_PRICING') && landing.includes('PREMIUM_PRICING'));
+const offerPrice = fs.readFileSync(path.join(root, 'src/components/OfferPrice.tsx'), 'utf8');
+assert('LandingPage uses shared offer pricing', landing.includes('OfferPrice') && offerPrice.includes('PREMIUM_PRICING'));
 assert('LandingPage no stale £99.99', !landing.includes('99.99'));
 
 const terms = fs.readFileSync(path.join(root, 'src/pages/Terms.tsx'), 'utf8');

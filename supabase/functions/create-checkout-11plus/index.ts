@@ -53,6 +53,11 @@ const normalizeEnv = (raw: string) => {
   return "test";
 };
 
+const PREMIUM_ANNUAL_OFFER_PRICE_IDS = {
+  live: "price_1TeW1iQYWoowhxMZ7f3MlPcR",
+  test: "price_1TeW1jHZeiDDkqObqPFnObVn",
+} as const;
+
 const customerHasUsedTrial = async (stripe: Stripe, customerId: string) => {
   let startingAfter: string | undefined;
 
@@ -90,18 +95,18 @@ const getStripeConfig = () => {
   const live = {
     stripeSecretKey: readEnv("STRIPE_SECRET_KEY_LIVE"),
     priceMonthly: readEnv("STRIPE_PRICE_MONTHLY_LIVE") || readEnv("PRICE_ID_LIVE"),
-    priceAnnual: readEnv("STRIPE_PRICE_ANNUAL_LIVE") || readEnv("STRIPE_PRICE_YEARLY_LIVE"),
+    priceAnnual: PREMIUM_ANNUAL_OFFER_PRICE_IDS.live || readEnv("STRIPE_PRICE_ANNUAL_LIVE") || readEnv("STRIPE_PRICE_YEARLY_LIVE"),
     price11PlusMonthly: readEnv("STRIPE_PRICE_11PLUS_MONTHLY_LIVE") || readEnv("STRIPE_PRICE_11PLUS_MONTHLY") || readEnv("STRIPE_PRICE_ELEVEN_PLUS_MONTHLY_LIVE") || readEnv("STRIPE_PRICE_ELEVEN_PLUS_MONTHLY"),
-    price11PlusAnnual: readEnv("STRIPE_PRICE_11PLUS_ANNUAL_LIVE") || readEnv("STRIPE_PRICE_11PLUS_ANNUAL") || readEnv("STRIPE_PRICE_ELEVEN_PLUS_ANNUAL_LIVE") || readEnv("STRIPE_PRICE_ELEVEN_PLUS_ANNUAL"),
+    price11PlusAnnual: PREMIUM_ANNUAL_OFFER_PRICE_IDS.live || readEnv("STRIPE_PRICE_11PLUS_ANNUAL_LIVE") || readEnv("STRIPE_PRICE_11PLUS_ANNUAL") || readEnv("STRIPE_PRICE_ELEVEN_PLUS_ANNUAL_LIVE") || readEnv("STRIPE_PRICE_ELEVEN_PLUS_ANNUAL"),
     price11PlusUltra: readEnv("STRIPE_PRICE_11PLUS_ULTRA_MONTHLY_LIVE") || readEnv("STRIPE_PRICE_11PLUS_ULTRA_MONTHLY") || readEnv("STRIPE_PRICE_ELEVEN_PLUS_ULTRA_MONTHLY_LIVE"),
     price11PlusUltraAnnual: readEnv("STRIPE_PRICE_11PLUS_ULTRA_ANNUAL_LIVE") || readEnv("STRIPE_PRICE_11PLUS_ULTRA_ANNUAL") || readEnv("STRIPE_PRICE_ELEVEN_PLUS_ULTRA_ANNUAL_LIVE"),
   };
   const test = {
     stripeSecretKey: readEnv("STRIPE_SECRET_KEY_TEST") || readEnv("STRIPE_SECRET_KEY"),
     priceMonthly: readEnv("STRIPE_PRICE_MONTHLY_TEST") || readEnv("PRICE_ID_TEST"),
-    priceAnnual: readEnv("STRIPE_PRICE_ANNUAL_TEST") || readEnv("STRIPE_PRICE_YEARLY_TEST"),
+    priceAnnual: PREMIUM_ANNUAL_OFFER_PRICE_IDS.test || readEnv("STRIPE_PRICE_ANNUAL_TEST") || readEnv("STRIPE_PRICE_YEARLY_TEST"),
     price11PlusMonthly: readEnv("STRIPE_PRICE_11PLUS_MONTHLY_TEST") || readEnv("STRIPE_PRICE_11PLUS_MONTHLY") || readEnv("STRIPE_PRICE_ELEVEN_PLUS_MONTHLY_TEST") || readEnv("STRIPE_PRICE_ELEVEN_PLUS_MONTHLY"),
-    price11PlusAnnual: readEnv("STRIPE_PRICE_11PLUS_ANNUAL_TEST") || readEnv("STRIPE_PRICE_11PLUS_ANNUAL") || readEnv("STRIPE_PRICE_ELEVEN_PLUS_ANNUAL_TEST") || readEnv("STRIPE_PRICE_ELEVEN_PLUS_ANNUAL"),
+    price11PlusAnnual: PREMIUM_ANNUAL_OFFER_PRICE_IDS.test || readEnv("STRIPE_PRICE_11PLUS_ANNUAL_TEST") || readEnv("STRIPE_PRICE_11PLUS_ANNUAL") || readEnv("STRIPE_PRICE_ELEVEN_PLUS_ANNUAL_TEST") || readEnv("STRIPE_PRICE_ELEVEN_PLUS_ANNUAL"),
     price11PlusUltra: readEnv("STRIPE_PRICE_11PLUS_ULTRA_MONTHLY_TEST") || readEnv("STRIPE_PRICE_11PLUS_ULTRA_MONTHLY") || readEnv("STRIPE_PRICE_ELEVEN_PLUS_ULTRA_MONTHLY_TEST"),
     price11PlusUltraAnnual: readEnv("STRIPE_PRICE_11PLUS_ULTRA_ANNUAL_TEST") || readEnv("STRIPE_PRICE_11PLUS_ULTRA_ANNUAL") || readEnv("STRIPE_PRICE_ELEVEN_PLUS_ULTRA_ANNUAL_TEST"),
   };
@@ -193,7 +198,7 @@ serve(async (req) => {
     }
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
-    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
+    const supabaseAnonKey = (Deno.env.get("SUPABASE_ANON_KEY") || Deno.env.get("VITE_SUPABASE_PUBLISHABLE_KEY") || Deno.env.get("VITE_SUPABASE_ANON_KEY")) ?? "";
     const supabaseServiceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 
     const supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
