@@ -1231,7 +1231,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                       onClick={handleSignup}
                       className="w-full rounded-full bg-white text-orange-700 font-semibold py-4 sm:py-6 hover:bg-white shadow-lg"
                     >
-                      {sprintCopy.buttonSecondary}
+                      Purchase plan
                       <ArrowRight className="ml-2 h-5 w-5" />
                     </Button>
                     <div className="mt-2 sm:mt-3 text-[11px] sm:text-xs text-white/80 text-center">Cancel anytime</div>
