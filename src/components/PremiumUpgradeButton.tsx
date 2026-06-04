@@ -7,6 +7,7 @@ import { getSprintUpgradeCopy } from '@/lib/foundersSprint';
 import { startPremiumCheckout } from "@/lib/checkout";
 import { PREMIUM_PRICING, ULTRA_PRICING } from "@/lib/pricing";
 import { AI_FEATURE_ENABLED, ULTRA_PLAN_ENABLED } from "@/lib/featureFlags";
+import { DiagonalStrikePrice } from "@/components/OfferPrice";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -108,7 +109,12 @@ export function PremiumUpgradeButton({
         <DropdownMenuItem onClick={() => handleUpgrade('monthly')}>
           <div className="flex flex-col">
             <span className="font-medium">Premium (Monthly)</span>
-            <span className="text-sm text-muted-foreground">3 Day Free Trial, then £{PREMIUM_PRICING.monthly}/month</span>
+            <span className="flex flex-wrap items-center gap-1 text-sm text-muted-foreground">
+              3 Day Free Trial, then
+              <DiagonalStrikePrice className="font-semibold text-slate-400" />
+              <span className="font-semibold text-slate-900">£{PREMIUM_PRICING.monthly}/month</span>
+              <span className="text-red-600">limited time offer</span>
+            </span>
           </div>
         </DropdownMenuItem>
         {ULTRA_PLAN_ENABLED && (

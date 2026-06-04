@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useSubject } from "@/contexts/SubjectContext";
 import { useMembership } from "@/hooks/useMembership";
 import { OnboardingModal } from "@/components/OnboardingModal";
@@ -46,6 +46,7 @@ const hasExistingProgress = (profile?: Profile | null) =>
 
 export default function SubjectSelection() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { setSubject } = useSubject();
   const { isUltra, isPremium } = useMembership();
   const [userId, setUserId] = useState<string | null>(null);
@@ -54,6 +55,8 @@ export default function SubjectSelection() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   
   const displayTier = isUltra ? 'Ultra' : isPremium ? 'Premium' : 'Free';
+  const planIntent = new URLSearchParams(location.search).get('intent') === 'plans';
+  const postPlanSetupPath = "/select-subject#settings";
 
   const fetchProfile = useCallback(async () => {
     setProfileLoading(true);
@@ -108,6 +111,11 @@ export default function SubjectSelection() {
     if (profileLoading || !userId || onboardingComplete) return;
     setShowOnboarding(true);
   }, [onboardingComplete, profileLoading, userId]);
+
+  useEffect(() => {
+    if (profileLoading || !userId || !planIntent || !onboardingComplete) return;
+    navigate(postPlanSetupPath, { replace: true });
+  }, [onboardingComplete, planIntent, profileLoading, userId, navigate]);
 
   const handleSelect = (subject: 'maths' | 'english') => {
     setSubject(subject);
@@ -214,6 +222,8 @@ export default function SubjectSelection() {
             setShowOnboarding(false);
             void fetchProfile();
           }}
+          continuePath={planIntent ? postPlanSetupPath : '/home'}
+          skipUpsell={planIntent}
         />
       ) : null}
     </div>

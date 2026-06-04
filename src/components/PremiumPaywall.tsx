@@ -8,6 +8,7 @@ import { useMembership } from "@/hooks/useMembership";
 import { cn } from "@/lib/utils";
 import { PREMIUM_PRICING, ULTRA_PRICING } from "@/lib/pricing";
 import { ULTRA_PLAN_ENABLED } from "@/lib/featureFlags";
+import { OfferPrice } from "@/components/OfferPrice";
 
 interface PaywallProps {
   open: boolean;
@@ -123,12 +124,21 @@ export function PremiumPaywall({
                   <p className="text-[9px] md:text-[10px] font-bold text-blue-500/60 uppercase tracking-[0.15em] mt-1">FOUNDATIONAL MASTERY</p>
                 </div>
                 <div className="flex flex-col">
-                  <div className="flex items-baseline gap-1 flex-wrap">
-                    <span className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
-                      £{billingCycle === 'monthly' ? PREMIUM_PRICING.monthly : PREMIUM_PRICING.annualPerMonth}
-                    </span>
-                    <span className="text-[10px] sm:text-xs font-bold text-slate-300 tracking-tight shrink-0">/mo</span>
-                  </div>
+                  {billingCycle === 'monthly' ? (
+                    <OfferPrice
+                      compact
+                      suffix="/mo"
+                      currentClassName="text-2xl sm:text-3xl text-slate-900 dark:text-white"
+                      labelClassName="tracking-[0.1em]"
+                    />
+                  ) : (
+                    <div className="flex items-baseline gap-1 flex-wrap">
+                      <span className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
+                        £{PREMIUM_PRICING.annualPerMonth}
+                      </span>
+                      <span className="text-[10px] sm:text-xs font-bold text-slate-300 tracking-tight shrink-0">/mo</span>
+                    </div>
+                  )}
                   {billingCycle === 'annual' && (
                     <p className="text-[8px] md:text-[9px] font-black text-slate-300 uppercase tracking-widest mt-1">Billed as £{PREMIUM_PRICING.annual} annually</p>
                   )}

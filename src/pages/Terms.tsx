@@ -4,6 +4,7 @@ import { ArrowLeft, FileText } from "lucide-react";
 import { Link } from "react-router-dom";
 import { AI_FEATURE_ENABLED } from "@/lib/featureFlags";
 import { PREMIUM_PRICING } from "@/lib/pricing";
+import { DiagonalStrikePrice } from "@/components/OfferPrice";
 
 export default function Terms() {
   return (
@@ -86,7 +87,13 @@ export default function Terms() {
                   </ul>
                 </div>
                 <div className="bg-primary/10 rounded-lg p-4">
-                  <h4 className="font-semibold mb-2">Premium Plan (£{PREMIUM_PRICING.monthly}/month or £{PREMIUM_PRICING.annual}/year):</h4>
+                  <h4 className="mb-2 flex flex-wrap items-center gap-1.5 font-semibold">
+                    Premium Plan (
+                    <DiagonalStrikePrice className="text-sm text-muted-foreground" />
+                    <span>£{PREMIUM_PRICING.monthly}/month</span>
+                    <span className="rounded-full bg-red-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-red-600">limited time offer</span>
+                    <span>or £{PREMIUM_PRICING.annual}/year):</span>
+                  </h4>
                   <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
                     <li>{AI_FEATURE_ENABLED ? '100 AI questions per day' : '100 questions per day'}</li>
                     <li>Detailed explanations and working</li>

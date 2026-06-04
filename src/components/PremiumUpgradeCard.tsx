@@ -10,6 +10,7 @@ import { getSprintUpgradeCopy } from '@/lib/foundersSprint';
 import { startPremiumCheckout } from "@/lib/checkout";
 import { AI_FEATURE_ENABLED, ULTRA_PLAN_ENABLED } from "@/lib/featureFlags";
 import { PREMIUM_PRICING, ULTRA_PRICING } from "@/lib/pricing";
+import { OfferPrice } from "@/components/OfferPrice";
 
 export function PremiumUpgradeCard() {
   const [isLoading, setIsLoading] = useState(false);
@@ -114,18 +115,28 @@ export function PremiumUpgradeCard() {
               </TabsList>
             </Tabs>
 
-            <div className="flex items-baseline gap-2 mb-3">
-              <span className={`text-responsive-xl font-bold ${selectedPlan === 'ultra' ? 'text-white' : 'text-foreground'}`}>
-                {selectedPlan === 'monthly'
-                  ? `£${PREMIUM_PRICING.monthly}`
-                  : selectedPlan === 'annual'
+            {selectedPlan === 'monthly' ? (
+              <OfferPrice
+                compact
+                suffix="/month"
+                tone="dark"
+                className="mb-3"
+                currentClassName="text-responsive-xl text-foreground"
+                originalClassName="text-white/75"
+                labelClassName="border-white/30 bg-white/15 text-white"
+              />
+            ) : (
+              <div className="flex items-baseline gap-2 mb-3">
+                <span className={`text-responsive-xl font-bold ${selectedPlan === 'ultra' ? 'text-white' : 'text-foreground'}`}>
+                  {selectedPlan === 'annual'
                     ? `£${PREMIUM_PRICING.annual}`
                     : `£${ULTRA_PRICING.monthly}`}
-              </span>
-              <span className={`text-responsive-sm ${selectedPlan === 'ultra' ? 'text-amber-200/60' : 'text-muted-foreground'}`}>
-                /{selectedPlan === 'annual' ? 'year' : 'month'}
-              </span>
-            </div>
+                </span>
+                <span className={`text-responsive-sm ${selectedPlan === 'ultra' ? 'text-amber-200/60' : 'text-muted-foreground'}`}>
+                  /{selectedPlan === 'annual' ? 'year' : 'month'}
+                </span>
+              </div>
+            )}
             
             {(isPremium && selectedPlan !== 'ultra') ? (
               <Button disabled className="w-full bg-white/50 text-foreground font-semibold min-h-[44px] text-responsive-sm" size="lg">

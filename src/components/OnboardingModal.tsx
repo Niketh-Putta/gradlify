@@ -14,6 +14,7 @@ import { UK_SECONDARY_SCHOOLS } from '@/lib/schools';
 import { useNavigate } from 'react-router-dom';
 import { startPremiumCheckout } from '@/lib/checkout';
 import { PREMIUM_PRICING, ULTRA_PRICING } from '@/lib/pricing';
+import { DiagonalStrikePrice, OfferPrice } from '@/components/OfferPrice';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -215,6 +216,7 @@ interface OnboardingModalProps {
   initialAnswers?: Partial<OnboardingAnswers>;
   onCompleted: () => void;
   continuePath?: string;
+  skipUpsell?: boolean;
 }
 
 type Phase = 'questions' | 'generating' | 'upsell';
@@ -320,11 +322,16 @@ function PlanCheckoutButton({
             <span className="font-semibold">
               {planType === 'premium' ? 'Premium Monthly' : 'Ultra Monthly'}
             </span>
-            <span className="text-xs text-muted-foreground">
-              {planType === 'premium'
-                ? `3 Day Free Trial, then £${PREMIUM_PRICING.monthly}/month`
-                : `£${ULTRA_PRICING.monthly}/month`}
-            </span>
+            {planType === 'premium' ? (
+              <span className="flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
+                3 Day Free Trial, then
+                <DiagonalStrikePrice className="font-semibold text-slate-400" />
+                <span className="font-semibold text-slate-900">£{PREMIUM_PRICING.monthly}/month</span>
+                <span className="text-red-600">limited time offer</span>
+              </span>
+            ) : (
+              <span className="text-xs text-muted-foreground">£{ULTRA_PRICING.monthly}/month</span>
+            )}
           </div>
         </DropdownMenuItem>
       </DropdownMenuContent>
@@ -332,7 +339,7 @@ function PlanCheckoutButton({
   );
 }
 
-export function OnboardingModal({ isOpen, userId, tier, premiumTrack, founderTrack, initialAnswers, onCompleted, continuePath = '/home' }: OnboardingModalProps) {
+export function OnboardingModal({ isOpen, userId, tier, premiumTrack, founderTrack, initialAnswers, onCompleted, continuePath = '/home', skipUpsell = false }: OnboardingModalProps) {
   const navigate = useNavigate();
   const [stepIndex, setStepIndex] = useState(0);
   const [answers, setAnswers] = useState<OnboardingAnswers>({ ...(initialAnswers || {}) });
@@ -491,6 +498,13 @@ export function OnboardingModal({ isOpen, userId, tier, premiumTrack, founderTra
       if (error) throw error;
 
       toast.success('All set! Your study plan is ready.');
+      if (skipUpsell) {
+        setPhase('questions');
+        setStepIndex(0);
+        onCompleted();
+        navigate(continuePath, { replace: true });
+        return;
+      }
       setPhase('upsell');
       return;
     } catch (err) {
@@ -990,10 +1004,13 @@ export function OnboardingModal({ isOpen, userId, tier, premiumTrack, founderTra
                       </div>
 
                       <div className="relative z-10 mt-5 sm:mt-6">
-                        <div className="flex items-end gap-2">
-                          <span className="font-gradlify text-3xl font-semibold sm:text-5xl lg:text-6xl">£{PREMIUM_PRICING.monthly}</span>
-                          <span className="pb-1 text-[10px] font-medium text-white/90 sm:pb-1.5 sm:text-base">/month</span>
-                        </div>
+                        <OfferPrice
+                          tone="dark"
+                          suffix="/month"
+                          currentClassName="font-gradlify text-3xl font-semibold text-white sm:text-5xl lg:text-6xl"
+                          originalClassName="text-white/75"
+                          labelClassName="border-white/35 bg-white/15 text-white"
+                        />
                         <p className="mt-2 max-w-md text-[11px] font-medium leading-4 text-white/90 sm:mt-3 sm:text-base sm:leading-6">
                           More mocks, deeper analytics, higher limits.
                         </p>

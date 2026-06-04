@@ -13,13 +13,15 @@ import { DemoQuestion, elevenPlusDemoQuestions, elevenPlusMathsDemoQuestions, mo
 import { ArrowLeft } from "lucide-react";
 
 import { LogoMark } from "@/components/LogoMark";
-import { SprintBanner } from "@/components/SprintBanner";
 import { DiscordFooterEntry } from "@/components/DiscordFooterEntry";
+import { OfferPrice } from "@/components/OfferPrice";
 import { supabase } from "@/integrations/supabase/client";
 import { getSprintUpgradeCopy } from "@/lib/foundersSprint";
 import { AI_FEATURE_ENABLED, EXAM_READINESS_ENABLED, ULTRA_PLAN_ENABLED } from "@/lib/featureFlags";
 import { getDashboardPath, setSignupTrack } from "@/lib/track";
-import { ULTRA_PRICING, PREMIUM_PRICING } from "@/lib/pricing";
+import { ULTRA_PRICING } from "@/lib/pricing";
+import { useOfferCountdown } from "@/hooks/useOfferCountdown";
+import { setPostAuthRedirect } from "@/lib/postAuthRedirect";
 
 /** Same clips as in `src/assets/`, but loaded from `/public` so they are not embedded in the JS bundle. */
 const PRACTICE_SHOWCASE_VIDEO = "/videos/practice-question.mov";
@@ -252,6 +254,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
   const [feedbackEmail, setFeedbackEmail] = useState("");
   const [feedbackMessage, setFeedbackMessage] = useState("");
   const [feedbackSubmitting, setFeedbackSubmitting] = useState(false);
+  const offerCountdown = useOfferCountdown();
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -317,6 +320,13 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
   }, []);
 
   const scrollTo = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+  const handleViewPlans = () => {
+    setPostAuthRedirect({
+      path: "/select-subject?intent=plans",
+      message: "Finish your quick setup, then choose the Premium offer.",
+    });
+    scrollTo("pricing");
+  };
   const handleSignup = () => {
     setSignupTrack("11plus");
     onAuthAction('signup');
@@ -546,7 +556,44 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
               : "bg-white/80 backdrop-blur-sm border-b border-transparent text-slate-900",
         ].join(" ")}
       >
-        {isElevenPlus && <SprintBanner />}
+        {isElevenPlus && (
+          <div className="relative overflow-hidden bg-[#160b08] text-white">
+            <div className="absolute inset-0 bg-[radial-gradient(560px_120px_at_18%_20%,rgba(239,68,68,0.34),transparent_68%),radial-gradient(520px_120px_at_82%_0%,rgba(250,204,21,0.30),transparent_66%)]" />
+            <div className="relative mx-auto flex max-w-7xl flex-col gap-2 px-4 py-2.5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+              <div className="flex flex-wrap items-center gap-2.5">
+                <span className="rounded-full border border-amber-200/45 bg-amber-200/12 px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-amber-100 shadow-[0_0_22px_rgba(251,146,60,0.28)]">
+                  Limited time offer
+                </span>
+                <span className="text-sm font-black sm:text-base">Save £20/month</span>
+                <span className="hidden h-5 w-px bg-white/20 sm:block" aria-hidden="true" />
+                <span className="text-xs font-semibold text-white/75 sm:text-sm">
+                  Lock in <span className="text-amber-100">£19.99/mo</span> before it returns to <span className="text-white">£39.99/mo</span>
+                </span>
+              </div>
+              <div className="flex flex-wrap items-center gap-2.5">
+                <span className="rounded-full bg-gradient-to-r from-red-600 to-orange-500 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-white shadow-[0_0_18px_rgba(249,115,22,0.45)]">
+                  £240/year saved
+                </span>
+                <span className="rounded-lg border border-white/15 bg-white/10 px-3 py-1 text-xs font-black tabular-nums text-white sm:text-sm">
+                  Ends in {offerCountdown.label}
+                </span>
+                <button
+                  type="button"
+                  onClick={handleViewPlans}
+                  className="rounded-lg bg-white px-3 py-1 text-xs font-black text-[#8f1d12] shadow-lg transition hover:bg-amber-100 sm:px-4 sm:py-1.5 sm:text-sm"
+                >
+                  View plans
+                </button>
+              </div>
+            </div>
+            <div className="relative h-1 bg-white/10">
+              <div
+                className="h-full rounded-r-full bg-gradient-to-r from-red-600 via-orange-400 to-amber-300 shadow-[0_0_18px_rgba(251,146,60,0.65)] transition-[width] duration-1000"
+                style={{ width: `${offerCountdown.progressPercent}%` }}
+              />
+            </div>
+          </div>
+        )}
         <div className="max-w-7xl mx-auto px-3 pr-4 sm:px-6 sm:pr-6 py-2.5 sm:py-4">
           <div className="flex items-center justify-between gap-3 sm:gap-4">
             <a href="#" className="flex items-center gap-3">
@@ -561,7 +608,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
 
             <div className="hidden sm:flex items-center gap-6 text-sm font-medium">
               <Link to="/11-plus" className={navLinkClass}>11+</Link>
-              <a href="#pricing" className={navLinkClass}>Pricing</a>
+              <button type="button" onClick={handleViewPlans} className={navLinkClass}>Pricing</button>
               <a href="/free-resources" className={navLinkClass}>
                 Free Resources
               </a>
@@ -593,12 +640,13 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
 
       <main
         className={cn(
-          "pt-24 sm:pt-28 lg:pt-8",
-          isElevenPlus && "pt-[6.75rem] sm:pt-[7.5rem]"
+          isElevenPlus
+            ? "pt-[12.5rem] sm:pt-[9rem] lg:pt-[8.5rem]"
+            : "pt-24 sm:pt-28 lg:pt-8"
         )}
       >
         {/* Hero: top padding accounts for fixed nav + sprint strip (11+) */}
-        <section className="relative pt-28 sm:pt-32 lg:pt-40 pb-12 sm:pb-18 lg:pb-20 overflow-hidden">
+        <section className="relative pt-12 sm:pt-16 lg:pt-20 pb-12 sm:pb-18 lg:pb-20 overflow-hidden">
           {ambientEffectsEnabled && (
             <div className="absolute inset-0 pointer-events-none">
               {isDark ? (
@@ -1142,9 +1190,24 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                         Best for exams
                       </div>
                     </div>
-                    <div className="mt-4 flex items-end gap-2">
-                      <div className="text-3xl sm:text-4xl font-semibold">£{PREMIUM_PRICING.monthly}</div>
-                      <div className="text-sm text-white/80 pb-1">/month</div>
+                    <OfferPrice
+                      className="mt-4"
+                      tone="dark"
+                      suffix="/month"
+                      currentClassName="text-white"
+                      labelClassName="border-white/30 bg-white/15 text-white"
+                    />
+                    <div className="mt-4 rounded-xl border border-white/25 bg-white/15 p-3 shadow-inner shadow-white/10">
+                      <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+                        <div>
+                          <p className="text-[11px] font-black uppercase tracking-[0.18em] text-white/80">Start today and save</p>
+                          <p className="mt-1 text-sm font-semibold text-white">£20 every month compared with tomorrow’s price.</p>
+                        </div>
+                        <div className="text-left sm:text-right">
+                          <div className="text-2xl font-black text-white">£240</div>
+                          <div className="text-[11px] font-bold uppercase tracking-[0.14em] text-white/75">saved yearly</div>
+                        </div>
+                      </div>
                     </div>
                     <p className="mt-3 text-[13px] sm:text-sm text-white/80">
                       {AI_FEATURE_ENABLED ? 'More mocks, deeper analytics, higher AI limits.' : 'More mocks, deeper analytics, higher limits.'}
@@ -1429,7 +1492,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
               <button
                 type="button"
                 className={`transition-colors ${isDark ? "hover:text-white" : "hover:text-slate-900"}`}
-                onClick={() => scrollTo("pricing")}
+                onClick={handleViewPlans}
               >
                 Pricing
               </button>

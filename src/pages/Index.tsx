@@ -38,7 +38,7 @@ const SubjectSelection = lazy(() => import('@/pages/SubjectSelection'));
 
 import { User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { setPostAuthRedirect } from '@/lib/postAuthRedirect';
+import { consumePostAuthRedirect } from '@/lib/postAuthRedirect';
 import { AI_FEATURE_ENABLED, EXAM_READINESS_ENABLED } from '@/lib/featureFlags';
 import { getDashboardPath, setSignupTrack } from '@/lib/track';
 import { isAbortLikeError } from '@/lib/errors';
@@ -103,7 +103,7 @@ const Index = () => {
           setUser(session.user);
           // If on public route and authenticated, redirect to the subject selection
           if (publicRoutes.includes(currentPath)) {
-            redirectTo = '/select-subject';
+            redirectTo = consumePostAuthRedirect()?.path ?? '/select-subject';
           }
         } else {
           setUser(null);
@@ -168,6 +168,10 @@ const Index = () => {
     setUser(userData);
     setAppState('app');
     setShowAuthModal(false);
+    const redirect = consumePostAuthRedirect();
+    if (redirect?.path) {
+      navigate(redirect.path, { replace: true });
+    }
   };
 
   const renderLanding = (overlay?: ReactNode) => (

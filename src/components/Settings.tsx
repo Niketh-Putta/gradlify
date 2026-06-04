@@ -63,6 +63,7 @@ import { UserTrack } from "@/lib/track";
 import { getTrackCopy } from "@/lib/trackContent";
 import { isAbortLikeError } from "@/lib/errors";
 import { ReferralCard } from "@/components/ReferralCard";
+import { OfferPrice } from "@/components/OfferPrice";
 
 interface Profile {
   id: string;
@@ -903,10 +904,15 @@ export function Settings({ user, onBackToChat, onSignOut }: SettingsProps) {
                           </h3>
                           <p className="text-xs text-slate-400 mt-1">Foundational mastery and readiness tools.</p>
                         </div>
-                        <div className="text-right">
-                          <span className="text-lg font-bold">£{PREMIUM_PRICING.monthly}</span>
-                          <span className="text-[10px] text-slate-400 block">/month</span>
-                        </div>
+                        <OfferPrice
+                          compact
+                          align="right"
+                          tone="dark"
+                          suffix="/month"
+                          currentClassName="text-lg text-white"
+                          originalClassName="text-slate-300"
+                          labelClassName="border-white/25 bg-white/10 text-white text-[8px] tracking-[0.08em]"
+                        />
                       </div>
                       
                       <ul className="space-y-2 mb-6 text-xs text-slate-300 whitespace-normal">
@@ -1043,10 +1049,11 @@ export function Settings({ user, onBackToChat, onSignOut }: SettingsProps) {
               className="cursor-pointer rounded-2xl border bg-card hover:bg-muted/50 p-4 transition-all"
             >
               <h4 className="font-semibold text-base mb-1">Monthly Billing</h4>
-              <div className="flex items-baseline gap-2">
-                <span className="text-xl font-bold text-foreground">£{PREMIUM_PRICING.monthly}</span>
-                <span className="text-sm text-muted-foreground">/month</span>
-              </div>
+              <OfferPrice
+                compact
+                suffix="/month"
+                currentClassName="text-xl text-foreground"
+              />
               <p className="text-xs text-muted-foreground mt-1">Pay as you go, cancel anytime.</p>
             </div>
           </div>
