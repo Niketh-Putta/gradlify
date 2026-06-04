@@ -320,16 +320,23 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
   }, []);
 
   const scrollTo = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
-  const handleViewPlans = () => {
+  const setPlanPostAuthRedirect = () => {
     setPostAuthRedirect({
       path: "/select-subject?intent=plans",
-      message: "Finish your quick setup, then choose the Premium offer.",
+      message: "Finish your quick setup, then open Premium in Settings.",
     });
+  };
+  const handleViewPlans = () => {
+    setPlanPostAuthRedirect();
     scrollTo("pricing");
   };
   const handleSignup = () => {
     setSignupTrack("11plus");
     onAuthAction('signup');
+  };
+  const handlePurchasePlan = () => {
+    setPlanPostAuthRedirect();
+    handleSignup();
   };
   const handleDashboardClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
@@ -1169,7 +1176,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                   </div>
                   <div className="mt-auto pt-6 sm:pt-8 w-full">
                     <Button
-                      onClick={handleSignup}
+                      onClick={handlePurchasePlan}
                       className={`w-full rounded-full font-semibold py-4 sm:py-6 ${
                         isDark ? "bg-white text-slate-900 hover:bg-white" : "bg-slate-900 text-white hover:bg-slate-900"
                       }`}
