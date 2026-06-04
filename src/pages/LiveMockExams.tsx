@@ -12,6 +12,7 @@ import {
   ShieldCheck,
   ClipboardCheck,
   Sparkles,
+  UsersRound,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -33,6 +34,12 @@ const BOTH_SUBJECTS_LIVE_MOCK = {
   slug: "both_subjects_live_mock",
   title: "Maths and English Mock",
 };
+
+const MIN_DISPLAYED_BOTH_SUBJECTS_SIGNUPS = 18;
+const BOTH_SUBJECTS_SIGNUP_DISPLAY_OFFSET = 15;
+
+const getDisplayedBothSubjectsSignupCount = (count: number) =>
+  Math.max(MIN_DISPLAYED_BOTH_SUBJECTS_SIGNUPS, count + BOTH_SUBJECTS_SIGNUP_DISPLAY_OFFSET);
 
 type SignupRow = {
   id: string;
@@ -64,8 +71,24 @@ export default function LiveMockExams() {
   const [finalizingBothSubjectsPayment, setFinalizingBothSubjectsPayment] = useState(false);
   const [signup, setSignup] = useState<SignupRow | null>(null);
   const [bothSubjectsSignup, setBothSubjectsSignup] = useState<SignupRow | null>(null);
+  const [bothSubjectsSignupCount, setBothSubjectsSignupCount] = useState(MIN_DISPLAYED_BOTH_SUBJECTS_SIGNUPS);
   /** Locks "Start" once an attempt row exists (created on first Start click). */
   const [attemptStatus, setAttemptStatus] = useState<LiveMockAttemptStatus>("none");
+
+  const loadBothSubjectsSignupCount = useCallback(async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke("live-mock-signup-count", {
+        body: { mockSlug: BOTH_SUBJECTS_LIVE_MOCK.slug },
+      });
+      if (error) throw error;
+
+      const count = typeof data?.count === "number" ? data.count : 0;
+      setBothSubjectsSignupCount(getDisplayedBothSubjectsSignupCount(count));
+    } catch (error) {
+      console.error("Failed to load live mock signup count", error);
+      setBothSubjectsSignupCount((count) => Math.max(MIN_DISPLAYED_BOTH_SUBJECTS_SIGNUPS, count));
+    }
+  }, []);
 
   const loadSignupAndAttempt = useCallback(async () => {
     if (!user?.id) {
@@ -128,6 +151,14 @@ export default function LiveMockExams() {
   useEffect(() => {
     void loadSignupAndAttempt();
   }, [loadSignupAndAttempt]);
+
+  useEffect(() => {
+    void loadBothSubjectsSignupCount();
+    const interval = window.setInterval(() => {
+      void loadBothSubjectsSignupCount();
+    }, 45000);
+    return () => window.clearInterval(interval);
+  }, [loadBothSubjectsSignupCount]);
 
   useEffect(() => {
     if (!user?.id || bothSubjectsSignup) return;
@@ -239,6 +270,7 @@ export default function LiveMockExams() {
     }
 
     setBothSubjectsSignup(data as SignupRow);
+    setBothSubjectsSignupCount((count) => Math.max(MIN_DISPLAYED_BOTH_SUBJECTS_SIGNUPS, count + 1));
   };
 
   const handleStartMockExam = async () => {
@@ -383,6 +415,15 @@ export default function LiveMockExams() {
             creators for top-school preparation. Premium members get it free; otherwise registration is one upfront
             £9.99 payment.
           </p>
+          <div className="mt-3 inline-flex max-w-full items-center gap-2 rounded-[14px] border border-orange-100 bg-white/80 px-3 py-2 text-xs font-semibold text-slate-700 shadow-[0_8px_18px_rgba(234,88,12,0.07)] sm:text-sm">
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-orange-50 text-orange-700">
+              <UsersRound className="h-4 w-4" />
+            </span>
+            <span className="min-w-0">
+              <span className="font-black text-orange-700">{bothSubjectsSignupCount}</span>{" "}
+              people have already saved their spot. You can too.
+            </span>
+          </div>
           <div className="mt-3 flex flex-wrap items-center gap-2 text-[10px] font-semibold text-slate-500 sm:text-xs">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-white/70 px-2.5 py-1">
               <CheckCircle2 className="h-3.5 w-3.5 text-amber-600" />
