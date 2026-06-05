@@ -9,7 +9,7 @@ const corsHeaders = {
 
 const readEnv = (name: string) => Deno.env.get(name)?.trim() || "";
 const BOTH_SUBJECTS_LIVE_MOCK_SLUG = "both_subjects_live_mock";
-const DEFAULT_LIVE_MOCK_PRICE_ID_LIVE = "price_1TeWVfQYWoowhxMZIcGdIDLo";
+const DEFAULT_LIVE_MOCK_PRICE_ID_LIVE = "price_1Tf63lQYWoowhxMZKU2Z2AWY";
 
 const inlineLiveMockLineItem = {
   quantity: 1,
