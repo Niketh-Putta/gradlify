@@ -27,7 +27,7 @@ export function GuestLoginPrompt({ onLogin }: GuestLoginPromptProps) {
         <div className="space-y-2 text-left">
           <div className="flex items-center gap-2 text-sm text-gray-700">
             <CheckCircle className="h-4 w-4 text-green-500" />
-            <span>2 mock exams daily for free users</span>
+            <span>1 mock exam daily for free users</span>
           </div>
           <div className="flex items-center gap-2 text-sm text-gray-700">
             <CheckCircle className="h-4 w-4 text-green-500" />

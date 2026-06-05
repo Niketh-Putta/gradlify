@@ -63,8 +63,10 @@ function buildLiveMockSessionSearchParams(): URLSearchParams {
 export default function LiveMockExams() {
   const navigate = useNavigate();
   const { user } = useAppContext();
-  const { isPremium, isFounder } = useMembership();
-  const hasPremiumLiveMockAccess = isPremium || isFounder;
+  const membership = useMembership();
+  const { isPremium } = membership;
+  const hasPaidPremiumLiveMockAccess = isPremium && membership.data?.subscription_status === "active";
+  const isPremiumTrialing = isPremium && membership.data?.subscription_status === "trialing";
   const [loading, setLoading] = useState(true);
   const [starting, setStarting] = useState(false);
   const [registeringBothSubjects, setRegisteringBothSubjects] = useState(false);
@@ -364,7 +366,7 @@ export default function LiveMockExams() {
 
     setRegisteringBothSubjects(true);
     try {
-      if (hasPremiumLiveMockAccess) {
+      if (hasPaidPremiumLiveMockAccess) {
         await recordBothSubjectsSignup();
         toast.success("You're registered for the both-subjects live mock.");
         return;
@@ -412,8 +414,8 @@ export default function LiveMockExams() {
           </h2>
           <p className="mt-1 max-w-2xl text-xs leading-5 text-slate-600 sm:text-sm">
             This Maths and English mock is on Sunday 14 June 2026. It is guided and built alongside real GL exam
-            creators for top-school preparation. Premium members get it free; otherwise registration is one upfront
-            £9.99 payment.
+            creators for top-school preparation. Paying Premium members get it included; free-trial users and free
+            users register with one upfront £10 payment.
           </p>
           <div className="mt-3 inline-flex max-w-full items-center gap-2 rounded-[14px] border border-orange-100 bg-white/80 px-3 py-2 text-xs font-semibold text-slate-700 shadow-[0_8px_18px_rgba(234,88,12,0.07)] sm:text-sm">
             <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-orange-50 text-orange-700">
@@ -435,7 +437,7 @@ export default function LiveMockExams() {
             </span>
             <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-100 bg-white/70 px-2.5 py-1">
               <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
-              Free for Premium
+              Included for paid Premium
             </span>
           </div>
         </div>
@@ -444,10 +446,10 @@ export default function LiveMockExams() {
           <div className="flex items-center justify-between gap-3">
             <div>
               <div className="text-[8px] font-black uppercase tracking-[0.14em] text-slate-400">
-                {hasPremiumLiveMockAccess ? "Premium registration" : "Upfront registration"}
+                {hasPaidPremiumLiveMockAccess ? "Paid Premium registration" : "Upfront registration"}
               </div>
               <div className="mt-1 text-2xl font-bold tracking-tight text-slate-950">
-                {hasPremiumLiveMockAccess ? "Free" : "£9.99"}
+                {hasPaidPremiumLiveMockAccess ? "Included" : "£10"}
               </div>
             </div>
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-amber-50 text-amber-700">
@@ -471,18 +473,23 @@ export default function LiveMockExams() {
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />
                 {finalizingBothSubjectsPayment
                   ? "Finalising registration"
-                  : hasPremiumLiveMockAccess
+                  : hasPaidPremiumLiveMockAccess
                     ? "Recording registration"
                     : "Opening checkout"}
               </span>
-            ) : hasPremiumLiveMockAccess ? (
+            ) : hasPaidPremiumLiveMockAccess ? (
               <span className="inline-flex items-center gap-2">
-                Register free with Premium
+                Register with paid Premium
+                <ArrowRight className="h-3.5 w-3.5" />
+              </span>
+            ) : isPremiumTrialing ? (
+              <span className="inline-flex items-center gap-2">
+                Trial users pay £10
                 <ArrowRight className="h-3.5 w-3.5" />
               </span>
             ) : (
               <span className="inline-flex items-center gap-2">
-                Register and pay £9.99
+                Register and pay £10
                 <ArrowRight className="h-3.5 w-3.5" />
               </span>
             )}

@@ -52,8 +52,8 @@ export function TrialCompleteModal({ open, onOpenChange, score, totalMarks }: Tr
             </h3>
             <p className="text-sm text-blue-700">
               {AI_FEATURE_ENABLED
-                ? 'Sign up to unlock 2 mock exams daily, plus unlimited practice questions and AI-powered study tools!'
-                : 'Sign up to unlock 2 mock exams daily, plus unlimited practice questions and study tools!'}
+                ? 'Sign up to unlock daily mock exams, plus unlimited practice questions and AI-powered study tools!'
+                : 'Sign up to unlock daily mock exams, plus unlimited practice questions and study tools!'}
             </p>
           </div>
           

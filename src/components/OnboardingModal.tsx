@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { ArrowRight, Check, ChevronDown, Loader2, Sparkles, X } from 'lucide-react';
 import { AI_FEATURE_ENABLED, EXAM_READINESS_ENABLED, ULTRA_PLAN_ENABLED } from '@/lib/featureFlags';
+import { is11Plus as is11PlusApp } from '@/lib/track-config';
 import { UK_SECONDARY_SCHOOLS } from '@/lib/schools';
 import { useNavigate } from 'react-router-dom';
 import { startPremiumCheckout } from '@/lib/checkout';
@@ -362,7 +363,7 @@ export function OnboardingModal({ isOpen, userId, tier, premiumTrack, founderTra
   // updates in realtime (e.g. onboarding_completed_at gets set).
   const dialogOpen = isOpen || phase === 'generating' || phase === 'upsell';
 
-  const is11Plus = import.meta.env.VITE_APP_TRACK === '11PLUS';
+  const is11Plus = is11PlusApp || import.meta.env.VITE_APP_TRACK === '11PLUS';
   const steps = useMemo<Step[]>(
     () => (is11Plus ? ELEVEN_PLUS_STEPS : GCSE_STEPS),
     [is11Plus]

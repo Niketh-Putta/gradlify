@@ -16,6 +16,7 @@ import {
   Users,
 } from "lucide-react";
 
+import { PostMockParentReport } from "@/components/PostMockParentReport";
 import RichQuestionContent from "@/components/RichQuestionContent";
 import { formatExplanation } from "@/lib/formatExplanation";
 import { Button } from "@/components/ui/button";
@@ -184,6 +185,14 @@ export default function LiveMockAnalytics() {
     }
     return Array.from(map.entries()).sort((a, b) => a[0].localeCompare(b[0]));
   }, [answers]);
+
+  const parentReportTopicBreakdown = useMemo(() => {
+    const breakdown: Record<string, { earned: number; total: number }> = {};
+    for (const [label, { correct: c, total: t }] of sectionStats) {
+      breakdown[label.replace(/_/g, " ")] = { earned: c, total: t };
+    }
+    return breakdown;
+  }, [sectionStats]);
 
   /** Every question not marked correct: wrong answers (`false`) and skipped/unanswered (`null`). */
   const questionsNotCorrect = useMemo(() => {
@@ -394,6 +403,17 @@ export default function LiveMockAnalytics() {
           </div>
         ) : (
           <>
+            {pct != null && qc > 0 && sectionStats.length > 0 ? (
+              <div className="pt-3">
+                <PostMockParentReport
+                  topicBreakdown={parentReportTopicBreakdown}
+                  correctCount={correct}
+                  totalCount={qc}
+                  percentage={pct}
+                />
+              </div>
+            ) : null}
+
             <div className="grid gap-3 pt-3 sm:grid-cols-2 lg:grid-cols-4">
               <div className="min-w-0 rounded-xl border border-slate-200 bg-slate-50/70 p-3">
                 <div className="flex items-center justify-between gap-2">

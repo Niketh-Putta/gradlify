@@ -258,7 +258,7 @@ export default function Auth() {
           <CardContent className="space-y-3">
             <div className="flex items-center gap-3 text-sm text-gray-700">
               <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
-              <span>2 mock exams daily (instead of 1)</span>
+              <span>1 mock exam daily (free tier)</span>
             </div>
             <div className="flex items-center gap-3 text-sm text-gray-700">
               <Timer className="h-4 w-4 text-green-500 flex-shrink-0" />

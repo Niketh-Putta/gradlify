@@ -22,6 +22,8 @@ import { buildBalancedMix } from '@/lib/questionMix';
 import { parseMultipartQuestion, MultipartQuestion } from '@/lib/multipart';
 import { TOPIC_SUBTOPICS, getTopicSubtopicKeys } from '@/lib/topicConstants';
 import { parseDbArray } from '@/lib/parseDbArray';
+import { PostMockParentReport } from '@/components/PostMockParentReport';
+import { is11Plus } from '@/lib/track-config';
 
 interface ExamQuestion {
   id: string;
@@ -1082,6 +1084,15 @@ const questionCalculatorLabel = (() => {
           </p>
           <p className="text-sm text-muted-foreground">Here's your performance analysis</p>
         </div>
+
+        {is11Plus && !isPractice && (
+          <PostMockParentReport
+            topicBreakdown={results.topicBreakdown}
+            correctCount={results.correctQuestionsCount}
+            totalCount={results.totalQuestionsCount}
+            percentage={results.percentage}
+          />
+        )}
 
         <div className={`grid ${gridColsClass} gap-3 mb-5 fade-up fade-up-2`}>
           <div className="card rounded-2xl p-4 text-center glow-subtle border border-border">

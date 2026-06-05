@@ -16,6 +16,8 @@ import { getDashboardPath, setSignupTrack } from "@/lib/track";
 import { ULTRA_PRICING } from "@/lib/pricing";
 import { useOfferCountdown } from "@/hooks/useOfferCountdown";
 import { setPostAuthRedirect } from "@/lib/postAuthRedirect";
+import { captureReferralFromSearch } from "@/lib/referrals";
+import { getPartnerReferralLabel, readStoredReferralCode } from "@/lib/partnerRefs";
 
 /** Same clips as in `src/assets/`, but loaded from `/public` so they are not embedded in the JS bundle. */
 const PRACTICE_SHOWCASE_VIDEO = "/videos/practice-question.mov";
@@ -238,6 +240,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
   const [isScrolled, setIsScrolled] = useState(false);
   const [ambientEffectsEnabled, setAmbientEffectsEnabled] = useState(true);
   const [showInternationalTagline, setShowInternationalTagline] = useState(false);
+  const [partnerReferralLabel, setPartnerReferralLabel] = useState<string | null>(null);
   const hasSession = false;
   const sessionChecked = true;
   const dashboardPath = getDashboardPath();
@@ -305,6 +308,13 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
     };
 
     recordLandingVisit();
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    captureReferralFromSearch(window.location.search);
+    const code = readStoredReferralCode();
+    setPartnerReferralLabel(getPartnerReferralLabel(code) ?? (code ? code : null));
   }, []);
 
   const scrollTo = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
@@ -584,24 +594,30 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
             >
               Sign In
             </Button>
-            {!isElevenPlus && (
-              <Button
-                onClick={handleSignup}
-                className={`rounded-full bg-gradient-to-r ${accentGradient.tailwind} text-white font-semibold px-2.5 py-1 text-[10px] sm:text-sm sm:px-5 sm:py-2.5 shadow-xl shadow-rose-500/40 max-w-[120px] sm:max-w-none whitespace-nowrap`}
-              >
-                <span className="sm:hidden">Start free</span>
-                <span className="hidden sm:inline">Start practising free</span>
-              </Button>
-            )}
+            <Button
+              onClick={handleSignup}
+              className={`rounded-full bg-gradient-to-r ${accentGradient.tailwind} text-white font-semibold px-2.5 py-1 text-[10px] sm:text-sm sm:px-5 sm:py-2.5 shadow-xl shadow-rose-500/40 max-w-[140px] sm:max-w-none whitespace-nowrap`}
+            >
+              <span className="sm:hidden">Start free</span>
+              <span className="hidden sm:inline">Start free practice</span>
+            </Button>
             </div>
           </div>
         </div>
       </nav>
 
+      {partnerReferralLabel && (
+        <div className="fixed top-[3.25rem] sm:top-[4.5rem] left-0 right-0 z-40 border-b border-emerald-200/80 bg-emerald-50/95 px-3 py-2 text-center text-xs sm:text-sm text-emerald-900">
+          Recommended by <span className="font-semibold">{partnerReferralLabel}</span> — start with free practice and mocks
+        </div>
+      )}
+
       <main
         className={cn(
           isElevenPlus
-            ? "pt-[10.75rem] sm:pt-[7.25rem] lg:pt-[6.75rem]"
+            ? partnerReferralLabel
+              ? "pt-[12.5rem] sm:pt-[9rem] lg:pt-[8.25rem]"
+              : "pt-[10.75rem] sm:pt-[7.25rem] lg:pt-[6.75rem]"
             : "pt-24 sm:pt-28 lg:pt-8"
         )}
       >

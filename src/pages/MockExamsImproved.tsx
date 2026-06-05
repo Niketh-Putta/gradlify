@@ -117,7 +117,7 @@ export default function MockExamsImproved() {
                   <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
                     {user 
                       ? `You've used ${dailyMockUses} out of ${dailyMockLimit} mock exams today.`
-                      : `Sign up to get 2 mock exams daily!`
+                      : `Sign up to get daily mock exams!`
                     }
                   </p>
                 </div>

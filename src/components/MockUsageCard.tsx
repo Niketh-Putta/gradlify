@@ -97,7 +97,7 @@ export function MockUsageCard() {
           {isPremium 
             ? `Unlimited mock exams with ${isFounder ? 'Founder access' : 'Premium'}`
             : user
-              ? "Free users get 2 mock exams per day"
+              ? "Free users get 1 mock exam per day"
               : actualMockUses >= 1 
                 ? "Trial complete • Sign up for 2 daily mock exams!"
                 : "Try 1 free mock exam • Sign up for 2 daily"
@@ -139,7 +139,7 @@ export function MockUsageCard() {
             ) : (
               <div className="space-y-1">
                 <p className="text-xs text-muted-foreground text-center">
-                  Sign up to unlock 2 mock exams daily
+                  Sign up to unlock daily mock exams
                 </p>
                 <Button 
                   onClick={() => window.location.href = '/auth'}

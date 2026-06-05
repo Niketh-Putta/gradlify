@@ -6,6 +6,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from "sonner";
 import { isAbortLikeError } from '@/lib/errors';
 import { getMissingColumnFromError, markProfileColumnMissing, profileSelect } from '@/lib/schemaCompatibility';
+import { hasCompletedOnboardingForApp } from '@/lib/onboardingCompletion';
+import { is11Plus } from '@/lib/track-config';
 
 interface Profile {
   id: string;
@@ -76,20 +78,8 @@ export function Layout({ user, onSettings, onSignOut }: LayoutProps) {
     location.pathname.startsWith('/gcse-maths-grade-boundaries') ||
     location.pathname.startsWith('/gcse-maths-topic-weakness-test') ||
     location.pathname.startsWith('/gcse-maths-grade-target-planner');
-  const hasCompletedOnboarding = (onboarding?: Record<string, unknown>) => {
-    const requiredKeys = [
-      'preferredName',
-      'examBoard',
-      'yearGroup',
-      'studyTime',
-      'currentGrade',
-      'targetGrade'
-    ];
-    return requiredKeys.every((key) => {
-      const value = onboarding?.[key];
-      return typeof value === 'string' && value.trim().length > 0;
-    });
-  };
+  const hasCompletedOnboarding = (onboarding?: Record<string, unknown>, profileTrack?: string | null) =>
+    hasCompletedOnboardingForApp(onboarding, profileTrack ?? (is11Plus ? '11plus' : 'gcse'));
   const hasExistingProgress = (currentProfile: Profile) =>
     (currentProfile.daily_uses ?? 0) > 0 ||
     (currentProfile.daily_mock_uses ?? 0) > 0 ||
@@ -266,7 +256,7 @@ export function Layout({ user, onSettings, onSignOut }: LayoutProps) {
   useEffect(() => {
     if (!profile) return;
     if (profile.onboarding_completed_at) return;
-    if (!hasCompletedOnboarding(profile.onboarding)) return;
+    if (!hasCompletedOnboarding(profile.onboarding, profile.track)) return;
     if (onboardingCompletionWrite.current) return;
     onboardingCompletionWrite.current = true;
 
@@ -336,7 +326,7 @@ export function Layout({ user, onSettings, onSignOut }: LayoutProps) {
 
   const onboardingComplete = profile
     ? Boolean(profile.onboarding_completed_at) ||
-      hasCompletedOnboarding(profile.onboarding) ||
+      hasCompletedOnboarding(profile.onboarding, profile.track) ||
       hasExistingProgress(profile) ||
       hasProgress
     : false;
