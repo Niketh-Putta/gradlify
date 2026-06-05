@@ -10,9 +10,12 @@ const DEFAULT_SUPABASE_PUBLISHABLE_KEY =
 
 const envUrl = typeof import.meta.env.VITE_SUPABASE_URL === "string" ? import.meta.env.VITE_SUPABASE_URL.trim() : "";
 const envKey =
-  typeof import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY === "string"
+  (typeof import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY === "string"
     ? import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY.trim()
-    : "";
+    : "") ||
+  (typeof import.meta.env.VITE_SUPABASE_ANON_KEY === "string"
+    ? import.meta.env.VITE_SUPABASE_ANON_KEY.trim()
+    : "");
 
 export const SUPABASE_URL = envUrl || DEFAULT_SUPABASE_URL;
 export const SUPABASE_PUBLISHABLE_KEY = envKey || DEFAULT_SUPABASE_PUBLISHABLE_KEY;

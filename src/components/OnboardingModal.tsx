@@ -314,7 +314,7 @@ function PlanCheckoutButton({
                 <span className="flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
                   3 Day Free Trial, then was
                   <DiagonalStrikePrice amount={PREMIUM_PRICING.annualOriginal} className="font-semibold text-slate-400" />
-                  now <span className="font-semibold text-slate-900">£{PREMIUM_PRICING.annual}/year</span>
+                  Annual <span className="font-semibold text-slate-900">£{PREMIUM_PRICING.annualPerMonth}/month</span>
                 </span>
                 <span className="text-xs font-semibold text-red-600">Limited time offer just for you.</span>
               </>

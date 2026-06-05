@@ -9,6 +9,19 @@ const corsHeaders = {
 
 const readEnv = (name: string) => Deno.env.get(name)?.trim() || "";
 const BOTH_SUBJECTS_LIVE_MOCK_SLUG = "both_subjects_live_mock";
+const DEFAULT_LIVE_MOCK_PRICE_ID_LIVE = "price_1TeWVfQYWoowhxMZIcGdIDLo";
+
+const inlineLiveMockLineItem = {
+  quantity: 1,
+  price_data: {
+    currency: "gbp",
+    unit_amount: 999,
+    product_data: {
+      name: "Gradlify 11+ Maths and English Mock",
+      description: "Guided and built alongside real GL exam creators. Exclusive mock for top schools.",
+    },
+  },
+};
 
 const sanitizeReturnPath = (value: string) => {
   if (!value) return "/live-mock-exams";
@@ -75,23 +88,13 @@ serve(async (req) => {
 
     const returnTo = sanitizeReturnPath(String(body.returnTo ?? "/live-mock-exams"));
     const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
+    const liveMockPriceId =
+      (useLive ? readEnv("LIVE_MOCK_PRICE_ID_LIVE") || DEFAULT_LIVE_MOCK_PRICE_ID_LIVE : readEnv("LIVE_MOCK_PRICE_ID_TEST"));
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       customer_email: user.email ?? undefined,
       client_reference_id: user.id,
-      line_items: [
-        {
-          quantity: 1,
-          price_data: {
-            currency: "gbp",
-            unit_amount: 999,
-            product_data: {
-              name: "Gradlify 11+ Maths and English Mock",
-              description: "Guided and built alongside real GL exam creators. Exclusive mock for top schools.",
-            },
-          },
-        },
-      ],
+      line_items: [liveMockPriceId ? { price: liveMockPriceId, quantity: 1 } : inlineLiveMockLineItem],
       metadata: {
         user_id: user.id,
         mock_type: BOTH_SUBJECTS_LIVE_MOCK_SLUG,

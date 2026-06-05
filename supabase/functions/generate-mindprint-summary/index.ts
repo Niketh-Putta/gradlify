@@ -22,7 +22,7 @@ serve(async (req: Request) => {
   try {
     // Step 1: Load environment variables
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
-    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY");
+    const supabaseAnonKey = (Deno.env.get("SUPABASE_ANON_KEY") || Deno.env.get("VITE_SUPABASE_PUBLISHABLE_KEY") || Deno.env.get("VITE_SUPABASE_ANON_KEY"));
     const openAIKey = Deno.env.get("GEMINI_API_KEY") || Deno.env.get("OPENAI_API_KEY");
 
     if (!supabaseUrl || !supabaseAnonKey) {

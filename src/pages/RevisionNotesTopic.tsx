@@ -496,9 +496,18 @@ function renderTextWithMath(children: ReactNode) {
   return <MathText text={text} />;
 }
 
+function repairMarkdownMathEscapes(md: string): string {
+  return md
+    .replace(/\t\s*imes/g, "\\times")
+    .replace(/\f\s*rac/g, "\\frac")
+    .replace(/\v\s*ert/g, "\\vert")
+    .replace(/\x08\s*egin\{/g, "\\begin{")
+    .replace(/\r\s*ight/g, "\\right");
+}
+
 function NotesMarkdown({ children, blockType }: { children: string, blockType?: string }) {
   // Pre-process markdown to handle [!NOTE] etc before it gets parsed into complex React structures
-  const processedMd = children
+  const processedMd = repairMarkdownMathEscapes(children)
     .replace(/^> \[!NOTE\]/gim, '> @@NOTE-ALERT@@')
     .replace(/^> \[!TIP\]/gim, '> @@TIP-ALERT@@')
     .replace(/^> \[!IMPORTANT\]/gim, '> @@IMPORTANT-ALERT@@');
@@ -636,7 +645,7 @@ function NotesMarkdown({ children, blockType }: { children: string, blockType?: 
           const isSvg = srcString.toLowerCase().endsWith(".svg");
           const isNotesDiagram = srcString.includes("/notes-diagrams/");
           // Keep diagrams readable without overflowing the viewport.
-          const maxHeight = isSvg || isNotesDiagram ? "min(520px, 70vh)" : "min(260px, 60vh)";
+          const maxHeight = isSvg || isNotesDiagram ? "min(640px, 80vh)" : "min(360px, 70vh)";
 
           return (
             <figure className="my-6 w-full">

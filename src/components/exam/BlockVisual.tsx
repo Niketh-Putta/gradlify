@@ -110,32 +110,32 @@ export const BlockVisual = ({ title }: { title: string }) => {
 
   if (normTitle.includes("the midpoint trick")) {
     return (
-      <div className="my-8 p-6 rounded-3xl border border-indigo-500/20 bg-gradient-to-br from-indigo-50 to-white dark:from-indigo-950/20 dark:to-transparent shadow-[0_8px_30px_rgb(0,0,0,0.04),0_20px_50px_rgb(0,0,0,0.02)] relative overflow-hidden text-center">
+      <div className="my-8 p-6 rounded-3xl border border-indigo-500/20 bg-gradient-to-br from-indigo-50 to-white dark:from-indigo-950/20 dark:to-transparent shadow-[0_8px_30px_rgb(0,0,0,0.04),0_20px_50px_rgb(0,0,0,0.02)] relative overflow-visible text-center">
         <h3 className="text-[11px] font-black mb-8 flex items-center justify-center gap-2 text-indigo-700 uppercase tracking-widest">
           The Decimal Midpoint
         </h3>
-        <div className="relative pt-4 pb-8 max-w-sm mx-auto">
+        <div className="relative pt-6 pb-16 max-w-sm mx-auto">
            {/* Main Line */}
-           <div className="absolute top-8 left-0 w-full h-1 bg-indigo-200 dark:bg-indigo-800 rounded-full" />
+           <div className="absolute top-10 left-0 w-full h-1 bg-indigo-200 dark:bg-indigo-800 rounded-full" />
            
            {/* Nodes */}
-           <div className="absolute top-6 left-0 -translate-x-1/2 flex flex-col items-center group">
+           <div className="absolute top-8 left-0 -translate-x-1/2 flex flex-col items-center group">
               <div className="w-5 h-5 rounded-full bg-white dark:bg-background border-[3px] border-indigo-400 z-10 shadow-sm transition-transform group-hover:scale-125" />
               <div className="mt-2 text-sm font-black text-indigo-900 dark:text-indigo-100">1.4<span className="text-indigo-400 dark:text-indigo-600 transition-opacity opacity-0 group-hover:opacity-100 font-bold">0</span></div>
            </div>
            
-           <div className="absolute top-6 left-1/2 -translate-x-1/2 flex flex-col items-center group">
+           <div className="absolute top-8 left-1/2 -translate-x-1/2 flex flex-col items-center group">
               <div className="w-6 h-6 rounded-full bg-indigo-500 border-[3px] border-white dark:border-background z-20 shadow-md transform scale-110" />
               <div className="mt-2 text-lg font-black text-indigo-600 dark:text-indigo-400">1.45</div>
            </div>
            
-           <div className="absolute top-6 right-0 translate-x-1/2 flex flex-col items-center group">
+           <div className="absolute top-8 right-0 translate-x-1/2 flex flex-col items-center group">
               <div className="w-5 h-5 rounded-full bg-white dark:bg-background border-[3px] border-indigo-400 z-10 shadow-sm transition-transform group-hover:scale-125" />
               <div className="mt-2 text-sm font-black text-indigo-900 dark:text-indigo-100">1.5<span className="text-indigo-400 dark:text-indigo-600 transition-opacity opacity-0 group-hover:opacity-100 font-bold">0</span></div>
            </div>
            
-           <div className="absolute top-0 left-1/4 w-1/2 h-16 border-t-2 border-dashed border-indigo-300 dark:border-indigo-700 rounded-t-xl opacity-50" />
-           <div className="absolute -top-3 left-1/2 -translate-x-1/2 text-[9px] font-black text-indigo-500 uppercase bg-white dark:bg-background px-2 py-0.5 rounded-full shadow-sm">+0.05</div>
+           <div className="absolute top-2 left-1/4 w-1/2 h-16 border-t-2 border-dashed border-indigo-300 dark:border-indigo-700 rounded-t-xl opacity-50" />
+           <div className="absolute -top-1 left-1/2 -translate-x-1/2 text-[9px] font-black text-indigo-500 uppercase bg-white dark:bg-background px-2 py-0.5 rounded-full shadow-sm">+0.05</div>
         </div>
       </div>
     );

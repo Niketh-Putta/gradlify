@@ -7,7 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import { PremiumLoader } from "@/components/PremiumLoader";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { getLeaderboard, getMyGlobalOptIn, setGlobalOptIn, LeaderboardEntry } from "@/lib/connectApi";
+import { getLeaderboard, getMyGlobalOptIn, setGlobalOptIn, LeaderboardEntry, type LeaderboardPeriod } from "@/lib/connectApi";
 import { Globe, Users, Target, Eye, EyeOff, Sparkles, ArrowRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useMembership } from "@/hooks/useMembership";
@@ -18,7 +18,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 export function LeaderboardTab() {
   const navigate = useNavigate();
-  const [period, setPeriod] = useState<'day' | 'week' | 'month'>('day');
+  const [period, setPeriod] = useState<LeaderboardPeriod>('sprint');
   const [scope, setScope] = useState<'global' | 'friends'>('global');
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -178,13 +178,13 @@ export function LeaderboardTab() {
         <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
           <Tabs
             value={period}
-            onValueChange={(v) => setPeriod(v === 'day' || v === 'week' || v === 'month' ? v : 'day')}
+            onValueChange={(v) => setPeriod(v === 'sprint' || v === 'day' || v === 'week' || v === 'month' ? v : 'sprint')}
             className="w-full sm:w-auto overflow-hidden"
           >
             <TabsList className="flex w-full overflow-x-auto no-scrollbar justify-start sm:justify-center">
+              <TabsTrigger value="sprint" className="shrink-0">Sprint</TabsTrigger>
               <TabsTrigger value="day" className="shrink-0">Today</TabsTrigger>
               <TabsTrigger value="week" className="shrink-0">This Week</TabsTrigger>
-              <TabsTrigger value="month" className="shrink-0">This Month</TabsTrigger>
             </TabsList>
           </Tabs>
 
@@ -249,7 +249,7 @@ export function LeaderboardTab() {
               Correct Answers
             </CardTitle>
             <CardDescription>
-              Rankings by correct answers {period === 'day' ? 'today' : period === 'week' ? 'this week' : 'this month'}
+              Rankings by correct answers {period === 'day' ? 'today' : period === 'week' ? 'this week' : 'since the sprint started'}
             </CardDescription>
           </div>
         </CardHeader>

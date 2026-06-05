@@ -114,8 +114,10 @@ const normalizeLeaderboardData = (rows: unknown): LeaderboardEntry[] => {
   });
 };
 
+export type LeaderboardPeriod = "sprint" | "day" | "week" | "month";
+
 async function fetchGlobalLeaderboardEntries(
-  period: "day" | "week" | "month",
+  period: LeaderboardPeriod,
   track: "gcse" | "11plus",
 ): Promise<LeaderboardEntry[]> {
   const trackArg = track === "11plus" ? "11plus" : "gcse";
@@ -166,7 +168,7 @@ async function mergeFriendsWithZeroScores(entries: LeaderboardEntry[]): Promise<
   return rankLeaderboardEntries(Array.from(byUserId.values()));
 }
 
-async function fetchFriendsLeaderboardEntries(period: "day" | "week" | "month"): Promise<LeaderboardEntry[]> {
+async function fetchFriendsLeaderboardEntries(period: LeaderboardPeriod): Promise<LeaderboardEntry[]> {
   const { data, error } = (await supabase.rpc("get_leaderboard_correct_friends", {
     p_period: period,
   })) as { data: unknown; error: unknown };
@@ -183,7 +185,7 @@ async function fetchFriendsLeaderboardEntries(period: "day" | "week" | "month"):
 
 // Leaderboard functions - uses persistent leaderboard_score with raw calculation fallback
 export async function getLeaderboard(
-  period: 'day' | 'week' | 'month',
+  period: LeaderboardPeriod,
   scope: 'global' | 'friends',
   track?: 'gcse' | '11plus'
 ): Promise<LeaderboardEntry[]> {

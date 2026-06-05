@@ -3,19 +3,27 @@ import { useEffect, useMemo, useState } from "react";
 const OFFER_COUNTDOWN_KEY = "gradlify-limited-offer-expires-at";
 const DAY_MS = 24 * 60 * 60 * 1000;
 
+function getFreshExpiry() {
+  return Date.now() + DAY_MS;
+}
+
+function storeExpiry(expiresAt: number) {
+  if (typeof window !== "undefined") {
+    window.localStorage.setItem(OFFER_COUNTDOWN_KEY, String(expiresAt));
+  }
+  return expiresAt;
+}
+
 function getStoredExpiry() {
   if (typeof window === "undefined") return Date.now() + DAY_MS;
 
   const stored = window.localStorage.getItem(OFFER_COUNTDOWN_KEY);
   const parsed = stored ? Number(stored) : Number.NaN;
-  if (Number.isFinite(parsed) && parsed > 0) {
+  if (Number.isFinite(parsed) && parsed > Date.now() + 1000) {
     return parsed;
   }
 
-  const randomDuration = Math.max(60 * 1000, Math.floor(Math.random() * DAY_MS));
-  const expiresAt = Date.now() + randomDuration;
-  window.localStorage.setItem(OFFER_COUNTDOWN_KEY, String(expiresAt));
-  return expiresAt;
+  return storeExpiry(getFreshExpiry());
 }
 
 function formatRemaining(ms: number) {
@@ -36,11 +44,21 @@ function formatRemaining(ms: number) {
 }
 
 export function useOfferCountdown() {
-  const expiresAt = useMemo(getStoredExpiry, []);
+  const initialExpiresAt = useMemo(getStoredExpiry, []);
+  const [expiresAt, setExpiresAt] = useState(initialExpiresAt);
   const [remainingMs, setRemainingMs] = useState(() => expiresAt - Date.now());
 
   useEffect(() => {
-    const tick = () => setRemainingMs(expiresAt - Date.now());
+    const tick = () => {
+      const nextRemainingMs = expiresAt - Date.now();
+      if (nextRemainingMs <= 0) {
+        const nextExpiresAt = storeExpiry(getFreshExpiry());
+        setExpiresAt(nextExpiresAt);
+        setRemainingMs(nextExpiresAt - Date.now());
+        return;
+      }
+      setRemainingMs(nextRemainingMs);
+    };
     tick();
     const interval = window.setInterval(tick, 1000);
     return () => window.clearInterval(interval);

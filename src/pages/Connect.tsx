@@ -81,7 +81,7 @@ export default function Connect() {
       setLoading(true);
     }
     try {
-      const data = await getLeaderboard('month', scope, userTrack);
+      const data = await getLeaderboard('sprint', scope, userTrack);
       setLeaderboard(data);
     } catch (error) {
       console.error('Failed to load leaderboard:', error);

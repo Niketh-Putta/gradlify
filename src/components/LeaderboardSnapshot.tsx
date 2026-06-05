@@ -71,7 +71,7 @@ export function LeaderboardSnapshot() {
 
   const loadLeaderboard = async () => {
     try {
-      const data = await getLeaderboard('month', 'global', userTrack);
+      const data = await getLeaderboard('sprint', 'global', userTrack);
       setLeaderboard(data.slice(0, 4));
     } catch (error) {
       if (isAbortLikeError(error)) return;
@@ -90,9 +90,9 @@ export function LeaderboardSnapshot() {
         <div className="flex items-center justify-between">
           <div>
             <CardTitle className="flex items-center gap-2">
-              Top Learners This Month
+              Top Learners This Sprint
             </CardTitle>
-            <CardDescription>Correct answers</CardDescription>
+            <CardDescription>Correct answers since sprint start</CardDescription>
           </div>
         </div>
       </CardHeader>
@@ -111,7 +111,7 @@ export function LeaderboardSnapshot() {
           </div>
         ) : leaderboard.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground text-sm">
-            No activity recorded this week
+            No sprint activity recorded yet
           </div>
         ) : (
           <>

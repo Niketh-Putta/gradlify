@@ -37,7 +37,7 @@ const getBearerToken = (req: Request): string | null => {
 
 const env = {
   url: Deno.env.get("SUPABASE_URL") ?? "",
-  anonKey: Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+  anonKey: (Deno.env.get("SUPABASE_ANON_KEY") || Deno.env.get("VITE_SUPABASE_PUBLISHABLE_KEY") || Deno.env.get("VITE_SUPABASE_ANON_KEY")) ?? "",
   serviceKey: Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
 };
 
@@ -215,10 +215,11 @@ Deno.serve(async (req) => {
   // GET /api/leaderboards
   if (method === "GET" && path === "/leaderboards") {
     const url = new URL(req.url);
-    const period = (url.searchParams.get("period") ?? "month").toLowerCase();
+    const period = (url.searchParams.get("period") ?? "sprint").toLowerCase();
     const scope = (url.searchParams.get("scope") ?? "global").toLowerCase();
-    const fn = scope === "friends" ? "get_leaderboard_correct_friends" : "get_leaderboard_correct_global";
-    const { data, error } = await admin.rpc(fn, { p_period: period });
+    const fn = scope === "friends" ? "get_leaderboard_correct_friends" : "get_leaderboard_correct_global_for_track";
+    const args = scope === "friends" ? { p_period: period } : { p_period: period, p_track: currentTrack };
+    const { data, error } = await admin.rpc(fn, args);
     if (error) return toJson({ error: error.message }, 400);
     return toJson({ track: currentTrack, scope, period, items: data ?? [] });
   }

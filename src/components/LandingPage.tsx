@@ -2,18 +2,12 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Link } from "react-router-dom";
 import { motion, useReducedMotion, type Variants } from "framer-motion";
 import { ArrowRight, CheckCircle, ShieldCheck, Sparkles, MousePointer2, Compass, Layers, SlidersHorizontal, AlertTriangle, Trophy, Volume2, VolumeX, Pause } from "lucide-react";
-import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { DemoQuestion, elevenPlusDemoQuestions, elevenPlusMathsDemoQuestions, mobileDemoQuestions } from "@/components/DemoQuestion";
-import { ArrowLeft } from "lucide-react";
 
 import { LogoMark } from "@/components/LogoMark";
-import { DiscordFooterEntry } from "@/components/DiscordFooterEntry";
 import { OfferPrice } from "@/components/OfferPrice";
 import { supabase } from "@/integrations/supabase/client";
 import { getSprintUpgradeCopy } from "@/lib/foundersSprint";
@@ -123,7 +117,6 @@ interface LandingPageProps {
   variant?: "11plus";
 }
 
-type FeedbackType = "support" | "suggestion";
 type WinnerShowcaseItem = {
   name: string;
   mediaSrc: string;
@@ -245,15 +238,10 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
   const [isScrolled, setIsScrolled] = useState(false);
   const [ambientEffectsEnabled, setAmbientEffectsEnabled] = useState(true);
   const [showInternationalTagline, setShowInternationalTagline] = useState(false);
-  const [demoSubject, setDemoSubject] = useState<"english" | "maths">("english");
   const hasSession = false;
   const sessionChecked = true;
   const dashboardPath = getDashboardPath();
 
-  const [feedbackType, setFeedbackType] = useState<FeedbackType>("support");
-  const [feedbackEmail, setFeedbackEmail] = useState("");
-  const [feedbackMessage, setFeedbackMessage] = useState("");
-  const [feedbackSubmitting, setFeedbackSubmitting] = useState(false);
   const offerCountdown = useOfferCountdown();
 
   useEffect(() => {
@@ -375,40 +363,6 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
     []
   );
 
-  const handleSubmitFeedback = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const trimmedMessage = feedbackMessage.trim();
-    const trimmedEmail = feedbackEmail.trim();
-
-    if (!trimmedMessage) {
-      toast.error("Please enter a message before submitting.");
-      return;
-    }
-
-    setFeedbackSubmitting(true);
-    try {
-      const { error } = await supabase.functions.invoke("support-request", {
-        body: {
-          kind: feedbackType,
-          message: trimmedMessage,
-          email: trimmedEmail || null,
-        },
-      });
-
-      if (error) throw error;
-
-      setFeedbackEmail("");
-      setFeedbackMessage("");
-      setFeedbackType("support");
-      toast.success("Thanks! Your message has been sent.");
-    } catch (error) {
-      console.error("Support request error:", error);
-      toast.error("Could not send your message. Please try again.");
-    } finally {
-      setFeedbackSubmitting(false);
-    }
-  };
-
   const navLinkClass = isDark ? "text-slate-200 hover:text-white" : "text-slate-600 hover:text-slate-900";
   const primaryText = isDark ? "text-white" : "text-slate-900";
   const mutedText = isDark ? "text-slate-200/90" : "text-slate-600";
@@ -437,7 +391,6 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
     : "border-slate-200/80 bg-slate-50";
   const premiumCardGradient = "bg-gradient-to-br from-red-600 via-orange-500 to-amber-400 border border-red-500/70 text-white";
   const feedbackButtonGradient = "bg-gradient-to-r from-red-600 via-orange-500 to-amber-400";
-  const supportButtonActiveClass = `rounded-full px-4 py-2 sm:px-5 sm:py-2.5 ${feedbackButtonGradient} text-white hover:brightness-95`;
   const outlineButtonClass = isDark
     ? "border-white/20 text-white bg-white/10 hover:bg-white/20 hover:text-white"
     : "border-slate-200 text-slate-900 bg-white hover:bg-slate-100";
@@ -566,34 +519,34 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
         {isElevenPlus && (
           <div className="relative overflow-hidden bg-[#160b08] text-white">
             <div className="absolute inset-0 bg-[radial-gradient(560px_120px_at_18%_20%,rgba(239,68,68,0.34),transparent_68%),radial-gradient(520px_120px_at_82%_0%,rgba(250,204,21,0.30),transparent_66%)]" />
-            <div className="relative mx-auto flex max-w-7xl flex-col gap-2 px-4 py-2.5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-              <div className="flex flex-wrap items-center gap-2.5">
-                <span className="rounded-full border border-amber-200/45 bg-amber-200/12 px-3 py-1 text-[10px] font-black uppercase tracking-[0.22em] text-amber-100 shadow-[0_0_22px_rgba(251,146,60,0.28)]">
+            <div className="relative mx-auto flex max-w-7xl flex-col gap-1 px-4 py-1.5 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="rounded-full border border-amber-200/45 bg-amber-200/12 px-2.5 py-0.5 text-[9px] font-black uppercase tracking-[0.2em] text-amber-100 shadow-[0_0_18px_rgba(251,146,60,0.24)]">
                   Limited time offer
                 </span>
-                <span className="text-sm font-black sm:text-base">Save £20/month</span>
-                <span className="hidden h-5 w-px bg-white/20 sm:block" aria-hidden="true" />
-                <span className="text-xs font-semibold text-white/75 sm:text-sm">
+                <span className="text-xs font-black sm:text-sm">Save £20/month</span>
+                <span className="hidden h-4 w-px bg-white/20 sm:block" aria-hidden="true" />
+                <span className="text-[11px] font-semibold text-white/75 sm:text-xs">
                   Lock in <span className="text-amber-100">£19.99/mo</span> before it returns to <span className="text-white">£39.99/mo</span>
                 </span>
               </div>
-              <div className="flex flex-wrap items-center gap-2.5">
-                <span className="rounded-full bg-gradient-to-r from-red-600 to-orange-500 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-white shadow-[0_0_18px_rgba(249,115,22,0.45)]">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="rounded-full bg-gradient-to-r from-red-600 to-orange-500 px-2.5 py-0.5 text-[9px] font-black uppercase tracking-[0.14em] text-white shadow-[0_0_14px_rgba(249,115,22,0.38)]">
                   £240/year saved
                 </span>
-                <span className="rounded-lg border border-white/15 bg-white/10 px-3 py-1 text-xs font-black tabular-nums text-white sm:text-sm">
+                <span className="rounded-md border border-white/15 bg-white/10 px-2.5 py-0.5 text-[11px] font-black tabular-nums text-white sm:text-xs">
                   Ends in {offerCountdown.label}
                 </span>
                 <button
                   type="button"
                   onClick={handleViewPlans}
-                  className="rounded-lg bg-white px-3 py-1 text-xs font-black text-[#8f1d12] shadow-lg transition hover:bg-amber-100 sm:px-4 sm:py-1.5 sm:text-sm"
+                  className="rounded-md bg-white px-2.5 py-0.5 text-[11px] font-black text-[#8f1d12] shadow-md transition hover:bg-amber-100 sm:px-3 sm:text-xs"
                 >
                   View plans
                 </button>
               </div>
             </div>
-            <div className="relative h-1 bg-white/10">
+            <div className="relative h-0.5 bg-white/10">
               <div
                 className="h-full rounded-r-full bg-gradient-to-r from-red-600 via-orange-400 to-amber-300 shadow-[0_0_18px_rgba(251,146,60,0.65)] transition-[width] duration-1000"
                 style={{ width: `${offerCountdown.progressPercent}%` }}
@@ -648,7 +601,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
       <main
         className={cn(
           isElevenPlus
-            ? "pt-[12.5rem] sm:pt-[9rem] lg:pt-[8.5rem]"
+            ? "pt-[10.75rem] sm:pt-[7.25rem] lg:pt-[6.75rem]"
             : "pt-24 sm:pt-28 lg:pt-8"
         )}
       >
@@ -714,21 +667,20 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
               <motion.div variants={motionCfg.fadeUp} className="lg:col-span-7 relative mt-6 lg:mt-8 h-[460px] lg:h-[520px] w-full max-w-[600px] mx-auto lg:ml-auto">
                 {/* 3D Stacked Deck - True Product Surface Overhaul */}
                 
-                {EXAM_READINESS_ENABLED && (
-                  <div className={cn(
-                    "absolute top-10 left-[-15px] sm:left-[-20px] w-[250px] sm:w-[380px] rounded-[24px] sm:rounded-[32px] border shadow-2xl transition-all duration-700 ease-out pointer-events-none block",
-                    "transform origin-bottom-left -rotate-[10deg] sm:-rotate-[12deg] scale-[0.85] sm:scale-[0.9] -translate-x-4 sm:-translate-x-16 -translate-y-8 sm:-translate-y-12 opacity-90 sm:opacity-100",
-                    isDark ? "bg-[radial-gradient(100%_100%_at_0%_0%,#1e293b,#0a0a0a)] border-white/10" : "bg-[radial-gradient(100%_100%_at_0%_0%,#f8fafc,#ffffff)] border-slate-200"
-                  )}>
-                    <div className={cn("h-[200px] sm:h-[280px] w-full p-0 flex flex-col rounded-[24px] sm:rounded-[32px] overflow-hidden shadow-2xl transition-colors duration-700", isDark ? "bg-[#0B1528]" : "bg-white")}>
-                      <img 
-                        src="/hero-analytics.png" 
-                        alt="Progress analytics dashboard" 
-                        className={cn("w-full h-full object-cover object-left-top transition-all duration-700", isDark && "invert hue-rotate-180 brightness-95 contrast-[1.15] opacity-90")} 
-                      />
-                    </div>
+                {/* Card 1: TRUE Exam Readiness (Back Left) */}
+                <div className={cn(
+                  "absolute top-10 left-[-15px] sm:left-[-20px] w-[250px] sm:w-[380px] rounded-[24px] sm:rounded-[32px] border shadow-2xl transition-all duration-700 ease-out pointer-events-none block",
+                  "transform origin-bottom-left -rotate-[10deg] sm:-rotate-[12deg] scale-[0.85] sm:scale-[0.9] -translate-x-4 sm:-translate-x-16 -translate-y-8 sm:-translate-y-12 opacity-90 sm:opacity-100",
+                  isDark ? "bg-[radial-gradient(100%_100%_at_0%_0%,#1e293b,#0a0a0a)] border-white/10" : "bg-[radial-gradient(100%_100%_at_0%_0%,#f8fafc,#ffffff)] border-slate-200"
+                )}>
+                  <div className={cn("h-[200px] sm:h-[280px] w-full p-0 flex flex-col rounded-[24px] sm:rounded-[32px] overflow-hidden shadow-2xl transition-colors duration-700", isDark ? "bg-[#0B1528]" : "bg-white")}>
+                    <img 
+                      src="/hero-analytics.png" 
+                      alt="Cognitive Readiness Profile" 
+                      className={cn("w-full h-full object-cover object-left-top transition-all duration-700", isDark && "invert hue-rotate-180 brightness-95 contrast-[1.15] opacity-90")} 
+                    />
                   </div>
-                )}
+                </div>
 
                 {/* Card 2: TRUE Revision Notes (Back Right) */}
                 <div className={cn(
@@ -965,120 +917,6 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
           </div>
         </section>
 
-
-        {/* Demo question */}
-          <section id="demo" className={`relative py-12 sm:py-16 lg:py-20 ${sectionSurface} hidden sm:block`}>
-          {ambientEffectsEnabled && (
-            <div
-              className={`absolute inset-0 pointer-events-none ${
-                isDark
-                  ? "bg-[radial-gradient(620px_360px_at_15%_25%,rgba(124,58,237,0.10),transparent_65%)]"
-                  : "bg-[radial-gradient(620px_360px_at_15%_25%,rgba(99,102,241,0.08),transparent_65%)]"
-              }`}
-            />
-          )}
-          <div className="max-w-7xl mx-auto px-4 sm:px-6">
-            <motion.div initial="hidden" whileInView="show" viewport={motionCfg.viewport} variants={motionCfg.stagger} className="flex flex-col gap-10 sm:gap-14 items-center">
-              <motion.div variants={motionCfg.fadeUp} className="max-w-3xl text-center space-y-4">
-                <div className={`text-sm font-semibold ${accentText}`}>Try it out</div>
-                <h2 className={`text-3xl sm:text-4xl font-semibold tracking-tight ${primaryText}`}>Practise now.</h2>
-                <p className={`${mutedText} leading-relaxed text-base sm:text-lg`}>
-                  A live question flow you can try in under a minute. Experience our authentic 11+ Split-View reading and reasoning environments.
-                </p>
-                <div className={`flex flex-wrap justify-center gap-4 sm:gap-8 pt-2 text-sm ${mutedText}`}>
-                  {["Split-View passages", "Instant feedback", "Mobile friendly"].map((line) => (
-                    <div key={line} className="flex items-center gap-2">
-                      <CheckCircle className={`h-4 w-4 ${isDark ? "text-emerald-400" : "text-emerald-600"}`} />
-                      <span className="font-medium">{line}</span>
-                    </div>
-                  ))}
-                </div>
-              </motion.div>
-
-              <motion.div variants={motionCfg.fadeUp} className="w-full relative px-0 sm:px-4">
-               <div className="flex flex-col md:flex-row justify-between items-center mb-6 relative z-10 w-full max-w-6xl mx-auto gap-4">
-                  
-                  {/* Premium Segmented Subject Toggle */}
-                  <div className={cn(
-                    "flex items-center p-1.5 rounded-[1.25rem] border backdrop-blur-md self-center md:self-start transition-all duration-300",
-                    isDark ? "bg-[#1f2937]/90 border-white/20 shadow-inner" : "bg-slate-100/90 border-slate-200/80 shadow-[inset_0_1px_4px_rgba(0,0,0,0.04)]"
-                  )}>
-                    <button
-                      onClick={() => setDemoSubject("english")}
-                      className={cn(
-                        "px-6 sm:px-8 py-2 sm:py-2.5 rounded-[14px] text-sm sm:text-[15px] font-bold tracking-wide transition-all duration-300 relative z-10",
-                        demoSubject === "english"
-                          ? (isDark 
-                              ? "bg-white text-slate-900 shadow-[0_4px_12px_rgba(255,255,255,0.15)] ring-1 ring-white/10" 
-                              : "bg-white text-slate-900 shadow-[0_4px_16px_rgba(0,0,0,0.08)] ring-1 ring-slate-900/5")
-                          : (isDark ? "text-slate-400 hover:text-white" : "text-slate-500 hover:text-slate-700")
-                      )}
-                    >
-                      English
-                    </button>
-                    <button
-                      onClick={() => setDemoSubject("maths")}
-                      className={cn(
-                        "px-6 sm:px-8 py-2 sm:py-2.5 rounded-[14px] text-sm sm:text-[15px] font-bold tracking-wide transition-all duration-300 relative z-10",
-                        demoSubject === "maths"
-                          ? (isDark 
-                              ? "bg-white text-slate-900 shadow-[0_4px_12px_rgba(255,255,255,0.15)] ring-1 ring-white/10" 
-                              : "bg-white text-slate-900 shadow-[0_4px_16px_rgba(0,0,0,0.08)] ring-1 ring-slate-900/5")
-                          : (isDark ? "text-slate-400 hover:text-white" : "text-slate-500 hover:text-slate-700")
-                      )}
-                    >
-                      Maths
-                    </button>
-                  </div>
-
-                  {/* Start Practicing CTA */}
-                  <Button
-                    size="sm"
-                    onClick={handleSignup}
-                    className={`rounded-full px-5 py-2 text-white shadow-lg shadow-rose-500/20 w-full md:w-auto ${isElevenPlus ? feedbackButtonGradient : "bg-orange-600"}`}
-                  >
-                    Start practising free
-                    <ArrowRight className="ml-2 w-4 h-4" />
-                  </Button>
-               </div>
-               
-               <div className="group/demo relative w-full max-w-6xl mx-auto">
-                 {/* Main Demo Box */}
-                 <div className={`w-full rounded-[32px] border ${cardSurface} shadow-2xl p-4 sm:p-6 md:p-8 lg:p-10 relative overflow-hidden transition-all duration-500`}>
-                    <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-transparent z-0 pointer-events-none" />
-                    <div className="relative z-10 w-full">
-                      <DemoQuestion
-                        key={demoSubject} // Force re-mount to reset internal scrolling correctly
-                        embedded
-                        tone={theme}
-                        onStartPracticeClick={handleSignup}
-                        className="max-w-full lg:max-w-full"
-                        questions={isElevenPlus ? (demoSubject === "english" ? elevenPlusDemoQuestions : elevenPlusMathsDemoQuestions) : undefined}
-                      />
-                    </div>
-                 </div>
-                 
-                 {/* Mobile Subject Toggle (Since arrows are hidden on tiny screens to save space) */}
-                 <div className="sm:hidden flex justify-center mt-6 z-20 relative">
-                   <Button 
-                     variant="outline" 
-                     size="sm" 
-                     onClick={() => setDemoSubject(prev => prev === "english" ? "maths" : "english")}
-                     className="rounded-full shadow-sm"
-                   >
-                     {demoSubject === "english" ? "Switch to Maths" : "Back to English"}
-                     {demoSubject === "english" ? <ArrowRight className="w-4 h-4 ml-2" /> : <ArrowLeft className="w-4 h-4 ml-2" />}
-                   </Button>
-                 </div>
-               </div>
-               <div className="mt-6 flex justify-center">
-                 <HoverFact tone={theme}>Instant feedback appears after every answer.</HoverFact>
-               </div>
-              </motion.div>
-            </motion.div>
-          </div>
-        </section>
-
         <section className={`relative py-12 sm:py-16 lg:py-20 ${sectionSurface}`}>
           {ambientEffectsEnabled && (
             <div
@@ -1126,6 +964,125 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                   </div>
                 </div>
               </motion.div>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* Founder Trust Section */}
+        <section className={`relative py-12 sm:py-16 lg:py-20 ${sectionSurface}`}>
+          {ambientEffectsEnabled && (
+            <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(680px_360px_at_20%_20%,rgba(245,158,11,0.10),transparent_65%),radial-gradient(560px_300px_at_88%_28%,rgba(239,68,68,0.08),transparent_62%)]" />
+          )}
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 relative">
+            <motion.div
+              initial="hidden"
+              whileInView="show"
+              viewport={motionCfg.viewport}
+              variants={motionCfg.stagger}
+              className={cn(
+                "relative overflow-hidden rounded-[28px] border px-5 py-7 sm:px-8 sm:py-9 lg:px-10 lg:py-11",
+                isDark
+                  ? "border-white/10 bg-white/[0.04]"
+                  : "border-slate-200/80 bg-white shadow-[0_26px_80px_-58px_rgba(180,83,9,0.45)]"
+              )}
+            >
+              <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-red-600 via-orange-400 to-amber-300" />
+              <div className="grid gap-8 lg:grid-cols-[1.55fr_1fr] lg:items-center">
+                <motion.div variants={motionCfg.fadeUp} className="space-y-6">
+                  <div className="grid gap-7 sm:grid-cols-[1.1fr_0.62fr] sm:items-end">
+                    <div className="self-end lg:pb-3">
+                      <p className={cn("text-xs font-black uppercase tracking-[0.28em]", accentText)}>
+                        Who built this
+                      </p>
+                      <h2 className={cn("mt-4 max-w-3xl text-4xl font-extrabold leading-[1.02] tracking-tight sm:text-5xl lg:text-[4.55rem]", primaryText)}>
+                        Built by people who aced the 11+
+                        <span className="block text-slate-400">because the prep we wanted did not exist.</span>
+                      </h2>
+                    </div>
+
+                    <div className="mx-auto w-full max-w-[330px] self-center sm:max-w-none">
+                      <div className={cn(
+                        "relative overflow-hidden rounded-[24px] border p-1.5 shadow-[0_28px_80px_-46px_rgba(15,23,42,0.72)]",
+                        isDark ? "border-white/10 bg-white/5" : "border-slate-200 bg-white"
+                      )}>
+                        <div className="pointer-events-none absolute -inset-6 bg-[radial-gradient(240px_180px_at_22%_18%,rgba(249,115,22,0.16),transparent_68%),radial-gradient(220px_170px_at_86%_12%,rgba(59,130,246,0.12),transparent_70%)]" />
+                        <div className="relative overflow-hidden rounded-[19px] bg-slate-100">
+                          <img
+                            src="/founder-niketh.jpg"
+                            alt="Niketh Putta, founder of Gradlify"
+                            className="aspect-[4/5] h-full w-full scale-[1.16] object-cover object-[43%_47%]"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/88 via-slate-950/28 to-transparent" />
+                          <div className="absolute inset-x-0 bottom-0 px-4 pb-4 pt-12">
+                            <p className="text-sm font-black text-white drop-shadow-sm">Niketh Putta</p>
+                            <p className="text-xs font-bold text-white/90 drop-shadow-sm">Founder, Gradlify</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <p className={cn("text-xs font-black uppercase tracking-[0.24em]", accentText)}>
+                      Gradlify:
+                    </p>
+                    <div className="grid gap-2.5 sm:grid-cols-3">
+                      {[
+                      ["01", "Saves you time"],
+                      ["02", "Gets you the same results I did"],
+                      ["03", "Saves you money"],
+                      ].map(([number, line]) => (
+                        <div
+                          key={line}
+                          className={cn(
+                            "group flex min-h-[88px] items-center gap-3 rounded-2xl border px-4 py-3.5 transition-colors",
+                            isDark
+                              ? "border-white/10 bg-white/[0.04]"
+                              : "border-slate-200/80 bg-white/90 shadow-[0_12px_34px_-30px_rgba(15,23,42,0.5)] hover:bg-white"
+                          )}
+                        >
+                          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-red-600 via-orange-500 to-amber-300 text-[11px] font-black text-white shadow-[0_10px_24px_-14px_rgba(249,115,22,0.9)]">
+                            {number}
+                          </span>
+                          <span className={cn("font-serif text-[1.28rem] font-black leading-tight tracking-tight sm:text-[1.35rem]", primaryText)}>
+                            {line}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </motion.div>
+
+                <motion.div variants={motionCfg.fadeUp} className="space-y-5 self-center">
+                    <div className={cn("space-y-4 text-base font-medium leading-7 sm:text-lg", mutedText)}>
+                      <p>
+                        I’m Niketh Putta. I go to QE Boys, and I also got into Wilson’s, Eton College, and every other school I applied for. At 14, I scored 1530 on the SAT.
+                      </p>
+                      <p>
+                        But I do not think families should have to pay £2,000 a month for a child to have a real shot at their dream school. That never felt fair to me.
+                      </p>
+                      <p>
+                        I’m building Gradlify to be the prep I wish existed: clear practice, honest feedback, and a smarter path that saves you time, helps you aim for the same results, and does not waste your money on generic tutoring.
+                      </p>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                      {["QE Boys", "Wilson's", "Eton College", "1530 SAT at 14"].map((item) => (
+                        <span key={item} className={cn("rounded-full border px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.14em]", chipClass)}>
+                          {item}
+                        </span>
+                      ))}
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={handleViewPlans}
+                      className={cn("inline-flex items-center gap-2 text-sm font-black", accentText)}
+                    >
+                      View plans <ArrowRight className="h-4 w-4" />
+                    </button>
+                </motion.div>
+              </div>
             </motion.div>
           </div>
         </section>
@@ -1345,112 +1302,6 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
           </div>
         </section>
 
-        {/* Discord spotlight */}
-        <section className={`relative py-12 sm:py-16 ${sectionSurface}`}>
-          <div className="max-w-7xl mx-auto px-4 sm:px-6">
-            <DiscordFooterEntry variant="spotlight" className="w-full" />
-          </div>
-        </section>
-
-        {/* Support */}
-        <section id="support" className={`relative py-12 sm:py-16 lg:py-20 ${sectionSurface}`}>
-          {ambientEffectsEnabled && (
-            <div
-              className={`absolute inset-0 pointer-events-none ${
-                isDark
-                  ? (isElevenPlus ? "bg-[radial-gradient(620px_340px_at_80%_25%,rgba(245,158,11,0.12),transparent_60%)]" : "bg-[radial-gradient(620px_340px_at_80%_25%,rgba(99,102,241,0.12),transparent_60%)]")
-                  : (isElevenPlus ? "bg-[radial-gradient(620px_340px_at_80%_25%,rgba(245,158,11,0.08),transparent_60%)]" : "bg-[radial-gradient(620px_340px_at_80%_25%,rgba(99,102,241,0.08),transparent_60%)]")
-              }`}
-            />
-          )}
-          <div className="max-w-7xl mx-auto px-4 sm:px-6">
-            <motion.div initial="hidden" whileInView="show" viewport={motionCfg.viewport} variants={motionCfg.stagger} className="grid lg:grid-cols-12 gap-10 items-start">
-              <motion.div variants={motionCfg.fadeUp} className="lg:col-span-4">
-                <div className={`text-sm font-semibold ${accentText}`}>Support</div>
-                <h2 className={`mt-3 text-2xl sm:text-4xl font-semibold tracking-tight ${primaryText}`}>
-                  Talk to us.
-                </h2>
-                <p className={`mt-4 ${mutedText} leading-relaxed`}>
-                  Found something confusing or want to suggest an improvement? Send a message - we read every one.
-                </p>
-              </motion.div>
-
-              <motion.div variants={motionCfg.fadeUp} className={`lg:col-span-8 rounded-[26px] sm:rounded-3xl border shadow-lg p-5 sm:p-8 ${cardSurface}`}>
-                <form onSubmit={handleSubmitFeedback} className="space-y-6">
-                  <div className="flex flex-wrap gap-3">
-                    <Button
-                      type="button"
-                      variant={feedbackType === "support" ? "default" : "outline"}
-                    className={
-                        feedbackType === "support"
-                          ? supportButtonActiveClass
-                          : `rounded-full px-4 py-2 sm:px-5 sm:py-2.5 border ${isDark ? "text-slate-200 border-white/10" : "text-slate-700 border-slate-200"} bg-transparent`
-                      }
-                      onClick={() => setFeedbackType("support")}
-                    >
-                      Contact support
-                    </Button>
-                    <Button
-                      type="button"
-                      variant={feedbackType === "suggestion" ? "default" : "outline"}
-                    className={
-                        feedbackType === "suggestion"
-                          ? supportButtonActiveClass
-                          : `rounded-full px-4 py-2 sm:px-5 sm:py-2.5 border ${isDark ? "text-slate-200 border-white/10" : "text-slate-700 border-slate-200"} bg-transparent`
-                      }
-                      onClick={() => setFeedbackType("suggestion")}
-                    >
-                      Suggest improvement
-                    </Button>
-                  </div>
-
-                  <div className="grid gap-4">
-                    <div>
-                      <label className={`text-sm font-medium ${primaryText}`}>Email (optional)</label>
-                      <Input
-                        type="email"
-                        placeholder="you@example.com"
-                        value={feedbackEmail}
-                        onChange={(event) => setFeedbackEmail(event.target.value)}
-                        className={`mt-2 rounded-xl border ${
-                          isDark
-                            ? "border-white/10 bg-slate-950 text-slate-100 placeholder:text-slate-500"
-                            : "border-slate-200 bg-white text-slate-900 placeholder:text-slate-400"
-                        }`}
-                      />
-                    </div>
-                    <div>
-                      <label className={`text-sm font-medium ${primaryText}`}>Your message</label>
-                      <Textarea
-                        placeholder="Tell us what you need help with or what we should improve."
-                        value={feedbackMessage}
-                        onChange={(event) => setFeedbackMessage(event.target.value)}
-                        className={`mt-2 min-h-[120px] sm:min-h-[140px] rounded-xl border ${
-                          isDark
-                            ? "border-white/10 bg-slate-950 text-slate-100 placeholder:text-slate-500"
-                            : "border-slate-200 bg-white text-slate-900 placeholder:text-slate-400"
-                        }`}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                    <p className={`text-sm ${subtleText}`}>
-                      We review every message. Please do not share sensitive information.
-                    </p>
-                    <Button
-                      type="submit"
-                      disabled={feedbackSubmitting}
-                    className={`rounded-full ${feedbackButtonGradient} text-white font-semibold px-5 py-2.5 sm:px-6 sm:py-3`}
-                    >
-                      {feedbackSubmitting ? "Sending..." : "Send message"}
-                    </Button>
-                  </div>
-                </form>
-              </motion.div>
-            </motion.div>
-          </div>
-        </section>
       </main>
 
       {/* Footer */}
@@ -1486,13 +1337,6 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
               >
                 Momentum
               </button>
-              <button
-                type="button"
-                className={`transition-colors ${isDark ? "hover:text-white" : "hover:text-slate-900"}`}
-                onClick={() => scrollTo("demo")}
-              >
-                Demo
-              </button>
               <Link to="/free-resources" className={`transition-colors ${isDark ? "hover:text-white" : "hover:text-slate-900"}`}>
                 Free Resources
               </Link>
@@ -1527,7 +1371,6 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
               WhatsApp: +44 7442 194299
             </a>
           </div>
-          <DiscordFooterEntry className="px-4 sm:px-6 mt-8" />
           <div className={`mt-8 text-xs ${subtleText}`}>
             © {new Date().getFullYear()} Gradlify. All rights reserved.
           </div>
