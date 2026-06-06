@@ -90,6 +90,7 @@ window.GRADLIFY_PLAYBOOK = {
     { type: "action", text: "After: send gradlify.com/11-plus?ref=FRENCHIEMUMMY + creator caption. Tracker → live." },
   ],
   "b2-6": [
+    { type: "action", text: "SPEED: When they reply with interest or a time — Calendar + Meet + confirm email within minutes, not days. Offer today/tomorrow first." },
     { type: "script", title: "Universal 10-min call script", lines: [
       "0–1 min: What do your parents struggle with most?",
       "1–3 min: Extra timed practice between lessons — not replacing tuition. Free → score + weak topics → £19.99/mo.",
@@ -127,6 +128,15 @@ window.GRADLIFY_PLAYBOOK = {
     { type: "action", text: "Tina (MumFounded): polite close sent — NO chase unless 7+ days silence." },
     { type: "message", label: "Only after 7+ days", text: "Hi Tina — performance-based 30% still an option, or no fit — either way fine. Best, Niketh" },
     { type: "action", text: "Sutton 11 Plus: NEVER contact. Archive thread." },
+    { type: "action", text: "Robert Lomax: NEVER contact (accidental send 6 Jun)." },
+  ],
+  "b2-12": [
+    { type: "list", title: "Wave 2 sent 7 Jun (Kimi)", items: [
+      "Emily Kendall — office.plusopedia@gmail.com",
+      "Sabah Hadi — sabah@the11plusjourney.co.uk",
+      "The Exam Coach — teamkeen@theexamcoach.tv",
+    ]},
+    { type: "action", text: "Book 10-min call on reply — same script as Wave 1." },
   ],
   "b3-1": [
     { type: "action", text: "Open Canva or Figma — canvas 1080×1080." },
@@ -145,17 +155,55 @@ window.GRADLIFY_PLAYBOOK = {
   "b3-3": [
     { type: "action", text: "Save as outreach/assets/14-june-mock-poster.png and story variant." },
   ],
+  "b4-0": [
+    { type: "list", title: "7-day points sprint (Level Field voice)", items: [
+      "Day 1: Post segment — reply Y4/Y5/Y6 (no link in group)",
+      "Within 12h: DM every year reply with ?ref=LEVELFIELD link",
+      "Day 2: Score loop — ask parents to send first mock score privately",
+      "Day 3–4: Post top 3 weak areas from real scores (fill placeholders)",
+      "Day 5–6: PREMIUM deadline post — DM only, no payment link in group",
+      "Day 7: Free retention post — trust stays, non-buyers not burned",
+    ]},
+    { type: "action", text: "Voice: helpful peer who sat 11+ recently — see outreach/level-field-voice.md" },
+    { type: "action", text: "Copy from outreach/wa/day1-relatability.txt — paste in The Level Field GC" },
+  ],
   "b4-1": [
-    { type: "message", label: "1:1 to each paying subscriber", text: "Hi [Name] — I'm running a live 11+ mock on Saturday 14 June on Gradlify.\n\nYou're on Premium so your child is in free. Do you know ONE family doing 11+ I should send the link to?\n\n£10 for new families if they're not on the app yet.\n\nLink: [LIVE MOCK LINK]" },
-    { type: "action", text: "Ask each: “Which WhatsApp group are you in? Can I send a poster to forward?”" },
+    { type: "action", text: "DM template: outreach/wa/dm-year-reply.txt (personalise with their year)" },
+    { type: "action", text: "Log: parent name, year, link sent, mock done Y/N, score, PREMIUM asked" },
+    { type: "check", text: "After first mock", pass: "Parent sent score — you replied with ONE concrete next topic" },
   ],
   "b4-2": [
-    { type: "action", text: "Send poster image FIRST — not link only." },
-    { type: "message", label: "Then text in GC", text: "Hi everyone — sharing in case useful for Y4/5 11+ prep.\n\nLive timed mock this Saturday 14 June. Exam-style on screen, score afterwards.\n\n£10 if not on Gradlify yet · free for Premium members.\n\nNot replacing tuition — extra practice between sessions. I'm Niketh, built this after doing the 11+ myself.\n\nLink: [LIVE MOCK LINK]" },
+    { type: "action", text: "24h after Day 1: post outreach/wa/day2-tips.txt" },
+    { type: "action", text: "Chase anyone who replied Y4/Y5/Y6 but did not send a score" },
   ],
   "b4-3": [
+    { type: "action", text: "After 8–10 scores: post outreach/wa/day3-quiz.txt — replace [WEAK AREA 1–3]" },
+    { type: "message", label: "DM — PREMIUM reply", text: "Use outreach/wa/dm-premium.txt (£19.99/mo, settings?ref=LEVELFIELD)" },
+    { type: "message", label: "DM — too expensive", text: "Use outreach/wa/dm-too-expensive.txt" },
+    { type: "message", label: "DM — why pay", text: "Use outreach/wa/dm-why-pay.txt" },
+  ],
+  "b4-4": [
+    { type: "message", label: "1:1 to each paying subscriber", text: "Hi [Name], I'm running a live 11+ mock on Saturday 14 June on Gradlify.\n\nYou're on Premium so your child is in free. Do you know ONE family doing 11+ I should send the link to?\n\n£10 for new families if they're not on the app yet.\n\nLink: [LIVE MOCK LINK]" },
+    { type: "action", text: "Ask each: Which WhatsApp group are you in? Can I send a poster to forward?" },
+  ],
+  "b4-5": [
+    { type: "action", text: "Send poster image FIRST, not link only." },
+    { type: "message", label: "Then text in GC", text: "Hi everyone, sharing in case useful for Y4/5 11+ prep.\n\nLive timed mock this Saturday 14 June. Exam-style on screen, score afterwards.\n\n£10 if not on Gradlify yet, free for Premium members.\n\nNot replacing tuition, extra practice between sessions. I'm Niketh, built this after doing the 11+ myself.\n\nLink: [LIVE MOCK LINK]" },
+  ],
+  "b4-6": [
     { type: "action", text: "Ask 1 £10 mock buyer + any warm parent to forward poster." },
     { type: "check", text: "Goal", pass: "3 forwards into GCs you can't access yourself." },
+  ],
+  "b5-0": [
+    { type: "list", title: "Reddit targets", items: ["r/11PlusHelp", "r/ukeducation", "r/Barnet r/Enfield (local)"] },
+    { type: "message", label: "Reddit reply (Template 3)", text: "Really useful thread, wanted to add a different angle.\n\nI'm at Queen Elizabeth Boys. I sat the 11+ a couple of years ago and built Gradlify because most resources didn't match the actual exam.\n\nBeyond textbooks: full timed mocks under real conditions, and tracking by topic so you're not doing more of the same. Free version at gradlify.com if useful.\n\nHappy to answer anything about QE or 11+ prep." },
+  ],
+  "b5-4": [
+    { type: "message", label: "FB DM — parent who posted (Template 1)", text: "Hi [Name], I saw your post about 11+ prep and wanted to reach out.\n\nI'm Niketh, I'm at Queen Elizabeth Boys Grammar School. I sat the 11+ recently and built Gradlify for proper mocks and a dashboard that shows gaps before exam day. Free to start, no card.\n\nHappy to share more if it helps. What's your child working on at the moment?" },
+    { type: "action", text: "Friday: 5 of these from groups you're active in." },
+  ],
+  "b5-5": [
+    { type: "action", text: "Mumsnet > Education > search 11+ threads. Answer helpfully, link free resources only when relevant." },
   ],
   "b5-1": [
     { type: "list", title: "Search Facebook and request join", items: [
@@ -174,10 +222,10 @@ window.GRADLIFY_PLAYBOOK = {
     { type: "action", text: "Example comment: “we use timed mocks for…” — no link yet." },
   ],
   "b5-3": [
-    { type: "message", label: "First post (after approved)", text: "We're running a live 11+ style mock on Saturday 14 June (timed, on screen).\n\nI'm Niketh — built Gradlify after going through 11+ myself.\n\n£10 for non-members · free for Gradlify Premium. Score + feedback after.\n\nIf useful for Y4/5: [LINK]\n\nHappy to answer GL-style format questions." },
+    { type: "message", label: "First post (after approved)", text: "We're running a live 11+ style mock on Saturday 14 June (timed, on screen).\n\nI'm Niketh, built Gradlify after going through 11+ myself.\n\n£10 for non-members, free for Gradlify Premium. Score + feedback after.\n\nIf useful for Y4/5: [LINK]\n\nHappy to answer GL-style format questions." },
   ],
-  "b5-4": [
-    { type: "message", label: "Reminder ~7 June", text: "Reminder — live 11+ mock this Saturday 14 June.\n\nA few slots left. £10 new families / free for Premium.\nRegister: [LINK]" },
+  "b5-6": [
+    { type: "message", label: "Reminder ~7 June", text: "Reminder, live 11+ mock this Saturday 14 June.\n\nA few slots left. £10 new families, free for Premium.\nRegister: [LINK]" },
   ],
   "b6-1": [
     { type: "action", text: "WhatsApp GC reminder + poster again." },
@@ -189,10 +237,18 @@ window.GRADLIFY_PLAYBOOK = {
     { type: "action", text: "Track every attendee: Name | Email | Score | Weak topics 1–3 | Follow-up sent?" },
   ],
   "b6-3": [
-    { type: "message", label: "Within 24h — every attendee", text: "Hi — thanks for sitting Saturday's mock.\n\n[Child] scored [X/Y] — strongest: [topic]. Main gap: [topic].\n\n15 min on [weak topic] this week: [PRACTICE LINK]\n\nUnlimited mocks + tracking = £19.99/mo, 3-day trial: [LINK]\n\nReply if you want help picking what to practice next." },
+    { type: "message", label: "Within 24h — every attendee", text: "Hi, thanks for sitting Saturday's mock.\n\n[Child] scored [X/Y], strongest: [topic]. Main gap: [topic].\n\n15 min on [weak topic] this week: [PRACTICE LINK]\n\nUnlimited mocks + tracking is £20/mo: [LINK]\n\nReply if you want help picking what to practice next." },
+    { type: "action", text: "If they object on price: anchor tutor £40-60/hr. If need to think: send free link now. See Objections panel in Mission Control." },
   ],
+  "b7-1": [{ type: "action", text: "Mon: one helpful FB post in 2-3 active groups. Story or tip, no product link." }],
+  "b7-2": [{ type: "action", text: "Tue: 2-3 genuine Reddit or Mumsnet answers." }],
+  "b7-3": [{ type: "action", text: "Wed: 5 personal DMs to warm WhatsApp members." }],
+  "b7-4": [{ type: "list", title: "Thu video angles", items: ["Day in the life at QE", "What I actually revised for 11+", "11+ mistake most kids make", "What happens after a bad mock score", "How I built Gradlify at 15"] }],
+  "b7-5": [{ type: "action", text: "Fri: 5 cold FB DMs + 1 partner call or booking." }],
+  "b7-6": [{ type: "list", title: "Sat log (spreadsheet)", items: ["DMs sent", "Replies", "Trial starts", "Paid conversions", "Source channel"] }],
+  "b7-7": [{ type: "action", text: "Sun 20 min: pick next week's content + 5 new outreach targets." }],
   "b6-4": [
     { type: "action", text: "Voice note or call to 3 hottest leads (most engaged / highest anxiety)." },
-    { type: "check", text: "Target by 20 June", pass: "3 new £19.99/mo subs from mock attendees." },
+    { type: "check", text: "Target by 20 June", pass: "3 new £20/mo subs from mock attendees." },
   ],
 };

@@ -1,0 +1,46 @@
+{
+  "partners": {
+    "tutor@elevenplussuccess.com": {
+      "name": "Chris",
+      "org": "Eleven Plus Success",
+      "code": "EPS",
+      "ref": "https://gradlify.com/11-plus?ref=EPS",
+      "hints": ["elevenplussuccess", "Chris Moore"],
+      "slots": ["Thu 12 Jun 4pm", "Fri 13 Jun 11am"],
+      "phone": "07771740569"
+    },
+    "prlcharrow@gmail.com": {
+      "name": "Andy",
+      "org": "Pinner Road Learning Centre",
+      "code": "PRLC",
+      "ref": "https://gradlify.com/11-plus?ref=PRLC",
+      "hints": ["prlcharrow", "Pinner Road"],
+      "slots": ["Early July — after 30 Jun"],
+      "hold_until": "2026-06-30"
+    },
+    "info@11plushub.com": {
+      "name": "David",
+      "org": "11 Plus Hub",
+      "code": "11PLUSHUB",
+      "ref": "https://gradlify.com/11-plus?ref=11PLUSHUB",
+      "hints": ["11plushub", "11 Plus Hub"],
+      "slots": ["Thu 12 Jun 2pm", "Fri 13 Jun 11am"]
+    },
+    "cecile@thefrenchiemummy.com": {
+      "name": "Cecile",
+      "org": "Frenchie Mummy",
+      "code": "FRENCHIEMUMMY",
+      "ref": "https://gradlify.com/11-plus?ref=FRENCHIEMUMMY",
+      "hints": ["frenchiemummy", "Cecile"],
+      "slots": ["Thu 12 Jun 4pm", "Fri 13 Jun 2pm"]
+    },
+    "info@mocktestmasters.com": {
+      "name": "Sandra",
+      "org": "Mock Test Masters",
+      "code": "MTM",
+      "ref": "https://gradlify.com/11-plus?ref=MTM",
+      "hints": ["mocktestmasters", "Mock Test Masters"],
+      "slots": ["Tue 10 Jun 11am", "Wed 11 Jun 3pm"]
+    }
+  }
+}

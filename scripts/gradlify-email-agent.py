@@ -50,12 +50,17 @@ BLOCKLIST_EMAILS = {
     "karentutorsutton@gmail.com",
 }
 
-PARTNER_SEARCH = (
-    "is:unread (from:elevenplussuccess.com OR from:prlcharrow@gmail.com "
-    "OR from:11plushub.com OR from:mocktestmasters.com OR from:thefrenchiemummy.com "
-    "OR from:mumfoundeduk@gmail.com OR partnership OR affiliate OR gradlify)"
+TIER_A_FROM = (
+    "from:elevenplussuccess.com OR from:prlcharrow@gmail.com OR from:11plushub.com "
+    "OR from:mocktestmasters.com OR from:thefrenchiemummy.com OR from:mumfoundeduk@gmail.com"
 )
+PARTNER_SEARCH = f"is:unread ({TIER_A_FROM})"
 SEARCH_QUERY = PARTNER_SEARCH
+
+NEWSLETTER_DOMAINS = (
+    "substack.com", "ebay.co.uk", "ebay.com", "alpaca.markets", "danmartell.com",
+    "joinvenn.org", "no-reply@", "noreply@", "mailer@", "newsletter",
+)
 
 OPENAI_MODEL = os.environ.get("GRADLIFY_EMAIL_MODEL", "gpt-4o-mini")
 
@@ -156,6 +161,20 @@ def should_skip_row(row: dict, tracker: List[dict]) -> Optional[str]:
         return "closed_no_commission"
     if partner and partner.get("status") == "final_followup_sent" and not row.get("unread"):
         return "final_followup_no_unread"
+    for dom in NEWSLETTER_DOMAINS:
+        if dom in email or dom in (row.get("subject") or "").lower():
+            return "newsletter_or_noise"
+    # Autopilot: only reply to known partners in tracker (or Tier A domain match)
+    partner = partner_for_email(email, tracker)
+    tier_a = any(
+        d in email
+        for d in (
+            "elevenplussuccess.com", "prlcharrow@gmail.com", "11plushub.com",
+            "mocktestmasters.com", "thefrenchiemummy.com", "mumfoundeduk@gmail.com",
+        )
+    )
+    if not partner and not tier_a:
+        return "not_a_tracked_partner"
     return None
 
 
@@ -344,6 +363,10 @@ def main() -> int:
     if not gmail.ping():
         print("ERROR: Kimi WebBridge not reachable at http://127.0.0.1:10086")
         print("Start Kimi WebBridge and log into Gmail (session: gradlify-gmail-partnerships)")
+        return 1
+
+    if not os.environ.get("OPENAI_API_KEY"):
+        print("ERROR: OPENAI_API_KEY not set. Add to .env.local for autopilot drafts.")
         return 1
 
     tracker = load_tracker()

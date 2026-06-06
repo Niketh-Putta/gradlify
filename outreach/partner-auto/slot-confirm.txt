@@ -1,0 +1,10 @@
+Hi {name},
+
+Great — locked in {confirmed_slot}. Calendar invite on its way.
+
+Google Meet: {meet_link}
+
+I'll walk through Gradlify in 10 minutes and we'll agree your referral link on the call.
+
+See you then,
+Niketh

@@ -1,0 +1,34 @@
+---
+description: Niketh approved autonomous partnership email replies. Run the email agent without asking each time.
+alwaysApply: true
+---
+
+# Email autopilot (approved)
+
+Niketh wants partnership Gmail replies handled **automatically** by the agent.
+
+## When to run (no permission needed)
+
+Run at the end of any turn that touches outreach, Block 2, partners, or inbox — and at session start if Kimi may be up:
+
+```bash
+python3 scripts/gradlify-email-agent.py --send --limit 10
+```
+
+If Kimi is down or `OPENAI_API_KEY` missing, say so once and use dry-run when key exists:
+
+```bash
+python3 scripts/gradlify-email-agent.py --limit 10
+```
+
+## After each run
+
+- Brief summary: how many sent / skipped / errors
+- Point to `outreach/email-agent-log.jsonl` for full audit
+- Do not draft duplicate manual replies for threads the agent already handled
+
+## Never auto-reply
+
+- Sutton 11 Plus
+- Non-partnership spam (agent search is partner-focused)
+- Threads agent logged as SKIP

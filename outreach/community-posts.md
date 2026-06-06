@@ -1,163 +1,75 @@
 # The Level Field WhatsApp Conversion Posts
 
-Do not lead with "free resources" as the main CTA. The group already expects free material, so the CTA should qualify parents by urgency, child year, exam timing, and willingness to follow a plan.
+**Voice guide:** `outreach/level-field-voice.md`  
+**Copy files:** `outreach/wa/day1-relatability.txt` through `day5-founder-close.txt` + `dm-*.txt`
 
-Primary goal: move parents from passive free-consumption into the existing 30-day Gradlify points sprint, then convert competitive or worried parents into Premium when they hit the free limits.
+Do not lead with "sign up free" in the group. Parents already expect free material — qualify by child year, then DM the link.
 
-Primary paid offer for this group:
+**Funnel:** Reply Y4/Y5/Y6 → DM link → child completes mock → parent sends score → you give next step → PREMIUM for serious competitors.
 
-- Gradlify Premium: unlimited mocks, larger mocks, full question set, history/progress tracking.
-- Group-only angle: "Your child can compete in the 30-day points sprint and I will help serious families understand what to practise next."
-- Competition hook: highest points during the 30-day sprint wins a £100 Amazon gift card.
-- Paid conversion hook: free users can enter, but Premium is for parents who want more attempts, larger mocks, and a better chance to keep climbing the leaderboard.
+**Links:** `https://gradlify.com/11-plus?ref=LEVELFIELD` · upgrade `https://gradlify.com/settings?ref=LEVELFIELD`
 
-## Post 1 - Segment The Group
+---
 
-Send this first. It gets replies without sounding like a sales pitch.
+## Post 1 — Segment the group (Day 1)
+
+File: `outreach/wa/day1-relatability.txt`
 
 ```text
 Parents doing 11+ this year or next year:
 
-I am running a 30-day Gradlify 11+ points sprint.
+I'm running a 30-day Gradlify points sprint for children in this group.
 
-Children compete by completing mock exams on Gradlify. The highest points at the end wins a £100 Amazon gift card.
+They earn points by completing mock exams on Gradlify. Highest points at the end wins a £100 Amazon gift card.
 
-If your child wants to join, reply with their year:
+If your child wants in, reply with their year:
 
 Y4
 Y5
 Y6
 
-I will send the right starting point privately.
+I'll DM you the right starting point. No link in the group — just reply with the year.
 ```
 
-## DM After Parent Replies Y4/Y5/Y6
+## DM — After Y4/Y5/Y6 reply
 
-```text
-Thanks. Start here:
+File: `outreach/wa/dm-year-reply.txt`
 
-https://gradlify.com/11-plus?ref=LEVELFIELD
+## Post 2 — Score loop (Day 2, 24h after Post 1)
 
-Get your child to complete one mock exam first. Only mock exams count properly for the sprint points.
+File: `outreach/wa/day2-tips.txt`
 
-After they finish, send me:
+## Post 3 — Public insight (Day 3–4, after 8–10 scores)
 
-1. score
-2. current leaderboard position if visible
-3. hardest topic/question type
+File: `outreach/wa/day3-quiz.txt` — fill [WEAK AREA 1–3] from real replies.
 
-Then I will tell you what they should do next to improve their points.
-```
+## DM — PREMIUM replies
 
-## Post 2 - Social Proof Loop
+File: `outreach/wa/dm-premium.txt` (£19.99/mo)
 
-Send 24 hours after Post 1.
+## DM — Too expensive
 
-```text
-For parents whose children joined the Gradlify points sprint:
+File: `outreach/wa/dm-too-expensive.txt`
 
-Once your child completes their first mock exam, send me their score privately.
+## DM — Why pay when group is free?
 
-I am grouping the common weak areas and I will post the top 3 things children in this group need to fix to score higher.
+File: `outreach/wa/dm-why-pay.txt`
 
-If you haven’t started yet, use this:
-https://gradlify.com/11-plus?ref=LEVELFIELD
-```
+## Post 4 — Deadline (Day 5–6, if interest exists)
 
-## Post 3 - Useful Public Insight
+File: `outreach/wa/day4-engage.txt`
 
-Send after at least 8-10 parents reply with scores or weak areas. This creates credibility before selling.
+## Post 5 — Non-buyer retention (Day 7)
 
-```text
-Quick pattern from the children doing the Gradlify points sprint:
+File: `outreach/wa/day5-founder-close.txt`
 
-The biggest weak areas so far are:
-1. [WEAK AREA 1]
-2. [WEAK AREA 2]
-3. [WEAK AREA 3]
+---
 
-Most children do not need more random worksheets. They need repeated mock-style practice on the exact weak areas where they lose points.
+## Operating rules
 
-Free users can compete, but Premium gives unlimited mocks, bigger mock sessions, and more chances to keep improving during the 30-day sprint.
-
-If your child is taking the sprint seriously, reply "PREMIUM" and I will send the details.
-```
-
-## DM For PREMIUM Replies
-
-```text
-Premium is for parents whose child is actually using the sprint and wants more chances to climb.
-
-You get:
-- unlimited 11+ Maths/English mocks and practice
-- larger mock sessions
-- progress/history tracking
-- more attempts during the 30-day sprint
-- my help choosing what your child should do next from their results
-
-It’s £24.99/month and you can cancel anytime.
-
-Start here:
-https://gradlify.com/settings?ref=LEVELFIELD
-
-After upgrading, send me your child’s latest score and I’ll tell you the first focus area.
-```
-
-## DM If They Say It Is Too Expensive
-
-```text
-That’s fair. The free version is still useful for starting.
-
-The reason Premium exists is for families who want consistent mocks, larger sessions, and clearer tracking instead of piecing together random worksheets.
-
-Use the free sprint first. If your child actually completes mocks and wants more attempts, Premium is probably worth it. If they do not use it, do not pay yet.
-```
-
-## DM If They Ask Why Pay When Group Is Free
-
-```text
-The group stays free.
-
-Gradlify Premium is for the parents who want the platform to do the heavier lifting: unlimited mocks, bigger sessions, progress history, and more sprint attempts.
-
-Free gets your child into the sprint. Premium helps serious children keep competing.
-```
-
-## Post 4 - Deadline/Scarcity
-
-Send 48 hours after Post 3 only if parents have replied.
-
-```text
-I am checking sprint progress tonight and replying to parents whose children are actively competing.
-
-This is best for parents who want:
-- more mock attempts
-- proper mock/practice tracking
-- less guessing about what to practise next
-- a better chance to climb the leaderboard
-
-Reply "PREMIUM" before 9pm if you want the details.
-```
-
-## Post 5 - Non-Buyer Retention
-
-Send after the paid push so non-buyers do not feel burned.
-
-```text
-For everyone staying on the free side:
-
-I’ll keep sharing useful 11+ material here.
-
-One thing I’d recommend this week: get your child to complete one timed mock exam, then write down the 2 question types they lost marks on.
-
-That matters more than collecting more worksheets.
-```
-
-## Operating Rules
-
-- Do not post a payment link as the first message.
-- Do not say "free" in the CTA unless the goal is broad signup, because it attracts low-intent users.
-- Ask for a reply keyword first, then DM.
-- DM every engaged parent within 12 hours.
-- Convert based on their child's completed action, not their vague interest.
-- Keep the group useful even after a paid pitch, or trust drops.
+- No payment link as first group message.
+- Reply keyword first, then DM within 12 hours.
+- Convert on **completed mock + score**, not vague interest.
+- Voice note optional on Post 3 or founder moments — then paste text.
+- Keep posting useful free material after paid push or trust drops.
+- Track parents in a sheet: year, link sent, mock done, score, PREMIUM asked, paid.

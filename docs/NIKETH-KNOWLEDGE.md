@@ -38,6 +38,10 @@ Synced from Codex knowledge interview. Cursor reads this for all Gradlify work.
 - Partners/tutors/parent groups before big creator spends.
 - No illegal/deceptive/exploitative tactics.
 
+## Email autopilot
+- Partnership replies: **agent runs automatically** (`scripts/gradlify-email-agent.py --send`).
+- No permission needed each time. Kimi + OPENAI_API_KEY required.
+
 ## Growth priorities
 1. Find best segment via outreach + calls (fast).
 2. WhatsApp audience → booked parent calls.

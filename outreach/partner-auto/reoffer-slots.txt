@@ -1,0 +1,10 @@
+Hi {name},
+
+Thanks for getting back to me — keen to move quickly.
+
+Could we do a 10-min call {slot_a} or {slot_b}? I'll send a Google Meet link as soon as you confirm.
+
+If neither works, send any slot in the next 48 hours and I'll book it straight away.
+
+Best,
+Niketh

@@ -766,6 +766,305 @@
     }
 
     .hidden { display: none !important; }
+
+    /* Playbook reference */
+    .playbook-section { margin-bottom: 1.5rem; animation: fadeUp 0.6s 0.2s ease both; }
+
+    .playbook-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+
+    @media (max-width: 900px) { .playbook-grid { grid-template-columns: 1fr; } }
+
+    .ref-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: calc(var(--radius) + 2px);
+      padding: 1rem 1.1rem;
+    }
+
+    .ref-panel h3 {
+      font-family: var(--font-display);
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 0.6rem;
+    }
+
+    .edge-quote {
+      font-size: 0.8rem;
+      color: var(--amber);
+      font-style: italic;
+      padding: 0.55rem 0.65rem;
+      background: var(--amber-dim);
+      border-radius: 8px;
+      margin-top: 0.5rem;
+      line-height: 1.45;
+    }
+
+    .angle-card {
+      padding: 0.55rem 0.65rem;
+      background: var(--surface-2);
+      border-radius: 8px;
+      margin-bottom: 0.4rem;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: border-color 0.2s;
+    }
+
+    .angle-card:hover { border-color: var(--border); }
+    .angle-card.open { border-color: rgba(94, 179, 255, 0.35); }
+
+    .angle-name { font-size: 0.78rem; font-weight: 600; }
+    .angle-for { font-size: 0.68rem; color: var(--muted); margin-top: 0.15rem; }
+    .angle-hook { font-size: 0.72rem; color: var(--blue); margin-top: 0.35rem; display: none; }
+    .angle-card.open .angle-hook { display: block; }
+
+    .impact-list { list-style: none; font-size: 0.75rem; }
+    .impact-list li { padding: 0.3rem 0; padding-left: 1rem; position: relative; line-height: 1.4; }
+    .impact-high li { color: var(--emerald); }
+    .impact-high li::before { content: "↑"; position: absolute; left: 0; font-weight: 700; }
+    .impact-low li { color: var(--muted); }
+    .impact-low li::before { content: "↓"; position: absolute; left: 0; }
+
+    .impact-verdict {
+      font-size: 0.78rem;
+      color: var(--text);
+      margin-top: 0.65rem;
+      padding: 0.55rem 0.65rem;
+      background: var(--surface-2);
+      border-radius: 8px;
+      line-height: 1.45;
+    }
+
+    .obj-row {
+      border-bottom: 1px solid var(--border);
+      padding: 0.45rem 0;
+    }
+
+    .obj-row:last-child { border-bottom: none; }
+
+    .obj-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .obj-detail {
+      display: none;
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin-top: 0.35rem;
+      line-height: 1.45;
+    }
+
+    .obj-row.open .obj-detail { display: block; }
+
+    .week-row {
+      display: flex;
+      gap: 0.65rem;
+      font-size: 0.75rem;
+      padding: 0.35rem 0;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+
+    .week-day {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: var(--amber);
+      width: 2.25rem;
+      flex-shrink: 0;
+    }
+
+    .pipeline-section { margin-bottom: 1.5rem; animation: fadeUp 0.5s ease both; }
+
+    .pipeline-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 0.65rem;
+    }
+
+    .pipe-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.85rem 1rem;
+    }
+
+    .pipe-card.highlight {
+      grid-column: 1 / -1;
+      background: var(--surface-2);
+      border-color: rgba(245, 185, 66, 0.2);
+    }
+
+    .pipe-label {
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.35rem;
+    }
+
+    .pipe-value {
+      font-family: var(--font-display);
+      font-size: 1.35rem;
+      font-weight: 700;
+      line-height: 1.1;
+    }
+
+    .pipe-value small {
+      font-family: var(--font-body);
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--muted);
+    }
+
+    .pipe-note {
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-top: 0.5rem;
+      line-height: 1.45;
+    }
+
+    .pipe-list {
+      font-size: 0.7rem;
+      color: var(--text);
+      margin-top: 0.35rem;
+      line-height: 1.5;
+    }
+
+    .live-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 900px) {
+      .live-row { grid-template-columns: 1fr; }
+    }
+
+    .update-item {
+      padding: 0.65rem 0;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      font-size: 0.78rem;
+    }
+
+    .update-item:last-child { border-bottom: none; }
+
+    .update-org {
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 0.2rem;
+    }
+
+    .update-meta {
+      font-size: 0.65rem;
+      color: var(--muted);
+      margin-bottom: 0.35rem;
+    }
+
+    .update-preview {
+      color: var(--muted);
+      line-height: 1.4;
+      font-size: 0.72rem;
+    }
+
+    .update-action {
+      font-size: 0.65rem;
+      margin-top: 0.35rem;
+      color: var(--emerald);
+    }
+
+    .update-action.warn { color: var(--amber); }
+
+    .next-card {
+      display: flex;
+      gap: 0.85rem;
+      padding: 0.85rem 0;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .next-card:last-child { border-bottom: none; }
+
+    .next-num {
+      width: 2rem;
+      height: 2rem;
+      border-radius: 10px;
+      background: var(--amber-dim);
+      color: var(--amber);
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .next-body h4 {
+      font-size: 0.88rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+
+    .next-why {
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin-bottom: 0.45rem;
+    }
+
+    .next-steps {
+      list-style: none;
+      font-size: 0.72rem;
+      color: var(--text);
+      line-height: 1.45;
+    }
+
+    .next-steps li {
+      padding: 0.2rem 0 0.2rem 1rem;
+      position: relative;
+    }
+
+    .next-steps li::before {
+      content: "→";
+      position: absolute;
+      left: 0;
+      color: var(--amber);
+      font-size: 0.65rem;
+    }
+
+    .next-file {
+      display: inline-block;
+      margin-top: 0.4rem;
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      color: var(--blue);
+      text-decoration: none;
+      border-bottom: 1px dashed rgba(94, 179, 255, 0.35);
+    }
+
+    .next-file:hover { color: var(--text); }
+
+    .next-open-hint {
+      font-size: 0.6rem;
+      color: var(--muted);
+      margin-top: 0.25rem;
+    }
+
+    .feed-stamp {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      color: var(--muted);
+      margin-top: 0.5rem;
+    }
   </style>
 </head>
 <body>
@@ -804,6 +1103,18 @@
       <div class="stats-grid" id="statsGrid"></div>
     </section>
 
+    <section class="live-row">
+      <div class="panel">
+        <div class="panel-title"><span class="dot" style="background:var(--blue)"></span> Recent updates</div>
+        <div id="recentUpdates"></div>
+        <p class="feed-stamp" id="feedStamp"></p>
+      </div>
+      <div class="panel">
+        <div class="panel-title"><span class="dot"></span> Next 3 things to do</div>
+        <div id="nextThree"></div>
+      </div>
+    </section>
+
     <section class="focus-row">
       <div class="panel">
         <div class="panel-title"><span class="dot"></span> Do this next</div>
@@ -813,6 +1124,16 @@
         <div class="panel-title">Rules of the game</div>
         <ul class="rules-list" id="rulesList"></ul>
       </div>
+    </section>
+
+    <section class="pipeline-section" id="pipelineSection" hidden>
+      <div class="panel-title" style="margin-bottom:0.65rem">Block 2 — partner pipeline</div>
+      <div class="pipeline-grid" id="pipelineGrid"></div>
+    </section>
+
+    <section class="playbook-section">
+      <div class="panel-title" style="margin-bottom:0.75rem">Growth &amp; sales playbook <span style="color:var(--muted);font-weight:400;font-size:0.7rem">· v6 · Kimi for browser</span></div>
+      <div class="playbook-grid" id="playbookGrid"></div>
     </section>
 
     <div class="timeline" id="timeline"></div>
@@ -844,10 +1165,14 @@
   </div>
 
   <script src="data.js"></script>
+  <script src="live-feed.js"></script>
   <script src="playbook.js"></script>
+  <script src="reference.js"></script>
   <script>
     const DATA = window.GRADLIFY_PROGRESS;
+    const LIVE = window.GRADLIFY_LIVE_FEED || {};
     const PLAYBOOK = window.GRADLIFY_PLAYBOOK || {};
+    const REF = window.GRADLIFY_REFERENCE || {};
     const LS_KEY = "gradlify-mc-overrides";
     const LS_SUCCESS = "gradlify-mc-success";
     const LS_SUBSTEPS = "gradlify-mc-substeps-open";
@@ -1037,12 +1362,86 @@
           <div class="stat-value">${ns.payingCustomers} <small>/ ${ns.payingTarget}</small></div>
           <div class="progress-bar-wrap"><div class="progress-bar"><div class="progress-bar-fill" style="width:${custPct}%"></div></div></div>
         </div>
+        <div class="stat">
+          <div class="stat-label">3-mo target</div>
+          <div class="stat-value">£${(ns.mrrTarget3mo || 2000).toLocaleString()}</div>
+          <div class="stat-label" style="margin-top:0.35rem">${ns.waCommunity || 600}+ WA warm pipe</div>
+        </div>
         <div class="stat countdown">
           <div class="stat-label">Anchor event</div>
           <div class="stat-value">${days}d</div>
           <div class="stat-label" style="margin-top:0.35rem">${ns.anchorEvent}</div>
         </div>
       `;
+    }
+
+    function renderReference() {
+      const grid = document.getElementById("playbookGrid");
+      if (!grid || !REF.coreEdge) return;
+
+      const impact = REF.impactAssessment || {};
+      const angles = (REF.fiveAngles || []).map(a => `
+        <div class="angle-card" data-angle="${a.id}">
+          <div class="angle-name">${escapeHtml(a.name)}</div>
+          <div class="angle-for">${escapeHtml(a.for)}</div>
+          <div class="angle-hook">${escapeHtml(a.hook)}</div>
+        </div>
+      `).join("");
+
+      const objections = (REF.objections || []).map(o => `
+        <div class="obj-row" data-obj="${o.id}">
+          <div class="obj-label">${escapeHtml(o.label)} <span style="color:var(--muted);font-weight:400">· ${escapeHtml(o.mean)}</span></div>
+          <div class="obj-detail">
+            <strong>Response:</strong> ${escapeHtml(o.response)}<br>
+            <strong>Close:</strong> ${escapeHtml(o.close)}
+          </div>
+        </div>
+      `).join("");
+
+      const week = (REF.weeklyRhythm || []).map(w => `
+        <div class="week-row">
+          <span class="week-day">${w.day}</span>
+          <span>${escapeHtml(w.action)}</span>
+        </div>
+      `).join("");
+
+      grid.innerHTML = `
+        <div class="ref-panel">
+          <h3>${escapeHtml(impact.headline || "Playbook impact")}</h3>
+          <ul class="impact-list impact-high">${(impact.high || []).map(i => `<li>${escapeHtml(i)}</li>`).join("")}</ul>
+          <div style="margin-top:0.5rem;font-size:0.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em">Medium</div>
+          <ul class="impact-list" style="color:var(--text)">${(impact.medium || []).map(i => `<li style="padding-left:0">${escapeHtml(i)}</li>`).join("")}</ul>
+          <div style="margin-top:0.35rem;font-size:0.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em">Defer now</div>
+          <ul class="impact-list impact-low">${(impact.lowNow || []).map(i => `<li>${escapeHtml(i)}</li>`).join("")}</ul>
+          <div class="impact-verdict">${escapeHtml(impact.verdict || "")}</div>
+        </div>
+        <div class="ref-panel">
+          <h3>${escapeHtml(REF.coreEdge.title)}</h3>
+          <ul class="rules-list">${REF.coreEdge.lines.map(l => `<li>${escapeHtml(l)}</li>`).join("")}</ul>
+          <div class="edge-quote">"${escapeHtml(REF.coreEdge.useEverywhere)}"</div>
+          <h3 style="margin-top:1rem">5 messaging angles</h3>
+          ${angles}
+        </div>
+        <div class="ref-panel">
+          <h3>Objection playbook</h3>
+          <p style="font-size:0.7rem;color:var(--muted);margin-bottom:0.5rem">Agree → reframe → question. Tap to expand.</p>
+          ${objections}
+          <div class="edge-quote" style="margin-top:0.75rem;font-style:normal">${escapeHtml(REF.universalClose || "")}</div>
+        </div>
+        <div class="ref-panel">
+          <h3>Weekly rhythm</h3>
+          ${week}
+          <h3 style="margin-top:1rem">Month targets</h3>
+          <ul class="rules-list">${(REF.monthlyTargets || []).map(t => `<li><strong>${escapeHtml(t.month)}:</strong> ${escapeHtml(t.paid)} · ${escapeHtml(t.free)}</li>`).join("")}</ul>
+        </div>
+      `;
+
+      grid.querySelectorAll(".angle-card").forEach(el => {
+        el.addEventListener("click", () => el.classList.toggle("open"));
+      });
+      grid.querySelectorAll(".obj-row .obj-label").forEach(el => {
+        el.addEventListener("click", () => el.closest(".obj-row").classList.toggle("open"));
+      });
     }
 
     function renderRing() {
@@ -1052,6 +1451,111 @@
       document.getElementById("ringFg").style.strokeDashoffset = offset;
       document.getElementById("ringPct").textContent = pct + "%";
       document.getElementById("stepsSummary").textContent = `${done} of ${total} steps complete`;
+    }
+
+    function actionLabel(action) {
+      if (!action) return "";
+      if (action.includes("auto_reply_sent")) return "✓ Auto-replied via Kimi";
+      if (action.includes("already_handled")) return "✓ Already handled";
+      if (action.includes("ignored")) return "— No action needed";
+      if (action.includes("failed")) return "⚠ Reply failed — check Gmail";
+      return action;
+    }
+
+    function renderLiveFeed() {
+      const updatesEl = document.getElementById("recentUpdates");
+      const nextEl = document.getElementById("nextThree");
+      const stampEl = document.getElementById("feedStamp");
+      if (!updatesEl || !nextEl) return;
+
+      const updates = LIVE.recentUpdates || [];
+      updatesEl.innerHTML = updates.length
+        ? updates.map(u => `
+            <div class="update-item">
+              <div class="update-org">${escapeHtml(u.org)}</div>
+              <div class="update-meta">${escapeHtml(u.kindLabel || u.kind)} · ${escapeHtml(u.subject || "")}</div>
+              <div class="update-preview">"${escapeHtml(u.preview || "")}"</div>
+              ${u.action ? `<div class="update-action ${u.action.includes("failed") ? "warn" : ""}">${escapeHtml(actionLabel(u.action))}</div>` : ""}
+              ${u.note ? `<div class="update-preview" style="margin-top:0.25rem">${escapeHtml(u.note)}</div>` : ""}
+            </div>
+          `).join("")
+        : `<p style="font-size:0.78rem;color:var(--muted)">No partner replies yet. Run <code>python3 scripts/partner-reply-agent.py</code> to refresh.</p>`;
+
+      const next = LIVE.nextThree || [];
+      nextEl.innerHTML = next.map(item => `
+        <div class="next-card">
+          <div class="next-num">${item.n}</div>
+          <div class="next-body">
+            <h4>${escapeHtml(item.title)}</h4>
+            <p class="next-why">${escapeHtml(item.why)} · ~${item.minutes || "?"} min · ${escapeHtml(item.block || "")}</p>
+            <ol class="next-steps">${(item.how || []).map(step => `<li>${escapeHtml(step)}</li>`).join("")}</ol>
+            ${item.file ? `
+              <a class="next-file" href="../${escapeHtml(item.file)}" target="_blank" rel="noopener" data-open="${escapeHtml(item.file)}">Open ${escapeHtml(item.file)} ↗</a>
+              <div class="next-open-hint">Click opens in browser · or run in Terminal: <code style="font-size:0.58rem">open "../${escapeHtml(item.file)}"</code></div>
+            ` : ""}
+          </div>
+        </div>
+      `).join("");
+
+      nextEl.querySelectorAll("[data-open]").forEach(el => {
+        el.addEventListener("click", () => {
+          const path = el.dataset.open;
+          const cmd = `open "/Users/nikethputta/Downloads/Projects/Gradlify/GRADLIFY APP CODES/11+ GRADLIFY/${path}"`;
+          navigator.clipboard.writeText(cmd).catch(() => {});
+        });
+      });
+
+      if (stampEl) {
+        stampEl.textContent = LIVE.generatedAt
+          ? `Feed updated ${LIVE.generatedAt} · auto-reply: scripts/partner-reply-agent.py`
+          : "";
+      }
+    }
+
+    function renderPipeline() {
+      const section = document.getElementById("pipelineSection");
+      const grid = document.getElementById("pipelineGrid");
+      const p = DATA.pipeline?.block2;
+      if (!section || !grid || !p) return;
+
+      section.hidden = false;
+      const stepPct = p.stepsTotal ? Math.round((p.stepsDone / p.stepsTotal) * 100) : 0;
+
+      const autoTag = p.automatableDone
+        ? '<span style="color:var(--emerald)">Automation complete</span>'
+        : '<span style="color:var(--amber)">In progress</span>';
+
+      grid.innerHTML = `
+        <div class="pipe-card">
+          <div class="pipe-label">Block 2 checklist</div>
+          <div class="pipe-value">${p.stepsDone}<small> / ${p.stepsTotal}</small></div>
+          <div class="pipe-note">${stepPct}% steps · ~${p.outcomePct}% outcomes · ${autoTag}</div>
+        </div>
+        <div class="pipe-card">
+          <div class="pipe-label">Tier A</div>
+          <div class="pipe-value">${p.tierA.contacted}<small> / ${p.tierA.total}</small></div>
+          <div class="pipe-note">${p.tierA.awaitingReply || 0} awaiting · ${p.tierA.onHold || 0} on hold · ${p.tierA.chased || 0} chased</div>
+        </div>
+        <div class="pipe-card">
+          <div class="pipe-label">Calls · live</div>
+          <div class="pipe-value">${p.calls.booked}<small> / ${p.calls.target} booked</small></div>
+          <div class="pipe-note">${p.partnersLive.count} / ${p.partnersLive.target} partners live</div>
+        </div>
+        <div class="pipe-card">
+          <div class="pipe-label">Cold outreach</div>
+          <div class="pipe-value">${p.totalColdSent || (p.wave1Cold.sent + (p.wave2Cold?.sent || 0))}<small> sent</small></div>
+          <div class="pipe-note">W1: ${p.wave1Cold.sent} · W2: ${p.wave2Cold?.sent || 0} · ${p.calendarHolds} holds</div>
+        </div>
+        <div class="pipe-card highlight">
+          <div class="pipe-label">Latest · blocked on</div>
+          <div class="pipe-note">${escapeHtml(p.lastAction)}</div>
+          <div class="pipe-list">${(p.blockedOn || []).map(b => `⏸ ${escapeHtml(b)}`).join("<br>")}</div>
+        </div>
+        <div class="pipe-card highlight">
+          <div class="pipe-label">Your manual next</div>
+          <div class="pipe-list">${(p.manualNext || []).map((n, i) => `${i + 1}. ${escapeHtml(n)}`).join("<br>")}</div>
+        </div>
+      `;
     }
 
     function renderFocus() {
@@ -1238,7 +1742,10 @@
 
       renderStats();
       renderRing();
+      renderLiveFeed();
+      renderPipeline();
       renderFocus();
+      renderReference();
       renderTimeline();
       renderBlocks();
       renderSuccess();

@@ -534,15 +534,15 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                 <span className="rounded-full border border-amber-200/45 bg-amber-200/12 px-2.5 py-0.5 text-[9px] font-black uppercase tracking-[0.2em] text-amber-100 shadow-[0_0_18px_rgba(251,146,60,0.24)]">
                   Limited time offer
                 </span>
-                <span className="text-xs font-black sm:text-sm">Save £20/month</span>
+                <span className="text-xs font-black sm:text-sm">Less than one tutor hour</span>
                 <span className="hidden h-4 w-px bg-white/20 sm:block" aria-hidden="true" />
                 <span className="text-[11px] font-semibold text-white/75 sm:text-xs">
-                  Lock in <span className="text-amber-100">£19.99/mo</span> before it returns to <span className="text-white">£39.99/mo</span>
+                  <span className="text-amber-100">£19.99/mo</span> for unlimited mocks — tutors charge <span className="text-white">£40–60/hr</span>
                 </span>
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 <span className="rounded-full bg-gradient-to-r from-red-600 to-orange-500 px-2.5 py-0.5 text-[9px] font-black uppercase tracking-[0.14em] text-white shadow-[0_0_14px_rgba(249,115,22,0.38)]">
-                  £240/year saved
+                  3-day free trial
                 </span>
                 <span className="rounded-md border border-white/15 bg-white/10 px-2.5 py-0.5 text-[11px] font-black tabular-nums text-white sm:text-xs">
                   Ends in {offerCountdown.label}
@@ -578,6 +578,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
 
             <div className="hidden sm:flex items-center gap-6 text-sm font-medium">
               <Link to="/11-plus" className={navLinkClass}>11+</Link>
+              <button type="button" onClick={() => scrollTo("compare")} className={navLinkClass}>Compare</button>
               <button type="button" onClick={handleViewPlans} className={navLinkClass}>Pricing</button>
               <a href="/free-resources" className={navLinkClass}>
                 Free Resources
@@ -1003,20 +1004,20 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
               )}
             >
               <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-red-600 via-orange-400 to-amber-300" />
-              <div className="grid gap-8 lg:grid-cols-[1.55fr_1fr] lg:items-center">
-                <motion.div variants={motionCfg.fadeUp} className="space-y-6">
-                  <div className="grid gap-7 sm:grid-cols-[1.1fr_0.62fr] sm:items-end">
-                    <div className="self-end lg:pb-3">
-                      <p className={cn("text-xs font-black uppercase tracking-[0.28em]", accentText)}>
-                        Who built this
-                      </p>
-                      <h2 className={cn("mt-4 max-w-3xl text-4xl font-extrabold leading-[1.02] tracking-tight sm:text-5xl lg:text-[4.55rem]", primaryText)}>
-                        Built by people who aced the 11+
-                        <span className="block text-slate-400">because the prep we wanted did not exist.</span>
-                      </h2>
-                    </div>
+              <div className="space-y-7">
+                <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start xl:grid-cols-[minmax(0,1fr)_390px]">
+                  <motion.div variants={motionCfg.fadeUp} className="lg:pt-3">
+                    <p className={cn("text-xs font-black uppercase tracking-[0.28em]", accentText)}>
+                      Who built this
+                    </p>
+                    <h2 className={cn("mt-4 max-w-4xl text-4xl font-extrabold leading-[1.02] tracking-tight sm:text-5xl lg:text-[4.3rem] xl:text-[4.65rem]", primaryText)}>
+                      Built by people who aced the 11+
+                      <span className="block text-slate-400">because the prep we wanted did not exist.</span>
+                    </h2>
+                  </motion.div>
 
-                    <div className="mx-auto w-full max-w-[330px] self-center sm:max-w-none">
+                  <motion.div variants={motionCfg.fadeUp} className="self-start">
+                    <div className="mx-auto w-full max-w-[330px] lg:max-w-none">
                       <div className={cn(
                         "relative overflow-hidden rounded-[24px] border p-1.5 shadow-[0_28px_80px_-46px_rgba(15,23,42,0.72)]",
                         isDark ? "border-white/10 bg-white/5" : "border-slate-200 bg-white"
@@ -1036,41 +1037,45 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                         </div>
                       </div>
                     </div>
-                  </div>
+                  </motion.div>
+                </div>
 
-                  <div className="space-y-3">
-                    <p className={cn("text-xs font-black uppercase tracking-[0.24em]", accentText)}>
-                      Gradlify:
-                    </p>
-                    <div className="grid gap-2.5 sm:grid-cols-3">
-                      {[
-                      ["01", "Saves you time"],
-                      ["02", "Gets you the same results I did"],
-                      ["03", "Saves you money"],
-                      ].map(([number, line]) => (
-                        <div
-                          key={line}
-                          className={cn(
-                            "group flex min-h-[88px] items-center gap-3 rounded-2xl border px-4 py-3.5 transition-colors",
-                            isDark
-                              ? "border-white/10 bg-white/[0.04]"
-                              : "border-slate-200/80 bg-white/90 shadow-[0_12px_34px_-30px_rgba(15,23,42,0.5)] hover:bg-white"
-                          )}
-                        >
-                          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-red-600 via-orange-500 to-amber-300 text-[11px] font-black text-white shadow-[0_10px_24px_-14px_rgba(249,115,22,0.9)]">
-                            {number}
-                          </span>
-                          <span className={cn("font-serif text-[1.28rem] font-black leading-tight tracking-tight sm:text-[1.35rem]", primaryText)}>
-                            {line}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
+                <motion.div variants={motionCfg.fadeUp} className="space-y-3">
+                  <p className={cn("text-xs font-black uppercase tracking-[0.24em]", accentText)}>
+                    Gradlify:
+                  </p>
+                  <div className="grid gap-2.5 sm:grid-cols-3">
+                    {[
+                    ["01", "Saves you time"],
+                    ["02", "Gets you the same results I did"],
+                    ["03", "Saves you money"],
+                    ].map(([number, line]) => (
+                      <div
+                        key={line}
+                        className={cn(
+                          "group flex min-h-[82px] items-center gap-3 rounded-2xl border px-4 py-3 transition-colors",
+                          isDark
+                            ? "border-white/10 bg-white/[0.04]"
+                            : "border-slate-200/80 bg-white/90 shadow-[0_12px_34px_-30px_rgba(15,23,42,0.5)] hover:bg-white"
+                        )}
+                      >
+                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-red-600 via-orange-500 to-amber-300 text-[11px] font-black text-white shadow-[0_10px_24px_-14px_rgba(249,115,22,0.9)]">
+                          {number}
+                        </span>
+                        <span className={cn("font-serif text-[1.2rem] font-black leading-tight tracking-tight sm:text-[1.35rem]", primaryText)}>
+                          {line}
+                        </span>
+                      </div>
+                    ))}
                   </div>
                 </motion.div>
 
-                <motion.div variants={motionCfg.fadeUp} className="space-y-5 self-center">
-                    <div className={cn("space-y-4 text-base font-medium leading-7 sm:text-lg", mutedText)}>
+                <motion.div variants={motionCfg.fadeUp} className="grid gap-4 lg:grid-cols-[1.05fr_0.95fr]">
+                    <div className={cn("rounded-2xl border p-5 sm:p-6", isDark ? "border-white/10 bg-white/[0.04]" : "border-slate-200/80 bg-slate-50/70")}>
+                      <p className={cn("text-xs font-black uppercase tracking-[0.2em]", accentText)}>
+                        Why I built it
+                      </p>
+                      <div className={cn("mt-4 space-y-3 text-sm font-medium leading-6 sm:text-base", mutedText)}>
                       <p>
                         I’m Niketh Putta. I go to QE Boys, and I also got into Wilson’s, Eton College, and every other school I applied for. At 14, I scored 1530 on the SAT.
                       </p>
@@ -1080,25 +1085,156 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                       <p>
                         I’m building Gradlify to be the prep I wish existed: clear practice, honest feedback, and a smarter path that saves you time, helps you aim for the same results, and does not waste your money on generic tutoring.
                       </p>
+                      </div>
                     </div>
 
-                    <div className="flex flex-wrap gap-2">
-                      {["QE Boys", "Wilson's", "Eton College", "1530 SAT at 14"].map((item) => (
-                        <span key={item} className={cn("rounded-full border px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.14em]", chipClass)}>
-                          {item}
-                        </span>
-                      ))}
-                    </div>
+                    <div className={cn("flex flex-col justify-between rounded-2xl border p-5 sm:p-6", isDark ? "border-white/10 bg-white/[0.04]" : "border-slate-200/80 bg-white")}>
+                      <div>
+                        <p className={cn("text-xs font-black uppercase tracking-[0.2em]", accentText)}>
+                          Proof points
+                        </p>
+                        <div className="mt-4 flex flex-wrap gap-2">
+                          {["QE Boys", "Wilson's", "Eton College", "1530 SAT at 14"].map((item) => (
+                            <span key={item} className={cn("rounded-full border px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.14em]", chipClass)}>
+                              {item}
+                            </span>
+                          ))}
+                        </div>
+                        <p className={cn("mt-5 max-w-md text-sm font-semibold leading-6", mutedText)}>
+                          The point is not more generic tutoring. It is a clearer path: practise the right things, see what is weak, then improve without wasting months.
+                        </p>
+                      </div>
 
-                    <button
-                      type="button"
-                      onClick={handleViewPlans}
-                      className={cn("inline-flex items-center gap-2 text-sm font-black", accentText)}
-                    >
-                      View plans <ArrowRight className="h-4 w-4" />
-                    </button>
+                      <div className={cn("mt-6 border-t pt-4", isDark ? "border-white/10" : "border-slate-200")}>
+                        <a
+                          href="https://wa.me/447442194299"
+                          target="_blank"
+                          rel="noreferrer"
+                          className={cn("block text-sm font-black leading-6 transition-colors", isDark ? "text-slate-200 hover:text-white" : "text-slate-700 hover:text-slate-950")}
+                        >
+                          Want to talk to me directly: +44 7442194299
+                        </a>
+
+                        <button
+                          type="button"
+                          onClick={handleViewPlans}
+                          className={cn("mt-3 inline-flex items-center gap-2 text-sm font-black", accentText)}
+                        >
+                          View plans <ArrowRight className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
                 </motion.div>
               </div>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* Comparison */}
+        <section id="compare" className={`relative py-10 sm:py-14 ${sectionSurface}`}>
+          {ambientEffectsEnabled && (
+            <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(720px_360px_at_14%_10%,rgba(249,115,22,0.10),transparent_64%)]" />
+          )}
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 relative">
+            <motion.div
+              initial="hidden"
+              whileInView="show"
+              viewport={motionCfg.viewport}
+              variants={motionCfg.stagger}
+              className="space-y-6"
+            >
+              <motion.div variants={motionCfg.fadeUp} className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+                <div>
+                  <p className={cn("text-xs font-black uppercase tracking-[0.24em]", accentText)}>
+                    Comparison
+                  </p>
+                  <h2 className={cn("mt-3 max-w-3xl text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl", primaryText)}>
+                    Gradlify gives you the outcome layer most prep misses.
+                  </h2>
+                </div>
+                <p className={cn("max-w-md text-sm font-semibold leading-6", mutedText)}>
+                  Other options can give you questions or tutoring. Gradlify is built around the full loop: practise, mock, diagnose, report, and improve without tutor-level spend.
+                </p>
+              </motion.div>
+
+              <motion.div
+                variants={motionCfg.fadeUp}
+                className={cn(
+                  "overflow-hidden rounded-[28px] border",
+                  isDark ? "border-white/10 bg-white/[0.04]" : "border-slate-200/80 bg-white shadow-[0_26px_80px_-58px_rgba(180,83,9,0.45)]"
+                )}
+              >
+                <div className="overflow-hidden">
+                  <table className="w-full table-fixed text-left">
+                    <thead>
+                      <tr className={cn("border-b", isDark ? "border-white/10 bg-white/[0.04]" : "border-slate-200 bg-slate-50")}>
+                        <th className={cn("w-[42%] px-3 py-4 text-[10px] font-black uppercase tracking-[0.12em] sm:w-[38%] sm:px-5 sm:py-5 sm:text-xs sm:tracking-[0.18em]", subtleText)}>
+                          Features
+                        </th>
+                        {["Gradlify", "Atom", "Explore", "Bond"].map((name) => (
+                          <th
+                            key={name}
+                            className={cn(
+                              "px-1 py-4 text-center text-[9px] font-black uppercase tracking-[0.08em] sm:px-3 sm:py-5 sm:text-xs sm:tracking-[0.16em]",
+                              name === "Gradlify"
+                                ? "bg-orange-50 text-orange-700"
+                                : subtleText
+                            )}
+                          >
+                            {name}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {[
+                        ["Full timed 11+ mocks", "yes", "yes", "partial", "yes"],
+                        ["Daily Maths + English practice", "yes", "yes", "partial", "yes"],
+                        ["Weak-topic diagnosis", "yes", "partial", "partial", "partial"],
+                        ["Parent-ready report", "yes", "partial", "partial", "partial"],
+                        ["Built from selective-school experience", "yes", "no", "no", "no"],
+                        ["Focused 11+ system under £20/mo", "yes", "no", "no", "yes"],
+                        ["Clear next-step plan after each mock", "yes", "partial", "partial", "no"],
+                      ].map(([feature, gradlify, atom, explore, bond]) => (
+                        <tr key={feature} className={cn("border-b last:border-b-0", isDark ? "border-white/10" : "border-slate-100")}>
+                          <td className={cn("px-3 py-3 text-xs font-black leading-snug sm:px-5 sm:py-4 sm:text-sm", primaryText)}>{feature}</td>
+                          {[gradlify, atom, explore, bond].map((value, index) => (
+                            <td
+                              key={`${feature}-${index}`}
+                              className={cn(
+                                "px-1 py-3 text-center sm:px-3 sm:py-4",
+                                index === 0 && !isDark ? "bg-orange-50/70" : ""
+                              )}
+                            >
+                              <span
+                                className={cn(
+                                  "inline-flex h-6 w-6 items-center justify-center rounded-full text-sm font-black sm:h-8 sm:w-8 sm:text-base",
+                                  value === "yes" && (index === 0
+                                    ? "bg-gradient-to-br from-red-600 via-orange-500 to-amber-300 text-white shadow-[0_10px_22px_-14px_rgba(249,115,22,0.9)]"
+                                    : "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200"),
+                                  value === "partial" && "bg-amber-50 text-amber-700 ring-1 ring-amber-200",
+                                  value === "no" && "bg-slate-100 text-slate-400 ring-1 ring-slate-200"
+                                )}
+                              >
+                                {value === "yes" ? "✓" : value === "partial" ? "–" : "×"}
+                              </span>
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </motion.div>
+
+              <motion.div variants={motionCfg.fadeUp} className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <p className={cn("text-xs font-semibold leading-5", subtleText)}>
+                  Pricing checked from public competitor pages. Last checked 6 June 2026.
+                </p>
+                <Link to="/compare" className={cn("inline-flex items-center gap-2 text-sm font-black", accentText)}>
+                  Open full comparison <ArrowRight className="h-4 w-4" />
+                </Link>
+              </motion.div>
             </motion.div>
           </div>
         </section>
@@ -1180,12 +1316,12 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                     <div className="mt-4 rounded-xl border border-white/25 bg-white/15 p-3 shadow-inner shadow-white/10">
                       <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
                         <div>
-                          <p className="text-[11px] font-black uppercase tracking-[0.18em] text-white/80">Start today and save</p>
-                          <p className="mt-1 text-sm font-semibold text-white">£20 every month compared with tomorrow’s price.</p>
+                          <p className="text-[11px] font-black uppercase tracking-[0.18em] text-white/80">Why parents switch</p>
+                          <p className="mt-1 text-sm font-semibold text-white">One tutor hour costs £40–60. Premium is £19.99 for the whole month.</p>
                         </div>
                         <div className="text-left sm:text-right">
-                          <div className="text-2xl font-black text-white">£240</div>
-                          <div className="text-[11px] font-bold uppercase tracking-[0.14em] text-white/75">saved yearly</div>
+                          <div className="text-2xl font-black text-white">£19.99</div>
+                          <div className="text-[11px] font-bold uppercase tracking-[0.14em] text-white/75">per month</div>
                         </div>
                       </div>
                     </div>
@@ -1356,6 +1492,9 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
               <Link to="/free-resources" className={`transition-colors ${isDark ? "hover:text-white" : "hover:text-slate-900"}`}>
                 Free Resources
               </Link>
+              <button type="button" onClick={() => scrollTo("compare")} className={`transition-colors ${isDark ? "hover:text-white" : "hover:text-slate-900"}`}>
+                Compare
+              </button>
               <button
                 type="button"
                 className={`transition-colors ${isDark ? "hover:text-white" : "hover:text-slate-900"}`}

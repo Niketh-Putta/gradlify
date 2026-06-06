@@ -1,0 +1,15 @@
+---
+description: Use Kimi WebBridge for all browser automation — never Cursor IDE browser
+alwaysApply: true
+---
+
+# Browser automation — Kimi only
+
+**Always use the Kimi browser extension (WebBridge) to control Niketh's default browser.**
+
+- Gmail, WhatsApp, Google Calendar, and any web UI: Kimi via `scripts/kimi_gmail_lib.py` / `scripts/kimi-gmail-send.py` and session `gradlify-gmail-partnerships` on `http://127.0.0.1:10086/command`.
+- Run Kimi scripts from the `scripts/` directory (or set PYTHONPATH) so imports resolve.
+
+**Never use the Cursor IDE browser MCP** (`cursor-ide-browser`: `browser_navigate`, `browser_click`, `browser_snapshot`, etc.). Do not open tabs in Cursor's embedded browser for any task.
+
+If Kimi is down, report it and ask Niketh to open Kimi/default browser — do not fall back to Cursor browser.

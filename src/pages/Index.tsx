@@ -36,6 +36,7 @@ const PayReturn = lazyWithRetry(() => import('@/pages/PayReturn'));
 const NotFound = lazyWithRetry(() => import('@/pages/NotFound'));
 const Tools = lazyWithRetry(() => import('@/pages/Tools'));
 const SubjectSelection = lazyWithRetry(() => import('@/pages/SubjectSelection'));
+const Compare = lazyWithRetry(() => import('@/pages/Compare'));
 
 import { User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -297,6 +298,7 @@ const Index = () => {
             <Route path="/11-plus" element={<Navigate to="/select-subject" replace />} />
             <Route path="/tools" element={<Tools />} />
             <Route path="/free-resources" element={<Tools />} />
+            <Route path="/compare" element={<Compare />} />
             <Route path="/sprint" element={<SprintHowItWorks />} />
             <Route path="/sprint-details" element={<SprintDetails />} />
             <Route path="/sprint-winning" element={<SprintWinning />} />
@@ -355,6 +357,7 @@ const Index = () => {
         <Route path="/11-plus" element={renderElevenPlusLanding()} />
         <Route path="/tools" element={<Tools />} />
         <Route path="/free-resources" element={<Tools />} />
+        <Route path="/compare" element={<Compare />} />
         <Route path="/reset-password" element={renderLanding(<UpdatePassword />)} />
         <Route path="/founders-circle" element={<FoundersCircle />} />
         <Route path="/sprint" element={<SprintHowItWorks />} />

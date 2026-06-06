@@ -35,7 +35,7 @@ const BOTH_SUBJECTS_LIVE_MOCK = {
   title: "Maths and English Mock",
 };
 
-const MIN_DISPLAYED_BOTH_SUBJECTS_SIGNUPS = 27;
+const MIN_DISPLAYED_BOTH_SUBJECTS_SIGNUPS = 48;
 const BOTH_SUBJECTS_SIGNUP_DISPLAY_OFFSET = 22;
 
 const getDisplayedBothSubjectsSignupCount = (count: number) =>
@@ -415,8 +415,25 @@ export default function LiveMockExams() {
           <p className="mt-1 max-w-2xl text-xs leading-5 text-slate-600 sm:text-sm">
             This Maths and English mock is on Sunday 14 June 2026. It is guided and built alongside real GL exam
             creators for top-school preparation. Paying Premium members get it included; free-trial users and free
-            users register with one upfront £9.99 payment.
+            users register with one upfront payment.
           </p>
+          {!hasPaidPremiumLiveMockAccess && (
+            <div className="mt-3 rounded-[14px] border border-orange-200 bg-[linear-gradient(135deg,#fff4e6_0%,#fff_70%)] px-3 py-2.5 shadow-[0_8px_18px_rgba(234,88,12,0.08)]">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-orange-600 px-2.5 py-1 text-[8px] font-black uppercase tracking-[0.14em] text-white">
+                <Clock3 className="h-3 w-3" />
+                Early booking discount
+              </span>
+              <p className="mt-2 text-xs leading-5 text-slate-700 sm:text-sm">
+                <span className="font-black text-orange-700">£9.99 until Sunday midnight</span> — after that the
+                price returns to <span className="font-semibold text-slate-500 line-through">£14.99</span>.
+              </p>
+              <p className="mt-1.5 text-xs leading-5 text-slate-600 sm:text-sm">
+                Don&apos;t miss out — very few mocks backed by ex-GL examiners are released every year. This is
+                probably the only one your students will have access to before their real exam. Check how prepared
+                your child really is&hellip;
+              </p>
+            </div>
+          )}
           <div className="mt-3 inline-flex max-w-full items-center gap-2 rounded-[14px] border border-orange-100 bg-white/80 px-3 py-2 text-xs font-semibold text-slate-700 shadow-[0_8px_18px_rgba(234,88,12,0.07)] sm:text-sm">
             <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-orange-50 text-orange-700">
               <UsersRound className="h-4 w-4" />
@@ -446,11 +463,22 @@ export default function LiveMockExams() {
           <div className="flex items-center justify-between gap-3">
             <div>
               <div className="text-[8px] font-black uppercase tracking-[0.14em] text-slate-400">
-                {hasPaidPremiumLiveMockAccess ? "Paid Premium registration" : "Upfront registration"}
+                {hasPaidPremiumLiveMockAccess ? "Paid Premium registration" : "Early booking price"}
               </div>
-              <div className="mt-1 text-2xl font-bold tracking-tight text-slate-950">
-                {hasPaidPremiumLiveMockAccess ? "Included" : "£9.99"}
+              <div className="mt-1 flex items-baseline gap-2">
+                <div className="text-2xl font-bold tracking-tight text-slate-950">
+                  {hasPaidPremiumLiveMockAccess ? "Included" : "£9.99"}
+                </div>
+                {!hasPaidPremiumLiveMockAccess && (
+                  <span className="text-sm font-semibold text-slate-400 line-through">£14.99</span>
+                )}
               </div>
+              {!hasPaidPremiumLiveMockAccess && (
+                <div className="mt-1 inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.08em] text-orange-700">
+                  <Clock3 className="h-3 w-3" />
+                  Until Sunday midnight
+                </div>
+              )}
             </div>
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-amber-50 text-amber-700">
               <CreditCard className="h-5 w-5" />
