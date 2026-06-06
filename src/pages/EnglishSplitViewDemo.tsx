@@ -9,6 +9,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { usePremium } from '@/hooks/usePremium';
 import { PremiumPaywall } from '@/components/PremiumPaywall';
 import { useAppContext } from '@/hooks/useAppContext';
+import { startPremiumCheckout } from '@/lib/checkout';
+import { toast } from 'sonner';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -862,6 +864,7 @@ export function EnglishSplitViewDemo() {
   const [isFinished, setIsFinished] = useState<boolean>(false);
   const [isReviewMode, setIsReviewMode] = useState<boolean>(false);
   const [showPaywall, setShowPaywall] = useState<boolean>(false);
+  const [isOpeningCheckout, setIsOpeningCheckout] = useState<boolean>(false);
   const [endMockConfirmOpen, setEndMockConfirmOpen] = useState(false);
   const [liveMockSubmittedBlocked, setLiveMockSubmittedBlocked] = useState(false);
   const [liveMockGateResolved, setLiveMockGateResolved] = useState(() => !isLiveMock);
@@ -888,6 +891,23 @@ export function EnglishSplitViewDemo() {
   useEffect(() => {
     localStorage.setItem(highlightsStorageKey, JSON.stringify(highlights));
   }, [highlights, highlightsStorageKey]);
+
+  const openFullAccessCheckout = useCallback(async () => {
+    if (isOpeningCheckout) return;
+    setIsOpeningCheckout(true);
+    try {
+      await startPremiumCheckout('monthly', 'eleven_plus');
+    } catch (error) {
+      console.error('Failed to open full access checkout:', error);
+      const message = error instanceof Error ? error.message : 'Could not open checkout. Please try again.';
+      toast.error(message);
+      if (message.toLowerCase().includes('log in')) {
+        navigate('/auth');
+      }
+    } finally {
+      setIsOpeningCheckout(false);
+    }
+  }, [isOpeningCheckout, navigate]);
 
 
   
@@ -1679,9 +1699,18 @@ export function EnglishSplitViewDemo() {
                   You are missing <strong className="font-bold text-amber-600 dark:text-amber-400">over 1300+ English questions</strong> encompassing isolated SPaG passages, Cloze structures, and rigorous full-length exams.
                 </div>
                 
-                <Button onClick={() => setShowPaywall(true)} className="w-full bg-gradient-to-b from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-amber-950 font-bold shadow-xl shadow-amber-500/25 py-6 rounded-xl text-lg transition-all duration-300 hover:scale-[1.02] border border-amber-400/50">
-                  <Lock className="w-5 h-5 mr-3" />
-                  Unlock Full Access
+                <Button
+                  type="button"
+                  onClick={() => void openFullAccessCheckout()}
+                  disabled={isOpeningCheckout}
+                  className="w-full bg-gradient-to-b from-amber-400 to-amber-500 hover:from-amber-500 hover:to-amber-600 text-amber-950 font-bold shadow-xl shadow-amber-500/25 py-6 rounded-xl text-lg transition-all duration-300 hover:scale-[1.02] border border-amber-400/50 disabled:opacity-75"
+                >
+                  {isOpeningCheckout ? (
+                    <Loader2 className="w-5 h-5 mr-3 animate-spin" />
+                  ) : (
+                    <Lock className="w-5 h-5 mr-3" />
+                  )}
+                  {isOpeningCheckout ? "Opening checkout..." : "Unlock Full Access"}
                 </Button>
               </div>
               
