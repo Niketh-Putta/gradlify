@@ -105,7 +105,7 @@ async function main() {
   const mcpOAuth = await checkMcpEndpoint(projectRef);
   console.log(
     mcpOAuth.status === 401
-      ? "MCP (OAuth): ready — authorize in Cursor Settings → Tools & MCP → supabase"
+      ? "MCP (OAuth): ready - authorize in Cursor Settings → Tools & MCP → supabase"
       : `MCP (OAuth): HTTP ${mcpOAuth.status}`,
   );
 
@@ -119,7 +119,7 @@ async function main() {
       if (link.status === 0) console.log("Supabase CLI: project linked");
       else console.log("Supabase CLI link:", (link.stderr || link.stdout || "").trim());
     } else {
-      console.log("Supabase CLI login failed — use Cursor OAuth MCP or run with a fresh --token");
+      console.log("Supabase CLI login failed - use Cursor OAuth MCP or run with a fresh --token");
     }
   }
 

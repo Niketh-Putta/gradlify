@@ -132,7 +132,7 @@ latest_history AS (
     rh.created_at
   FROM public.readiness_history rh
   JOIN user_tracks ut ON ut.user_id = rh.user_id
-  -- TRACK ISOLATION — Prevents GCSE activity affecting 11+ readiness
+  -- TRACK ISOLATION - Prevents GCSE activity affecting 11+ readiness
   WHERE rh.track = ut.track
   ORDER BY rh.user_id, rh.track, rh.topic, rh.created_at DESC
 ),
@@ -154,7 +154,7 @@ practice_rollup AS (
     MAX(pr.created_at) AS latest_event
   FROM public.practice_results pr
   JOIN user_tracks ut ON ut.user_id = pr.user_id
-  -- TRACK ISOLATION — Prevents GCSE activity affecting 11+ readiness
+  -- TRACK ISOLATION - Prevents GCSE activity affecting 11+ readiness
   WHERE pr.track = ut.track
     AND COALESCE(pr.attempts, 0) > 0
   GROUP BY pr.user_id, ut.track, 3
@@ -178,7 +178,7 @@ mock_rollup AS (
   FROM public.mock_attempts ma
   JOIN public.mock_questions mq ON mq.attempt_id = ma.id
   JOIN user_tracks ut ON ut.user_id = ma.user_id
-  -- TRACK ISOLATION — Prevents GCSE activity affecting 11+ readiness
+  -- TRACK ISOLATION - Prevents GCSE activity affecting 11+ readiness
   WHERE ma.track = ut.track
     AND ma.status IN ('completed', 'submitted', 'scored')
   GROUP BY ma.user_id, ut.track, 3
@@ -244,7 +244,7 @@ SELECT DISTINCT ON (rh.user_id, rh.topic)
   rh.track
 FROM public.readiness_history rh
 JOIN current_tracks ct ON ct.user_id = rh.user_id
--- TRACK ISOLATION — Prevents GCSE activity affecting 11+ readiness
+-- TRACK ISOLATION - Prevents GCSE activity affecting 11+ readiness
 WHERE rh.track = ct.track
 ORDER BY rh.user_id, rh.topic, rh.created_at DESC;
 
@@ -291,7 +291,7 @@ BEGIN
       vtr.readiness,
       vtr.created_at AS last_updated
     FROM public.v_topic_readiness vtr
-    -- TRACK ISOLATION — Prevents GCSE activity affecting 11+ readiness
+    -- TRACK ISOLATION - Prevents GCSE activity affecting 11+ readiness
     WHERE vtr.user_id = v_uid
       AND vtr.track = v_track
   ),

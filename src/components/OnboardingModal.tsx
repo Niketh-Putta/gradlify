@@ -320,7 +320,7 @@ function PlanCheckoutButton({
                 <span className="text-xs font-semibold text-red-600">Limited time offer just for you.</span>
               </>
             ) : (
-              <span className="text-xs text-muted-foreground">Best value — £{ULTRA_PRICING.annual}/year</span>
+              <span className="text-xs text-muted-foreground">Best value - £{ULTRA_PRICING.annual}/year</span>
             )}
           </div>
         </DropdownMenuItem>

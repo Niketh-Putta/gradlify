@@ -16,8 +16,8 @@ ALTER TABLE public.sprint_windows ALTER COLUMN updated_at SET DEFAULT now();
 GRANT SELECT ON public.sprint_windows TO authenticated, anon;
 INSERT INTO public.sprint_windows (id, start_at, end_at, is_active, description, updated_at)
 VALUES
-  ('founders-202601', '2026-01-07T00:00:00Z', '2026-01-16T23:59:59Z', true, 'Founders Sprint — Jan 2026', now()),
-  ('founders-202602', '2026-02-01T00:00:00Z', '2026-02-10T23:59:59Z', false, 'Founders Sprint — Feb 2026', now())
+  ('founders-202601', '2026-01-07T00:00:00Z', '2026-01-16T23:59:59Z', true, 'Founders Sprint - Jan 2026', now()),
+  ('founders-202602', '2026-02-01T00:00:00Z', '2026-02-10T23:59:59Z', false, 'Founders Sprint - Feb 2026', now())
 ON CONFLICT (id) DO UPDATE
 SET
   start_at = EXCLUDED.start_at,

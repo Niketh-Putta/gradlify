@@ -180,7 +180,7 @@ def should_skip_row(row: dict, tracker: List[dict]) -> Optional[str]:
 
 def validate_draft(body: str) -> List[str]:
     issues = []
-    if "—" in body or "–" in body:
+    if "-" in body or "–" in body:
         issues.append("contains em dash")
     banned = [
         "i hope this",
@@ -254,7 +254,7 @@ BUSINESS CONTEXT:
 
 OUTPUT RULES:
 - British English. Short, human, direct. Like a founder texting professionally.
-- NO em dashes (—). Use commas or full stops.
+- NO em dashes (-). Use commas or full stops.
 - Default for warm partners: book a 10-min call with TWO specific time slots this week.
 - Sign off exactly:
 Best,
@@ -408,7 +408,7 @@ def main() -> int:
         if out.get("action") == "sent":
             print("SENT OK")
         elif out.get("action") == "send_failed":
-            print("SEND FAILED — check Gmail manually")
+            print("SEND FAILED - check Gmail manually")
         processed += 1
         time.sleep(2)
 

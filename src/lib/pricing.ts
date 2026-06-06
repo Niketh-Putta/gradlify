@@ -2,7 +2,7 @@
 
 export const PREMIUM_PRICING = {
   monthly: 19.99,
-  /** Strikethrough anchor in-app — keep modest; never £40 (scares parents). */
+  /** Strikethrough anchor in-app - keep modest; never £40 (scares parents). */
   monthlyOriginal: 24.99,
   annual: 199.99,
   annualOriginal: 249.99,

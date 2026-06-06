@@ -7,7 +7,7 @@ DELETE FROM public.exam_questions
 WHERE subtopic IN ('geometry|shapes', 'number|unit_conversions');
 
 -- -----------------------------
--- geometry|shapes (2D and 3D shapes) — 8 varied questions
+-- geometry|shapes (2D and 3D shapes) - 8 varied questions
 -- -----------------------------
 
 INSERT INTO public.exam_questions (
@@ -252,7 +252,7 @@ Final answer: 6',
 );
 
 -- -----------------------------
--- number|unit_conversions — 8 varied questions (Higher includes multi-step and speed conversions)
+-- number|unit_conversions - 8 varied questions (Higher includes multi-step and speed conversions)
 -- -----------------------------
 
 INSERT INTO public.exam_questions (

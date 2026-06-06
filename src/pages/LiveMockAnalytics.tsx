@@ -53,14 +53,14 @@ import {
 const POLL_MS = 15_000;
 
 function formatDuration(seconds: number | null | undefined): string {
-  if (seconds == null || Number.isNaN(seconds) || seconds < 0) return "—";
+  if (seconds == null || Number.isNaN(seconds) || seconds < 0) return "-";
   const m = Math.floor(seconds / 60);
   const s = Math.floor(seconds % 60);
   return `${m}m ${s.toString().padStart(2, "0")}s`;
 }
 
 function formatSubmittedAt(iso: string | null | undefined): string {
-  if (!iso) return "—";
+  if (!iso) return "-";
   try {
     return new Date(iso).toLocaleString(undefined, {
       dateStyle: "medium",
@@ -269,22 +269,22 @@ export default function LiveMockAnalytics() {
   const placementDisplay = useMemo(() => {
     if (!scoreRank) {
       return {
-        value: "—",
+        value: "-",
         hint: "Try Refresh now. If this stays empty, ask your team to apply the latest Supabase migrations.",
       };
     }
     const total = scoreRank.total;
     if (total === 0) {
-      return { value: "—", hint: "No one has submitted this mock yet." };
+      return { value: "-", hint: "No one has submitted this mock yet." };
     }
     if (!scoreRank.has_submitted_rank) {
       return {
-        value: "—",
+        value: "-",
         hint: "Submit your completed mock to see your rank among everyone who finished.",
       };
     }
     if (scoreRank.rank == null) {
-      return { value: "—", hint: "Unable to load placement." };
+      return { value: "-", hint: "Unable to load placement." };
     }
     return {
       value: `${scoreRank.rank} / ${total}`,
@@ -422,7 +422,7 @@ export default function LiveMockAnalytics() {
                 <div className="mt-3 text-[9px] font-black uppercase tracking-[0.13em] text-slate-400">Your score</div>
                 <div className="mt-0.5 flex flex-wrap items-baseline gap-x-2 gap-y-1 text-2xl font-bold tracking-tight text-slate-950">
                   <span>
-                    {correct}/{qc || "—"}
+                    {correct}/{qc || "-"}
                   </span>
                   {pct != null ? (
                     <span className="text-lg font-semibold text-blue-700">({pct}%)</span>
@@ -455,7 +455,7 @@ export default function LiveMockAnalytics() {
                   {formatDuration(summary.duration_seconds)}
                 </div>
                 <div className="mt-0.5 text-xs text-slate-500">
-                  Answered {summary.answered_count ?? "—"} / {qc || "—"}
+                  Answered {summary.answered_count ?? "-"} / {qc || "-"}
                 </div>
               </div>
 
@@ -490,13 +490,13 @@ export default function LiveMockAnalytics() {
                   <div className="min-w-0 rounded-lg border border-slate-100 bg-white px-3 py-3 shadow-sm">
                     <div className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Submissions</div>
                     <div className="mt-1 text-2xl font-black text-slate-950">
-                      {cohort?.submitted_count ?? "—"}
+                      {cohort?.submitted_count ?? "-"}
                     </div>
                   </div>
                   <div className="min-w-0 rounded-lg border border-slate-100 bg-white px-3 py-3 shadow-sm">
                     <div className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Cohort mean %</div>
                     <div className="mt-1 text-2xl font-black text-slate-950">
-                      {cohort?.mean_score_percent != null ? `${cohort.mean_score_percent}%` : "—"}
+                      {cohort?.mean_score_percent != null ? `${cohort.mean_score_percent}%` : "-"}
                     </div>
                   </div>
                   <div className="min-w-0 rounded-lg border border-amber-100 bg-gradient-to-br from-amber-50/90 to-white px-3 py-3 shadow-sm">
@@ -585,9 +585,9 @@ export default function LiveMockAnalytics() {
                         : (
                             row.selected_option_label?.trim() ||
                             row.selected_option?.trim() ||
-                            "—"
+                            "-"
                           );
-                      const correctDisplay = row.correct_option_label?.trim() || "—";
+                      const correctDisplay = row.correct_option_label?.trim() || "-";
                       const rowAccent =
                         row.is_correct === false
                           ? "border-rose-200/80 bg-white hover:bg-rose-50/50"
@@ -604,18 +604,18 @@ export default function LiveMockAnalytics() {
                         >
                           <div className="flex items-start justify-between gap-2">
                             <span className="font-mono text-sm font-semibold text-slate-900">
-                              Q{row.question_number ?? "—"}
+                              Q{row.question_number ?? "-"}
                             </span>
                             <ChevronRight className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" aria-hidden />
                           </div>
                           <div className="mt-2 space-y-1.5 break-words text-[13px] leading-snug">
                             <p className="text-slate-600">
                               <span className="font-semibold text-slate-500">Section:</span>{" "}
-                              {(row.section_key || "—").replace(/_/g, " ")}
+                              {(row.section_key || "-").replace(/_/g, " ")}
                             </p>
                             <p className="text-slate-600">
                               <span className="font-semibold text-slate-500">Type:</span>{" "}
-                              {row.question_type || "—"}
+                              {row.question_type || "-"}
                             </p>
                             <p className={unanswered ? "text-slate-500" : "text-rose-800"}>
                               <span className="font-semibold text-slate-500">Your answer:</span>{" "}
@@ -653,10 +653,10 @@ export default function LiveMockAnalytics() {
                             : (
                                 row.selected_option_label?.trim() ||
                                 row.selected_option?.trim() ||
-                                "—"
+                                "-"
                               );
                           const correctDisplay =
-                            row.correct_option_label?.trim() || "—";
+                            row.correct_option_label?.trim() || "-";
                           return (
                             <tr
                               key={row.id}
@@ -676,13 +676,13 @@ export default function LiveMockAnalytics() {
                               }}
                             >
                               <td className="whitespace-nowrap px-2 py-2 font-mono font-semibold text-slate-800">
-                                {row.question_number ?? "—"}
+                                {row.question_number ?? "-"}
                               </td>
                               <td className="max-w-[140px] break-words px-2 py-2 text-slate-700">
-                                {(row.section_key || "—").replace(/_/g, " ")}
+                                {(row.section_key || "-").replace(/_/g, " ")}
                               </td>
                               <td className="max-w-[120px] break-words px-2 py-2 text-slate-600">
-                                {row.question_type || "—"}
+                                {row.question_type || "-"}
                               </td>
                               <td className="max-w-[200px] break-words px-2 py-2 font-medium">
                                 {unanswered ? (
@@ -718,7 +718,7 @@ export default function LiveMockAnalytics() {
                   <>
                     <DialogHeader className="border-b border-slate-100 px-4 pb-3 pt-4 text-left sm:px-5">
                       <DialogTitle className="pr-8 text-base font-bold text-slate-950">
-                        Question {reviewDetail.question_number ?? "—"}
+                        Question {reviewDetail.question_number ?? "-"}
                         <span className="mt-1 block text-xs font-normal capitalize text-slate-500">
                           {(reviewDetail.section_key || "").replace(/_/g, " ") || "Section"}
                           {reviewDetail.question_type ? ` · ${reviewDetail.question_type}` : ""}
@@ -762,7 +762,7 @@ export default function LiveMockAnalytics() {
                       <div>
                         <p className="text-[10px] font-black uppercase tracking-wide text-slate-400">Question</p>
                         <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-slate-950">
-                          {reviewStem || "—"}
+                          {reviewStem || "-"}
                         </p>
                       </div>
 

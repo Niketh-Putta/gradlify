@@ -1,9 +1,9 @@
 ---
-description: Use Kimi WebBridge for all browser automation — never Cursor IDE browser
+description: Use Kimi WebBridge for all browser automation - never Cursor IDE browser
 alwaysApply: true
 ---
 
-# Browser automation — Kimi only
+# Browser automation - Kimi only
 
 **Always use the Kimi browser extension (WebBridge) to control Niketh's default browser.**
 
@@ -12,4 +12,4 @@ alwaysApply: true
 
 **Never use the Cursor IDE browser MCP** (`cursor-ide-browser`: `browser_navigate`, `browser_click`, `browser_snapshot`, etc.). Do not open tabs in Cursor's embedded browser for any task.
 
-If Kimi is down, report it and ask Niketh to open Kimi/default browser — do not fall back to Cursor browser.
+If Kimi is down, report it and ask Niketh to open Kimi/default browser - do not fall back to Cursor browser.

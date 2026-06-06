@@ -3,7 +3,7 @@ export const formatExplanation = (explanation?: string | null): string => {
   let clean = String(explanation);
 
   // No em/en dashes in explanations (prefer commas)
-  clean = clean.replace(/\u2014/g, ", ").replace(/\u2013/g, ", ").replace(/—/g, ", ");
+  clean = clean.replace(/\u2014/g, ", ").replace(/\u2013/g, ", ").replace(/-/g, ", ");
   clean = clean.replace(/,\s{2,}/g, ", ");
 
   // Remove any metadata square bracket content like [VISUAL: Unit Pricing] or [Ratios]

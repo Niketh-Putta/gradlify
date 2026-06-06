@@ -29,7 +29,7 @@ LOG_PATH = ROOT / "outreach" / "partner-reply-log.jsonl"
 FEED_PATH = ROOT / "progress" / "live-feed.js"
 AUTO_DIR = ROOT / "outreach" / "partner-auto"
 
-MEET_PLACEHOLDER = "[ADD MEET LINK — confirm in Google Calendar, then paste]"
+MEET_PLACEHOLDER = "[ADD MEET LINK - confirm in Google Calendar, then paste]"
 
 CLASSIFIERS = [
     ("auto_reply", re.compile(r"thank you for contacting.*support|we've included answers to common questions|auto.?reply|out of office", re.I)),
@@ -121,7 +121,7 @@ def load_template(filename: str, **kwargs: str) -> str:
 
 
 def earliest_slots() -> Tuple[str, str]:
-    """Next two call slots within ~72h — book ASAP, not next week."""
+    """Next two call slots within ~72h - book ASAP, not next week."""
     now = datetime.now()
     candidates: List[str] = []
     for day_offset in range(0, 5):
@@ -169,7 +169,7 @@ def build_reply(kind: str, partner: dict, text: str, partner_email: str) -> Opti
     if kind == "deck_request":
         return (
             f"Hi {name},\n\n"
-            f"Happy to share the partner overview — easiest if we do a quick 10-min call so I can walk you through it.\n\n"
+            f"Happy to share the partner overview - easiest if we do a quick 10-min call so I can walk you through it.\n\n"
             f"Does {slot_a} or {slot_b} work? I'll send a Meet link.\n\n"
             f"Best,\nNiketh"
         )
@@ -289,7 +289,7 @@ def scan_and_process(dry_run: bool = False) -> dict:
             should_act = not already or kind != state["processed"].get(fp, {}).get("kind")
 
         if kind == "delayed" and "not yet" in inbound.lower():
-            update["note"] = "Partner asked for more time — slots re-offered once only"
+            update["note"] = "Partner asked for more time - slots re-offered once only"
 
         if should_act and not dry_run:
             body = build_reply(kind, partner, inbound, partner_email or "")
@@ -343,7 +343,7 @@ def build_live_feed(updates: List[dict], actions: List[dict]) -> dict:
         {
             "n": 1,
             "title": "Post WA Day 1 in your 600-member group",
-            "why": "Warmest pipe — no partner reply needed",
+            "why": "Warmest pipe - no partner reply needed",
             "how": [
                 "Open file: outreach/wa/day1-relatability.txt",
                 "Copy all text → paste in WhatsApp group (no link, no price)",
@@ -356,7 +356,7 @@ def build_live_feed(updates: List[dict], actions: List[dict]) -> dict:
         {
             "n": 2,
             "title": "Export mock poster PNGs",
-            "why": "Parents share images — needed before 14 Jun push",
+            "why": "Parents share images - needed before 14 Jun push",
             "how": [
                 "Open outreach/assets/14-june-mock-poster.html in your default browser",
                 "Screenshot left panel → save as outreach/assets/14-june-mock-poster.png",
@@ -369,7 +369,7 @@ def build_live_feed(updates: List[dict], actions: List[dict]) -> dict:
         {
             "n": 3,
             "title": "When a partner confirms a slot → Calendar + Meet",
-            "why": "0/5 calls booked — this unlocks b2-6 and ?ref= links",
+            "why": "0/5 calls booked - this unlocks b2-6 and ?ref= links",
             "how": [
                 "Gmail: search from:(elevenplussuccess OR 11plushub OR mocktestmasters OR frenchiemummy)",
                 "Google Calendar: find matching tentative hold → Confirm → Add Google Meet",
@@ -387,10 +387,10 @@ def build_live_feed(updates: List[dict], actions: List[dict]) -> dict:
     if cecile and cecile.get("kind") == "login_issue":
         next_three[2] =         {
             "n": 3,
-            "title": "Cecile login fix — book call ASAP",
-            "why": "She replied: paywall + kicked out — fix on call today/tomorrow",
+            "title": "Cecile login fix - book call ASAP",
+            "why": "She replied: paywall + kicked out - fix on call today/tomorrow",
             "how": [
-                "Gmail: '11+ paid/affiliate collab?' — if she confirms ANY time, book immediately",
+                "Gmail: '11+ paid/affiliate collab?' - if she confirms ANY time, book immediately",
                 "Google Calendar: create event now + Meet link → reply within minutes",
                 "On call: fix login live, demo mock, send ?ref=FRENCHIEMUMMY within 1h",
             ],
@@ -425,7 +425,7 @@ def build_live_feed(updates: List[dict], actions: List[dict]) -> dict:
             "org": "Cecile · Frenchie Mummy",
             "kind": "login_issue",
             "kindLabel": "Login / access issue",
-            "preview": "Paywall + kicked out — login-fix email sent with Thu 12 / Fri 13 call slots.",
+            "preview": "Paywall + kicked out - login-fix email sent with Thu 12 / Fri 13 call slots.",
             "action": "auto_reply_sent",
             "note": "Awaiting her time confirm",
             "subject": "11+ paid/affiliate collab?",
@@ -434,7 +434,7 @@ def build_live_feed(updates: List[dict], actions: List[dict]) -> dict:
             "org": "Chris · Eleven Plus Success",
             "kind": "delayed",
             "kindLabel": "Asked for more time",
-            "preview": "Not yet — will look next week. Chased 7 Jun (email + WA).",
+            "preview": "Not yet - will look next week. Chased 7 Jun (email + WA).",
             "action": "already_handled",
             "note": "Thu 12 / Fri 13 slots offered",
             "subject": "Re: 11+ affiliate partnership?",
@@ -462,7 +462,7 @@ def build_live_feed(updates: List[dict], actions: List[dict]) -> dict:
 
 def write_live_feed(feed: dict) -> None:
     FEED_PATH.write_text(
-        "/** Auto-generated by scripts/partner-reply-agent.py — do not edit */\n"
+        "/** Auto-generated by scripts/partner-reply-agent.py - do not edit */\n"
         f"window.GRADLIFY_LIVE_FEED = {json.dumps(feed, indent=2)};\n"
     )
 

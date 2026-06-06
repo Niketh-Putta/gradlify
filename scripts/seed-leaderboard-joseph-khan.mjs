@@ -5,8 +5,8 @@
  * Requires SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in .env or .env.functions.
  *
  * Optional env:
- *   JOSEPH_KHAN_EMAIL  — auth email (default: joseph.khan.<random>@gmail.com)
- *   JOSEPH_KHAN_PASSWORD — login password (default: random, printed once)
+ *   JOSEPH_KHAN_EMAIL  - auth email (default: joseph.khan.<random>@gmail.com)
+ *   JOSEPH_KHAN_PASSWORD - login password (default: random, printed once)
  */
 
 import fs from "node:fs";
@@ -48,7 +48,7 @@ const password =
 const displayName = "joseph_khan";
 const targetScore = 41;
 const track = "11plus";
-/** After sprint reset — must be >= leaderboard_config.effective_start */
+/** After sprint reset - must be >= leaderboard_config.effective_start */
 const mockCreatedAt = "2026-05-15T12:00:00.000Z";
 
 const adminHeaders = {

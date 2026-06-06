@@ -19,14 +19,14 @@
 
 | Do | Don't |
 |----|--------|
-| `Hi Chris,` | `Hi Chris —` (no em dash) |
+| `Hi Chris,` | `Hi Chris -` (no em dash) |
 | `Best,` / `Thanks,` then `Niketh` | `Kind regards`, `Best regards`, `Warmly` |
 | `gradlify.com` on last line | Long signature blocks |
 | `10-min call` or `quick call` | `discovery call`, `sync`, `connect` |
 
 ## Banned (AI smell)
 
-- Em dashes (—)
+- Em dashes (-)
 - "I hope this email finds you well"
 - "Just circling back" / "just checking in"
 - "I'd be happy to" / "I'd love to"
@@ -70,7 +70,7 @@ Tweak for audience. Never say "revolutionary" or "cutting-edge".
 ### Bad (AI)
 
 ```
-Hi David —
+Hi David -
 
 I hope you're doing well! I wanted to circle back regarding our exciting partnership opportunity. I'd be happy to leverage Gradlify's comprehensive platform to streamline outcomes for your community.
 

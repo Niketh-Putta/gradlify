@@ -40,9 +40,9 @@ Honest Mum, Baby on Board, Tutor's 11 Plus, Willow, Slough, Harrow, etc. Codes i
 
 | They said… | Intent |
 |------------|--------|
-| Pricing question | `parent_pricing` — £20/mo, £200/yr vs tuition cost, free start |
-| Mock / exam help | `parent_help` — specific next step, link to practice |
-| Complaint / bug | `fix_fast` — acknowledge, fix today, no corporate apology essay |
+| Pricing question | `parent_pricing` - £20/mo, £200/yr vs tuition cost, free start |
+| Mock / exam help | `parent_help` - specific next step, link to practice |
+| Complaint / bug | `fix_fast` - acknowledge, fix today, no corporate apology essay |
 
 ## Sender accounts
 

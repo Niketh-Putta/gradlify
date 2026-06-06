@@ -426,7 +426,7 @@ const postWithRetry = async (body, { label, maxAttempts = 10, baseDelayMs = 1200
       const msg = String(err?.message || err);
       if (!isTransientErrorMessage(msg)) throw err;
       const delay = Math.min(15000, baseDelayMs * Math.pow(1.4, attempt - 1)) + Math.floor(Math.random() * 400);
-      console.log(`  transient${label ? ` (${label})` : ''}: ${msg} — retry ${attempt}/${maxAttempts} in ${delay}ms`);
+      console.log(`  transient${label ? ` (${label})` : ''}: ${msg} - retry ${attempt}/${maxAttempts} in ${delay}ms`);
       await sleep(delay);
     }
   }
@@ -784,7 +784,7 @@ const pruneSubtopicToTarget = async ({ topicKey, subtopicId, subtopicName, targe
   const currentTotal = rows.length;
 
   if (currentTotal <= targetTotal) {
-    console.log(`- prune: already at ${currentTotal}/${targetTotal} — skip`);
+    console.log(`- prune: already at ${currentTotal}/${targetTotal} - skip`);
     return;
   }
 
@@ -883,7 +883,7 @@ const runForSubtopic = async ({ topicKey, subtopicId, subtopicName, equalizeTarg
     const neededRaw = Math.max(0, targetTotal - existingTotal);
     const needed = CHUNK_PER_SUBTOPIC > 0 ? Math.min(neededRaw, CHUNK_PER_SUBTOPIC) : neededRaw;
     if (needed === 0) {
-      console.log(`- equalize: already at ${existingTotal}/${targetTotal} — skip`);
+      console.log(`- equalize: already at ${existingTotal}/${targetTotal} - skip`);
       return;
     }
 
@@ -1083,7 +1083,7 @@ const runForSubtopic = async ({ topicKey, subtopicId, subtopicName, equalizeTarg
       });
 
       if (MODE !== 'add' && baselineExisting >= phase.count) {
-        console.log(`- ${phase.label}: already has ${baselineExisting} (target ${phase.count}) — skip`);
+        console.log(`- ${phase.label}: already has ${baselineExisting} (target ${phase.count}) - skip`);
         continue;
       }
 
@@ -1166,7 +1166,7 @@ const runForSubtopic = async ({ topicKey, subtopicId, subtopicName, equalizeTarg
               const msg = String(e?.message || e);
               if (!isTransientErrorMessage(msg)) throw e;
               const delay = Math.min(12000, 900 * Math.pow(1.4, a - 1)) + Math.floor(Math.random() * 300);
-              console.log(`  transient (insert(rest)): ${msg} — retry ${a}/10 in ${delay}ms`);
+              console.log(`  transient (insert(rest)): ${msg} - retry ${a}/10 in ${delay}ms`);
               await sleep(delay);
             }
           }

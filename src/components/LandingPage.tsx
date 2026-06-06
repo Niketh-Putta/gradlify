@@ -537,7 +537,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                 <span className="text-xs font-black sm:text-sm">Less than one tutor hour</span>
                 <span className="hidden h-4 w-px bg-white/20 sm:block" aria-hidden="true" />
                 <span className="text-[11px] font-semibold text-white/75 sm:text-xs">
-                  <span className="text-amber-100">£19.99/mo</span> for unlimited mocks — tutors charge <span className="text-white">£40–60/hr</span>
+                  <span className="text-amber-100">£19.99/mo</span> for unlimited mocks - tutors charge <span className="text-white">£40–60/hr</span>
                 </span>
               </div>
               <div className="flex flex-wrap items-center gap-2">
@@ -609,7 +609,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
 
       {partnerReferralLabel && (
         <div className="fixed top-[3.25rem] sm:top-[4.5rem] left-0 right-0 z-40 border-b border-emerald-200/80 bg-emerald-50/95 px-3 py-2 text-center text-xs sm:text-sm text-emerald-900">
-          Recommended by <span className="font-semibold">{partnerReferralLabel}</span> — start with free practice and mocks
+          Recommended by <span className="font-semibold">{partnerReferralLabel}</span> - start with free practice and mocks
         </div>
       )}
 

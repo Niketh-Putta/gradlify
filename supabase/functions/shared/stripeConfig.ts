@@ -74,7 +74,7 @@ export interface StripePriceIds {
   ultra_annual?: string;
 }
 
-// Price IDs come from Supabase/Deno env (STRIPE_PRICE_*). Amounts live in Stripe — create new Prices to change billing.
+// Price IDs come from Supabase/Deno env (STRIPE_PRICE_*). Amounts live in Stripe - create new Prices to change billing.
 // Premium monthly: £19.99/mo (1999 pence). 11+ Premium annual offer: £199.99/yr (19999 pence).
 // Ultra: £249.99/mo (24999 pence), £2499.99/yr (249999 pence) as of May 2026.
 // After creating new Stripe Prices, update STRIPE_PRICE_11PLUS_* (and Supabase edge-function secrets).

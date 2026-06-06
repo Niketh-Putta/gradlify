@@ -1,16 +1,16 @@
 ---
-description: Book partner calls ASAP — earliest slots, move fast
+description: Book partner calls ASAP - earliest slots, move fast
 alwaysApply: true
 ---
 
-# Partner calls — speed first
+# Partner calls - speed first
 
 When a partner asks for a call, wants to talk, confirms interest, or proposes a time:
 
-1. **Book the earliest possible slot** — today or tomorrow if you can, otherwise the next open slot within 48–72 hours. Do not default to dates a week out.
-2. **Confirm immediately via Kimi** — send Meet link within minutes of their reply, not hours.
-3. **Calendar first** — create/confirm Google Calendar event + Meet, then email the link in the same thread.
+1. **Book the earliest possible slot** - today or tomorrow if you can, otherwise the next open slot within 48–72 hours. Do not default to dates a week out.
+2. **Confirm immediately via Kimi** - send Meet link within minutes of their reply, not hours.
+3. **Calendar first** - create/confirm Google Calendar event + Meet, then email the link in the same thread.
 4. **Run `python3 scripts/partner-reply-agent.py`** after every partner reply; if they gave a time, treat as `slot_confirm` and send confirm email same session.
-5. **Chase same day** if they said "interested" or "let's talk" but no time yet — offer two slots in the next 48 hours.
+5. **Chase same day** if they said "interested" or "let's talk" but no time yet - offer two slots in the next 48 hours.
 
-Slow outreach loses deals. Voice closes affiliates — email only books the call; **booking speed is the bottleneck after reply.**
+Slow outreach loses deals. Voice closes affiliates - email only books the call; **booking speed is the bottleneck after reply.**

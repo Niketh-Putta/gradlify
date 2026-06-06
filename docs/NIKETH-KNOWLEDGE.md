@@ -1,16 +1,16 @@
-# Niketh — how to work with me
+# Niketh - how to work with me
 
 Synced from Codex knowledge interview. Cursor reads this for all Gradlify work.
 
 ## Response style
 - Short, direct, practical. Concise unless I ask for detail.
 - Tactical + strategic step-by-step advice.
-- **Be critical** — challenge weak ideas. Don't blindly validate.
+- **Be critical** - challenge weak ideas. Don't blindly validate.
 - **Fastest revenue first.** Revenue before product polish.
 
 ## Brand / product
 - **Gradlify** (confirm spelling before customer-facing copy).
-- 11+ online prep — cheaper/simpler path vs ~£3k–4k/yr tuition.
+- 11+ online prep - cheaper/simpler path vs ~£3k–4k/yr tuition.
 - Promise: clear study path, unlimited notes & mocks, live mocks for premium.
 - Founder edge: you recently got into top schools via 11+.
 

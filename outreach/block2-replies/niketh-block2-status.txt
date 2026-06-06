@@ -1,9 +1,9 @@
-Block 2 partner pipeline — status update (Mission Control synced)
+Block 2 partner pipeline - status update (Mission Control synced)
 
 DONE TODAY (Kimi / default browser)
 • Wave 2 cold sent: Sabah Hadi, The Exam Coach (Emily Kendall was already sent)
-• Chris (Eleven Plus Success): email chase sent — Thu 12 / Fri 13 Jun slots
-• WhatsApp wa.me opened for Chris 07771740569 — tap Send if chat loads
+• Chris (Eleven Plus Success): email chase sent - Thu 12 / Fri 13 Jun slots
+• WhatsApp wa.me opened for Chris 07771740569 - tap Send if chat loads
 • WA sprint copy ready: outreach/wa/day1–day5 + founder close
 • Mock poster HTML ready: outreach/assets/14-june-mock-poster.html (export PNG in browser)
 
@@ -11,12 +11,12 @@ BLOCK 2 CHECKLIST (12 steps)
 ✅ b2-0 Inbox prep
 ✅ b2-11 Wave 1 cold (7 partners, Robert excluded)
 ✅ b2-12 Wave 2 cold (3 partners)
-🟡 b2-1 Chris — chased, awaiting slot confirm
-🟡 b2-3 David — slots sent, awaiting reply
-🟡 b2-4 MTM — slots sent, awaiting reply
-🟡 b2-5 Cecile — slots sent, awaiting reply
-⏸ b2-2 Andy — holiday until 30 Jun
-⏳ b2-6–b2-8 Calls / ?ref= / deck — blocked on partner replies
+🟡 b2-1 Chris - chased, awaiting slot confirm
+🟡 b2-3 David - slots sent, awaiting reply
+🟡 b2-4 MTM - slots sent, awaiting reply
+🟡 b2-5 Cecile - slots sent, awaiting reply
+⏸ b2-2 Andy - holiday until 30 Jun
+⏳ b2-6–b2-8 Calls / ?ref= / deck - blocked on partner replies
 ✅ b2-10 Tina closed · Sutton + Robert never
 
 OUTCOMES (what moves MRR)
@@ -33,4 +33,4 @@ YOUR MANUAL ACTIONS (cannot automate)
 
 Open Mission Control: progress/index.html
 
-— Cursor via Kimi
+- Cursor via Kimi

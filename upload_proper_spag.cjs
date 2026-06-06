@@ -152,7 +152,7 @@ const PROPER_SPAG = [
     passageBlocks: [
       {
         id: "p1",
-        text: "The tempest howled across the moors, battering the ancient, ivy-strangled walls of Oakhaven Manor; within, Lord Alistair—a man of singular, brooding temperament—paced the length of the grand library. His mind was a tempest of its own, swirling with unresolved grievances: betrayal by his kin, the loss of his ancestral fortune, and a creeping, unshakable dread."
+        text: "The tempest howled across the moors, battering the ancient, ivy-strangled walls of Oakhaven Manor; within, Lord Alistair-a man of singular, brooding temperament-paced the length of the grand library. His mind was a tempest of its own, swirling with unresolved grievances: betrayal by his kin, the loss of his ancestral fortune, and a creeping, unshakable dread."
       },
       {
         id: "p2",
@@ -160,11 +160,11 @@ const PROPER_SPAG = [
       },
       {
         id: "p3",
-        text: "On the mahogany desk lay the fateful document. Its wax seal, bearing the crest of the Royal Court (a silver falcon clutching a serpent), was fractured—a stark symbol of his ruined legacy. He reached for his quill, the feather trembling slightly in his grip, yet he hesitated. To sign meant surrender; to refuse meant certain ruin."
+        text: "On the mahogany desk lay the fateful document. Its wax seal, bearing the crest of the Royal Court (a silver falcon clutching a serpent), was fractured-a stark symbol of his ruined legacy. He reached for his quill, the feather trembling slightly in his grip, yet he hesitated. To sign meant surrender; to refuse meant certain ruin."
       },
       {
         id: "p4",
-        text: "A sudden, sharp knock echoed through the cavernous hall. The heavy oak doors, which hadn't been opened to visitors in a decade, groaned in protest. Alistair's manservant, Barnaby—whose loyalty was as unquestionable as his age was advanced—shuffled into the room. \"My Lord,\" Barnaby wheezed, \"the emissaries... they have arrived.\""
+        text: "A sudden, sharp knock echoed through the cavernous hall. The heavy oak doors, which hadn't been opened to visitors in a decade, groaned in protest. Alistair's manservant, Barnaby-whose loyalty was as unquestionable as his age was advanced-shuffled into the room. \"My Lord,\" Barnaby wheezed, \"the emissaries... they have arrived.\""
       }
     ],
     questions: [
@@ -181,14 +181,14 @@ const PROPER_SPAG = [
       },
       {
         id: "h_q2", tag: "Punctuation Hunt", evidenceLine: "p1",
-        text: "Look at the phrase '...Lord Alistair—a man of singular, brooding temperament—paced...'. Why has the author used dashes here?",
+        text: "Look at the phrase '...Lord Alistair-a man of singular, brooding temperament-paced...'. Why has the author used dashes here?",
         options: [
           { id: "A", text: "To show a sudden interruption in speech.", correct: false },
           { id: "B", text: "To enclose parenthetical (extra) information.", correct: true },
           { id: "C", text: "To introduce a list of character traits.", correct: false },
           { id: "D", text: "To separate a subordinate clause from a main clause.", correct: false }
         ],
-        explanation: "A pair of dashes can be used to mark parenthesis—extra information inserted into a sentence."
+        explanation: "A pair of dashes can be used to mark parenthesis-extra information inserted into a sentence."
       },
       {
         id: "h_q3", tag: "Punctuation Hunt", evidenceLine: "p1",

@@ -1,14 +1,14 @@
 Hi {name},
 
-Great speaking — here's your partner link:
+Great speaking - here's your partner link:
 {ref}
 
 30% of all payments from families who sign up through your link.
 
 Caption to paste:
-"Extra 11+ timed practice between sessions — free to start, mocks and weak-topic feedback. We use Gradlify: {ref}"
+"Extra 11+ timed practice between sessions - free to start, mocks and weak-topic feedback. We use Gradlify: {ref}"
 
-Live group mock Sat 14 June — shout if you want to mention it to your list.
+Live group mock Sat 14 June - shout if you want to mention it to your list.
 
 Best,
 Niketh

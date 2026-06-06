@@ -115,7 +115,7 @@ export default function Tools() {
             Free 11+ PDF Drops
           </h1>
           <p className="mt-6 text-base sm:text-lg font-medium leading-relaxed text-[#334155] dark:text-slate-300">
-            Download our beautifully formatted, high-quality PDFs covering every core 11+ subject. No signup required—just click to grab them from Google Drive.
+            Download our beautifully formatted, high-quality PDFs covering every core 11+ subject. No signup required-just click to grab them from Google Drive.
           </p>
         </header>
 

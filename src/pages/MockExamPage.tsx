@@ -971,7 +971,7 @@ export default function MockExamPage() {
     handleSubmitRef.current = handleSubmit;
   }, [handleSubmit]);
 
-  // Timer — disabled in practice mode
+  // Timer - disabled in practice mode
   useEffect(() => {
     if (isPractice || view !== 'exam' || loading || examQuestions.length === 0 || timeLeftRef.current <= 0) return;
 

@@ -9,7 +9,7 @@ Niketh wants partnership Gmail replies handled **automatically** by the agent.
 
 ## When to run (no permission needed)
 
-Run at the end of any turn that touches outreach, Block 2, partners, or inbox — and at session start if Kimi may be up:
+Run at the end of any turn that touches outreach, Block 2, partners, or inbox - and at session start if Kimi may be up:
 
 ```bash
 python3 scripts/gradlify-email-agent.py --send --limit 10

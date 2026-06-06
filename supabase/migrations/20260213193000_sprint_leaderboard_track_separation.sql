@@ -248,7 +248,7 @@ BEGIN
     WHERE ca.created_at >= v_start
       AND ca.created_at <= v_end
       AND ca.source IN ('mock', 'challenge')
-      -- TRACK FILTER — Ensures separation between GCSE and 11+
+      -- TRACK FILTER - Ensures separation between GCSE and 11+
       AND ca.track = tl.track
       AND NOT (
         p.founder_track IS NOT DISTINCT FROM 'founder'

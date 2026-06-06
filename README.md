@@ -21,7 +21,7 @@ When you run `npm run dev`, the Vite server (usually at `http://127.0.0.1:5173`)
 
 1. Add `http://127.0.0.1:5173/auth/callback` (and `http://localhost:5173/auth/callback` if you use the bare hostname) to your Supabase project’s **Redirect URLs** so OAuth and magic links land back on the local build instead of `gradlify.com`.
 2. Point `APP_BASE_URL` (used by the Supabase Edge functions) at your local origin while testing so return URLs stay on `localhost`.
-3. Always open the Vite URL in your browser or the VS Code preview—if a tab tries to open `https://gradlify.com`, close it and continue on `http://127.0.0.1:5173`.
+3. Always open the Vite URL in your browser or the VS Code preview-if a tab tries to open `https://gradlify.com`, close it and continue on `http://127.0.0.1:5173`.
 4. If you accidentally land on `gradlify.com` after auth, copy the cookies/local storage back to the dev tab by reloading the Vite URL; the app uses the same Supabase session, so it will recognize you immediately.
 
 ## UI density

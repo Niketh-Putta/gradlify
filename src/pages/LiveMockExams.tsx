@@ -21,6 +21,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAppContext } from "@/hooks/useAppContext";
 import { useMembership } from "@/hooks/useMembership";
 
+// Toggle to re-enable the old English-only live mock (9 May 2026). Set to true to show it again.
+const SHOW_ENGLISH_LIVE_MOCK = false;
+
 const LIVE_MOCK = {
   slug: "live-11plus-english-mock-2026-05-09-1700",
   startsAtIso: "2026-05-09T16:00:00.000Z",
@@ -326,7 +329,7 @@ export default function LiveMockExams() {
       });
 
       if (insertError) {
-        // Race: another tab already created the row — reload status and send user to session if in progress
+        // Race: another tab already created the row - reload status and send user to session if in progress
         const { data: existing } = await supabase
           .from("live_mock_attempts" as never)
           .select("status")
@@ -424,11 +427,11 @@ export default function LiveMockExams() {
                 Early booking discount
               </span>
               <p className="mt-2 text-xs leading-5 text-slate-700 sm:text-sm">
-                <span className="font-black text-orange-700">£9.99 until Sunday midnight</span> — after that the
+                <span className="font-black text-orange-700">£9.99 until Sunday midnight</span> - after that the
                 price returns to <span className="font-semibold text-slate-500 line-through">£14.99</span>.
               </p>
               <p className="mt-1.5 text-xs leading-5 text-slate-600 sm:text-sm">
-                Don&apos;t miss out — very few mocks backed by ex-GL examiners are released every year. This is
+                Don&apos;t miss out - very few mocks backed by <span className="rounded bg-amber-100/70 px-1 font-black text-orange-800">ex-GL examiners</span> are released every year. This is
                 probably the only one your students will have access to before their real exam. Check how prepared
                 your child really is&hellip;
               </p>
@@ -532,6 +535,7 @@ export default function LiveMockExams() {
       <section className="mx-auto w-full min-w-0 max-w-5xl">
         {bothSubjectsRegistrationCard}
 
+        {SHOW_ENGLISH_LIVE_MOCK && (
         <div className="rounded-[16px] border border-slate-200/80 bg-[linear-gradient(135deg,#ffffff_0%,#fbfdff_58%,#fffdf8_100%)] px-3 py-3 shadow-[0_14px_34px_rgba(15,23,42,0.05)] sm:px-4">
           <div className="flex items-center justify-end border-b border-slate-200/90 pb-2">
             <span className="inline-flex items-center gap-2 rounded-full bg-blue-50/95 px-3 py-1 text-[9px] font-black uppercase tracking-[0.16em] text-blue-700 shadow-[inset_0_1px_0_rgba(255,255,255,0.95)]">
@@ -686,6 +690,7 @@ export default function LiveMockExams() {
             </div>
           </div>
         </div>
+        )}
 
       </section>
     </main>

@@ -1,4 +1,4 @@
-# 11+ creator outreach — how to contact each person
+# 11+ creator outreach - how to contact each person
 
 **Best order:** Email → contact form → Calendly/booking link → Instagram/Facebook DM → YouTube “Business inquiries” (if shown) → Buy Me a Coffee message.
 
@@ -17,7 +17,7 @@ No public business inbox on YouTube About. Use podcast email or the contact form
 
 ---
 
-## 2. Robert Lomax — Easy 11 Plus
+## 2. Robert Lomax - Easy 11 Plus
 
 | Method | Details |
 |--------|---------|
@@ -28,7 +28,7 @@ No public business inbox on YouTube About. Use podcast email or the contact form
 
 ---
 
-## 3. Kevin Olding — Mathsaurus
+## 3. Kevin Olding - Mathsaurus
 
 | Method | Details |
 |--------|---------|
@@ -49,7 +49,7 @@ No public business inbox on YouTube About. Use podcast email or the contact form
 | **Facebook** | https://www.facebook.com/lessonadelessonade (Messenger) |
 | **YouTube** | https://www.youtube.com/@Lessonade |
 
-Do **not** use lessonades@gmail.com — that is a different “Sonades” podcast project.
+Do **not** use lessonades@gmail.com - that is a different “Sonades” podcast project.
 
 ---
 
@@ -65,7 +65,7 @@ Do **not** use lessonades@gmail.com — that is a different “Sonades” podcas
 
 ---
 
-## 6. Joycellyn Akuffo — Geek School Tutoring
+## 6. Joycellyn Akuffo - Geek School Tutoring
 
 | Method | Details |
 |--------|---------|
@@ -77,7 +77,7 @@ Do **not** use lessonades@gmail.com — that is a different “Sonades” podcas
 
 ---
 
-## 7. Lucy Kennedy — The 11+ English Club
+## 7. Lucy Kennedy - The 11+ English Club
 
 | Method | Details |
 |--------|---------|
@@ -91,7 +91,7 @@ Pitch the **club brand**, not only the small personal channel.
 
 ---
 
-## 8. Mr O — 11 Plus Hub
+## 8. Mr O - 11 Plus Hub
 
 | Method | Details |
 |--------|---------|
@@ -102,7 +102,7 @@ YouTube channel is secondary; email is the main route.
 
 ---
 
-## 9. Emily Kendall — Emily Kendall 11 Plus
+## 9. Emily Kendall - Emily Kendall 11 Plus
 
 | Method | Details |
 |--------|---------|
@@ -113,7 +113,7 @@ YouTube channel is secondary; email is the main route.
 
 ---
 
-## 10. Sabah Hadi — The 11 Plus Journey
+## 10. Sabah Hadi - The 11 Plus Journey
 
 | Method | Details |
 |--------|---------|
@@ -123,7 +123,7 @@ YouTube channel is secondary; email is the main route.
 
 ---
 
-## 11. James Davey — The Exam Coach
+## 11. James Davey - The Exam Coach
 
 | Method | Details |
 |--------|---------|
@@ -147,7 +147,7 @@ YouTube channel is secondary; email is the main route.
 
 ---
 
-## 13. Kin Learning (from channel scan — add to list)
+## 13. Kin Learning (from channel scan - add to list)
 
 | Method | Details |
 |--------|---------|
@@ -167,7 +167,7 @@ Bromley/Kent 11+ tuition; small YouTube, strong local brand.
 | **Email** | None |
 | **YouTube** | https://www.youtube.com/channel/UCNesDenqynQJpBduV2kDdtA |
 
-About page is generic lifestyle content — **low fit** for 11+ promo unless recent videos are exam-focused. Try **YouTube comment** on an 11+ video or **Instagram** if linked in video description.
+About page is generic lifestyle content - **low fit** for 11+ promo unless recent videos are exam-focused. Try **YouTube comment** on an 11+ video or **Instagram** if linked in video description.
 
 ---
 
@@ -178,7 +178,7 @@ About page is generic lifestyle content — **low fit** for 11+ promo unless rec
 | **Email** | None |
 | **YouTube** | https://www.youtube.com/channel/UCFxIDE56-XvyOmXvCrYa3Dg |
 
-Viral “how I passed 11+” video — no links in About. Use **YouTube Community tab** (if enabled) or **comment** asking for business email.
+Viral “how I passed 11+” video - no links in About. Use **YouTube Community tab** (if enabled) or **comment** asking for business email.
 
 ---
 
@@ -191,11 +191,11 @@ Viral “how I passed 11+” video — no links in About. Use **YouTube Communit
 | **Contact** | https://mrtimsclassroom.com/contact-us/ |
 | **YouTube** | https://www.youtube.com/channel/UCd7EZXwePQFJlswaHq-4sSg |
 
-Australian primary educator — useful for **creative writing** angle, not UK grammar-specific.
+Australian primary educator - useful for **creative writing** angle, not UK grammar-specific.
 
 ---
 
-## 17. Rush Mehta — Rush Resources
+## 17. Rush Mehta - Rush Resources
 
 | Method | Details |
 |--------|---------|
@@ -203,11 +203,11 @@ Australian primary educator — useful for **creative writing** angle, not UK gr
 | **Phone** | 07827277948 |
 | **Contact** | https://rushresources.co.uk/contact-us/ |
 
-More **papers/publisher** than YouTuber — still founder-reachable.
+More **papers/publisher** than YouTuber - still founder-reachable.
 
 ---
 
 ## Quick copy-paste subject lines
 
-- `Partnership enquiry — Gradlify (11+ prep platform)`
-- `Paid collaboration / affiliate — audience fit for your 11+ content`
+- `Partnership enquiry - Gradlify (11+ prep platform)`
+- `Paid collaboration / affiliate - audience fit for your 11+ content`

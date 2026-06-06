@@ -1,4 +1,4 @@
-# Gradlify — Partner One-Pager
+# Gradlify - Partner One-Pager
 **For tutors, parent creators & 11+ platforms**
 
 ---
@@ -12,7 +12,7 @@ Gradlify is an 11+ preparation platform for UK Year 4/5 families:
 - Exam readiness tracking over time
 - Free tier to start; paid upgrade for unlimited mocks + deeper progress
 
-**Positioning for your audience:** Extra timed practice **between** lessons — not a replacement for tuition.
+**Positioning for your audience:** Extra timed practice **between** lessons - not a replacement for tuition.
 
 ---
 
@@ -24,17 +24,17 @@ Parents don't buy "an app." They buy **proof**:
 2. They see a **score + weak topics**  
 3. £19.99/mo feels cheap vs one tutor hour (£40–£60)
 
-Your recommendation gives them **permission to try** — the product gives them **reason to pay**.
+Your recommendation gives them **permission to try** - the product gives them **reason to pay**.
 
 ---
 
 ## What we'd like you to do
 
-**Option A — Affiliate (default)**  
+**Option A - Affiliate (default)**  
 Share your tracked link with parents. They start free; you earn on paid sign-ups.
 
-**Option B — Co-branded live mock**  
-"[Your brand] x Gradlify" Saturday mock — you promote, we run the platform. Strong for trust.
+**Option B - Co-branded live mock**  
+"[Your brand] x Gradlify" Saturday mock - you promote, we run the platform. Strong for trust.
 
 ---
 
@@ -43,7 +43,7 @@ Share your tracked link with parents. They start free; you earn on paid sign-ups
 | Structure | Detail |
 |-----------|--------|
 | **Affiliate** | **30% of all payments** from families who sign up through your link |
-| **Alternative** | **£10 per paid subscriber** (for smaller lists — agree on call) |
+| **Alternative** | **£10 per paid subscriber** (for smaller lists - agree on call) |
 | **Tracking** | Unique link: `https://gradlify.com/11-plus?ref=YOURCODE` |
 | **Payout** | Monthly, tracked on our side |
 
@@ -53,7 +53,7 @@ No upfront fee required for affiliate partners. Sponsored video deals discussed 
 
 ## Suggested post angle (parent POV)
 
-> "If your child is preparing for the 11+, I've been using Gradlify for extra Maths/English practice and mocks. Free to start — useful between tutoring sessions."
+> "If your child is preparing for the 11+, I've been using Gradlify for extra Maths/English practice and mocks. Free to start - useful between tutoring sessions."
 
 **Show:** Homepage → free practice → one mock → score screen.
 
@@ -63,7 +63,7 @@ No upfront fee required for affiliate partners. Sponsored video deals discussed 
 
 ## Live anchor event
 
-**14 June 2026** — Gradlify live mock (subscribers free; small fee for non-members). Good co-promotion hook if you want to test engagement before a full affiliate post.
+**14 June 2026** - Gradlify live mock (subscribers free; small fee for non-members). Good co-promotion hook if you want to test engagement before a full affiliate post.
 
 ---
 

@@ -56,7 +56,7 @@ questions = [
         "question": "Adult cinema tickets cost £8.50 and child tickets cost £4.50. A family buys 2 adult tickets and 3 child tickets. How much change will they receive from a £50 note?",
         "correct_answer": "£19.50",
         "wrong_answers": ["£30.50", "£21.50", "£18.50", "£10.50"],
-        "explanation": "💡 Key Insight: Read the question carefully—it asks for the CHANGE from £50, not the total cost.\nStep 1: Calculate adult tickets -> 2 × £8.50 = £17.00.\nStep 2: Calculate child tickets -> 3 × £4.50 = £13.50.\nStep 3: Add the costs together -> £17.00 + £13.50 = £30.50.\nStep 4: Calculate the change -> £50.00 - £30.50 = £19.50.\nFinal answer: £19.50."
+        "explanation": "💡 Key Insight: Read the question carefully-it asks for the CHANGE from £50, not the total cost.\nStep 1: Calculate adult tickets -> 2 × £8.50 = £17.00.\nStep 2: Calculate child tickets -> 3 × £4.50 = £13.50.\nStep 3: Add the costs together -> £17.00 + £13.50 = £30.50.\nStep 4: Calculate the change -> £50.00 - £30.50 = £19.50.\nFinal answer: £19.50."
     },
     {
         "track": "11plus", "question_type": "Problem Solving & Strategies", "subtopic": "strategies|word-problems", "tier": "11+ Standard", "calculator": "Non-Calculator",

@@ -16,7 +16,7 @@
   </defs>
 
   <rect width="900" height="480" fill="#ffffff"/>
-  <text x="40" y="50" class="title">Simultaneous equations — elimination (clean example)</text>
+  <text x="40" y="50" class="title">Simultaneous equations - elimination (clean example)</text>
   <text x="40" y="78" class="subtitle">Make one variable cancel; show steps with clear reasons.</text>
 
   <!-- equations area -->

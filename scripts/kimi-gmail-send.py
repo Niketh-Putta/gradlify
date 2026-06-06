@@ -72,7 +72,7 @@ def send_compose(label: str, to: str, subject: str, body: str, attachments: Opti
         print(f"{k}: {v}")
     verify_data = steps["verify"].get("data", {})
     if not (isinstance(verify_data, dict) and verify_data.get("ok")):
-        print("RESULT: ABORTED — compose body not verified")
+        print("RESULT: ABORTED - compose body not verified")
         return False
     send = click_send()
     print(f"send: {send}")
@@ -96,7 +96,7 @@ def send_reply(label: str, body: str, *hints: str, attachments: Optional[List[st
 
     verify_data = steps["verify"].get("data", {})
     if not (isinstance(verify_data, dict) and verify_data.get("ok")):
-        print("RESULT: ABORTED — compose body not verified")
+        print("RESULT: ABORTED - compose body not verified")
         return False
 
     send = click_send()

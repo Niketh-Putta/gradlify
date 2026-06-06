@@ -31,7 +31,7 @@ VALUES (
   '2026-02-02T00:00:00Z',
   '2026-02-08T20:00:00Z',
   true,
-  'Founders Sprint — Feb 2026',
+  'Founders Sprint - Feb 2026',
   now()
 )
 ON CONFLICT (id) DO UPDATE

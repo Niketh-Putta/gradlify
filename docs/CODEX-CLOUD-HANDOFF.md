@@ -1,4 +1,4 @@
-# Cloud Codex handoff — Block 1 deploy + verify
+# Cloud Codex handoff - Block 1 deploy + verify
 **Paste this entire prompt into Cloud Codex.**
 
 ---
@@ -9,7 +9,7 @@ You are finishing **Gradlify Block 1 funnel** work. Cursor already implemented t
 
 ### Repo context
 - Path: Gradlify 11+ app (Vite + React + Supabase + Stripe + Vercel)
-- Product: gradlify.com/11-plus — UK 11+ prep SaaS
+- Product: gradlify.com/11-plus - UK 11+ prep SaaS
 - Block 1 goal: fix funnel before marketing push (14 June live mock)
 
 ### Already done in working tree (DO NOT re-implement unless broken)
@@ -39,7 +39,7 @@ npm run build
 ```
 Fix only if build fails. Do not scope-creep.
 
-#### 2. Commit Block 1 funnel (if Niketh wants it committed — default: yes for deploy)
+#### 2. Commit Block 1 funnel (if Niketh wants it committed - default: yes for deploy)
 ```bash
 git add \
   .env.example \
@@ -66,7 +66,7 @@ git add \
 git commit -m "$(cat <<'EOF'
 Fix 11+ funnel before mock marketing push.
 
-Parents need proof (post-mock report), honest mock limits, partner ref tracking, and 11+ onboarding — not GCSE gates or £9.99 live mock drift.
+Parents need proof (post-mock report), honest mock limits, partner ref tracking, and 11+ onboarding - not GCSE gates or £9.99 live mock drift.
 EOF
 )"
 ```
@@ -116,7 +116,7 @@ Send to **niketh13putta@gmail.com**:
 - Anything blocked (needs Niketh login)
 
 ### Do NOT do in this task
-- Partner outreach emails (Block 2 — voice calls)
+- Partner outreach emails (Block 2 - voice calls)
 - New features beyond Block 1
 - Force push main
 

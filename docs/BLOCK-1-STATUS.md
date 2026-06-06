@@ -1,5 +1,5 @@
-# Block 1 funnel — status
-**Updated:** 2026-05-20 — **COMPLETE**
+# Block 1 funnel - status
+**Updated:** 2026-05-20 - **COMPLETE**
 
 ## All items done
 
@@ -17,4 +17,4 @@
 
 ## Next: Block 2
 
-Partner calls — see `docs/GRADLIFY-ACTION-SEQUENCE.md` and `progress/index.html` (Mission Control).
+Partner calls - see `docs/GRADLIFY-ACTION-SEQUENCE.md` and `progress/index.html` (Mission Control).

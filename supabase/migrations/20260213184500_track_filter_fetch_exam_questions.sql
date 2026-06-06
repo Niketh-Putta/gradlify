@@ -31,7 +31,7 @@ BEGIN
   WHERE (p_tier IS NULL OR q.tier = p_tier)
     AND (p_calculator IS NULL OR q.calculator = p_calculator)
     AND (p_question_types IS NULL OR q.question_type = ANY(p_question_types))
-    -- TRACK FILTER — Ensures separation between GCSE and 11+
+    -- TRACK FILTER - Ensures separation between GCSE and 11+
     AND q.track = v_user_track
   ORDER BY random()
   LIMIT p_limit;
@@ -112,7 +112,7 @@ BEGIN
     AND (p_subtopics IS NULL OR array_length(p_subtopics, 1) IS NULL OR q.subtopic = ANY(p_subtopics))
     AND (p_difficulty_min IS NULL OR q.difficulty >= p_difficulty_min)
     AND (p_difficulty_max IS NULL OR q.difficulty <= p_difficulty_max)
-    -- TRACK FILTER — Ensures separation between GCSE and 11+
+    -- TRACK FILTER - Ensures separation between GCSE and 11+
     AND q.track = v_user_track
   ORDER BY
     (COALESCE(us.attempts, 0) = 0) DESC,

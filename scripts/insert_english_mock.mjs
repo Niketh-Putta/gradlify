@@ -14,11 +14,11 @@ const questions = [];
 // COMPREHENSION
 const comprehension_passage = `### Passage 1: 19th Century Classic
 
-The fog was so thick it seemed to swallow the cobbled streets of London whole. Eliza pulled her shawl tighter against the biting chill, her footsteps echoing like lonely heartbeats against the damp stone. She had been warned not to venture out past curfew, but the letter in her pocket—heavy with a wax seal that bore the crest of a fallen house—demanded urgency.
+The fog was so thick it seemed to swallow the cobbled streets of London whole. Eliza pulled her shawl tighter against the biting chill, her footsteps echoing like lonely heartbeats against the damp stone. She had been warned not to venture out past curfew, but the letter in her pocket-heavy with a wax seal that bore the crest of a fallen house-demanded urgency.
 
 Above her, the gas lamps flickered weakly, struggling to pierce the miasma. A sudden clatter from a nearby alleyway made her freeze. Naturally, her mind raced. Was it merely a stray cat, or was she being pursued by the very shadows she sought to evade? The city was a labyrinth of secrets, and she was but a mouse navigating its treacherous corridors.
 
-Clutching the letter, she turned the corner onto Blackwood Avenue. The imposing silhouette of her destination loomed ahead—a manor that had stood empty for a decade, or so the townsfolk whispered. Yet, a single, pale light burned in the highest window.`;
+Clutching the letter, she turned the corner onto Blackwood Avenue. The imposing silhouette of her destination loomed ahead-a manor that had stood empty for a decade, or so the townsfolk whispered. Yet, a single, pale light burned in the highest window.`;
 
 for (let i = 0; i < 10; i++) {
     questions.push({

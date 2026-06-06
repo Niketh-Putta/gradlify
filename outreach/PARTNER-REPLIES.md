@@ -13,7 +13,7 @@
 ```
 Hi [Name],
 
-Happy to send the overview — easiest if we do a quick 10-min call so I can show you the platform and we can agree what fits your audience.
+Happy to send the overview - easiest if we do a quick 10-min call so I can show you the platform and we can agree what fits your audience.
 
 Are you free [TIME 1] or [TIME 2] this week? I'll send a Meet/Zoom link.
 
@@ -37,11 +37,11 @@ Niketh
 | Polite close (declined commission) | No |
 
 **Email framing for deck:**  
-*"I've attached a short partner overview deck. It's the same product story we use with schools and tutors — happy to jump on a quick call to tailor it for your audience."*
+*"I've attached a short partner overview deck. It's the same product story we use with schools and tutors - happy to jump on a quick call to tailor it for your audience."*
 
 ---
 
-## 1. Cecile — The Frenchie Mummy
+## 1. Cecile - The Frenchie Mummy
 **To:** cecile@thefrenchiemummy.com  
 **Thread:** Re: 11+ paid/affiliate collab?  
 **Needs:** Brief + deck + login fix  
@@ -56,7 +56,7 @@ I've attached a short partner overview deck plus the key points below.
 
 Partner summary:
 - Gradlify = 11+ practice, mocks and resources for Year 4/5 families
-- Your angle: extra practice between tutoring — not a replacement for tuition
+- Your angle: extra practice between tutoring - not a replacement for tuition
 - Offer: 30% of all payments through your referral link (code FRENCHIEMUMMY once we agree)
 
 Access:
@@ -73,7 +73,7 @@ gradlify.com
 
 ---
 
-## 2. Chris — Eleven Plus Success
+## 2. Chris - Eleven Plus Success
 **To:** tutor@elevenplussuccess.com  
 **Thread:** Re: 11+ affiliate partnership?  
 **Needs:** Partner details + trial + deck  
@@ -82,7 +82,7 @@ gradlify.com
 ```
 Hi Chris,
 
-Thanks — I've attached a short partner overview deck.
+Thanks - I've attached a short partner overview deck.
 
 Partner structure:
 - Eleven Plus Success shares Gradlify as extra 11+ practice between lessons
@@ -103,7 +103,7 @@ gradlify.com
 
 ---
 
-## 3. Andy — Pinner Road Learning Centre
+## 3. Andy - Pinner Road Learning Centre
 **To:** prlcharrow@gmail.com  
 **Thread:** Re: 11+ affiliate partnership?  
 **Needs:** Confirm 30% + deck for centre staff  
@@ -112,7 +112,7 @@ gradlify.com
 ```
 Hi Andy,
 
-Following up — I've attached a short partner overview deck you can share with your team.
+Following up - I've attached a short partner overview deck you can share with your team.
 
 Quick recap:
 - Pinner Road recommends Gradlify as extra timed practice between lessons
@@ -141,7 +141,7 @@ Hi,
 
 Hope you had a good week.
 
-I've attached a short partner overview deck. At a high level: Gradlify gives families extra timed practice and mocks between formal mock-test sessions — we complement what you run, not replace it.
+I've attached a short partner overview deck. At a high level: Gradlify gives families extra timed practice and mocks between formal mock-test sessions - we complement what you run, not replace it.
 
 Are you free for a 10-minute call this week to agree referral terms? I'm flexible on times.
 
@@ -159,22 +159,22 @@ gradlify.com
 
 ---
 
-## 5. David — 11 Plus Hub
+## 5. David - 11 Plus Hub
 **To:** info@11plushub.com  
 **Thread:** Re: 11+ Paid Promo / partnership  
-**Needs:** Outline before call — deck supports this  
+**Needs:** Outline before call - deck supports this  
 **Attach:** Yes
 
 ```
 Hi David,
 
-As requested, here's a clearer outline — I've attached a short partner overview deck as well.
+As requested, here's a clearer outline - I've attached a short partner overview deck as well.
 
 At a high level:
 - Affiliate partnership (not a one-off ad fee)
 - 11 Plus Hub families get Gradlify as extra timed practice between your lessons
 - You earn on paid sign-ups through your tracked link
-- Placement options: member email, resources page, or lesson notes — we decide on a short call
+- Placement options: member email, resources page, or lesson notes - we decide on a short call
 
 Exact commercial terms and placement are easiest on a 10-minute call rather than over email.
 
@@ -187,8 +187,8 @@ gradlify.com
 
 ---
 
-## 6. Tina — MumFounded (CLOSED)
-**Status:** Declined commission — polite close already sent. **No further action.**
+## 6. Tina - MumFounded (CLOSED)
+**Status:** Declined commission - polite close already sent. **No further action.**
 
 ---
 
@@ -197,7 +197,7 @@ gradlify.com
 ```
 Hi [Name],
 
-Great — here's your partner link:
+Great - here's your partner link:
 
 https://gradlify.com/11-plus?ref=[CODE]
 
@@ -213,7 +213,7 @@ Niketh
 
 ---
 
-## 8. Wave 1 — New creator outreach (July, after funnel fix)
+## 8. Wave 1 - New creator outreach (July, after funnel fix)
 
 **To:** hello@mathsaurus.com (and TD, Kin, Geek School, Robert Lomax)  
 **Subject:** Quick question about a collab  
@@ -226,7 +226,7 @@ I'm Niketh, founder of Gradlify (gradlify.com). We help UK families with 11+ pre
 
 I've been following [specific channel/work] and think your audience is a strong fit.
 
-We're setting up affiliate partnerships with a few 11+ educators — tracked link, 30% on referral payments, optional co-branded live mock.
+We're setting up affiliate partnerships with a few 11+ educators - tracked link, 30% on referral payments, optional co-branded live mock.
 
 Would you be open to a 10-minute call, or should I send a short partner overview first?
 

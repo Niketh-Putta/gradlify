@@ -7,10 +7,10 @@
 **Work rate:** 10 hrs/day  
 
 **Related files:**
-- `GRADLIFY-FAST-TRACK-10K.md` — daily schedule + viral content  
-- `GRADLIFY-GROWTH-PROGRAM.md` — FB posts + mock ops copy  
-- `scripts/11plus-creator-outreach.csv` — contact list  
-- `scripts/11plus-outreach-emails.md` — email templates  
+- `GRADLIFY-FAST-TRACK-10K.md` - daily schedule + viral content  
+- `GRADLIFY-GROWTH-PROGRAM.md` - FB posts + mock ops copy  
+- `scripts/11plus-creator-outreach.csv` - contact list  
+- `scripts/11plus-outreach-emails.md` - email templates  
 
 ---
 
@@ -47,13 +47,13 @@ CREATORS (partners) →  borrowed trust     →  qualified parents
 
 # Partnership playbook (read once)
 
-## Three deal types — match creator to deal
+## Three deal types - match creator to deal
 
 | Type | Best for | You offer | They do | Target cost |
 |------|----------|-----------|---------|-------------|
-| **A — Affiliate** | Platforms (11 Plus Hub), tutors, email lists | **25% of first 3 months** (£15 total per sub) or **£10 flat per paid signup** | Link in member email, site, lesson notes | Low risk, scale to 30 partners |
-| **B — Sponsored integration** | YouTubers (Mathsaurus, TD, Kin) | **£200–800** + affiliate on top OR pure affiliate if small | 60–90 sec mid-roll, description link, optional dedicated short | Pay when you have £500+ MRR cash buffer |
-| **C — Co-branded mock** | Any creator with engaged parents | Free Premium for their audience + **rev share** on conversions | “[Creator] x Gradlify live mock” — they promote, you run | Best for rapid trust — **use 14 Jun + July mock** |
+| **A - Affiliate** | Platforms (11 Plus Hub), tutors, email lists | **25% of first 3 months** (£15 total per sub) or **£10 flat per paid signup** | Link in member email, site, lesson notes | Low risk, scale to 30 partners |
+| **B - Sponsored integration** | YouTubers (Mathsaurus, TD, Kin) | **£200–800** + affiliate on top OR pure affiliate if small | 60–90 sec mid-roll, description link, optional dedicated short | Pay when you have £500+ MRR cash buffer |
+| **C - Co-branded mock** | Any creator with engaged parents | Free Premium for their audience + **rev share** on conversions | “[Creator] x Gradlify live mock” - they promote, you run | Best for rapid trust - **use 14 Jun + July mock** |
 
 **Do not lead with:** CPM guarantees, upfront %, video count, your age, or full pricing in cold email. **Lead with:** 10-min call OR “try it + affiliate link.”
 
@@ -69,9 +69,9 @@ CREATORS (partners) →  borrowed trust     →  qualified parents
 
 ---
 
-## Creator tiers — who to approach when
+## Creator tiers - who to approach when
 
-### Tier 1 — Priority (Wave 1: June–July)
+### Tier 1 - Priority (Wave 1: June–July)
 *Active YouTube, solo, right audience size*
 
 | # | Name | Email | Deal type | `ref` code |
@@ -82,7 +82,7 @@ CREATORS (partners) →  borrowed trust     →  qualified parents
 | 4 | Joycellyn Akuffo (Geek School) | info@geekschool.co.uk | A or C | GEEKSCHOOL |
 | 5 | Robert Lomax | robert@rsleducational.co.uk | A or B | EASY11PLUS |
 
-### Tier 2 — Wave 2 (July–August)
+### Tier 2 - Wave 2 (July–August)
 
 | # | Name | Email | Deal type | `ref` code |
 |---|------|-------|-----------|------------|
@@ -93,14 +93,14 @@ CREATORS (partners) →  borrowed trust     →  qualified parents
 | 10 | The Exam Coach | teamkeen@theexamcoach.tv | B | EXAMCOACH |
 | 11 | 11 Plus Tutors Essex | Form only | C (co-mock) | ESSEX11 |
 
-### Tier 3 — Platform / special (parallel)
+### Tier 3 - Platform / special (parallel)
 
 | # | Name | Email | Deal type | Notes |
 |---|------|-------|-----------|-------|
-| P1 | Mr O (11 Plus Hub) | info@11plushub.com | **A only** | Member email / site — not video CPM |
-| P2 | Rush Resources | enquiries@rushresources.co.uk | A | Paper brand — bundle with mocks |
+| P1 | Mr O (11 Plus Hub) | info@11plushub.com | **A only** | Member email / site - not video CPM |
+| P2 | Rush Resources | enquiries@rushresources.co.uk | A | Paper brand - bundle with mocks |
 
-### Tier 4 — Harder contact (August+)
+### Tier 4 - Harder contact (August+)
 
 | # | Name | Contact | Notes |
 |---|------|---------|-------|
@@ -109,16 +109,16 @@ CREATORS (partners) →  borrowed trust     →  qualified parents
 | 14 | Tamima | YouTube DM | Weak 11+ fit |
 
 ### Do NOT pursue (wrong shape)
-Atom Learning, Pi Academy, Bond, CGP, CareerVidz — too big or B2B; not solo promo deals.
+Atom Learning, Pi Academy, Bond, CGP, CareerVidz - too big or B2B; not solo promo deals.
 
 ---
 
-# PHASE 0 — Launch week (14 June mock)
+# PHASE 0 - Launch week (14 June mock)
 **Dates:** Now → 20 June 2026  
 **Subs target:** 6 → **25** · **MRR ~£500**  
 **Partners target:** **3 conversations**, **1 signed** (affiliate or co-mock)
 
-## 0A — Product (do first, 1–2 days)
+## 0A - Product (do first, 1–2 days)
 
 - [ ] Align live mock price (**£10** everywhere)  
 - [ ] Fix **1 mock/day** copy (not 2)  
@@ -126,16 +126,16 @@ Atom Learning, Pi Academy, Bond, CGP, CareerVidz — too big or B2B; not solo pr
 - [ ] Partner sheet + `?ref=` codes ready  
 - [ ] Test: stranger signup → mock → paywall  
 
-## 0B — 14 June mock (your event)
+## 0B - 14 June mock (your event)
 
 - [ ] Enroll **50+** (stretch 100)  
 - [ ] Post in **10** Facebook groups (see GROWTH-PROGRAM)  
 - [ ] **2 TikToks/day** until 14 June  
 - [ ] Post-mock message to **100%** within 12h  
 
-## 0C — Creator Wave 0 (soft outreach only)
+## 0C - Creator Wave 0 (soft outreach only)
 
-**Goal:** 5 emails, 2 replies — **do not promise paid spend yet**
+**Goal:** 5 emails, 2 replies - **do not promise paid spend yet**
 
 | Day | Send to | Subject |
 |-----|---------|---------|
@@ -148,7 +148,7 @@ Atom Learning, Pi Academy, Bond, CGP, CareerVidz — too big or B2B; not solo pr
 **Co-mock pitch (if they reply):**
 ```
 We're running live 11+ mocks (50+ families on the last one). 
-Would you be open to a co-branded mock — your audience gets priority slots, 
+Would you be open to a co-branded mock - your audience gets priority slots, 
 you get £X per paid signup or rev share? 10-min call to align.
 ```
 
@@ -160,7 +160,7 @@ you get £X per paid signup or rev share? 10-min call to align.
 
 ---
 
-# PHASE 1 — Funnel + partner kit
+# PHASE 1 - Funnel + partner kit
 **Dates:** 21–30 June 2026  
 **Subs target:** **25** steady · **MRR ~£500**  
 **Partners target:** **3 signed**, **1 live** with link  
@@ -183,7 +183,7 @@ you get £X per paid signup or rev share? 10-min call to align.
 | First **affiliate-only** partner live | 1 link in description or email |
 | Book **July co-mock** with best reply | 1 date locked |
 
-**Email — send kit after call:**
+**Email - send kit after call:**
 ```
 Thanks for the chat. Here's everything for your audience:
 
@@ -204,12 +204,12 @@ We'll track signups on our side and pay [25% of 3 months / £10 per paid signup]
 
 ---
 
-# PHASE 2 — Creator Wave 1 goes live
+# PHASE 2 - Creator Wave 1 goes live
 **Dates:** 1–31 July 2026  
 **Subs target:** **75** · **MRR ~£1,500**  
 **Partners target:** **8 signed**, **5 live**  
 
-## Your content (daily — see FAST-TRACK)
+## Your content (daily - see FAST-TRACK)
 
 - [ ] 2 TikTok + 2 Reels / day  
 - [ ] 1 YouTube Short / day  
@@ -248,7 +248,7 @@ your honest take → link gradlify.com/11-plus?ref=CODE +
 
 ---
 
-# PHASE 3 — Scale creators + paid ads test
+# PHASE 3 - Scale creators + paid ads test
 **Dates:** 1–31 August 2026  
 **Subs target:** **150** · **MRR ~£3,000**  
 **Partners target:** **15 live**, **3 paid integrations**  
@@ -257,18 +257,18 @@ your honest take → link gradlify.com/11-plus?ref=CODE +
 
 - [ ] **Wave 3:** Lessonade FB, Star's Channel, Tamima  
 - [ ] **Repeat winners:** 2nd post from best-converting partner  
-- [ ] **Tutor grid:** 30 local tutors on affiliate (20% × 3 mo) — maps search + email  
+- [ ] **Tutor grid:** 30 local tutors on affiliate (20% × 3 mo) - maps search + email  
 - [ ] Monthly **partner newsletter:** mock dates, new features, leaderboard stats  
 
 ## Paid ads (start if trial→paid ≥ 25%)
 
-- [ ] Meta **£50/day** — UK parents 35–50, interests: 11 plus, grammar school, Bond  
+- [ ] Meta **£50/day** - UK parents 35–50, interests: 11 plus, grammar school, Bond  
 - [ ] Creative: your best TikTok + “Recommended by [creator]” social proof  
 - [ ] Kill ad if CAC > **£50** after £200 spend  
 
 ## Weekly mock
 
-- [ ] **1 live mock/week** or **2 big mocks/month** — always invite partners to co-brand  
+- [ ] **1 live mock/week** or **2 big mocks/month** - always invite partners to co-brand  
 
 - [ ] 150 subs · £3K MRR  
 - [ ] 15 partner links  
@@ -276,14 +276,14 @@ your honest take → link gradlify.com/11-plus?ref=CODE +
 
 ---
 
-# PHASE 4 — Partnership machine
+# PHASE 4 - Partnership machine
 **Dates:** Sep–Oct 2026  
 **Subs target:** **300** · **MRR ~£6,000**  
 **Partners target:** **25 live**  
 
-- [ ] Hire VA or use sheet — **partner payouts monthly** (don't delay; trust dies)  
+- [ ] Hire VA or use sheet - **partner payouts monthly** (don't delay; trust dies)  
 - [ ] **Tiered partner program:** Bronze (affiliate) / Silver (co-mock) / Gold (£500+ integrated)  
-- [ ] **Case study** from best partner: “X trials, Y paid” — use to close next 10  
+- [ ] **Case study** from best partner: “X trials, Y paid” - use to close next 10  
 - [ ] Approach **2nd-tier YouTubers** with proof: “Mathsaurus drove X signups”  
 - [ ] **£100/day** Meta if CAC < £40  
 
@@ -292,20 +292,20 @@ your honest take → link gradlify.com/11-plus?ref=CODE +
 
 ---
 
-# PHASE 5 — £10K MRR
+# PHASE 5 - £10K MRR
 **Dates:** Nov–Dec 2026  
 **Subs target:** **500** · **MRR ~£10,000**  
 
 - [ ] **35+ partners**, top 5 each drive **5+ subs/month**  
-- [ ] **Annual plan push** (exam year parents) — 20% choose £199/yr  
-- [ ] **January mock marathon** — national event, all partners  
+- [ ] **Annual plan push** (exam year parents) - 20% choose £199/yr  
+- [ ] **January mock marathon** - national event, all partners  
 - [ ] Consider **£1K–2K** package: 3 creators same week (bundle audience)  
 
 - [ ] **500 subs · £10K MRR**  
 
 ---
 
-# Daily schedule (10 hrs) — with creator block
+# Daily schedule (10 hrs) - with creator block
 
 | Block | Time | Focus |
 |-------|------|-------|
@@ -349,7 +349,7 @@ Subject: Quick call about a collab?
 
 Hi [Name],
 
-I'm Niketh, founder of Gradlify (gradlify.com) — 11+ maths and English practice with timed mocks and split-view comprehension.
+I'm Niketh, founder of Gradlify (gradlify.com) - 11+ maths and English practice with timed mocks and split-view comprehension.
 
 I've been following [specific: Mathsaurus / your Kent content / 11+ English Club] and think your audience is a strong fit.
 
@@ -365,12 +365,12 @@ gradlify.com
 # Copy-paste: after they say yes (before call)
 
 ```
-Great — here's a 2-min demo so you can see the product before we chat: [LINK]
+Great - here's a 2-min demo so you can see the product before we chat: [LINK]
 
 On the call we'll cover:
 1. What your audience gets (trial + optional live mock slot)
 2. Simple tracking link (?ref=YOURNAME)
-3. Rev share or co-branded mock — whatever fits your setup
+3. Rev share or co-branded mock - whatever fits your setup
 
 What times work for a 10-min call?
 ```
@@ -380,7 +380,7 @@ What times work for a 10-min call?
 # Copy-paste: co-branded mock invite (for creator to forward)
 
 ```
-[Creator name] x Gradlify — live 11+ mock, [DATE]
+[Creator name] x Gradlify - live 11+ mock, [DATE]
 
 Timed exam-style practice for Year 4/5 families preparing for grammar and selective schools.
 
@@ -408,13 +408,13 @@ Run by Gradlify (built by a student who went through the 11+).
 
 # Success rules
 
-1. **Funnel before scale** — no creator send until post-mock screen exists  
-2. **Affiliate default** — low risk; paid sponsorship only when MRR > £500  
-3. **Co-mock = fastest trust** — creators promote events more easily than “another app”  
-4. **Pay partners on time** — manual bank transfer beats fancy software early  
-5. **Double down** — 2nd post from whoever drives >15 trials  
-6. **Your content + creators** — not either/or; creators need you to look legit when parents check TikTok  
+1. **Funnel before scale** - no creator send until post-mock screen exists  
+2. **Affiliate default** - low risk; paid sponsorship only when MRR > £500  
+3. **Co-mock = fastest trust** - creators promote events more easily than “another app”  
+4. **Pay partners on time** - manual bank transfer beats fancy software early  
+5. **Double down** - 2nd post from whoever drives >15 trials  
+6. **Your content + creators** - not either/or; creators need you to look legit when parents check TikTok  
 
 ---
 
-*Master Plan v1 — June 2026. Tick phases in order. Speed is allowed; skipping Phase 1 is not.*
+*Master Plan v1 - June 2026. Tick phases in order. Speed is allowed; skipping Phase 1 is not.*

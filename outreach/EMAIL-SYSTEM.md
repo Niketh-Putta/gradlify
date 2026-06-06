@@ -48,7 +48,7 @@ python3 scripts/gradlify-email-agent.py --send --limit 5
 ## Run on a schedule (optional)
 
 ```bash
-# every 2 hours during work day — add to crontab
+# every 2 hours during work day - add to crontab
 0 9-18/2 * * * cd "/path/to/repo" && python3 scripts/gradlify-email-agent.py --send --limit 10
 ```
 

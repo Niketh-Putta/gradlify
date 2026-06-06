@@ -1,6 +1,6 @@
 Hi {name},
 
-Great — locked in {confirmed_slot}. Calendar invite on its way.
+Great - locked in {confirmed_slot}. Calendar invite on its way.
 
 Google Meet: {meet_link}
 

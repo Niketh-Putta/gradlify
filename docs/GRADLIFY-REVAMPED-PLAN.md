@@ -20,7 +20,7 @@
 | **Phone / Zoom (10 min)** | Close affiliate deal, demo product, fix Cecile login, agree 30% |
 | **WhatsApp voice note** | Warm follow-up after mock; nudge trial users |
 | **Email** | Book the call, send link **after** verbal yes, attach deck if asked |
-| **Long email negotiation** | Avoid — always end with “easier on a quick call” |
+| **Long email negotiation** | Avoid - always end with “easier on a quick call” |
 
 Psychology: tutors and creators trust **tone + screen-share**, not PDFs. Deck supports the call; it does not replace it.
 
@@ -28,7 +28,7 @@ Psychology: tutors and creators trust **tone + screen-share**, not PDFs. Deck su
 
 ## The one decision: partners or grow solo?
 
-**Answer: both — but in this order, at this stage.**
+**Answer: both - but in this order, at this stage.**
 
 | Stage | Primary engine | Why |
 |-------|----------------|-----|
@@ -40,10 +40,10 @@ Psychology: tutors and creators trust **tone + screen-share**, not PDFs. Deck su
 
 | Type | Example | When | Deal |
 |------|---------|------|------|
-| **Warm pipeline** | Chris, Andy, Cecile, Mock Test Masters, David | **This week** | Affiliate / co-mock — already talking |
-| **Micro tutors** | Pinner Road, Eleven Plus Success, local tuition centres | **June** | 30% or £10/signup — trust transfer |
-| **Mid creators** (5K–40K engaged) | Mathsaurus, TD, Kin, Geek School | **July** | Affiliate + optional co-mock — **after funnel fixed** |
-| **Large creators** (100K+) | Lessonade-scale | **£1.5K MRR+** | Paid integration — need cash buffer + proof |
+| **Warm pipeline** | Chris, Andy, Cecile, Mock Test Masters, David | **This week** | Affiliate / co-mock - already talking |
+| **Micro tutors** | Pinner Road, Eleven Plus Success, local tuition centres | **June** | 30% or £10/signup - trust transfer |
+| **Mid creators** (5K–40K engaged) | Mathsaurus, TD, Kin, Geek School | **July** | Affiliate + optional co-mock - **after funnel fixed** |
+| **Large creators** (100K+) | Lessonade-scale | **£1.5K MRR+** | Paid integration - need cash buffer + proof |
 
 **Rule:** One mid-size creator with a **good fit post** can add 8–25 paid subs **if** the funnel converts. At 6 subs, fixing conversion beats finding a bigger audience.
 
@@ -55,10 +55,10 @@ Psychology: tutors and creators trust **tone + screen-share**, not PDFs. Deck su
 
 UK parent (often Asian heritage), child Year 4/5, grammar/independent target. They are **not** buying “another app.” They buy:
 
-1. **Proof** — “Is my child on track?”
-2. **Gap clarity** — “Which topics are weak?”
-3. **Peer safety** — “Other families are doing this”
-4. **Price anchor** — “£20/mo vs £60/hr tutor”
+1. **Proof** - “Is my child on track?”
+2. **Gap clarity** - “Which topics are weak?”
+3. **Peer safety** - “Other families are doing this”
+4. **Price anchor** - “£20/mo vs £60/hr tutor”
 
 ### Emotional journey
 
@@ -103,13 +103,13 @@ Miss a week → double mock promotion + partner follow-up the next.
 ## Three engines (how they fit)
 
 ```
-ENGINE 1 — LIVE MOCKS (you)
+ENGINE 1 - LIVE MOCKS (you)
   14 Jun mock → urgency, WhatsApp shares, £10 ticket → trial → paid
 
-ENGINE 2 — WARM PARTNERS (borrowed trust)
+ENGINE 2 - WARM PARTNERS (borrowed trust)
   Tutors + parent creators → ?ref=CODE → families who already trust them
 
-ENGINE 3 — CONTENT (you, 1/day minimum)
+ENGINE 3 - CONTENT (you, 1/day minimum)
   TikTok/Reels repurpose → credibility, not primary growth until £500 MRR
 ```
 
@@ -119,7 +119,7 @@ ENGINE 3 — CONTENT (you, 1/day minimum)
 
 ## Who to reach out to (priority list)
 
-### Tier A — Close this week (already in thread)
+### Tier A - Close this week (already in thread)
 
 | Name | Email | Status | Next action |
 |------|-------|--------|-------------|
@@ -129,13 +129,13 @@ ENGINE 3 — CONTENT (you, 1/day minimum)
 | Mock Test Masters | info@mocktestmasters.com | Call pending | Deck + book 10-min call |
 | David (11 Plus Hub) | info@11plushub.com | Wanted outline | Deck + call times |
 
-### Tier B — Re-engage only if they reply YES (31 May last check)
+### Tier B - Re-engage only if they reply YES (31 May last check)
 
 Honest Mum, A Baby on Board, Tutor's 11 Plus, Willow Plus, Slough Tuition → send link + 30% terms.
 
-### Tier C — New Wave 1 outreach (July, with deck)
+### Tier C - New Wave 1 outreach (July, with deck)
 
-Mathsaurus, TD Tutoring, Kin Learning, Geek School, Robert Lomax — **after** post-mock screen ships.
+Mathsaurus, TD Tutoring, Kin Learning, Geek School, Robert Lomax - **after** post-mock screen ships.
 
 ### Do not contact
 
@@ -147,9 +147,9 @@ Sutton 11 Plus (Karen asked to stop).
 
 | Type | Best for | Offer | They do |
 |------|----------|-------|---------|
-| **A — Affiliate** | Tutors, platforms, email lists | **30% all payments** or **£10/signup** | Link in emails, site, lesson notes |
-| **B — Co-mock** | Creators with engaged parents | Free access + rev share | Promote “[Name] x Gradlify mock” |
-| **C — Sponsored** | YouTubers 20K+ | £200–800 + affiliate | 60–90s integration — **£500 MRR+ only** |
+| **A - Affiliate** | Tutors, platforms, email lists | **30% all payments** or **£10/signup** | Link in emails, site, lesson notes |
+| **B - Co-mock** | Creators with engaged parents | Free access + rev share | Promote “[Name] x Gradlify mock” |
+| **C - Sponsored** | YouTubers 20K+ | £200–800 + affiliate | 60–90s integration - **£500 MRR+ only** |
 
 Lead with: **10-min call** → demo → **then** affiliate link. Not CPM, upfront %, video bundles, or deal terms over long email.
 
@@ -159,18 +159,18 @@ Lead with: **10-min call** → demo → **then** affiliate link. Not CPM, upfron
 
 | Block | Time | Task |
 |-------|------|------|
-| **Morning — product** | 2h | Funnel fixes (onboarding, post-mock, `?ref=`, copy) |
-| **Mid — revenue** | 2.5h | Mock ops, trial follow-up, partner calls, Gmail |
-| **Afternoon — distribution** | 2h | FB groups, WhatsApp, tutor DMs, 14 Jun push |
-| **Late — content** | 1.5h | 1–2 short videos (mock clips, score reactions) |
-| **Evening — outreach** | 1.5h | Tier A follow-ups, Wave 1 prep |
+| **Morning - product** | 2h | Funnel fixes (onboarding, post-mock, `?ref=`, copy) |
+| **Mid - revenue** | 2.5h | Mock ops, trial follow-up, partner calls, Gmail |
+| **Afternoon - distribution** | 2h | FB groups, WhatsApp, tutor DMs, 14 Jun push |
+| **Late - content** | 1.5h | 1–2 short videos (mock clips, score reactions) |
+| **Evening - outreach** | 1.5h | Tier A follow-ups, Wave 1 prep |
 | **Buffer** | 0.5h | Tracker update, inbox zero |
 
 ---
 
 ## Phase plan
 
-### Phase 0 — Now → 20 June (mock week)
+### Phase 0 - Now → 20 June (mock week)
 
 - [ ] Ship **post-mock parent report** (score + 3 weak topics + upgrade CTA)
 - [ ] Fix 11+ onboarding track + nav signup CTA
@@ -179,14 +179,14 @@ Lead with: **10-min call** → demo → **then** affiliate link. Not CPM, upfron
 - [ ] Close **2 signed affiliates** from Tier A
 - [ ] Send partner deck to everyone who asked for materials
 
-### Phase 1 — 21 June → 31 July
+### Phase 1 - 21 June → 31 July
 
 - [ ] Weekly live mock (co-brand with 1 partner)
 - [ ] Wave 1 creator outreach (5 emails with deck)
 - [ ] 1 TikTok/Reel per day
 - [ ] **75 subs / ~£1.5K MRR**
 
-### Phase 2 — Aug → Dec
+### Phase 2 - Aug → Dec
 
 - [ ] Tutor affiliate grid (15+ live)
 - [ ] Test Meta ads at £20/day once trial→paid >25%
@@ -197,10 +197,10 @@ Lead with: **10-min call** → demo → **then** affiliate link. Not CPM, upfron
 
 ## Partner kit (what you send when they ask for “deck” or “brief”)
 
-1. **PPTX:** `outreach/assets/Gradlify-Partner-Overview.pptx` (your pitch deck — frame as product overview, not investment ask)
+1. **PPTX:** `outreach/assets/Gradlify-Partner-Overview.pptx` (your pitch deck - frame as product overview, not investment ask)
 2. **One-pager:** `outreach/partner-one-pager.md` (copy-paste or PDF later)
 3. **Their link:** `https://gradlify.com/11-plus?ref=CODE` (only after they agree terms)
-4. **Talking points:** Extra practice between lessons — not a tutor replacement
+4. **Talking points:** Extra practice between lessons - not a tutor replacement
 
 ---
 
@@ -219,12 +219,12 @@ Lead with: **10-min call** → demo → **then** affiliate link. Not CPM, upfron
 
 ## Bottom line
 
-**At 6 subs, your bottleneck is conversion and proof — not audience size.**
+**At 6 subs, your bottleneck is conversion and proof - not audience size.**
 
 1. Fix the funnel so a mock produces a score parents act on.  
 2. Run the 14 June mock hard.  
 3. Close warm partners (tutors > big creators).  
-4. Send the deck to anyone who asked — it builds seriousness.  
+4. Send the deck to anyone who asked - it builds seriousness.  
 5. Chase Mathsaurus-scale creators in July, not June.
 
 £10K MRR = **500 parents trusting you with their child’s exam.** That comes from **mocks + partner trust + daily follow-up**, not one viral post.

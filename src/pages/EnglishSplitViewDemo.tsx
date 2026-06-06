@@ -1239,7 +1239,7 @@ export function EnglishSplitViewDemo() {
     };
   }, [isLiveMock, liveMockPaperId, user?.id, isLoadingLiveMock, liveMockPaperQuestionCount]);
 
-  // Live mock: one submission per user per paper — block session URL if already submitted.
+  // Live mock: one submission per user per paper - block session URL if already submitted.
   useEffect(() => {
     if (!isLiveMock) {
       setLiveMockSubmittedBlocked(false);

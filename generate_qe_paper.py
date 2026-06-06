@@ -138,11 +138,11 @@ story = []
 story += [
     Spacer(1, 3*cm),
     Paragraph("QUEEN ELIZABETH'S SCHOOL", st_cover_title),
-    Paragraph("Barnet — 11+ English Entrance Examination", st_cover_sub),
+    Paragraph("Barnet - 11+ English Entrance Examination", st_cover_sub),
     Spacer(1, 0.5*cm),
     HR('#1a1a2e', 2),
     Spacer(1, 0.4*cm),
-    Paragraph("MOCK PAPER — FULL EXAMINATION", st_cover_sub),
+    Paragraph("MOCK PAPER - FULL EXAMINATION", st_cover_sub),
     Spacer(1, 1.5*cm),
     Paragraph("Time allowed: <b>45 minutes</b>", st_cover_meta),
     Paragraph("Total questions: <b>70</b>", st_cover_meta),
@@ -191,8 +191,8 @@ fiction_paras = [
      "without announcement and was rarely repeated."),
     ("",
      "On this particular morning, a woman entered the shop at twenty minutes past nine. She was "
-     "dressed in mourning — black wool, black gloves, a veil so fine it seemed more like shadow "
-     "than fabric — and she carried a clock in both hands as one might carry something that had "
+     "dressed in mourning - black wool, black gloves, a veil so fine it seemed more like shadow "
+     "than fabric - and she carried a clock in both hands as one might carry something that had "
      "once been alive. Edmund straightened at once. Mr. Crabtree did not move."),
     ("",
      "\u201cI was told,\u201d the woman said, addressing Mr. Crabtree\u2019s back, \u201cthat you are "
@@ -203,7 +203,7 @@ fiction_paras = [
      "\u201cMy husband wound this clock on the morning he died,\u201d she said, more quietly. "
      "\u201cIt has not been touched since.\u201d"),
     ("",
-     "There was a pause — not an empty one, but weighted, as though the room were considering "
+     "There was a pause - not an empty one, but weighted, as though the room were considering "
      "her words along with its inhabitants. Then Mr. Crabtree set down his instrument, turned "
      "on his stool, and looked at the woman fully for the first time."),
     ("",
@@ -212,7 +212,7 @@ fiction_paras = [
      "The woman placed the clock on the counter with a care that Edmund found almost unbearable "
      "to watch. She left without another word. When the door had closed and the bell above it had "
      "ceased to shiver, Mr. Crabtree returned to his work without comment. Edmund waited for "
-     "something — an explanation, a softening. Neither came."),
+     "something - an explanation, a softening. Neither came."),
     ("",
      "He looked at the clock. It was a beautiful object: dark walnut case, a face of cream enamel, "
      "and hands of such fine brass that they seemed hardly capable of bearing the weight of time. "

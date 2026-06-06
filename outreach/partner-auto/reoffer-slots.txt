@@ -1,6 +1,6 @@
 Hi {name},
 
-Thanks for getting back to me — keen to move quickly.
+Thanks for getting back to me - keen to move quickly.
 
 Could we do a 10-min call {slot_a} or {slot_b}? I'll send a Google Meet link as soon as you confirm.
 

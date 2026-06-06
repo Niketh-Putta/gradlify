@@ -8,7 +8,7 @@ alwaysApply: true
 For **any** task that needs a browser (navigate, click, fill forms, screenshots, scrape, sign in, shop, etc.):
 
 1. **Do NOT** use `cursor-ide-browser` unless Kimi WebBridge is unavailable.
-2. **Always** use **Kimi WebBridge** first — it controls the user's real browser (Atlas) with their logins via the extension.
+2. **Always** use **Kimi WebBridge** first - it controls the user's real browser (Atlas) with their logins via the extension.
 
 ## Health check (run first)
 

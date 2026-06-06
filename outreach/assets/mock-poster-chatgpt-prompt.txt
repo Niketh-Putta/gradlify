@@ -1,0 +1,29 @@
+Create a square WhatsApp poster (1080x1080), clean modern ed-tech style.
+
+Background: dark navy blue gradient (#0f172a to #0c4a6e), subtle amber glow top-right.
+
+Layout (large readable text for parents on mobile):
+
+TOP — small amber pill badge: "WEEKEND ONLY"
+
+HEADLINE (huge, white, bold):
+"11+ LIVE MOCK"
+"Sunday 14 June"
+
+SUBHEAD (light grey):
+"4:00 – 6:30pm · ~2h 30m · Maths + English"
+
+MIDDLE — two price lines (urgency):
+"£9.99 this weekend" in bright green
+"Then £13.99 from Monday" in white, slightly smaller
+
+SOCIAL PROOF line (amber or white):
+"Nearly 50 families registered"
+
+CREDIBILITY line (smaller grey):
+"Built with past GL exam board markers"
+
+BOTTOM LEFT: "gradlify.com" in white bold
+BOTTOM RIGHT: "Premium: FREE" in green
+
+Style: professional, not childish, no stock photos of kids, no clutter, high contrast, UK 11+ exam prep feel. No fake logos. Text must be spelled exactly as above.

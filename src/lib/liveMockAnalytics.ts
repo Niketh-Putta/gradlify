@@ -20,7 +20,7 @@ export function buildLiveMockSessionPath(): string {
   return `/live-mock-exams/session?${params.toString()}`;
 }
 
-/** Summary JSON from `get_my_live_mock_attempt_summary` — extend as you add fields in SQL. */
+/** Summary JSON from `get_my_live_mock_attempt_summary` - extend as you add fields in SQL. */
 export type LiveMockMyAttemptSummary = {
   attempt_id?: string;
   paper_id?: string;
@@ -64,7 +64,7 @@ export type LiveMockPublicCohortSummary = {
   mean_score_percent: number | null;
 };
 
-/** From `get_my_live_mock_score_rank` — rank 1 is highest score; total is submitted attempts. */
+/** From `get_my_live_mock_score_rank` - rank 1 is highest score; total is submitted attempts. */
 export type LiveMockScoreRank = {
   rank: number | null;
   total: number;

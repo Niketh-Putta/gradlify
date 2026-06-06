@@ -46,8 +46,8 @@ export function PostMockParentReport({
       </h2>
       <p className="text-sm text-muted-foreground mb-4">
         {percentage >= 70
-          ? 'Strong mock — keep momentum with targeted practice on any weaker topics below.'
-          : 'Clear gaps to work on this week — short practice sessions on weak topics add up fast.'}
+          ? 'Strong mock - keep momentum with targeted practice on any weaker topics below.'
+          : 'Clear gaps to work on this week - short practice sessions on weak topics add up fast.'}
       </p>
 
       {strongTopic && (
@@ -91,7 +91,7 @@ export function PostMockParentReport({
           className="flex-1 rounded-xl border-primary/30"
           onClick={() => navigate('/select-subject?intent=plans')}
         >
-          Unlimited mocks — £19.99/mo trial
+          Unlimited mocks - £19.99/mo trial
         </Button>
       </div>
       <p className="text-xs text-muted-foreground mt-3">

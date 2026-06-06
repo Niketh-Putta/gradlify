@@ -1073,7 +1073,7 @@
       <div class="brand">
         <div class="brand-eyebrow">Private · Not linked to gradlify.com</div>
         <h1>Mission Control</h1>
-        <p>Your £10K MRR path — what's done, what's next, and when to do it.</p>
+        <p>Your £10K MRR path - what's done, what's next, and when to do it.</p>
       </div>
       <div class="meta-chip" id="metaUpdated">Loading…</div>
     </header>
@@ -1097,7 +1097,7 @@
             <span class="ring-sub">steps done</span>
           </div>
         </div>
-        <p style="font-size:0.72rem;color:var(--muted);margin-top:0.75rem;text-align:center" id="stepsSummary">—</p>
+        <p style="font-size:0.72rem;color:var(--muted);margin-top:0.75rem;text-align:center" id="stepsSummary">-</p>
       </div>
 
       <div class="stats-grid" id="statsGrid"></div>
@@ -1127,7 +1127,7 @@
     </section>
 
     <section class="pipeline-section" id="pipelineSection" hidden>
-      <div class="panel-title" style="margin-bottom:0.65rem">Block 2 — partner pipeline</div>
+      <div class="panel-title" style="margin-bottom:0.65rem">Block 2 - partner pipeline</div>
       <div class="pipeline-grid" id="pipelineGrid"></div>
     </section>
 
@@ -1160,7 +1160,7 @@
     </section>
 
     <p class="footer-note">
-      Open: <code>progress/index.html</code> · Status: <code>data.js</code> · Playbooks: <code>playbook.js</code> — ask Cursor to update when things change.
+      Open: <code>progress/index.html</code> · Status: <code>data.js</code> · Playbooks: <code>playbook.js</code> - ask Cursor to update when things change.
     </p>
   </div>
 
@@ -1223,7 +1223,7 @@
 
     function statusBadge(status) {
       const map = { done: ["Done", "badge-done"], active: ["Now", "badge-active"], pending: ["Next", "badge-pending"] };
-      const [label, cls] = map[status] || ["—", "badge-pending"];
+      const [label, cls] = map[status] || ["-", "badge-pending"];
       return `<span class="badge ${cls}">${label}</span>`;
     }
 
@@ -1457,8 +1457,8 @@
       if (!action) return "";
       if (action.includes("auto_reply_sent")) return "✓ Auto-replied via Kimi";
       if (action.includes("already_handled")) return "✓ Already handled";
-      if (action.includes("ignored")) return "— No action needed";
-      if (action.includes("failed")) return "⚠ Reply failed — check Gmail";
+      if (action.includes("ignored")) return "- No action needed";
+      if (action.includes("failed")) return "⚠ Reply failed - check Gmail";
       return action;
     }
 
@@ -1569,7 +1569,7 @@
           <span class="focus-num">${i + 1}</span>
           <div class="focus-text">
             <h4>${s.title}</h4>
-            <p>${s.blockTitle} · ${s.when || "—"} · ${statusBadge(s.status).replace(/<[^>]+>/g, "")}</p>
+            <p>${s.blockTitle} · ${s.when || "-"} · ${statusBadge(s.status).replace(/<[^>]+>/g, "")}</p>
           </div>
         </div>
       `).join("") || "<p style='color:var(--muted);font-size:0.85rem'>All steps complete 🎉</p>";

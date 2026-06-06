@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Creates new Stripe Prices for Gradlify Ultra (£249.99/mo, £2499.99/yr) in TEST and LIVE.
- * Stripe Price objects are immutable — this does not change existing subscriptions on old prices.
+ * Stripe Price objects are immutable - this does not change existing subscriptions on old prices.
  *
  * Usage: node scripts/create-ultra-stripe-prices.mjs
  * Then update .env and run: ./scripts/sync-ultra-stripe-secrets.sh
