@@ -607,22 +607,14 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
         </div>
       </nav>
 
-      {partnerReferralLabel && (
-        <div className="fixed top-[3.25rem] sm:top-[4.5rem] left-0 right-0 z-40 border-b border-emerald-200/80 bg-emerald-50/95 px-3 py-2 text-center text-xs sm:text-sm text-emerald-900">
-          Recommended by <span className="font-semibold">{partnerReferralLabel}</span> - start with free practice and mocks
-        </div>
-      )}
-
       <main
         className={cn(
           isElevenPlus
-            ? partnerReferralLabel
-              ? "pt-[12.5rem] sm:pt-[9rem] lg:pt-[8.25rem]"
-              : "pt-[10.75rem] sm:pt-[7.25rem] lg:pt-[6.75rem]"
+            ? "pt-[10.75rem] sm:pt-[7.25rem] lg:pt-[6.75rem]"
             : "pt-24 sm:pt-28 lg:pt-8"
         )}
       >
-        {/* Hero: top padding accounts for fixed nav + sprint strip (11+) */}
+        {/* Hero: top padding accounts for fixed nav + offer strip (11+) */}
         <section className="relative pt-12 sm:pt-16 lg:pt-20 pb-12 sm:pb-18 lg:pb-20 overflow-hidden">
           {ambientEffectsEnabled && (
             <div className="absolute inset-0 pointer-events-none">
