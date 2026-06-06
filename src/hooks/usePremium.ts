@@ -194,12 +194,11 @@ export function usePremium(trackOverride?: UserTrack, subject?: 'maths' | 'engli
       if (error) throw error;
 
       setDailyUses(0);
-      setTier(tier);
     } catch (error) {
       if (isAbortLikeError(error)) return;
       console.error('Error resetting daily usage:', error);
     }
-  }, [profile?.user_id, tier]);
+  }, [profile?.user_id]);
 
   const resetDailyMockUsage = useCallback(async (isSpecificSubject: boolean, subjectColRaw?: string, resetColRaw?: string) => {
     if (!profile?.user_id) return;
@@ -390,7 +389,7 @@ export function usePremium(trackOverride?: UserTrack, subject?: 'maths' | 'engli
     } finally {
       setIsLoading(false);
     }
-  }, [activeTrack, profile?.user_id, user?.id, resetDailyChallengeUsage, resetDailyMockUsage, resetDailyUsage, subject]);
+  }, [activeTrack, profile?.user_id, user?.id, resetDailyChallengeUsage, resetDailyUsage, subject]);
 
   useEffect(() => {
     console.log("[usePremium] Effect triggered", { hasUserContext, isLoading });

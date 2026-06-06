@@ -1,4 +1,5 @@
-import { lazy, Suspense } from "react";
+import { Suspense } from "react";
+import { lazyWithRetry } from "@/lib/lazyWithRetry";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -14,16 +15,16 @@ const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
 import Index from "./pages/Index";
 
 // Lazy load all other secondary pages
-const Privacy = lazy(() => import("./pages/Privacy"));
-const Terms = lazy(() => import("./pages/Terms"));
-const NotFound = lazy(() => import("./pages/NotFound"));
-const Debug = lazy(() => import("./pages/Debug"));
-const ResetPassword = lazy(() => import("./pages/ResetPassword"));
-const UpdatePassword = lazy(() => import("./pages/UpdatePassword"));
-const AdminQuestions = lazy(() => import("./pages/AdminQuestions"));
-const AdminAnalytics = lazy(() => import("./pages/AdminAnalytics"));
-const Tools = lazy(() => import("./pages/Tools"));
-const GrowthTracker = lazy(() => import("./pages/GrowthTracker"));
+const Privacy = lazyWithRetry(() => import("./pages/Privacy"));
+const Terms = lazyWithRetry(() => import("./pages/Terms"));
+const NotFound = lazyWithRetry(() => import("./pages/NotFound"));
+const Debug = lazyWithRetry(() => import("./pages/Debug"));
+const ResetPassword = lazyWithRetry(() => import("./pages/ResetPassword"));
+const UpdatePassword = lazyWithRetry(() => import("./pages/UpdatePassword"));
+const AdminQuestions = lazyWithRetry(() => import("./pages/AdminQuestions"));
+const AdminAnalytics = lazyWithRetry(() => import("./pages/AdminAnalytics"));
+const Tools = lazyWithRetry(() => import("./pages/Tools"));
+const GrowthTracker = lazyWithRetry(() => import("./pages/GrowthTracker"));
 
 const queryClient = new QueryClient({
   defaultOptions: {

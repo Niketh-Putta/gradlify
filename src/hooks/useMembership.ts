@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { getPremiumStatus } from '@/lib/premiumStatus';
 import { syncBillingStatus } from '@/lib/billingSync';
@@ -28,6 +28,7 @@ export function useMembership() {
   const [data, setData] = useState<MembershipData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const refreshTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -110,7 +111,13 @@ export function useMembership() {
           // Verify this update is for the current user
           const { data: { user } } = await supabase.auth.getUser();
           if (user && payload.new?.user_id === user.id && mounted) {
-            fetchMembership(true);
+            if (refreshTimerRef.current) {
+              window.clearTimeout(refreshTimerRef.current);
+            }
+            refreshTimerRef.current = window.setTimeout(() => {
+              refreshTimerRef.current = null;
+              void fetchMembership(true);
+            }, 750);
           }
         }
       )
@@ -118,6 +125,10 @@ export function useMembership() {
 
     return () => {
       mounted = false;
+      if (refreshTimerRef.current) {
+        window.clearTimeout(refreshTimerRef.current);
+        refreshTimerRef.current = null;
+      }
       supabase.removeChannel(channel);
     };
   }, []);
