@@ -204,6 +204,7 @@ export default function LiveMockExams() {
       if (!error && data) {
         setBothSubjectsSignup(data as SignupRow);
         setFinalizingBothSubjectsPayment(false);
+        void loadBothSubjectsSignupCount();
         toast.success("You're registered for the Maths and English mock.");
         window.history.replaceState({}, "", window.location.pathname);
         return;
@@ -223,7 +224,7 @@ export default function LiveMockExams() {
     return () => {
       cancelled = true;
     };
-  }, [bothSubjectsSignup, loadSignupAndAttempt, user?.id]);
+  }, [bothSubjectsSignup, loadBothSubjectsSignupCount, loadSignupAndAttempt, user?.id]);
 
   /** After submitting in another tab or returning from the session, pick up status === submitted. */
   useEffect(() => {
@@ -291,6 +292,7 @@ export default function LiveMockExams() {
 
     setBothSubjectsSignup(data as SignupRow);
     setBothSubjectsSignupCount((count) => Math.max(MIN_DISPLAYED_BOTH_SUBJECTS_SIGNUPS, count + 1));
+    void loadBothSubjectsSignupCount();
   };
 
   const handleStartMockExam = async () => {
