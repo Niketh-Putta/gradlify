@@ -9,13 +9,13 @@ const corsHeaders = {
 
 const readEnv = (name: string) => Deno.env.get(name)?.trim() || "";
 const BOTH_SUBJECTS_LIVE_MOCK_SLUG = "both_subjects_live_mock";
-const DEFAULT_LIVE_MOCK_PRICE_ID_LIVE = "price_1Tf63lQYWoowhxMZKU2Z2AWY";
+const DEFAULT_LIVE_MOCK_PRICE_ID_LIVE = "price_1TfEfVQYWoowhxMZGWQpCGmO";
 
 const inlineLiveMockLineItem = {
   quantity: 1,
   price_data: {
     currency: "gbp",
-    unit_amount: 1000,
+    unit_amount: 999,
     product_data: {
       name: "Gradlify 11+ Maths and English Mock",
       description: "Guided and built alongside real GL exam creators. Exclusive mock for top schools.",
@@ -100,7 +100,7 @@ serve(async (req) => {
         mock_type: BOTH_SUBJECTS_LIVE_MOCK_SLUG,
         mock_slug: BOTH_SUBJECTS_LIVE_MOCK_SLUG,
         mock_starts_at: new Date().toISOString(),
-        amount_gbp: "10.00",
+        amount_gbp: "9.99",
       },
       success_url: `${baseUrl}/pay/success?session_id={CHECKOUT_SESSION_ID}&returnTo=${encodeURIComponent(returnTo)}`,
       cancel_url: `${baseUrl}/pay/cancelled?returnTo=${encodeURIComponent(returnTo)}`,

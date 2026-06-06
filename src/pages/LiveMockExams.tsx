@@ -415,7 +415,7 @@ export default function LiveMockExams() {
           <p className="mt-1 max-w-2xl text-xs leading-5 text-slate-600 sm:text-sm">
             This Maths and English mock is on Sunday 14 June 2026. It is guided and built alongside real GL exam
             creators for top-school preparation. Paying Premium members get it included; free-trial users and free
-            users register with one upfront £10 payment.
+            users register with one upfront £9.99 payment.
           </p>
           <div className="mt-3 inline-flex max-w-full items-center gap-2 rounded-[14px] border border-orange-100 bg-white/80 px-3 py-2 text-xs font-semibold text-slate-700 shadow-[0_8px_18px_rgba(234,88,12,0.07)] sm:text-sm">
             <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-orange-50 text-orange-700">
@@ -449,7 +449,7 @@ export default function LiveMockExams() {
                 {hasPaidPremiumLiveMockAccess ? "Paid Premium registration" : "Upfront registration"}
               </div>
               <div className="mt-1 text-2xl font-bold tracking-tight text-slate-950">
-                {hasPaidPremiumLiveMockAccess ? "Included" : "£10"}
+                {hasPaidPremiumLiveMockAccess ? "Included" : "£9.99"}
               </div>
             </div>
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-amber-50 text-amber-700">
@@ -484,12 +484,12 @@ export default function LiveMockExams() {
               </span>
             ) : isPremiumTrialing ? (
               <span className="inline-flex items-center gap-2">
-                Trial users pay £10
+                Trial users pay £9.99
                 <ArrowRight className="h-3.5 w-3.5" />
               </span>
             ) : (
               <span className="inline-flex items-center gap-2">
-                Register and pay £10
+                Register and pay £9.99
                 <ArrowRight className="h-3.5 w-3.5" />
               </span>
             )}
