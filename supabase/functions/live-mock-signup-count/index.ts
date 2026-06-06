@@ -9,9 +9,9 @@ const corsHeaders = {
 const DEFAULT_MOCK_SLUG = "both_subjects_live_mock";
 const readEnv = (name: string) => Deno.env.get(name)?.trim() ?? "";
 
-const DISCOUNT_DISPLAY_CAP = Number(readEnv("LIVE_MOCK_DISCOUNT_DISPLAY_CAP") || "60");
-const SIGNUP_DISPLAY_OFFSET = Number(readEnv("LIVE_MOCK_SIGNUP_DISPLAY_OFFSET") || "42");
-const MIN_DISPLAYED_SIGNUPS = Number(readEnv("LIVE_MOCK_MIN_DISPLAYED_SIGNUPS") || "48");
+const DISCOUNT_DISPLAY_CAP = Number(readEnv("LIVE_MOCK_DISCOUNT_DISPLAY_CAP") || "80");
+const SIGNUP_DISPLAY_OFFSET = Number(readEnv("LIVE_MOCK_SIGNUP_DISPLAY_OFFSET") || "56");
+const MIN_DISPLAYED_SIGNUPS = Number(readEnv("LIVE_MOCK_MIN_DISPLAYED_SIGNUPS") || "68");
 const DISCOUNT_REAL_CAP = DISCOUNT_DISPLAY_CAP - SIGNUP_DISPLAY_OFFSET;
 const DISCOUNT_PRICE_GBP = Number(readEnv("LIVE_MOCK_DISCOUNT_PRICE_GBP") || "9.99");
 const STANDARD_PRICE_GBP = Number(readEnv("LIVE_MOCK_STANDARD_PRICE_GBP") || "14.99");
