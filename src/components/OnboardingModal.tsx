@@ -551,6 +551,18 @@ export function OnboardingModal({ isOpen, userId, tier, premiumTrack, founderTra
   };
 
   const isUpsell = phase === 'upsell';
+  const handleQuestionKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.key !== 'Enter') return;
+    if (event.shiftKey || event.metaKey || event.ctrlKey || event.altKey) return;
+    if (saving || !canContinue) return;
+
+    event.preventDefault();
+    if (isLast) {
+      void handleFinish();
+    } else {
+      goNext();
+    }
+  };
 
   return (
     <DialogPrimitive.Root open={dialogOpen}>
@@ -580,7 +592,11 @@ export function OnboardingModal({ isOpen, userId, tier, premiumTrack, founderTra
           onInteractOutside={(e) => e.preventDefault()}
         >
           {phase === 'questions' && (
-            <div key="questions" className="animate-in fade-in-0 slide-in-from-bottom-2 duration-300">
+            <div
+              key="questions"
+              className="animate-in fade-in-0 slide-in-from-bottom-2 duration-300"
+              onKeyDown={handleQuestionKeyDown}
+            >
               <DialogHeader>
                 <div className="flex items-center justify-between gap-3">
                   <div>
