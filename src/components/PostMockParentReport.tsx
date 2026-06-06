@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Target, TrendingUp } from 'lucide-react';
+import { ArrowRight, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 type TopicBreakdown = Record<string, { earned: number; total: number }>;
@@ -62,7 +62,7 @@ export function PostMockParentReport({
       {weakTopics.length > 0 && (
         <div className="mb-4">
           <p className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
-            <Target className="w-4 h-4 text-amber-600" />
+            <span className="text-amber-600" aria-hidden="true">•</span>
             Focus on these next
           </p>
           <ul className="space-y-1.5 text-sm text-foreground">
