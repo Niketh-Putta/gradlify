@@ -6,12 +6,12 @@ export const LIVE_MOCK_STANDARD_PRICE_GBP = 14.99;
 
 /**
  * Must match LiveMockExams signup display offset.
- * Calibrated so displayed == LIVE_MOCK_MIN_DISPLAYED_SIGNUPS (48) at the real
- * paid signup count at launch (5 → offset 43). Because real signups only grow
- * from that anchor, `realCount + offset` is always >= the floor, so each new
- * paid signup increments the displayed count by exactly 1 (spots-left 12 → 11 → …).
+ * Calibrated so displayed == realCount + offset at the real paid signup count
+ * at launch (5 → offset 48 → displayed 53, 7 spots left). Because real signups
+ * only grow from that anchor, `realCount + offset` is always >= the floor, so
+ * each new paid signup increments the displayed count by exactly 1 (7 → 6 → …).
  */
-export const LIVE_MOCK_SIGNUP_DISPLAY_OFFSET = 43;
+export const LIVE_MOCK_SIGNUP_DISPLAY_OFFSET = 48;
 export const LIVE_MOCK_MIN_DISPLAYED_SIGNUPS = 48;
 
 export const getDisplayedLiveMockSignupCount = (count: number) =>
