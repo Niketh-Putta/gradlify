@@ -4,7 +4,9 @@
 **Owner:** Niketh · **Product:** gradlify.com / 11+ track  
 **Document version:** June 2026 · **Event anchor:** Live mock — **Saturday 14 June 2026**
 
-> **Going fast?** Use **`GRADLIFY-FAST-TRACK-10K.md`** — £10K MRR targets, 10hr/day schedule, 50–100 mock scale, viral video factory, tutor affiliate army. This file = ops checklists and copy-paste posts. Run both.
+> **Start here:** **`GRADLIFY-ACTION-SEQUENCE.md`** — do-this-in-order list (ship → calls → poster → GCs → FB).  
+> **Strategy:** `GRADLIFY-REVAMPED-PLAN.md` · **Partners:** voice-first (call closes deal; email books call).  
+> **Also:** `GRADLIFY-MASTER-PLAN.md`, `GRADLIFY-FAST-TRACK-10K.md`. **This file** = FB/WhatsApp copy-paste posts.
 
 ---
 

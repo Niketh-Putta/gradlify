@@ -1,7 +1,8 @@
 # Gradlify Fast Track — £10K MRR War Plan
 ## 10 hours/day · viral + volume · print & tick
 
-**Companion doc:** `GRADLIFY-GROWTH-PROGRAM.md` (ops checklists)  
+**Main plan:** `GRADLIFY-MASTER-PLAN.md` (phases + creator partnerships + £10K path)  
+**Companion:** `GRADLIFY-GROWTH-PROGRAM.md` (FB posts + mock copy)  
 **Owner:** Niketh · **North star:** **£10,000 MRR**  
 **Today:** 6 subs · **~£121 MRR**
 
