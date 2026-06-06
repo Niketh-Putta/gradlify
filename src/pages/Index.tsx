@@ -12,8 +12,6 @@ import { AIUnavailableRedirect } from "@/components/AIUnavailableRedirect";
 // Lazy load all page components
 const ElevenPlusLanding = lazyWithRetry(() => import("@/pages/ElevenPlusLanding").then(m => ({ default: m.ElevenPlusLanding })));
 const Home = lazyWithRetry(() => import("@/pages/Home").then(m => ({ default: m.Home })));
-const Readiness = lazyWithRetry(() => import("@/pages/Readiness").then(m => ({ default: m.Readiness })));
-const ExamReadiness = lazyWithRetry(() => import("@/pages/ExamReadiness"));
 const MockExams = lazyWithRetry(() => import("@/pages/MockExams"));
 const MockExamPage = lazyWithRetry(() => import("@/pages/MockExamPage"));
 const LiveMockExams = lazyWithRetry(() => import("@/pages/LiveMockExams"));
@@ -41,7 +39,6 @@ const Compare = lazyWithRetry(() => import('@/pages/Compare'));
 import { User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { consumePostAuthRedirect } from '@/lib/postAuthRedirect';
-import { AI_FEATURE_ENABLED, EXAM_READINESS_ENABLED } from '@/lib/featureFlags';
 import { getDashboardPath, setSignupTrack } from '@/lib/track';
 import { isAbortLikeError } from '@/lib/errors';
 import { captureReferralFromSearch } from '@/lib/referrals';
@@ -61,12 +58,9 @@ type AppState = 'app' | 'settings';
 const protectedRoutes = [
   '/select-subject',
   '/practice-page',
-  '/exam-readiness',
   '/home',
   '/dashboard/11plus',
   '/dashboard/gcse',
-
-  '/readiness',
   '/mocks',
   '/mock-exam',
   '/live-mock-exams',
@@ -322,14 +316,8 @@ const Index = () => {
               <Route path="dashboard/gcse" element={<Navigate to="/dashboard" replace />} />
               <Route path="dashboard/11plus" element={<Navigate to="/dashboard" replace />} />
 
-              <Route
-                path="readiness"
-                element={EXAM_READINESS_ENABLED ? <Readiness /> : <Navigate to="/dashboard" replace />}
-              />
-              <Route
-                path="exam-readiness"
-                element={EXAM_READINESS_ENABLED ? <ExamReadiness /> : <Navigate to="/dashboard" replace />}
-              />
+              <Route path="readiness" element={<Navigate to="/dashboard" replace />} />
+              <Route path="exam-readiness" element={<Navigate to="/dashboard" replace />} />
               <Route path="connect" element={<Connect />} />
               
               <Route path="mocks" element={<MockExams />} />

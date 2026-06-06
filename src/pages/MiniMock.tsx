@@ -234,9 +234,9 @@ export function MiniMock() {
     return (
       <div className="space-y-6">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" onClick={() => navigate('/readiness')}>
+          <Button variant="ghost" onClick={() => navigate('/dashboard')}>
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Readiness
+            Back to Dashboard
           </Button>
         </div>
 
@@ -298,7 +298,7 @@ export function MiniMock() {
 
             <div className="flex gap-2">
               <Button 
-                onClick={() => navigate('/readiness')}
+                onClick={() => navigate('/dashboard')}
                 className="flex-1"
               >
                 <Target className="h-4 w-4 mr-2" />
@@ -330,7 +330,7 @@ export function MiniMock() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" onClick={() => navigate('/readiness')}>
+            <Button variant="ghost" onClick={() => navigate('/dashboard')}>
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back
             </Button>
@@ -404,9 +404,9 @@ export function MiniMock() {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
-        <Button variant="ghost" onClick={() => navigate('/readiness')}>
+        <Button variant="ghost" onClick={() => navigate('/dashboard')}>
           <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Readiness
+          Back to Dashboard
         </Button>
       </div>
 

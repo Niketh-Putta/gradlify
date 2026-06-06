@@ -8,7 +8,6 @@ import { PremiumUpgradeCard } from './PremiumUpgradeCard';
 import { AIUsageCard } from './AIUsageCard';
 import { ReadinessSummary } from './ReadinessSummary';
 import { MathRenderer } from './MathRenderer';
-import { PremiumUpgradeButton } from './PremiumUpgradeButton';
 
 import { AI_FEATURE_ENABLED } from "@/lib/featureFlags";
 import { useMembership } from '@/hooks/useMembership';
@@ -18,7 +17,6 @@ import {
   Settings, 
   LogOut, 
   Sparkles,
-  Target,
   Calendar
 } from "lucide-react";
 import { toast } from "sonner";
@@ -204,16 +202,6 @@ export function Dashboard({
                 <CardDescription>Access key features to boost your readiness</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
-                <Button 
-                  onClick={() => window.location.href = "/exam-readiness"}
-                  variant="outline" 
-                  className="w-full justify-start"
-                >
-                  <Target className="h-4 w-4 mr-2" />
-                  Exam Readiness Analytics
-                </Button>
-                <PremiumUpgradeButton />
-                
                 {AI_FEATURE_ENABLED ? (
                   <div className="mt-4 p-3 bg-secondary/30 rounded-lg">
                     <div className="flex items-center justify-between mb-2">

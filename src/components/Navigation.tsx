@@ -7,7 +7,6 @@ import { LogoMark } from "@/components/LogoMark";
 import { 
   Home, 
   MessageSquare, 
-  BarChart2, 
   BookOpen,
   Calendar,
   FileText,
@@ -26,7 +25,7 @@ import { User } from '@supabase/supabase-js';
 import { cn } from "@/lib/utils";
 import { useMembership } from '@/hooks/useMembership';
 import { useSubject } from '@/contexts/SubjectContext';
-import { AI_FEATURE_ENABLED, EXAM_READINESS_ENABLED, ULTRA_PLAN_ENABLED } from "@/lib/featureFlags";
+import { AI_FEATURE_ENABLED, ULTRA_PLAN_ENABLED } from "@/lib/featureFlags";
 import { resolveUserTrack } from '@/lib/track';
 import { getTrackLabel } from '@/lib/trackCurriculum';
 
@@ -162,7 +161,6 @@ export function Navigation({ user, profile, onSettings, onSignOut }: NavigationP
 
   const primaryNavigationItems = [
     { path: homePath, icon: Home, label: 'Home' },
-    ...(EXAM_READINESS_ENABLED ? [{ path: '/readiness', icon: BarChart2, label: 'Exam Readiness' }] : []),
     { path: '/notes', icon: BookMarked, label: 'Notes' },
     { path: `/mocks/${currentSubject}`, icon: FileText, label: 'Practice' },
   ];

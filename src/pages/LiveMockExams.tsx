@@ -428,6 +428,28 @@ export default function LiveMockExams() {
 
   const bothSubjectsRegistrationCard = (
     <div className="mb-3 rounded-[16px] border border-amber-200/80 bg-[linear-gradient(135deg,#fffaf0_0%,#ffffff_52%,#f8fbff_100%)] px-3 py-3 shadow-[0_14px_34px_rgba(146,64,14,0.07)] sm:px-4">
+      {bothSubjectsSignup && (
+        <div className="mb-3 rounded-[14px] border border-emerald-200 bg-emerald-50 px-3 py-3 shadow-[0_8px_18px_rgba(5,150,105,0.08)] sm:px-4">
+          <div className="flex items-start gap-2.5">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
+              <CheckCircle2 className="h-5 w-5" />
+            </span>
+            <div className="min-w-0">
+              <h3 className="text-sm font-bold tracking-tight text-emerald-800 sm:text-base">
+                You have registered for this mock
+              </h3>
+              <p className="mt-1 text-xs leading-5 text-emerald-700 sm:text-sm">
+                Your spot for the Maths &amp; English mock is locked in. You&apos;ll be able to sit it right here on the
+                day, no further action needed.
+              </p>
+              <span className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-white/70 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.08em] text-emerald-700 sm:text-xs">
+                <CalendarDays className="h-3.5 w-3.5" />
+                Sunday 14 June 2026
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="grid min-w-0 gap-3 lg:grid-cols-[1fr_0.9fr] lg:items-center">
         <div className="min-w-0">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100/90 px-2.5 py-1 text-[8px] font-black uppercase tracking-[0.14em] text-amber-800">

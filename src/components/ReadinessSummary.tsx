@@ -1,12 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { 
-  Target, 
-  ArrowRight
-} from "lucide-react";
-import { useNavigate } from 'react-router-dom';
+import { Target } from "lucide-react";
 import { Skeleton } from '@/components/ui/skeleton';
 import { useOverallReadiness } from '@/hooks/useOverallReadiness';
 
@@ -15,7 +10,6 @@ interface ReadinessSummaryProps {
 }
 
 export function ReadinessSummary({ userId }: ReadinessSummaryProps) {
-  const navigate = useNavigate();
   const { overall, loading } = useOverallReadiness(userId);
 
   const getReadinessColor = (score: number) => {
@@ -92,18 +86,6 @@ export function ReadinessSummary({ userId }: ReadinessSummaryProps) {
           />
         </div>
 
-
-        {/* Action Button */}
-        <div className="pt-2">
-          <Button 
-            variant="outline" 
-            className="w-full"
-            onClick={() => navigate('/exam-readiness')}
-          >
-            View Full Analytics
-            <ArrowRight className="h-4 w-4 ml-2" />
-          </Button>
-        </div>
       </CardContent>
     </Card>
   );

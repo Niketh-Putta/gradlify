@@ -512,7 +512,6 @@ export function Home() {
                 currentGrade={computedGrades?.displayCurrentGrade}
                 targetGrade={computedGrades?.displayPotentialGrade}
                 className="h-full"
-                onClick={() => navigate('/readiness')}
               />
             </div>
           )}
@@ -715,14 +714,6 @@ export function Home() {
                       {currentSubject === 'english' ? 'Your readiness across the curriculum' : getTrackReadinessSummaryLabel(userTrack)}
                     </CardDescription>
                   </div>
-                  <Button 
-                    variant="ghost" 
-                    onClick={() => navigate('/readiness')}
-                    className={currentSubject === 'english' ? "text-amber-500 hover:text-amber-500/80" : "text-primary hover:text-primary/80"}
-                  >
-                    View Details
-                    <ArrowRight className="h-4 w-4 ml-1" />
-                  </Button>
                 </div>
               </CardHeader>
               <CardContent className="pt-4">
@@ -749,10 +740,9 @@ export function Home() {
                       <div 
                         key={topic.key} 
                         className={cn(
-                          "group p-4 rounded-xl border border-border/60 bg-card hover:shadow-md cursor-pointer transition-all duration-300 hover:-translate-y-0.5",
-                          isEnglish ? "hover:border-amber-500/30" : "hover:border-primary/30"
-                        )}
-                        onClick={() => navigate('/readiness')}
+                        "group p-4 rounded-xl border border-border/60 bg-card transition-all duration-300",
+                        isEnglish ? "hover:border-amber-500/30" : "hover:border-primary/30"
+                      )}
                       >
                       <div className="flex items-center gap-3 mb-3">
                           <div 
@@ -811,25 +801,6 @@ export function Home() {
               <h3 className="font-medium text-foreground mb-1">Practice Questions</h3>
               <p className="text-sm text-muted-foreground">Test your knowledge with exam-style questions</p>
             </button>
-
-            {EXAM_READINESS_ENABLED && (
-              <button
-                onClick={() => navigate('/readiness')}
-                className={cn(
-                   "group p-5 rounded-xl bg-card border transition-all duration-200 text-left hover:shadow-sm",
-                   currentSubject === 'english' ? "border-border hover:border-amber-500/30" : "border-border hover:border-primary/30"
-                )}
-              >
-                <div className={cn(
-                   "p-3 rounded-xl w-fit mb-3 group-hover:scale-105 transition-transform duration-200",
-                   currentSubject === 'english' ? "bg-amber-500/10" : "bg-primary/10"
-                )}>
-                  <Gauge className={cn("h-5 w-5", currentSubject === 'english' ? "text-amber-500" : "text-primary")} />
-                </div>
-                <h3 className="font-medium text-foreground mb-1">Exam Readiness</h3>
-                <p className="text-sm text-muted-foreground">Track your progress across all topics</p>
-              </button>
-            )}
 
             {AI_FEATURE_ENABLED && (
               <button
