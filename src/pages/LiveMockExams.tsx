@@ -567,6 +567,10 @@ export default function LiveMockExams() {
           </Button>
         </div>
       </div>
+      <p className="mt-3 flex items-center gap-1.5 text-[10px] leading-4 text-slate-500 sm:text-xs">
+        <Sparkles className="h-3 w-3 shrink-0 text-amber-600" />
+        Completely <span className="font-semibold text-orange-700">free</span> for Gradlify Premium members (£9.99/month).
+      </p>
     </div>
   );
 
