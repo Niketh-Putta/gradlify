@@ -1,0 +1,14 @@
+---
+description: When drafting Gradlify emails, outreach, or Gmail replies for Niketh — use gradlify-email skill. Human voice, no em dashes, no AI phrases.
+globs: outreach/**,docs/NIKETH-KNOWLEDGE.md,progress/playbook.js
+alwaysApply: false
+---
+
+# Email and outreach writing
+
+When writing or editing partnership emails, parent replies, or outreach copy for Niketh:
+
+1. Read `.cursor/skills/gradlify-email/SKILL.md` and `voice.md`.
+2. No em dashes. No AI-sounding phrases (see voice.md banned list).
+3. Default partner goal: book a 10-min call, not negotiate in email.
+4. Show paste-ready draft; never auto-send without explicit approval.

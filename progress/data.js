@@ -1,13 +1,13 @@
 /**
  * Gradlify Mission Control — progress state
  * Updated by Cursor/Codex when milestones change.
- * Last updated: 2026-06-05
+ * Last updated: 2026-05-20
  */
 window.GRADLIFY_PROGRESS = {
   meta: {
-    lastUpdated: "2026-06-05",
-    updatedBy: "Cursor",
-    version: 1,
+    lastUpdated: "2026-05-20",
+    updatedBy: "Cursor · Block 1 E2E passed",
+    version: 3,
   },
   northStar: {
     mrr: 121,
@@ -30,7 +30,7 @@ window.GRADLIFY_PROGRESS = {
       number: 1,
       title: "Ship the funnel",
       subtitle: "Fix conversion before any big promotion",
-      status: "active",
+      status: "done",
       owner: "mixed",
       why: "100 parents to a broken funnel wastes trust forever.",
       steps: [
@@ -41,7 +41,7 @@ window.GRADLIFY_PROGRESS = {
         { id: "b1-5", title: "Post-mock parent report (score + weak topics)", status: "done", owner: "cursor", when: "Before Block 2" },
         { id: "b1-6", title: "Honest copy: 1 mock/day (not 2)", status: "done", owner: "cursor", when: "Before Block 2" },
         { id: "b1-7", title: "Deploy to production", status: "done", owner: "codex", when: "Before Block 2", note: "Commits 497af2b + 0e1895a" },
-        { id: "b1-8", title: "30-min logged-in E2E test", status: "active", owner: "niketh", when: "Today", note: "New email → signup → mock → parent card → £10 checkout" },
+        { id: "b1-8", title: "30-min logged-in E2E test", status: "done", owner: "niketh", when: "2026-05-20", note: "E2E passed — signup, onboarding, mock, parent card, £10 checkout" },
       ],
     },
     {
@@ -49,10 +49,11 @@ window.GRADLIFY_PROGRESS = {
       number: 2,
       title: "Partner calls",
       subtitle: "Voice closes deals — email books the call",
-      status: "pending",
+      status: "active",
       owner: "niketh",
       why: "Tutors trust your voice + demo, not a deck in email.",
       steps: [
+        { id: "b2-0", title: "Inbox prep (5 min)", status: "active", owner: "niketh", when: "First", note: "Both Gmail accounts · star unanswered · open tracker CSV" },
         { id: "b2-1", title: "Book call — Chris (Eleven Plus Success)", status: "pending", owner: "niketh", when: "Today/tomorrow", contact: "tutor@elevenplussuccess.com · 07771740569", note: "Deck sent — goal: trial + 30% affiliate" },
         { id: "b2-2", title: "Book call — Andy (Pinner Road)", status: "pending", owner: "niketh", when: "Today/tomorrow", contact: "prlcharrow@gmail.com", note: "Deck sent — goal: 30% + ?ref=PRLC live" },
         { id: "b2-3", title: "Book call — David (11 Plus Hub)", status: "pending", owner: "niketh", when: "Today/tomorrow", contact: "info@11plushub.com", note: "Deck sent — affiliate on member site" },
@@ -61,6 +62,8 @@ window.GRADLIFY_PROGRESS = {
         { id: "b2-6", title: "Run 10-min call script on each", status: "pending", owner: "niketh", when: "This week" },
         { id: "b2-7", title: "Send ?ref= link + caption after each yes", status: "pending", owner: "niketh", when: "Within 1h of call" },
         { id: "b2-8", title: "Manual deck attach if they reply DECK", status: "pending", owner: "niketh", when: "As needed", note: "~/Downloads/Gradlify-Partner-Overview.pptx" },
+        { id: "b2-9", title: "Priority 2 — only if they replied YES", status: "pending", owner: "niketh", when: "After inbox check", note: "Honest Mum, Willow, etc. — no cold email" },
+        { id: "b2-10", title: "Tina wait · Sutton never", status: "pending", owner: "niketh", when: "As needed", note: "Tina: no chase 7d · Sutton: do not contact" },
       ],
     },
     {
@@ -141,7 +144,7 @@ window.GRADLIFY_PROGRESS = {
   ],
   milestones: [
     { id: "m1", label: "Block 1 deployed", date: "2026-06-05", status: "done" },
-    { id: "m2", label: "Block 1 E2E tested", date: "2026-06-06", status: "active" },
+    { id: "m2", label: "Block 1 E2E tested", date: "2026-05-20", status: "done" },
     { id: "m3", label: "5 partner calls booked", date: "2026-06-08", status: "pending" },
     { id: "m4", label: "2 partners live with ?ref=", date: "2026-06-12", status: "pending" },
     { id: "m5", label: "FB reminder posts", date: "2026-06-07", status: "pending" },
@@ -149,7 +152,7 @@ window.GRADLIFY_PROGRESS = {
     { id: "m7", label: "3 new subs from mock", date: "2026-06-20", status: "pending" },
   ],
   successBy20June: [
-    { id: "s1", label: "Block 1 shipped and tested", done: false },
+    { id: "s1", label: "Block 1 shipped and tested", done: true },
     { id: "s2", label: "5 partner calls done (or 3+ completed)", done: false },
     { id: "s3", label: "2 partners live with ?ref= links", done: false },
     { id: "s4", label: "Poster in 3+ GCs + 5+ FB groups", done: false },
@@ -161,6 +164,5 @@ window.GRADLIFY_PROGRESS = {
     "Paid Meta ads",
     "Long email negotiations (book the call)",
     "Sutton 11 Plus",
-    "FB posts before Block 1 E2E passes",
   ],
 };

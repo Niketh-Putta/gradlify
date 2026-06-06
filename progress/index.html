@@ -470,15 +470,18 @@
     .steps { display: flex; flex-direction: column; gap: 0.45rem; }
 
     .step {
-      display: grid;
-      grid-template-columns: auto 1fr auto;
-      gap: 0.75rem;
-      align-items: start;
       padding: 0.7rem 0.85rem;
       background: var(--surface-2);
       border-radius: 10px;
       border: 1px solid transparent;
       transition: all 0.2s;
+    }
+
+    .step-row {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 0.75rem;
+      align-items: start;
     }
 
     .step:hover { border-color: var(--border); }
@@ -549,6 +552,137 @@
       margin-top: 0.3rem;
       padding-left: 0.5rem;
       border-left: 2px solid var(--border);
+    }
+
+    .substeps-toggle {
+      margin-top: 0.55rem;
+      margin-left: 2.1rem;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--blue);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0.2rem 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-family: var(--font-body);
+    }
+
+    .substeps-toggle:hover { color: var(--amber); }
+
+    .substeps-toggle .sub-chevron {
+      width: 0.85rem;
+      height: 0.85rem;
+      transition: transform 0.2s;
+    }
+
+    .step.substeps-open .substeps-toggle .sub-chevron { transform: rotate(90deg); }
+
+    .substeps-panel {
+      display: grid;
+      grid-template-rows: 0fr;
+      transition: grid-template-rows 0.25s ease;
+      margin-left: 2.1rem;
+      margin-top: 0;
+    }
+
+    .step.substeps-open .substeps-panel { grid-template-rows: 1fr; margin-top: 0.5rem; }
+
+    .substeps-inner { overflow: hidden; }
+
+    .substep {
+      display: flex;
+      gap: 0.6rem;
+      padding: 0.5rem 0;
+      border-top: 1px solid rgba(255,255,255,0.04);
+      font-size: 0.78rem;
+      line-height: 1.45;
+    }
+
+    .substep:first-child { border-top: none; padding-top: 0; }
+
+    .substep-icon {
+      flex-shrink: 0;
+      width: 1.25rem;
+      height: 1.25rem;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.6rem;
+      font-weight: 700;
+      margin-top: 0.1rem;
+    }
+
+    .substep-icon.action { background: var(--blue-dim); color: var(--blue); }
+    .substep-icon.check { background: var(--emerald-dim); color: var(--emerald); }
+    .substep-icon.message { background: var(--amber-dim); color: var(--amber); }
+    .substep-icon.script { background: rgba(167, 139, 250, 0.15); color: var(--violet); }
+    .substep-icon.list { background: rgba(255,255,255,0.06); color: var(--muted); }
+
+    .substep-body { flex: 1; min-width: 0; }
+
+    .substep-pass {
+      font-size: 0.7rem;
+      color: var(--emerald);
+      margin-top: 0.2rem;
+    }
+
+    .substep-label {
+      font-size: 0.62rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--amber);
+      margin-bottom: 0.25rem;
+    }
+
+    .substep-list { margin: 0.25rem 0 0 1rem; color: var(--muted); }
+    .substep-list li { margin-bottom: 0.2rem; }
+
+    .copy-block {
+      position: relative;
+      margin-top: 0.35rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.55rem 0.65rem;
+      padding-top: 1.75rem;
+      font-size: 0.72rem;
+      color: var(--text);
+      white-space: pre-wrap;
+      font-family: var(--font-body);
+      line-height: 1.5;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 0.35rem;
+      right: 0.35rem;
+      font-size: 0.6rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.25rem 0.45rem;
+      border-radius: 5px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--muted);
+      cursor: pointer;
+      font-family: var(--font-body);
+    }
+
+    .copy-btn:hover { color: var(--amber); border-color: rgba(245,185,66,0.3); }
+    .copy-btn.copied { color: var(--emerald); border-color: rgba(61,214,140,0.3); }
+
+    .script-line {
+      padding: 0.3rem 0;
+      border-left: 2px solid var(--violet);
+      padding-left: 0.5rem;
+      margin-bottom: 0.25rem;
+      color: var(--muted);
     }
 
     /* Bottom grids */
@@ -705,15 +839,18 @@
     </section>
 
     <p class="footer-note">
-      Open this file locally: <code>progress/index.html</code> · State lives in <code>progress/data.js</code> — ask Cursor to update when milestones change.
+      Open: <code>progress/index.html</code> · Status: <code>data.js</code> · Playbooks: <code>playbook.js</code> — ask Cursor to update when things change.
     </p>
   </div>
 
   <script src="data.js"></script>
+  <script src="playbook.js"></script>
   <script>
     const DATA = window.GRADLIFY_PROGRESS;
+    const PLAYBOOK = window.GRADLIFY_PLAYBOOK || {};
     const LS_KEY = "gradlify-mc-overrides";
     const LS_SUCCESS = "gradlify-mc-success";
+    const LS_SUBSTEPS = "gradlify-mc-substeps-open";
 
     function getOverrides() {
       try { return JSON.parse(localStorage.getItem(LS_KEY) || "{}"); } catch { return {}; }
@@ -774,6 +911,114 @@
 
     let currentFilter = "all";
     let openBlocks = new Set(["block-1", "block-2"]);
+
+    const DEFAULT_OPEN_SUBSTEPS = ["b2-0", "b2-1"];
+
+    function getOpenSubsteps() {
+      try {
+        const raw = localStorage.getItem(LS_SUBSTEPS);
+        if (raw === null) return new Set(DEFAULT_OPEN_SUBSTEPS);
+        return new Set(JSON.parse(raw));
+      } catch { return new Set(DEFAULT_OPEN_SUBSTEPS); }
+    }
+
+    let openSubsteps = getOpenSubsteps();
+
+    function saveOpenSubsteps() {
+      localStorage.setItem(LS_SUBSTEPS, JSON.stringify([...openSubsteps]));
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function renderSubsteps(stepId) {
+      const items = PLAYBOOK[stepId];
+      if (!items || !items.length) return "";
+
+      const isOpen = openSubsteps.has(stepId);
+      const count = items.length;
+
+      return `
+        <button type="button" class="substeps-toggle" data-substeps="${stepId}">
+          <svg class="sub-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg>
+          ${isOpen ? "Hide" : "Show"} ${count} step${count === 1 ? "" : "s"}
+        </button>
+        <div class="substeps-panel">
+          <div class="substeps-inner">
+            ${items.map((item, i) => renderSubstepItem(item, i)).join("")}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderSubstepItem(item, index) {
+      const icons = { action: "→", check: "✓", message: "✉", script: "🎙", list: "•" };
+      const icon = icons[item.type] || "·";
+
+      if (item.type === "message") {
+        const id = `copy-${index}-${Math.random().toString(36).slice(2, 7)}`;
+        return `
+          <div class="substep">
+            <span class="substep-icon message">${icon}</span>
+            <div class="substep-body">
+              <div class="substep-label">${escapeHtml(item.label || "Copy-paste")}</div>
+              <div class="copy-block" id="${id}">
+                <button type="button" class="copy-btn" data-copy="${id}">Copy</button>
+                ${escapeHtml(item.text)}
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      if (item.type === "script") {
+        return `
+          <div class="substep">
+            <span class="substep-icon script">${icon}</span>
+            <div class="substep-body">
+              <div class="substep-label">${escapeHtml(item.title || "Script")}</div>
+              ${(item.lines || []).map(line => `<div class="script-line">${escapeHtml(line)}</div>`).join("")}
+            </div>
+          </div>
+        `;
+      }
+
+      if (item.type === "list") {
+        return `
+          <div class="substep">
+            <span class="substep-icon list">${icon}</span>
+            <div class="substep-body">
+              <strong>${escapeHtml(item.title || "")}</strong>
+              <ul class="substep-list">${(item.items || []).map(li => `<li>${escapeHtml(li)}</li>`).join("")}</ul>
+            </div>
+          </div>
+        `;
+      }
+
+      if (item.type === "check") {
+        return `
+          <div class="substep">
+            <span class="substep-icon check">${icon}</span>
+            <div class="substep-body">
+              ${escapeHtml(item.text)}
+              ${item.pass ? `<div class="substep-pass">Pass if: ${escapeHtml(item.pass)}</div>` : ""}
+            </div>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="substep">
+          <span class="substep-icon action">${icon}</span>
+          <div class="substep-body">${escapeHtml(item.text)}</div>
+        </div>
+      `;
+    }
 
     function renderStats() {
       const ns = DATA.northStar;
@@ -884,19 +1129,24 @@
               <div class="steps">
                 ${block.steps.map(step => {
                   const st = getEffectiveStatus(step);
+                  const hasPlaybook = PLAYBOOK[step.id]?.length;
+                  const subOpen = openSubsteps.has(step.id);
                   return `
-                    <div class="step ${st}" data-step="${step.id}">
-                      <div class="step-check" title="Toggle (saved locally)">${st === "done" ? "✓" : ""}</div>
-                      <div class="step-content">
-                        <h3>${step.title}</h3>
-                        <div class="step-meta">
-                          ${statusBadge(st)}
-                          ${ownerBadge(step.owner)}
-                          ${step.contact ? `<span class="badge badge-pending">${step.contact}</span>` : ""}
+                    <div class="step ${st} ${subOpen ? "substeps-open" : ""}" data-step="${step.id}">
+                      <div class="step-row">
+                        <div class="step-check" title="Toggle (saved locally)">${st === "done" ? "✓" : ""}</div>
+                        <div class="step-content">
+                          <h3>${step.title}</h3>
+                          <div class="step-meta">
+                            ${statusBadge(st)}
+                            ${ownerBadge(step.owner)}
+                            ${step.contact ? `<span class="badge badge-pending">${step.contact}</span>` : ""}
+                          </div>
+                          ${step.note ? `<p class="step-note">${step.note}</p>` : ""}
+                          ${hasPlaybook ? renderSubsteps(step.id) : ""}
                         </div>
-                        ${step.note ? `<p class="step-note">${step.note}</p>` : ""}
+                        <div class="step-when">${step.when || ""}</div>
                       </div>
-                      <div class="step-when">${step.when || ""}</div>
                     </div>
                   `;
                 }).join("")}
@@ -920,6 +1170,33 @@
             const cur = getEffectiveStatus(step);
             const next = cur === "done" ? "pending" : "done";
             setOverride(stepId, next);
+          });
+        });
+
+        el.querySelectorAll(".substeps-toggle").forEach(btn => {
+          btn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const id = btn.dataset.substeps;
+            if (openSubsteps.has(id)) openSubsteps.delete(id);
+            else openSubsteps.add(id);
+            saveOpenSubsteps();
+            renderBlocks();
+          });
+        });
+
+        el.querySelectorAll(".copy-btn").forEach(btn => {
+          btn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const el = document.getElementById(btn.dataset.copy);
+            if (!el) return;
+            navigator.clipboard.writeText(el.textContent).then(() => {
+              btn.textContent = "Copied";
+              btn.classList.add("copied");
+              setTimeout(() => {
+                btn.textContent = "Copy";
+                btn.classList.remove("copied");
+              }, 2000);
+            });
           });
         });
 
