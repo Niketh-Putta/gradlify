@@ -2,7 +2,8 @@
 
 ## Before you send
 
-- [ ] Stripe live mock is **£9.99** until Monday (then **£13.99** if you claim that in the post)
+- [ ] Deploy edge functions so **£9.99** caps at **60 signups**, then **£14.99** (see below)
+- [ ] Optional: create Stripe **£14.99** one-time Price → `LIVE_MOCK_STANDARD_PRICE_ID_LIVE`
 - [ ] Image ready (ChatGPT or screenshot from `14-june-mock-poster.html`)
 
 ---
@@ -26,26 +27,28 @@
 ## Step 2 — Send in WhatsApp (exact order)
 
 1. Open **The Level Field** group
-2. Tap **attach** → **Gallery** → select `mock-14-june-poster.png`
-3. In the caption box, paste from `outreach/wa/mock-gc-caption.txt` (see below)
-4. Tap **Send** (one message: image + caption)
+2. **Optional:** 15 sec voice note from `mock-viral-share-playbook.md` (forward ask + Monday price)
+3. Tap **attach** → **Gallery** → select `mock-14-june-poster.png`
+4. In the caption box, paste from `outreach/wa/mock-gc-caption.txt`
+5. Tap **Send** (one message: image + caption)
+6. **2 min later:** paste `mock-forward-ask.txt` as a separate text message
 
-**Optional (more FOMO):** 15 sec voice note *before* the image:  
-*"Sunday mock is locked — weekend price £9.99 ends Monday."*
+If a parent asks what to forward elsewhere, send them `mock-forward-for-parents.txt` in DM.
 
 ---
 
-## Step 3 — Monday reminder (copy in `mock-weekend-reminder.txt`)
+## Step 0 — Deploy spot pricing (once)
 
-Send text only (no image needed):
-
+```bash
+supabase functions deploy live-mock-signup-count
+supabase functions deploy create-live-mock-payment
 ```
-Last day at £9.99 — goes to £13.99 tomorrow.
 
-Sun 14 June · 4:00–6:30pm
-gradlify.com/live-mock-exams?ref=LEVELFIELD
-Premium: free.
-```
+First **60 registrations** → £9.99 at checkout. **61+** → £14.99.
+
+## Step 3 — Spots reminder (`mock-spots-reminder.txt`)
+
+Send when spots are low or after a burst of signups.
 
 ---
 

@@ -1,0 +1,26 @@
+Improve this 11+ mock exam WhatsApp poster. Keep the same dark navy gradient, amber WEEKEND ONLY badge, and overall layout — make it sharper and more urgent for parents scrolling fast.
+
+CHANGES TO MAKE:
+1. Add a thin amber banner or second badge under WEEKEND ONLY: "ENDS MONDAY"
+2. Make "£9.99 this weekend" even larger — main focal point after the headline
+3. Strikethrough or dim "£13.99 from Monday" so the price jump feels real
+4. Under "Nearly 50 families registered" add one short urgency line in white: "Don't miss the live window"
+5. Change grey credibility line to exactly: "GL examiner-backed mock exams"
+6. Add tiny subline under Sunday 14 June: "One of the only mocks built to real GL standard"
+7. Bottom: keep gradlify.com left, Premium: FREE right — add centre or above footer: "Register now" in amber (no button graphic, just text)
+8. More contrast on all text — must read clearly on a phone thumbnail
+9. No photos of children, no clutter, no fake logos, 1080x1080 square
+
+KEEP EXACT TEXT:
+- WEEKEND ONLY
+- 11+ LIVE MOCK
+- Sunday 14 June
+- 4:00 – 6:30pm · ~2h 30m · Maths + English
+- £9.99 this weekend
+- Then £13.99 from Monday
+- Nearly 50 families registered
+- GL examiner-backed mock exams
+- gradlify.com
+- Premium: FREE
+
+Style: premium UK ed-tech, urgent but trustworthy, not scammy.

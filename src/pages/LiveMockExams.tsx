@@ -20,6 +20,11 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAppContext } from "@/hooks/useAppContext";
 import { useMembership } from "@/hooks/useMembership";
+import {
+  formatLiveMockPrice,
+  LIVE_MOCK_DISCOUNT_PRICE_GBP,
+  LIVE_MOCK_MIN_DISPLAYED_SIGNUPS,
+} from "@/lib/liveMockPricing";
 
 // Toggle to re-enable the old English-only live mock (9 May 2026). Set to true to show it again.
 const SHOW_ENGLISH_LIVE_MOCK = false;
@@ -38,11 +43,13 @@ const BOTH_SUBJECTS_LIVE_MOCK = {
   title: "Maths and English Mock",
 };
 
-const MIN_DISPLAYED_BOTH_SUBJECTS_SIGNUPS = 48;
-const BOTH_SUBJECTS_SIGNUP_DISPLAY_OFFSET = 22;
+const MIN_DISPLAYED_BOTH_SUBJECTS_SIGNUPS = LIVE_MOCK_MIN_DISPLAYED_SIGNUPS;
 
-const getDisplayedBothSubjectsSignupCount = (count: number) =>
-  Math.max(MIN_DISPLAYED_BOTH_SUBJECTS_SIGNUPS, count + BOTH_SUBJECTS_SIGNUP_DISPLAY_OFFSET);
+// Scarcity (FOMO) pricing for the Maths + English mock: the first 60 sign-ups get
+// the early price; after that the displayed price reverts to the regular price.
+const EARLY_BIRD_SPOT_CAP = 60;
+const EARLY_BIRD_PRICE = "£9.99";
+const REGULAR_LIVE_MOCK_PRICE = "£14.99";
 
 type SignupRow = {
   id: string;
@@ -77,6 +84,7 @@ export default function LiveMockExams() {
   const [signup, setSignup] = useState<SignupRow | null>(null);
   const [bothSubjectsSignup, setBothSubjectsSignup] = useState<SignupRow | null>(null);
   const [bothSubjectsSignupCount, setBothSubjectsSignupCount] = useState(MIN_DISPLAYED_BOTH_SUBJECTS_SIGNUPS);
+  const [liveMockPriceGbp, setLiveMockPriceGbp] = useState(LIVE_MOCK_DISCOUNT_PRICE_GBP);
   /** Locks "Start" once an attempt row exists (created on first Start click). */
   const [attemptStatus, setAttemptStatus] = useState<LiveMockAttemptStatus>("none");
 
@@ -88,7 +96,14 @@ export default function LiveMockExams() {
       if (error) throw error;
 
       const count = typeof data?.count === "number" ? data.count : 0;
-      setBothSubjectsSignupCount(getDisplayedBothSubjectsSignupCount(count));
+      const displayedCount =
+        typeof data?.displayedCount === "number"
+          ? data.displayedCount
+          : Math.max(MIN_DISPLAYED_BOTH_SUBJECTS_SIGNUPS, count);
+      setBothSubjectsSignupCount(displayedCount);
+      setLiveMockPriceGbp(
+        typeof data?.currentPriceGbp === "number" ? data.currentPriceGbp : LIVE_MOCK_DISCOUNT_PRICE_GBP,
+      );
     } catch (error) {
       console.error("Failed to load live mock signup count", error);
       setBothSubjectsSignupCount((count) => Math.max(MIN_DISPLAYED_BOTH_SUBJECTS_SIGNUPS, count));
@@ -404,6 +419,11 @@ export default function LiveMockExams() {
     { label: "Questions", value: String(LIVE_MOCK.questions), icon: FileText },
   ];
 
+  // Spots left at the early price are derived from the displayed signup count: every
+  // real payment raises bothSubjectsSignupCount, which lowers earlyBirdSpotsLeft.
+  const earlyBirdSpotsLeft = Math.max(0, EARLY_BIRD_SPOT_CAP - bothSubjectsSignupCount);
+  const earlyBirdActive = earlyBirdSpotsLeft > 0;
+
   const bothSubjectsRegistrationCard = (
     <div className="mb-3 rounded-[16px] border border-amber-200/80 bg-[linear-gradient(135deg,#fffaf0_0%,#ffffff_52%,#f8fbff_100%)] px-3 py-3 shadow-[0_14px_34px_rgba(146,64,14,0.07)] sm:px-4">
       <div className="grid min-w-0 gap-3 lg:grid-cols-[1fr_0.9fr] lg:items-center">
@@ -423,17 +443,29 @@ export default function LiveMockExams() {
           {!hasPaidPremiumLiveMockAccess && (
             <div className="mt-3 rounded-[14px] border border-orange-200 bg-[linear-gradient(135deg,#fff4e6_0%,#fff_70%)] px-3 py-2.5 shadow-[0_8px_18px_rgba(234,88,12,0.08)]">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-orange-600 px-2.5 py-1 text-[8px] font-black uppercase tracking-[0.14em] text-white">
-                <Clock3 className="h-3 w-3" />
-                Early booking discount
+                <UsersRound className="h-3 w-3" />
+                {earlyBirdActive ? `Only ${earlyBirdSpotsLeft} early spots left` : "Early spots gone"}
               </span>
               <p className="mt-2 text-xs leading-5 text-slate-700 sm:text-sm">
-                <span className="font-black text-orange-700">£9.99 until Sunday midnight</span> - after that the
-                price returns to <span className="font-semibold text-slate-500 line-through">£14.99</span>.
+                {earlyBirdActive ? (
+                  <>
+                    {EARLY_BIRD_PRICE} is locked to the first {EARLY_BIRD_SPOT_CAP} people - only{" "}
+                    <span className="font-black text-orange-700">{earlyBirdSpotsLeft} spots left at {EARLY_BIRD_PRICE}</span>{" "}
+                    before it rises to{" "}
+                    <span className="font-semibold text-slate-500 line-through">{REGULAR_LIVE_MOCK_PRICE}</span>.
+                  </>
+                ) : (
+                  <>
+                    The {EARLY_BIRD_PRICE} early spots are gone. Registration is now{" "}
+                    <span className="font-black text-orange-700">{REGULAR_LIVE_MOCK_PRICE}</span>.
+                  </>
+                )}
               </p>
               <p className="mt-1.5 text-xs leading-5 text-slate-600 sm:text-sm">
-                Don&apos;t miss out - very few mocks backed by <span className="rounded bg-amber-100/70 px-1 font-black text-orange-800">ex-GL examiners</span> are released every year. This is
-                probably the only one your students will have access to before their real exam. Check how prepared
-                your child really is&hellip;
+                Don&apos;t miss out - very few mocks backed by{" "}
+                <span className="rounded bg-amber-100/70 px-1 font-black text-orange-800">ex-GL examiners</span> are
+                released every year. This is probably the only one your students will have access to before their real
+                exam.
               </p>
             </div>
           )}
@@ -466,20 +498,28 @@ export default function LiveMockExams() {
           <div className="flex items-center justify-between gap-3">
             <div>
               <div className="text-[8px] font-black uppercase tracking-[0.14em] text-slate-400">
-                {hasPaidPremiumLiveMockAccess ? "Paid Premium registration" : "Early booking price"}
+                {hasPaidPremiumLiveMockAccess ? "Paid Premium registration" : "Registration price"}
               </div>
               <div className="mt-1 flex items-baseline gap-2">
                 <div className="text-2xl font-bold tracking-tight text-slate-950">
-                  {hasPaidPremiumLiveMockAccess ? "Included" : "£9.99"}
+                  {hasPaidPremiumLiveMockAccess
+                    ? "Included"
+                    : earlyBirdActive
+                      ? EARLY_BIRD_PRICE
+                      : REGULAR_LIVE_MOCK_PRICE}
                 </div>
-                {!hasPaidPremiumLiveMockAccess && (
-                  <span className="text-sm font-semibold text-slate-400 line-through">£14.99</span>
+                {!hasPaidPremiumLiveMockAccess && earlyBirdActive && (
+                  <span className="text-sm font-semibold text-slate-400 line-through">
+                    {REGULAR_LIVE_MOCK_PRICE}
+                  </span>
                 )}
               </div>
               {!hasPaidPremiumLiveMockAccess && (
                 <div className="mt-1 inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.08em] text-orange-700">
-                  <Clock3 className="h-3 w-3" />
-                  Until Sunday midnight
+                  <UsersRound className="h-3 w-3" />
+                  {earlyBirdActive
+                    ? `Only ${earlyBirdSpotsLeft} of ${EARLY_BIRD_SPOT_CAP} left at ${EARLY_BIRD_PRICE}`
+                    : `Early ${EARLY_BIRD_PRICE} spots gone`}
                 </div>
               )}
             </div>
@@ -515,12 +555,12 @@ export default function LiveMockExams() {
               </span>
             ) : isPremiumTrialing ? (
               <span className="inline-flex items-center gap-2">
-                Trial users pay £9.99
+                Trial users pay {formatLiveMockPrice(liveMockPriceGbp)}
                 <ArrowRight className="h-3.5 w-3.5" />
               </span>
             ) : (
               <span className="inline-flex items-center gap-2">
-                Register and pay £9.99
+                Register and pay {formatLiveMockPrice(liveMockPriceGbp)}
                 <ArrowRight className="h-3.5 w-3.5" />
               </span>
             )}

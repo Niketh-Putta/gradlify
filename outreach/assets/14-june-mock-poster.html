@@ -2,56 +2,190 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Gradlify 14 June Mock Poster</title>
+  <title>Gradlify 14 June Mock Poster — Premium</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: #111; display: flex; gap: 24px; padding: 24px; font-family: system-ui, sans-serif; flex-wrap: wrap; }
-    .poster, .story {
-      background: linear-gradient(145deg, #0f172a 0%, #1e293b 55%, #0c4a6e 100%);
-      color: #f8fafc;
-      border-radius: 24px;
-      padding: 48px;
+    body {
+      background: #e8e6e1;
+      display: flex;
+      gap: 32px;
+      padding: 32px;
+      font-family: 'DM Sans', system-ui, sans-serif;
+      flex-wrap: wrap;
+    }
+    .poster {
+      width: 1080px;
+      height: 1080px;
+      background: #F9F8F3;
+      color: #1D1D1D;
+      padding: 72px 80px;
       position: relative;
       overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
     }
-    .poster { width: 1080px; height: 1080px; }
-    .story { width: 1080px; height: 1920px; padding-top: 120px; }
-    .badge { display: inline-block; background: #f59e0b; color: #111; font-weight: 800; font-size: 22px; padding: 10px 18px; border-radius: 999px; letter-spacing: 0.04em; text-transform: uppercase; }
-    h1 { font-size: 72px; line-height: 1.05; margin: 28px 0 16px; font-weight: 900; letter-spacing: -0.03em; }
-    .sub { font-size: 34px; color: #cbd5e1; line-height: 1.35; max-width: 90%; }
-    .price { margin-top: 40px; font-size: 42px; font-weight: 700; }
-    .price span { color: #4ade80; }
-    .footer { position: absolute; left: 48px; right: 48px; bottom: 48px; display: flex; justify-content: space-between; align-items: flex-end; font-size: 28px; color: #94a3b8; }
-    .brand { font-size: 36px; font-weight: 800; color: #fff; }
-    .glow { position: absolute; width: 500px; height: 500px; border-radius: 50%; background: radial-gradient(circle, rgba(245,158,11,0.25), transparent 70%); top: -120px; right: -80px; }
-    .note { margin-top: 16px; font-size: 24px; color: #64748b; }
+    .wash {
+      position: absolute;
+      top: -120px;
+      left: -80px;
+      width: 520px;
+      height: 520px;
+      background: radial-gradient(circle, rgba(37, 99, 235, 0.07) 0%, transparent 68%);
+      pointer-events: none;
+    }
+    .top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      position: relative;
+      z-index: 1;
+    }
+    .brand-name { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; }
+    .brand-tag { font-size: 18px; color: #64748B; margin-top: 6px; }
+    .badge {
+      border: 1.5px solid #2563EB;
+      color: #2563EB;
+      background: #fff;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 10px 18px;
+      border-radius: 999px;
+    }
+    .hero { position: relative; z-index: 1; margin-top: 48px; }
+    .hero h1 {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 96px;
+      font-weight: 700;
+      line-height: 1.02;
+      letter-spacing: -0.03em;
+      color: #1D1D1D;
+    }
+    .date {
+      font-size: 34px;
+      color: #64748B;
+      margin-top: 20px;
+      font-weight: 500;
+    }
+    .rule {
+      height: 1px;
+      background: #E2E8F0;
+      margin: 40px 0;
+      width: 100%;
+    }
+    .details {
+      font-size: 22px;
+      color: #64748B;
+      letter-spacing: 0.01em;
+      line-height: 1.5;
+    }
+    .cred {
+      font-size: 20px;
+      color: #94A3B8;
+      font-style: italic;
+      margin-top: 16px;
+    }
+    .mid { position: relative; z-index: 1; }
+    .price-card {
+      background: #fff;
+      border: 1px solid #E2E8F0;
+      border-radius: 16px;
+      padding: 36px 40px;
+      box-shadow: 0 8px 32px rgba(29, 29, 29, 0.04);
+      display: inline-block;
+      min-width: 420px;
+    }
+    .price-main {
+      font-size: 72px;
+      font-weight: 700;
+      color: #059669;
+      letter-spacing: -0.03em;
+      line-height: 1;
+    }
+    .price-sub {
+      font-size: 22px;
+      color: #64748B;
+      margin-top: 8px;
+    }
+    .price-was {
+      font-size: 24px;
+      color: #94A3B8;
+      text-decoration: line-through;
+      margin-top: 12px;
+    }
+    .proof {
+      margin-top: 36px;
+      font-size: 20px;
+      font-weight: 600;
+      color: #B45309;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .urgency {
+      margin-top: 12px;
+      font-size: 22px;
+      color: #1D1D1D;
+      font-weight: 500;
+    }
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      position: relative;
+      z-index: 1;
+      padding-top: 24px;
+      border-top: 1px solid #E2E8F0;
+    }
+    .url { font-size: 28px; font-weight: 700; color: #2563EB; }
+    .premium {
+      font-size: 20px;
+      color: #64748B;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #059669;
+    }
   </style>
 </head>
 <body>
   <div class="poster">
-    <div class="glow"></div>
-    <div class="badge">Live mock</div>
-    <h1>11+ Mock Exam<br/>Sunday 14 June</h1>
-    <p class="sub">Sunday 14 June · 4:00–6:30pm · Score + weak topics after</p>
-    <p class="price"><span>£9.99</span> this weekend · then <span>£13.99</span> · <span>FREE</span> Premium</p>
-    <p class="note">Extra practice between tutoring - not replacing tuition</p>
-    <div class="footer">
-      <div class="brand">gradlify.com</div>
-      <div>Built by a QE Boys student</div>
+    <div class="wash"></div>
+    <div class="top">
+      <div>
+        <div class="brand-name">Gradlify</div>
+        <div class="brand-tag">11+ Practised Properly.</div>
+      </div>
+      <div class="badge">10 spots left</div>
     </div>
-  </div>
-  <div class="story">
-    <div class="glow"></div>
-    <div class="badge">14 June 2026</div>
-    <h1 style="font-size:88px">Live 11+ Mock</h1>
-    <p class="sub" style="font-size:40px;margin-top:24px">Sunday 14 June · 4:00–6:30pm · Can't make it? Same mock anytime</p>
-    <p class="price" style="margin-top:80px;font-size:48px"><span>£9.99</span> this weekend</p>
-    <p class="price" style="margin-top:16px;font-size:40px">Then <span>£13.99</span></p>
-    <p class="price" style="margin-top:16px;font-size:48px"><span>FREE</span> if you're on Premium</p>
-    <p class="sub" style="margin-top:80px;font-size:36px">gradlify.com/live-mock-exams</p>
-    <div class="footer" style="bottom:120px">
-      <div class="brand">Gradlify</div>
-      <div>Share in your 11+ group</div>
+    <div class="hero">
+      <h1>11+ Live Mock</h1>
+      <div class="date">Sunday 14 June · 4:00–6:30pm</div>
+      <div class="rule"></div>
+      <div class="details">~2 hours 30 minutes · Maths &amp; English · GL examiner-backed</div>
+      <div class="cred">Built with past GL exam board markers</div>
+    </div>
+    <div class="mid">
+      <div class="price-card">
+        <div class="price-main">£9.99</div>
+        <div class="price-sub">next 10 spots only</div>
+        <div class="price-was">£14.99 after</div>
+      </div>
+      <div class="proof">Nearly 50 families registered</div>
+      <div class="urgency">Don't miss the live window</div>
+    </div>
+    <div class="footer">
+      <div class="url">gradlify.com</div>
+      <div class="premium"><span class="dot"></span> Premium · Free</div>
     </div>
   </div>
 </body>
