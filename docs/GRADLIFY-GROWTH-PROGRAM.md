@@ -12,15 +12,19 @@
 
 ## Where you are today (baseline)
 
-| Metric | Actual |
+**Refresh live numbers before planning:** `python3 scripts/fetch-metrics-snapshot.py` → `progress/metrics-snapshot.js`
+
+| Metric | Actual (live API, Jun 2026) |
 |--------|--------|
-| Paying subscribers | **6** (5 × £19.99/mo + 1 × £199–250/yr) |
-| Approx. MRR | **~£121/mo** (5×19.99 + annual÷12) |
-| Cash collected (annual) | **£250** upfront (1 customer) |
-| 14 June mock - paid £10 | **1** |
-| 14 June mock - enrolled (subs) | **4** |
-| **Total mock enrolled** | **5** |
-| Live mock list goal (this doc) | **20 paid + subs combined** |
+| Active paying subscribers | **4** (Stripe/profile active) |
+| Trialing | **2–3** (check Growth Tracker) |
+| Premium funnel (active + trialing) | **6–7** |
+| Approx. MRR | **~£250/mo** (admin-analytics; annual fix deploying) |
+| **14 June mock enrolled (real)** | **22** |
+| **14 June mock displayed on site** | **77** (offset for social proof) |
+| **Live mock cash collected** | **£400+** (Stripe checkout; confirm in Growth Tracker) |
+| Mock price now | **£19.99** + code **LEVELFIELD** (3 promo spots left) |
+| Live mock stretch goal | **50–80** enrolled by 14 June |
 
 **Revenue math you are optimizing:**
 - Every new **£19.99/mo** sub ≈ **+£20 MRR**

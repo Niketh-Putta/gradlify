@@ -258,9 +258,19 @@ export default function GrowthTracker() {
     setErrorText(null);
 
     try {
-      const { data, error } = await supabase.functions.invoke<ApiPayload>("admin-analytics", {
-        body: { days: DAYS_LOOKBACK },
-      });
+      const [{ data, error }, mockCountResult] = await Promise.all([
+        supabase.functions.invoke<ApiPayload>("admin-analytics", {
+          body: { days: DAYS_LOOKBACK },
+        }),
+        supabase.functions.invoke<{
+          count?: number;
+          displayedCount?: number;
+          promoSpotsRemaining?: number;
+          currentPriceGbp?: number;
+        }>("live-mock-signup-count", {
+          body: { mockSlug: "both_subjects_live_mock" },
+        }),
+      ]);
 
       if (error) throw error;
       if (!data?.ok || !data.data) {
@@ -268,6 +278,15 @@ export default function GrowthTracker() {
       }
 
       const api = data.data;
+      if (mockCountResult.data && api.kpis) {
+        api.kpis.liveMock = {
+          enrolledReal: mockCountResult.data.count,
+          enrolledDisplayed: mockCountResult.data.displayedCount,
+          promoSpotsRemaining: mockCountResult.data.promoSpotsRemaining,
+          currentPriceGbp: mockCountResult.data.currentPriceGbp,
+          ...(typeof api.kpis.liveMock === "object" ? api.kpis.liveMock : {}),
+        };
+      }
       const timeline: TrendPoint[] = (api.timeline ?? []).map((point) => {
         const day = new Date(point.date);
         return {
@@ -354,6 +373,12 @@ export default function GrowthTracker() {
   const premiumConversions = snapshot?.totals.premiumSignups ?? 0;
   const monthlyRevenue = snapshot?.kpis?.earnings?.monthly ?? 0;
   const payingUsers = snapshot?.payingUsers ?? [];
+  const trialingCount = payingUsers.filter(
+    (user) => user.status === "trialing" && !user.cancel_at_period_end
+  ).length;
+  const liveMockKpis = snapshot?.kpis?.liveMock as
+    | { enrolledReal?: number; revenueGbp?: number; promoSpotsRemaining?: number }
+    | undefined;
 
   return (
     <div className="w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 bg-slate-50/50 min-h-screen">
@@ -387,7 +412,7 @@ export default function GrowthTracker() {
       {snapshot ? (
         <div className="max-w-7xl mx-auto space-y-8 animate-in fade-in duration-500 slide-in-from-bottom-2">
           {/* Executive Overview Row */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <Card className="border-slate-200 shadow-sm border-t-2 border-t-emerald-500">
               <CardContent className="p-6">
                 <div className="flex justify-between items-start">
@@ -421,12 +446,54 @@ export default function GrowthTracker() {
                   </div>
                 </div>
                 <div className="flex items-center gap-1 mt-4 text-sm">
-                  <span className="text-slate-400">Currently active profiles</span>
+                  <span className="text-slate-400">Active paying (not trialing)</span>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="border-slate-200 shadow-sm border-t-2 border-t-blue-500">
+            <Card className="border-slate-200 shadow-sm border-t-2 border-t-amber-500">
+              <CardContent className="p-6">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="text-sm font-medium text-slate-500">11+ Trialing</p>
+                    <h3 className="text-3xl font-bold text-slate-900 mt-2">
+                      {formatNumber(trialingCount)}
+                    </h3>
+                  </div>
+                  <div className="p-3 bg-amber-50 text-amber-600 rounded-xl">
+                    <Users className="w-6 h-6" />
+                  </div>
+                </div>
+                <div className="flex items-center gap-1 mt-4 text-sm">
+                  <span className="text-slate-400">3-day trial in progress</span>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-slate-200 shadow-sm border-t-2 border-t-orange-500">
+              <CardContent className="p-6">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="text-sm font-medium text-slate-500">14 June Mock Enrolled</p>
+                    <h3 className="text-3xl font-bold text-slate-900 mt-2">
+                      {formatNumber(liveMockKpis?.enrolledReal ?? 0)}
+                    </h3>
+                  </div>
+                  <div className="p-3 bg-orange-50 text-orange-600 rounded-xl">
+                    <PoundSterling className="w-6 h-6" />
+                  </div>
+                </div>
+                <div className="flex items-center gap-1 mt-4 text-sm">
+                  <span className="text-slate-400">
+                    {liveMockKpis?.revenueGbp
+                      ? `£${formatNumber(liveMockKpis.revenueGbp)} mock cash`
+                      : "Refresh after admin-analytics deploy"}
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-slate-200 shadow-sm border-t-2 border-t-blue-500 lg:col-span-2">
               <CardContent className="p-6">
                 <div className="flex justify-between items-start">
                   <div>

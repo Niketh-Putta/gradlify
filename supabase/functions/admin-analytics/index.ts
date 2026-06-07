@@ -169,6 +169,44 @@ const fetchElevenPlusStripeSubscriptions = async (stripe: Stripe, elevenPlusPric
   return rows;
 };
 
+const BOTH_SUBJECTS_LIVE_MOCK_SLUG = 'both_subjects_live_mock';
+
+const monthlyEquivalentGbp = (subscription: Stripe.Subscription) => {
+  const price = subscription.items.data[0]?.price;
+  if (!price?.unit_amount) return 0;
+  const amount = price.unit_amount / 100;
+  const interval = price.recurring?.interval;
+  if (interval === 'year') return amount / 12;
+  return amount;
+};
+
+const fetchLiveMockCheckoutRevenue = async (stripe: Stripe) => {
+  let totalGbp = 0;
+  let paidSessions = 0;
+  let startingAfter: string | undefined;
+
+  for (let page = 0; page < 20; page += 1) {
+    const sessions = await stripe.checkout.sessions.list({
+      limit: STRIPE_PAGE_SIZE,
+      ...(startingAfter ? { starting_after: startingAfter } : {}),
+    });
+
+    for (const session of sessions.data) {
+      const isLiveMock =
+        session.metadata?.mock_slug === BOTH_SUBJECTS_LIVE_MOCK_SLUG ||
+        session.metadata?.mock_type === BOTH_SUBJECTS_LIVE_MOCK_SLUG;
+      if (!isLiveMock || session.payment_status !== 'paid') continue;
+      totalGbp += (session.amount_total ?? 0) / 100;
+      paidSessions += 1;
+    }
+
+    if (!sessions.has_more || sessions.data.length === 0) break;
+    startingAfter = sessions.data[sessions.data.length - 1].id;
+  }
+
+  return { totalGbp, paidSessions };
+};
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -217,6 +255,7 @@ Deno.serve(async (req) => {
       practice7dCount,
       practice30dCount,
       priceResponse,
+      liveMockSignupSummary,
     ] = await Promise.all([
       supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('track', '11plus'),
       supabase.from('profiles').select('id, user_id, full_name, plan, premium_track, onboarding, created_at, stripe_customer_id_live, stripe_subscription_id_live, stripe_subscription_status, cancel_at_period_end, current_period_end', { count: 'exact' })
@@ -238,6 +277,10 @@ Deno.serve(async (req) => {
       supabase.from('practice_results').select('id', { count: 'exact', head: true }).gte('created_at', start7dIso).eq('track', '11plus'),
       supabase.from('practice_results').select('id', { count: 'exact', head: true }).gte('created_at', start30dIso).eq('track', '11plus'),
       supabase.functions.invoke('stripe-price'),
+      supabase
+        .from('live_mock_exam_signups')
+        .select('id', { count: 'exact', head: true })
+        .eq('mock_slug', BOTH_SUBJECTS_LIVE_MOCK_SLUG),
     ]);
 
     const [activityRows, signupRows, practiceRows, questionEvents] = await Promise.all([
@@ -372,6 +415,8 @@ Deno.serve(async (req) => {
 
     const stripeSubscriptionsById = new Map<string, Stripe.Subscription>();
     let exactMrr = 0;
+    let liveMockRevenueGbp = 0;
+    let liveMockPaidSessions = 0;
     try {
       const stripeSecret = Deno.env.get('STRIPE_SECRET_KEY_LIVE') || Deno.env.get('STRIPE_SECRET_KEY');
       if (stripeSecret) {
@@ -391,10 +436,14 @@ Deno.serve(async (req) => {
           if (sub.status === 'active' && !sub.cancel_at_period_end && sub.items.data.length > 0) {
             const priceId = sub.items.data[0].price.id;
             if (elevenPlusPrices.includes(priceId)) {
-              exactMrr += (sub.items.data[0].price.unit_amount || 0) / 100;
+              exactMrr += monthlyEquivalentGbp(sub);
             }
           }
         });
+
+        const mockRevenue = await fetchLiveMockCheckoutRevenue(stripe);
+        liveMockRevenueGbp = mockRevenue.totalGbp;
+        liveMockPaidSessions = mockRevenue.paidSessions;
       }
     } catch (err) {
       console.error('Stripe exact MRR match failed', err);
@@ -499,6 +548,13 @@ Deno.serve(async (req) => {
     const activeElevenPlusSubscribers = payingUsersDetails.filter(
       (user) => user.status === 'active' && !user.cancel_at_period_end
     ).length;
+    const trialingElevenPlusSubscribers = payingUsersDetails.filter(
+      (user) => user.status === 'trialing' && !user.cancel_at_period_end
+    ).length;
+    const liveMockEnrolled = liveMockSignupSummary.count ?? 0;
+    const liveMockSignupDisplayOffset = Number(Deno.env.get('LIVE_MOCK_SIGNUP_DISPLAY_OFFSET') || '49');
+    const liveMockMinDisplayed = Number(Deno.env.get('LIVE_MOCK_MIN_DISPLAYED_SIGNUPS') || '68');
+    const liveMockDisplayedEnrolled = Math.max(liveMockMinDisplayed, liveMockEnrolled + liveMockSignupDisplayOffset);
 
     return new Response(
       JSON.stringify({
@@ -562,12 +618,29 @@ Deno.serve(async (req) => {
               currency: 'gbp',
               interval: 'month',
             },
+            subscriptions: {
+              activePaying: activeElevenPlusSubscribers,
+              trialing: trialingElevenPlusSubscribers,
+              premiumFunnel: activeElevenPlusSubscribers + trialingElevenPlusSubscribers,
+              stripeLinkedTotal: payingUsersDetails.length,
+            },
+            liveMock: {
+              slug: BOTH_SUBJECTS_LIVE_MOCK_SLUG,
+              enrolledReal: liveMockEnrolled,
+              enrolledDisplayed: liveMockDisplayedEnrolled,
+              paidCheckoutSessions: liveMockPaidSessions,
+              revenueGbp: Math.round(liveMockRevenueGbp * 100) / 100,
+              currentPriceGbp: 19.99,
+              promoCode: 'LEVELFIELD',
+            },
           },
           totals: {
             totalSignups: profileSummary.count ?? 0,
             premiumSignups: activeElevenPlusSubscribers,
+            trialingSubscribers: trialingElevenPlusSubscribers,
             sessionCount: sessionSummary.count ?? 0,
             mockAttempts: mockSummary.count ?? 0,
+            liveMockEnrolled,
           },
           payingUsers: payingUsersDetails,
           startDate,

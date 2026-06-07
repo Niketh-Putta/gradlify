@@ -50,10 +50,35 @@ def run_script(name: str, args: list[str]) -> tuple[int, str]:
         return 1, f"{name} timed out"
 
 
+def load_metrics() -> dict:
+    path = ROOT / "progress" / "metrics-snapshot.js"
+    if not path.exists():
+        return {}
+    text = path.read_text()
+    start = text.find("{")
+    end = text.rfind("}") + 1
+    if start < 0 or end <= start:
+        return {}
+    try:
+        return json.loads(text[start:end])
+    except json.JSONDecodeError:
+        return {}
+
+
 def print_checklist() -> None:
     d = days_until_mock()
+    metrics = load_metrics()
+    lm = metrics.get("liveMock", {})
+    subs = metrics.get("subscriptions", {})
     print(f"\n=== Gradlify marketing ops — {datetime.now().strftime('%Y-%m-%d')} ===")
-    print(f"14 June mock: {d} days left\n")
+    print(f"14 June mock: {d} days left")
+    if lm:
+        print(
+            f"Live metrics: {lm.get('enrolledReal', '?')} enrolled (real) · "
+            f"£{lm.get('revenueGbp') or '400+'} mock cash · "
+            f"{subs.get('activePaying', '?')} active + {subs.get('trialing', '?')} trialing"
+        )
+    print("Refresh: python3 scripts/fetch-metrics-snapshot.py\n")
 
     daily = ROOT / "outreach" / "execute" / "DAILY-AUDIT.md"
     daily_ref = str(daily) if daily.exists() else "python3 scripts/kimi-state-audit.py"
