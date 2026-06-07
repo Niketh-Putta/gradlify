@@ -16,7 +16,7 @@ Timed Maths + English on screen. Score + weak topics straight after.
 I'm Niketh - built Gradlify after going through 11+ myself. Trying to help families get exam-style practice without another £50/hr session.
 
 Premium members: free.
-New families: register at gradlify.com/live-mock-exams (use code LEVELFIELD at checkout).
+New families: register at gradlify.com/live-mock-exams (use code LEVELFIELD at checkout for the group discount).
 
 A few spots left. Happy to answer GL-style format questions. Not affiliated with any single school.
 ```

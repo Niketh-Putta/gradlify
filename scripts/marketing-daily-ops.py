@@ -55,13 +55,15 @@ def print_checklist() -> None:
     print(f"\n=== Gradlify marketing ops — {datetime.now().strftime('%Y-%m-%d')} ===")
     print(f"14 June mock: {d} days left\n")
 
+    daily = ROOT / "outreach" / "execute" / "DAILY-AUDIT.md"
+    daily_ref = str(daily) if daily.exists() else "python3 scripts/kimi-state-audit.py"
     items = [
-        ("P1", "Level Field: poll or mock announce + poster", "outreach/execute/2026-06-07-DAILY.md"),
-        ("P2", "Chase Tier A partners (MTM, Chris, David, Cecile)", "outreach/manual-affiliate-tracker.csv"),
-        ("P3", "FB 7-day reminder in approved groups", "outreach/fb/7-day-reminder-posts.md"),
-        ("P4", "Message 5 paying subs for referrals", "docs/GRADLIFY-ACTION-SEQUENCE.md Step 13"),
-        ("P5", "DM every trial/mock lead (60 min)", "manual"),
-        ("P6", "Export mock poster PNG", "outreach/assets/14-june-mock-poster.html"),
+        ("P1", "Read sent-ledger next action only", daily_ref),
+        ("P2", "Partner CALLS not emails (MTM Tue 10)", "outreach/partner-calls/CALL-BRIEFS.md"),
+        ("P3", "DM sweep scores/PREMIUM", "scripts/dm-sweep-agent.py"),
+        ("P4", "5 paying subs referral DMs", "outreach/distribution/paying-subs-referral.txt"),
+        ("P5", "FB reminder in approved groups only", "outreach/fb/7-day-reminder-posts.md"),
+        ("P6", "Full pipeline", "python3 scripts/marketing-execute.py"),
     ]
     for prio, task, ref in items:
         print(f"  [{prio}] {task}")
