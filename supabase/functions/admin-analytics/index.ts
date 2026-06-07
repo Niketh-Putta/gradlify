@@ -1,6 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.56.1';
 import Stripe from 'https://esm.sh/stripe@14.18.0?target=deno';
-import { getStripeTrackPriceIdsForMode, getStripeModeFromLivemode } from '../shared/stripeConfig.ts';
+import { getPlanFromPriceId, getStripeTrackPriceIdsForMode, getStripeModeFromLivemode } from '../shared/stripeConfig.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -266,7 +266,7 @@ Deno.serve(async (req) => {
       supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('track', '11plus'),
       supabase.from('profiles').select('id, user_id, full_name, plan, premium_track, track, onboarding, created_at, stripe_customer_id_live, stripe_subscription_id_live, stripe_subscription_status, cancel_at_period_end, current_period_end', { count: 'exact' })
         .not('stripe_subscription_id_live', 'is', null)
-        .or('premium_track.in.(eleven_plus,11plus,gcse),track.eq.11plus'),
+        .eq('track', '11plus'),
       supabase.from('profiles').select('id, user_id, full_name, onboarding, created_at, stripe_customer_id_live, stripe_customer_id_test, premium_track, track').eq('track', '11plus').limit(2000),
       supabase.from('study_sessions').select('id, profiles!inner(track)', { count: 'exact', head: true }).eq('profiles.track', '11plus'),
       supabase.from('mock_attempts').select('id', { count: 'exact', head: true }).eq('status', 'completed').eq('track', '11plus'),
@@ -503,13 +503,28 @@ Deno.serve(async (req) => {
           }
         } catch (err) { /* intentionally left empty */ }
       }
+
+      const stripePriceId = stripeSubscription?.items.data[0]?.price?.id;
+      const stripeSecret = Deno.env.get('STRIPE_SECRET_KEY_LIVE') || Deno.env.get('STRIPE_SECRET_KEY') || '';
+      const stripePlan = stripePriceId
+        ? getPlanFromPriceId(getStripeModeFromLivemode(stripeSecret.startsWith('sk_live_')), stripePriceId)
+        : null;
+      const monthlyAmountGbp = stripeSubscription ? monthlyEquivalentGbp(stripeSubscription) : null;
+      const billingTier =
+        stripePlan === 'ultra' || (monthlyAmountGbp !== null && monthlyAmountGbp >= 200)
+          ? 'ultra_250'
+          : p.plan === 'premium_monthly' || (monthlyAmountGbp !== null && monthlyAmountGbp < 50)
+          ? 'monthly_20'
+          : 'other';
       
       return {
         id: p.id,
         name: getProfileName(p) || getAuthUserName(authUserById.get(p.user_id)) || nameFromEmail(email),
         email,
-        plan: p.plan || "premium",
+        plan: stripePlan === 'ultra' ? 'ultra' : (p.plan || "premium"),
         track: p.premium_track === 'gcse' ? 'eleven_plus_legacy' : (p.premium_track || p.track || "unknown"),
+        billing_tier: billingTier,
+        monthly_amount_gbp: monthlyAmountGbp,
         created_at: p.created_at,
         subscription_id: p.stripe_subscription_id_live,
         status: stripeSubscription?.status || p.stripe_subscription_status || 'unknown',
@@ -564,13 +579,25 @@ Deno.serve(async (req) => {
       (user) => user.status === 'active' && !user.cancel_at_period_end
     ).length;
     const trialingElevenPlusSubscribers = payingUsersDetails.filter(
-      (user) => user.status === 'trialing' && !user.cancel_at_period_end
+      (user) => user.status === 'trialing'
+    ).length;
+    const monthlyPaying = payingUsersDetails.filter(
+      (user) =>
+        user.status === 'active' &&
+        !user.cancel_at_period_end &&
+        (user.billing_tier === 'monthly_20' || user.plan === 'premium_monthly')
+    ).length;
+    const ultraPaying = payingUsersDetails.filter(
+      (user) =>
+        user.status === 'active' &&
+        !user.cancel_at_period_end &&
+        (user.billing_tier === 'ultra_250' || user.plan === 'ultra')
     ).length;
     const legacyOtherPaying = payingUsersDetails.filter(
       (user) =>
         user.status === 'active' &&
         !user.cancel_at_period_end &&
-        (user.track === 'eleven_plus_legacy' || user.track === 'gcse')
+        user.track === 'eleven_plus_legacy'
     ).length;
     const liveMockEnrolled = liveMockSignupSummary.count ?? 0;
     const liveMockSignupDisplayOffset = Number(Deno.env.get('LIVE_MOCK_SIGNUP_DISPLAY_OFFSET') || '49');
@@ -643,6 +670,8 @@ Deno.serve(async (req) => {
               activePaying: activeElevenPlusSubscribers,
               trialing: trialingElevenPlusSubscribers,
               premiumFunnel: activeElevenPlusSubscribers + trialingElevenPlusSubscribers,
+              monthlyPaying,
+              ultraPaying,
               legacyOtherPaying,
               stripeLinkedTotal: payingUsersDetails.length,
             },

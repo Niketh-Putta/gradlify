@@ -16,8 +16,8 @@ Synced from Codex knowledge interview. Cursor reads this for all Gradlify work.
 
 ## Numbers (baseline)
 - **Always refresh:** `python3 scripts/fetch-metrics-snapshot.py` (do not trust stale docs).
-- **~£290 MRR** (live + 2 legacy £20/mo on other checkout) → target **£2k @ 3mo**, **£10k @ 6mo**.
-- **6 paying** (4 on 11+ checkout + **2 legacy £20/mo** on other subs, both count as 11+) + **2–3 trialing**.
+- **~£350 MRR** (5×£19.99/mo + 1×£249.99 ultra) → target **£2k @ 3mo**, **£10k @ 6mo**.
+- **6 paying** (5 monthly + 1 ultra) + **3 trialing**. Run `python3 scripts/fetch-metrics-snapshot.py` — profiles REST is source of truth.
 - **22 mock enrolled**, **£400+ mock cash**, price **£19.99** + **LEVELFIELD** promo.
 - Premium: **£19.99/mo**, **£199.99/yr** annual.
 - **10 hrs/day** on Gradlify. Priority: **cash now**. SaaS only.
