@@ -75,7 +75,7 @@ def print_checklist() -> None:
     if lm:
         print(
             f"Live metrics: {lm.get('enrolledReal', '?')} enrolled (real) · "
-            f"£{lm.get('revenueGbp') or '400+'} mock cash · "
+            f"£{lm.get('revenueGbp') or 'TBD (Stripe)'} mock cash · "
             f"{subs.get('activePaying', '?')} active + {subs.get('trialing', '?')} trialing"
         )
     print("Refresh: python3 scripts/fetch-metrics-snapshot.py\n")

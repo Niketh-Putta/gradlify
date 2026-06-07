@@ -109,6 +109,12 @@ def main() -> int:
     mock = post_json("live-mock-signup-count", {"mockSlug": MOCK_SLUG})
     analytics = post_json("admin-analytics", {"days": 14})
 
+    revenue_audit: dict | None = None
+    try:
+        revenue_audit = post_json("revenue-audit", {})
+    except Exception:
+        revenue_audit = None
+
     if not analytics.get("ok"):
         raise SystemExit(f"admin-analytics failed: {analytics}")
 
@@ -169,14 +175,28 @@ def main() -> int:
         1 for p in active_profiles if p.get("premium_track") == "gcse"
     )
 
+    audit_data = (revenue_audit or {}).get("data") if revenue_audit and revenue_audit.get("ok") else None
+    mock_cash_gbp = None
+    mock_paid_sessions = None
+    mock_sessions = None
+    if audit_data:
+        live_mock_audit = audit_data.get("liveMock") or {}
+        mock_cash_gbp = live_mock_audit.get("totalCashGbp")
+        mock_paid_sessions = live_mock_audit.get("paidSessions")
+        mock_sessions = live_mock_audit.get("sessions")
+    elif live_mock_api.get("revenueGbp") is not None:
+        mock_cash_gbp = live_mock_api.get("revenueGbp")
+        mock_paid_sessions = live_mock_api.get("paidCheckoutSessions")
+
     snapshot = {
         "fetchedAt": fetched_at,
-        "source": "profiles REST + live-mock-signup-count + admin-analytics",
+        "source": "profiles REST + live-mock-signup-count + admin-analytics + revenue-audit",
         "warning": "Do not use stale docs — re-run this script before marketing decisions",
         "pricingNote": (
             "Premium £19.99/mo or annual (~£200–250/yr, annualized for MRR). "
             "Mock tickets are one-off (£9.99–£19.99 promos) — never added to MRR."
         ),
+        "revenueAuditDeployed": bool(audit_data),
         "subscriptions": {
             "activePaying": len(active_profiles),
             "trialing": len(trialing_profiles),
@@ -193,9 +213,15 @@ def main() -> int:
             or totals.get("liveMockEnrolled"),
             "enrolledDisplayed": live_mock_api.get("enrolledDisplayed")
             or mock.get("displayedCount"),
-            "revenueGbp": live_mock_api.get("revenueGbp"),
-            "revenueNote": "One-off ticket sales (various promo prices) — not subscription MRR",
-            "paidCheckoutSessions": live_mock_api.get("paidCheckoutSessions"),
+            "revenueGbp": mock_cash_gbp,
+            "revenueNote": (
+                "Exact total from Stripe paid checkout sessions (revenue-audit). "
+                "22 enrollments includes free Premium seats — not 22 paid tickets."
+                if mock_cash_gbp is not None
+                else "Deploy revenue-audit edge function for exact mock cash from Stripe"
+            ),
+            "paidCheckoutSessions": mock_paid_sessions,
+            "paidSessions": mock_sessions,
             "currentPriceGbp": mock.get("currentPriceGbp") or mock.get("standardPriceGbp"),
             "promoCode": mock.get("promoCode", "LEVELFIELD"),
             "promoSpotsRemaining": mock.get("promoSpotsRemaining"),

@@ -22,7 +22,7 @@
 | Approx. MRR | **~£250/mo** (admin-analytics; annual fix deploying) |
 | **14 June mock enrolled (real)** | **22** |
 | **14 June mock displayed on site** | **77** (offset for social proof) |
-| **Live mock cash collected** | **£400+** (Stripe checkout; confirm in Growth Tracker) |
+| **Live mock cash collected** | **Stripe checkout total** (run `revenue-audit` — not enrollments × price) |
 | Mock price now | **£19.99** + code **LEVELFIELD** (3 promo spots left) |
 | Live mock stretch goal | **50–80** enrolled by 14 June |
 
