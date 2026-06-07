@@ -145,7 +145,7 @@ const nameFromEmail = (email: string | null | undefined) => {
     .join(' ');
 };
 
-const fetchElevenPlusStripeSubscriptions = async (stripe: Stripe, elevenPlusPrices: string[]) => {
+const fetchStripeSubscriptionsByPrices = async (stripe: Stripe, priceIds: string[]) => {
   const rows: Stripe.Subscription[] = [];
   let startingAfter: string | undefined;
 
@@ -158,7 +158,7 @@ const fetchElevenPlusStripeSubscriptions = async (stripe: Stripe, elevenPlusPric
     });
 
     const matched = subscriptions.data.filter((subscription: Stripe.Subscription) =>
-      subscription.items.data.some((item: Stripe.SubscriptionItem) => elevenPlusPrices.includes(item.price.id))
+      subscription.items.data.some((item: Stripe.SubscriptionItem) => priceIds.includes(item.price.id))
     );
     rows.push(...matched);
 
@@ -168,6 +168,12 @@ const fetchElevenPlusStripeSubscriptions = async (stripe: Stripe, elevenPlusPric
 
   return rows;
 };
+
+const isElevenPlusAttributedPrice = (
+  priceId: string | undefined,
+  elevenPlusPrices: string[],
+  legacyOtherPrices: string[],
+) => Boolean(priceId && (elevenPlusPrices.includes(priceId) || legacyOtherPrices.includes(priceId)));
 
 const BOTH_SUBJECTS_LIVE_MOCK_SLUG = 'both_subjects_live_mock';
 
@@ -258,9 +264,9 @@ Deno.serve(async (req) => {
       liveMockSignupSummary,
     ] = await Promise.all([
       supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('track', '11plus'),
-      supabase.from('profiles').select('id, user_id, full_name, plan, premium_track, onboarding, created_at, stripe_customer_id_live, stripe_subscription_id_live, stripe_subscription_status, cancel_at_period_end, current_period_end', { count: 'exact' })
+      supabase.from('profiles').select('id, user_id, full_name, plan, premium_track, track, onboarding, created_at, stripe_customer_id_live, stripe_subscription_id_live, stripe_subscription_status, cancel_at_period_end, current_period_end', { count: 'exact' })
         .not('stripe_subscription_id_live', 'is', null)
-        .in('premium_track', ['eleven_plus', '11plus']),
+        .or('premium_track.in.(eleven_plus,11plus,gcse),track.eq.11plus'),
       supabase.from('profiles').select('id, user_id, full_name, onboarding, created_at, stripe_customer_id_live, stripe_customer_id_test, premium_track, track').eq('track', '11plus').limit(2000),
       supabase.from('study_sessions').select('id, profiles!inner(track)', { count: 'exact', head: true }).eq('profiles.track', '11plus'),
       supabase.from('mock_attempts').select('id', { count: 'exact', head: true }).eq('status', 'completed').eq('track', '11plus'),
@@ -414,6 +420,7 @@ Deno.serve(async (req) => {
     const minutesPrev7d = prev7.reduce((sum, point) => sum + point.minutes, 0);
 
     const stripeSubscriptionsById = new Map<string, Stripe.Subscription>();
+    const legacyOtherPriceIds = new Set<string>();
     let exactMrr = 0;
     let liveMockRevenueGbp = 0;
     let liveMockPaidSessions = 0;
@@ -429,13 +436,19 @@ Deno.serve(async (req) => {
           priceIds.eleven_plus.ultra,
           priceIds.eleven_plus.ultra_annual
         ].filter((priceId): priceId is string => Boolean(priceId));
-        const subs = await fetchElevenPlusStripeSubscriptions(stripe, elevenPlusPrices);
+        const legacyOtherPrices = [
+          priceIds.gcse.monthly,
+          priceIds.gcse.annual,
+        ].filter((priceId): priceId is string => Boolean(priceId));
+        legacyOtherPrices.forEach((priceId) => legacyOtherPriceIds.add(priceId));
+        const attributedPrices = [...new Set([...elevenPlusPrices, ...legacyOtherPrices])];
+        const subs = await fetchStripeSubscriptionsByPrices(stripe, attributedPrices);
 
         subs.forEach(sub => {
           stripeSubscriptionsById.set(sub.id, sub);
           if (sub.status === 'active' && !sub.cancel_at_period_end && sub.items.data.length > 0) {
             const priceId = sub.items.data[0].price.id;
-            if (elevenPlusPrices.includes(priceId)) {
+            if (isElevenPlusAttributedPrice(priceId, elevenPlusPrices, legacyOtherPrices)) {
               exactMrr += monthlyEquivalentGbp(sub);
             }
           }
@@ -496,7 +509,7 @@ Deno.serve(async (req) => {
         name: getProfileName(p) || getAuthUserName(authUserById.get(p.user_id)) || nameFromEmail(email),
         email,
         plan: p.plan || "premium",
-        track: p.premium_track || "unknown",
+        track: p.premium_track === 'gcse' ? 'eleven_plus_legacy' : (p.premium_track || p.track || "unknown"),
         created_at: p.created_at,
         subscription_id: p.stripe_subscription_id_live,
         status: stripeSubscription?.status || p.stripe_subscription_status || 'unknown',
@@ -515,6 +528,7 @@ Deno.serve(async (req) => {
       .filter((subscription) => hasDefaultPaymentMethod(subscription))
       .map((subscription) => {
         const price = subscription.items.data[0]?.price;
+        const priceId = price?.id;
         const interval = price?.recurring?.interval === 'year' ? 'annual' : 'monthly';
         const customer = subscription.customer as Stripe.Customer | string | null;
         const customerId = typeof customer === 'string' ? customer : customer?.id ?? null;
@@ -524,13 +538,14 @@ Deno.serve(async (req) => {
           (customerId ? profileByCustomerId.get(customerId) : null) ||
           (authUser ? profileByUserId.get(authUser.id) : null) ||
           null;
+        const isLegacyOther = Boolean(priceId && legacyOtherPriceIds.has(priceId));
 
         return {
           id: subscription.id,
           name: getCustomerName(subscription) || getProfileName(matchedProfile) || getAuthUserName(authUser) || nameFromEmail(email),
           email: email || "unknown",
           plan: price?.metadata?.plan || (interval === 'annual' ? 'premium annual' : 'premium'),
-          track: 'eleven_plus',
+          track: isLegacyOther ? 'eleven_plus_legacy' : 'eleven_plus',
           created_at: toIsoFromStripeSeconds(subscription.start_date) || toIsoFromStripeSeconds(subscription.created) || new Date().toISOString(),
           subscription_id: subscription.id,
           status: subscription.status || 'unknown',
@@ -550,6 +565,12 @@ Deno.serve(async (req) => {
     ).length;
     const trialingElevenPlusSubscribers = payingUsersDetails.filter(
       (user) => user.status === 'trialing' && !user.cancel_at_period_end
+    ).length;
+    const legacyOtherPaying = payingUsersDetails.filter(
+      (user) =>
+        user.status === 'active' &&
+        !user.cancel_at_period_end &&
+        (user.track === 'eleven_plus_legacy' || user.track === 'gcse')
     ).length;
     const liveMockEnrolled = liveMockSignupSummary.count ?? 0;
     const liveMockSignupDisplayOffset = Number(Deno.env.get('LIVE_MOCK_SIGNUP_DISPLAY_OFFSET') || '49');
@@ -622,6 +643,7 @@ Deno.serve(async (req) => {
               activePaying: activeElevenPlusSubscribers,
               trialing: trialingElevenPlusSubscribers,
               premiumFunnel: activeElevenPlusSubscribers + trialingElevenPlusSubscribers,
+              legacyOtherPaying,
               stripeLinkedTotal: payingUsersDetails.length,
             },
             liveMock: {

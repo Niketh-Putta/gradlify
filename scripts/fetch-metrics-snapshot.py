@@ -54,15 +54,33 @@ def main() -> int:
     live_mock_api = kpis.get("liveMock") or {}
     subs_api = kpis.get("subscriptions") or {}
 
+    # Legacy £20/mo subs on other checkout (gcse price path) count as 11+ — Niketh-confirmed: 2
+    legacy_other = subs_api.get("legacyOtherPaying")
+    api_active = subs_api.get("activePaying") or len(active)
+    api_mrr = kpis.get("earnings", {}).get("monthly", 0) or 0
+    if legacy_other is None:
+        legacy_other = 2
+        active_paying = api_active + legacy_other
+        mrr_gbp = round(api_mrr + (legacy_other * 20), 2)
+        legacy_note = "Manual include until admin-analytics deploy picks up legacy gcse-price subs"
+    else:
+        active_paying = api_active
+        mrr_gbp = round(api_mrr, 2)
+        legacy_note = None
+
+    trialing_count = subs_api.get("trialing") or len(trialing)
+
     snapshot = {
         "fetchedAt": fetched_at,
         "source": "live-mock-signup-count + admin-analytics (production)",
         "warning": "Do not use stale docs — re-run this script before marketing decisions",
         "subscriptions": {
-            "activePaying": subs_api.get("activePaying") or len(active),
-            "trialing": subs_api.get("trialing") or len(trialing),
-            "premiumFunnel": subs_api.get("premiumFunnel") or (len(active) + len(trialing)),
-            "mrrGbp": round(kpis.get("earnings", {}).get("monthly", 0), 2),
+            "activePaying": active_paying,
+            "trialing": trialing_count,
+            "premiumFunnel": active_paying + trialing_count,
+            "legacyOtherPaying": legacy_other,
+            "mrrGbp": mrr_gbp,
+            **({"legacyNote": legacy_note} if legacy_note else {}),
         },
         "liveMock": {
             "slug": MOCK_SLUG,
