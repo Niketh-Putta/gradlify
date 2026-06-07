@@ -1,6 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.56.1';
 import Stripe from 'https://esm.sh/stripe@14.18.0?target=deno';
-import { getPlanFromPriceId, getStripeTrackPriceIdsForMode, getStripeModeFromLivemode } from '../shared/stripeConfig.ts';
+import { getStripeTrackPriceIdsForMode, getStripeModeFromLivemode } from '../shared/stripeConfig.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -264,7 +264,7 @@ Deno.serve(async (req) => {
       liveMockSignupSummary,
     ] = await Promise.all([
       supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('track', '11plus'),
-      supabase.from('profiles').select('id, user_id, full_name, plan, premium_track, track, onboarding, created_at, stripe_customer_id_live, stripe_subscription_id_live, stripe_subscription_status, cancel_at_period_end, current_period_end', { count: 'exact' })
+      supabase.from('profiles').select('id, user_id, full_name, plan, premium_track, track, subscription_interval, onboarding, created_at, stripe_customer_id_live, stripe_subscription_id_live, stripe_subscription_status, cancel_at_period_end, current_period_end', { count: 'exact' })
         .not('stripe_subscription_id_live', 'is', null)
         .eq('track', '11plus'),
       supabase.from('profiles').select('id, user_id, full_name, onboarding, created_at, stripe_customer_id_live, stripe_customer_id_test, premium_track, track').eq('track', '11plus').limit(2000),
@@ -504,27 +504,33 @@ Deno.serve(async (req) => {
         } catch (err) { /* intentionally left empty */ }
       }
 
-      const stripePriceId = stripeSubscription?.items.data[0]?.price?.id;
-      const stripeSecret = Deno.env.get('STRIPE_SECRET_KEY_LIVE') || Deno.env.get('STRIPE_SECRET_KEY') || '';
-      const stripePlan = stripePriceId
-        ? getPlanFromPriceId(getStripeModeFromLivemode(stripeSecret.startsWith('sk_live_')), stripePriceId)
-        : null;
+      const stripePrice = stripeSubscription?.items.data[0]?.price;
+      const stripeInterval = stripePrice?.recurring?.interval === 'year' ? 'annual' : 'monthly';
+      const profileInterval = (p as { subscription_interval?: string | null }).subscription_interval;
+      const billingInterval =
+        profileInterval === 'annual' || profileInterval === 'monthly'
+          ? profileInterval
+          : stripeInterval;
       const monthlyAmountGbp = stripeSubscription ? monthlyEquivalentGbp(stripeSubscription) : null;
+      const annualCashGbp =
+        billingInterval === 'annual' && stripePrice?.unit_amount
+          ? stripePrice.unit_amount / 100
+          : null;
       const billingTier =
-        stripePlan === 'ultra' || (monthlyAmountGbp !== null && monthlyAmountGbp >= 200)
-          ? 'ultra_250'
-          : p.plan === 'premium_monthly' || (monthlyAmountGbp !== null && monthlyAmountGbp < 50)
-          ? 'monthly_20'
-          : 'other';
+        billingInterval === 'annual'
+          ? 'premium_annual'
+          : 'premium_monthly';
       
       return {
         id: p.id,
         name: getProfileName(p) || getAuthUserName(authUserById.get(p.user_id)) || nameFromEmail(email),
         email,
-        plan: stripePlan === 'ultra' ? 'ultra' : (p.plan || "premium"),
+        plan: billingInterval === 'annual' ? 'premium_annual' : (p.plan || 'premium_monthly'),
         track: p.premium_track === 'gcse' ? 'eleven_plus_legacy' : (p.premium_track || p.track || "unknown"),
         billing_tier: billingTier,
+        billing_interval: billingInterval,
         monthly_amount_gbp: monthlyAmountGbp,
+        annual_cash_gbp: annualCashGbp,
         created_at: p.created_at,
         subscription_id: p.stripe_subscription_id_live,
         status: stripeSubscription?.status || p.stripe_subscription_status || 'unknown',
@@ -585,13 +591,13 @@ Deno.serve(async (req) => {
       (user) =>
         user.status === 'active' &&
         !user.cancel_at_period_end &&
-        (user.billing_tier === 'monthly_20' || user.plan === 'premium_monthly')
+        user.billing_tier === 'premium_monthly'
     ).length;
-    const ultraPaying = payingUsersDetails.filter(
+    const annualPaying = payingUsersDetails.filter(
       (user) =>
         user.status === 'active' &&
         !user.cancel_at_period_end &&
-        (user.billing_tier === 'ultra_250' || user.plan === 'ultra')
+        user.billing_tier === 'premium_annual'
     ).length;
     const legacyOtherPaying = payingUsersDetails.filter(
       (user) =>
@@ -671,7 +677,7 @@ Deno.serve(async (req) => {
               trialing: trialingElevenPlusSubscribers,
               premiumFunnel: activeElevenPlusSubscribers + trialingElevenPlusSubscribers,
               monthlyPaying,
-              ultraPaying,
+              annualPaying,
               legacyOtherPaying,
               stripeLinkedTotal: payingUsersDetails.length,
             },

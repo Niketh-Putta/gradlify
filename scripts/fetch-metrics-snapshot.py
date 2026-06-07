@@ -19,8 +19,10 @@ ANON_KEY = (
 )
 MOCK_SLUG = "both_subjects_live_mock"
 
-MONTHLY_PREMIUM_GBP = 19.99
-ULTRA_MONTHLY_GBP = 249.99
+# Gradlify Premium subscription pricing (not mock tickets)
+PREMIUM_MONTHLY_GBP = 19.99
+PREMIUM_ANNUAL_LEGACY_GBP = 250.0  # older annual checkout
+PREMIUM_ANNUAL_CURRENT_GBP = 199.99  # stripe-price yearly today (£200 list)
 
 
 def post_json(path: str, body: dict) -> dict:
@@ -54,7 +56,10 @@ def get_json(path: str, params: dict | None = None) -> list | dict:
 
 def fetch_profile_subscriptions() -> list[dict]:
     params = {
-        "select": "id,user_id,plan,premium_track,track,stripe_subscription_status,cancel_at_period_end,stripe_subscription_id_live",
+        "select": (
+            "id,user_id,plan,premium_track,track,stripe_subscription_status,"
+            "cancel_at_period_end,stripe_subscription_id_live,subscription_interval"
+        ),
         "track": "eq.11plus",
         "stripe_subscription_id_live": "not.is.null",
         "stripe_subscription_status": "in.(active,trialing)",
@@ -64,25 +69,30 @@ def fetch_profile_subscriptions() -> list[dict]:
     return rows if isinstance(rows, list) else []
 
 
-def classify_billing_tier(profile: dict) -> str:
-    plan = profile.get("plan") or ""
-    premium_track = profile.get("premium_track") or ""
-    if plan == "premium_monthly":
-        return "monthly_20"
-    if plan == "ultra":
-        return "ultra_250"
-    # vineela pattern: premium + eleven_plus = ultra £250
-    if plan == "premium" and premium_track == "eleven_plus":
-        return "ultra_250"
-    # gcse-price / legacy checkout still counts as £20/mo for 11+
-    return "monthly_20"
+def subscription_kind(profile: dict) -> str:
+    """premium_monthly | premium_annual — uses Stripe-synced interval, not guessed tiers."""
+    interval = (profile.get("subscription_interval") or "").lower()
+    if interval == "annual" or profile.get("plan") == "premium_annual":
+        return "premium_annual"
+    return "premium_monthly"
 
 
-def monthly_mrr_for_profile(profile: dict) -> float:
-    tier = classify_billing_tier(profile)
-    if tier == "ultra_250":
-        return ULTRA_MONTHLY_GBP
-    return MONTHLY_PREMIUM_GBP
+def annual_cash_gbp(profile: dict, email: str) -> float:
+    """Best-effort annual ticket price. Legacy £250 annual; new list ~£200."""
+    # vivek.botcha is the known £250/yr annual subscriber in production
+    if email == "vivek.botcha@gmail.com":
+        return PREMIUM_ANNUAL_LEGACY_GBP
+    return PREMIUM_ANNUAL_CURRENT_GBP
+
+
+def mrr_for_active_profile(profile: dict, email: str) -> tuple[float, float | None]:
+    """Return (mrr_monthly_equivalent, annual_cash_if_annual). Trialing → 0."""
+    if profile.get("stripe_subscription_status") != "active":
+        return 0.0, None
+    if subscription_kind(profile) == "premium_annual":
+        cash = annual_cash_gbp(profile, email)
+        return round(cash / 12, 2), cash
+    return PREMIUM_MONTHLY_GBP, None
 
 
 def email_by_subscription(paying_users: list[dict]) -> dict[str, str]:
@@ -106,10 +116,8 @@ def main() -> int:
     kpis = data.get("kpis", {})
     totals = data.get("totals", {})
     paying_users = data.get("payingUsers", [])
-    subs_api = kpis.get("subscriptions") or {}
     live_mock_api = kpis.get("liveMock") or {}
 
-    # Ground truth from profiles (admin-analytics deploy may lag)
     profile_rows = fetch_profile_subscriptions()
     sub_emails = email_by_subscription(paying_users)
 
@@ -120,35 +128,30 @@ def main() -> int:
         p for p in profile_rows if p.get("stripe_subscription_status") == "trialing"
     ]
 
-    monthly_paying = sum(
-        1 for p in active_profiles if classify_billing_tier(p) == "monthly_20"
-    )
-    ultra_paying = sum(
-        1 for p in active_profiles if classify_billing_tier(p) == "ultra_250"
-    )
-    legacy_other = sum(
-        1
-        for p in active_profiles
-        if p.get("premium_track") == "gcse" and classify_billing_tier(p) == "monthly_20"
-    )
-
-    active_paying = len(active_profiles)
-    trialing_count = len(trialing_profiles)
-    mrr_gbp = round(
-        sum(monthly_mrr_for_profile(p) for p in active_profiles),
-        2,
-    )
-
     active_details = []
+    subscription_mrr = 0.0
+    monthly_paying = 0
+    annual_paying = 0
+
     for p in active_profiles:
         sub_id = p.get("stripe_subscription_id_live")
+        email = sub_emails.get(sub_id, "?")
+        kind = subscription_kind(p)
+        mrr, annual_cash = mrr_for_active_profile(p, email)
+        subscription_mrr += mrr
+        if kind == "premium_annual":
+            annual_paying += 1
+        else:
+            monthly_paying += 1
         active_details.append(
             {
-                "email": sub_emails.get(sub_id, "?"),
+                "email": email,
                 "plan": p.get("plan"),
+                "kind": kind,
+                "subscription_interval": p.get("subscription_interval"),
                 "premium_track": p.get("premium_track"),
-                "billing_tier": classify_billing_tier(p),
-                "monthly_gbp": monthly_mrr_for_profile(p),
+                "mrr_gbp": mrr,
+                "annual_cash_gbp": annual_cash,
             }
         )
 
@@ -162,18 +165,26 @@ def main() -> int:
             }
         )
 
+    legacy_other = sum(
+        1 for p in active_profiles if p.get("premium_track") == "gcse"
+    )
+
     snapshot = {
         "fetchedAt": fetched_at,
         "source": "profiles REST + live-mock-signup-count + admin-analytics",
         "warning": "Do not use stale docs — re-run this script before marketing decisions",
+        "pricingNote": (
+            "Premium £19.99/mo or annual (~£200–250/yr, annualized for MRR). "
+            "Mock tickets are one-off (£9.99–£19.99 promos) — never added to MRR."
+        ),
         "subscriptions": {
-            "activePaying": active_paying,
-            "trialing": trialing_count,
-            "premiumFunnel": active_paying + trialing_count,
+            "activePaying": len(active_profiles),
+            "trialing": len(trialing_profiles),
+            "premiumFunnel": len(active_profiles) + len(trialing_profiles),
             "monthlyPaying": monthly_paying,
-            "ultraPaying": ultra_paying,
+            "annualPaying": annual_paying,
             "legacyOtherPaying": legacy_other,
-            "mrrGbp": mrr_gbp,
+            "mrrGbp": round(subscription_mrr, 2),
         },
         "liveMock": {
             "slug": MOCK_SLUG,
@@ -183,6 +194,7 @@ def main() -> int:
             "enrolledDisplayed": live_mock_api.get("enrolledDisplayed")
             or mock.get("displayedCount"),
             "revenueGbp": live_mock_api.get("revenueGbp"),
+            "revenueNote": "One-off ticket sales (various promo prices) — not subscription MRR",
             "paidCheckoutSessions": live_mock_api.get("paidCheckoutSessions"),
             "currentPriceGbp": mock.get("currentPriceGbp") or mock.get("standardPriceGbp"),
             "promoCode": mock.get("promoCode", "LEVELFIELD"),
