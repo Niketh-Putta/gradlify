@@ -9,13 +9,8 @@ const corsHeaders = {
 
 const readEnv = (name: string) => Deno.env.get(name)?.trim() || "";
 const BOTH_SUBJECTS_LIVE_MOCK_SLUG = "both_subjects_live_mock";
-const DEFAULT_LIVE_MOCK_PRICE_ID_LIVE = "price_1TfEfVQYWoowhxMZGWQpCGmO";
 
-const DISCOUNT_DISPLAY_CAP = Number(readEnv("LIVE_MOCK_DISCOUNT_DISPLAY_CAP") || "80");
-const SIGNUP_DISPLAY_OFFSET = Number(readEnv("LIVE_MOCK_SIGNUP_DISPLAY_OFFSET") || "56");
-const DISCOUNT_REAL_CAP = DISCOUNT_DISPLAY_CAP - SIGNUP_DISPLAY_OFFSET;
-const DISCOUNT_PRICE_GBP = Number(readEnv("LIVE_MOCK_DISCOUNT_PRICE_GBP") || "9.99");
-const STANDARD_PRICE_GBP = Number(readEnv("LIVE_MOCK_STANDARD_PRICE_GBP") || "14.99");
+const STANDARD_PRICE_GBP = Number(readEnv("LIVE_MOCK_STANDARD_PRICE_GBP") || "19.99");
 
 const buildInlineLiveMockLineItem = (amountGbp: number) => ({
   quantity: 1,
@@ -58,14 +53,10 @@ serve(async (req) => {
 
     const supabaseUrl = readEnv("SUPABASE_URL");
     const supabaseAnonKey = readEnv("SUPABASE_ANON_KEY");
-    const serviceRoleKey = readEnv("SUPABASE_SERVICE_ROLE_KEY");
     const supabase = createClient(supabaseUrl, supabaseAnonKey, {
       global: { headers: { Authorization: authHeader } },
       auth: { persistSession: false },
     });
-    const supabaseAdmin = serviceRoleKey
-      ? createClient(supabaseUrl, serviceRoleKey, { auth: { persistSession: false } })
-      : null;
 
     const {
       data: { user },
@@ -84,18 +75,7 @@ serve(async (req) => {
       throw new Error("Stripe is not configured.");
     }
 
-    let signupCount = 0;
-    if (supabaseAdmin) {
-      const { count, error: countError } = await supabaseAdmin
-        .from("live_mock_exam_signups")
-        .select("id", { count: "exact", head: true })
-        .eq("mock_slug", BOTH_SUBJECTS_LIVE_MOCK_SLUG);
-      if (countError) throw countError;
-      signupCount = count ?? 0;
-    }
-
-    const discountAvailable = signupCount < DISCOUNT_REAL_CAP;
-    const amountGbp = discountAvailable ? DISCOUNT_PRICE_GBP : STANDARD_PRICE_GBP;
+    const amountGbp = STANDARD_PRICE_GBP;
 
     const body = await req.json().catch(() => ({}));
     const candidateBaseUrl =
@@ -112,20 +92,13 @@ serve(async (req) => {
     const returnTo = sanitizeReturnPath(String(body.returnTo ?? "/live-mock-exams"));
     const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
 
-    const discountPriceId = useLive
-      ? readEnv("LIVE_MOCK_PRICE_ID_LIVE") || DEFAULT_LIVE_MOCK_PRICE_ID_LIVE
-      : readEnv("LIVE_MOCK_PRICE_ID_TEST");
     const standardPriceId = useLive
       ? readEnv("LIVE_MOCK_STANDARD_PRICE_ID_LIVE")
       : readEnv("LIVE_MOCK_STANDARD_PRICE_ID_TEST");
 
-    const useDiscountPriceId = discountAvailable && discountPriceId;
-    const useStandardPriceId = !discountAvailable && standardPriceId;
-    const lineItem = useDiscountPriceId
-      ? { price: discountPriceId, quantity: 1 }
-      : useStandardPriceId
-        ? { price: standardPriceId, quantity: 1 }
-        : buildInlineLiveMockLineItem(amountGbp);
+    const lineItem = standardPriceId
+      ? { price: standardPriceId, quantity: 1 }
+      : buildInlineLiveMockLineItem(amountGbp);
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
@@ -139,7 +112,7 @@ serve(async (req) => {
         mock_slug: BOTH_SUBJECTS_LIVE_MOCK_SLUG,
         mock_starts_at: new Date().toISOString(),
         amount_gbp: String(amountGbp),
-        discount_available: String(discountAvailable),
+        promo_code_enabled: "true",
       },
       success_url: `${baseUrl}/pay/success?session_id={CHECKOUT_SESSION_ID}&returnTo=${encodeURIComponent(returnTo)}`,
       cancel_url: `${baseUrl}/pay/cancelled?returnTo=${encodeURIComponent(returnTo)}`,

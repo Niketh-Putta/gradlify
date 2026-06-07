@@ -22,8 +22,9 @@ import { useAppContext } from "@/hooks/useAppContext";
 import { useMembership } from "@/hooks/useMembership";
 import {
   formatLiveMockPrice,
-  LIVE_MOCK_DISCOUNT_PRICE_GBP,
   LIVE_MOCK_MIN_DISPLAYED_SIGNUPS,
+  LIVE_MOCK_PROMO_CODE,
+  LIVE_MOCK_STANDARD_PRICE_GBP,
 } from "@/lib/liveMockPricing";
 
 // Toggle to re-enable the old English-only live mock (9 May 2026). Set to true to show it again.
@@ -45,11 +46,7 @@ const BOTH_SUBJECTS_LIVE_MOCK = {
 
 const MIN_DISPLAYED_BOTH_SUBJECTS_SIGNUPS = LIVE_MOCK_MIN_DISPLAYED_SIGNUPS;
 
-// Scarcity (FOMO) pricing for the Maths + English mock: the first 60 sign-ups get
-// the early price; after that the displayed price reverts to the regular price.
-const EARLY_BIRD_SPOT_CAP = 60;
-const EARLY_BIRD_PRICE = "£9.99";
-const REGULAR_LIVE_MOCK_PRICE = "£14.99";
+const REGULAR_LIVE_MOCK_PRICE = "£19.99";
 
 type SignupRow = {
   id: string;
@@ -84,7 +81,8 @@ export default function LiveMockExams() {
   const [signup, setSignup] = useState<SignupRow | null>(null);
   const [bothSubjectsSignup, setBothSubjectsSignup] = useState<SignupRow | null>(null);
   const [bothSubjectsSignupCount, setBothSubjectsSignupCount] = useState(MIN_DISPLAYED_BOTH_SUBJECTS_SIGNUPS);
-  const [liveMockPriceGbp, setLiveMockPriceGbp] = useState(LIVE_MOCK_DISCOUNT_PRICE_GBP);
+  const [promoSpotsRemaining, setPromoSpotsRemaining] = useState(12);
+  const [liveMockPriceGbp, setLiveMockPriceGbp] = useState(LIVE_MOCK_STANDARD_PRICE_GBP);
   /** Locks "Start" once an attempt row exists (created on first Start click). */
   const [attemptStatus, setAttemptStatus] = useState<LiveMockAttemptStatus>("none");
 
@@ -102,7 +100,10 @@ export default function LiveMockExams() {
           : Math.max(MIN_DISPLAYED_BOTH_SUBJECTS_SIGNUPS, count);
       setBothSubjectsSignupCount(displayedCount);
       setLiveMockPriceGbp(
-        typeof data?.currentPriceGbp === "number" ? data.currentPriceGbp : LIVE_MOCK_DISCOUNT_PRICE_GBP,
+        typeof data?.currentPriceGbp === "number" ? data.currentPriceGbp : LIVE_MOCK_STANDARD_PRICE_GBP,
+      );
+      setPromoSpotsRemaining(
+        typeof data?.promoSpotsRemaining === "number" ? data.promoSpotsRemaining : 12,
       );
     } catch (error) {
       console.error("Failed to load live mock signup count", error);
@@ -421,11 +422,6 @@ export default function LiveMockExams() {
     { label: "Questions", value: String(LIVE_MOCK.questions), icon: FileText },
   ];
 
-  // Spots left at the early price are derived from the displayed signup count: every
-  // real payment raises bothSubjectsSignupCount, which lowers earlyBirdSpotsLeft.
-  const earlyBirdSpotsLeft = Math.max(0, EARLY_BIRD_SPOT_CAP - bothSubjectsSignupCount);
-  const earlyBirdActive = earlyBirdSpotsLeft > 0;
-
   const bothSubjectsRegistrationCard = (
     <div className="mb-3 rounded-[16px] border border-amber-200/80 bg-[linear-gradient(135deg,#fffaf0_0%,#ffffff_52%,#f8fbff_100%)] px-3 py-3 shadow-[0_14px_34px_rgba(146,64,14,0.07)] sm:px-4">
       {bothSubjectsSignup && (
@@ -467,29 +463,16 @@ export default function LiveMockExams() {
           {!hasPaidPremiumLiveMockAccess && (
             <div className="mt-3 rounded-[14px] border border-orange-200 bg-[linear-gradient(135deg,#fff4e6_0%,#fff_70%)] px-3 py-2.5 shadow-[0_8px_18px_rgba(234,88,12,0.08)]">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-orange-600 px-2.5 py-1 text-[8px] font-black uppercase tracking-[0.14em] text-white">
-                <UsersRound className="h-3 w-3" />
-                {earlyBirdActive ? `Only ${earlyBirdSpotsLeft} early spots left` : "Early spots gone"}
+                <Sparkles className="h-3 w-3" />
+                Use code {LIVE_MOCK_PROMO_CODE}
               </span>
               <p className="mt-2 text-xs leading-5 text-slate-700 sm:text-sm">
-                {earlyBirdActive ? (
-                  <>
-                    {EARLY_BIRD_PRICE} is locked to the first {EARLY_BIRD_SPOT_CAP} people - only{" "}
-                    <span className="font-black text-orange-700">{earlyBirdSpotsLeft} spots left at {EARLY_BIRD_PRICE}</span>{" "}
-                    before it rises to{" "}
-                    <span className="font-semibold text-slate-500 line-through">{REGULAR_LIVE_MOCK_PRICE}</span>.
-                  </>
-                ) : (
-                  <>
-                    The {EARLY_BIRD_PRICE} early spots are gone. Registration is now{" "}
-                    <span className="font-black text-orange-700">{REGULAR_LIVE_MOCK_PRICE}</span>.
-                  </>
-                )}
+                <span className="font-black text-orange-700">{bothSubjectsSignupCount} spots have already been taken.</span>{" "}
+                Enter <span className="font-black text-slate-950">{LIVE_MOCK_PROMO_CODE}</span> at checkout for a discount.
               </p>
               <p className="mt-1.5 text-xs leading-5 text-slate-600 sm:text-sm">
-                Don&apos;t miss out - very few mocks backed by{" "}
-                <span className="rounded bg-amber-100/70 px-1 font-black text-orange-800">ex-GL examiners</span> are
-                released every year. This is probably the only one your students will have access to before their real
-                exam.
+                Only <span className="font-black text-orange-700">{promoSpotsRemaining} discount spots</span>{" "}
+                remain before the promo code stops working.
               </p>
             </div>
           )}
@@ -528,22 +511,13 @@ export default function LiveMockExams() {
                 <div className="text-2xl font-bold tracking-tight text-slate-950">
                   {hasPaidPremiumLiveMockAccess
                     ? "Included"
-                    : earlyBirdActive
-                      ? EARLY_BIRD_PRICE
-                      : REGULAR_LIVE_MOCK_PRICE}
+                    : REGULAR_LIVE_MOCK_PRICE}
                 </div>
-                {!hasPaidPremiumLiveMockAccess && earlyBirdActive && (
-                  <span className="text-sm font-semibold text-slate-400 line-through">
-                    {REGULAR_LIVE_MOCK_PRICE}
-                  </span>
-                )}
               </div>
               {!hasPaidPremiumLiveMockAccess && (
                 <div className="mt-1 inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.08em] text-orange-700">
-                  <UsersRound className="h-3 w-3" />
-                  {earlyBirdActive
-                    ? `Only ${earlyBirdSpotsLeft} of ${EARLY_BIRD_SPOT_CAP} left at ${EARLY_BIRD_PRICE}`
-                    : `Early ${EARLY_BIRD_PRICE} spots gone`}
+                  <Sparkles className="h-3 w-3" />
+                  Use code {LIVE_MOCK_PROMO_CODE} - {promoSpotsRemaining} uses left
                 </div>
               )}
             </div>
@@ -591,10 +565,6 @@ export default function LiveMockExams() {
           </Button>
         </div>
       </div>
-      <p className="mt-3 flex items-center gap-1.5 text-[10px] leading-4 text-slate-500 sm:text-xs">
-        <Sparkles className="h-3 w-3 shrink-0 text-amber-600" />
-        Completely <span className="font-semibold text-orange-700">free</span> for Gradlify Premium members (£9.99/month).
-      </p>
     </div>
   );
 
@@ -602,6 +572,33 @@ export default function LiveMockExams() {
     <main className="min-h-screen overflow-x-hidden bg-[#faf9f4] px-3 py-3 text-slate-950 sm:px-4 sm:py-4">
       <section className="mx-auto w-full min-w-0 max-w-5xl">
         {bothSubjectsRegistrationCard}
+
+        <div className="mb-3 rounded-[16px] border border-amber-200/90 bg-[linear-gradient(135deg,#fff7ed_0%,#ffffff_58%,#fffdf7_100%)] px-4 py-4 shadow-[0_14px_34px_rgba(234,88,12,0.08)] sm:px-5 sm:py-5">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-orange-600 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.14em] text-white">
+                <Sparkles className="h-3 w-3" />
+                Premium benefit
+              </span>
+              <h3 className="mt-3 text-xl font-black tracking-tight text-slate-950 sm:text-2xl">
+                Gradlify Premium members get this mock for free.
+              </h3>
+              <p className="mt-2 max-w-3xl text-sm font-semibold leading-6 text-slate-600 sm:text-base">
+                Premium is £19.99/month and includes free access to this mock plus all future Gradlify mocks.
+              </p>
+            </div>
+            <Button
+              type="button"
+              onClick={() => {
+                window.location.hash = "settings";
+              }}
+              className="h-11 shrink-0 rounded-[12px] bg-[linear-gradient(90deg,#f59e0b_0%,#ea580c_100%)] px-5 text-sm font-bold text-white shadow-[0_12px_24px_rgba(234,88,12,0.2)] hover:brightness-105"
+            >
+              View Premium
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </div>
+        </div>
 
         {SHOW_ENGLISH_LIVE_MOCK && (
         <div className="rounded-[16px] border border-slate-200/80 bg-[linear-gradient(135deg,#ffffff_0%,#fbfdff_58%,#fffdf8_100%)] px-3 py-3 shadow-[0_14px_34px_rgba(15,23,42,0.05)] sm:px-4">

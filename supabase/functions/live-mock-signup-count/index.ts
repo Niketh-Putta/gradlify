@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import Stripe from "https://esm.sh/stripe@14.21.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -9,12 +10,11 @@ const corsHeaders = {
 const DEFAULT_MOCK_SLUG = "both_subjects_live_mock";
 const readEnv = (name: string) => Deno.env.get(name)?.trim() ?? "";
 
-const DISCOUNT_DISPLAY_CAP = Number(readEnv("LIVE_MOCK_DISCOUNT_DISPLAY_CAP") || "80");
-const SIGNUP_DISPLAY_OFFSET = Number(readEnv("LIVE_MOCK_SIGNUP_DISPLAY_OFFSET") || "56");
+const SIGNUP_DISPLAY_OFFSET = Number(readEnv("LIVE_MOCK_SIGNUP_DISPLAY_OFFSET") || "49");
 const MIN_DISPLAYED_SIGNUPS = Number(readEnv("LIVE_MOCK_MIN_DISPLAYED_SIGNUPS") || "68");
-const DISCOUNT_REAL_CAP = DISCOUNT_DISPLAY_CAP - SIGNUP_DISPLAY_OFFSET;
-const DISCOUNT_PRICE_GBP = Number(readEnv("LIVE_MOCK_DISCOUNT_PRICE_GBP") || "9.99");
-const STANDARD_PRICE_GBP = Number(readEnv("LIVE_MOCK_STANDARD_PRICE_GBP") || "14.99");
+const STANDARD_PRICE_GBP = Number(readEnv("LIVE_MOCK_STANDARD_PRICE_GBP") || "19.99");
+const PROMO_CODE = readEnv("LIVE_MOCK_PROMO_CODE") || "LEVELFIELD";
+const PROMO_MAX_REDEMPTIONS = Number(readEnv("LIVE_MOCK_PROMO_MAX_REDEMPTIONS") || "12");
 
 const getDisplayedSignupCount = (count: number) =>
   Math.max(MIN_DISPLAYED_SIGNUPS, count + SIGNUP_DISPLAY_OFFSET);
@@ -50,19 +50,28 @@ serve(async (req) => {
 
     const realCount = count ?? 0;
     const displayedCount = getDisplayedSignupCount(realCount);
-    const discountAvailable = realCount < DISCOUNT_REAL_CAP;
-    const spotsRemaining = Math.max(0, DISCOUNT_DISPLAY_CAP - displayedCount);
-    const currentPriceGbp = discountAvailable ? DISCOUNT_PRICE_GBP : STANDARD_PRICE_GBP;
+    let promoSpotsRemaining = PROMO_MAX_REDEMPTIONS;
+    const stripeKey = readEnv("STRIPE_SECRET_KEY_LIVE") || readEnv("STRIPE_SECRET_KEY");
+    if (stripeKey) {
+      const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
+      const promotionCodes = await stripe.promotionCodes.list({
+        code: PROMO_CODE,
+        active: true,
+        limit: 1,
+      });
+      const coupon = promotionCodes.data[0]?.coupon;
+      const maxRedemptions = coupon?.max_redemptions ?? PROMO_MAX_REDEMPTIONS;
+      const timesRedeemed = coupon?.times_redeemed ?? 0;
+      promoSpotsRemaining = Math.max(0, maxRedemptions - timesRedeemed);
+    }
 
     return new Response(
       JSON.stringify({
         count: realCount,
         displayedCount,
-        discountAvailable,
-        spotsRemaining,
-        discountDisplayCap: DISCOUNT_DISPLAY_CAP,
-        currentPriceGbp,
-        discountPriceGbp: DISCOUNT_PRICE_GBP,
+        currentPriceGbp: STANDARD_PRICE_GBP,
+        promoCode: PROMO_CODE,
+        promoSpotsRemaining,
         standardPriceGbp: STANDARD_PRICE_GBP,
       }),
       {
