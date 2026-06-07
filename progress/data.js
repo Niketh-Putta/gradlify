@@ -5,9 +5,9 @@
  */
 window.GRADLIFY_PROGRESS = {
   meta: {
-    lastUpdated: "2026-05-20",
-    updatedBy: "Cursor · Level Field voice + points sprint funnel",
-    version: 8,
+    lastUpdated: "2026-06-07",
+    updatedBy: "Cursor · 14 June mock sprint + SEO + daily ops",
+    version: 9,
   },
   pipeline: {
     block2: {
@@ -22,13 +22,13 @@ window.GRADLIFY_PROGRESS = {
       wave2Cold: { sent: 3, sentTo: ["Emily Kendall", "Sabah Hadi", "The Exam Coach"] },
       totalColdSent: 10,
       calendarHolds: 9,
-      lastAction: "Level Field sprint already announced - ops = DMs + scores only",
-      blockedOn: ["Partner slot confirmations", "You running 10-min calls (b2-6)", "Andy until 30 Jun", "Kimi extension disconnected - reconnect to auto-read WA"],
+      lastAction: "Marketing sprint: live mock banner on landing, SEO sitemap, FB reminder copy, daily ops script",
+      blockedOn: ["Partner slot confirmations", "You running 10-min calls (b2-6)", "Andy until 30 Jun", "Kimi extension disconnected - reconnect to auto-read Gmail/WA"],
       manualNext: [
-        "Level Field: inbox sweep - DM link/score chase (no new group announcement)",
-        "Reply to every score with one next topic; PREMIUM only in DM",
-        "Partner wants a call → book earliest slot → Meet within minutes",
-        "Export poster PNG before 7 Jun group post",
+        "Execute outreach/execute/2026-06-07-DAILY.md (Level Field announce + partner chases + FB)",
+        "Reconnect Kimi → python3 scripts/marketing-daily-ops.py --agents --send",
+        "Message 5 paying subs for mock referrals",
+        "Export poster PNG from outreach/assets/14-june-mock-poster.html",
       ],
     },
   },

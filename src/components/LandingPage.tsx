@@ -18,6 +18,7 @@ import { useOfferCountdown } from "@/hooks/useOfferCountdown";
 import { setPostAuthRedirect } from "@/lib/postAuthRedirect";
 import { captureReferralFromSearch } from "@/lib/referrals";
 import { getPartnerReferralLabel, readStoredReferralCode } from "@/lib/partnerRefs";
+import { LiveMockPromoBanner } from "@/components/LiveMockPromoBanner";
 
 /** Same clips as in `src/assets/`, but loaded from `/public` so they are not embedded in the JS bundle. */
 const PRACTICE_SHOWCASE_VIDEO = "/videos/practice-question.mov";
@@ -241,6 +242,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
   const [ambientEffectsEnabled, setAmbientEffectsEnabled] = useState(true);
   const [showInternationalTagline, setShowInternationalTagline] = useState(false);
   const [partnerReferralLabel, setPartnerReferralLabel] = useState<string | null>(null);
+  const [storedRefCode, setStoredRefCode] = useState<string | null>(null);
   const hasSession = false;
   const sessionChecked = true;
   const dashboardPath = getDashboardPath();
@@ -314,6 +316,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
     if (typeof window === "undefined") return;
     captureReferralFromSearch(window.location.search);
     const code = readStoredReferralCode();
+    setStoredRefCode(code);
     setPartnerReferralLabel(getPartnerReferralLabel(code) ?? (code ? code : null));
   }, []);
 
@@ -564,6 +567,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
             </div>
           </div>
         )}
+        {isElevenPlus && <LiveMockPromoBanner refCode={storedRefCode ?? "LEVELFIELD"} />}
         <div className="max-w-7xl mx-auto px-3 pr-4 sm:px-6 sm:pr-6 py-2.5 sm:py-4">
           <div className="flex items-center justify-between gap-3 sm:gap-4">
             <a href="#" className="flex items-center gap-3">
@@ -610,7 +614,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
       <main
         className={cn(
           isElevenPlus
-            ? "pt-[10.75rem] sm:pt-[7.25rem] lg:pt-[6.75rem]"
+            ? "pt-[13.5rem] sm:pt-[9.5rem] lg:pt-[9rem]"
             : "pt-24 sm:pt-28 lg:pt-8"
         )}
       >
@@ -671,6 +675,11 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                      Explore the system
                    </Button>
                 </div>
+                {isElevenPlus && (
+                  <div className="mt-4 max-w-lg">
+                    <LiveMockPromoBanner variant="compact" refCode={storedRefCode ?? "LEVELFIELD"} />
+                  </div>
+                )}
               </motion.div>
 
               <motion.div variants={motionCfg.fadeUp} className="lg:col-span-7 relative mt-6 lg:mt-8 h-[460px] lg:h-[520px] w-full max-w-[600px] mx-auto lg:ml-auto">
