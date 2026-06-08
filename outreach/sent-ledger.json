@@ -79,13 +79,13 @@
     }
   },
   "nextAction": {
-    "channel": "distribution",
-    "action": "day_1_warm_network",
+    "channel": "level_field",
+    "action": "fomo_reframe_post",
     "steps": [
-      "Scroll Level Field: poster sent? If yes → mock-spots-reminder.txt; if no → HOW-TO-SEND-MOCK-GC once",
-      "WA DM pavan, vineela, harinishuj, vivek (paying-subs-referral.txt) — ask 1 family + which year-group GC",
-      "WA DM hhspk + avikvara4 (trial → mock free + forward ask)",
-      "90 min DM inbox sweep — log parent-conversion-tracker.csv"
+      "Optional 15s voice: outreach/wa/level-field-fomo-voice-note.txt",
+      "Post outreach/wa/level-field-fomo-post.txt (NOT mock-spots-reminder — new angle)",
+      "DM within 2h everyone who replies LEVELFIELD with checkout link + code",
+      "90 min DM sweep on existing threads — warmer than group spam"
     ],
     "doNot": [
       "Sassy",
