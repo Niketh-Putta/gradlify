@@ -1,0 +1,53 @@
+═══════════════════════════════════════════════════════════════
+IMPORTANT: Cloud VM Cannot Access Your Mac
+═══════════════════════════════════════════════════════════════
+
+I'm running on a Linux Cloud VM and cannot directly access your Mac's
+file system or Finder. However, I've prepared everything you need.
+
+═══════════════════════════════════════════════════════════════
+COMPLETE SETUP (Run on Your Mac)
+═══════════════════════════════════════════════════════════════
+
+1. Open Terminal on your Mac
+
+2. Navigate to the repo:
+   cd ~/Downloads/Projects/Gradlify/Codes  # or wherever your repo is
+
+3. Pull latest changes:
+   git pull origin cursor/cloud-dev-env-setup-452c
+
+4. Run the automated script:
+   ./copy-video-to-favourites.sh
+
+This will:
+✓ Find your GRADLIFY Finder favourites folder
+✓ Copy "Gradlify demo video.mp4" to the top level
+✓ Reveal it in Finder (same level as pptx, not in subfolders)
+
+═══════════════════════════════════════════════════════════════
+FILES NOW IN REPO (Already Pushed)
+═══════════════════════════════════════════════════════════════
+
+✓ Gradlify demo video.mp4 (13 MB) at repo root
+✓ copy-video-to-favourites.sh - automated setup script
+✓ reveal-demo-in-finder.command - double-click to reveal
+✓ SETUP_MAC_FAVOURITES.md - detailed documentation
+
+All committed to: cursor/cloud-dev-env-setup-452c
+All pushed to: origin
+
+═══════════════════════════════════════════════════════════════
+EXPECTED FINAL STRUCTURE ON YOUR MAC
+═══════════════════════════════════════════════════════════════
+
+~/Downloads/Projects/Gradlify/  (or your GRADLIFY favourites folder)
+├── Codes/  (or "11+ GRADLIFY" repo with all code)
+├── Gradlify-Partner-Overview.pptx
+├── 11+ 14th June Mock Poster.jpeg
+└── Gradlify demo video.mp4  ← NEW (same level as pptx)
+
+File will be at: /path/to/GRADLIFY/Gradlify demo video.mp4
+(exactly where you requested, NOT buried in subfolders)
+
+═══════════════════════════════════════════════════════════════
