@@ -7,7 +7,7 @@
 
 - You run **free daily 11+ material** - parents already trust you as a helper, not a salesman.
 - They **already know Gradlify Premium** - never pitch it like a launch.
-- Your edge: you **sat the 11+ only a few years ago** and you're at **QE Boys**. Peer energy, not tutor-on-a-pedestal.
+- Your edge: you **sat 11+ at 10** (five years ago) and you're at **QE Boys** now. Peer energy, not tutor-on-a-pedestal.
 - The group cares about **fair access** (anti-£3k tuition narrative). Sell **structure + mocks + knowing what to practise next**, not replacing community free stuff.
 
 ## How your messages read

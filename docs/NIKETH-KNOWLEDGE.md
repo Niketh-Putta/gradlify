@@ -12,7 +12,7 @@ Synced from Codex knowledge interview. Cursor reads this for all Gradlify work.
 - **Gradlify** (confirm spelling before customer-facing copy).
 - 11+ online prep - cheaper/simpler path vs ~£3k–4k/yr tuition.
 - Promise: clear study path, unlimited notes & mocks, live mocks for premium.
-- Founder edge: you recently got into top schools via 11+.
+- Founder edge: sat **11+ at age 10** (~5 years ago), now at QE Boys. **15 now** (LinkedIn says 16 for platform age rules).
 
 ## Numbers (baseline)
 - **Always refresh:** `python3 scripts/fetch-metrics-snapshot.py` (do not trust stale docs).
