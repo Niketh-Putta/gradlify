@@ -12,7 +12,7 @@
 
 ## Where you are today (baseline)
 
-**Refresh live numbers before planning:** `python3 scripts/fetch-metrics-snapshot.py` → `progress/metrics-snapshot.js`
+**Refresh live numbers before planning:** `python3 scripts/fetch-metrics-snapshot.py` → `outreach/metrics-latest.json`
 
 | Metric | Actual (live API, Jun 2026) |
 |--------|--------|

@@ -17,4 +17,4 @@
 
 ## Next: Block 2
 
-Partner calls - see `docs/GRADLIFY-ACTION-SEQUENCE.md` and `progress/index.html` (Mission Control).
+Partner calls - see `docs/GRADLIFY-ACTION-SEQUENCE.md` and `outreach/sent-ledger.json`.

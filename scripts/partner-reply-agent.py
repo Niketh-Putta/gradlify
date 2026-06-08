@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Scan partner Gmail threads via Kimi, classify replies, auto-respond, sync Mission Control feed."""
+"""Scan partner Gmail threads via Kimi, classify replies, auto-respond, update sent-ledger."""
 from __future__ import annotations
 
 import hashlib
@@ -374,9 +374,9 @@ def build_live_feed(updates: List[dict], actions: List[dict]) -> dict:
                 "Gmail: search from:(elevenplussuccess OR 11plushub OR mocktestmasters OR frenchiemummy)",
                 "Google Calendar: find matching tentative hold → Confirm → Add Google Meet",
                 "Reply in same thread with Meet link (agent drafts confirm when they reply YES)",
-                "On call: use b2-6 script in Mission Control → send ?ref= within 1h (b2-7)",
+                "On call: use partner call brief → send ?ref= within 1h",
             ],
-            "file": "progress/index.html#block-2",
+            "file": "outreach/partner-calls/CALL-BRIEFS.md",
             "block": "b2-6",
             "minutes": 15,
         },

@@ -83,7 +83,7 @@ def seed_ledger_from_repo() -> dict:
                     "Poll flow skipped - date pre-confirmed",
                 ],
                 "sends": [
-                    {"type": "sprint_launch", "status": "sent", "source": "repo", "note": "Per progress/data.js + level-field-ops"},
+                    {"type": "sprint_launch", "status": "sent", "source": "repo", "note": "Per sent-ledger + level-field-ops"},
                     {"type": "poll", "status": "skipped", "source": "repo", "note": "Date locked; poll not needed"},
                     {"type": "mock_poster", "status": "unknown", "source": "repo", "note": "Kimi audit required - check poster+caption sent"},
                     {"type": "forward_ask", "status": "unknown", "source": "repo"},

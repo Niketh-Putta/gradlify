@@ -17,7 +17,7 @@
           "type": "sprint_launch",
           "status": "sent",
           "source": "repo",
-          "note": "Per progress/data.js + level-field-ops"
+          "note": "Per sent-ledger + level-field-ops"
         },
         {
           "type": "poll",
