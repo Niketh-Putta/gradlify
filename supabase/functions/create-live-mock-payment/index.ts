@@ -9,8 +9,11 @@ const corsHeaders = {
 
 const readEnv = (name: string) => Deno.env.get(name)?.trim() || "";
 const BOTH_SUBJECTS_LIVE_MOCK_SLUG = "both_subjects_live_mock";
+const metadataValue = (value: unknown) =>
+  typeof value === "string" && value.trim().length > 0 ? value.trim() : undefined;
 
-const STANDARD_PRICE_GBP = Number(readEnv("LIVE_MOCK_STANDARD_PRICE_GBP") || "19.99");
+// Hardcoded so the charged price can't be overridden by a stale secret or Stripe price ID.
+const STANDARD_PRICE_GBP = 14.99;
 
 const buildInlineLiveMockLineItem = (amountGbp: number) => ({
   quantity: 1,
@@ -78,6 +81,10 @@ serve(async (req) => {
     const amountGbp = STANDARD_PRICE_GBP;
 
     const body = await req.json().catch(() => ({}));
+    const datafastMetadata = {
+      ...(metadataValue(body.datafast_visitor_id) ? { datafast_visitor_id: metadataValue(body.datafast_visitor_id) } : {}),
+      ...(metadataValue(body.datafast_session_id) ? { datafast_session_id: metadataValue(body.datafast_session_id) } : {}),
+    };
     const candidateBaseUrl =
       body.baseUrl ||
       req.headers.get("origin") ||
@@ -92,13 +99,9 @@ serve(async (req) => {
     const returnTo = sanitizeReturnPath(String(body.returnTo ?? "/live-mock-exams"));
     const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
 
-    const standardPriceId = useLive
-      ? readEnv("LIVE_MOCK_STANDARD_PRICE_ID_LIVE")
-      : readEnv("LIVE_MOCK_STANDARD_PRICE_ID_TEST");
-
-    const lineItem = standardPriceId
-      ? { price: standardPriceId, quantity: 1 }
-      : buildInlineLiveMockLineItem(amountGbp);
+    // Always charge the inline £14.99 amount so a stale Stripe price ID secret
+    // can't keep charging the old price.
+    const lineItem = buildInlineLiveMockLineItem(amountGbp);
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
@@ -113,6 +116,7 @@ serve(async (req) => {
         mock_starts_at: new Date().toISOString(),
         amount_gbp: String(amountGbp),
         promo_code_enabled: "true",
+        ...datafastMetadata,
       },
       success_url: `${baseUrl}/pay/success?session_id={CHECKOUT_SESSION_ID}&returnTo=${encodeURIComponent(returnTo)}`,
       cancel_url: `${baseUrl}/pay/cancelled?returnTo=${encodeURIComponent(returnTo)}`,

@@ -10,11 +10,14 @@ const corsHeaders = {
 const DEFAULT_MOCK_SLUG = "both_subjects_live_mock";
 const readEnv = (name: string) => Deno.env.get(name)?.trim() ?? "";
 
-const SIGNUP_DISPLAY_OFFSET = Number(readEnv("LIVE_MOCK_SIGNUP_DISPLAY_OFFSET") || "49");
-const MIN_DISPLAYED_SIGNUPS = Number(readEnv("LIVE_MOCK_MIN_DISPLAYED_SIGNUPS") || "68");
-const STANDARD_PRICE_GBP = Number(readEnv("LIVE_MOCK_STANDARD_PRICE_GBP") || "19.99");
+const SIGNUP_DISPLAY_OFFSET = Number(readEnv("LIVE_MOCK_SIGNUP_DISPLAY_OFFSET") || "55");
+const MIN_DISPLAYED_SIGNUPS = Number(readEnv("LIVE_MOCK_MIN_DISPLAYED_SIGNUPS") || "76");
+// Hardcoded so the displayed price can't be overridden by a stale secret.
+const STANDARD_PRICE_GBP = 14.99;
 const PROMO_CODE = readEnv("LIVE_MOCK_PROMO_CODE") || "LEVELFIELD";
-const PROMO_MAX_REDEMPTIONS = Number(readEnv("LIVE_MOCK_PROMO_MAX_REDEMPTIONS") || "12");
+// Authoritative discount-spot cap. Hardcoded (not env-driven) so the displayed
+// scarcity stays controllable from code and isn't overridden by stale secrets.
+const PROMO_MAX_REDEMPTIONS = 3;
 
 const getDisplayedSignupCount = (count: number) =>
   Math.max(MIN_DISPLAYED_SIGNUPS, count + SIGNUP_DISPLAY_OFFSET);
@@ -59,10 +62,12 @@ serve(async (req) => {
         active: true,
         limit: 1,
       });
-      const coupon = promotionCodes.data[0]?.coupon;
-      const maxRedemptions = coupon?.max_redemptions ?? PROMO_MAX_REDEMPTIONS;
-      const timesRedeemed = coupon?.times_redeemed ?? 0;
-      promoSpotsRemaining = Math.max(0, maxRedemptions - timesRedeemed);
+      const promotionCode = promotionCodes.data[0];
+      const coupon = promotionCode?.coupon;
+      const timesRedeemed = promotionCode?.times_redeemed ?? coupon?.times_redeemed ?? 0;
+      // Use the configured cap as the source of truth so the displayed scarcity
+      // is controllable, while still decrementing with real Stripe redemptions.
+      promoSpotsRemaining = Math.max(0, PROMO_MAX_REDEMPTIONS - timesRedeemed);
     }
 
     return new Response(

@@ -17,13 +17,16 @@ import {
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { PremiumUpgradeButton } from "@/components/PremiumUpgradeButton";
 import { supabase } from "@/integrations/supabase/client";
 import { useAppContext } from "@/hooks/useAppContext";
 import { useMembership } from "@/hooks/useMembership";
+import { getDataFastIds } from "@/lib/datafast";
 import {
   formatLiveMockPrice,
   LIVE_MOCK_MIN_DISPLAYED_SIGNUPS,
   LIVE_MOCK_PROMO_CODE,
+  LIVE_MOCK_PROMO_SPOTS_REMAINING,
   LIVE_MOCK_STANDARD_PRICE_GBP,
 } from "@/lib/liveMockPricing";
 
@@ -46,7 +49,7 @@ const BOTH_SUBJECTS_LIVE_MOCK = {
 
 const MIN_DISPLAYED_BOTH_SUBJECTS_SIGNUPS = LIVE_MOCK_MIN_DISPLAYED_SIGNUPS;
 
-const REGULAR_LIVE_MOCK_PRICE = "£19.99";
+const REGULAR_LIVE_MOCK_PRICE = "£14.99";
 
 type SignupRow = {
   id: string;
@@ -81,7 +84,7 @@ export default function LiveMockExams() {
   const [signup, setSignup] = useState<SignupRow | null>(null);
   const [bothSubjectsSignup, setBothSubjectsSignup] = useState<SignupRow | null>(null);
   const [bothSubjectsSignupCount, setBothSubjectsSignupCount] = useState(MIN_DISPLAYED_BOTH_SUBJECTS_SIGNUPS);
-  const [promoSpotsRemaining, setPromoSpotsRemaining] = useState(12);
+  const [promoSpotsRemaining, setPromoSpotsRemaining] = useState(LIVE_MOCK_PROMO_SPOTS_REMAINING);
   const [liveMockPriceGbp, setLiveMockPriceGbp] = useState(LIVE_MOCK_STANDARD_PRICE_GBP);
   /** Locks "Start" once an attempt row exists (created on first Start click). */
   const [attemptStatus, setAttemptStatus] = useState<LiveMockAttemptStatus>("none");
@@ -103,7 +106,7 @@ export default function LiveMockExams() {
         typeof data?.currentPriceGbp === "number" ? data.currentPriceGbp : LIVE_MOCK_STANDARD_PRICE_GBP,
       );
       setPromoSpotsRemaining(
-        typeof data?.promoSpotsRemaining === "number" ? data.promoSpotsRemaining : 12,
+        typeof data?.promoSpotsRemaining === "number" ? data.promoSpotsRemaining : LIVE_MOCK_PROMO_SPOTS_REMAINING,
       );
     } catch (error) {
       console.error("Failed to load live mock signup count", error);
@@ -398,6 +401,7 @@ export default function LiveMockExams() {
         body: {
           returnTo,
           baseUrl: window.location.origin,
+          ...getDataFastIds(),
         },
       });
 
@@ -587,16 +591,10 @@ export default function LiveMockExams() {
                 Premium is £19.99/month and includes free access to this mock plus all future Gradlify mocks.
               </p>
             </div>
-            <Button
-              type="button"
-              onClick={() => {
-                window.location.hash = "settings";
-              }}
-              className="h-11 shrink-0 rounded-[12px] bg-[linear-gradient(90deg,#f59e0b_0%,#ea580c_100%)] px-5 text-sm font-bold text-white shadow-[0_12px_24px_rgba(234,88,12,0.2)] hover:brightness-105"
-            >
-              View Premium
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
+            <PremiumUpgradeButton
+              label="View Premium"
+              className="h-11 min-h-0 w-auto shrink-0 rounded-[12px] bg-[linear-gradient(90deg,#f59e0b_0%,#ea580c_100%)] px-5 text-sm font-bold text-white shadow-[0_12px_24px_rgba(234,88,12,0.2)] hover:brightness-105"
+            />
           </div>
         </div>
 
