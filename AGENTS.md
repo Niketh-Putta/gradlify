@@ -36,7 +36,6 @@ Headless Chrome may hit `ERR_INSUFFICIENT_RESOURCES` on first load. Relaunch wit
 - **Python** `gemini_venv/` for question-bank import scripts under `supabase/import/`
 
 ### Investor demo video (always)
-- **Save final cuts only** to `gradlify/Gradlify demo video.mp4` (no other filenames in that folder).
-- **Mac Finder (Favourites → Gradlify):** `/Users/nikethputta/Downloads/Projects/Gradlify/GRADLIFY APP CODES/11+ GRADLIFY/gradlify/`
-- **Always tell Niketh:** give a clickable Finder link to that folder and the file, e.g. `file:///Users/nikethputta/Downloads/Projects/Gradlify/GRADLIFY%20APP%20CODES/11+%20GRADLIFY/gradlify/`
-- Terminal: `open "/Users/nikethputta/Downloads/Projects/Gradlify/GRADLIFY APP CODES/11+ GRADLIFY/gradlify/Gradlify demo video.mp4"`
+- **Save final cuts only** to `gradlify/Gradlify demo video.mp4`.
+- **Do not use `file://` links** — they do not work from Cloud Agent chat.
+- **Tell Niketh:** pull latest, then double-click `gradlify/Open in Finder.command` in the Gradlify repo (Finder → Favourites → Gradlify), or run `open "gradlify/Gradlify demo video.mp4"` from repo root.
