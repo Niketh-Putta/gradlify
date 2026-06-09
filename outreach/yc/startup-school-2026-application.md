@@ -22,8 +22,53 @@
 | Field | Fill |
 |-------|------|
 | **LinkedIn** | https://www.linkedin.com/in/niketh-putta-1086483a9 |
-| **Education** | QE Boys' School, Barnet (current). Add primary / any other schools if the form asks. |
-| **Work History** | Founder, Gradlify — Sep 2025 to present. Built and run gradlify.com end to end (product, growth, sales). |
+| **Education** | Queen Elizabeth's School, Barnet (2022–2029, current). |
+| **Work History** | See **Work History (paste into form)** below — 4 roles. |
+
+---
+
+## Work History (paste into form)
+
+Add these in order (most recent first). Short descriptions for YC's work-history UI:
+
+### 1. Founder — Gradlify
+**Sep 2025 – Present** · Barnet, UK · https://gradlify.com
+
+```
+Built and run Gradlify end to end: 11+ maths/English prep SaaS with timed mocks, live exams, Stripe checkout, and Premium subscriptions. ~240 signups, paying parents, ~£120 MRR. Grew through a 450+ parent WhatsApp community, direct sales calls, and LinkedIn. ~10 hrs/day. Product, engineering, distribution, support — all me.
+```
+
+### 2. Synthica Chapter Leader — Queen Elizabeth's School
+**Jan 2026 – Present** · Barnet, UK
+
+```
+Founded and lead the QEBS x Synthica research club. Selected 25 students from 140+ applicants. Run weekly research sessions, mentor long-term projects, built recruitment/attendance systems. Focus: getting motivated students to produce real academic output, not just grades.
+```
+
+### 3. Summer Intern — Marlin
+**Aug 2025** · Remote / UK
+
+```
+Software internship at Marlin (digital agency). Learned how professional teams ship SaaS: dev process, team structure, client delivery. Picked up practical SaaS development skills in a real workspace, not a classroom.
+```
+
+### 4. Freelance web developer (client websites)
+**Jun 2025 – Aug 2025** (~2 months) · Remote
+
+```
+Built and sold full websites for businesses — front-end, backend, domain/DNS, handover to client. Biggest project: Terrawise (real estate, Bangalore) — company site plus custom backend for deals/project tracking. https://www.terrawiseventures.in/
+
+Also built RakshaHelp — multilingual first-aid emergency app + website (rakshahelp.com), Play Store submission, domain setup. Paid client/agency-style work before I went all-in on Gradlify.
+```
+
+**Optional fourth line if form has room (leadership, not paid job):**
+
+### VEX Robotics Team Captain
+**Sep 2023 – May 2025**
+
+```
+Led international-level robotics team. 2x UK National Champion, World Championship qualifier twice, World Build Award 2025, Top 40 Skills globally (400+ teams). Managed design process and team under competition pressure.
+```
 
 ---
 
@@ -54,6 +99,12 @@ SAT: 1530 at age 14 (took it early to see where I stood vs US applicants).
 ```
 Founder @ Gradlify — running it like a real company, not a school project. ~10 hrs/day.
 
+Synthica Chapter Leader @ QE Boys — founded research club, 25 selected from 140+ applicants.
+
+Marlin summer internship (Aug 2025) — SaaS dev in a professional agency.
+
+~2 months freelance: built and sold full client websites (Terrawise real estate platform, RakshaHelp first-aid app + site).
+
 Built and grew a 450+ parent WhatsApp community (The Level Field) around free 11+ resources, then converted serious families into paid mock exams and Premium subscriptions.
 
 LinkedIn: ~2.5k followers, posting founder/builder content in public (distribution is half the job).
@@ -66,7 +117,9 @@ LinkedIn: ~2.5k followers, posting founder/builder content in public (distributi
 ```
 No formal research papers yet.
 
-Selective school admissions outcome above is the main "competition" result — 11+ at 10, multiple top grammar/independent offers.
+VEX Robotics: 2x UK National Champion, World Championship qualifier twice, World Build Award 2025, Top 40 Skills globally out of 400+ international teams (team captain, 27 awards over 2 seasons).
+
+11+ at age 10: offers from QE Boys, Wilson's, Eton, and every selective school I applied to.
 
 Running live timed 11+ mocks with 70+ families registered for the June mock (GL-style, examiner-backed format).
 ```
@@ -78,6 +131,12 @@ Running live timed 11+ mocks with 70+ families registered for the June mock (GL-
 ```
 Gradlify — https://gradlify.com
 AI-powered 11+ maths and English prep for UK families. Timed mocks, score + weak-topic feedback, live mock exam product, Premium subscriptions. I built the stack, content pipeline, checkout, and distribution myself. ~240 signups, paying customers, ~£120 MRR, growing through parent WhatsApp groups and direct sales.
+
+Terrawise — https://www.terrawiseventures.in/
+Full company website + custom backend for a real estate firm (project/deal tracking). Sold as a client build during my freelance phase.
+
+RakshaHelp — https://www.rakshahelp.com/
+Multilingual first-aid emergency app (Kotlin/Android) + website. Built for real-world use in India, Play Store submission, domain/DNS.
 
 Also cloned a 1M+ user consumer app in 8 hours with AI coding agents (posted the build on LinkedIn — was a speed run to prove how fast you can ship if you stop overthinking).
 

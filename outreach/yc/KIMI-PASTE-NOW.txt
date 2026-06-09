@@ -1,0 +1,58 @@
+Paste this into Kimi "Ask Chat" or your Cursor agent while the Startup School tab is open and WebBridge shows Connected:
+
+---
+
+Fill out the YC Startup School 2026 application on this page. Click REGISTER if needed. Use my details:
+
+Basics:
+- Gender: Male
+- City: Barnet, United Kingdom
+- Country of citizenship: United Kingdom
+- (Leave Date of Birth for me to confirm — do not guess)
+
+Background:
+- LinkedIn: https://www.linkedin.com/in/niketh-putta-1086483a9
+- Education: Queen Elizabeth's School, Barnet (2022–2029, current)
+
+Work history (add all four):
+1) Founder @ Gradlify — Sep 2025–present. Built gradlify.com end to end. ~240 signups, ~£120 MRR, 450+ parent WhatsApp community, live mocks, Stripe, ~10 hrs/day.
+2) Synthica Chapter Leader @ QE Boys — Jan 2026–present. Founded research club, 25 from 140+ applicants.
+3) Summer Intern @ Marlin — Aug 2025. SaaS dev, professional agency, team delivery process.
+4) Freelance web developer — ~2 months (Jun–Aug 2025). Built and sold full client websites: Terrawise (terrawiseventures.in — site + backend for real estate), RakshaHelp (rakshahelp.com — first-aid app + site).
+
+Personal:
+- Website: https://gradlify.com
+- GitHub: https://github.com/Niketh-Putta/exam-mate-genie
+
+Test scores:
+11+ (sat at age 10): offers from QE Boys, Wilson's School, Eton College, and every selective school I applied to.
+
+SAT: 1530 at age 14 (took it early to see where I stood vs US applicants).
+
+Entrepreneurship programs/clubs:
+Founder @ Gradlify. Synthica Chapter Leader. Marlin internship. ~2 months selling client websites (Terrawise, RakshaHelp). The Level Field WhatsApp community (450+ parents). LinkedIn ~2.5k followers.
+
+Competitions/awards/papers:
+VEX Robotics: 2x UK National Champion, World Build Award 2025, World Championship qualifier twice, Top 40 Skills globally. 11+ at 10: QE Boys, Wilson's, Eton offers. Live GL mocks, 70+ families registered.
+
+Things you've built:
+Gradlify — https://gradlify.com
+AI-powered 11+ maths and English prep for UK families. Timed mocks, score + weak-topic feedback, live mock exam product, Premium subscriptions. I built the stack, content pipeline, checkout, and distribution myself. ~240 signups, paying customers, ~£120 MRR, growing through parent WhatsApp groups and direct sales.
+
+Also cloned a 1M+ user consumer app in 8 hours with AI coding agents (posted the build on LinkedIn — was a speed run to prove how fast you can ship if you stop overthinking).
+
+Jarvis — personal AI ops stack I bought and wired into how I run Gradlify (email, outreach, browser automation). Not pretty, but it lets one person operate like a small team.
+
+Hacking a non-computer system:
+I wanted a proper AI agent setup (Jarvis) without waiting on enterprise sales or paying stupid money for something I could wire up myself.
+
+The "system" was basically access: who has the tool, who controls the waitlist, and who decides what counts as a real setup. I found someone already running a Jarvis-style stack, bought it off them directly, and negotiated to keep their config and prompts instead of starting from zero.
+
+That sounds small. It wasn't. I went from watching other founders tweet about their agents to actually running mine the same week — handling Gmail, outreach, and ops while I'm still in school and building Gradlify on the side.
+
+The hack was realising the bottleneck wasn't code. It was access. I bought my way past the queue and spent my time on distribution instead of reinventing an agent framework.
+
+Most impressive thing (1-2 sentences):
+At 14 I scored 1530 on the SAT while building Gradlify — a live 11+ prep product with real paying parents, timed GL-style mocks, and ~£120 MRR I grew mostly through WhatsApp and sales calls, not ads.
+
+Do NOT submit. Stop on the review screen and tell me what's left for me to fill manually (DOB, education JSON fields, etc.).
