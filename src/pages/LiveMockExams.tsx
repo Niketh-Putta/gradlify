@@ -49,8 +49,6 @@ const BOTH_SUBJECTS_LIVE_MOCK = {
 
 const MIN_DISPLAYED_BOTH_SUBJECTS_SIGNUPS = LIVE_MOCK_MIN_DISPLAYED_SIGNUPS;
 
-const REGULAR_LIVE_MOCK_PRICE = "£14.99";
-
 type SignupRow = {
   id: string;
   registered_at: string;
@@ -515,7 +513,7 @@ export default function LiveMockExams() {
                 <div className="text-2xl font-bold tracking-tight text-slate-950">
                   {hasPaidPremiumLiveMockAccess
                     ? "Included"
-                    : REGULAR_LIVE_MOCK_PRICE}
+                    : formatLiveMockPrice(liveMockPriceGbp)}
                 </div>
               </div>
               {!hasPaidPremiumLiveMockAccess && (
