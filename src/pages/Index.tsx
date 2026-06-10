@@ -35,6 +35,7 @@ const NotFound = lazyWithRetry(() => import('@/pages/NotFound'));
 const Tools = lazyWithRetry(() => import('@/pages/Tools'));
 const SubjectSelection = lazyWithRetry(() => import('@/pages/SubjectSelection'));
 const Compare = lazyWithRetry(() => import('@/pages/Compare'));
+const ProteinTracker = lazyWithRetry(() => import('@/pages/ProteinTracker'));
 
 import { User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -283,6 +284,8 @@ const Index = () => {
         <Route path="/auth/callback" element={<AuthCallback />} />
         <Route path="/pay/success" element={<PayReturn />} />
         <Route path="/pay/cancelled" element={<PayReturn />} />
+        <Route path="/protein" element={<ProteinTracker />} />
+        <Route path="/protein-tracker" element={<ProteinTracker />} />
         
         {/* Redirect authenticated users from landing page to subject selection */}
         {user ? (
@@ -335,6 +338,8 @@ const Index = () => {
               <Route path="notes/:section" element={<RevisionNotesSection />} />
               <Route path="notes/:section/:topic" element={<RevisionNotesTopic />} />
               <Route path="nikethputtaadmin-growth" element={<GrowthTracker />} />
+              <Route path="protein" element={<ProteinTracker />} />
+              <Route path="protein-tracker" element={<ProteinTracker />} />
               <Route path="*" element={<NotFound />} />
             </Route>
           </>

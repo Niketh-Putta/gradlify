@@ -1,0 +1,52 @@
+{
+  "product": "Protein Lens",
+  "updated": "2026-06-10",
+  "route": "/protein",
+  "features": [
+    {
+      "date": "2026-06-10",
+      "title": "Full Protein Tracker app",
+      "detail": "Dedicated page at /protein with auth gate, protein ring, macro bars, and meal log."
+    },
+    {
+      "date": "2026-06-10",
+      "title": "Camera and gallery food scan",
+      "detail": "Scan meals via camera or upload; pick breakfast, lunch, dinner, or snack before analysing."
+    },
+    {
+      "date": "2026-06-10",
+      "title": "AI protein analysis edge function",
+      "detail": "analyze-food-protein Supabase function with food-database cross-validation and confidence scoring."
+    },
+    {
+      "date": "2026-06-10",
+      "title": "Confirm-before-log modal",
+      "detail": "Review and edit protein, calories, carbs, and fat before a meal is saved."
+    },
+    {
+      "date": "2026-06-10",
+      "title": "Gamification layer",
+      "detail": "XP, levels, streaks, badges, and a seven-day protein heatmap with goal confetti."
+    },
+    {
+      "date": "2026-06-10",
+      "title": "Freemium scan limits and paywall",
+      "detail": "Three free scans per day; Stripe checkout via create-protein-checkout for unlimited premium."
+    },
+    {
+      "date": "2026-06-10",
+      "title": "Settings and dark mode",
+      "detail": "Settings sheet for protein goal, theme toggle, subscription plans, and sign-out."
+    },
+    {
+      "date": "2026-06-10",
+      "title": "Payment details in settings",
+      "detail": "Settings now shows plan, price, billing status, renewal date, Stripe manage billing, and upgrade checkout."
+    },
+    {
+      "date": "2026-06-10",
+      "title": "Supabase protein schema",
+      "detail": "Migration for protein_profiles, protein_meal_logs, scan feedback, and founder unlimited scans."
+    }
+  ]
+}

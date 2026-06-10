@@ -25,6 +25,11 @@ const AdminQuestions = lazyWithRetry(() => import("./pages/AdminQuestions"));
 const AdminAnalytics = lazyWithRetry(() => import("./pages/AdminAnalytics"));
 const Tools = lazyWithRetry(() => import("./pages/Tools"));
 const GrowthTracker = lazyWithRetry(() => import("./pages/GrowthTracker"));
+const ProteinTracker = lazyWithRetry(() => import("./pages/ProteinTracker"));
+const AuthCallback = lazyWithRetry(() =>
+  import("./pages/AuthCallback").then((m) => ({ default: m.AuthCallback })),
+);
+const PayReturn = lazyWithRetry(() => import("./pages/PayReturn"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -70,6 +75,11 @@ const AppContent = () => (
                   path="/nikethputtaadmin-growth"
                   element={<GrowthTracker />}
                 />
+                <Route path="/auth/callback" element={<AuthCallback />} />
+                <Route path="/pay/success" element={<PayReturn />} />
+                <Route path="/pay/cancelled" element={<PayReturn />} />
+                <Route path="/protein" element={<ProteinTracker />} />
+                <Route path="/protein-tracker" element={<ProteinTracker />} />
                 {/* Catch-all app shell last so standalone routes above always win */}
                 <Route path="/*" element={<Index />} />
                 <Route path="*" element={<NotFound />} />

@@ -127,6 +127,36 @@ const recordPaidLiveMockSignup = async (session: Stripe.Checkout.Session) => {
   return { success: true, ignored: false };
 };
 
+const recordProteinPremium = async (session: Stripe.Checkout.Session, active: boolean) => {
+  const userId =
+    session.metadata?.user_id ??
+    session.metadata?.userId ??
+    session.metadata?.supabase_user_id ??
+    session.client_reference_id ??
+    null;
+  if (!userId) {
+    logStep('Protein premium payment missing user id', { sessionId: session.id });
+    return { success: true, ignored: true };
+  }
+
+  const { error } = await getSupabaseClient()
+    .from('protein_profiles')
+    .upsert(
+      {
+        user_id: userId,
+        is_premium: active,
+        unlimited_scans: active,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: 'user_id' },
+    );
+
+  if (error) throw error;
+
+  logStep('Updated protein premium profile', { sessionId: session.id, userId, active });
+  return { success: true, ignored: false };
+};
+
 const determineBillingInterval = (
   subscription: Stripe.Subscription,
   priceIds: StripePriceIds
@@ -370,6 +400,11 @@ serve(async (req: Request): Promise<Response> => {
               session.metadata?.mock_type === 'both_subjects_live_mock')
           ) {
             result = await recordPaidLiveMockSignup(session);
+            break;
+          }
+
+          if (session.metadata?.product_type === 'protein_premium') {
+            result = await recordProteinPremium(session, true);
             break;
           }
 

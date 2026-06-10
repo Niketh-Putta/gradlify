@@ -63,6 +63,7 @@ export function GoogleSignInButton({
           token: credentialResponse.credential,
         });
         if (error) throw error;
+        onSignInEnd?.();
       } catch (error) {
         toast.error(errorMessage(error));
         onSignInEnd?.();
