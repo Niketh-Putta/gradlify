@@ -103,6 +103,7 @@ export function ProteinSettings({
             <ProteinBillingDetails
               hasPremiumAccess={hasPremiumAccess}
               isFounderEmail={isFounderEmail}
+              userEmail={user.email}
               scansUsedToday={scansUsedToday}
             />
 
@@ -154,6 +155,7 @@ export function ProteinSettings({
             <ProteinPaymentPlans
               hasPremiumAccess={hasPremiumAccess}
               isFounderEmail={isFounderEmail}
+              userEmail={user.email}
               scansUsedToday={scansUsedToday}
             />
           </TabsContent>

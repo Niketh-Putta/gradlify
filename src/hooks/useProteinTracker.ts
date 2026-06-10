@@ -1,14 +1,14 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
-import { useMembership } from "@/hooks/useMembership";
+import { useProteinMembership } from "@/hooks/useProteinMembership";
 import { isAbortLikeError } from "@/lib/errors";
 import { analyzeFoodImage } from "@/lib/protein/analyzeFood";
 import confetti from "canvas-confetti";
 
-export const FOUNDER_EMAIL = "nikhath13@gmail.com";
-export const FREE_DAILY_SCANS = 3;
-export const DEFAULT_PROTEIN_GOAL = 150;
+import { FOUNDER_EMAIL, FREE_DAILY_SCANS, DEFAULT_PROTEIN_GOAL } from "@/lib/protein/types";
+
+export { FOUNDER_EMAIL, FREE_DAILY_SCANS, DEFAULT_PROTEIN_GOAL };
 
 export type MealType = "breakfast" | "lunch" | "dinner" | "snack";
 
@@ -188,10 +188,13 @@ export function useProteinTracker() {
   const [dailyScans, setDailyScans] = useState<Record<string, number>>({});
   const [goalCelebratedToday, setGoalCelebratedToday] = useState(false);
 
-  const { isPremium, isFounder, loading: membershipLoading } = useMembership();
-
-  const isFounderEmail = user?.email?.toLowerCase() === FOUNDER_EMAIL.toLowerCase();
-  const hasPremiumAccess = isFounderEmail || isFounder || isPremium;
+  const membership = useProteinMembership({ userEmail: user?.email });
+  const {
+    isFounder,
+    loading: membershipLoading,
+    isFounderEmail,
+    hasPremiumAccess,
+  } = membership;
 
   useEffect(() => {
     let mounted = true;

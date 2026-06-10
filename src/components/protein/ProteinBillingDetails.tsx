@@ -9,8 +9,8 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useMembership } from "@/hooks/useMembership";
-import { FREE_DAILY_SCANS } from "@/hooks/useProteinTracker";
+import { useProteinMembership } from "@/hooks/useProteinMembership";
+import { FOUNDER_EMAIL, FREE_DAILY_SCANS } from "@/lib/protein/types";
 import { openBillingPortal } from "@/lib/billingPortal";
 import { startProteinCheckout } from "@/lib/protein/checkout";
 import { PROTEIN_PREMIUM_PRICE_GBP } from "@/lib/protein/types";
@@ -21,6 +21,7 @@ import { cn } from "@/lib/utils";
 type Props = {
   hasPremiumAccess: boolean;
   isFounderEmail: boolean;
+  userEmail?: string | null;
   scansUsedToday: number;
   compact?: boolean;
   className?: string;
@@ -45,11 +46,14 @@ function formatStatus(status: string | null | undefined) {
 export function ProteinBillingDetails({
   hasPremiumAccess,
   isFounderEmail,
+  userEmail,
   scansUsedToday,
   compact = false,
   className,
 }: Props) {
-  const { data: membership, loading: membershipLoading } = useMembership();
+  const { data: membership, loading: membershipLoading, hasProteinPremium } = useProteinMembership({
+    userEmail: userEmail ?? (isFounderEmail ? FOUNDER_EMAIL : null),
+  });
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [portalLoading, setPortalLoading] = useState(false);
 
@@ -63,7 +67,8 @@ export function ProteinBillingDetails({
   const subscriptionStatus = isFounderEmail
     ? "Complimentary"
     : hasPremiumAccess
-      ? formatStatus(membership?.subscription_status)
+      ? formatStatus(membership?.subscription_status) ||
+        (hasProteinPremium ? "Active subscription" : "Active")
       : "Free tier";
 
   const handleUpgrade = async () => {

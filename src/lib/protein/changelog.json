@@ -40,8 +40,8 @@
     },
     {
       "date": "2026-06-10",
-      "title": "Payment details in settings",
-      "detail": "Settings now shows plan, price, billing status, renewal date, Stripe manage billing, and upgrade checkout."
+      "title": "Protein Lens production billing fix",
+      "detail": "Payment details now load protein_profiles premium for all users; proteinlens.vercel.app serves the Gradlify tracker with billing in settings."
     },
     {
       "date": "2026-06-10",

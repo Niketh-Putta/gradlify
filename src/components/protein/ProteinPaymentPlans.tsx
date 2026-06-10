@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 type Props = {
   hasPremiumAccess: boolean;
   isFounderEmail: boolean;
+  userEmail?: string | null;
   scansUsedToday: number;
   className?: string;
 };
@@ -21,6 +22,7 @@ type Props = {
 export function ProteinPaymentPlans({
   hasPremiumAccess,
   isFounderEmail,
+  userEmail,
   scansUsedToday,
   className,
 }: Props) {
@@ -49,6 +51,7 @@ export function ProteinPaymentPlans({
         compact
         hasPremiumAccess={hasPremiumAccess}
         isFounderEmail={isFounderEmail}
+        userEmail={userEmail}
         scansUsedToday={scansUsedToday}
       />
 
