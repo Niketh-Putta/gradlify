@@ -1,9 +1,13 @@
 import { supabase } from "@/integrations/supabase/client";
+import { isProteinLensHost, PROTEIN_CHECKOUT_KEY } from "@/lib/protein/host";
+
+const defaultReturnPath = () => (isProteinLensHost() ? "/" : "/protein");
 
 const sanitizeReturnPath = (value: string) => {
-  if (!value) return "/protein";
-  if (!value.startsWith("/")) return "/protein";
-  if (value.startsWith("/pay/")) return "/protein";
+  const fallback = defaultReturnPath();
+  if (!value) return fallback;
+  if (!value.startsWith("/")) return fallback;
+  if (value.startsWith("/pay/")) return fallback;
   return value;
 };
 
@@ -18,7 +22,7 @@ export async function startProteinCheckout() {
   }
 
   const returnTo = `${window.location.pathname}${window.location.search}${window.location.hash}`;
-  localStorage.setItem("gradlify:checkout:returnTo", returnTo);
+  localStorage.setItem(PROTEIN_CHECKOUT_KEY, returnTo);
 
   const { data, error } = await supabase.functions.invoke("create-protein-checkout", {
     body: {

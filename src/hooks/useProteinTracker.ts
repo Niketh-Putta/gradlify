@@ -6,6 +6,13 @@ import { isAbortLikeError } from "@/lib/errors";
 import { analyzeFoodImage } from "@/lib/protein/analyzeFood";
 import confetti from "canvas-confetti";
 
+import {
+  clearProteinGuestMode,
+  isProteinGuestMode,
+  PROTEIN_MVP_SKIP_SETUP,
+  PROTEIN_STORAGE_PREFIX,
+  enableProteinGuestMode,
+} from "@/lib/protein/host";
 import { FOUNDER_EMAIL, FREE_DAILY_SCANS, DEFAULT_PROTEIN_GOAL } from "@/lib/protein/types";
 
 export { FOUNDER_EMAIL, FREE_DAILY_SCANS, DEFAULT_PROTEIN_GOAL };
@@ -74,7 +81,7 @@ type StoredState = {
   dailyScans: Record<string, number>;
 };
 
-const STORAGE_PREFIX = "gradlify:protein";
+const LEGACY_STORAGE_PREFIX = "gradlify:protein";
 
 const todayKey = () => new Date().toISOString().slice(0, 10);
 
@@ -95,9 +102,23 @@ const defaultSettings = (): ProteinSettings => ({
 const xpForLevel = (level: number) => level * 100;
 
 const storageKey = (userId: string | null) =>
-  userId ? `${STORAGE_PREFIX}:${userId}` : `${STORAGE_PREFIX}:guest`;
+  userId ? `${PROTEIN_STORAGE_PREFIX}:${userId}` : `${PROTEIN_STORAGE_PREFIX}:guest`;
+
+function migrateLegacyStorage(userId: string | null) {
+  if (typeof window === "undefined") return;
+  const nextKey = storageKey(userId);
+  if (localStorage.getItem(nextKey)) return;
+  const legacyKey = userId
+    ? `${LEGACY_STORAGE_PREFIX}:${userId}`
+    : `${LEGACY_STORAGE_PREFIX}:guest`;
+  const legacy = localStorage.getItem(legacyKey);
+  if (legacy) {
+    localStorage.setItem(nextKey, legacy);
+  }
+}
 
 function readStoredState(userId: string | null): StoredState {
+  migrateLegacyStorage(userId);
   if (typeof window === "undefined") {
     return {
       meals: [],
@@ -180,6 +201,7 @@ function triggerGoalConfetti() {
 
 export function useProteinTracker() {
   const [user, setUser] = useState<User | null>(null);
+  const [isGuest, setIsGuest] = useState(isProteinGuestMode);
   const [authLoading, setAuthLoading] = useState(true);
   const [analyzing, setAnalyzing] = useState(false);
   const [meals, setMeals] = useState<MealEntry[]>([]);
@@ -205,6 +227,10 @@ export function useProteinTracker() {
         if (!mounted) return;
         const currentUser = session?.user ?? null;
         setUser(currentUser);
+        if (!currentUser && PROTEIN_MVP_SKIP_SETUP) {
+          enableProteinGuestMode();
+          setIsGuest(true);
+        }
         const stored = readStoredState(currentUser?.id ?? null);
         setMeals(stored.meals);
         setGamification(stored.gamification);
@@ -222,6 +248,10 @@ export function useProteinTracker() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       const nextUser = session?.user ?? null;
       setUser(nextUser);
+      if (nextUser) {
+        clearProteinGuestMode();
+        setIsGuest(false);
+      }
       const stored = readStoredState(nextUser?.id ?? null);
       setMeals(stored.meals);
       setGamification(stored.gamification);
@@ -423,11 +453,34 @@ export function useProteinTracker() {
     [persist, settings],
   );
 
+  const enableGuestMode = useCallback(() => {
+    enableProteinGuestMode();
+    setIsGuest(true);
+    const stored = readStoredState(null);
+    setMeals(stored.meals);
+    setGamification(stored.gamification);
+    setSettings(stored.settings);
+    setDailyScans(stored.dailyScans);
+  }, []);
+
+  const exitGuestMode = useCallback(() => {
+    if (PROTEIN_MVP_SKIP_SETUP) {
+      enableProteinGuestMode();
+      setIsGuest(true);
+      return;
+    }
+    clearProteinGuestMode();
+    setIsGuest(false);
+  }, []);
+
   const xpProgress = gamification.xp % xpForLevel(gamification.level);
   const xpToNext = xpForLevel(gamification.level);
 
   return {
     user,
+    isGuest,
+    enableGuestMode,
+    exitGuestMode,
     authLoading,
     membershipLoading,
     analyzing,

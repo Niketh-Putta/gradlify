@@ -62,7 +62,7 @@ export function ProteinPaywall({ open, onOpenChange, scansUsedToday = FREE_DAILY
             </li>
             <li className="flex items-center gap-3">
               <Infinity className="h-4 w-4 text-teal-500 shrink-0" />
-              Full Gradlify Premium — mocks, notes &amp; analytics
+              Unlimited meal history and streak tracking
             </li>
             <li className="flex items-center gap-3">
               <Sparkles className="h-4 w-4 text-cyan-500 shrink-0" />

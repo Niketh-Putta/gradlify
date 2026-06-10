@@ -5,6 +5,21 @@
   "features": [
     {
       "date": "2026-06-10",
+      "title": "MVP skip setup gate",
+      "detail": "Auth and onboarding screens are hidden for now. The tracker opens immediately in guest mode."
+    },
+    {
+      "date": "2026-06-10",
+      "title": "Standalone Protein Lens app",
+      "detail": "proteinlens.vercel.app now opens only Protein Lens, not Gradlify. Google sign-in removed; use guest mode or email/password."
+    },
+    {
+      "date": "2026-06-10",
+      "title": "Public production deploy",
+      "detail": "Latest tracker with billing and payment plans is live at proteinlens.vercel.app from any device, not just localhost."
+    },
+    {
+      "date": "2026-06-10",
       "title": "Full Protein Tracker app",
       "detail": "Dedicated page at /protein with auth gate, protein ring, macro bars, and meal log."
     },

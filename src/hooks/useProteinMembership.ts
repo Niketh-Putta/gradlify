@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useMembership } from "@/hooks/useMembership";
 import { fetchProteinProfile } from "@/lib/protein/storage";
+import { isProteinLensHost } from "@/lib/protein/host";
 import { FOUNDER_EMAIL } from "@/lib/protein/types";
 import { isAbortLikeError } from "@/lib/errors";
 
@@ -42,7 +43,10 @@ export function useProteinMembership({ userEmail }: Options = {}) {
 
   const isFounderEmail = userEmail?.toLowerCase() === FOUNDER_EMAIL.toLowerCase();
   const hasGradlifyPremium = membership.isPremium || membership.isFounder;
-  const hasPremiumAccess = isFounderEmail || hasGradlifyPremium || hasProteinPremium;
+  const proteinOnly = typeof window !== "undefined" && isProteinLensHost();
+  const hasPremiumAccess = proteinOnly
+    ? isFounderEmail || hasProteinPremium
+    : isFounderEmail || hasGradlifyPremium || hasProteinPremium;
   const loading = membership.loading || proteinLoading;
 
   return useMemo(

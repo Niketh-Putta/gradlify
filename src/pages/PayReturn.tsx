@@ -1,22 +1,28 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { syncBillingStatus } from '@/lib/billingSync';
+import { isProteinLensHost, PROTEIN_CHECKOUT_KEY } from '@/lib/protein/host';
 
-const STORAGE_KEY = 'gradlify:checkout:returnTo';
+const GRADLIFY_STORAGE_KEY = 'gradlify:checkout:returnTo';
 
 const PayReturn = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
     const isSuccessReturn = window.location.pathname === '/pay/success';
-    const stored = localStorage.getItem(STORAGE_KEY);
+    const proteinCheckout = localStorage.getItem(PROTEIN_CHECKOUT_KEY);
+    const gradlifyCheckout = localStorage.getItem(GRADLIFY_STORAGE_KEY);
+    const stored = proteinCheckout ?? gradlifyCheckout;
     const params = new URLSearchParams(window.location.search);
     const queryReturn = params.get("returnTo") ?? "";
-    if (stored) {
-      localStorage.removeItem(STORAGE_KEY);
+    if (proteinCheckout) {
+      localStorage.removeItem(PROTEIN_CHECKOUT_KEY);
+    }
+    if (gradlifyCheckout) {
+      localStorage.removeItem(GRADLIFY_STORAGE_KEY);
     }
 
-    const fallback = '/home';
+    const fallback = isProteinLensHost() ? '/' : '/home';
     const sanitizePath = (value: string | null) => {
       if (!value) return null;
       if (!value.startsWith('/')) return null;

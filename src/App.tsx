@@ -8,8 +8,10 @@ import { SubjectProvider } from "@/contexts/SubjectContext";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { GoogleOAuthProvider } from "@react-oauth/google";
+import { isProteinLensHost } from "@/lib/protein/host";
 
 const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
+const proteinLensOnly = typeof window !== "undefined" && isProteinLensHost();
 
 // Eagerly load the main landing page to prevent a flash of loading state on first visit
 import Index from "./pages/Index";
@@ -48,7 +50,29 @@ const PageLoading = () => (
   </div>
 );
 
-const AppContent = () => (
+const ProteinLensAppContent = () => (
+  <QueryClientProvider client={queryClient}>
+    <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+          <Suspense fallback={<PageLoading />}>
+            <Routes>
+              <Route path="/pay/success" element={<PayReturn />} />
+              <Route path="/pay/cancelled" element={<PayReturn />} />
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="/terms" element={<Terms />} />
+              <Route path="*" element={<ProteinTracker />} />
+            </Routes>
+          </Suspense>
+        </BrowserRouter>
+      </TooltipProvider>
+    </ThemeProvider>
+  </QueryClientProvider>
+);
+
+const GradlifyAppContent = () => (
   <QueryClientProvider client={queryClient}>
     <SubjectProvider>
       <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
@@ -93,14 +117,18 @@ const AppContent = () => (
 );
 
 const App = () => {
+  if (proteinLensOnly) {
+    return <ProteinLensAppContent />;
+  }
+
   if (googleClientId) {
     return (
       <GoogleOAuthProvider clientId={googleClientId}>
-        <AppContent />
+        <GradlifyAppContent />
       </GoogleOAuthProvider>
     );
   }
-  return <AppContent />;
+  return <GradlifyAppContent />;
 };
 
 export default App;

@@ -22,6 +22,7 @@ import {
   type FoodAnalysis,
   type MealEntry,
 } from "@/hooks/useProteinTracker";
+import { isProteinLensHost, PROTEIN_MVP_SKIP_SETUP } from "@/lib/protein/host";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -109,8 +110,13 @@ export default function ProteinTracker() {
     );
   }
 
-  if (!tracker.user) {
-    return <ProteinAuthGate redirectPath="/protein" />;
+  if (!PROTEIN_MVP_SKIP_SETUP && !tracker.user && !tracker.isGuest) {
+    return (
+      <ProteinAuthGate
+        redirectPath={isProteinLensHost() ? "/" : "/protein"}
+        onGuestMode={tracker.enableGuestMode}
+      />
+    );
   }
 
   const macroItems = [
@@ -130,19 +136,23 @@ export default function ProteinTracker() {
     >
       <header className="sticky top-0 z-20 border-b border-slate-200/60 bg-white/80 px-4 py-3 backdrop-blur-lg dark:border-slate-800 dark:bg-slate-950/80">
         <div className="mx-auto flex max-w-lg items-center justify-between">
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="rounded-xl"
-            onClick={() => navigate("/home")}
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
+          {!isProteinLensHost() ? (
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="rounded-xl"
+              onClick={() => navigate("/home")}
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+          ) : (
+            <div className="w-10" aria-hidden />
+          )}
 
           <div className="flex items-center gap-2">
             <Beef className="h-5 w-5 text-emerald-500" />
-            <span className="font-black tracking-tight">Protein Tracker</span>
+            <span className="font-black tracking-tight">Protein Lens</span>
             {tracker.hasPremiumAccess && (
               <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-bold uppercase text-emerald-600 dark:text-emerald-300">
                 {tracker.isFounderEmail ? "Founder" : "Premium"}
@@ -284,20 +294,20 @@ export default function ProteinTracker() {
         scansUsedToday={tracker.scansUsedToday}
       />
 
-      {tracker.user && (
-        <ProteinSettings
-          open={settingsOpen}
-          onOpenChange={setSettingsOpen}
-          user={tracker.user}
-          proteinGoal={tracker.settings.proteinGoal}
-          darkMode={tracker.settings.darkMode}
-          hasPremiumAccess={tracker.hasPremiumAccess}
-          isFounderEmail={tracker.isFounderEmail}
-          scansUsedToday={tracker.scansUsedToday}
-          onProteinGoalChange={tracker.setProteinGoal}
-          onDarkModeChange={tracker.setDarkMode}
-        />
-      )}
+      <ProteinSettings
+        open={settingsOpen}
+        onOpenChange={setSettingsOpen}
+        user={tracker.user}
+        isGuest={tracker.isGuest}
+        proteinGoal={tracker.settings.proteinGoal}
+        darkMode={tracker.settings.darkMode}
+        hasPremiumAccess={tracker.hasPremiumAccess}
+        isFounderEmail={tracker.isFounderEmail}
+        scansUsedToday={tracker.scansUsedToday}
+        onProteinGoalChange={tracker.setProteinGoal}
+        onDarkModeChange={tracker.setDarkMode}
+        onSignedOut={tracker.exitGuestMode}
+      />
     </div>
   );
 }

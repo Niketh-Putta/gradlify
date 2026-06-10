@@ -11,7 +11,9 @@ import {
   type ProteinSettings,
 } from "./types";
 
-const STORAGE_PREFIX = "gradlify:protein";
+import { PROTEIN_STORAGE_PREFIX } from "./host";
+
+const LEGACY_STORAGE_PREFIX = "gradlify:protein";
 
 const todayKey = () => new Date().toISOString().slice(0, 10);
 
@@ -22,10 +24,24 @@ const defaultSettings = (): ProteinSettings => ({
 });
 
 function storageKey(userId: string | null) {
-  return userId ? `${STORAGE_PREFIX}:${userId}` : `${STORAGE_PREFIX}:guest`;
+  return userId ? `${PROTEIN_STORAGE_PREFIX}:${userId}` : `${PROTEIN_STORAGE_PREFIX}:guest`;
+}
+
+function migrateLegacyStorage(userId: string | null) {
+  if (typeof window === "undefined") return;
+  const nextKey = storageKey(userId);
+  if (localStorage.getItem(nextKey)) return;
+  const legacyKey = userId
+    ? `${LEGACY_STORAGE_PREFIX}:${userId}`
+    : `${LEGACY_STORAGE_PREFIX}:guest`;
+  const legacy = localStorage.getItem(legacyKey);
+  if (legacy) {
+    localStorage.setItem(nextKey, legacy);
+  }
 }
 
 function readOfflineState(userId: string | null): OfflineProteinState {
+  migrateLegacyStorage(userId);
   if (typeof window === "undefined") {
     return {
       meals: [],

@@ -121,7 +121,7 @@ export function ProteinPaymentPlans({
               </li>
               <li className="flex items-center gap-2">
                 <Crown className="h-3.5 w-3.5 shrink-0 text-teal-500" />
-                Full Gradlify Premium mocks and analytics
+                Unlimited meal history and streak tracking
               </li>
               <li className="flex items-center gap-2">
                 <Sparkles className="h-3.5 w-3.5 shrink-0 text-cyan-500" />

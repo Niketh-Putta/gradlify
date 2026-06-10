@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { clearProteinGuestMode } from "@/lib/protein/host";
 import { ProteinBillingDetails } from "@/components/protein/ProteinBillingDetails";
 import { ProteinPaymentPlans } from "@/components/protein/ProteinPaymentPlans";
 import { ProteinWhatsNew } from "@/components/protein/ProteinWhatsNew";
@@ -22,7 +23,8 @@ import { toast } from "sonner";
 type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  user: User;
+  user: User | null;
+  isGuest?: boolean;
   proteinGoal: number;
   darkMode: boolean;
   hasPremiumAccess: boolean;
@@ -37,6 +39,7 @@ export function ProteinSettings({
   open,
   onOpenChange,
   user,
+  isGuest = false,
   proteinGoal,
   darkMode,
   hasPremiumAccess,
@@ -56,8 +59,13 @@ export function ProteinSettings({
   const handleSignOut = async () => {
     setSigningOut(true);
     try {
-      await supabase.auth.signOut({ scope: "global" });
-      toast.success("Signed out");
+      if (isGuest) {
+        clearProteinGuestMode();
+        toast.success("Local session cleared");
+      } else {
+        await supabase.auth.signOut({ scope: "global" });
+        toast.success("Signed out");
+      }
       onOpenChange(false);
       onSignedOut?.();
     } catch (error) {
@@ -93,9 +101,11 @@ export function ProteinSettings({
                 </div>
                 <div className="min-w-0">
                   <p className="truncate text-sm font-semibold text-slate-900 dark:text-white">
-                    {user.email ?? "Signed in"}
+                    {isGuest ? "Guest mode" : user?.email ?? "Signed in"}
                   </p>
-                  <p className="text-xs text-slate-500">Google account linked</p>
+                  <p className="text-xs text-slate-500">
+                    {isGuest ? "Data saved on this device only" : "Protein Lens account"}
+                  </p>
                 </div>
               </div>
             </div>
@@ -103,7 +113,7 @@ export function ProteinSettings({
             <ProteinBillingDetails
               hasPremiumAccess={hasPremiumAccess}
               isFounderEmail={isFounderEmail}
-              userEmail={user.email}
+              userEmail={user?.email}
               scansUsedToday={scansUsedToday}
             />
 
@@ -147,7 +157,7 @@ export function ProteinSettings({
               onClick={() => void handleSignOut()}
             >
               <LogOut className="mr-2 h-4 w-4" />
-              {signingOut ? "Signing out..." : "Sign out"}
+              {signingOut ? "Signing out..." : isGuest ? "Clear local session" : "Sign out"}
             </Button>
           </TabsContent>
 
@@ -155,7 +165,7 @@ export function ProteinSettings({
             <ProteinPaymentPlans
               hasPremiumAccess={hasPremiumAccess}
               isFounderEmail={isFounderEmail}
-              userEmail={user.email}
+              userEmail={user?.email}
               scansUsedToday={scansUsedToday}
             />
           </TabsContent>
