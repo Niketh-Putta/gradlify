@@ -74,6 +74,8 @@
       "trialing_targets": ["hhspk@yahoo.com", "avikvara4@gmail.com"],
       "personal_gcs": [],
       "fb_groups_posted": [],
+      "fb_paid_post_pending": true,
+      "fb_paid_post_files": "outreach/fb/paid-group-admin-email.txt + paid-group-post.txt",
       "mock_buyer_referral_dm": false,
       "fb_reminder": false
     }
@@ -96,5 +98,6 @@
       "sprint_launch"
     ]
   },
-  "auditNote": "Kimi down - seeded from repo. Re-run when WebBridge is up."
+  "auditNote": "Browser automation PAUSED — do not open Gmail or Gradlify via Kimi until Niketh says resume.",
+  "browserAutomationPaused": true
 }

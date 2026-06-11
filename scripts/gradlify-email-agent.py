@@ -32,6 +32,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 
 import kimi_gmail_lib as gmail  # noqa: E402
+from kimi_webbridge_lib import browser_automation_paused  # noqa: E402
 
 STATE_PATH = ROOT / "outreach" / "email-agent-state.json"
 LOG_PATH = ROOT / "outreach" / "email-agent-log.jsonl"
@@ -359,6 +360,11 @@ def main() -> int:
     parser.add_argument("--limit", type=int, default=10)
     parser.add_argument("--search", default=SEARCH_QUERY)
     args = parser.parse_args()
+
+    paused, reason = browser_automation_paused()
+    if paused:
+        print(f"SKIPPED: browser automation paused — {reason}")
+        return 0
 
     if not gmail.ping():
         print("ERROR: Kimi WebBridge not reachable at http://127.0.0.1:10086")
