@@ -534,10 +534,10 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                 <span className="rounded-full border border-amber-200/45 bg-amber-200/12 px-2.5 py-0.5 text-[9px] font-black uppercase tracking-[0.2em] text-amber-100 shadow-[0_0_18px_rgba(251,146,60,0.24)]">
                   Limited time offer
                 </span>
-                <span className="text-xs font-black sm:text-sm">Less than one tutor hour</span>
+                <span className="text-xs font-black sm:text-sm">Gradlify is £19.99/mo</span>
                 <span className="hidden h-4 w-px bg-white/20 sm:block" aria-hidden="true" />
                 <span className="text-[11px] font-semibold text-white/75 sm:text-xs">
-                  <span className="text-amber-100">£19.99/mo</span> for unlimited mocks - tutors charge <span className="text-white">£40–60/hr</span>
+                  about a third of one tutor hour - tutors often charge <span className="text-white">£40–60/hr</span>
                 </span>
               </div>
               <div className="flex flex-wrap items-center gap-2">
