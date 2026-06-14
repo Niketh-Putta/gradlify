@@ -2,6 +2,8 @@ import { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowRight,
+  BookOpen,
+  Calculator,
   CalendarDays,
   CheckCircle2,
   Clock3,
@@ -422,6 +424,146 @@ export default function LiveMockExams() {
     { label: "Duration", value: `${LIVE_MOCK.durationMinutes} minutes`, icon: Hourglass },
     { label: "Questions", value: String(LIVE_MOCK.questions), icon: FileText },
   ];
+
+  if (import.meta.env.DEV) {
+    return (
+      <main className="min-h-screen overflow-x-hidden bg-[#f7f5ef] px-4 py-6 text-slate-950 sm:px-6 sm:py-10">
+        <section className="mx-auto w-full max-w-5xl">
+          <div className="overflow-hidden rounded-[28px] border border-orange-200/80 bg-white shadow-[0_30px_90px_rgba(124,45,18,0.10)]">
+            <div className="relative overflow-hidden bg-[linear-gradient(125deg,#9a3412_0%,#ea580c_55%,#f59e0b_100%)] px-6 py-9 text-white sm:px-10 sm:py-12">
+              <div className="absolute -right-20 -top-24 h-64 w-64 rounded-full border-[40px] border-white/10" />
+              <div className="absolute -bottom-24 right-24 h-52 w-52 rounded-full bg-white/10 blur-2xl" />
+              <div className="relative max-w-3xl">
+                <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/15 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.16em] backdrop-blur">
+                  <ShieldCheck className="h-3.5 w-3.5" />
+                  Premium registered access
+                </span>
+                <h1 className="mt-5 text-3xl font-black tracking-tight sm:text-5xl">
+                  Maths &amp; English Mock
+                </h1>
+                <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-orange-50 sm:text-base">
+                  Your complete 11+ mock environment is ready. Sit both papers under timed conditions and move
+                  automatically from Maths to the break and then English.
+                </p>
+              </div>
+            </div>
+
+            <div className="grid gap-8 px-6 py-7 sm:px-10 sm:py-9 lg:grid-cols-[1fr_330px] lg:items-start">
+              <div>
+                <div className="grid gap-3 sm:grid-cols-3">
+                  {[
+                    { icon: Calculator, label: "Maths", value: "60 questions", sub: "Non-calculator · 50 minutes" },
+                    { icon: Hourglass, label: "Break", value: "15 minutes", sub: "Automatic transition" },
+                    { icon: BookOpen, label: "English", value: "60 questions", sub: "50 minutes" },
+                  ].map((item) => (
+                    <div key={item.label} className="rounded-2xl border border-slate-200 bg-[#fbfaf7] p-4">
+                      <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-100 text-orange-700">
+                        <item.icon className="h-5 w-5" />
+                      </span>
+                      <p className="mt-4 text-[10px] font-black uppercase tracking-[0.14em] text-orange-700">
+                        {item.label}
+                      </p>
+                      <p className="mt-1 text-base font-black">{item.value}</p>
+                      <p className="mt-0.5 text-xs text-slate-500">{item.sub}</p>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-5">
+                  <h2 className="text-lg font-black">Before you begin</h2>
+                  <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                    {[
+                      "Use a quiet room and stable internet connection.",
+                      "Have paper, pencils and an eraser ready.",
+                      "The timer starts after your final confirmation.",
+                      "Your local placeholder answers save automatically.",
+                    ].map((item) => (
+                      <div key={item} className="flex items-start gap-2.5 text-sm leading-5 text-slate-600">
+                        <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
+                        <span>{item}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <aside className="rounded-[22px] border border-orange-200 bg-[linear-gradient(145deg,#fff7ed_0%,#ffffff_75%)] p-5 shadow-[0_16px_40px_rgba(234,88,12,0.10)]">
+                {loading ? (
+                  <div className="flex min-h-[180px] items-center justify-center gap-2 text-sm font-semibold text-slate-500">
+                    <Loader2 className="h-5 w-5 animate-spin text-orange-600" />
+                    Checking registration...
+                  </div>
+                ) : bothSubjectsSignup ? (
+                  <>
+                    <span className="inline-flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-emerald-800">
+                      <CheckCircle2 className="h-3.5 w-3.5" />
+                      Registered
+                    </span>
+                    <h2 className="mt-5 text-2xl font-black tracking-tight">Ready to start?</h2>
+                    <p className="mt-2 text-sm leading-6 text-slate-600">
+                      Maths first, then break, then English. One final confirmation before the timer starts.
+                    </p>
+                    <Button
+                      asChild
+                      className="mt-6 h-12 w-full rounded-xl bg-[linear-gradient(90deg,#ea580c_0%,#f59e0b_100%)] text-base font-black text-white shadow-[0_12px_24px_rgba(234,88,12,0.24)] hover:brightness-105"
+                    >
+                      <Link to="/live-mock-exams/local-preview">
+                        Start Mock
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Link>
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <span className="inline-flex items-center gap-2 rounded-full bg-amber-100 px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-amber-900">
+                      <CreditCard className="h-3.5 w-3.5" />
+                      Registration required
+                    </span>
+                    <h2 className="mt-5 text-2xl font-black tracking-tight">Join this mock</h2>
+                    <p className="mt-2 text-sm leading-6 text-slate-600">
+                      {hasPremiumLiveMockAccess
+                        ? "Register free with Premium, then start the mock."
+                        : `Pay ${formatLiveMockPrice(liveMockPriceGbp)} once to register and sit the full Maths and English mock.`}
+                    </p>
+                    <Button
+                      className="mt-6 h-12 w-full rounded-xl bg-[linear-gradient(90deg,#ea580c_0%,#f59e0b_100%)] text-base font-black text-white shadow-[0_12px_24px_rgba(234,88,12,0.24)] hover:brightness-105"
+                      disabled={registeringBothSubjects || finalizingBothSubjectsPayment}
+                      onClick={() => void handleBothSubjectsRegistration()}
+                    >
+                      {registeringBothSubjects || finalizingBothSubjectsPayment ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          {finalizingBothSubjectsPayment ? "Confirming payment..." : "Opening checkout..."}
+                        </>
+                      ) : hasPremiumLiveMockAccess ? (
+                        <>
+                          <ShieldCheck className="mr-2 h-4 w-4" />
+                          Register with Premium
+                        </>
+                      ) : (
+                        <>
+                          <CreditCard className="mr-2 h-4 w-4" />
+                          Pay {formatLiveMockPrice(liveMockPriceGbp)} and register
+                        </>
+                      )}
+                    </Button>
+                  </>
+                )}
+                <div className="mt-4 flex items-center justify-center gap-2 text-xs font-semibold text-slate-500">
+                  <Clock3 className="h-3.5 w-3.5" />
+                  Total timed experience: 1h 55m
+                </div>
+              </aside>
+            </div>
+          </div>
+
+          <p className="mt-4 text-center text-xs font-semibold text-slate-400">
+            Local prototype only. No payment is required and no mock answers are sent to production.
+          </p>
+        </section>
+      </main>
+    );
+  }
 
   const bothSubjectsRegistrationCard = (
     <div className="mb-3 rounded-[16px] border border-amber-200/80 bg-[linear-gradient(135deg,#fffaf0_0%,#ffffff_52%,#f8fbff_100%)] px-3 py-3 shadow-[0_14px_34px_rgba(146,64,14,0.07)] sm:px-4">

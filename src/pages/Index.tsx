@@ -16,6 +16,7 @@ const MockExams = lazyWithRetry(() => import("@/pages/MockExams"));
 const MockExamPage = lazyWithRetry(() => import("@/pages/MockExamPage"));
 const LiveMockExams = lazyWithRetry(() => import("@/pages/LiveMockExams"));
 const LiveMockAnalytics = lazyWithRetry(() => import("@/pages/LiveMockAnalytics"));
+const LocalCombinedMock = lazyWithRetry(() => import("@/pages/LocalCombinedMock"));
 const RevisionNotes = lazyWithRetry(() => import("@/pages/RevisionNotes"));
 const RevisionNotesSection = lazyWithRetry(() => import("@/pages/RevisionNotesSection"));
 const RevisionNotesTopic = lazyWithRetry(() => import("@/pages/RevisionNotesTopic"));
@@ -35,17 +36,37 @@ const NotFound = lazyWithRetry(() => import('@/pages/NotFound'));
 const Tools = lazyWithRetry(() => import('@/pages/Tools'));
 const SubjectSelection = lazyWithRetry(() => import('@/pages/SubjectSelection'));
 const Compare = lazyWithRetry(() => import('@/pages/Compare'));
-const ProteinTracker = lazyWithRetry(() => import('@/pages/ProteinTracker'));
 
 import { User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { consumePostAuthRedirect } from '@/lib/postAuthRedirect';
+import { consumePostAuthRedirect, setPostAuthRedirect } from '@/lib/postAuthRedirect';
 import { getDashboardPath, setSignupTrack } from '@/lib/track';
 import { isAbortLikeError } from '@/lib/errors';
 import { captureReferralFromSearch } from '@/lib/referrals';
 import { PaymentFailedGate } from '@/components/PaymentFailedGate';
 import { usePaymentFailedBlock } from '@/hooks/usePaymentFailedBlock';
 import { isPaymentGateExemptPath } from '@/lib/paymentBlocklist';
+import { useCombinedMockReleased } from '@/hooks/useCombinedMockReleased';
+
+/**
+ * `/live-mock-exams`: shows the current hub until the scheduled go-live, then
+ * flips to the combined Maths + English mock automatically (no reload needed).
+ */
+const LiveMockExamsRoute = () => {
+  const released = useCombinedMockReleased();
+  return released ? <LocalCombinedMock /> : <LiveMockExams />;
+};
+
+/**
+ * `/live-mock-exams/local-preview`: the combined mock. Always available in dev
+ * for testing; in production it only opens once the mock has gone live,
+ * otherwise it sends people to the hub.
+ */
+const LocalCombinedMockRoute = () => {
+  const released = useCombinedMockReleased();
+  if (import.meta.env.DEV || released) return <LocalCombinedMock />;
+  return <Navigate to="/live-mock-exams" replace />;
+};
 
 // Loading Fallback Component
 const PageLoading = () => (
@@ -106,6 +127,12 @@ const Index = () => {
           setUser(null);
           // If on protected route and not authenticated, redirect to landing
           if (protectedRoutes.some(route => currentPath.startsWith(route))) {
+            if (currentPath.startsWith('/live-mock-exams/local-preview')) {
+              setPostAuthRedirect({
+                path: '/live-mock-exams/local-preview',
+                message: 'Sign in with the Premium account registered for this mock.',
+              });
+            }
             redirectTo = '/11-plus';
           }
         }
@@ -284,8 +311,6 @@ const Index = () => {
         <Route path="/auth/callback" element={<AuthCallback />} />
         <Route path="/pay/success" element={<PayReturn />} />
         <Route path="/pay/cancelled" element={<PayReturn />} />
-        <Route path="/protein" element={<ProteinTracker />} />
-        <Route path="/protein-tracker" element={<ProteinTracker />} />
         
         {/* Redirect authenticated users from landing page to subject selection */}
         {user ? (
@@ -330,16 +355,15 @@ const Index = () => {
               <Route path="english-demo" element={<EnglishSplitViewDemo />} />
               <Route path="live-mock-exams/session" element={<EnglishSplitViewDemo />} />
               <Route path="live-mock-exams/analytics" element={<LiveMockAnalytics />} />
+              <Route path="live-mock-exams/local-preview" element={<LocalCombinedMockRoute />} />
               <Route path="practice-page" element={<Navigate to="/mocks" replace />} />
               <Route path="practice/maths" element={<Navigate to="/mocks/maths" replace />} />
               <Route path="practice/english" element={<Navigate to="/mocks/english" replace />} />
-              <Route path="live-mock-exams" element={<LiveMockExams />} />
+              <Route path="live-mock-exams" element={<LiveMockExamsRoute />} />
               <Route path="notes" element={<RevisionNotes />} />
               <Route path="notes/:section" element={<RevisionNotesSection />} />
               <Route path="notes/:section/:topic" element={<RevisionNotesTopic />} />
               <Route path="nikethputtaadmin-growth" element={<GrowthTracker />} />
-              <Route path="protein" element={<ProteinTracker />} />
-              <Route path="protein-tracker" element={<ProteinTracker />} />
               <Route path="*" element={<NotFound />} />
             </Route>
           </>

@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import {
   ArrowLeft,
   BarChart3,
@@ -88,19 +88,91 @@ function displayNameFromProfile(
   return preferred || metaName || fromEmail || "Student";
 }
 
+/** Rank box: always surfaces the participant count as the denominator (rank out of everyone doing it). */
+function buildRankDisplay(scoreRank: LiveMockScoreRank | null): { value: string; hint: string } {
+  if (!scoreRank || scoreRank.total === 0) {
+    return { value: "-", hint: "No one has submitted this mock yet." };
+  }
+  const total = scoreRank.total;
+  if (!scoreRank.has_submitted_rank || scoreRank.rank == null) {
+    return {
+      value: `- / ${total}`,
+      hint: `Submit your completed mock to see your rank among the ${total} ${total === 1 ? "student" : "students"} who have finished.`,
+    };
+  }
+  return {
+    value: `${scoreRank.rank} / ${total}`,
+    hint: "1 = highest score so far. Tied scores share a rank, and this climbs live as more people finish.",
+  };
+}
+
+type SubjectPaperStats = {
+  summary: LiveMockMyAttemptSummary | null;
+  cohort: LiveMockPublicCohortSummary | null;
+  scoreRank: LiveMockScoreRank | null;
+};
+
+async function loadSubjectPaperStats(paperId: string): Promise<SubjectPaperStats> {
+  const [sum, cohortRow, rankRow] = await Promise.all([
+    getMyLiveMockAttemptSummary(paperId),
+    getLiveMockPublicCohortSummary(paperId),
+    getMyLiveMockScoreRank(paperId),
+  ]);
+  return {
+    summary: sum,
+    cohort: cohortRow ?? cohortSummaryFromAttemptSummary(sum),
+    scoreRank: rankRow ?? scoreRankFromAttemptSummary(sum),
+  };
+}
+
+/** Combined Maths+English mock: each tab maps to its own seeded paper. */
+const COMBINED_SUBJECT_SLUGS: Record<"maths" | "english", string> = {
+  maths: "both_subjects_maths",
+  english: "both_subjects_english",
+};
+const COMBINED_SUBJECT_TITLES: Record<"maths" | "english", string> = {
+  maths: "11+ Maths",
+  english: "11+ English",
+};
+
 export default function LiveMockAnalytics() {
   const { user, profile } = useAppContext();
   const displayName = useMemo(() => displayNameFromProfile(profile, user), [profile, user]);
+
+  const [searchParams, setSearchParams] = useSearchParams();
+  const isCombined = searchParams.get("combined") === "1";
+  const combinedSubject: "maths" | "english" =
+    searchParams.get("subject") === "maths" ? "maths" : "english";
+  const activeSlug = isCombined ? COMBINED_SUBJECT_SLUGS[combinedSubject] : LIVE_MOCK_PAPER_SLUG;
+  const fallbackTitle = isCombined
+    ? COMBINED_SUBJECT_TITLES[combinedSubject]
+    : "11+ English complete mock exam";
+
+  const selectCombinedSubject = useCallback(
+    (subject: "maths" | "english") => {
+      const next = new URLSearchParams(searchParams);
+      next.set("combined", "1");
+      next.set("subject", subject);
+      setSearchParams(next, { replace: true });
+    },
+    [searchParams, setSearchParams],
+  );
 
   const [paperTitle, setPaperTitle] = useState<string>("11+ English complete mock exam");
   const [summary, setSummary] = useState<LiveMockMyAttemptSummary | null>(null);
   const [answers, setAnswers] = useState<LiveMockAnswerDetail[]>([]);
   const [cohort, setCohort] = useState<LiveMockPublicCohortSummary | null>(null);
   const [scoreRank, setScoreRank] = useState<LiveMockScoreRank | null>(null);
+  const [combinedBoth, setCombinedBoth] = useState<Record<"maths" | "english", SubjectPaperStats> | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [updatedAt, setUpdatedAt] = useState<Date | null>(null);
+
+  // A submitted attempt's per-question answers never change, so on background
+  // polls we only refresh the live cohort numbers and skip re-fetching the
+  // (static) answer review. This keeps DB load low when many people are viewing.
+  const loadedAnswersAttemptRef = useRef<string | null>(null);
 
   const loadAll = useCallback(async (isPoll: boolean) => {
     if (!user?.id) {
@@ -115,37 +187,79 @@ export default function LiveMockAnalytics() {
     try {
       setError(null);
 
-      const paper = await getLiveMockPaperBySlug(LIVE_MOCK_PAPER_SLUG);
-      if (!paper) {
-        setSummary(null);
-        setAnswers([]);
-        setCohort(null);
-        setScoreRank(null);
-        setError("This mock paper could not be loaded.");
-        return;
-      }
+      if (isCombined) {
+        const [mathsPaper, englishPaper] = await Promise.all([
+          getLiveMockPaperBySlug(COMBINED_SUBJECT_SLUGS.maths),
+          getLiveMockPaperBySlug(COMBINED_SUBJECT_SLUGS.english),
+        ]);
 
-      setPaperTitle(paper.title?.trim() || "11+ English complete mock exam");
+        if (!mathsPaper || !englishPaper) {
+          setSummary(null);
+          setAnswers([]);
+          setCohort(null);
+          setScoreRank(null);
+          setCombinedBoth(null);
+          setError("This mock paper could not be loaded.");
+          return;
+        }
 
-      const [sum, cohortRow, rankRow] = await Promise.all([
-        getMyLiveMockAttemptSummary(paper.id),
-        getLiveMockPublicCohortSummary(paper.id),
-        getMyLiveMockScoreRank(paper.id),
-      ]);
+        const [mathsStats, englishStats] = await Promise.all([
+          loadSubjectPaperStats(mathsPaper.id),
+          loadSubjectPaperStats(englishPaper.id),
+        ]);
 
-      setSummary(sum);
+        setCombinedBoth({ maths: mathsStats, english: englishStats });
 
-      const cohortFallback = cohortSummaryFromAttemptSummary(sum);
-      const rankFallback = scoreRankFromAttemptSummary(sum);
+        const activePaper = combinedSubject === "maths" ? mathsPaper : englishPaper;
+        const activeStats = combinedSubject === "maths" ? mathsStats : englishStats;
 
-      setCohort(cohortRow ?? cohortFallback);
-      setScoreRank(rankRow ?? rankFallback);
+        setPaperTitle(activePaper.title?.trim() || COMBINED_SUBJECT_TITLES[combinedSubject]);
+        setSummary(activeStats.summary);
+        setCohort(activeStats.cohort);
+        setScoreRank(activeStats.scoreRank);
 
-      if (sum?.attempt_id) {
-        const raw = await getMyLiveMockAnswerDetails(sum.attempt_id);
-        setAnswers(await enrichLiveMockAnswerDetails(raw));
+        const attemptId = activeStats.summary?.attempt_id ?? null;
+        if (attemptId) {
+          if (!isPoll || loadedAnswersAttemptRef.current !== attemptId) {
+            const raw = await getMyLiveMockAnswerDetails(attemptId);
+            setAnswers(await enrichLiveMockAnswerDetails(raw));
+            loadedAnswersAttemptRef.current = attemptId;
+          }
+        } else {
+          setAnswers([]);
+          loadedAnswersAttemptRef.current = null;
+        }
       } else {
-        setAnswers([]);
+        setCombinedBoth(null);
+
+        const paper = await getLiveMockPaperBySlug(activeSlug);
+        if (!paper) {
+          setSummary(null);
+          setAnswers([]);
+          setCohort(null);
+          setScoreRank(null);
+          setError("This mock paper could not be loaded.");
+          return;
+        }
+
+        setPaperTitle(paper.title?.trim() || fallbackTitle);
+
+        const activeStats = await loadSubjectPaperStats(paper.id);
+        setSummary(activeStats.summary);
+        setCohort(activeStats.cohort);
+        setScoreRank(activeStats.scoreRank);
+
+        const attemptId = activeStats.summary?.attempt_id ?? null;
+        if (attemptId) {
+          if (!isPoll || loadedAnswersAttemptRef.current !== attemptId) {
+            const raw = await getMyLiveMockAnswerDetails(attemptId);
+            setAnswers(await enrichLiveMockAnswerDetails(raw));
+            loadedAnswersAttemptRef.current = attemptId;
+          }
+        } else {
+          setAnswers([]);
+          loadedAnswersAttemptRef.current = null;
+        }
       }
 
       setUpdatedAt(new Date());
@@ -156,7 +270,7 @@ export default function LiveMockAnalytics() {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [user?.id]);
+  }, [user?.id, activeSlug, fallbackTitle, isCombined, combinedSubject]);
 
   useEffect(() => {
     void loadAll(false);
@@ -194,11 +308,9 @@ export default function LiveMockAnalytics() {
     return breakdown;
   }, [sectionStats]);
 
-  /** Every question not marked correct: wrong answers (`false`) and skipped/unanswered (`null`). */
-  const questionsNotCorrect = useMemo(() => {
-    return answers
-      .filter((a) => a.is_correct !== true)
-      .sort((a, b) => (a.question_number ?? 0) - (b.question_number ?? 0));
+  /** Every question in the attempt (all 60), ordered by question number. */
+  const reviewQuestions = useMemo(() => {
+    return [...answers].sort((a, b) => (a.question_number ?? 0) - (b.question_number ?? 0));
   }, [answers]);
 
   const [reviewDetail, setReviewDetail] = useState<LiveMockAnswerDetail | null>(null);
@@ -266,31 +378,7 @@ export default function LiveMockAnalytics() {
     return fallbackEnrich?.explanation?.trim() || "";
   }, [reviewDetail, fallbackEnrich]);
 
-  const placementDisplay = useMemo(() => {
-    if (!scoreRank) {
-      return {
-        value: "-",
-        hint: "Try Refresh now. If this stays empty, ask your team to apply the latest Supabase migrations.",
-      };
-    }
-    const total = scoreRank.total;
-    if (total === 0) {
-      return { value: "-", hint: "No one has submitted this mock yet." };
-    }
-    if (!scoreRank.has_submitted_rank) {
-      return {
-        value: "-",
-        hint: "Submit your completed mock to see your rank among everyone who finished.",
-      };
-    }
-    if (scoreRank.rank == null) {
-      return { value: "-", hint: "Unable to load placement." };
-    }
-    return {
-      value: `${scoreRank.rank} / ${total}`,
-      hint: "1 = highest score in the cohort. Larger first number means a lower placement. Tied scores share a rank.",
-    };
-  }, [scoreRank]);
+  const rankDisplay = useMemo(() => buildRankDisplay(scoreRank), [scoreRank]);
 
   const qc = summary?.question_count ?? 0;
   const correct = summary?.correct_count ?? 0;
@@ -331,16 +419,12 @@ export default function LiveMockAnalytics() {
         <div className="flex flex-col gap-3 border-b border-slate-200 pb-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0 flex-1">
             <p className="text-[9px] font-black uppercase tracking-[0.16em] text-blue-700">
-              Live mock results
+              {isCombined ? "Combined mock results · Maths + English" : "Live mock results"}
             </p>
             <h1 className="mt-1 break-words font-serif text-xl font-bold tracking-tight text-slate-950 sm:text-2xl md:text-[30px]">
               Hi, {displayName}
             </h1>
             <p className="mt-1 break-words text-base font-semibold leading-snug text-slate-800">{paperTitle}</p>
-            <p className="mt-3 max-w-2xl border-l-2 border-amber-200/90 pl-3 text-xs leading-relaxed text-slate-600 sm:text-sm">
-              This was undoubtedly a very difficult exam. Do not be disheartened if you have gotten lower than
-              expected. But remember to keep practising and revising with exam-style questions until your real exam.
-            </p>
             <p className="mt-3 max-w-2xl text-xs leading-5 text-slate-500 sm:text-sm">
               Numbers refresh automatically every few seconds so they stay aligned with your saved attempt.
               {updatedAt ? (
@@ -377,31 +461,155 @@ export default function LiveMockAnalytics() {
           </div>
         </div>
 
+        {isCombined ? (
+          <div className="mt-3 inline-flex w-full gap-1 rounded-xl border border-slate-200 bg-slate-50 p-1 sm:w-auto">
+            {(["maths", "english"] as const).map((subject) => {
+              const active = combinedSubject === subject;
+              return (
+                <button
+                  key={subject}
+                  type="button"
+                  onClick={() => selectCombinedSubject(subject)}
+                  className={[
+                    "flex-1 rounded-lg px-4 py-2 text-sm font-bold capitalize transition-colors sm:flex-none sm:px-6",
+                    active
+                      ? "bg-white text-blue-700 shadow-sm"
+                      : "text-slate-500 hover:text-slate-700",
+                  ].join(" ")}
+                >
+                  {subject}
+                </button>
+              );
+            })}
+          </div>
+        ) : null}
+
         {error ? (
           <p className="mt-3 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-900">{error}</p>
         ) : null}
 
+        {/* Cohort stats — always visible (submissions, mean, your placement) */}
+        {isCombined && combinedBoth ? (
+          <div className="mt-3 pt-3">
+            <div className="mb-3 flex items-start justify-between gap-3">
+              <div>
+                <h2 className="flex flex-wrap items-center gap-2 text-base font-bold tracking-tight text-slate-950">
+                  <BarChart3 className="h-4 w-4 shrink-0 text-blue-600" />
+                  Cohort snapshot · both papers
+                </h2>
+                <p className="mt-0.5 text-xs leading-relaxed text-slate-500">
+                  Live aggregates for everyone who submitted. Updates as new attempts arrive.
+                </p>
+              </div>
+              <Users className="h-5 w-5 shrink-0 text-blue-400" aria-hidden />
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {(["maths", "english"] as const).map((subject) => {
+                const stats = combinedBoth[subject];
+                const rank = buildRankDisplay(stats.scoreRank);
+                const active = combinedSubject === subject;
+                return (
+                  <div
+                    key={subject}
+                    className={[
+                      "min-w-0 rounded-xl border bg-[linear-gradient(135deg,#fbfdff_0%,#ffffff_62%,#f8fbff_100%)] p-3",
+                      active ? "border-blue-300 ring-1 ring-blue-200/80" : "border-slate-200",
+                    ].join(" ")}
+                  >
+                    <p className="text-[10px] font-black uppercase tracking-[0.14em] text-blue-700">
+                      {COMBINED_SUBJECT_TITLES[subject]}
+                    </p>
+                    <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                      <div className="min-w-0 rounded-lg border border-amber-100 bg-gradient-to-br from-amber-50/90 to-white px-3 py-3 shadow-sm">
+                        <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wide text-amber-800/90">
+                          <Trophy className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                          Your rank
+                        </div>
+                        <div className="mt-1 font-mono text-2xl font-black tracking-tight text-slate-950">
+                          {rank.value}
+                        </div>
+                        <p className="mt-1 text-[10px] leading-snug text-slate-500">{rank.hint}</p>
+                      </div>
+                      <div className="min-w-0 rounded-lg border border-slate-100 bg-white px-3 py-3 shadow-sm">
+                        <div className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Cohort mean</div>
+                        <div className="mt-1 text-2xl font-black text-slate-950">
+                          {stats.cohort?.mean_score_percent != null ? `${stats.cohort.mean_score_percent}%` : "-"}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ) : (
+          <div className="mt-3 pt-3">
+            <div className="min-w-0 rounded-xl border border-slate-200 bg-[linear-gradient(135deg,#fbfdff_0%,#ffffff_62%,#f8fbff_100%)] p-3">
+              <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div className="min-w-0 flex-1">
+                  <h2 className="flex flex-wrap items-center gap-2 text-base font-bold tracking-tight text-slate-950">
+                    <BarChart3 className="h-4 w-4 shrink-0 text-blue-600" />
+                    Cohort snapshot
+                  </h2>
+                  <p className="mt-0.5 text-xs leading-relaxed text-slate-500">
+                    Live aggregates across everyone who submitted this paper (updates as submissions arrive).
+                  </p>
+                </div>
+                <Users className="h-5 w-5 shrink-0 text-blue-400 sm:mt-0.5" aria-hidden />
+              </div>
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                <div className="min-w-0 rounded-lg border border-amber-100 bg-gradient-to-br from-amber-50/90 to-white px-3 py-3 shadow-sm">
+                  <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wide text-amber-800/90">
+                    <Trophy className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                    Your rank
+                  </div>
+                  <div className="mt-1 font-mono text-2xl font-black tracking-tight text-slate-950">
+                    {rankDisplay.value}
+                  </div>
+                  <p className="mt-2 text-[11px] leading-snug text-slate-500">{rankDisplay.hint}</p>
+                </div>
+                <div className="min-w-0 rounded-lg border border-slate-100 bg-white px-3 py-3 shadow-sm">
+                  <div className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Cohort mean %</div>
+                  <div className="mt-1 text-2xl font-black text-slate-950">
+                    {cohort?.mean_score_percent != null ? `${cohort.mean_score_percent}%` : "-"}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {!summary ? (
-          <div className="mt-6 rounded-xl border border-slate-200 bg-slate-50/80 p-6 text-center">
+          <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-4 sm:px-5">
             <p className="text-sm text-slate-600">
-              You don&apos;t have an attempt on file for this paper yet. Start the live mock to generate results here.
+              You don&apos;t have a personal attempt on file for{" "}
+              <strong className="font-semibold text-slate-800">{paperTitle}</strong> yet. Submit the mock to see your
+              score, section breakdown, and question review below.
             </p>
-            <Link to="/live-mock-exams" className="mt-4 inline-block">
-              <Button className="rounded-xl bg-blue-600 hover:bg-blue-700">Go to live mock</Button>
+            <Link to="/live-mock-exams/local-preview?dev=1" className="mt-3 inline-block">
+              <Button className="rounded-xl bg-blue-600 hover:bg-blue-700">Go to combined mock</Button>
             </Link>
           </div>
         ) : inProgress && answers.length === 0 ? (
-          <div className="mt-6 rounded-xl border border-amber-200 bg-amber-50/90 p-6 text-center">
+          <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50/90 px-4 py-4 sm:px-5">
             <p className="text-sm font-medium text-amber-950">
               Your attempt is in progress. Finish and submit the exam to see full question-by-question breakdown here.
             </p>
-            <Link to={buildLiveMockSessionPath()}>
-              <Button className="mt-4 rounded-xl bg-amber-600 hover:bg-amber-700 text-white">
+            <Link
+              to={
+                isCombined
+                  ? `/live-mock-exams/session?track=11plus&subject=english&topics=Comprehension,SPaG&mode=mock-exam&questions=60&duration=50&liveMockSlug=both_subjects_english`
+                  : buildLiveMockSessionPath()
+              }
+            >
+              <Button className="mt-3 rounded-xl bg-amber-600 text-white hover:bg-amber-700">
                 Continue mock exam
               </Button>
             </Link>
           </div>
-        ) : (
+        ) : null}
+
+        {summary && !(inProgress && answers.length === 0) ? (
           <>
             {pct != null && qc > 0 && sectionStats.length > 0 ? (
               <div className="pt-3">
@@ -471,47 +679,7 @@ export default function LiveMockAnalytics() {
               </div>
             </div>
 
-            <div className="grid min-w-0 gap-3 pt-3 lg:grid-cols-[1.2fr_0.8fr]">
-              <div className="min-w-0 rounded-xl border border-slate-200 bg-[linear-gradient(135deg,#fbfdff_0%,#ffffff_62%,#f8fbff_100%)] p-3">
-                <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                  <div className="min-w-0 flex-1">
-                    <h2 className="flex flex-wrap items-center gap-2 text-base font-bold tracking-tight text-slate-950">
-                      <BarChart3 className="h-4 w-4 shrink-0 text-blue-600" />
-                      Cohort snapshot
-                    </h2>
-                    <p className="mt-0.5 text-xs leading-relaxed text-slate-500">
-                      Live aggregates across everyone who submitted this paper (updates as submissions arrive).
-                    </p>
-                  </div>
-                  <Users className="h-5 w-5 shrink-0 text-blue-400 sm:mt-0.5" aria-hidden />
-                </div>
-
-                <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-                  <div className="min-w-0 rounded-lg border border-slate-100 bg-white px-3 py-3 shadow-sm">
-                    <div className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Submissions</div>
-                    <div className="mt-1 text-2xl font-black text-slate-950">
-                      {cohort?.submitted_count ?? "-"}
-                    </div>
-                  </div>
-                  <div className="min-w-0 rounded-lg border border-slate-100 bg-white px-3 py-3 shadow-sm">
-                    <div className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Cohort mean %</div>
-                    <div className="mt-1 text-2xl font-black text-slate-950">
-                      {cohort?.mean_score_percent != null ? `${cohort.mean_score_percent}%` : "-"}
-                    </div>
-                  </div>
-                  <div className="min-w-0 rounded-lg border border-amber-100 bg-gradient-to-br from-amber-50/90 to-white px-3 py-3 shadow-sm">
-                    <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wide text-amber-800/90">
-                      <Trophy className="h-3.5 w-3.5 shrink-0" aria-hidden />
-                      Your placement
-                    </div>
-                    <div className="mt-1 font-mono text-2xl font-black tracking-tight text-slate-950">
-                      {placementDisplay.value}
-                    </div>
-                    <p className="mt-2 text-[11px] leading-snug text-slate-500">{placementDisplay.hint}</p>
-                  </div>
-                </div>
-              </div>
-
+            <div className="pt-3">
               <div className="min-w-0 rounded-xl border border-slate-200 bg-white p-3">
                 <div className="mb-3">
                   <h2 className="flex items-center gap-2 text-base font-bold tracking-tight text-slate-950">
@@ -557,16 +725,14 @@ export default function LiveMockAnalytics() {
                 Question-level review
               </h2>
               <p className="mt-0.5 text-xs leading-relaxed text-slate-500">
-                All questions you did not get correct: incorrect answers and any you left unanswered. Tap a row to see
-                the full passage (if any), question text, and every answer option.
+                Every question in this paper, with your answer and the correct answer. Tap a row to see the full passage
+                (if any), question text, and every answer option.
               </p>
 
-              {questionsNotCorrect.length === 0 ? (
+              {reviewQuestions.length === 0 ? (
                 <div className="mt-4 rounded-lg border border-emerald-100 bg-emerald-50/80 px-4 py-5 text-center">
                   <p className="text-sm font-medium text-emerald-900">
-                    {answers.length === 0
-                      ? "No saved answers yet. Submit the mock to populate this list."
-                      : "Every question in this attempt is marked correct. Nothing to review here."}
+                    No saved answers yet. Submit the mock to populate this list.
                   </p>
                 </div>
               ) : (
@@ -575,9 +741,9 @@ export default function LiveMockAnalytics() {
                     On small screens, use the cards below. On wider screens, scroll the table sideways if needed.
                   </p>
                   <div className="mt-3 space-y-2 md:hidden">
-                    {questionsNotCorrect.map((row) => {
+                    {reviewQuestions.map((row) => {
                       const unanswered =
-                        row.is_correct === null &&
+                        row.is_correct !== true &&
                         !row.selected_option?.trim() &&
                         !row.selected_option_label?.trim();
                       const yourAnswerDisplay = unanswered
@@ -589,9 +755,11 @@ export default function LiveMockAnalytics() {
                           );
                       const correctDisplay = row.correct_option_label?.trim() || "-";
                       const rowAccent =
-                        row.is_correct === false
-                          ? "border-rose-200/80 bg-white hover:bg-rose-50/50"
-                          : "border-amber-200/80 bg-white hover:bg-amber-50/40";
+                        row.is_correct === true
+                          ? "border-emerald-200/80 bg-white hover:bg-emerald-50/50"
+                          : row.is_correct === false
+                            ? "border-rose-200/80 bg-white hover:bg-rose-50/50"
+                            : "border-amber-200/80 bg-white hover:bg-amber-50/40";
                       return (
                         <button
                           key={row.id}
@@ -617,7 +785,7 @@ export default function LiveMockAnalytics() {
                               <span className="font-semibold text-slate-500">Type:</span>{" "}
                               {row.question_type || "-"}
                             </p>
-                            <p className={unanswered ? "text-slate-500" : "text-rose-800"}>
+                            <p className={unanswered ? "text-slate-500" : row.is_correct === true ? "text-emerald-800" : "text-rose-800"}>
                               <span className="font-semibold text-slate-500">Your answer:</span>{" "}
                               {unanswered ? "Not answered" : yourAnswerDisplay}
                             </p>
@@ -643,9 +811,9 @@ export default function LiveMockAnalytics() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100">
-                        {questionsNotCorrect.map((row) => {
+                        {reviewQuestions.map((row) => {
                           const unanswered =
-                            row.is_correct === null &&
+                            row.is_correct !== true &&
                             !row.selected_option?.trim() &&
                             !row.selected_option_label?.trim();
                           const yourAnswerDisplay = unanswered
@@ -663,9 +831,11 @@ export default function LiveMockAnalytics() {
                               role="button"
                               tabIndex={0}
                               className={
-                                row.is_correct === false
-                                  ? "cursor-pointer bg-white hover:bg-rose-50/60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
-                                  : "cursor-pointer bg-white hover:bg-amber-50/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
+                                row.is_correct === true
+                                  ? "cursor-pointer bg-white hover:bg-emerald-50/60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
+                                  : row.is_correct === false
+                                    ? "cursor-pointer bg-white hover:bg-rose-50/60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
+                                    : "cursor-pointer bg-white hover:bg-amber-50/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500"
                               }
                               onClick={() => setReviewDetail(row)}
                               onKeyDown={(e) => {
@@ -688,7 +858,7 @@ export default function LiveMockAnalytics() {
                                 {unanswered ? (
                                   <span className="text-slate-500">Not answered</span>
                                 ) : (
-                                  <span className="text-rose-800">{yourAnswerDisplay}</span>
+                                  <span className={row.is_correct === true ? "text-emerald-800" : "text-rose-800"}>{yourAnswerDisplay}</span>
                                 )}
                               </td>
                               <td className="max-w-[200px] break-words px-2 py-2 font-medium text-emerald-800">
@@ -845,7 +1015,7 @@ export default function LiveMockAnalytics() {
               </DialogContent>
             </Dialog>
           </>
-        )}
+        ) : null}
 
         <div className="mt-3 flex flex-col gap-3 border-t border-slate-200 pt-3 sm:flex-row sm:items-center sm:justify-between">
           <Link

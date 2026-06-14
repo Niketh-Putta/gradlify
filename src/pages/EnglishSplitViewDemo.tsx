@@ -66,6 +66,83 @@ export interface EnglishSection {
   questions: EnglishQuestion[];
 }
 
+/** Parse (A)…(B)… stems from live-mock SPaG into a full sentence + fragment map. */
+function parseSpagStemFragments(stem: string): { fullLine: string; fragments: Record<string, string> } {
+  const fragments: Record<string, string> = {};
+  const ordered: string[] = [];
+  const re = /\(([A-E]|N)\)\s*([^()]*)/gi;
+  let match: RegExpExecArray | null;
+  while ((match = re.exec(stem)) !== null) {
+    const id = match[1].toUpperCase();
+    const text = match[2].trim();
+    if (text) {
+      fragments[id] = text;
+      ordered.push(text);
+    }
+  }
+  if (ordered.length === 0) {
+    const cleaned = stem
+      .replace(/^Question\s*\d+\s*:\s*/i, "")
+      .replace(
+        /^Identify\s+the\s+section\s+with\s+the\s+(spelling|punctuation|grammar)\s+mistake,\s*or\s*choose\s*N\s*if\s*there\s*is\s*no\s*mistake\.\s*/i,
+        "",
+      )
+      .trim();
+    return { fullLine: cleaned, fragments: {} };
+  }
+  return { fullLine: ordered.join(" ").replace(/\s+/g, " ").trim(), fragments };
+}
+
+function normalizeSpagOptionText(
+  optionId: string,
+  rawText: string,
+  fragments: Record<string, string>,
+): string {
+  const id = optionId.toUpperCase();
+  if (fragments[id]) return fragments[id];
+  const text = String(rawText || "").trim();
+  if (/^fragment\s+[a-e]$/i.test(text)) return fragments[id] || text;
+  if (id === "N" || id === "E") {
+    if (/^no\s+(error|mistake)/i.test(text)) return "No mistake";
+    return text || "No mistake";
+  }
+  return text;
+}
+
+/** Map comprehension question wording to the matching passage paragraph block. */
+function inferComprehensionEvidenceLine(stem: string, passageBlocks: EnglishPassageBlock[]): string {
+  if (passageBlocks.length === 0) return "global";
+  const s = stem.toLowerCase();
+
+  const paraMatch =
+    s.match(/\b(?:in|from)\s+(?:the\s+)?(\w+)\s+paragraph\b/) ||
+    s.match(/\(paragraph\s+(\d+)\)/) ||
+    s.match(/\bparagraph\s+(\d+)\b/);
+
+  if (paraMatch) {
+    const token = paraMatch[1];
+    const wordToNum: Record<string, number> = {
+      first: 1,
+      second: 2,
+      third: 3,
+      fourth: 4,
+      fifth: 5,
+      final: passageBlocks.length,
+      last: passageBlocks.length,
+    };
+    const n = wordToNum[token] ?? parseInt(token, 10);
+    if (Number.isFinite(n) && n >= 1 && n <= passageBlocks.length) {
+      return passageBlocks[n - 1].id;
+    }
+  }
+
+  if (/\bfinal paragraph\b|\blast paragraph\b|\bend of the passage\b/.test(s)) {
+    return passageBlocks[passageBlocks.length - 1].id;
+  }
+
+  return passageBlocks[0].id;
+}
+
 const TEST_DATA: EnglishSection[] = [
   {
     sectionId: 'comprehension',
@@ -561,9 +638,20 @@ export function EnglishSplitViewDemo() {
   const modeParam = searchParams.get('mode') || 'practice';
   const liveMockSlug = searchParams.get('liveMockSlug') || '';
   const isLiveMock = Boolean(liveMockSlug);
-  const isTargetLiveMock = liveMockSlug === 'live-11plus-english-mock-2026-05-09-1700';
-  const forceFullComprehensionHighlight =
-    isLiveMock && isTargetLiveMock;
+  // Slugs that use the full authored-paper styling: single-line SPaG sections
+  // and full-passage comprehension highlighting. The combined Maths+English
+  // mock reuses this exact English experience for its English paper.
+  const FULL_STYLED_LIVE_MOCK_SLUGS = new Set([
+    'live-11plus-english-mock-2026-05-09-1700',
+    'both_subjects_english',
+  ]);
+  const isTargetLiveMock = FULL_STYLED_LIVE_MOCK_SLUGS.has(liveMockSlug);
+  // The combined Maths+English mock has its own results page (two tabs); the
+  // English paper here routes there. Other live mocks use the standard page.
+  const analyticsPath =
+    liveMockSlug === "both_subjects_english"
+      ? "/live-mock-exams/analytics?combined=1&subject=english"
+      : "/live-mock-exams/analytics";
   // Topics usually arrives comma separated from MockExams, e.g., "Comprehension,SPaG"
   const rawTopics = searchParams.get('topics') || 'Comprehension';
   const selectedTopics = rawTopics.toLowerCase();
@@ -691,9 +779,10 @@ export function EnglishSplitViewDemo() {
         return;
       }
 
+      setIsLoadingLiveMock(true);
+      const maxAttempts = 4;
+      for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
       try {
-        setIsLoadingLiveMock(true);
-
         const { data: paper, error: paperError } = await supabase
           .from('live_mock_papers' as any)
           .select('id, slug, title, duration_minutes, question_count, status')
@@ -706,6 +795,7 @@ export function EnglishSplitViewDemo() {
           setLiveMockSections([]);
           setLiveMockDurationMinutes(50);
           setLiveMockPaperQuestionCount(70);
+          setIsLoadingLiveMock(false);
           return;
         }
 
@@ -762,23 +852,19 @@ export function EnglishSplitViewDemo() {
                 : BookOpen;
           const sectionQuestions = questionsBySection.get(section.id) || [];
           const isTargetSpagSection = isTargetLiveMock && (qType === 'spelling' || qType === 'punctuation' || qType === 'grammar');
-          const formatSpagSentenceLine = (stem: string): string =>
-            stem
-              .replace(/^Question\s*\d+\s*:\s*/i, '')
-              .replace(
-                /^Identify\s+the\s+section\s+with\s+the\s+(spelling|punctuation|grammar)\s+mistake,\s*or\s*choose\s*N\s*if\s*there\s*is\s*no\s*mistake\.\s*/i,
-                ''
-              )
-              .replace(/\b([A-DN])\s*:\s*/g, '')
-              .replace(/\s*\/\s*/g, ' | ')
-              .replace(/\s{2,}/g, ' ')
-              .trim();
           const rawPassageBlocks = Array.isArray(section.passage_blocks) ? section.passage_blocks : [];
           const passageBlocks = isTargetSpagSection
-            ? sectionQuestions.map((question: any) => ({
-                id: `q-${String(question.question_number)}`,
-                text: `${String(question.question_number)}. ${formatSpagSentenceLine(String(question.stem || ''))}`,
-              }))
+            ? sectionQuestions.map((question: any) => {
+                const qNum = String(question.question_number);
+                if (qType === 'grammar') {
+                  const sentence = String(question.stem || '')
+                    .replace(/^Question\s*\d+\s*:\s*/i, '')
+                    .trim();
+                  return { id: `q-${qNum}`, text: `${qNum}. ${sentence}` };
+                }
+                const { fullLine } = parseSpagStemFragments(String(question.stem || ''));
+                return { id: `q-${qNum}`, text: `${qNum}. ${fullLine}` };
+              })
             : rawPassageBlocks.length > 0
               ? rawPassageBlocks
               : [{ id: `${section.section_key}-instructions`, text: section.instructions || section.title }];
@@ -806,45 +892,61 @@ export function EnglishSplitViewDemo() {
             tier: 'Live mock',
             difficulty: null,
             passageBlocks,
-            questions: sectionQuestions.map((question: any) => ({
-              id: String(question.question_number),
-              questionNumber:
-                typeof question.question_number === "number" && Number.isFinite(question.question_number)
-                  ? question.question_number
-                  : parseInt(String(question.question_number ?? ""), 10) || undefined,
-              dbQuestionId: question.id,
-              stemSnapshot: String(question.stem || ''),
-              tag: question.question_type || question.subtopic || 'Question',
-              tagColor: tagColorByType[String(question.question_type || '').toLowerCase()] || tagColorByType.comprehension,
-              text: isTargetSpagSection
-                ? qType === 'grammar'
-                  ? 'Choose the correct option to fill the gap'
-                  : 'Select the part of the sentence with the mistake'
-                : question.stem,
-              evidenceLine: isTargetSpagSection
-                ? `q-${String(question.question_number)}`
-                : (passageBlocks[0]?.id || 'global'),
-              explanation: question.explanation || undefined,
-              options: (Array.isArray(question.options) ? question.options : []).map((option: any) => ({
-                id: String(option.id),
-                text: String(option.text),
-                trap: option.trap ?? null,
-                correct: Boolean(option.correct)
-              }))
-            }))
+            questions: sectionQuestions.map((question: any) => {
+              const qNum = String(question.question_number);
+              const stemText = String(question.stem || '');
+              const spagFragments =
+                isTargetSpagSection && qType !== 'grammar'
+                  ? parseSpagStemFragments(stemText).fragments
+                  : {};
+              return {
+                id: qNum,
+                questionNumber:
+                  typeof question.question_number === "number" && Number.isFinite(question.question_number)
+                    ? question.question_number
+                    : parseInt(qNum, 10) || undefined,
+                dbQuestionId: question.id,
+                stemSnapshot: stemText,
+                tag: question.question_type || question.subtopic || 'Question',
+                tagColor: tagColorByType[String(question.question_type || '').toLowerCase()] || tagColorByType.comprehension,
+                text: isTargetSpagSection
+                  ? qType === 'grammar'
+                    ? 'Choose the correct option to fill the gap'
+                    : 'Select the part of the sentence with the mistake'
+                  : question.stem,
+                evidenceLine: isTargetSpagSection
+                  ? `q-${qNum}`
+                  : inferComprehensionEvidenceLine(stemText, passageBlocks),
+                explanation: question.explanation || undefined,
+                options: (Array.isArray(question.options) ? question.options : []).map((option: any) => ({
+                  id: String(option.id),
+                  text: isTargetSpagSection && qType !== 'grammar'
+                    ? normalizeSpagOptionText(String(option.id), String(option.text), spagFragments)
+                    : String(option.text),
+                  trap: option.trap ?? null,
+                  correct: Boolean(option.correct),
+                })),
+              };
+            })
           };
         });
 
         setLiveMockPaperId(paper.id);
         setLiveMockSections(mapped);
-      } catch (error) {
-        console.error('Live mock fetch error:', error);
-        setLiveMockPaperId(null);
-        setLiveMockSections([]);
-        setLiveMockDurationMinutes(50);
-        setLiveMockPaperQuestionCount(70);
-      } finally {
         setIsLoadingLiveMock(false);
+        return;
+      } catch (error) {
+        if (attempt === maxAttempts) {
+          console.error('Live mock fetch error (after retries):', error);
+          setLiveMockPaperId(null);
+          setLiveMockSections([]);
+          setLiveMockDurationMinutes(50);
+          setLiveMockPaperQuestionCount(70);
+          setIsLoadingLiveMock(false);
+          return;
+        }
+        await new Promise((resolve) => setTimeout(resolve, 400 * attempt));
+      }
       }
     };
 
@@ -1203,6 +1305,36 @@ export function EnglishSplitViewDemo() {
 
     return () => observer.disconnect();
   }, [activeSections, isFinished, examMode, activeQuestionId]);
+
+  // LEFT-PANE AUTO-ALIGN: when the dominant question changes (via scroll or
+  // clicking a question), smoothly scroll the passage column so the matching
+  // passage/section is vertically centred in the reading pane.
+  useEffect(() => {
+    if (isFinished || !activeQuestionId) return;
+    const container = passageContainerRef.current;
+    if (!container) return;
+
+    let target: HTMLElement | null = null;
+    for (const section of activeSections) {
+      const q = (section.questions || []).find(
+        (qq) => `${section.uniqueId}_${qq.id}` === activeQuestionId
+      );
+      if (!q) continue;
+      const evidenceKey = `${section.uniqueId}_${q.evidenceLine}`;
+      target =
+        passageLineRefs.current[evidenceKey] ||
+        passageSectionRefs.current[section.uniqueId] ||
+        null;
+      break;
+    }
+    if (!target) return;
+
+    const containerRect = container.getBoundingClientRect();
+    const targetRect = target.getBoundingClientRect();
+    const delta =
+      targetRect.top + targetRect.height / 2 - (containerRect.top + containerRect.height / 2);
+    container.scrollTo({ top: container.scrollTop + delta, behavior: "smooth" });
+  }, [activeQuestionId, activeSections, isFinished]);
 
   // First visit to session (including deep links): ensure an in_progress attempt exists so the hub page can lock "Start".
   useEffect(() => {
@@ -1864,11 +1996,7 @@ export function EnglishSplitViewDemo() {
                                              evidenceLine.includes('passage') || 
                                              evidenceLine.includes('text') || 
                                              evidenceLine.includes('entire');
-                            if (
-                              (forceFullComprehensionHighlight && isComprehensionSection) ||
-                              activeQInfo.evidenceLine === p.id ||
-                              isGlobal
-                            ) {
+                            if (activeQInfo.evidenceLine === p.id || isGlobal) {
                               isTargetEvidence = true;
                             }
                           }
@@ -1980,9 +2108,14 @@ export function EnglishSplitViewDemo() {
                     <CheckCircle className="w-4 h-4" />
                     Review Mode
                   </div>
-                  <div className="text-xs font-semibold text-emerald-600/80 uppercase tracking-wider flex items-center gap-2">
-                    Evaluation Complete
-                  </div>
+                  <Button
+                    type="button"
+                    size="sm"
+                    onClick={() => navigate(analyticsPath)}
+                    className="h-8 rounded-full bg-amber-500 px-4 text-xs font-bold text-amber-950 hover:bg-amber-600"
+                  >
+                    See results &amp; compare
+                  </Button>
                 </>
               )}
             </div>
@@ -2013,7 +2146,7 @@ export function EnglishSplitViewDemo() {
                 {isLiveMock && (
                   <Button
                     type="button"
-                    onClick={() => navigate("/live-mock-exams/analytics")}
+                    onClick={() => navigate(analyticsPath)}
                     className="mt-6 h-11 rounded-xl bg-amber-500 px-6 font-bold text-amber-950 hover:bg-amber-600"
                   >
                     End mock
@@ -2342,19 +2475,28 @@ export function EnglishSplitViewDemo() {
         </AlertDialog>
 
         {isFinished && isLiveMock && (
-          <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black px-4">
-            <div className="w-full max-w-md rounded-2xl border border-white/10 bg-card p-8 text-center shadow-2xl">
+          <div className="fixed inset-0 z-[60] flex items-center justify-center bg-[#faf9f4] px-4">
+            <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-[0_20px_60px_rgba(15,23,42,0.12)]">
               <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-600">
                 <CheckCircle className="h-8 w-8" />
               </div>
-              <h2 className="font-serif text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+              <h2 className="font-serif text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
                 Mock exam completed
               </h2>
-              <p className="mt-3 text-sm text-muted-foreground">
-                Your answers have been saved. Full analytics will be available after the live window closes.
+              <p className="mt-3 text-sm text-slate-500">
+                Your answers have been saved. See how you did against everyone else, or keep practising.
               </p>
-              <Link to="/mocks/english" className="mt-8 block">
-                <Button className="h-12 w-full rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-sm font-bold text-amber-950 hover:brightness-105">
+              <Button
+                onClick={() => navigate(analyticsPath)}
+                className="mt-8 h-12 w-full rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-sm font-bold text-amber-950 hover:brightness-105"
+              >
+                See how you did
+              </Button>
+              <Link to="/mocks/english" reloadDocument className="mt-3 block">
+                <Button
+                  variant="outline"
+                  className="h-12 w-full rounded-xl border-slate-200 text-sm font-bold text-slate-700 hover:bg-slate-50"
+                >
                   Practice more exam styled questions
                 </Button>
               </Link>

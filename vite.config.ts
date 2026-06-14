@@ -8,7 +8,7 @@ export default defineConfig(({ mode }) => ({
     host: "127.0.0.1",
     port: 5173,
     strictPort: true,
-    open: true,
+    open: "/live-mock-exams/local-preview?fast=1&dev=1",
   },
   plugins: [
     react(),
