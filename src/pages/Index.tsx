@@ -14,7 +14,7 @@ const ElevenPlusLanding = lazyWithRetry(() => import("@/pages/ElevenPlusLanding"
 const Home = lazyWithRetry(() => import("@/pages/Home").then(m => ({ default: m.Home })));
 const MockExams = lazyWithRetry(() => import("@/pages/MockExams"));
 const MockExamPage = lazyWithRetry(() => import("@/pages/MockExamPage"));
-const LiveMockExams = lazyWithRetry(() => import("@/pages/LiveMockExams"));
+const LiveMockHub = lazyWithRetry(() => import("@/pages/LiveMockHub"));
 const LiveMockAnalytics = lazyWithRetry(() => import("@/pages/LiveMockAnalytics"));
 const LocalCombinedMock = lazyWithRetry(() => import("@/pages/LocalCombinedMock"));
 const RevisionNotes = lazyWithRetry(() => import("@/pages/RevisionNotes"));
@@ -49,11 +49,11 @@ import { isPaymentGateExemptPath } from '@/lib/paymentBlocklist';
 import { useCombinedMockReleased } from '@/hooks/useCombinedMockReleased';
 
 /**
- * `/live-mock-exams`: the live mock hub (registration + "Start mock" once live).
- * The combined mock exam itself lives at `/live-mock-exams/local-preview`, which the
- * hub's Start button links to. This keeps a real hub to return to from the exam.
+ * `/live-mock-exams`: minimal live mock landing (the replacement for the old hub).
+ * It just announces the mock and opens the exam lobby at
+ * `/live-mock-exams/local-preview`, which is also where the exam's Back link returns.
  */
-const LiveMockExamsRoute = () => <LiveMockExams />;
+const LiveMockExamsRoute = () => <LiveMockHub />;
 
 /** Legacy `/live-mock-exams/details` now just points at the hub. */
 const LiveMockExamsDetailsRoute = () => <Navigate to="/live-mock-exams" replace />;
