@@ -14,7 +14,7 @@ import {
   LockKeyhole,
   ShieldCheck,
 } from "lucide-react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -297,8 +297,8 @@ export default function LocalCombinedMock() {
   // Remediation (apology popup) + maths-only re-sit state for the affected cohort.
   const [remediation, setRemediation] = useState<AffectedMathsState>(NOT_AFFECTED);
   const [remediationOpen, setRemediationOpen] = useState(false);
-  const [remediationDismissed, setRemediationDismissed] = useState(false);
   const [resitMode, setResitMode] = useState(false);
+  const location = useLocation();
 
   // Autosave safety net: per-answer writes to the DB during the Maths phase so a
   // crash / early-exit can never silently wipe a student's answers again.
@@ -467,9 +467,9 @@ export default function LocalCombinedMock() {
     };
   }, [user?.id]);
 
-  // Post-English remediation gate. We only check (and only ever show the popup)
-  // once English is fully submitted, and only for users who precisely match the
-  // affected-cohort rule via a fresh DB check. During a re-sit we skip the check.
+  // Post-English remediation gate. Fresh DB check on every visit to this page.
+  // Affected users see the apology popup each time until they redo Maths and
+  // submit a real score ("Not now" only closes it for the current view).
   useEffect(() => {
     if (!user?.id || !hasFullyCompleted || resitMode) return;
     let cancelled = false;
@@ -477,12 +477,12 @@ export default function LocalCombinedMock() {
       const result = await detectAffectedMathsAttempt(user.id);
       if (cancelled) return;
       setRemediation(result);
-      if (result.affected && !remediationDismissed) setRemediationOpen(true);
+      if (result.affected) setRemediationOpen(true);
     })();
     return () => {
       cancelled = true;
     };
-  }, [user?.id, hasFullyCompleted, resitMode, remediationDismissed]);
+  }, [user?.id, hasFullyCompleted, resitMode, location.key]);
 
   useEffect(() => {
     void supabase.functions
@@ -827,7 +827,6 @@ export default function LocalCombinedMock() {
   // broken attempt in place — no second attempt row, so cohort counts / rank stay 1:1.
   const startMathsResit = () => {
     setRemediationOpen(false);
-    setRemediationDismissed(true);
     mathsSubmittedRef.current = false;
     autosaveAttemptIdRef.current = null;
     pendingAutosaveRef.current.clear();
@@ -842,7 +841,6 @@ export default function LocalCombinedMock() {
 
   const dismissRemediation = () => {
     setRemediationOpen(false);
-    setRemediationDismissed(true);
   };
 
   const submitCurrentPaper = () => {
@@ -1152,8 +1150,8 @@ export default function LocalCombinedMock() {
 
         {/*
           Post-English apology + maths re-sit popup. Mounted ONLY when the DB check
-          has verified this user is in the affected cohort, and only opened post-English.
-          Double gate (remediation.affected + remediationOpen) keeps false positives at zero.
+          has verified this user is in the affected cohort. Re-opens on every visit
+          to this tab until they submit a corrected Maths re-sit.
         */}
         {remediation.affected && (
           <Dialog
