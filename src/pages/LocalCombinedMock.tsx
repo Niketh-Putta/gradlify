@@ -84,6 +84,63 @@ function formatTime(totalSeconds: number) {
   return `${minutes}:${String(seconds % 60).padStart(2, "0")}`;
 }
 
+/** Stable localStorage keys — must match submitMaths lookup (not display labels like "Non-calculator Maths"). */
+const MATHS_ANSWER_PREFIX = "maths";
+const ENGLISH_ANSWER_PREFIX = "english";
+/** Buggy prefix used before fix; still read on submit so in-flight sittings are not lost. */
+const LEGACY_MATHS_ANSWER_PREFIX = "non-calculator maths";
+
+function mathsAnswerKey(questionNumber: number) {
+  return `${MATHS_ANSWER_PREFIX}-${questionNumber}`;
+}
+
+function englishAnswerKey(questionNumber: number) {
+  return `${ENGLISH_ANSWER_PREFIX}-${questionNumber}`;
+}
+
+function answerKeyForPhase(phase: Phase, questionNumber: number) {
+  return phase === "english" ? englishAnswerKey(questionNumber) : mathsAnswerKey(questionNumber);
+}
+
+function migrateSavedAnswers(raw: Record<string, string>): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const [key, value] of Object.entries(raw)) {
+    const legacy = key.match(/^non-calculator maths-(\d+)$/);
+    if (legacy) out[mathsAnswerKey(Number(legacy[1]))] = value;
+    else out[key] = value;
+  }
+  return out;
+}
+
+function migrateFlaggedKeys(flagged: string[]): string[] {
+  return flagged.map((key) => {
+    const legacy = key.match(/^non-calculator maths-(\d+)$/);
+    return legacy ? mathsAnswerKey(Number(legacy[1])) : key;
+  });
+}
+
+function getMathsSelectedAnswer(answers: Record<string, string>, questionNumber: number): string | null {
+  return (
+    answers[mathsAnswerKey(questionNumber)] ||
+    answers[`${LEGACY_MATHS_ANSWER_PREFIX}-${questionNumber}`] ||
+    null
+  );
+}
+
+function hasMathsAnswer(answers: Record<string, string>, questionNumber: number): boolean {
+  return Boolean(getMathsSelectedAnswer(answers, questionNumber));
+}
+
+function countMathsAnswers(answers: Record<string, string>): number {
+  const seen = new Set<number>();
+  for (const key of Object.keys(answers)) {
+    if (!answers[key]) continue;
+    const match = key.match(/^maths-(\d+)$/) || key.match(/^non-calculator maths-(\d+)$/);
+    if (match) seen.add(Number(match[1]));
+  }
+  return seen.size;
+}
+
 /**
  * The English paper reuses the EXACT app split-view (EnglishSplitViewDemo) via
  * the live-mock session route, pointed at the seeded `both_subjects_english`
@@ -346,8 +403,8 @@ export default function LocalCombinedMock() {
       }
       setPhase(saved.phase);
       setCurrentQuestion(saved.currentQuestion);
-      setAnswers(saved.answers || {});
-      setFlagged(saved.flagged || []);
+      setAnswers(migrateSavedAnswers(saved.answers || {}));
+      setFlagged(migrateFlaggedKeys(saved.flagged || []));
       setPhaseEndsAt(saved.phaseEndsAt);
     } catch {
       window.localStorage.removeItem(storageKey);
@@ -385,7 +442,7 @@ export default function LocalCombinedMock() {
         const elapsedSeconds = Math.max(0, allocated - secondsLeft);
 
         const rows = mathsQuestions.map((q) => {
-          const selected = answers[`maths-${q.questionNumber}`] || null;
+          const selected = getMathsSelectedAnswer(answers, q.questionNumber);
           const correct = q.options.find((o) => o.correct);
           const selectedChoice = selected ? q.options.find((o) => o.id === selected) : undefined;
           return { q, selected, correct, selectedChoice };
@@ -474,11 +531,15 @@ export default function LocalCombinedMock() {
       : mathsQuestions.length || paperQuestionCount(MATHS_PAPER);
   const currentSection = sectionForQuestion(currentPaper, currentQuestion);
   const currentMathsQuestion = mathsQuestions.find((q) => q.questionNumber === currentQuestion) || null;
-  const questionKey = `${subject.toLowerCase()}-${currentQuestion}`;
-  const answeredCount = useMemo(
-    () => Object.keys(answers).filter((key) => key.startsWith(subject.toLowerCase())).length,
-    [answers, subject],
-  );
+  const questionKey = answerKeyForPhase(phase, currentQuestion);
+  const selectedOptionId =
+    phase === "english" ? answers[questionKey] ?? null : getMathsSelectedAnswer(answers, currentQuestion);
+  const answeredCount = useMemo(() => {
+    if (phase === "english") {
+      return Object.keys(answers).filter((key) => key.startsWith(`${ENGLISH_ANSWER_PREFIX}-`) && answers[key]).length;
+    }
+    return countMathsAnswers(answers);
+  }, [answers, phase]);
 
   const startMock = () => {
     mathsSubmittedRef.current = false;
@@ -563,7 +624,9 @@ export default function LocalCombinedMock() {
         <div className="max-w-md rounded-2xl border bg-white p-8 text-center shadow-sm">
           <LockKeyhole className="mx-auto h-8 w-8 text-orange-600" />
           <h1 className="mt-4 text-xl font-bold">Sign in required</h1>
-          <p className="mt-2 text-sm text-slate-600">Sign in with a registered mock account to use the local prototype.</p>
+          <p className="mt-2 text-sm text-slate-600">
+            Sign in with the account you used to register for this live mock.
+          </p>
           <Button asChild className="mt-6 bg-orange-600 text-white hover:bg-orange-700">
             <Link to="/11-plus">Sign in</Link>
           </Button>
@@ -586,15 +649,14 @@ export default function LocalCombinedMock() {
       <main className="min-h-screen bg-[#faf9f4] text-slate-950">
         {devBanner}
         <section className="mx-auto max-w-4xl px-4 py-8">
-          <Link to="/dashboard" className="inline-flex items-center gap-2 text-sm font-semibold text-slate-500 transition hover:text-slate-700">
-            <ArrowLeft className="h-4 w-4" />
-            Back to live mocks
+          <Link to="/live-mock-exams/details" className="text-sm font-semibold text-slate-500 transition hover:text-slate-700">
+            Back
           </Link>
 
           <div className="mt-5 overflow-hidden rounded-[24px] border border-orange-200 bg-white shadow-[0_20px_60px_rgba(124,45,18,0.08)]">
             <div className="border-b border-orange-100 bg-gradient-to-r from-orange-600 to-amber-500 px-6 py-7 text-white sm:px-9">
               <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-black uppercase tracking-[0.14em]">
-                Local mock prototype
+                Live mock exam
               </span>
               <h1 className="mt-4 text-3xl font-black tracking-tight sm:text-4xl">11+ Maths &amp; English Mock</h1>
               <p className="mt-2 max-w-2xl text-sm font-medium text-orange-50 sm:text-base">
@@ -633,8 +695,8 @@ export default function LocalCombinedMock() {
                 </div>
                 <p className="mt-1 text-xs text-slate-600">
                   {eligibility.registered
-                    ? `${user.email} is registered for this mock.`
-                    : "This account is not registered for the mock yet. Register on the live mocks page (Premium or fixed-price) to unlock it."}
+                    ? `${user.email} is registered. The mock is live — start when you are ready.`
+                    : "This account is not registered yet. Register below to unlock the mock (free with Premium, or one fixed payment)."}
                 </p>
               </div>
 
@@ -717,9 +779,6 @@ export default function LocalCombinedMock() {
                       </>
                     )}
                   </Button>
-                  <Button asChild variant="outline" className="h-11 w-full rounded-xl">
-                    <Link to="/live-mock-exams/details">View mock details</Link>
-                  </Button>
                 </div>
               )}
             </div>
@@ -774,7 +833,7 @@ export default function LocalCombinedMock() {
   }
 
   if (phase === "complete") {
-    const mathsAnswered = Object.keys(answers).filter((key) => key.startsWith("maths")).length;
+    const mathsAnswered = countMathsAnswers(answers);
     const englishAnswered = Object.keys(answers).filter((key) => key.startsWith("english")).length;
     return (
       <main className="flex min-h-screen items-center justify-center bg-[#faf9f4] p-6">
@@ -790,9 +849,11 @@ export default function LocalCombinedMock() {
             See how you did
             <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
-          <Button variant="outline" className="mt-3 w-full" onClick={resetPrototype}>
-            Reset local prototype
-          </Button>
+          {import.meta.env.DEV && (
+            <Button variant="outline" className="mt-3 w-full" onClick={resetPrototype}>
+              Reset (dev only)
+            </Button>
+          )}
         </section>
       </main>
     );
@@ -827,7 +888,9 @@ export default function LocalCombinedMock() {
           </div>
           <div className="mt-4 grid max-h-48 grid-cols-6 gap-1.5 overflow-y-auto sm:mt-5 sm:max-h-none sm:grid-cols-5 sm:gap-2 lg:max-h-[420px]">
             {Array.from({ length: questionsThisPaper }, (_, index) => index + 1).map((number) => {
-              const key = `${subject.toLowerCase()}-${number}`;
+              const key = answerKeyForPhase(phase, number);
+              const answered =
+                phase === "english" ? Boolean(answers[key]) : hasMathsAnswer(answers, number);
               return (
                 <button
                   key={number}
@@ -835,8 +898,8 @@ export default function LocalCombinedMock() {
                   className={cn(
                     "h-7 rounded-md text-[11px] font-bold transition sm:h-8 sm:text-xs",
                     currentQuestion === number && "bg-slate-950 text-white",
-                    currentQuestion !== number && answers[key] && "bg-emerald-100 text-emerald-800",
-                    currentQuestion !== number && !answers[key] && "bg-slate-100 text-slate-500 hover:bg-orange-100",
+                    currentQuestion !== number && answered && "bg-emerald-100 text-emerald-800",
+                    currentQuestion !== number && !answered && "bg-slate-100 text-slate-500 hover:bg-orange-100",
                   )}
                 >
                   {number}
@@ -887,13 +950,13 @@ export default function LocalCombinedMock() {
                     onClick={() => setAnswers((current) => ({ ...current, [questionKey]: option.id }))}
                     className={cn(
                       "flex w-full items-center gap-4 rounded-xl border p-4 text-left transition",
-                      answers[questionKey] === option.id
+                      selectedOptionId === option.id
                         ? "border-orange-500 bg-orange-50 shadow-[0_0_0_2px_rgba(249,115,22,0.12)]"
                         : "border-slate-200 hover:border-orange-300 hover:bg-orange-50/40",
                     )}
                   >
-                    <span className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border text-sm font-black", answers[questionKey] === option.id ? "border-orange-500 bg-orange-500 text-white" : "border-slate-200 bg-white")}>
-                      {answers[questionKey] === option.id ? <Check className="h-4 w-4" /> : option.id}
+                    <span className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border text-sm font-black", selectedOptionId === option.id ? "border-orange-500 bg-orange-500 text-white" : "border-slate-200 bg-white")}>
+                      {selectedOptionId === option.id ? <Check className="h-4 w-4" /> : option.id}
                     </span>
                     <span className="text-sm font-semibold text-slate-700">{option.text}</span>
                   </button>

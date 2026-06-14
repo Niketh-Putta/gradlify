@@ -17,10 +17,10 @@ const bannerContent = (
 
     <div className="flex min-w-0 flex-1 flex-col items-center gap-0.5 text-center sm:flex-row sm:justify-center sm:gap-3">
       <span className="text-[12px] font-semibold leading-tight tracking-tight text-white sm:text-base">
-        Take Part in Free Live English Mock Exam This Saturday 5pm
+        Live 11+ Maths &amp; English mock is open now
       </span>
       <span className="inline-flex items-center gap-1.5 rounded-full border border-white/18 bg-white/15 px-2.5 py-0.5 text-[11px] font-semibold text-white/95 shadow-[inset_0_1px_0_rgba(255,255,255,0.22)] backdrop-blur-md sm:text-sm">
-        Reserve place
+        Start mock
         <ArrowRight className="h-3 w-3 transition-transform duration-200 group-hover:translate-x-0.5" />
       </span>
     </div>

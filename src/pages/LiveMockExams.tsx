@@ -31,6 +31,7 @@ import {
   LIVE_MOCK_PROMO_SPOTS_REMAINING,
   LIVE_MOCK_STANDARD_PRICE_GBP,
 } from "@/lib/liveMockPricing";
+import { isCombinedMockReleased } from "@/lib/liveMockCombinedConfig";
 
 // Toggle to re-enable the old English-only live mock (9 May 2026). Set to true to show it again.
 const SHOW_ENGLISH_LIVE_MOCK = false;
@@ -72,6 +73,7 @@ function buildLiveMockSessionSearchParams(): URLSearchParams {
 
 export default function LiveMockExams() {
   const navigate = useNavigate();
+  const combinedMockLive = isCombinedMockReleased();
   const { user } = useAppContext();
   const membership = useMembership();
   const { isPremium } = membership;
@@ -507,7 +509,7 @@ export default function LiveMockExams() {
                       asChild
                       className="mt-6 h-12 w-full rounded-xl bg-[linear-gradient(90deg,#ea580c_0%,#f59e0b_100%)] text-base font-black text-white shadow-[0_12px_24px_rgba(234,88,12,0.24)] hover:brightness-105"
                     >
-                      <Link to="/live-mock-exams/local-preview">
+                      <Link to="/live-mock-exams">
                         Start Mock
                         <ArrowRight className="ml-2 h-4 w-4" />
                       </Link>
@@ -578,9 +580,21 @@ export default function LiveMockExams() {
                 You have registered for this mock
               </h3>
               <p className="mt-1 text-xs leading-5 text-emerald-700 sm:text-sm">
-                Your spot for the Maths &amp; English mock is locked in. You&apos;ll be able to sit it right here on the
-                day, no further action needed.
+                {combinedMockLive
+                  ? "Your spot is locked in. The mock is live — tap Start below to begin (Maths first, then break, then English)."
+                  : "Your spot for the Maths & English mock is locked in. Come back here on the day to sit it — no further action needed."}
               </p>
+              {combinedMockLive && (
+                <Button
+                  asChild
+                  className="mt-4 h-11 w-full rounded-xl bg-orange-600 text-sm font-bold text-white hover:bg-orange-700"
+                >
+                  <Link to="/live-mock-exams">
+                    Start mock now
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+              )}
               <span className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-white/70 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.08em] text-emerald-700 sm:text-xs">
                 <CalendarDays className="h-3.5 w-3.5" />
                 Sunday 14 June 2026

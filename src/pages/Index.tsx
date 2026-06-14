@@ -49,13 +49,16 @@ import { isPaymentGateExemptPath } from '@/lib/paymentBlocklist';
 import { useCombinedMockReleased } from '@/hooks/useCombinedMockReleased';
 
 /**
- * `/live-mock-exams`: shows the current hub until the scheduled go-live, then
- * flips to the combined Maths + English mock automatically (no reload needed).
+ * `/live-mock-exams`: registration hub before go-live; combined mock exam lobby after.
+ * Use `/live-mock-exams/details` for the hub page once the mock is live (Back link target).
  */
 const LiveMockExamsRoute = () => {
   const released = useCombinedMockReleased();
   return released ? <LocalCombinedMock /> : <LiveMockExams />;
 };
+
+/** Registration hub — always available so Back from the exam lobby never loops. */
+const LiveMockExamsDetailsRoute = () => <LiveMockExams />;
 
 /**
  * `/live-mock-exams/local-preview`: the combined mock. Always available in dev
@@ -127,10 +130,12 @@ const Index = () => {
           setUser(null);
           // If on protected route and not authenticated, redirect to landing
           if (protectedRoutes.some(route => currentPath.startsWith(route))) {
-            if (currentPath.startsWith('/live-mock-exams/local-preview')) {
+            if (currentPath.startsWith('/live-mock-exams')) {
               setPostAuthRedirect({
-                path: '/live-mock-exams/local-preview',
-                message: 'Sign in with the Premium account registered for this mock.',
+                path: currentPath.startsWith('/live-mock-exams/local-preview')
+                  ? '/live-mock-exams'
+                  : currentPath,
+                message: 'Sign in with the account registered for this mock.',
               });
             }
             redirectTo = '/11-plus';
@@ -355,7 +360,7 @@ const Index = () => {
               <Route path="english-demo" element={<EnglishSplitViewDemo />} />
               <Route path="live-mock-exams/session" element={<EnglishSplitViewDemo />} />
               <Route path="live-mock-exams/analytics" element={<LiveMockAnalytics />} />
-              <Route path="live-mock-exams/details" element={<LiveMockExams />} />
+              <Route path="live-mock-exams/details" element={<LiveMockExamsDetailsRoute />} />
               <Route path="live-mock-exams/local-preview" element={<LocalCombinedMockRoute />} />
               <Route path="practice-page" element={<Navigate to="/mocks" replace />} />
               <Route path="practice/maths" element={<Navigate to="/mocks/maths" replace />} />
