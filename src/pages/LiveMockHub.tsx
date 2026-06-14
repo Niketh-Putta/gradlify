@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, CalendarClock, CheckCircle2, Clock3, Lock } from "lucide-react";
+import { ArrowRight, CalendarClock, CheckCircle2, Clock3, Lock, Sparkles } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -123,6 +123,40 @@ function MockExamCard({ card }: { card: MockCard }) {
   );
 }
 
+/** Opens the in-app Settings view (where Premium upgrade lives) via the hash. */
+function goToPremiumSettings() {
+  window.location.hash = "settings";
+}
+
+function PremiumBanner() {
+  return (
+    <div className="overflow-hidden rounded-[20px] border border-amber-300/70 bg-gradient-to-r from-amber-50 to-orange-50 p-5 shadow-[0_10px_30px_rgba(124,45,18,0.06)] sm:p-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <div className="inline-flex items-center gap-1.5 rounded-full bg-orange-600 px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-white">
+            <Sparkles className="h-3.5 w-3.5" />
+            Gradlify Premium
+          </div>
+          <h2 className="mt-2 text-lg font-black tracking-tight text-slate-950 sm:text-xl">
+            Free access to every mock, past and future
+          </h2>
+          <p className="mt-1 text-sm leading-6 text-slate-600">
+            Premium members sit all previous and upcoming live mocks at no extra cost, for just{" "}
+            <span className="font-bold text-slate-900">£19.99 a month</span>.
+          </p>
+        </div>
+        <Button
+          onClick={goToPremiumSettings}
+          className="h-12 w-full shrink-0 rounded-xl bg-orange-600 px-6 text-base font-bold text-white hover:bg-orange-700 sm:w-auto"
+        >
+          Get Gradlify Premium
+          <ArrowRight className="ml-2 h-4 w-4" />
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 /**
  * Live mock landing at `/live-mock-exams`. Lists each mock with a clear status
  * (open now vs upcoming) driven by the release dates in liveMockCombinedConfig,
@@ -148,6 +182,10 @@ export default function LiveMockHub() {
   return (
     <main className="min-h-screen bg-[#faf9f4] text-slate-950">
       <section className="mx-auto max-w-3xl px-4 py-10 sm:py-14">
+        <div className="mb-7 sm:mb-9">
+          <PremiumBanner />
+        </div>
+
         <header className="mb-7 sm:mb-9">
           <p className="text-[11px] font-black uppercase tracking-[0.16em] text-orange-600">Gradlify</p>
           <h1 className="mt-1 font-serif text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
