@@ -649,9 +649,9 @@ export default function LocalCombinedMock() {
       <main className="min-h-screen bg-[#faf9f4] text-slate-950">
         {devBanner}
         <section className="mx-auto max-w-4xl px-4 py-8">
-          <Link to="/dashboard" className="inline-flex items-center gap-2 text-sm font-semibold text-slate-500 transition hover:text-slate-700">
+          <Link to="/live-mock-exams" className="inline-flex items-center gap-2 text-sm font-semibold text-slate-500 transition hover:text-slate-700">
             <ArrowLeft className="h-4 w-4" />
-            Back to dashboard
+            Back
           </Link>
 
           <div className="mt-5 overflow-hidden rounded-[24px] border border-orange-200 bg-white shadow-[0_20px_60px_rgba(124,45,18,0.08)]">
