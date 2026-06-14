@@ -1,80 +1,168 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, CalendarDays } from "lucide-react";
+import { ArrowRight, CalendarClock, CheckCircle2, Clock3, Lock } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import {
   COMBINED_MOCK_DISPLAY_TITLE,
   SECOND_MOCK_DISPLAY_TITLE,
+  SECOND_MOCK_RELEASE_AT,
+  isCombinedMockReleased,
+  isSecondMockReleased,
 } from "@/lib/liveMockCombinedConfig";
 
-/**
- * Minimal live mock landing — the replacement for the old `/live-mock-exams`
- * page. It announces each available mock and sends people into the full exam
- * lobby (mock 1) or the reservation page (mock 2). This is the page the "Live
- * Mock Exams" tab opens and the page the Back link inside the exam returns to.
- */
-export default function LiveMockHub() {
+type MockCard = {
+  title: string;
+  blurb: string;
+  href: string;
+  live: boolean;
+  /** Shown on the CTA + status pill when the mock is not yet open. */
+  opensAt?: Date;
+};
+
+/** "Sat 21 Jun" style label for an upcoming mock's open date. */
+function formatOpensLabel(date: Date): string {
+  return date.toLocaleDateString("en-GB", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+  });
+}
+
+function StatusPill({ live, opensAt }: { live: boolean; opensAt?: Date }) {
+  if (live) {
+    return (
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1 text-[11px] font-black uppercase tracking-[0.14em] text-white">
+        <span className="relative flex h-2 w-2">
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-300 opacity-75" />
+          <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-300" />
+        </span>
+        Open now
+      </span>
+    );
+  }
   return (
-    <main className="min-h-screen bg-[#faf9f4] text-slate-950">
-      <section className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-10 sm:py-14">
-        {/* Mock 1 — live now */}
-        <div className="overflow-hidden rounded-[24px] border border-orange-200 bg-white shadow-[0_20px_60px_rgba(124,45,18,0.08)]">
-          <div className="bg-gradient-to-r from-orange-600 to-amber-500 px-6 py-8 text-white sm:px-9 sm:py-10">
-            <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-black uppercase tracking-[0.14em]">
-              Live mock exam
+    <span className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1 text-[11px] font-black uppercase tracking-[0.14em] text-white">
+      <CalendarClock className="h-3.5 w-3.5" />
+      {opensAt ? `Opens ${formatOpensLabel(opensAt)}` : "Coming soon"}
+    </span>
+  );
+}
+
+function MockExamCard({ card }: { card: MockCard }) {
+  const { title, blurb, href, live, opensAt } = card;
+
+  return (
+    <div
+      className={cn(
+        "overflow-hidden rounded-[24px] border bg-white transition-shadow",
+        live
+          ? "border-orange-200 shadow-[0_20px_60px_rgba(124,45,18,0.10)]"
+          : "border-slate-200 shadow-[0_12px_40px_rgba(15,23,42,0.05)]",
+      )}
+    >
+      <div
+        className={cn(
+          "px-6 py-8 text-white sm:px-9 sm:py-10",
+          live
+            ? "bg-gradient-to-r from-orange-600 to-amber-500"
+            : "bg-gradient-to-r from-slate-700 to-slate-500",
+        )}
+      >
+        <div className="flex items-center justify-between gap-3">
+          <span className="rounded-full bg-white/15 px-3 py-1 text-[11px] font-black uppercase tracking-[0.14em]">
+            Live mock exam
+          </span>
+          <StatusPill live={live} opensAt={opensAt} />
+        </div>
+        <h2 className="mt-4 text-2xl font-black capitalize tracking-tight sm:text-3xl">{title}</h2>
+        <p className={cn("mt-2 text-sm font-medium sm:text-base", live ? "text-orange-50" : "text-slate-200")}>
+          {blurb}
+        </p>
+      </div>
+
+      <div className="px-6 py-7 sm:px-9 sm:py-8">
+        <div className="flex flex-wrap items-center gap-2 text-xs font-bold text-slate-600">
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5">
+            <Clock3 className="h-4 w-4 text-orange-600" />
+            Maths + English · one sitting
+          </span>
+          {live ? (
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-emerald-700">
+              <CheckCircle2 className="h-4 w-4" />
+              Available to sit now
             </span>
-            <h1 className="mt-4 text-3xl font-black tracking-tight sm:text-4xl">{COMBINED_MOCK_DISPLAY_TITLE}</h1>
-            <p className="mt-2 text-sm font-medium text-orange-50 sm:text-base">
-              A full, timed 11+ live mock exam.
-            </p>
-          </div>
-
-          <div className="px-6 py-7 sm:px-9 sm:py-8">
-            <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-600">
-              <CalendarDays className="h-4 w-4 text-orange-600" />
-              {COMBINED_MOCK_DISPLAY_TITLE} · one sitting
-            </div>
-
-            <Button
-              asChild
-              className="mt-6 h-12 w-full rounded-xl bg-orange-600 text-base font-bold text-white hover:bg-orange-700"
-            >
-              <Link to="/live-mock-exams/local-preview">
-                Open mock
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-          </div>
+          ) : (
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-amber-800">
+              <Lock className="h-4 w-4" />
+              Reserve your place
+            </span>
+          )}
         </div>
 
-        {/* Mock 2 — reservation now, opens Saturday */}
-        <div className="overflow-hidden rounded-[24px] border border-orange-200 bg-white shadow-[0_20px_60px_rgba(124,45,18,0.08)]">
-          <div className="bg-gradient-to-r from-orange-600 to-amber-500 px-6 py-8 text-white sm:px-9 sm:py-10">
-            <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-black uppercase tracking-[0.14em]">
-              Live mock exam
-            </span>
-            <h1 className="mt-4 text-3xl font-black tracking-tight sm:text-4xl">{SECOND_MOCK_DISPLAY_TITLE}</h1>
-            <p className="mt-2 text-sm font-medium text-orange-50 sm:text-base">
-              A full, timed 11+ live mock exam.
-            </p>
-          </div>
+        {!live ? (
+          <p className="mt-4 text-sm text-slate-500">
+            Free for Gradlify Premium members. Everyone else can reserve a place for £14.99.
+          </p>
+        ) : null}
 
-          <div className="px-6 py-7 sm:px-9 sm:py-8">
-            <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-600">
-              <CalendarDays className="h-4 w-4 text-orange-600" />
-              Available from Saturday
-            </div>
+        <Button
+          asChild
+          className={cn(
+            "mt-6 h-12 w-full rounded-xl text-base font-bold text-white",
+            live ? "bg-orange-600 hover:bg-orange-700" : "bg-slate-900 hover:bg-slate-800",
+          )}
+        >
+          <Link to={href}>
+            {live ? "Open mock" : "Reserve your place"}
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Link>
+        </Button>
+      </div>
+    </div>
+  );
+}
 
-            <Button
-              asChild
-              className="mt-6 h-12 w-full rounded-xl bg-orange-600 text-base font-bold text-white hover:bg-orange-700"
-            >
-              <Link to="/live-mock-exams/local-preview2">
-                Open mock
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-          </div>
+/**
+ * Live mock landing at `/live-mock-exams`. Lists each mock with a clear status
+ * (open now vs upcoming) driven by the release dates in liveMockCombinedConfig,
+ * so cards flip from "reserve" to "open" automatically on their release date.
+ */
+export default function LiveMockHub() {
+  const cards: MockCard[] = [
+    {
+      title: COMBINED_MOCK_DISPLAY_TITLE,
+      blurb: "A full, timed 11+ live mock exam. Marked papers, explanations and how you compare.",
+      href: "/live-mock-exams/local-preview",
+      live: isCombinedMockReleased(),
+    },
+    {
+      title: SECOND_MOCK_DISPLAY_TITLE,
+      blurb: "Our next full, timed 11+ live mock exam. Reserve your place now.",
+      href: "/live-mock-exams/local-preview2",
+      live: isSecondMockReleased(),
+      opensAt: SECOND_MOCK_RELEASE_AT,
+    },
+  ];
+
+  return (
+    <main className="min-h-screen bg-[#faf9f4] text-slate-950">
+      <section className="mx-auto max-w-3xl px-4 py-10 sm:py-14">
+        <header className="mb-7 sm:mb-9">
+          <p className="text-[11px] font-black uppercase tracking-[0.16em] text-orange-600">Gradlify</p>
+          <h1 className="mt-1 font-serif text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
+            Live Mock Exams
+          </h1>
+          <p className="mt-2 max-w-xl text-sm leading-6 text-slate-500 sm:text-base">
+            Full, timed 11+ mocks under real exam conditions. Open mocks can be sat now; upcoming
+            mocks can be reserved ahead of their open date.
+          </p>
+        </header>
+
+        <div className="flex flex-col gap-6">
+          {cards.map((card) => (
+            <MockExamCard key={card.href} card={card} />
+          ))}
         </div>
       </section>
     </main>
