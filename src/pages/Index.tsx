@@ -57,8 +57,11 @@ const LiveMockExamsRoute = () => {
   return released ? <LocalCombinedMock /> : <LiveMockExams />;
 };
 
-/** Registration hub — always available so Back from the exam lobby never loops. */
-const LiveMockExamsDetailsRoute = () => <LiveMockExams />;
+/**
+ * Legacy `/live-mock-exams/details` hub is stale post-launch (old pricing/scarcity
+ * copy). Redirect it to the live combined mock so no one lands on the outdated page.
+ */
+const LiveMockExamsDetailsRoute = () => <Navigate to="/live-mock-exams" replace />;
 
 /**
  * `/live-mock-exams/local-preview`: the combined mock. Always available in dev
