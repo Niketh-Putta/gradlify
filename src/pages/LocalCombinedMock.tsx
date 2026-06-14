@@ -36,6 +36,7 @@ import {
   BREAK_MINUTES,
   BREAK_SECONDS,
   COMBINED_MOCK_EVENT_SLUG,
+  COMBINED_MOCK_DISPLAY_TITLE,
   ENGLISH_PAPER,
   isCombinedMockReleased,
   MATHS_PAPER,
@@ -659,7 +660,7 @@ export default function LocalCombinedMock() {
               <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-black uppercase tracking-[0.14em]">
                 Live mock exam
               </span>
-              <h1 className="mt-4 text-3xl font-black tracking-tight sm:text-4xl">11+ Maths &amp; English Mock</h1>
+              <h1 className="mt-4 text-3xl font-black tracking-tight sm:text-4xl">{COMBINED_MOCK_DISPLAY_TITLE}</h1>
               <p className="mt-2 max-w-2xl text-sm font-medium text-orange-50 sm:text-base">
                 Paper order: non-calculator Maths first, then a break, then English. Full marked papers with answers,
                 explanations and a results comparison.

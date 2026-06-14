@@ -94,7 +94,7 @@ BEGIN
 
   -- Combined event linking both papers --------------------------------------
   INSERT INTO public.live_mock_events (slug, title, track, starts_at, break_minutes, maths_paper_id, english_paper_id, access_rule, status)
-  VALUES ('both_subjects_live_mock', '11+ Maths & English Live Mock', '11plus', v_start, 15, v_maths, v_english, 'registered', 'draft')
+  VALUES ('both_subjects_live_mock', '11+ maths and english mock 1', '11plus', v_start, 15, v_maths, v_english, 'registered', 'draft')
   ON CONFLICT (slug) DO UPDATE
     SET maths_paper_id = EXCLUDED.maths_paper_id,
         english_paper_id = EXCLUDED.english_paper_id,

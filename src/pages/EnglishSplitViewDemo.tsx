@@ -11,6 +11,7 @@ import { PremiumPaywall } from '@/components/PremiumPaywall';
 import { useAppContext } from '@/hooks/useAppContext';
 import { startPremiumCheckout } from '@/lib/checkout';
 import { toast } from 'sonner';
+import { COMBINED_MOCK_DISPLAY_TITLE } from '@/lib/liveMockCombinedConfig';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -646,6 +647,10 @@ export function EnglishSplitViewDemo() {
     'both_subjects_english',
   ]);
   const isTargetLiveMock = FULL_STYLED_LIVE_MOCK_SLUGS.has(liveMockSlug);
+  const liveMockHeaderTitle =
+    liveMockSlug === "both_subjects_english"
+      ? COMBINED_MOCK_DISPLAY_TITLE
+      : "11+ English Complete Mock Exam";
   // The combined Maths+English mock has its own results page (two tabs); the
   // English paper here routes there. Other live mocks use the standard page.
   const analyticsPath =
@@ -1886,7 +1891,7 @@ export function EnglishSplitViewDemo() {
               <div className="flex items-center gap-2">
                 <BookOpen className="w-4 h-4 text-amber-500" />
                 <span className="font-serif font-bold tracking-tight text-foreground line-clamp-1">
-                  {isLiveMock ? '11+ English Complete Mock Exam' : examMode === 'mock' ? 'Full Mock Examination Paper' : `Practice Source: ${activeSections[0]?.leftTitle}`}
+                  {isLiveMock ? liveMockHeaderTitle : examMode === 'mock' ? 'Full Mock Examination Paper' : `Practice Source: ${activeSections[0]?.leftTitle}`}
                 </span>
               </div>
             </div>
@@ -2129,7 +2134,7 @@ export function EnglishSplitViewDemo() {
             <div className="mb-4 md:mb-10 flex items-start justify-between gap-2 sm:gap-4 snap-start scroll-m-24">
               <div>
                 <h1 className="text-xl sm:text-2xl font-bold tracking-tight mb-1 sm:mb-2">
-                  {isLiveMock ? '11+ English Complete Mock Exam' : examMode === 'mock' ? 'Mock Exam' : (activeSections.length > 1 ? 'MIXED TOPIC DRILLS' : `${practiceFocus.toUpperCase()} DRILLS`)}
+                  {isLiveMock ? liveMockHeaderTitle : examMode === 'mock' ? 'Mock Exam' : (activeSections.length > 1 ? 'MIXED TOPIC DRILLS' : `${practiceFocus.toUpperCase()} DRILLS`)}
                 </h1>
                 <p className="text-[11px] sm:text-sm text-muted-foreground">
                   {isLiveMock ? 'This one-off live mock uses the scheduled paper only and is separate from regular mocks. Your attempt is saved for cohort analytics when you finish or when time runs out.' : examMode === 'mock' ? 'You have configured a custom Mock Exam mixing multiple passages.' : 'Answer the questions based on the source texts strictly.'}

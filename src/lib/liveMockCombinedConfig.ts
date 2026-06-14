@@ -10,6 +10,9 @@
 
 export const COMBINED_MOCK_EVENT_SLUG = "both_subjects_live_mock";
 
+/** User-facing name for the combined live mock everywhere in the app. */
+export const COMBINED_MOCK_DISPLAY_TITLE = "11+ maths and english mock 1";
+
 /** Sitting the mock: anyone with a registration row (fixed-price or Premium). */
 export const COMBINED_MOCK_ACCESS_RULE = "registered" as const;
 

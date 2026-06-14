@@ -2,6 +2,7 @@ import { ArrowRight, CalendarClock } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import { cn } from "@/lib/utils";
+import { COMBINED_MOCK_DISPLAY_TITLE } from "@/lib/liveMockCombinedConfig";
 
 interface LiveMockExamBannerProps {
   className?: string;
@@ -17,7 +18,7 @@ const bannerContent = (
 
     <div className="flex min-w-0 flex-1 flex-col items-center gap-0.5 text-center sm:flex-row sm:justify-center sm:gap-3">
       <span className="text-[12px] font-semibold leading-tight tracking-tight text-white sm:text-base">
-        Live 11+ Maths &amp; English mock is open now
+        {COMBINED_MOCK_DISPLAY_TITLE} is open now
       </span>
       <span className="inline-flex items-center gap-1.5 rounded-full border border-white/18 bg-white/15 px-2.5 py-0.5 text-[11px] font-semibold text-white/95 shadow-[inset_0_1px_0_rgba(255,255,255,0.22)] backdrop-blur-md sm:text-sm">
         Start mock

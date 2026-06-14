@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { ArrowRight, CalendarDays } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { COMBINED_MOCK_DISPLAY_TITLE } from "@/lib/liveMockCombinedConfig";
 
 /**
  * Minimal live mock landing — the replacement for the old `/live-mock-exams`
@@ -18,7 +19,7 @@ export default function LiveMockHub() {
             <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-black uppercase tracking-[0.14em]">
               Live mock exam
             </span>
-            <h1 className="mt-4 text-3xl font-black tracking-tight sm:text-4xl">11+ Maths &amp; English Mock</h1>
+            <h1 className="mt-4 text-3xl font-black tracking-tight sm:text-4xl">{COMBINED_MOCK_DISPLAY_TITLE}</h1>
             <p className="mt-2 text-sm font-medium text-orange-50 sm:text-base">
               A full, timed 11+ live mock exam.
             </p>
@@ -27,7 +28,7 @@ export default function LiveMockHub() {
           <div className="px-6 py-7 sm:px-9 sm:py-8">
             <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-bold text-slate-600">
               <CalendarDays className="h-4 w-4 text-orange-600" />
-              Maths &amp; English · one sitting
+              {COMBINED_MOCK_DISPLAY_TITLE} · one sitting
             </div>
 
             <Button

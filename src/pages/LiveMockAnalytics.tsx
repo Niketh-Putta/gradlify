@@ -49,6 +49,7 @@ import {
   type LiveMockPublicCohortSummary,
   type LiveMockScoreRank,
 } from "@/lib/liveMockAnalytics";
+import { COMBINED_MOCK_DISPLAY_TITLE } from "@/lib/liveMockCombinedConfig";
 
 const POLL_MS = 15_000;
 
@@ -419,7 +420,7 @@ export default function LiveMockAnalytics() {
         <div className="flex flex-col gap-3 border-b border-slate-200 pb-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0 flex-1">
             <p className="text-[9px] font-black uppercase tracking-[0.16em] text-blue-700">
-              {isCombined ? "Combined mock results · Maths + English" : "Live mock results"}
+              {isCombined ? `${COMBINED_MOCK_DISPLAY_TITLE} results` : "Live mock results"}
             </p>
             <h1 className="mt-1 break-words font-serif text-xl font-bold tracking-tight text-slate-950 sm:text-2xl md:text-[30px]">
               Hi, {displayName}

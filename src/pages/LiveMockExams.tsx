@@ -31,7 +31,7 @@ import {
   LIVE_MOCK_PROMO_SPOTS_REMAINING,
   LIVE_MOCK_STANDARD_PRICE_GBP,
 } from "@/lib/liveMockPricing";
-import { isCombinedMockReleased } from "@/lib/liveMockCombinedConfig";
+import { COMBINED_MOCK_DISPLAY_TITLE, isCombinedMockReleased } from "@/lib/liveMockCombinedConfig";
 
 // Toggle to re-enable the old English-only live mock (9 May 2026). Set to true to show it again.
 const SHOW_ENGLISH_LIVE_MOCK = false;
@@ -47,7 +47,7 @@ const LIVE_MOCK = {
 
 const BOTH_SUBJECTS_LIVE_MOCK = {
   slug: "both_subjects_live_mock",
-  title: "Maths and English Mock",
+  title: COMBINED_MOCK_DISPLAY_TITLE,
 };
 
 const MIN_DISPLAYED_BOTH_SUBJECTS_SIGNUPS = LIVE_MOCK_MIN_DISPLAYED_SIGNUPS;
@@ -210,7 +210,7 @@ export default function LiveMockExams() {
         setBothSubjectsSignup(data as SignupRow);
         setFinalizingBothSubjectsPayment(false);
         void loadBothSubjectsSignupCount();
-        toast.success("You're registered for the Maths and English mock.");
+        toast.success(`You're registered for ${COMBINED_MOCK_DISPLAY_TITLE}.`);
         window.history.replaceState({}, "", window.location.pathname);
         return;
       }
@@ -393,7 +393,7 @@ export default function LiveMockExams() {
     try {
       if (hasPremiumLiveMockAccess) {
         await recordBothSubjectsSignup();
-        toast.success("You're registered for the both-subjects live mock.");
+        toast.success(`You're registered for ${COMBINED_MOCK_DISPLAY_TITLE}.`);
         return;
       }
 
@@ -441,7 +441,7 @@ export default function LiveMockExams() {
                   Premium registered access
                 </span>
                 <h1 className="mt-5 text-3xl font-black tracking-tight sm:text-5xl">
-                  Maths &amp; English Mock
+                  {COMBINED_MOCK_DISPLAY_TITLE}
                 </h1>
                 <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-orange-50 sm:text-base">
                   Your complete 11+ mock environment is ready. Sit both papers under timed conditions and move
@@ -525,7 +525,7 @@ export default function LiveMockExams() {
                     <p className="mt-2 text-sm leading-6 text-slate-600">
                       {hasPremiumLiveMockAccess
                         ? "Register free with Premium, then start the mock."
-                        : `Pay ${formatLiveMockPrice(liveMockPriceGbp)} once to register and sit the full Maths and English mock.`}
+                        : `Pay ${formatLiveMockPrice(liveMockPriceGbp)} once to register and sit ${COMBINED_MOCK_DISPLAY_TITLE}.`}
                     </p>
                     <Button
                       className="mt-6 h-12 w-full rounded-xl bg-[linear-gradient(90deg,#ea580c_0%,#f59e0b_100%)] text-base font-black text-white shadow-[0_12px_24px_rgba(234,88,12,0.24)] hover:brightness-105"
@@ -582,7 +582,7 @@ export default function LiveMockExams() {
               <p className="mt-1 text-xs leading-5 text-emerald-700 sm:text-sm">
                 {combinedMockLive
                   ? "Your spot is locked in. The mock is live — tap Start below to begin (Maths first, then break, then English)."
-                  : "Your spot for the Maths & English mock is locked in. Come back here on the day to sit it — no further action needed."}
+                  : `Your spot for ${COMBINED_MOCK_DISPLAY_TITLE} is locked in. Come back here on the day to sit it — no further action needed.`}
               </p>
               {combinedMockLive && (
                 <Button
@@ -613,7 +613,7 @@ export default function LiveMockExams() {
             {BOTH_SUBJECTS_LIVE_MOCK.title}
           </h2>
           <p className="mt-1 max-w-2xl text-xs leading-5 text-slate-600 sm:text-sm">
-            This Maths and English mock is on Sunday 14 June 2026. It is guided and built alongside real GL exam
+            {COMBINED_MOCK_DISPLAY_TITLE} is on Sunday 14 June 2026. It is guided and built alongside real GL exam
             creators for top-school preparation. Gradlify Premium members, including free trials, get this mock
             included. Everyone else registers with one upfront payment.
           </p>
@@ -645,7 +645,7 @@ export default function LiveMockExams() {
           <div className="mt-3 flex flex-wrap items-center gap-2 text-[10px] font-semibold text-slate-500 sm:text-xs">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-white/70 px-2.5 py-1">
               <CheckCircle2 className="h-3.5 w-3.5 text-amber-600" />
-              Maths + English
+              {COMBINED_MOCK_DISPLAY_TITLE}
             </span>
             <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-100 bg-white/70 px-2.5 py-1">
               <ShieldCheck className="h-3.5 w-3.5 text-blue-600" />

@@ -21,7 +21,7 @@ const buildInlineLiveMockLineItem = (amountGbp: number) => ({
     currency: "gbp",
     unit_amount: Math.round(amountGbp * 100),
     product_data: {
-      name: "Gradlify 11+ Maths and English Mock",
+      name: "Gradlify 11+ maths and english mock 1",
       description: "Guided and built alongside real GL exam creators. Exclusive mock for top schools.",
     },
   },
