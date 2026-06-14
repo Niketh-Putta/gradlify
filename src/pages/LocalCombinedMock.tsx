@@ -37,6 +37,7 @@ import {
   BREAK_SECONDS,
   COMBINED_MOCK_EVENT_SLUG,
   ENGLISH_PAPER,
+  isCombinedMockReleased,
   MATHS_PAPER,
   type MockPaper,
   paperQuestionCount,
@@ -543,13 +544,14 @@ export default function LocalCombinedMock() {
     </div>
   ) : null;
 
-  if (!import.meta.env.DEV) {
+  // Available in local dev, and in production once the mock has gone live.
+  if (!import.meta.env.DEV && !isCombinedMockReleased()) {
     return (
       <div className="flex min-h-[70vh] items-center justify-center bg-[#faf9f4] p-6">
         <div className="max-w-md rounded-2xl border bg-white p-8 text-center shadow-sm">
           <LockKeyhole className="mx-auto h-8 w-8 text-orange-600" />
-          <h1 className="mt-4 text-xl font-bold">Local preview only</h1>
-          <p className="mt-2 text-sm text-slate-600">This prototype is disabled outside local development.</p>
+          <h1 className="mt-4 text-xl font-bold">Not open yet</h1>
+          <p className="mt-2 text-sm text-slate-600">This mock opens shortly. Please check back in a moment.</p>
         </div>
       </div>
     );
