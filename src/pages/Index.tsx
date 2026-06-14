@@ -355,6 +355,7 @@ const Index = () => {
               <Route path="english-demo" element={<EnglishSplitViewDemo />} />
               <Route path="live-mock-exams/session" element={<EnglishSplitViewDemo />} />
               <Route path="live-mock-exams/analytics" element={<LiveMockAnalytics />} />
+              <Route path="live-mock-exams/details" element={<LiveMockExams />} />
               <Route path="live-mock-exams/local-preview" element={<LocalCombinedMockRoute />} />
               <Route path="practice-page" element={<Navigate to="/mocks" replace />} />
               <Route path="practice/maths" element={<Navigate to="/mocks/maths" replace />} />

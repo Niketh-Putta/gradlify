@@ -586,7 +586,7 @@ export default function LocalCombinedMock() {
       <main className="min-h-screen bg-[#faf9f4] text-slate-950">
         {devBanner}
         <section className="mx-auto max-w-4xl px-4 py-8">
-          <Link to="/live-mock-exams" className="inline-flex items-center gap-2 text-sm font-semibold text-slate-500">
+          <Link to="/dashboard" className="inline-flex items-center gap-2 text-sm font-semibold text-slate-500 transition hover:text-slate-700">
             <ArrowLeft className="h-4 w-4" />
             Back to live mocks
           </Link>
@@ -718,7 +718,7 @@ export default function LocalCombinedMock() {
                     )}
                   </Button>
                   <Button asChild variant="outline" className="h-11 w-full rounded-xl">
-                    <Link to="/live-mock-exams">View mock details</Link>
+                    <Link to="/live-mock-exams/details">View mock details</Link>
                   </Button>
                 </div>
               )}
