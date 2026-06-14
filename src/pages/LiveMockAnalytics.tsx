@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 
 import { PostMockParentReport } from "@/components/PostMockParentReport";
+import StandardisedScorePanel from "@/components/live-mock/StandardisedScorePanel";
 import RichQuestionContent from "@/components/RichQuestionContent";
 import { formatExplanation } from "@/lib/formatExplanation";
 import { Button } from "@/components/ui/button";
@@ -679,6 +680,17 @@ export default function LiveMockAnalytics() {
                 <div className="mt-0.5 text-xs text-slate-500">When your attempt was saved</div>
               </div>
             </div>
+
+            {pct != null && qc > 0 ? (
+              <div className="pt-3">
+                <StandardisedScorePanel
+                  subject={isCombined ? combinedSubject : "combined"}
+                  percentage={pct}
+                  correct={correct}
+                  total={qc}
+                />
+              </div>
+            ) : null}
 
             <div className="pt-3">
               <div className="min-w-0 rounded-xl border border-slate-200 bg-white p-3">
