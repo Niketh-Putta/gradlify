@@ -9,19 +9,34 @@ const corsHeaders = {
 
 const readEnv = (name: string) => Deno.env.get(name)?.trim() || "";
 const BOTH_SUBJECTS_LIVE_MOCK_SLUG = "both_subjects_live_mock";
+const SECOND_LIVE_MOCK_SLUG = "both_subjects_live_mock_2";
+
+// Only these two known live-mock slugs may be charged for; anything else falls
+// back to mock 1. This keeps Stripe metadata (and the signup it later creates)
+// locked to a tight allowlist instead of an arbitrary caller-supplied slug.
+const LIVE_MOCK_PRODUCTS: Record<string, string> = {
+  [BOTH_SUBJECTS_LIVE_MOCK_SLUG]: "Gradlify 11+ maths and english mock 1",
+  [SECOND_LIVE_MOCK_SLUG]: "Gradlify 11+ maths and english mock 2",
+};
+
+const resolveMockSlug = (value: unknown): string => {
+  const candidate = typeof value === "string" ? value.trim() : "";
+  return candidate in LIVE_MOCK_PRODUCTS ? candidate : BOTH_SUBJECTS_LIVE_MOCK_SLUG;
+};
+
 const metadataValue = (value: unknown) =>
   typeof value === "string" && value.trim().length > 0 ? value.trim() : undefined;
 
 // Hardcoded so the charged price can't be overridden by a stale secret or Stripe price ID.
 const STANDARD_PRICE_GBP = 14.99;
 
-const buildInlineLiveMockLineItem = (amountGbp: number) => ({
+const buildInlineLiveMockLineItem = (amountGbp: number, productName: string) => ({
   quantity: 1,
   price_data: {
     currency: "gbp",
     unit_amount: Math.round(amountGbp * 100),
     product_data: {
-      name: "Gradlify 11+ maths and english mock 1",
+      name: productName,
       description: "Guided and built alongside real GL exam creators. Exclusive mock for top schools.",
     },
   },
@@ -97,11 +112,13 @@ serve(async (req) => {
     }
 
     const returnTo = sanitizeReturnPath(String(body.returnTo ?? "/live-mock-exams"));
+    const mockSlug = resolveMockSlug(body.mockSlug);
+    const productName = LIVE_MOCK_PRODUCTS[mockSlug];
     const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
 
     // Always charge the inline £14.99 amount so a stale Stripe price ID secret
     // can't keep charging the old price.
-    const lineItem = buildInlineLiveMockLineItem(amountGbp);
+    const lineItem = buildInlineLiveMockLineItem(amountGbp, productName);
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
@@ -111,8 +128,8 @@ serve(async (req) => {
       line_items: [lineItem],
       metadata: {
         user_id: user.id,
-        mock_type: BOTH_SUBJECTS_LIVE_MOCK_SLUG,
-        mock_slug: BOTH_SUBJECTS_LIVE_MOCK_SLUG,
+        mock_type: mockSlug,
+        mock_slug: mockSlug,
         mock_starts_at: new Date().toISOString(),
         amount_gbp: String(amountGbp),
         promo_code_enabled: "true",

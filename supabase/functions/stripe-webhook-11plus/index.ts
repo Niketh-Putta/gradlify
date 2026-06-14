@@ -83,6 +83,14 @@ const resolveCustomerId = (
   customer: string | Stripe.Customer | null | undefined
 ) => (typeof customer === 'string' ? customer : customer?.id ?? null);
 
+// Tight allowlist of the live-mock slugs whose paid checkouts create a signup
+// row. Keep this in sync with create-live-mock-payment; never match arbitrary
+// slugs so an unrelated payment can't mint a live-mock registration.
+const LIVE_MOCK_SLUGS = new Set(['both_subjects_live_mock', 'both_subjects_live_mock_2']);
+const isLiveMockSession = (session: Stripe.Checkout.Session) =>
+  LIVE_MOCK_SLUGS.has(session.metadata?.mock_slug ?? '') ||
+  LIVE_MOCK_SLUGS.has(session.metadata?.mock_type ?? '');
+
 const recordPaidLiveMockSignup = async (session: Stripe.Checkout.Session) => {
   const userId =
     session.metadata?.user_id ??
@@ -394,11 +402,7 @@ serve(async (req: Request): Promise<Response> => {
       switch (event.type) {
         case 'checkout.session.completed': {
           const session = event.data.object as Stripe.Checkout.Session;
-          if (
-            session.mode === 'payment' &&
-            (session.metadata?.mock_slug === 'both_subjects_live_mock' ||
-              session.metadata?.mock_type === 'both_subjects_live_mock')
-          ) {
+          if (session.mode === 'payment' && isLiveMockSession(session)) {
             result = await recordPaidLiveMockSignup(session);
             break;
           }

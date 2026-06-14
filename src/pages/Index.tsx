@@ -17,6 +17,7 @@ const MockExamPage = lazyWithRetry(() => import("@/pages/MockExamPage"));
 const LiveMockHub = lazyWithRetry(() => import("@/pages/LiveMockHub"));
 const LiveMockAnalytics = lazyWithRetry(() => import("@/pages/LiveMockAnalytics"));
 const LocalCombinedMock = lazyWithRetry(() => import("@/pages/LocalCombinedMock"));
+const LocalCombinedMock2 = lazyWithRetry(() => import("@/pages/LocalCombinedMock2"));
 const RevisionNotes = lazyWithRetry(() => import("@/pages/RevisionNotes"));
 const RevisionNotesSection = lazyWithRetry(() => import("@/pages/RevisionNotesSection"));
 const RevisionNotesTopic = lazyWithRetry(() => import("@/pages/RevisionNotesTopic"));
@@ -130,9 +131,14 @@ const Index = () => {
           if (protectedRoutes.some(route => currentPath.startsWith(route))) {
             if (currentPath.startsWith('/live-mock-exams')) {
               setPostAuthRedirect({
-                path: currentPath.startsWith('/live-mock-exams/local-preview')
-                  ? '/live-mock-exams'
-                  : currentPath,
+                // Mock 2's reservation page handles its own pre-release state, so
+                // send people straight back to it. Mock 1's lobby needs the
+                // released/registration gate, so it returns to the hub instead.
+                path: currentPath.startsWith('/live-mock-exams/local-preview2')
+                  ? '/live-mock-exams/local-preview2'
+                  : currentPath.startsWith('/live-mock-exams/local-preview')
+                    ? '/live-mock-exams'
+                    : currentPath,
                 message: 'Sign in with the account registered for this mock.',
               });
             }
@@ -360,6 +366,8 @@ const Index = () => {
               <Route path="live-mock-exams/analytics" element={<LiveMockAnalytics />} />
               <Route path="live-mock-exams/details" element={<LiveMockExamsDetailsRoute />} />
               <Route path="live-mock-exams/local-preview" element={<LocalCombinedMockRoute />} />
+              {/* Mock 2 reservation page handles its own pre-release state, so no released gate here. */}
+              <Route path="live-mock-exams/local-preview2" element={<LocalCombinedMock2 />} />
               <Route path="practice-page" element={<Navigate to="/mocks" replace />} />
               <Route path="practice/maths" element={<Navigate to="/mocks/maths" replace />} />
               <Route path="practice/english" element={<Navigate to="/mocks/english" replace />} />

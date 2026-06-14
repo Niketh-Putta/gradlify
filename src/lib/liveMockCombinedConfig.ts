@@ -28,6 +28,32 @@ export const COMBINED_MOCK_RELEASE_AT = new Date("2026-06-14T15:58:00+01:00");
 export const isCombinedMockReleased = (now: Date = new Date()): boolean =>
   now.getTime() >= COMBINED_MOCK_RELEASE_AT.getTime();
 
+/* ───────────────────────────────────────────────────────────────────────────
+ * SECOND COMBINED MOCK ("mock 2")
+ *
+ * Additive and fully isolated from mock 1: its own slug so registrations,
+ * payments and signups never touch mock 1's data, scoring or saved scores.
+ * Mock 2 is registration/reservation only until it goes live on Saturday — no
+ * questions are seeded and the exam engine never runs for this slug yet.
+ * ─────────────────────────────────────────────────────────────────────────── */
+
+export const SECOND_MOCK_EVENT_SLUG = "both_subjects_live_mock_2";
+
+/** User-facing name for the second combined live mock. */
+export const SECOND_MOCK_DISPLAY_TITLE = "11+ maths and english mock 2";
+
+/**
+ * Scheduled go-live for mock 2: Saturday 21 June 2026, 9:00am UK time. UK is on
+ * BST (UTC+1) in June, so the explicit +01:00 offset avoids timezone ambiguity.
+ * Before this instant the reservation page lets people register/pay to save a
+ * spot, but the exam itself cannot be sat.
+ */
+export const SECOND_MOCK_RELEASE_AT = new Date("2026-06-21T09:00:00+01:00");
+
+/** True once the second mock has gone live (defaults to the current time). */
+export const isSecondMockReleased = (now: Date = new Date()): boolean =>
+  now.getTime() >= SECOND_MOCK_RELEASE_AT.getTime();
+
 export type MockPhase = "instructions" | "maths" | "break" | "english" | "complete";
 
 /** Ordered timed phases the student moves through. */
