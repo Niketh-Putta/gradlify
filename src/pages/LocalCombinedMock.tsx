@@ -999,22 +999,54 @@ export default function LocalCombinedMock() {
 
               {eligible && hasFullyCompleted ? (
                 <div className="mt-6 space-y-3">
-                  <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
-                    <div className="flex items-center gap-2 font-bold text-emerald-800">
-                      <CheckCircle2 className="h-5 w-5 text-emerald-600" />
-                      You have completed this mock
-                    </div>
-                    <p className="mt-1 text-xs text-slate-600">
-                      One attempt per student. See your personalised results and how you compare with everyone else.
-                    </p>
-                  </div>
-                  <Button
-                    className="h-12 w-full rounded-xl bg-orange-600 text-base font-bold text-white hover:bg-orange-700"
-                    onClick={() => navigate(combinedAnalyticsUrl)}
-                  >
-                    See how you did
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
+                  {remediation.affected ? (
+                    <>
+                      {/* Persistent redo entry point for affected users — always
+                          available on return visits, even if the popup was dismissed. */}
+                      <div className="rounded-xl border border-amber-300 bg-amber-50 p-4">
+                        <div className="flex items-center gap-2 font-bold text-amber-900">
+                          <CheckCircle2 className="h-5 w-5 text-amber-600" />
+                          Your Maths paper needs redoing
+                        </div>
+                        <p className="mt-1 text-xs text-slate-600">
+                          A technical fault meant your Maths answers were not saved. Your English paper is safe. Redo Maths now and it will score correctly — your result updates in place.
+                        </p>
+                      </div>
+                      <Button
+                        className="h-12 w-full rounded-xl bg-orange-600 text-base font-bold text-white hover:bg-orange-700"
+                        onClick={startMathsResit}
+                      >
+                        Restart Maths paper
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="h-12 w-full rounded-xl text-base font-bold"
+                        onClick={() => navigate(combinedAnalyticsUrl)}
+                      >
+                        See how you did
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+                        <div className="flex items-center gap-2 font-bold text-emerald-800">
+                          <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+                          You have completed this mock
+                        </div>
+                        <p className="mt-1 text-xs text-slate-600">
+                          One attempt per student. See your personalised results and how you compare with everyone else.
+                        </p>
+                      </div>
+                      <Button
+                        className="h-12 w-full rounded-xl bg-orange-600 text-base font-bold text-white hover:bg-orange-700"
+                        onClick={() => navigate(combinedAnalyticsUrl)}
+                      >
+                        See how you did
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </Button>
+                    </>
+                  )}
                 </div>
               ) : eligible && awaitingEnglish ? (
                 <div className="mt-6 space-y-3">
