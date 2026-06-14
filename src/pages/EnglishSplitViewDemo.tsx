@@ -1990,7 +1990,11 @@ export function EnglishSplitViewDemo() {
                           const isQuestionPaywalled = !isPremium && examMode !== 'mock' && activeQIndex >= PAYWALL_THRESHOLD;
                           if (!isQuestionPaywalled) {
                             const evidenceLine = (activeQInfo.evidenceLine || "").toLowerCase();
-                            const isGlobal = !evidenceLine || 
+                            // Comprehension highlights the WHOLE passage for any of its
+                            // questions (the answer can be anywhere in the text). SPaG
+                            // sections keep per-line/paragraph evidence highlighting.
+                            const isGlobal = isComprehensionSection ||
+                                             !evidenceLine || 
                                              evidenceLine === 'global' || 
                                              evidenceLine === 'overall' || 
                                              evidenceLine.includes('passage') || 
