@@ -73,8 +73,7 @@ export default function LiveMockExams() {
   const { user } = useAppContext();
   const membership = useMembership();
   const { isPremium } = membership;
-  const hasPaidPremiumLiveMockAccess = isPremium && membership.data?.subscription_status === "active";
-  const isPremiumTrialing = isPremium && membership.data?.subscription_status === "trialing";
+  const hasPremiumLiveMockAccess = isPremium;
   const [loading, setLoading] = useState(true);
   const [starting, setStarting] = useState(false);
   const [registeringBothSubjects, setRegisteringBothSubjects] = useState(false);
@@ -388,7 +387,7 @@ export default function LiveMockExams() {
 
     setRegisteringBothSubjects(true);
     try {
-      if (hasPaidPremiumLiveMockAccess) {
+      if (hasPremiumLiveMockAccess) {
         await recordBothSubjectsSignup();
         toast.success("You're registered for the both-subjects live mock.");
         return;
@@ -459,10 +458,10 @@ export default function LiveMockExams() {
           </h2>
           <p className="mt-1 max-w-2xl text-xs leading-5 text-slate-600 sm:text-sm">
             This Maths and English mock is on Sunday 14 June 2026. It is guided and built alongside real GL exam
-            creators for top-school preparation. Paying Premium members get it included; free-trial users and free
-            users register with one upfront payment.
+            creators for top-school preparation. Gradlify Premium members, including free trials, get this mock
+            included. Everyone else registers with one upfront payment.
           </p>
-          {!hasPaidPremiumLiveMockAccess && (
+          {!hasPremiumLiveMockAccess && (
             <div className="mt-3 rounded-[14px] border border-orange-200 bg-[linear-gradient(135deg,#fff4e6_0%,#fff_70%)] px-3 py-2.5 shadow-[0_8px_18px_rgba(234,88,12,0.08)]">
               <span className="inline-flex items-center gap-1.5 rounded-full bg-orange-600 px-2.5 py-1 text-[8px] font-black uppercase tracking-[0.14em] text-white">
                 <Sparkles className="h-3 w-3" />
@@ -498,7 +497,7 @@ export default function LiveMockExams() {
             </span>
             <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-100 bg-white/70 px-2.5 py-1">
               <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
-              Included for paid Premium
+              Included with Premium
             </span>
           </div>
         </div>
@@ -507,16 +506,16 @@ export default function LiveMockExams() {
           <div className="flex items-center justify-between gap-3">
             <div>
               <div className="text-[8px] font-black uppercase tracking-[0.14em] text-slate-400">
-                {hasPaidPremiumLiveMockAccess ? "Paid Premium registration" : "Registration price"}
+                {hasPremiumLiveMockAccess ? "Premium registration" : "Registration price"}
               </div>
               <div className="mt-1 flex items-baseline gap-2">
                 <div className="text-2xl font-bold tracking-tight text-slate-950">
-                  {hasPaidPremiumLiveMockAccess
+                  {hasPremiumLiveMockAccess
                     ? "Included"
                     : formatLiveMockPrice(liveMockPriceGbp)}
                 </div>
               </div>
-              {!hasPaidPremiumLiveMockAccess && (
+              {!hasPremiumLiveMockAccess && (
                 <div className="mt-1 inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.08em] text-orange-700">
                   <Sparkles className="h-3 w-3" />
                   Use code {LIVE_MOCK_PROMO_CODE} - {promoSpotsRemaining} uses left
@@ -544,18 +543,13 @@ export default function LiveMockExams() {
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />
                 {finalizingBothSubjectsPayment
                   ? "Finalising registration"
-                  : hasPaidPremiumLiveMockAccess
+                  : hasPremiumLiveMockAccess
                     ? "Recording registration"
                     : "Opening checkout"}
               </span>
-            ) : hasPaidPremiumLiveMockAccess ? (
+            ) : hasPremiumLiveMockAccess ? (
               <span className="inline-flex items-center gap-2">
-                Register with paid Premium
-                <ArrowRight className="h-3.5 w-3.5" />
-              </span>
-            ) : isPremiumTrialing ? (
-              <span className="inline-flex items-center gap-2">
-                Trial users pay {formatLiveMockPrice(liveMockPriceGbp)}
+                Register with Premium
                 <ArrowRight className="h-3.5 w-3.5" />
               </span>
             ) : (
