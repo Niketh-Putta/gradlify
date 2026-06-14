@@ -184,7 +184,9 @@ export default function LocalCombinedMock() {
     registered: false,
     error: null,
   });
-  const [hasCompleted, setHasCompleted] = useState(false);
+  const [mockProgress, setMockProgress] = useState<
+    "loading" | "not_started" | "maths_submitted" | "complete"
+  >("loading");
   const combinedAnalyticsUrl = "/live-mock-exams/analytics?combined=1&subject=english";
   const [phase, setPhase] = useState<Phase>("instructions");
   const [currentQuestion, setCurrentQuestion] = useState(1);
@@ -318,31 +320,43 @@ export default function LocalCombinedMock() {
     };
   }, [reloadKey]);
 
-  // One attempt only: a submitted attempt on EITHER combined paper (Maths or
-  // English) counts as having used your single sitting, so the entry screen
-  // shows results instead of letting anyone restart and overwrite a score.
+  // Completed = English submitted (paper 2). Maths-only submitted must still allow
+  // continuing to English — the old "either paper" check wrongly locked people out
+  // after paper 1 when they refreshed during the break.
   useEffect(() => {
     if (!user?.id) {
-      setHasCompleted(false);
+      setMockProgress("not_started");
       return;
     }
     let cancelled = false;
     void (async () => {
       const { data: papers } = await supabase
         .from("live_mock_papers" as never)
-        .select("id")
+        .select("id, slug")
         .in("slug", [MATHS_PAPER.slug, ENGLISH_PAPER.slug]);
-      const paperIds = ((papers as { id: string }[] | null) || []).map((p) => p.id);
-      if (paperIds.length === 0 || cancelled) return;
-      const { data: attempt } = await supabase
+      const rows = (papers as { id: string; slug: string }[] | null) || [];
+      const mathsPaperId = rows.find((p) => p.slug === MATHS_PAPER.slug)?.id;
+      const englishPaperId = rows.find((p) => p.slug === ENGLISH_PAPER.slug)?.id;
+      if (!mathsPaperId || !englishPaperId || cancelled) {
+        if (!cancelled) setMockProgress("not_started");
+        return;
+      }
+
+      const { data: attempts } = await supabase
         .from("live_mock_attempts" as never)
-        .select("id")
-        .in("paper_id", paperIds)
+        .select("paper_id, status")
         .eq("user_id", user.id)
-        .eq("status", "submitted")
-        .limit(1)
-        .maybeSingle();
-      if (!cancelled) setHasCompleted(Boolean(attempt));
+        .in("paper_id", [mathsPaperId, englishPaperId]);
+
+      if (cancelled) return;
+
+      const list = (attempts as { paper_id: string; status: string }[] | null) || [];
+      const mathsSubmitted = list.some((a) => a.paper_id === mathsPaperId && a.status === "submitted");
+      const englishSubmitted = list.some((a) => a.paper_id === englishPaperId && a.status === "submitted");
+
+      if (englishSubmitted) setMockProgress("complete");
+      else if (mathsSubmitted) setMockProgress("maths_submitted");
+      else setMockProgress("not_started");
     })();
     return () => {
       cancelled = true;
@@ -543,6 +557,10 @@ export default function LocalCombinedMock() {
   }, [answers, phase]);
 
   const startMock = () => {
+    if (mockProgress === "maths_submitted") {
+      launchEnglish();
+      return;
+    }
     mathsSubmittedRef.current = false;
     setAnswers({});
     setFlagged([]);
@@ -704,7 +722,7 @@ export default function LocalCombinedMock() {
 
               {eligibility.error && <p className="mt-4 text-sm font-semibold text-rose-600">{eligibility.error}</p>}
 
-              {eligible && hasCompleted ? (
+              {eligible && mockProgress === "complete" ? (
                 <div className="mt-6 space-y-3">
                   <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
                     <div className="flex items-center gap-2 font-bold text-emerald-800">
@@ -723,6 +741,25 @@ export default function LocalCombinedMock() {
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </div>
+              ) : eligible && mockProgress === "maths_submitted" ? (
+                <div className="mt-6 space-y-3">
+                  <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+                    <div className="flex items-center gap-2 font-bold text-amber-900">
+                      <CheckCircle2 className="h-5 w-5 text-amber-600" />
+                      Maths complete — English paper is next
+                    </div>
+                    <p className="mt-1 text-xs text-slate-600">
+                      Your Maths paper is saved. Continue to the English paper to finish the mock.
+                    </p>
+                  </div>
+                  <Button
+                    className="h-12 w-full rounded-xl bg-orange-600 text-base font-bold text-white hover:bg-orange-700"
+                    onClick={launchEnglish}
+                  >
+                    Continue to English paper
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </div>
               ) : eligible && questionsError ? (
                 <div className="mt-6 space-y-3">
                   <div className="rounded-xl border border-rose-200 bg-rose-50/60 p-4 text-sm font-semibold text-rose-700">
@@ -735,7 +772,7 @@ export default function LocalCombinedMock() {
                     Try again
                   </Button>
                 </div>
-              ) : eligible ? (
+              ) : eligible && mockProgress !== "loading" ? (
                 <Button
                   className="mt-6 h-12 w-full rounded-xl bg-orange-600 text-base font-bold text-white hover:bg-orange-700"
                   disabled={questionsLoading || mathsQuestions.length === 0}
@@ -753,6 +790,11 @@ export default function LocalCombinedMock() {
                     </>
                   )}
                 </Button>
+              ) : eligible ? (
+                <div className="mt-6 flex items-center justify-center gap-2 text-sm font-semibold text-slate-500">
+                  <Loader2 className="h-4 w-4 animate-spin text-orange-600" />
+                  Checking your progress...
+                </div>
               ) : (
                 <div className="mt-6 space-y-3">
                   <p className="text-sm leading-6 text-slate-600">
