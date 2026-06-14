@@ -509,7 +509,7 @@ export default function LiveMockExams() {
                       asChild
                       className="mt-6 h-12 w-full rounded-xl bg-[linear-gradient(90deg,#ea580c_0%,#f59e0b_100%)] text-base font-black text-white shadow-[0_12px_24px_rgba(234,88,12,0.24)] hover:brightness-105"
                     >
-                      <Link to="/live-mock-exams">
+                      <Link to="/live-mock-exams/local-preview">
                         Start Mock
                         <ArrowRight className="ml-2 h-4 w-4" />
                       </Link>
@@ -589,7 +589,7 @@ export default function LiveMockExams() {
                   asChild
                   className="mt-4 h-11 w-full rounded-xl bg-orange-600 text-sm font-bold text-white hover:bg-orange-700"
                 >
-                  <Link to="/live-mock-exams">
+                  <Link to="/live-mock-exams/local-preview">
                     Start mock now
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>

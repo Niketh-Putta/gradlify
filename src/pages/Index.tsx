@@ -49,24 +49,19 @@ import { isPaymentGateExemptPath } from '@/lib/paymentBlocklist';
 import { useCombinedMockReleased } from '@/hooks/useCombinedMockReleased';
 
 /**
- * `/live-mock-exams`: registration hub before go-live; combined mock exam lobby after.
- * Use `/live-mock-exams/details` for the hub page once the mock is live (Back link target).
+ * `/live-mock-exams`: the live mock hub (registration + "Start mock" once live).
+ * The combined mock exam itself lives at `/live-mock-exams/local-preview`, which the
+ * hub's Start button links to. This keeps a real hub to return to from the exam.
  */
-const LiveMockExamsRoute = () => {
-  const released = useCombinedMockReleased();
-  return released ? <LocalCombinedMock /> : <LiveMockExams />;
-};
+const LiveMockExamsRoute = () => <LiveMockExams />;
 
-/**
- * Legacy `/live-mock-exams/details` hub is stale post-launch (old pricing/scarcity
- * copy). Redirect it to the live combined mock so no one lands on the outdated page.
- */
+/** Legacy `/live-mock-exams/details` now just points at the hub. */
 const LiveMockExamsDetailsRoute = () => <Navigate to="/live-mock-exams" replace />;
 
 /**
- * `/live-mock-exams/local-preview`: the combined mock. Always available in dev
- * for testing; in production it only opens once the mock has gone live,
- * otherwise it sends people to the hub.
+ * `/live-mock-exams/local-preview`: the combined Maths + English mock exam lobby.
+ * Always available in dev; in production it only opens once the mock has gone live,
+ * otherwise it sends people back to the hub.
  */
 const LocalCombinedMockRoute = () => {
   const released = useCombinedMockReleased();
