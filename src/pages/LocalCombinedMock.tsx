@@ -54,7 +54,9 @@ const FAST_MATHS_SECONDS = 30;
 const FAST_BREAK_SECONDS = 10;
 const FAST_ENGLISH_SECONDS = 30;
 
-type Phase = "instructions" | "maths" | "break" | "english" | "complete";
+// `maths_resit_complete` is the maths-only re-sit success screen for users hit by
+// the key-mismatch bug; it links to analytics and never routes back to break/English.
+type Phase = "instructions" | "maths" | "break" | "english" | "complete" | "maths_resit_complete";
 type Eligibility = {
   loading: boolean;
   registered: boolean;
@@ -67,6 +69,8 @@ type SavedMockState = {
   answers: Record<string, string>;
   flagged: string[];
   phaseEndsAt: number | null;
+  /** True while a maths-only re-sit is in progress, so a refresh resumes correctly. */
+  resit?: boolean;
 };
 
 type MockOption = { id: string; text: string; correct: boolean };
@@ -142,6 +146,92 @@ function countMathsAnswers(answers: Record<string, string>): number {
   return seen.size;
 }
 
+/*
+ * ───────────────────────────────────────────────────────────────────────────
+ * REMEDIATION POPUP COPY — EDIT THE WORDING HERE (single source of truth).
+ *
+ * Niketh: this is the ONLY place the apology popup wording lives. Change the
+ * title, body (including the £5 refund line) and button labels here and it
+ * updates everywhere. The body below is an honest placeholder; swap it for the
+ * final wording when ready. Keep the £5 refund mention and the restart button.
+ * ───────────────────────────────────────────────────────────────────────────
+ */
+const REMEDIATION_POPUP_COPY = {
+  title: "We need to put something right",
+  body:
+    "Due to a technical fault on our end, your Maths answers from earlier today were not saved and your score was lost. We're really sorry. We're refunding you £5 as an apology, and you can redo the Maths paper now - this time it will score correctly.",
+  reassurance:
+    "Your English paper is already done and stays saved - this only redoes Maths. No break, no English again.",
+  restartButton: "Restart Maths paper",
+  dismissButton: "Not now",
+} as const;
+
+/** Result of the precise affected-cohort DB check. */
+type AffectedMathsState = {
+  affected: boolean;
+  attemptId: string | null;
+  mathsPaperId: string | null;
+};
+
+const NOT_AFFECTED: AffectedMathsState = { affected: false, attemptId: null, mathsPaperId: null };
+
+/**
+ * AFFECTED-COHORT DETECTION — designed for ZERO false positives.
+ *
+ * A user is "affected" by the key-mismatch Maths bug ONLY when their
+ * `both_subjects_maths` attempt satisfies ALL of:
+ *   1. it exists (they actually sat Maths), and
+ *   2. status === 'submitted', and
+ *   3. answered_count === 0, and
+ *   4. every live_mock_answers.selected_option for that attempt is NULL.
+ *
+ * Anyone with a real score (answered_count > 0 or any non-null selected_option),
+ * an in-progress attempt, no Maths attempt at all, or ANY read error returns
+ * `affected: false` — so the apology popup can never show to the wrong person.
+ * The check runs against the DB (not client/localStorage state) every time.
+ */
+async function detectAffectedMathsAttempt(userId: string): Promise<AffectedMathsState> {
+  try {
+    const { data: paper, error: paperError } = await supabase
+      .from("live_mock_papers" as never)
+      .select("id")
+      .eq("slug", MATHS_PAPER.slug)
+      .maybeSingle();
+    if (paperError) return NOT_AFFECTED;
+    const mathsPaperId = (paper as { id?: string } | null)?.id ?? null;
+    if (!mathsPaperId) return NOT_AFFECTED;
+
+    const { data: attempt, error: attemptError } = await supabase
+      .from("live_mock_attempts" as never)
+      .select("id, status, answered_count")
+      .eq("paper_id", mathsPaperId)
+      .eq("user_id", userId)
+      .maybeSingle();
+    if (attemptError) return { ...NOT_AFFECTED, mathsPaperId };
+
+    const row = attempt as { id: string; status: string; answered_count: number | null } | null;
+    // Condition 1 + 2: must have a SUBMITTED Maths attempt. (Never sat / in-progress => safe.)
+    if (!row || row.status !== "submitted") return { ...NOT_AFFECTED, mathsPaperId };
+    // Condition 3: a real score means answered_count > 0 — definitely not affected.
+    if ((row.answered_count ?? 0) !== 0) return { ...NOT_AFFECTED, mathsPaperId };
+
+    // Condition 4 (authoritative final guard): confirm against raw answer rows that
+    // NOTHING was selected. If even one selected_option is non-null, do NOT flag.
+    const { count, error: answersError } = await supabase
+      .from("live_mock_answers" as never)
+      .select("id", { count: "exact", head: true })
+      .eq("attempt_id", row.id)
+      .not("selected_option", "is", null);
+    if (answersError) return { ...NOT_AFFECTED, mathsPaperId };
+    if ((count ?? 0) > 0) return { ...NOT_AFFECTED, mathsPaperId };
+
+    return { affected: true, attemptId: row.id, mathsPaperId };
+  } catch {
+    // When in doubt, never show the popup.
+    return NOT_AFFECTED;
+  }
+}
+
 /**
  * The English paper reuses the EXACT app split-view (EnglishSplitViewDemo) via
  * the live-mock session route, pointed at the seeded `both_subjects_english`
@@ -187,6 +277,7 @@ export default function LocalCombinedMock() {
   const [hasFullyCompleted, setHasFullyCompleted] = useState(false);
   const [awaitingEnglish, setAwaitingEnglish] = useState(false);
   const combinedAnalyticsUrl = "/live-mock-exams/analytics?combined=1&subject=english";
+  const mathsAnalyticsUrl = "/live-mock-exams/analytics?combined=1&subject=maths";
   const [phase, setPhase] = useState<Phase>("instructions");
   const [currentQuestion, setCurrentQuestion] = useState(1);
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -202,6 +293,20 @@ export default function LocalCombinedMock() {
   const [reloadKey, setReloadKey] = useState(0);
   const [submittingMaths, setSubmittingMaths] = useState(false);
   const mathsSubmittedRef = useRef(false);
+
+  // Remediation (apology popup) + maths-only re-sit state for the affected cohort.
+  const [remediation, setRemediation] = useState<AffectedMathsState>(NOT_AFFECTED);
+  const [remediationOpen, setRemediationOpen] = useState(false);
+  const [remediationDismissed, setRemediationDismissed] = useState(false);
+  const [resitMode, setResitMode] = useState(false);
+
+  // Autosave safety net: per-answer writes to the DB during the Maths phase so a
+  // crash / early-exit can never silently wipe a student's answers again.
+  const autosaveAttemptIdRef = useRef<string | null>(null);
+  const pendingAutosaveRef = useRef<Map<number, string>>(new Map());
+  const autosaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Mirror of `answers` for stable reads inside debounced autosave callbacks.
+  const answersRef = useRef<Record<string, string>>({});
 
   const checkEligibility = useCallback(async () => {
     if (!user) {
@@ -362,6 +467,23 @@ export default function LocalCombinedMock() {
     };
   }, [user?.id]);
 
+  // Post-English remediation gate. We only check (and only ever show the popup)
+  // once English is fully submitted, and only for users who precisely match the
+  // affected-cohort rule via a fresh DB check. During a re-sit we skip the check.
+  useEffect(() => {
+    if (!user?.id || !hasFullyCompleted || resitMode) return;
+    let cancelled = false;
+    void (async () => {
+      const result = await detectAffectedMathsAttempt(user.id);
+      if (cancelled) return;
+      setRemediation(result);
+      if (result.affected && !remediationDismissed) setRemediationOpen(true);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.id, hasFullyCompleted, resitMode, remediationDismissed]);
+
   useEffect(() => {
     void supabase.functions
       .invoke("live-mock-signup-count", { body: { mockSlug: MOCK_SLUG } })
@@ -411,7 +533,8 @@ export default function LocalCombinedMock() {
     try {
       const saved = JSON.parse(raw) as SavedMockState;
       // English is handed off to the real split-view page; never resume into it here.
-      if (saved.phase === "english" || saved.phase === "complete") {
+      // The maths re-sit success screen is terminal, so never resume into it either.
+      if (saved.phase === "english" || saved.phase === "complete" || saved.phase === "maths_resit_complete") {
         window.localStorage.removeItem(storageKey);
         return;
       }
@@ -420,15 +543,30 @@ export default function LocalCombinedMock() {
       setAnswers(migrateSavedAnswers(saved.answers || {}));
       setFlagged(migrateFlaggedKeys(saved.flagged || []));
       setPhaseEndsAt(saved.phaseEndsAt);
+      // Resume an in-flight maths-only re-sit so submit still routes to the
+      // maths results screen (not back through break/English).
+      setResitMode(Boolean(saved.resit));
     } catch {
       window.localStorage.removeItem(storageKey);
     }
   }, [storageKey]);
 
   useEffect(() => {
-    const saved: SavedMockState = { phase, currentQuestion, answers, flagged, phaseEndsAt };
+    const saved: SavedMockState = { phase, currentQuestion, answers, flagged, phaseEndsAt, resit: resitMode };
     window.localStorage.setItem(storageKey, JSON.stringify(saved));
-  }, [answers, currentQuestion, flagged, phase, phaseEndsAt, storageKey]);
+  }, [answers, currentQuestion, flagged, phase, phaseEndsAt, resitMode, storageKey]);
+
+  useEffect(() => {
+    answersRef.current = answers;
+  }, [answers]);
+
+  // Clear any pending autosave timer on unmount so a late flush cannot fire.
+  useEffect(
+    () => () => {
+      if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current);
+    },
+    [],
+  );
 
   const launchEnglish = useCallback(() => {
     // Hand off to the real split-view English paper (same code as the app).
@@ -442,12 +580,113 @@ export default function LocalCombinedMock() {
     setPhaseEndsAt(Date.now() + durations.break * 1000);
   }, [durations.break]);
 
+  // Ensure there is an `in_progress` both_subjects_maths attempt to attach answers
+  // to. Reuses the single row per (paper_id, user_id) via upsert onConflict, so a
+  // re-sit RESETS the existing (blank, broken) attempt in place — it never creates
+  // a second attempt row, which keeps cohort counts and rank to one row per user.
+  const ensureInProgressAttempt = useCallback(async (): Promise<string | null> => {
+    if (autosaveAttemptIdRef.current) return autosaveAttemptIdRef.current;
+    if (!user?.id || !mathsPaperId) return null;
+    const userEmail =
+      typeof user.email === "string" && user.email.trim().length > 0 ? user.email.trim() : null;
+    const { data, error } = await supabase
+      .from("live_mock_attempts" as never)
+      .upsert(
+        {
+          paper_id: mathsPaperId,
+          user_id: user.id,
+          user_email: userEmail,
+          status: "in_progress",
+          question_count: mathsQuestions.length || paperQuestionCount(MATHS_PAPER),
+          answered_count: 0,
+        } as never,
+        { onConflict: "paper_id,user_id" },
+      )
+      .select("id")
+      .single();
+    if (error) {
+      console.error("autosave: ensureInProgressAttempt", error);
+      return null;
+    }
+    const id = (data as { id: string }).id;
+    autosaveAttemptIdRef.current = id;
+    return id;
+  }, [mathsPaperId, mathsQuestions.length, user]);
+
+  // Flush queued answer selections to live_mock_answers (overwrite in place via
+  // onConflict attempt_id,question_id). Debounced from the option click handler.
+  const flushAutosave = useCallback(async () => {
+    if (autosaveTimerRef.current) {
+      clearTimeout(autosaveTimerRef.current);
+      autosaveTimerRef.current = null;
+    }
+    const pending = pendingAutosaveRef.current;
+    if (pending.size === 0 || !user?.id || !mathsPaperId) return;
+
+    const attemptId = await ensureInProgressAttempt();
+    if (!attemptId) return;
+
+    const entries = Array.from(pending.entries());
+    pending.clear();
+
+    const rows = entries.flatMap(([questionNumber, optionId]) => {
+      const q = mathsQuestions.find((m) => m.questionNumber === questionNumber);
+      if (!q) return [];
+      const correct = q.options.find((o) => o.correct);
+      const selectedChoice = q.options.find((o) => o.id === optionId);
+      return [
+        {
+          attempt_id: attemptId,
+          paper_id: mathsPaperId,
+          question_id: q.dbQuestionId,
+          user_id: user.id,
+          question_number: q.questionNumber,
+          section_key: q.sectionKey,
+          question_type: q.questionType,
+          stem_snapshot: q.stem,
+          correct_option_id: correct?.id ?? null,
+          correct_option_label: correct?.text ?? null,
+          selected_option: optionId,
+          selected_option_label: selectedChoice?.text ?? null,
+          options_snapshot: q.options.map((o) => ({ id: o.id, text: o.text, correct: o.correct })),
+          is_correct: Boolean(correct && optionId === correct.id),
+          answered_at: new Date().toISOString(),
+        },
+      ];
+    });
+    if (rows.length === 0) return;
+
+    const { error } = await supabase
+      .from("live_mock_answers" as never)
+      .upsert(rows as never, { onConflict: "attempt_id,question_id" });
+    if (error) {
+      console.error("autosave: flush answers", error);
+      // Re-queue so the next flush (or the authoritative submit) still captures them.
+      entries.forEach(([qn, opt]) => pending.set(qn, opt));
+      return;
+    }
+    // Keep the attempt's answered_count roughly current for crash-recovery clarity;
+    // the submit path recomputes it authoritatively, so a stale value is harmless.
+    const answeredCount = countMathsAnswers(answersRef.current);
+    void supabase
+      .from("live_mock_attempts" as never)
+      .update({ answered_count: answeredCount } as never)
+      .eq("id", attemptId);
+  }, [ensureInProgressAttempt, mathsPaperId, mathsQuestions, user]);
+
   // Submit Maths (paper 1) to Supabase so the combined analytics Maths tab shows
   // the real score, placement and per-question review, then move to the break.
   const submitMaths = useCallback(async () => {
     if (mathsSubmittedRef.current || submittingMaths) return;
     mathsSubmittedRef.current = true;
     setSubmittingMaths(true);
+    // Cancel any pending debounced autosave; the upsert below writes the full,
+    // authoritative answer set anyway.
+    if (autosaveTimerRef.current) {
+      clearTimeout(autosaveTimerRef.current);
+      autosaveTimerRef.current = null;
+    }
+    pendingAutosaveRef.current.clear();
     try {
       if (user?.id && mathsPaperId && mathsQuestions.length > 0) {
         const userEmail =
@@ -513,9 +752,20 @@ export default function LocalCombinedMock() {
       toast.error("Could not save your Maths answers. You can still continue to the break.");
     } finally {
       setSubmittingMaths(false);
-      goToBreak();
+      autosaveAttemptIdRef.current = null;
+      if (resitMode) {
+        // Maths-only re-sit: English is already done — show the maths results
+        // screen instead of routing back through the break / English paper.
+        window.localStorage.removeItem(storageKey);
+        setResitMode(false);
+        setHasFullyCompleted(true);
+        setRemediation(NOT_AFFECTED);
+        setPhase("maths_resit_complete");
+      } else {
+        goToBreak();
+      }
     }
-  }, [answers, durations.maths, goToBreak, mathsPaperId, mathsQuestions, secondsLeft, submittingMaths, user]);
+  }, [answers, durations.maths, goToBreak, mathsPaperId, mathsQuestions, resitMode, secondsLeft, storageKey, submittingMaths, user]);
 
   useEffect(() => {
     if (!phaseEndsAt || !["maths", "break"].includes(phase)) return;
@@ -557,12 +807,42 @@ export default function LocalCombinedMock() {
 
   const startMock = () => {
     mathsSubmittedRef.current = false;
+    autosaveAttemptIdRef.current = null;
+    pendingAutosaveRef.current.clear();
+    setResitMode(false);
     setAnswers({});
     setFlagged([]);
     setCurrentQuestion(1);
     setPhase("maths");
     setPhaseEndsAt(Date.now() + durations.maths * 1000);
     setStartDialogOpen(false);
+    // Create the in_progress attempt up front so the autosave safety net is armed
+    // from the very first answer.
+    void ensureInProgressAttempt();
+  };
+
+  // Maths-only re-sit for an affected user. English is already done, so this runs
+  // ONLY the Maths phase and ends on the maths results screen. ensureInProgressAttempt
+  // upserts the SAME attempt row (onConflict paper_id,user_id), resetting the blank
+  // broken attempt in place — no second attempt row, so cohort counts / rank stay 1:1.
+  const startMathsResit = () => {
+    setRemediationOpen(false);
+    setRemediationDismissed(true);
+    mathsSubmittedRef.current = false;
+    autosaveAttemptIdRef.current = null;
+    pendingAutosaveRef.current.clear();
+    setResitMode(true);
+    setAnswers({});
+    setFlagged([]);
+    setCurrentQuestion(1);
+    setPhase("maths");
+    setPhaseEndsAt(Date.now() + durations.maths * 1000);
+    void ensureInProgressAttempt();
+  };
+
+  const dismissRemediation = () => {
+    setRemediationOpen(false);
+    setRemediationDismissed(true);
   };
 
   const submitCurrentPaper = () => {
@@ -837,6 +1117,41 @@ export default function LocalCombinedMock() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        {/*
+          Post-English apology + maths re-sit popup. Mounted ONLY when the DB check
+          has verified this user is in the affected cohort, and only opened post-English.
+          Double gate (remediation.affected + remediationOpen) keeps false positives at zero.
+        */}
+        {remediation.affected && (
+          <Dialog
+            open={remediationOpen}
+            onOpenChange={(open) => {
+              if (open) setRemediationOpen(true);
+              else dismissRemediation();
+            }}
+          >
+            <DialogContent className="rounded-2xl sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>{REMEDIATION_POPUP_COPY.title}</DialogTitle>
+                <DialogDescription className="text-sm leading-6 text-slate-600">
+                  {REMEDIATION_POPUP_COPY.body}
+                </DialogDescription>
+              </DialogHeader>
+              <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-950">
+                {REMEDIATION_POPUP_COPY.reassurance}
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={dismissRemediation}>
+                  {REMEDIATION_POPUP_COPY.dismissButton}
+                </Button>
+                <Button className="bg-orange-600 text-white hover:bg-orange-700" onClick={startMathsResit}>
+                  {REMEDIATION_POPUP_COPY.restartButton}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        )}
       </main>
     );
   }
@@ -888,6 +1203,35 @@ export default function LocalCombinedMock() {
               Reset (dev only)
             </Button>
           )}
+        </section>
+      </main>
+    );
+  }
+
+  if (phase === "maths_resit_complete") {
+    const mathsAnswered = countMathsAnswers(answers);
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-[#faf9f4] p-6">
+        <section className="w-full max-w-xl rounded-[24px] border border-emerald-200 bg-white p-8 text-center shadow-[0_20px_60px_rgba(124,45,18,0.08)]">
+          <CheckCircle2 className="mx-auto h-14 w-14 text-emerald-600" />
+          <h1 className="mt-5 text-3xl font-black">Maths paper re-submitted</h1>
+          <p className="mt-2 text-sm leading-6 text-slate-500">
+            Thanks for redoing it. Your Maths answers are saved and scored correctly this time, and your
+            English result is unchanged.
+          </p>
+          <div className="mt-6 rounded-xl bg-slate-50 p-4">
+            <strong>
+              {mathsAnswered}/{paperQuestionCount(MATHS_PAPER)}
+            </strong>
+            <p className="text-xs text-slate-500">Maths answered</p>
+          </div>
+          <Button
+            className="mt-6 w-full bg-orange-600 text-white hover:bg-orange-700"
+            onClick={() => navigate(mathsAnalyticsUrl)}
+          >
+            See your Maths results
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
         </section>
       </main>
     );
@@ -981,7 +1325,17 @@ export default function LocalCombinedMock() {
                 {currentMathsQuestion.options.map((option) => (
                   <button
                     key={option.id}
-                    onClick={() => setAnswers((current) => ({ ...current, [questionKey]: option.id }))}
+                    onClick={() => {
+                      setAnswers((current) => ({ ...current, [questionKey]: option.id }));
+                      // Autosave safety net: queue this answer for a debounced DB write.
+                      if (phase === "maths" && user?.id) {
+                        pendingAutosaveRef.current.set(currentQuestion, option.id);
+                        if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current);
+                        autosaveTimerRef.current = setTimeout(() => {
+                          void flushAutosave();
+                        }, 500);
+                      }
+                    }}
                     className={cn(
                       "flex w-full items-center gap-4 rounded-xl border p-4 text-left transition",
                       selectedOptionId === option.id
