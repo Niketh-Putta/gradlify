@@ -39,12 +39,12 @@ const assert = (name, ok, detail = '') => {
 const liveKey = env.STRIPE_SECRET_KEY_LIVE || env.STRIPE_SECRET_KEY;
 const testKey = env.STRIPE_SECRET_KEY_TEST;
 
-const [lm, la, tm, ta, pm, pa] = await Promise.all([
+const [lm, la, tm, ta, pw, pa] = await Promise.all([
   getPrice(liveKey, env.STRIPE_PRICE_11PLUS_ULTRA_MONTHLY_LIVE),
   getPrice(liveKey, env.STRIPE_PRICE_11PLUS_ULTRA_ANNUAL_LIVE),
   getPrice(testKey, env.STRIPE_PRICE_11PLUS_ULTRA_MONTHLY_TEST),
   getPrice(testKey, env.STRIPE_PRICE_11PLUS_ULTRA_ANNUAL_TEST),
-  getPrice(liveKey, env.STRIPE_PRICE_11PLUS_MONTHLY_LIVE),
+  getPrice(liveKey, env.STRIPE_PRICE_11PLUS_WEEKLY_LIVE || 'price_1Tj1g4QYWoowhxMZAH866USC'),
   getPrice(liveKey, env.STRIPE_PRICE_11PLUS_ANNUAL_LIVE),
 ]);
 
@@ -52,7 +52,7 @@ assert('ultra live monthly (24999 pence)', lm.unit_amount === 24999, String(lm.u
 assert('ultra live annual (249999 pence)', la.unit_amount === 249999, String(la.unit_amount));
 assert('ultra test monthly', tm.unit_amount === 24999, String(tm.unit_amount));
 assert('ultra test annual', ta.unit_amount === 249999, String(ta.unit_amount));
-assert('premium live monthly', pm.unit_amount === 1999, String(pm.unit_amount));
+assert('premium live weekly', pw.unit_amount === 899, String(pw.unit_amount));
 assert('premium live annual', pa.unit_amount === 19999, String(pa.unit_amount));
 
 for (const file of ['Srinika_winner.mov', 'Vivaan_winner.mp4', 'videos/exam-readiness.mov']) {
@@ -64,7 +64,7 @@ assert('no duplicate root Vivaan', !fs.existsSync(path.join(root, 'Vivaan_winner
 const anon = env.VITE_SUPABASE_ANON_KEY;
 const base = env.VITE_SUPABASE_URL;
 for (const [plan, expected] of [
-  ['monthly', 1999],
+  ['weekly', 899],
   ['yearly', 19999],
 ]) {
   const res = await fetch(`${base}/functions/v1/stripe-price?plan=${plan}`, {

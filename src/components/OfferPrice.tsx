@@ -13,7 +13,7 @@ type OfferPriceProps = {
 };
 
 export function DiagonalStrikePrice({
-  amount = PREMIUM_PRICING.monthlyOriginal,
+  amount = PREMIUM_PRICING.weeklyOriginal,
   className,
 }: {
   amount?: number;
@@ -157,7 +157,7 @@ export function OfferPrice({
       </div>
       <div className="flex items-baseline gap-2">
         <span className={cn(compact ? "text-xl font-black" : "text-3xl font-semibold sm:text-4xl", currentClassName)}>
-          {formatGbp(PREMIUM_PRICING.monthly)}
+          {formatGbp(PREMIUM_PRICING.weekly)}
         </span>
         {suffix && <span className={cn("text-sm", tone === "dark" ? "text-white/80" : "text-muted-foreground")}>{suffix}</span>}
       </div>

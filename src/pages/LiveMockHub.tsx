@@ -3,6 +3,7 @@ import { ArrowRight, CalendarClock, CheckCircle2, Clock3, Lock, Sparkles } from 
 
 import { Button } from "@/components/ui/button";
 import { useMembership } from "@/hooks/useMembership";
+import { PREMIUM_PRICING } from "@/lib/pricing";
 import { cn } from "@/lib/utils";
 import {
   COMBINED_MOCK_DISPLAY_TITLE,
@@ -162,7 +163,7 @@ function PremiumBanner({
             ) : (
               <>
                 Paid Premium members sit all previous and upcoming live mocks at no extra cost, for just{" "}
-                <span className="font-bold text-slate-900">£19.99 a month</span>. Free trials are not included.
+                <span className="font-bold text-slate-900">£{PREMIUM_PRICING.weekly} a week</span>. Free trials are not included.
               </>
             )}
           </p>

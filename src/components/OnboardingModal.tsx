@@ -250,7 +250,7 @@ const shuffle = <T,>(arr: T[]) => {
   return copy;
 };
 
-type CheckoutPlan = 'monthly' | 'annual' | 'ultra' | 'ultra_annual';
+type CheckoutPlan = 'weekly' | 'annual' | 'ultra' | 'ultra_annual';
 
 function PlanCheckoutButton({
   planType,
@@ -278,7 +278,7 @@ function PlanCheckoutButton({
 
   const isLoading = Boolean(loadingPlan);
   const annualPlan = planType === 'premium' ? 'annual' : 'ultra_annual';
-  const monthlyPlan = planType === 'premium' ? 'monthly' : 'ultra';
+  const weeklyPlan = planType === 'premium' ? 'weekly' : 'ultra';
 
   return (
     <DropdownMenu>
@@ -325,18 +325,18 @@ function PlanCheckoutButton({
           </div>
         </DropdownMenuItem>
         <DropdownMenuItem
-          onClick={() => handleCheckout(monthlyPlan)}
+          onClick={() => handleCheckout(weeklyPlan)}
           className="cursor-pointer rounded-xl p-3"
         >
           <div className="flex w-full flex-col">
             <span className="font-semibold">
-              {planType === 'premium' ? 'Premium Monthly' : 'Ultra Monthly'}
+              {planType === 'premium' ? 'Premium Weekly' : 'Ultra Monthly'}
             </span>
             {planType === 'premium' ? (
               <span className="flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
                 3 Day Free Trial, then
                 <DiagonalStrikePrice className="font-semibold text-slate-400" />
-                <span className="font-semibold text-slate-900">£{PREMIUM_PRICING.monthly}/month</span>
+                <span className="font-semibold text-slate-900">£{PREMIUM_PRICING.weekly}/week</span>
                 <span className="text-red-600">limited time offer</span>
               </span>
             ) : (
@@ -1032,7 +1032,7 @@ export function OnboardingModal({ isOpen, userId, tier, premiumTrack, founderTra
                       <div className="relative z-10 mt-5 sm:mt-6">
                         <OfferPrice
                           tone="dark"
-                          suffix="/month"
+                          suffix="/week"
                           currentClassName="font-gradlify text-3xl font-semibold text-white sm:text-5xl lg:text-6xl"
                           originalClassName="text-white/75"
                           labelClassName="border-white/35 bg-white/15 text-white"

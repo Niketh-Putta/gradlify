@@ -37,6 +37,7 @@ export interface StripeConfig {
   stripeKey: string;
   stripeKeyPrefix: 'sk_test' | 'sk_live';
   webhookSecret: string;
+  weeklyPriceId: string;
   monthlyPriceId: string;
   annualPriceId: string;
 }
@@ -68,6 +69,8 @@ export const getStripeWebhookSecretForMode = (mode: StripeMode): string =>
   readEnv(`STRIPE_WEBHOOK_SECRET_${mode}`) || requireEnvVar('STRIPE_WEBHOOK_SECRET');
 
 export interface StripePriceIds {
+  weekly: string;
+  /** Legacy monthly price — existing subscribers only; not offered at checkout. */
   monthly: string;
   annual: string;
   ultra?: string;
@@ -75,7 +78,8 @@ export interface StripePriceIds {
 }
 
 // Price IDs come from Supabase/Deno env (STRIPE_PRICE_*). Amounts live in Stripe - create new Prices to change billing.
-// Premium monthly: £19.99/mo (1999 pence). 11+ Premium annual offer: £199.99/yr (19999 pence).
+// Premium weekly: £8.99/wk (899 pence). Legacy monthly kept for existing subs only.
+// 11+ Premium annual offer: £199.99/yr (19999 pence).
 // Ultra: £249.99/mo (24999 pence), £2499.99/yr (249999 pence) as of May 2026.
 // After creating new Stripe Prices, update STRIPE_PRICE_11PLUS_* (and Supabase edge-function secrets).
 export type PremiumTrack = 'gcse' | 'eleven_plus';
@@ -88,12 +92,21 @@ export interface StripeTrackPriceIds {
 const readModeAware = (base: string, mode: StripeMode) =>
   readEnv(`${base}_${mode}`) || readEnv(base);
 
+const PREMIUM_WEEKLY_PRICE_IDS: Record<StripeMode, string> = {
+  LIVE: "price_1Tj1g4QYWoowhxMZAH866USC",
+  TEST: "price_1Tj1g5HZeiDDkqObijVVbv6C",
+};
+
 const PREMIUM_ANNUAL_OFFER_PRICE_IDS: Record<StripeMode, string> = {
   LIVE: "price_1TeW1iQYWoowhxMZ7f3MlPcR",
   TEST: "price_1TeW1jHZeiDDkqObqPFnObVn",
 };
 
 export const getStripePriceIdsForMode = (mode: StripeMode): StripePriceIds => ({
+  weekly:
+    readEnv(`STRIPE_PRICE_11PLUS_WEEKLY_${mode}`) ||
+    readEnv(`STRIPE_PRICE_WEEKLY_${mode}`) ||
+    PREMIUM_WEEKLY_PRICE_IDS[mode],
   monthly: requireEnvVar(`STRIPE_PRICE_MONTHLY_${mode}`),
   annual: PREMIUM_ANNUAL_OFFER_PRICE_IDS[mode],
   ultra: readEnv(`STRIPE_PRICE_ULTRA_MONTHLY_${mode}`) || undefined,
@@ -114,6 +127,10 @@ export const getStripeTrackPriceIdsForMode = (mode: StripeMode): StripeTrackPric
   const premiumAnnualOfferPriceId = PREMIUM_ANNUAL_OFFER_PRICE_IDS[mode];
   const gcseMonthly = readModeAware('STRIPE_PRICE_MONTHLY', mode);
   const gcseAnnual = premiumAnnualOfferPriceId || readModeAware('STRIPE_PRICE_ANNUAL', mode);
+  const elevenPlusWeekly =
+    readModeAware('STRIPE_PRICE_11PLUS_WEEKLY', mode) ||
+    readModeAware('STRIPE_PRICE_WEEKLY', mode) ||
+    PREMIUM_WEEKLY_PRICE_IDS[mode];
   const elevenPlusMonthly =
     readModeAware('STRIPE_PRICE_11PLUS_MONTHLY', mode) ||
     readModeAware('STRIPE_PRICE_ELEVEN_PLUS_MONTHLY', mode);
@@ -131,14 +148,20 @@ export const getStripeTrackPriceIdsForMode = (mode: StripeMode): StripeTrackPric
   if (!gcseMonthly || !gcseAnnual) {
     throw new Error(`Missing GCSE Stripe price IDs for mode ${mode}`);
   }
-  if (!elevenPlusMonthly || !elevenPlusAnnual) {
+  if (!elevenPlusWeekly || !elevenPlusAnnual) {
     throw new Error(`Missing 11+ Stripe price IDs for mode ${mode}`);
   }
   // The apps are now decoupled, so it's okay if only one track's price IDs are valid or if they overlap during migration.
 
   return {
-    gcse: { monthly: gcseMonthly, annual: gcseAnnual },
-    eleven_plus: { monthly: elevenPlusMonthly, annual: elevenPlusAnnual, ultra: elevenPlusUltra, ultra_annual: elevenPlusUltraAnnual },
+    gcse: { weekly: gcseMonthly, monthly: gcseMonthly, annual: gcseAnnual },
+    eleven_plus: {
+      weekly: elevenPlusWeekly,
+      monthly: elevenPlusMonthly,
+      annual: elevenPlusAnnual,
+      ultra: elevenPlusUltra,
+      ultra_annual: elevenPlusUltraAnnual,
+    },
   };
 };
 
@@ -151,7 +174,13 @@ export const getPremiumTrackFromPriceId = (
   
   // WARNING: If the user re-uses the same Stripe price ID for both apps, 
   // we now prioritize 11Plus tracking to align with the core Gradlify platform switch.
-  if (priceId === priceIds.eleven_plus.monthly || priceId === priceIds.eleven_plus.annual || priceId === priceIds.eleven_plus.ultra || priceId === priceIds.eleven_plus.ultra_annual) return 'eleven_plus';
+  if (
+    priceId === priceIds.eleven_plus.weekly ||
+    priceId === priceIds.eleven_plus.monthly ||
+    priceId === priceIds.eleven_plus.annual ||
+    priceId === priceIds.eleven_plus.ultra ||
+    priceId === priceIds.eleven_plus.ultra_annual
+  ) return 'eleven_plus';
   if (priceId === priceIds.gcse.monthly || priceId === priceIds.gcse.annual) return 'gcse';
   
   return null;
@@ -217,6 +246,10 @@ export const getStripeConfig = (): StripeConfig => {
   const resolvedMode: 'TEST' | 'LIVE' = normalizedPrefix;
   const resolvedEnvironment = environment ?? (resolvedMode === 'LIVE' ? 'production' : 'development');
 
+  const weeklyPriceId =
+    readEnv(`STRIPE_PRICE_11PLUS_WEEKLY_${resolvedMode}`) ||
+    readEnv(`STRIPE_PRICE_WEEKLY_${resolvedMode}`) ||
+    PREMIUM_WEEKLY_PRICE_IDS[resolvedMode];
   const monthlyPriceId =
     readEnv(`STRIPE_PRICE_MONTHLY_${resolvedMode}`) ||
     readEnv('STRIPE_PRICE_MONTHLY');
@@ -228,6 +261,9 @@ export const getStripeConfig = (): StripeConfig => {
     readEnv(`STRIPE_WEBHOOK_SECRET_${resolvedMode}`) ||
     readEnv('STRIPE_WEBHOOK_SECRET');
 
+  if (!weeklyPriceId) {
+    throw new Error('Weekly price ID is not configured');
+  }
   if (!monthlyPriceId) {
     throw new Error('Monthly price ID is not configured');
   }
@@ -246,7 +282,7 @@ export const getStripeConfig = (): StripeConfig => {
 
   if (resolvedEnvironment !== 'production') {
     console.debug(
-      `[StripeConfig] env=${resolvedEnvironment} stripeKeyPrefix=${stripeKeyPrefix} monthly=${shortenId(monthlyPriceId)} annual=${shortenId(annualPriceId)}`,
+      `[StripeConfig] env=${resolvedEnvironment} stripeKeyPrefix=${stripeKeyPrefix} weekly=${shortenId(weeklyPriceId)} monthly=${shortenId(monthlyPriceId)} annual=${shortenId(annualPriceId)}`,
     );
   }
 
@@ -255,6 +291,7 @@ export const getStripeConfig = (): StripeConfig => {
     stripeKey,
     stripeKeyPrefix,
     webhookSecret,
+    weeklyPriceId,
     monthlyPriceId,
     annualPriceId,
   };

@@ -30,7 +30,7 @@ const stripeKeyPrefix = (key: string) =>
 const ACTIVE_STATUSES = new Set(['active', 'trialing']);
 const PRICE_LOG_LIMIT = 3;
 
-type BillingInterval = 'monthly' | 'annual';
+type BillingInterval = 'weekly' | 'monthly' | 'annual';
 
 type ProfileUpdatePayload = {
   mode: StripeMode;
@@ -171,10 +171,13 @@ const determineBillingInterval = (
 ): BillingInterval => {
   const priceId = subscription.items.data[0]?.price?.id;
   if (priceId === priceIds.annual) return 'annual';
+  if (priceId === priceIds.weekly) return 'weekly';
   if (priceId === priceIds.monthly) return 'monthly';
   const interval = subscription.items.data[0]?.price?.recurring?.interval;
   if (interval === 'year') return 'annual';
-  return 'monthly';
+  if (interval === 'week') return 'weekly';
+  if (interval === 'month') return 'monthly';
+  return 'weekly';
 };
 
 const resolvePremiumTrackFromPriceIds = (

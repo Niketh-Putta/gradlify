@@ -26,7 +26,7 @@ export function PracticeLimitModal({
   onOpenChange,
   onComeBack,
 }: PracticeLimitModalProps) {
-  const [selectedPlan, setSelectedPlan] = useState<"monthly" | "annual">("monthly");
+  const [selectedPlan, setSelectedPlan] = useState<"weekly" | "annual">("weekly");
 
   return (
     <PremiumPaywall
@@ -37,18 +37,17 @@ export function PracticeLimitModal({
       freeFeatures={freeFeatures}
       premiumFeatures={premiumFeatures}
       onComeBack={onComeBack}
-      primaryLabel={`Start Your 3 Day Free Trial (${selectedPlan === "monthly" ? "Monthly" : "Annual"})`}
+      primaryLabel={`Start Your 3 Day Free Trial (${selectedPlan === "weekly" ? "Weekly" : "Annual"})`}
       secondaryLabel="Come back tomorrow"
-      upgradePlan={selectedPlan}
       children={
         <div className="w-full flex flex-col items-center mb-4">
           <Tabs
             value={selectedPlan}
-            onValueChange={(v) => setSelectedPlan(v as "monthly" | "annual")}
+            onValueChange={(v) => setSelectedPlan(v as "weekly" | "annual")}
             className="w-full mb-2"
           >
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="monthly">Monthly</TabsTrigger>
+              <TabsTrigger value="weekly">Weekly</TabsTrigger>
               <TabsTrigger value="annual">Annual</TabsTrigger>
             </TabsList>
           </Tabs>

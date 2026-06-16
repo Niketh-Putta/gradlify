@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button";
+import { PREMIUM_PRICING } from "@/lib/pricing";
 import { PremiumUpgradeButton } from "@/components/PremiumUpgradeButton";
 import { supabase } from "@/integrations/supabase/client";
 import { useAppContext } from "@/hooks/useAppContext";
@@ -738,7 +738,7 @@ export default function LiveMockExams() {
                 Only paid Gradlify Premium members get this mock for free.
               </h3>
               <p className="mt-2 max-w-3xl text-sm font-semibold leading-6 text-slate-600 sm:text-base">
-                Paid Premium only. 3-day free trial accounts are excluded. Premium is £19.99/month and includes this
+                Paid Premium only. 3-day free trial accounts are excluded. Premium is £{PREMIUM_PRICING.weekly}/week and includes this
                 mock plus future Gradlify mocks.
               </p>
             </div>

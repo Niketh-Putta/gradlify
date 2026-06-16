@@ -12,7 +12,7 @@ const logStep = (step: string, details?: unknown) => {
   console.log(`[STRIPE-PRICE] ${step}${detailsStr}`);
 };
 
-type PlanKey = 'monthly' | 'yearly';
+type PlanKey = 'weekly' | 'yearly';
 
 type PriceResponse = {
   unit_amount: number | null;
@@ -22,7 +22,7 @@ type PriceResponse = {
 
 // Simple in-memory cache (10 minute TTL)
 const priceCache: Record<PlanKey, { data: PriceResponse; timestamp: number } | null> = {
-  monthly: null,
+  weekly: null,
   yearly: null,
 };
 const CACHE_TTL = 10 * 60 * 1000; // 10 minutes
@@ -33,13 +33,14 @@ serve(async (req) => {
   }
 
   const planParam = new URL(req.url).searchParams.get('plan');
-  const plan: PlanKey = planParam === 'yearly' ? 'yearly' : 'monthly';
+  const plan: PlanKey =
+    planParam === 'yearly' || planParam === 'annual' ? 'yearly' : 'weekly';
 
   try {
     logStep("Function started");
 
-    const { stripeKey, monthlyPriceId, annualPriceId } = getStripeConfig();
-    const priceId = plan === 'yearly' ? annualPriceId : monthlyPriceId;
+    const { stripeKey, weeklyPriceId, annualPriceId } = getStripeConfig();
+    const priceId = plan === 'yearly' ? annualPriceId : weeklyPriceId;
 
     logStep("Stripe price selected", { plan, priceId: priceId.slice(0, 8) });
 
@@ -65,7 +66,7 @@ serve(async (req) => {
     const responseData: PriceResponse = {
       unit_amount: price.unit_amount,
       currency: price.currency,
-      interval: price.recurring?.interval || 'month',
+      interval: price.recurring?.interval || (plan === 'yearly' ? 'year' : 'week'),
     };
 
     // Cache the result
@@ -85,9 +86,9 @@ serve(async (req) => {
     
     // Return fallback price data based on the requested plan
     const fallbackData = {
-      unit_amount: plan === 'yearly' ? 19999 : 1999, // GBP pence fallback when Stripe env/retrieve fails (£19.99/mo, £199.99/yr offer)
+      unit_amount: plan === 'yearly' ? 19999 : 899, // GBP pence fallback (£8.99/wk, £199.99/yr offer)
       currency: 'gbp',
-      interval: plan === 'yearly' ? 'year' : 'month',
+      interval: plan === 'yearly' ? 'year' : 'week',
     };
     
     return new Response(JSON.stringify(fallbackData), {

@@ -13,7 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { getSprintUpgradeCopy } from "@/lib/foundersSprint";
 import { AI_FEATURE_ENABLED, EXAM_READINESS_ENABLED, ULTRA_PLAN_ENABLED } from "@/lib/featureFlags";
 import { getDashboardPath, setSignupTrack } from "@/lib/track";
-import { ULTRA_PRICING } from "@/lib/pricing";
+import { PREMIUM_PRICING, ULTRA_PRICING } from "@/lib/pricing";
 import { useOfferCountdown } from "@/hooks/useOfferCountdown";
 import { setPostAuthRedirect } from "@/lib/postAuthRedirect";
 import { captureReferralFromSearch } from "@/lib/referrals";
@@ -540,7 +540,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                 <span className="rounded-full border border-amber-200/45 bg-amber-200/12 px-2.5 py-0.5 text-[9px] font-black uppercase tracking-[0.2em] text-amber-100 shadow-[0_0_18px_rgba(251,146,60,0.24)]">
                   Limited time offer
                 </span>
-                <span className="text-xs font-black sm:text-sm">Gradlify is £19.99/mo</span>
+                <span className="text-xs font-black sm:text-sm">Gradlify is £{PREMIUM_PRICING.weekly}/wk</span>
                 <span className="hidden h-4 w-px bg-white/20 sm:block" aria-hidden="true" />
                 <span className="text-[11px] font-semibold text-white/75 sm:text-xs">
                   about a third of one tutor hour - tutors often charge <span className="text-white">£40–60/hr</span>
@@ -1191,7 +1191,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                         ["Weak-topic diagnosis", "yes", "partial", "partial", "partial"],
                         ["Parent-ready report", "yes", "partial", "partial", "partial"],
                         ["Built from selective-school experience", "yes", "no", "no", "no"],
-                        ["Focused 11+ system under £20/mo", "yes", "no", "no", "yes"],
+                        ["Focused 11+ system under £9/wk", "yes", "no", "no", "yes"],
                         ["Clear next-step plan after each mock", "yes", "partial", "partial", "no"],
                       ].map(([feature, gradlify, atom, explore, bond]) => (
                         <tr key={feature} className={cn("border-b last:border-b-0", isDark ? "border-white/10" : "border-slate-100")}>
@@ -1307,7 +1307,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                     <OfferPrice
                       className="mt-4"
                       tone="dark"
-                      suffix="/month"
+                      suffix="/week"
                       currentClassName="text-white"
                       labelClassName="border-white/30 bg-white/15 text-white"
                     />
@@ -1315,11 +1315,11 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                       <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
                         <div>
                           <p className="text-[11px] font-black uppercase tracking-[0.18em] text-white/80">Why parents switch</p>
-                          <p className="mt-1 text-sm font-semibold text-white">One tutor hour costs £40–60. Premium is £19.99 for the whole month.</p>
+                          <p className="mt-1 text-sm font-semibold text-white">One tutor hour costs £40–60. Premium is £{PREMIUM_PRICING.weekly} per week.</p>
                         </div>
                         <div className="text-left sm:text-right">
-                          <div className="text-2xl font-black text-white">£19.99</div>
-                          <div className="text-[11px] font-bold uppercase tracking-[0.14em] text-white/75">per month</div>
+                          <div className="text-2xl font-black text-white">£{PREMIUM_PRICING.weekly}</div>
+                          <div className="text-[11px] font-bold uppercase tracking-[0.14em] text-white/75">per week</div>
                         </div>
                       </div>
                     </div>

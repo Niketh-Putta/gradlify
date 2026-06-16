@@ -15,6 +15,11 @@ const jsonResponse = (body: Record<string, unknown>, status = 200) =>
 
 const readEnv = (name: string) => Deno.env.get(name)?.trim() ?? "";
 
+const PREMIUM_WEEKLY_PRICE_IDS: Record<string, string> = {
+  live: "price_1Tj1g4QYWoowhxMZAH866USC",
+  test: "price_1Tj1g5HZeiDDkqObijVVbv6C",
+};
+
 const PREMIUM_ANNUAL_OFFER_PRICE_IDS: Record<string, string> = {
   live: "price_1TeW1iQYWoowhxMZ7f3MlPcR",
   test: "price_1TeW1jHZeiDDkqObqPFnObVn",
@@ -41,6 +46,7 @@ const toIso = (value?: number | null) => (value ? new Date(value * 1000).toISOSt
 const mapInterval = (interval?: string | null) => {
   if (!interval) return null;
   if (interval === "year") return "annual";
+  if (interval === "week") return "weekly";
   if (interval === "month") return "monthly";
   return interval;
 };
@@ -59,12 +65,19 @@ const getTrackPriceIds = (environment: string) => {
     suffix ? readEnv(`${base}_${suffix}`) || readEnv(base) : readEnv(base);
   const premiumAnnualOfferPriceId = PREMIUM_ANNUAL_OFFER_PRICE_IDS[environment] || '';
 
+  const premiumWeeklyPriceId = PREMIUM_WEEKLY_PRICE_IDS[environment] || '';
   return {
     gcse: {
+      weekly: premiumWeeklyPriceId || read('STRIPE_PRICE_MONTHLY'),
       monthly: read('STRIPE_PRICE_MONTHLY'),
       annual: premiumAnnualOfferPriceId || read('STRIPE_PRICE_ANNUAL'),
     },
     eleven_plus: {
+      weekly:
+        read('STRIPE_PRICE_11PLUS_WEEKLY') ||
+        premiumWeeklyPriceId ||
+        read('STRIPE_PRICE_11PLUS_MONTHLY') ||
+        read('STRIPE_PRICE_ELEVEN_PLUS_MONTHLY'),
       monthly: read('STRIPE_PRICE_11PLUS_MONTHLY') || read('STRIPE_PRICE_ELEVEN_PLUS_MONTHLY'),
       annual: premiumAnnualOfferPriceId || read('STRIPE_PRICE_11PLUS_ANNUAL') || read('STRIPE_PRICE_ELEVEN_PLUS_ANNUAL'),
     },
@@ -77,8 +90,12 @@ const resolvePremiumTrackFromPriceId = (
 ): 'gcse' | 'eleven_plus' | null => {
   if (!priceId) return null;
   const ids = getTrackPriceIds(environment);
-  if (priceId === ids.gcse.monthly || priceId === ids.gcse.annual) return 'gcse';
-  if (priceId === ids.eleven_plus.monthly || priceId === ids.eleven_plus.annual) return 'eleven_plus';
+  if (priceId === ids.gcse.weekly || priceId === ids.gcse.monthly || priceId === ids.gcse.annual) return 'gcse';
+  if (
+    priceId === ids.eleven_plus.weekly ||
+    priceId === ids.eleven_plus.monthly ||
+    priceId === ids.eleven_plus.annual
+  ) return 'eleven_plus';
   return null;
 };
 
@@ -205,6 +222,8 @@ serve(async (req) => {
       isPremium && subscriptionInterval
         ? subscriptionInterval === "annual"
           ? "premium_annual"
+          : subscriptionInterval === "weekly"
+          ? "premium_weekly"
           : "premium_monthly"
         : "free";
 

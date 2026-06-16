@@ -14,7 +14,7 @@ import { AnnualOfferPrice, OfferPrice } from "@/components/OfferPrice";
 
 export function PremiumUpgradeCard() {
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'annual' | 'ultra'>(ULTRA_PLAN_ENABLED ? 'ultra' : 'monthly');
+  const [selectedPlan, setSelectedPlan] = useState<'weekly' | 'annual' | 'ultra'>(ULTRA_PLAN_ENABLED ? 'ultra' : 'weekly');
   const { tier, isPremium, isUltra, isFounder } = useMembership();
   const sprintCopy = getSprintUpgradeCopy();
 
@@ -99,9 +99,9 @@ export function PremiumUpgradeCard() {
 	          </div>
 
           <div className="pt-2">
-            <Tabs value={selectedPlan} onValueChange={(v) => setSelectedPlan(v as 'monthly' | 'annual' | 'ultra')} className="w-full mb-4">
+            <Tabs value={selectedPlan} onValueChange={(v) => setSelectedPlan(v as 'weekly' | 'annual' | 'ultra')} className="w-full mb-4">
               <TabsList className={`grid w-full grid-cols-3 ${selectedPlan === 'ultra' ? 'bg-amber-900/40 border border-amber-500/20' : 'bg-white/20'}`}>
-                <TabsTrigger value="monthly" className={`text-foreground data-[state=active]:bg-white data-[state=active]:text-primary ${selectedPlan === 'ultra' ? 'text-amber-100 hover:text-amber-50 data-[state=active]:bg-transparent data-[state=active]:text-amber-300' : ''}`}>
+                <TabsTrigger value="weekly" className={`text-foreground data-[state=active]:bg-white data-[state=active]:text-primary ${selectedPlan === 'ultra' ? 'text-amber-100 hover:text-amber-50 data-[state=active]:bg-transparent data-[state=active]:text-amber-300' : ''}`}>
                   Premium
                 </TabsTrigger>
                 <TabsTrigger value="annual" className={`text-foreground data-[state=active]:bg-white data-[state=active]:text-primary ${selectedPlan === 'ultra' ? 'text-amber-100 hover:text-amber-50 data-[state=active]:bg-transparent data-[state=active]:text-amber-300' : ''}`}>
@@ -115,10 +115,10 @@ export function PremiumUpgradeCard() {
               </TabsList>
             </Tabs>
 
-            {selectedPlan === 'monthly' ? (
+            {selectedPlan === 'weekly' ? (
               <OfferPrice
                 compact
-                suffix="/month"
+                suffix="/week"
                 tone="dark"
                 className="mb-3"
                 currentClassName="text-responsive-xl text-foreground"

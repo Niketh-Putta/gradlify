@@ -51,7 +51,7 @@ export function PremiumUpgradeButton({
     );
   }
 
-  const handleUpgrade = async (plan: 'monthly' | 'annual' | 'ultra' | 'ultra_annual') => {
+  const handleUpgrade = async (plan: 'weekly' | 'annual' | 'ultra' | 'ultra_annual') => {
     try {
       setIsLoading(true);
       await startPremiumCheckout(plan);
@@ -111,13 +111,13 @@ export function PremiumUpgradeButton({
             <span className="text-xs font-semibold text-red-600">Limited time offer just for you.</span>
           </div>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => handleUpgrade('monthly')}>
+        <DropdownMenuItem onClick={() => handleUpgrade('weekly')}>
           <div className="flex flex-col">
-            <span className="font-medium">Premium (Monthly)</span>
+            <span className="font-medium">Premium (Weekly)</span>
             <span className="flex flex-wrap items-center gap-1 text-sm text-muted-foreground">
               3 Day Free Trial, then
               <DiagonalStrikePrice className="font-semibold text-slate-400" />
-              <span className="font-semibold text-slate-900">£{PREMIUM_PRICING.monthly}/month</span>
+              <span className="font-semibold text-slate-900">£{PREMIUM_PRICING.weekly}/week</span>
               <span className="text-red-600">limited time offer</span>
             </span>
           </div>

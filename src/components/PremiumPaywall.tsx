@@ -36,7 +36,7 @@ export function PremiumPaywall({
   const [isUpgrading, setIsUpgrading] = useState(false);
   const { isFounder, isPremium } = useMembership();
   
-  const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
+  const [billingCycle, setBillingCycle] = useState<'weekly' | 'annual'>('weekly');
   const [selectedTier, setSelectedTier] = useState<'premium' | 'ultra'>('premium');
 
   useEffect(() => {
@@ -51,12 +51,12 @@ export function PremiumPaywall({
 
   const handleUpgrade = async () => {
     setIsUpgrading(true);
-    let planId: 'monthly' | 'annual' | 'ultra' | 'ultra_annual' = 'monthly';
+    let planId: 'weekly' | 'annual' | 'ultra' | 'ultra_annual' = 'weekly';
     
     if (selectedTier === 'premium') {
-      planId = billingCycle === 'monthly' ? 'monthly' : 'annual';
+      planId = billingCycle === 'weekly' ? 'weekly' : 'annual';
     } else {
-      planId = billingCycle === 'monthly' ? 'ultra' : 'ultra_annual';
+      planId = billingCycle === 'weekly' ? 'ultra' : 'ultra_annual';
     }
 
     try {
@@ -88,13 +88,13 @@ export function PremiumPaywall({
           <div className="flex justify-center mb-6 sm:mb-8">
             <div className="inline-flex p-1 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm">
               <button
-                onClick={() => setBillingCycle('monthly')}
+                onClick={() => setBillingCycle('weekly')}
                 className={cn(
                   "px-6 py-2 text-[10px] font-black uppercase tracking-[0.2em] rounded-lg transition-all",
-                  billingCycle === 'monthly' ? "text-slate-900 bg-white shadow-sm" : "text-slate-400 hover:text-slate-600"
+                  billingCycle === 'weekly' ? "text-slate-900 bg-white shadow-sm" : "text-slate-400 hover:text-slate-600"
                 )}
               >
-                Monthly
+                Weekly
               </button>
               <button
                 onClick={() => setBillingCycle('annual')}
@@ -124,10 +124,10 @@ export function PremiumPaywall({
                   <p className="text-[9px] md:text-[10px] font-bold text-blue-500/60 uppercase tracking-[0.15em] mt-1">FOUNDATIONAL MASTERY</p>
                 </div>
                 <div className="flex flex-col">
-                  {billingCycle === 'monthly' ? (
+                  {billingCycle === 'weekly' ? (
                     <OfferPrice
                       compact
-                      suffix="/mo"
+                      suffix="/week"
                       currentClassName="text-2xl sm:text-3xl text-slate-900 dark:text-white"
                       labelClassName="tracking-[0.1em]"
                     />
@@ -176,7 +176,7 @@ export function PremiumPaywall({
                 <div className="flex flex-col">
                   <div className="flex items-baseline gap-1 flex-wrap">
                     <span className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white">
-                      £{billingCycle === 'monthly' ? ULTRA_PRICING.monthly : ULTRA_PRICING.annualPerMonth}
+                      £{billingCycle === 'weekly' ? ULTRA_PRICING.monthly : ULTRA_PRICING.annualPerMonth}
                     </span>
                     <span className="text-[10px] sm:text-xs font-bold text-slate-300 tracking-tight shrink-0">/mo</span>
                   </div>

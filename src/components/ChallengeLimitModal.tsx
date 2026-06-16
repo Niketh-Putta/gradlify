@@ -26,7 +26,7 @@ export function ChallengeLimitModal({
   onOpenChange,
   onComeBack,
 }: ChallengeLimitModalProps) {
-  const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'annual'>('monthly');
+  const [selectedPlan, setSelectedPlan] = useState<'weekly' | 'annual'>('weekly');
 
   return (
     <PremiumPaywall
@@ -38,14 +38,12 @@ export function ChallengeLimitModal({
       premiumFeatures={premiumFeatures}
       secondaryLabel="Come back tomorrow"
       onComeBack={onComeBack}
-      primaryLabel={`Start Your 3 Day Free Trial (${selectedPlan === 'monthly' ? 'Monthly' : 'Annual'})`}
-      upgradePlan={selectedPlan}
-      // Plan selector UI
+      primaryLabel={`Start Your 3 Day Free Trial (${selectedPlan === 'weekly' ? 'Weekly' : 'Annual'})`}
       children={
         <div className="w-full flex flex-col items-center mb-4">
-          <Tabs value={selectedPlan} onValueChange={(v) => setSelectedPlan(v as 'monthly' | 'annual')} className="w-full mb-2">
+          <Tabs value={selectedPlan} onValueChange={(v) => setSelectedPlan(v as 'weekly' | 'annual')} className="w-full mb-2">
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="monthly">Monthly</TabsTrigger>
+              <TabsTrigger value="weekly">Weekly</TabsTrigger>
               <TabsTrigger value="annual">Annual</TabsTrigger>
             </TabsList>
           </Tabs>

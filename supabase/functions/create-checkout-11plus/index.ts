@@ -53,6 +53,11 @@ const normalizeEnv = (raw: string) => {
   return "test";
 };
 
+const PREMIUM_WEEKLY_PRICE_IDS = {
+  live: "price_1Tj1g4QYWoowhxMZAH866USC",
+  test: "price_1Tj1g5HZeiDDkqObijVVbv6C",
+} as const;
+
 const PREMIUM_ANNUAL_OFFER_PRICE_IDS = {
   live: "price_1TeW1iQYWoowhxMZ7f3MlPcR",
   test: "price_1TeW1jHZeiDDkqObqPFnObVn",
@@ -96,6 +101,10 @@ const getStripeConfig = () => {
     stripeSecretKey: readEnv("STRIPE_SECRET_KEY_LIVE"),
     priceMonthly: readEnv("STRIPE_PRICE_MONTHLY_LIVE") || readEnv("PRICE_ID_LIVE"),
     priceAnnual: PREMIUM_ANNUAL_OFFER_PRICE_IDS.live || readEnv("STRIPE_PRICE_ANNUAL_LIVE") || readEnv("STRIPE_PRICE_YEARLY_LIVE"),
+    price11PlusWeekly:
+      readEnv("STRIPE_PRICE_11PLUS_WEEKLY_LIVE") ||
+      readEnv("STRIPE_PRICE_11PLUS_WEEKLY") ||
+      PREMIUM_WEEKLY_PRICE_IDS.live,
     price11PlusMonthly: readEnv("STRIPE_PRICE_11PLUS_MONTHLY_LIVE") || readEnv("STRIPE_PRICE_11PLUS_MONTHLY") || readEnv("STRIPE_PRICE_ELEVEN_PLUS_MONTHLY_LIVE") || readEnv("STRIPE_PRICE_ELEVEN_PLUS_MONTHLY"),
     price11PlusAnnual: PREMIUM_ANNUAL_OFFER_PRICE_IDS.live || readEnv("STRIPE_PRICE_11PLUS_ANNUAL_LIVE") || readEnv("STRIPE_PRICE_11PLUS_ANNUAL") || readEnv("STRIPE_PRICE_ELEVEN_PLUS_ANNUAL_LIVE") || readEnv("STRIPE_PRICE_ELEVEN_PLUS_ANNUAL"),
     price11PlusUltra: readEnv("STRIPE_PRICE_11PLUS_ULTRA_MONTHLY_LIVE") || readEnv("STRIPE_PRICE_11PLUS_ULTRA_MONTHLY") || readEnv("STRIPE_PRICE_ELEVEN_PLUS_ULTRA_MONTHLY_LIVE"),
@@ -105,6 +114,10 @@ const getStripeConfig = () => {
     stripeSecretKey: readEnv("STRIPE_SECRET_KEY_TEST") || readEnv("STRIPE_SECRET_KEY"),
     priceMonthly: readEnv("STRIPE_PRICE_MONTHLY_TEST") || readEnv("PRICE_ID_TEST"),
     priceAnnual: PREMIUM_ANNUAL_OFFER_PRICE_IDS.test || readEnv("STRIPE_PRICE_ANNUAL_TEST") || readEnv("STRIPE_PRICE_YEARLY_TEST"),
+    price11PlusWeekly:
+      readEnv("STRIPE_PRICE_11PLUS_WEEKLY_TEST") ||
+      readEnv("STRIPE_PRICE_11PLUS_WEEKLY") ||
+      PREMIUM_WEEKLY_PRICE_IDS.test,
     price11PlusMonthly: readEnv("STRIPE_PRICE_11PLUS_MONTHLY_TEST") || readEnv("STRIPE_PRICE_11PLUS_MONTHLY") || readEnv("STRIPE_PRICE_ELEVEN_PLUS_MONTHLY_TEST") || readEnv("STRIPE_PRICE_ELEVEN_PLUS_MONTHLY"),
     price11PlusAnnual: PREMIUM_ANNUAL_OFFER_PRICE_IDS.test || readEnv("STRIPE_PRICE_11PLUS_ANNUAL_TEST") || readEnv("STRIPE_PRICE_11PLUS_ANNUAL") || readEnv("STRIPE_PRICE_ELEVEN_PLUS_ANNUAL_TEST") || readEnv("STRIPE_PRICE_ELEVEN_PLUS_ANNUAL"),
     price11PlusUltra: readEnv("STRIPE_PRICE_11PLUS_ULTRA_MONTHLY_TEST") || readEnv("STRIPE_PRICE_11PLUS_ULTRA_MONTHLY") || readEnv("STRIPE_PRICE_ELEVEN_PLUS_ULTRA_MONTHLY_TEST"),
@@ -126,6 +139,7 @@ const getStripeConfig = () => {
   const stripeSecretKey = config.stripeSecretKey;
   const priceGcseMonthly = config.priceMonthly;
   const priceGcseAnnual = config.priceAnnual;
+  const price11PlusWeekly = config.price11PlusWeekly;
   const price11PlusMonthly = config.price11PlusMonthly;
   const price11PlusAnnual = config.price11PlusAnnual;
   const price11PlusUltra = config.price11PlusUltra;
@@ -141,6 +155,7 @@ const getStripeConfig = () => {
     hasTestKey: hasTest,
     priceGcseMonthlyPresent: Boolean(priceGcseMonthly),
     priceGcseAnnualPresent: Boolean(priceGcseAnnual),
+    price11PlusWeeklyPresent: Boolean(price11PlusWeekly),
     price11PlusMonthlyPresent: Boolean(price11PlusMonthly),
     price11PlusAnnualPresent: Boolean(price11PlusAnnual),
     priceGcseMonthlyPrefix: pricePrefix(priceGcseMonthly),
@@ -164,7 +179,7 @@ const getStripeConfig = () => {
     throw new Error("Missing Stripe GCSE price IDs");
   }
 
-  if (!price11PlusMonthly || !price11PlusAnnual) {
+  if (!price11PlusWeekly || !price11PlusAnnual) {
     throw new Error("Missing Stripe 11+ price IDs");
   }
 
@@ -174,10 +189,12 @@ const getStripeConfig = () => {
     stripeSecretKey,
     prices: {
       gcse: {
+        weekly: priceGcseMonthly,
         monthly: priceGcseMonthly,
         annual: priceGcseAnnual,
       },
       eleven_plus: {
+        weekly: price11PlusWeekly,
         monthly: price11PlusMonthly,
         annual: price11PlusAnnual,
         ultra: price11PlusUltra,
@@ -283,7 +300,7 @@ serve(async (req) => {
 
     const {
       plan_interval: planInterval,
-      plan = "monthly",
+      plan = "weekly",
       returnTo: rawReturnTo,
       premiumTrack: requestedPremiumTrackRaw,
       baseUrl: clientBaseUrl,
@@ -298,6 +315,8 @@ serve(async (req) => {
       ? "annual"
       : planInterval === "yearly"
       ? "annual"
+      : planInterval === "weekly"
+      ? "weekly"
       : plan === "ultra_annual"
       ? "ultra_annual"
       : plan === "annual"
@@ -306,14 +325,16 @@ serve(async (req) => {
       ? "annual"
       : plan === "ultra"
       ? "ultra"
-      : "monthly";
+      : plan === "monthly"
+      ? "weekly"
+      : "weekly";
     if (normalizedPlan === "ultra" || normalizedPlan === "ultra_annual") {
       throw new Error("This plan is not currently available.");
     }
 
     const checkoutTrack = "eleven_plus";
     const trackPrices = config.prices[checkoutTrack as keyof typeof config.prices];
-    let priceId = trackPrices?.monthly;
+    let priceId = trackPrices?.weekly;
     if (normalizedPlan === "annual") {
         priceId = trackPrices?.annual;
     } else if (normalizedPlan === "ultra") {

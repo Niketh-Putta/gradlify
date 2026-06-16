@@ -1003,7 +1003,7 @@ export function EnglishSplitViewDemo() {
     if (isOpeningCheckout) return;
     setIsOpeningCheckout(true);
     try {
-      await startPremiumCheckout('monthly', 'eleven_plus');
+      await startPremiumCheckout('weekly', 'eleven_plus');
     } catch (error) {
       console.error('Failed to open full access checkout:', error);
       const message = error instanceof Error ? error.message : 'Could not open checkout. Please try again.';

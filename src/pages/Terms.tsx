@@ -90,7 +90,7 @@ export default function Terms() {
                   <h4 className="mb-2 flex flex-wrap items-center gap-1.5 font-semibold">
                     Premium Plan (
                     <DiagonalStrikePrice className="text-sm text-muted-foreground" />
-                    <span>£{PREMIUM_PRICING.monthly}/month</span>
+                    <span>£{PREMIUM_PRICING.weekly}/week</span>
                     <span className="rounded-full bg-red-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-red-600">limited time offer</span>
                     <span>or annual was</span>
                     <DiagonalStrikePrice amount={PREMIUM_PRICING.annualOriginal} className="text-sm text-muted-foreground" />
@@ -122,7 +122,7 @@ export default function Terms() {
                 <h2 className="text-xl font-semibold mb-3">6. Payment and Subscriptions</h2>
                 <ul className="list-disc list-inside space-y-2 text-muted-foreground">
                   <li>Subscription fees are processed securely through Stripe</li>
-                  <li>Subscriptions auto-renew monthly unless cancelled</li>
+                  <li>Subscriptions auto-renew weekly or annually unless cancelled</li>
                   <li>You can cancel your subscription at any time</li>
                   <li>Refunds are subject to our refund policy</li>
                   <li>Price changes will be communicated 30 days in advance</li>

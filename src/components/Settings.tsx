@@ -199,7 +199,7 @@ export function Settings({ user, onBackToChat, onSignOut }: SettingsProps) {
   const isSupportAdmin = user?.email?.toLowerCase() === 'team@gradlify.com';
   const premiumSettingsTitle = "Upgrade to Gradlify Premium";
   const premiumSettingsDescription =
-    "Choose monthly or annual billing to unlock Premium access for your current track.";
+    "Choose weekly or annual billing to unlock Premium access for your current track.";
   const premiumSettingsCta = "Upgrade to Gradlify Premium";
   const TRACK_FEATURES: Record<UserTrack, string[]> = {
     gcse: [
@@ -610,7 +610,7 @@ export function Settings({ user, onBackToChat, onSignOut }: SettingsProps) {
     );
   };
 
-  const handleUpgradeToPremium = async (plan: 'monthly' | 'annual' | 'ultra' | 'ultra_annual') => {
+  const handleUpgradeToPremium = async (plan: 'weekly' | 'annual' | 'ultra' | 'ultra_annual') => {
     setIsCreatingCheckout(true);
     try {
       await startPremiumCheckout(plan);
@@ -908,7 +908,7 @@ export function Settings({ user, onBackToChat, onSignOut }: SettingsProps) {
                           compact
                           align="right"
                           tone="dark"
-                          suffix="/month"
+                          suffix="/week"
                           currentClassName="text-lg text-white"
                           originalClassName="text-slate-300"
                           labelClassName="border-white/25 bg-white/10 text-white text-[8px] tracking-[0.08em]"
@@ -1045,13 +1045,13 @@ export function Settings({ user, onBackToChat, onSignOut }: SettingsProps) {
             </div>
 
             <div 
-              onClick={() => { setShowPremiumOptions(false); handleUpgradeToPremium('monthly'); }}
+              onClick={() => { setShowPremiumOptions(false); handleUpgradeToPremium('weekly'); }}
               className="cursor-pointer rounded-2xl border bg-card hover:bg-muted/50 p-4 transition-all"
             >
-              <h4 className="font-semibold text-base mb-1">Monthly Billing</h4>
+              <h4 className="font-semibold text-base mb-1">Weekly Billing</h4>
               <OfferPrice
                 compact
-                suffix="/month"
+                suffix="/week"
                 currentClassName="text-xl text-foreground"
               />
               <p className="text-xs text-muted-foreground mt-1">Pay as you go, cancel anytime.</p>
