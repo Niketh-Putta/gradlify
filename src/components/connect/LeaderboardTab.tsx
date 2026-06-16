@@ -8,16 +8,14 @@ import { PremiumLoader } from "@/components/PremiumLoader";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { getLeaderboard, getMyGlobalOptIn, setGlobalOptIn, LeaderboardEntry, type LeaderboardPeriod } from "@/lib/connectApi";
-import { Globe, Users, Target, Eye, EyeOff, Sparkles, ArrowRight } from "lucide-react";
+import { Globe, Users, Target, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useMembership } from "@/hooks/useMembership";
 import { useAppContext } from "@/hooks/useAppContext";
 import { resolveUserTrack } from "@/lib/track";
-import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
 export function LeaderboardTab() {
-  const navigate = useNavigate();
   const [period, setPeriod] = useState<LeaderboardPeriod>('sprint');
   const [scope, setScope] = useState<'global' | 'friends'>('global');
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
@@ -142,38 +140,6 @@ export function LeaderboardTab() {
 
   return (
     <div className="space-y-6">
-      <Card
-        className="group cursor-pointer border-slate-200 bg-white text-slate-950 shadow-sm transition-all duration-300 hover:border-primary/30 hover:shadow-md"
-        role="button"
-        tabIndex={0}
-        onClick={() => navigate("/sprint-details")}
-        onKeyDown={(event) => {
-          if (event.key === "Enter" || event.key === " ") {
-            event.preventDefault();
-            navigate("/sprint-details");
-          }
-        }}
-      >
-        <CardContent className="p-4">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex min-w-0 items-center gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-blue-600 text-white shadow-sm">
-                <Sparkles className="h-5 w-5" />
-              </div>
-              <div className="min-w-0">
-                <p className="truncate text-sm font-bold leading-5 text-slate-950">
-                  100 pound Amazon gift card
-                </p>
-                <p className="text-[11px] font-black uppercase text-slate-400">
-                  Prize details &amp; rules
-                </p>
-              </div>
-            </div>
-            <ArrowRight className="h-4 w-4 shrink-0 text-slate-300 transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
-          </div>
-        </CardContent>
-      </Card>
-
       <div className="flex flex-col gap-4">
         <div className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center">
           <Tabs

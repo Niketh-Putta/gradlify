@@ -129,7 +129,7 @@ export function SprintHowItWorks() {
                           11+ Launch Sprint
                         </h1>
                         <p className="mt-3 max-w-[52ch] text-lg text-slate-600 sm:text-xl">
-                          One cash prize: a £100 Amazon gift card, awarded after 30 days to whoever has the highest leaderboard score. Only correct answers from full mock exams count; practice does not. Live now. 11+ only.
+                          One cash prize, awarded after 30 days to whoever has the highest leaderboard score. Only correct answers from full mock exams count; practice does not. Live now. 11+ only.
                         </p>
                         <p className="mt-1 text-sm text-slate-500">
                           This sprint is for the 11+ track only. GCSE content and leaderboards remain separate.
@@ -214,7 +214,7 @@ export function SprintHowItWorks() {
                       <li>Sit full mock exams during the 30-day window.</li>
                       <li>Only correct answers in those mocks add to your leaderboard score.</li>
                       <li>Practice never counts toward the sprint leaderboard. Use it to prepare, then prove it in mocks.</li>
-                      <li>When the month ends, the highest score wins the £100 Amazon cash prize (after verification).</li>
+                      <li>When the month ends, the highest score wins the cash prize (after verification).</li>
                     </ol>
                   </div>
                 </section>
@@ -226,14 +226,14 @@ export function SprintHowItWorks() {
                       <div className="relative w-full">
                         <img
                           src="/prizes-11plus.png"
-                          alt="11+ sprint prize, £100 Amazon gift card"
+                          alt="11+ sprint prize, cash prize"
                           className="w-full max-h-[520px] min-h-[320px] object-contain"
                           loading="lazy"
                         />
                       </div>
                     </div>
                     <div>
-                      <p className="text-lg font-semibold text-slate-900">One cash prize: £100 Amazon gift card</p>
+                      <p className="text-lg font-semibold text-slate-900">One cash prize</p>
                       <p className="mt-2 text-sm text-slate-600">
                         One cash prize. After the month closes, the student with the highest mock-only leaderboard score wins (verified by Gradlify).
                       </p>
@@ -383,7 +383,7 @@ export function SprintHowItWorks() {
                       <li>Sit full mock exams during the 30-day window.</li>
                       <li>Only correct answers in those mocks add to your leaderboard score.</li>
                       <li>Practice never counts toward the sprint leaderboard. Use it to prepare, then prove it in mocks.</li>
-                      <li>When the month ends, the highest score wins the £100 Amazon cash prize (after verification).</li>
+                      <li>When the month ends, the highest score wins the cash prize (after verification).</li>
                     </ol>
                   </div>
                 </section>
@@ -394,12 +394,12 @@ export function SprintHowItWorks() {
               <div className="overflow-hidden rounded-[16px] border border-[#E6E8F0]">
                 <img
                   src="/prizes.png"
-                  alt="Sprint prize, £100 Amazon gift card"
+                  alt="Sprint prize, cash prize"
                   className="h-full w-full object-cover"
                 />
               </div>
               <div>
-                <p className="text-lg font-semibold text-slate-900">One cash prize: £100 Amazon gift card</p>
+                <p className="text-lg font-semibold text-slate-900">One cash prize</p>
                 <p className="mt-2 text-sm text-slate-600">
                   After 30 days, the highest mock-only leaderboard score wins. Only correct answers from full mock exams count; practice does not.
                 </p>
@@ -432,7 +432,7 @@ export function SprintHowItWorks() {
 
           <section className="mt-8 rounded-[20px] border-2 border-dashed border-[#4f46e5]/30 bg-[#4f46e5]/5 p-8 text-center">
             <h2 className="text-2xl font-black tracking-tight text-[#4f46e5]">
-              Monthly sprint: £100 Amazon gift card. Highest mock-only score wins.
+              Monthly sprint: cash prize. Highest mock-only score wins.
             </h2>
           </section>
         </div>

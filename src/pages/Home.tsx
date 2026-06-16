@@ -49,7 +49,6 @@ import { isAbortLikeError } from "@/lib/errors";
 import { buildTrackReadinessRows, getTrackLabel, getTrackReadinessSummaryLabel, getTrackReadinessSections } from "@/lib/trackCurriculum";
 import { isForcedStarterUser } from "@/lib/starterOverrides";
 import { ReferralInviteDialog } from "@/components/ReferralInviteDialog";
-import { SprintBanner } from "@/components/SprintBanner";
 
 const TOPIC_ICONS = {
   number: Calculator,
@@ -389,7 +388,6 @@ export function Home() {
 
   return (
     <div className="min-h-screen bg-background">
-      {isElevenPlus && <SprintBanner />}
       <div className="pt-6 pb-10 sm:pt-8 sm:pb-14 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
 
         <div className="mb-4 flex items-center justify-between">

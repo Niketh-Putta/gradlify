@@ -422,7 +422,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
       name: "Lupin",
       mediaSrc: "/Lupin_winner.mp4",
       mediaType: "video",
-      prizeLabel: "Winner · £100 Amazon Gift Card",
+      prizeLabel: "Winner · Amazon Gift Card",
     },
     {
       name: "Srinika",

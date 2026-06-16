@@ -18,7 +18,7 @@ import {
   UserProfile,
   Friendship
 } from "@/lib/connectApi";
-import { Search, Plus, Users, X, Check, UserPlus, Trophy, Sparkles, ArrowRight } from "lucide-react";
+import { Search, Plus, Users, X, Check, UserPlus, Trophy } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { useAppContext } from "@/hooks/useAppContext";
@@ -35,7 +35,6 @@ const LEADERBOARD_SCORES_SINCE = new Intl.DateTimeFormat("en-GB", {
   hour12: true,
   timeZone: "Europe/London",
 }).format(SPRINT_START_AT);
-import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 
 type Scope = 'global' | 'friends';
@@ -43,7 +42,6 @@ type Scope = 'global' | 'friends';
 export default function Connect() {
   const { currentSubject } = useSubject();
   const { profile } = useAppContext();
-  const navigate = useNavigate();
   const userTrack = resolveUserTrack(profile?.track ?? null);
   const [scope, setScope] = useState<Scope>('global');
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
@@ -343,32 +341,6 @@ export default function Connect() {
           </div>
         </div>
       </header>
-
-      <button
-        type="button"
-        onClick={() => navigate("/sprint-details")}
-        className="group mb-4 w-full rounded-2xl border border-slate-200 bg-white p-3.5 text-left shadow-sm transition-all duration-300 animate-in slide-in-from-top-4 hover:border-primary/30 hover:shadow-md active:scale-[0.99]"
-      >
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex min-w-0 items-center gap-3">
-            <div className={cn(
-              "flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br text-white shadow-sm",
-              currentSubject === "english" ? "from-amber-400 to-amber-600" : "from-primary to-blue-600"
-            )}>
-              <Sparkles className="h-5 w-5" />
-            </div>
-            <div className="min-w-0">
-              <p className="truncate text-[13px] font-bold leading-5 text-slate-950 sm:text-sm">
-                100 pound Amazon gift card
-              </p>
-              <p className="text-[10px] font-black uppercase text-slate-400 sm:text-[11px]">
-                Prize details &amp; rules
-              </p>
-            </div>
-          </div>
-          <ArrowRight className="h-4 w-4 flex-shrink-0 text-slate-300 transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
-        </div>
-      </button>
 
       {/* Secondary Actions Row - Compact on mobile */}
       <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3 flex-shrink-0 animate-fade-in flex-wrap w-full" style={{ animationDelay: '0.05s' }}>

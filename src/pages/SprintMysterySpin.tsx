@@ -16,7 +16,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { getFoundersSprintInfo, getSprintEventDisplayLabels } from "@/lib/foundersSprint";
 
-const PRIZE_PHRASE = "100 pound Amazon gift card";
+const PRIZE_PHRASE = "cash prize";
 
 export default function SprintMysterySpin() {
   const navigate = useNavigate();
@@ -96,7 +96,7 @@ export default function SprintMysterySpin() {
 
                 <h1 className="mx-auto max-w-4xl font-serif text-5xl font-black leading-snug sm:text-7xl sm:leading-snug lg:text-8xl lg:leading-[1.12] lg:mx-0">
                   <span className="block text-transparent bg-clip-text bg-gradient-to-br from-blue-600 via-violet-600 to-orange-500">
-                    <span className="block leading-[1.12] sm:leading-[1.1] lg:leading-[1.08]">100 pound</span>
+                    <span className="block leading-[1.12] sm:leading-[1.1] lg:leading-[1.08]">Cash prize</span>
                     <span className="mt-1.5 block leading-[1.12] sm:mt-2 sm:leading-[1.1] lg:mt-2.5 lg:leading-[1.08]">
                       Amazon
                     </span>

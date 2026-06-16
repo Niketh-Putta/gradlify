@@ -32,7 +32,7 @@ export default function PublicSprintInfo() {
           <h1 className="mb-6 text-4xl font-extrabold tracking-tight text-slate-900 sm:text-7xl">
             Want to <br />
             win <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-700">
-              £100?
+              the prize?
             </span>
           </h1>
           <p className="max-w-xl text-lg font-medium leading-relaxed text-slate-400 sm:text-xl">
@@ -66,7 +66,7 @@ export default function PublicSprintInfo() {
           <div className="relative overflow-hidden rounded-[32px] border border-slate-200/60 bg-white p-3 shadow-2xl shadow-slate-200/40">
             <img 
               src="/sprint-prizes-new.jpeg" 
-              alt="Gradlify Sprint, £100 Amazon gift card" 
+              alt="Gradlify Sprint, cash prize" 
               className="rounded-[24px] w-full object-cover"
             />
           </div>
@@ -76,7 +76,7 @@ export default function PublicSprintInfo() {
         <section className="mb-32">
           <div className="mx-auto max-w-lg rounded-2xl border border-slate-200 bg-white/50 p-8 text-center">
             <span className="text-[10px] font-black uppercase tracking-widest text-amber-500">Winner</span>
-            <div className="mt-2 text-4xl font-bold text-slate-900 font-serif italic">£100</div>
+            <div className="mt-2 text-4xl font-bold text-slate-900 font-serif italic">Prize</div>
             <p className="mt-2 text-sm font-medium text-slate-500">
               One cash prize · highest mock-only leaderboard score when the sprint closes (see local times below) · verified by Gradlify
             </p>

@@ -67,13 +67,13 @@ export function SprintDetails() {
                   isEnglish ? "from-amber-500 to-amber-700" : "from-primary to-blue-700",
                 )}
               >
-                £100?
+                the prize?
               </span>
             </h1>
             <p className="max-w-xl text-base font-medium leading-relaxed text-slate-400 sm:text-lg italic">
               The competition runs for 30 days. When it ends, whoever has the{" "}
               <span className="font-semibold not-italic text-slate-600">highest</span> leaderboard score wins the only
-              cash prize: a £100 Amazon gift card. Only correct answers from full mock exams count; practice questions
+              cash prize. Only correct answers from full mock exams count; practice questions
               do not.
             </p>
           </header>
@@ -118,7 +118,7 @@ export function SprintDetails() {
                   <span className="text-[10px] font-black uppercase tracking-widest text-amber-500">Winner</span>
                   <div className="h-1.5 w-1.5 rounded-full bg-amber-500" />
                 </div>
-                <div className="mb-1 font-serif text-5xl font-bold italic tracking-tighter text-slate-900">£100</div>
+                <div className="mb-1 font-serif text-5xl font-bold italic tracking-tighter text-slate-900">Prize</div>
                 <p className="mb-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">Amazon gift card</p>
                 <p className="text-sm font-medium leading-relaxed text-slate-500">
                   After the month closes, whoever has the highest mock-only leaderboard score wins this cash prize
@@ -172,7 +172,7 @@ export function SprintDetails() {
             <div className="mt-12 flex items-center gap-4">
               <div className="h-px w-8 bg-border" />
               <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">
-                £100 Amazon gift card
+                cash prize
               </span>
               <div className="h-px w-8 bg-border" />
             </div>

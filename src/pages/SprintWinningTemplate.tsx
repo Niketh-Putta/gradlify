@@ -52,11 +52,11 @@ export default function SprintWinning() {
             <h1 className="mb-6 text-4xl font-extrabold tracking-tight text-slate-900 sm:text-6xl lg:text-7xl">
               Want to <br className="hidden sm:block" />
               win <span className={cn("text-transparent bg-clip-text bg-gradient-to-r", isEnglish ? "from-amber-500 to-amber-700" : "from-primary to-blue-700")}>
-                £100?
+                the prize?
               </span>
             </h1>
             <p className="max-w-xl text-base font-medium leading-relaxed text-slate-400 sm:text-lg italic">
-              The competition runs for 30 days. When it ends, whoever has the <span className="font-semibold not-italic text-slate-600">highest</span> leaderboard score wins the only cash prize: a £100 Amazon gift card. Only correct answers from full mock exams count; practice questions do not.
+              The competition runs for 30 days. When it ends, whoever has the <span className="font-semibold not-italic text-slate-600">highest</span> leaderboard score wins the only cash prize. Only correct answers from full mock exams count; practice questions do not.
             </p>
           </header>
 
@@ -86,7 +86,7 @@ export default function SprintWinning() {
               <div className="aspect-[16/10] sm:aspect-[16/9] w-full overflow-hidden rounded-[24px]">
                 <img 
                   src="/sprint-prizes-new.jpeg" 
-                  alt="Gradlify Sprint prize, £100 Amazon gift card" 
+                  alt="Gradlify Sprint prize, cash prize" 
                   className="h-full w-full object-cover transition-transform duration-1000 group-hover:scale-105"
                 />
               </div>
@@ -105,10 +105,10 @@ export default function SprintWinning() {
                   <span className="text-[10px] font-black uppercase tracking-widest text-amber-500">Winner</span>
                   <div className="h-1.5 w-1.5 rounded-full bg-amber-500" />
                 </div>
-                <div className="mb-1 text-5xl font-bold tracking-tighter text-slate-900 font-serif italic">£100</div>
+                <div className="mb-1 text-5xl font-bold tracking-tighter text-slate-900 font-serif italic">Prize</div>
                 <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3">Amazon gift card</p>
                 <p className="text-sm font-medium leading-relaxed text-slate-500">
-                  After the month closes, whoever has the highest mock-only leaderboard score wins this cash prize (verified by Gradlify).
+                  After the month closes, whoever has the highest mock-only leaderboard score wins this prize (verified by Gradlify).
                 </p>
               </div>
             </div>
@@ -152,7 +152,7 @@ export default function SprintWinning() {
             </button>
             <div className="mt-12 flex items-center gap-4">
               <div className="h-px w-8 bg-border" />
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">£100 Amazon gift card</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">cash prize</span>
               <div className="h-px w-8 bg-border" />
             </div>
           </div>
