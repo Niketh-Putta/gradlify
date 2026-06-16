@@ -77,7 +77,8 @@ export default function LiveMockExams() {
   const { user } = useAppContext();
   const membership = useMembership();
   const { isPremium } = membership;
-  const hasPremiumLiveMockAccess = isPremium;
+  const isTrialingPremium = membership.data?.subscription_status === "trialing";
+  const hasPremiumLiveMockAccess = isPremium && !isTrialingPremium;
   const [loading, setLoading] = useState(true);
   const [starting, setStarting] = useState(false);
   const [registeringBothSubjects, setRegisteringBothSubjects] = useState(false);
@@ -614,8 +615,8 @@ export default function LiveMockExams() {
           </h2>
           <p className="mt-1 max-w-2xl text-xs leading-5 text-slate-600 sm:text-sm">
             {COMBINED_MOCK_DISPLAY_TITLE} is on Sunday 14 June 2026. It is guided and built alongside real GL exam
-            creators for top-school preparation. Gradlify Premium members, including free trials, get this mock
-            included. Everyone else registers with one upfront payment.
+            creators for top-school preparation. Paid Gradlify Premium members get this mock included. 3-day free
+            trial accounts do not include live mock access. Everyone else registers with one upfront payment.
           </p>
           {!hasPremiumLiveMockAccess && (
             <div className="mt-3 rounded-[14px] border border-orange-200 bg-[linear-gradient(135deg,#fff4e6_0%,#fff_70%)] px-3 py-2.5 shadow-[0_8px_18px_rgba(234,88,12,0.08)]">
@@ -653,7 +654,7 @@ export default function LiveMockExams() {
             </span>
             <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-100 bg-white/70 px-2.5 py-1">
               <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
-              Included with Premium
+              Included with paid Premium
             </span>
           </div>
         </div>
@@ -733,10 +734,11 @@ export default function LiveMockExams() {
                 Premium benefit
               </span>
               <h3 className="mt-3 text-xl font-black tracking-tight text-slate-950 sm:text-2xl">
-                Gradlify Premium members get this mock for free.
+                Only paid Gradlify Premium members get this mock for free.
               </h3>
               <p className="mt-2 max-w-3xl text-sm font-semibold leading-6 text-slate-600 sm:text-base">
-                Premium is £19.99/month and includes free access to this mock plus all future Gradlify mocks.
+                The 3-day free trial does not include live mock access. Premium is £19.99/month and includes this mock
+                plus future Gradlify mocks.
               </p>
             </div>
             <PremiumUpgradeButton
