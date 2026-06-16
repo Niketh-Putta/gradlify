@@ -39,7 +39,8 @@ type AnnualOfferPriceProps = {
   compact?: boolean;
   align?: "left" | "right" | "center";
   tone?: "light" | "dark";
-  showPerMonth?: boolean;
+  /** When true, shows "Billed yearly at £199.99" under the per-week headline. */
+  showAnnualBilling?: boolean;
 };
 
 export function AnnualOfferPrice({
@@ -47,11 +48,11 @@ export function AnnualOfferPrice({
   currentClassName,
   originalClassName,
   labelClassName,
-  suffix = "/month",
+  suffix = "/week",
   compact = false,
   align = "left",
   tone = "light",
-  showPerMonth = false,
+  showAnnualBilling = false,
 }: AnnualOfferPriceProps) {
   return (
     <div
@@ -94,14 +95,14 @@ export function AnnualOfferPrice({
       </div>
       <div className="flex flex-wrap items-baseline gap-2">
         <span className={cn(compact ? "text-xl font-black" : "text-3xl font-semibold sm:text-4xl", currentClassName)}>
-          {formatGbp(PREMIUM_PRICING.annualPerMonth)}
+          {formatGbp(PREMIUM_PRICING.annualPerWeek)}
         </span>
         {suffix && <span className={cn("text-sm", tone === "dark" ? "text-white/80" : "text-muted-foreground")}>{suffix}</span>}
         <span className={cn("text-xs font-bold", tone === "dark" ? "text-white/80" : "text-red-600")}>
           just for you
         </span>
       </div>
-      {showPerMonth && (
+      {showAnnualBilling && (
         <p className={cn("text-xs font-semibold", tone === "dark" ? "text-white/70" : "text-muted-foreground")}>
           Billed yearly at {formatGbp(PREMIUM_PRICING.annual)}.
         </p>
@@ -115,7 +116,7 @@ export function OfferPrice({
   currentClassName,
   originalClassName,
   labelClassName,
-  suffix,
+  suffix = "/week",
   compact = false,
   align = "left",
   tone = "light",

@@ -134,7 +134,8 @@ export function PremiumPaywall({
                   ) : (
                     <AnnualOfferPrice
                       compact
-                      showPerMonth
+                      showAnnualBilling
+                      suffix="/week"
                       currentClassName="text-2xl sm:text-3xl text-slate-900 dark:text-white"
                       labelClassName="tracking-[0.1em]"
                     />

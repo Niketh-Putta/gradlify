@@ -637,7 +637,7 @@ export default function GrowthTracker() {
                   <UserTable 
                     users={payingUsers.filter(u => u.status === 'active' && !u.cancel_at_period_end && !isActuallyTrial(u))}
                     title="11+ Active Paying"
-                    description="11+ users who securely completed trial and are paying monthly/annually right now."
+                    description="11+ users who securely completed trial and are paying weekly or annually right now."
                     emptyText="No 11+ active paying customers yet."
                     icon={Crown}
                     iconColorClass="text-emerald-600"

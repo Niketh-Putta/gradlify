@@ -6,7 +6,8 @@ export const PREMIUM_PRICING = {
   weeklyOriginal: 11.99,
   annual: 199.99,
   annualOriginal: 249.99,
-  annualPerMonth: 16.67,
+  /** Annual ÷ 52 — shown as the headline rate when annual billing is selected. */
+  annualPerWeek: 3.85,
   annualSavings: 50,
 } as const;
 

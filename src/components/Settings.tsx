@@ -1038,7 +1038,8 @@ export function Settings({ user, onBackToChat, onSignOut }: SettingsProps) {
                 <h4 className="font-bold text-lg mb-1">Annual Billing</h4>
                 <AnnualOfferPrice
                   compact
-                  showPerMonth
+                  showAnnualBilling
+                  suffix="/week"
                   currentClassName="text-2xl text-foreground"
                 />
               </div>

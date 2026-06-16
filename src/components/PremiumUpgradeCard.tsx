@@ -129,7 +129,8 @@ export function PremiumUpgradeCard() {
               <AnnualOfferPrice
                 compact
                 tone="dark"
-                showPerMonth
+                showAnnualBilling
+                suffix="/week"
                 className="mb-3"
                 currentClassName="text-responsive-xl text-foreground"
                 originalClassName="text-white/75"

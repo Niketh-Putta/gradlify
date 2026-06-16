@@ -1265,7 +1265,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                     <div className={`text-lg sm:text-xl font-gradlify font-bold tracking-tight ${primaryText}`}>Free</div>
                     <div className="mt-4 flex items-end gap-2">
                       <div className={`text-3xl sm:text-4xl font-semibold ${primaryText}`}>£0</div>
-                      <div className={`text-sm ${subtleText} pb-1`}>/month</div>
+                      <div className={`text-sm ${subtleText} pb-1`}>forever</div>
                     </div>
                     <div className={`mt-5 sm:mt-6 space-y-3 text-[13px] sm:text-sm ${mutedText}`}>
                       {[
