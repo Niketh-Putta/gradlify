@@ -37,7 +37,6 @@ import {
 import { usePremium } from "@/hooks/usePremium";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { LeaderboardSnapshot } from "@/components/LeaderboardSnapshot";
 import { PremiumUpgradeButton } from "@/components/PremiumUpgradeButton";
 import { useReadinessStore } from "@/lib/stores/useReadinessStore";
 import { PracticeConfirmationModal } from "@/components/readiness/PracticeConfirmationModal";
@@ -857,13 +856,6 @@ export function Home() {
               <p className="text-sm text-muted-foreground">Review key concepts and formulas</p>
             </button>
           </div>
-        </div>
-
-        {/* Leaderboard Section */}
-        <div 
-          className="mb-8 delay-350"
-        >
-          <LeaderboardSnapshot />
         </div>
 
         {/* Premium Upgrade Banner - Only hide for paid premium users */}
