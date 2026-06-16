@@ -419,6 +419,12 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
 
   const winnerShowcase: WinnerShowcaseItem[] = [
     {
+      name: "Lupin",
+      mediaSrc: "/Lupin_winner.mp4",
+      mediaType: "video",
+      prizeLabel: "Winner · £100 Amazon Gift Card",
+    },
+    {
       name: "Srinika",
       mediaSrc: "/Srinika_winner.mov",
       mediaType: "video",
