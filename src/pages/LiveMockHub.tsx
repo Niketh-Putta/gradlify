@@ -103,7 +103,7 @@ function MockExamCard({ card }: { card: MockCard }) {
 
         {!live ? (
           <p className="mt-4 text-sm text-slate-500">
-            Free for Gradlify Premium members. Everyone else can reserve a place for £14.99.
+            Free for paid Gradlify Premium members only. 3-day trial accounts and everyone else can reserve a place for £14.99.
           </p>
         ) : null}
 
@@ -139,14 +139,14 @@ function PremiumBanner({ isPremium }: { isPremium: boolean }) {
             Gradlify Premium
           </div>
           <h2 className="mt-2 text-lg font-black tracking-tight text-slate-950 sm:text-xl">
-            Free access to every mock, past and future
+            Paid Premium unlocks every mock, past and future
           </h2>
           <p className="mt-1 text-sm leading-6 text-slate-600">
             {isPremium ? (
               <>You have Gradlify Premium, so every previous and upcoming live mock is included at no extra cost.</>
             ) : (
               <>
-                Premium members sit all previous and upcoming live mocks at no extra cost, for just{" "}
+                Paid Premium members sit all previous and upcoming live mocks at no extra cost, for just{" "}
                 <span className="font-bold text-slate-900">£19.99 a month</span>.
               </>
             )}
@@ -177,7 +177,9 @@ function PremiumBanner({ isPremium }: { isPremium: boolean }) {
  * so cards flip from "reserve" to "open" automatically on their release date.
  */
 export default function LiveMockHub() {
-  const { isPremium } = useMembership();
+  const membership = useMembership();
+  const isTrialingPremium = membership.data?.subscription_status === "trialing";
+  const hasPaidPremium = membership.isPremium && !isTrialingPremium;
   const cards: MockCard[] = [
     {
       title: COMBINED_MOCK_DISPLAY_TITLE,
@@ -198,7 +200,7 @@ export default function LiveMockHub() {
     <main className="min-h-screen bg-[#faf9f4] text-slate-950">
       <section className="mx-auto max-w-3xl px-4 py-10 sm:py-14">
         <div className="mb-7 sm:mb-9">
-          <PremiumBanner isPremium={isPremium} />
+          <PremiumBanner isPremium={hasPaidPremium} />
         </div>
 
         <header className="mb-7 sm:mb-9">

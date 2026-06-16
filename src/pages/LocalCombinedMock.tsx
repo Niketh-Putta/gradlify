@@ -252,7 +252,8 @@ export default function LocalCombinedMock() {
   const { user } = useAppContext();
   const navigate = useNavigate();
   const membership = useMembership();
-  const isPremium = membership.isPremium;
+  const isTrialingPremium = membership.data?.subscription_status === "trialing";
+  const hasPaidPremium = membership.isPremium && !isTrialingPremium;
   const [searchParams] = useSearchParams();
   const fastMode = searchParams.get("fast") === "1" && import.meta.env.DEV;
   // `?dev=1` skips the registration/payment check, so it must never work in production.
@@ -863,7 +864,7 @@ export default function LocalCombinedMock() {
       const result = await registerForCombinedMock({
         userId: user.id,
         email: user.email,
-        isPremium,
+        isPremium: hasPaidPremium,
         returnTo: `${window.location.pathname}${window.location.search}${window.location.hash}`,
       });
       if (result === "registered") {
@@ -989,7 +990,7 @@ export default function LocalCombinedMock() {
                 <p className="mt-1 text-xs text-slate-600">
                   {eligibility.registered
                     ? `${user.email} is registered. The mock is live — start when you are ready.`
-                    : "This account is not registered yet. Register below to unlock the mock (free with Premium, or one fixed payment)."}
+                    : "This account is not registered yet. Register below to unlock the mock (free with paid Premium, or one fixed payment)."}
                 </p>
               </div>
 
@@ -1098,7 +1099,7 @@ export default function LocalCombinedMock() {
               ) : (
                 <div className="mt-6 space-y-3">
                   <p className="text-sm leading-6 text-slate-600">
-                    Register to unlock this mock. Premium members (including trials) register free. Everyone else pays{" "}
+                    Register to unlock this mock. Paid Premium members register free. 3-day trial accounts and everyone else pay{" "}
                     <span className="font-black text-orange-700">{formatLiveMockPrice(liveMockPriceGbp)}</span> once.
                   </p>
                   <Button
@@ -1111,7 +1112,7 @@ export default function LocalCombinedMock() {
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         Opening checkout...
                       </>
-                    ) : isPremium ? (
+                    ) : hasPaidPremium ? (
                       <>
                         <ShieldCheck className="mr-2 h-4 w-4" />
                         Register with Premium

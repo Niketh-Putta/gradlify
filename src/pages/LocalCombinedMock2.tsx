@@ -41,7 +41,7 @@ import {
  * saved scores is touched. Everything keys off SECOND_MOCK_EVENT_SLUG.
  *
  * Access model (mirrors mock 1):
- *  - Gradlify Premium (incl. trials): registers free via a direct signup row.
+ *  - Paid Gradlify Premium: registers free via a direct signup row.
  *  - Everyone else: pays £14.99 via Stripe Checkout; the webhook records the row.
  */
 const MOCK_SLUG = SECOND_MOCK_EVENT_SLUG;
@@ -55,7 +55,8 @@ type Eligibility = {
 export default function LocalCombinedMock2() {
   const { user } = useAppContext();
   const membership = useMembership();
-  const isPremium = membership.isPremium;
+  const isTrialingPremium = membership.data?.subscription_status === "trialing";
+  const hasPaidPremium = membership.isPremium && !isTrialingPremium;
   const [searchParams] = useSearchParams();
 
   const [eligibility, setEligibility] = useState<Eligibility>({
@@ -157,7 +158,7 @@ export default function LocalCombinedMock2() {
       const result = await registerForSecondMock({
         userId: user.id,
         email: user.email,
-        isPremium,
+        isPremium: hasPaidPremium,
         returnTo: "/live-mock-exams/local-preview2",
       });
       if (result === "registered") {
@@ -267,7 +268,7 @@ export default function LocalCombinedMock2() {
                   ? released
                     ? `${user.email} is registered. The mock is open — come back to sit it.`
                     : `${user.email} is registered. This mock opens Saturday — we'll have your place saved.`
-                  : "Reserve your place now. Premium members (including trials) reserve free; everyone else pays once."}
+                  : "Reserve your place now. Paid Premium members reserve free; 3-day trial accounts and everyone else pay once."}
               </p>
             </div>
 
@@ -292,7 +293,7 @@ export default function LocalCombinedMock2() {
                   {released
                     ? "Register to unlock this mock. "
                     : "This mock goes live on Saturday — reserve your place now. "}
-                  Premium members (including trials) register free. Everyone else pays{" "}
+                  Paid Premium members register free. 3-day trial accounts and everyone else pay{" "}
                   <span className="font-black text-orange-700">
                     {formatLiveMockPrice(LIVE_MOCK_STANDARD_PRICE_GBP)}
                   </span>{" "}
@@ -308,7 +309,7 @@ export default function LocalCombinedMock2() {
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       Opening checkout...
                     </>
-                  ) : isPremium ? (
+                  ) : hasPaidPremium ? (
                     <>
                       <ShieldCheck className="mr-2 h-4 w-4" />
                       Reserve free with Premium
