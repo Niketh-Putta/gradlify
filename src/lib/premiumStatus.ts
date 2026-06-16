@@ -5,6 +5,7 @@ import { ULTRA_PLAN_ENABLED } from "@/lib/featureFlags";
 export type PremiumStatus = {
   isPremium: boolean;
   isUltra?: boolean;
+  isTrialing?: boolean;
   hasPremiumSubscription: boolean;
   hasTrackPremium: boolean;
   premiumUntil: string | null;
@@ -74,8 +75,6 @@ export async function getPremiumStatus(userId: string): Promise<PremiumStatus> {
   const currentTrack = normalizeTrack((pData as { track?: string | null } | null)?.track ?? null) ?? 'gcse';
   const premiumTrack = normalizeTrack((pData as { premium_track?: string | null } | null)?.premium_track ?? null);
   const hasTrackPremium = premiumTrack ? premiumTrack === currentTrack : currentTrack === 'gcse';
-  // A trialing subscription only counts if a premiumTrack is assigned.
-  // This prevents a cancelled/incomplete Stripe checkout from showing 'Manage Billing'.
   const isActiveTrialing = isTrialing;
   const hasPremiumSubscription = isPremiumTier || isActiveTrialing || (hasPaidPlan && hasActivePeriod) || isPremiumFlag;
   const isPremium = isFounder || hasPremiumSubscription;
@@ -85,6 +84,7 @@ export async function getPremiumStatus(userId: string): Promise<PremiumStatus> {
   return {
     isPremium,
     isUltra,
+    isTrialing,
     hasPremiumSubscription: isFounder || hasPremiumSubscription,
     hasTrackPremium: true,
     premiumUntil,
@@ -98,4 +98,21 @@ export async function getPremiumStatus(userId: string): Promise<PremiumStatus> {
     currentPeriodEnd: pData?.current_period_end ?? null,
     tier: pData?.tier ?? null,
   };
+}
+
+/**
+ * Live mocks are included for paying Premium members only — not free trials.
+ * Founders and active (non-trial) subscribers get free registration; trial users
+ * must pay the one-off mock fee or upgrade to paid Premium first.
+ */
+export function hasPaidPremiumLiveMockAccess(status: PremiumStatus): boolean {
+  if (status.founderTrack === 'founder') return true;
+  if (status.isTrialing || status.subscriptionStatus === 'trialing') return false;
+  if (status.subscriptionStatus === 'active' && status.hasPremiumSubscription) return true;
+  const premiumUntil = status.premiumUntil;
+  const hasActivePeriod = premiumUntil ? new Date(premiumUntil).getTime() > Date.now() : false;
+  const hasPaidPlan = Boolean(status.plan && status.plan !== 'free');
+  if (hasPaidPlan && hasActivePeriod) return true;
+  if (status.tier === 'premium' && status.subscriptionStatus === 'active') return true;
+  return false;
 }

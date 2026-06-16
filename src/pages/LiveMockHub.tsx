@@ -130,15 +130,15 @@ function goToPremiumSettings() {
 }
 
 function PremiumBanner({
-  hasPaidPremium,
-  isTrialingPremium,
+  hasPaidPremiumLiveMockAccess,
+  isTrialing,
 }: {
-  hasPaidPremium: boolean;
-  isTrialingPremium: boolean;
+  hasPaidPremiumLiveMockAccess: boolean;
+  isTrialing: boolean;
 }) {
-  const heading = hasPaidPremium
+  const heading = hasPaidPremiumLiveMockAccess
     ? "Your paid Premium includes every mock, past and future"
-    : isTrialingPremium
+    : isTrialing
       ? "Your 3-day trial does not include free live mocks"
       : "Paid Premium unlocks every mock, past and future";
 
@@ -152,9 +152,9 @@ function PremiumBanner({
           </div>
           <h2 className="mt-2 text-lg font-black tracking-tight text-slate-950 sm:text-xl">{heading}</h2>
           <p className="mt-1 text-sm leading-6 text-slate-600">
-            {hasPaidPremium ? (
-              <>You have Gradlify Premium, so every previous and upcoming live mock is included at no extra cost.</>
-            ) : isTrialingPremium ? (
+            {hasPaidPremiumLiveMockAccess ? (
+              <>You have paying Gradlify Premium, so every previous and upcoming live mock is included at no extra cost.</>
+            ) : isTrialing ? (
               <>
                 Upgrade to paid Premium to include all live mocks. During the 3-day trial, each live mock is charged
                 separately at checkout.
@@ -162,16 +162,24 @@ function PremiumBanner({
             ) : (
               <>
                 Paid Premium members sit all previous and upcoming live mocks at no extra cost, for just{" "}
-                <span className="font-bold text-slate-900">£19.99 a month</span>.
+                <span className="font-bold text-slate-900">£19.99 a month</span>. Free trials are not included.
               </>
             )}
           </p>
         </div>
-        {hasPaidPremium ? (
+        {hasPaidPremiumLiveMockAccess ? (
           <div className="inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-6 text-base font-bold text-emerald-700">
             <CheckCircle2 className="h-5 w-5" />
-            You have Gradlify Premium
+            Paying Premium — mocks included
           </div>
+        ) : isTrialing ? (
+          <Button
+            onClick={goToPremiumSettings}
+            className="h-12 w-full shrink-0 rounded-xl bg-orange-600 px-6 text-base font-bold text-white hover:bg-orange-700 sm:w-auto"
+          >
+            Upgrade to paid Premium
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
         ) : (
           <Button
             onClick={goToPremiumSettings}
@@ -192,9 +200,7 @@ function PremiumBanner({
  * so cards flip from "reserve" to "open" automatically on their release date.
  */
 export default function LiveMockHub() {
-  const membership = useMembership();
-  const isTrialingPremium = membership.data?.subscription_status === "trialing";
-  const hasPaidPremium = membership.isPremium && !isTrialingPremium;
+  const { isTrialing, hasPaidPremiumLiveMockAccess } = useMembership();
   const cards: MockCard[] = [
     {
       title: COMBINED_MOCK_DISPLAY_TITLE,
@@ -215,7 +221,10 @@ export default function LiveMockHub() {
     <main className="min-h-screen bg-[#faf9f4] text-slate-950">
       <section className="mx-auto max-w-3xl px-4 py-10 sm:py-14">
         <div className="mb-7 sm:mb-9">
-          <PremiumBanner hasPaidPremium={hasPaidPremium} isTrialingPremium={isTrialingPremium} />
+          <PremiumBanner
+            hasPaidPremiumLiveMockAccess={hasPaidPremiumLiveMockAccess}
+            isTrialing={isTrialing}
+          />
         </div>
 
         <header className="mb-7 sm:mb-9">

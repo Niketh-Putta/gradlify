@@ -65,12 +65,13 @@ export async function startCombinedMockCheckout(
 export async function registerForCombinedMock(options: {
   userId: string;
   email: string;
-  isPremium: boolean;
+  /** Paying Premium (not trial) — gets free registration. */
+  hasPaidPremiumLiveMockAccess: boolean;
   returnTo?: string;
   mockSlug?: string;
 }) {
   const mockSlug = options.mockSlug ?? BOTH_SUBJECTS_MOCK_SLUG;
-  if (options.isPremium) {
+  if (options.hasPaidPremiumLiveMockAccess) {
     await recordCombinedMockSignup(options.userId, options.email, mockSlug);
     return "registered" as const;
   }
@@ -114,7 +115,7 @@ export async function startSecondMockCheckout(returnTo: string) {
 export async function registerForSecondMock(options: {
   userId: string;
   email: string;
-  isPremium: boolean;
+  hasPaidPremiumLiveMockAccess: boolean;
   returnTo?: string;
 }) {
   return registerForCombinedMock({ ...options, mockSlug: SECOND_MOCK_EVENT_SLUG });

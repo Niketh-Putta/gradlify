@@ -76,9 +76,8 @@ export default function LiveMockExams() {
   const combinedMockLive = isCombinedMockReleased();
   const { user } = useAppContext();
   const membership = useMembership();
-  const { isPremium } = membership;
-  const isTrialingPremium = membership.data?.subscription_status === "trialing";
-  const hasPremiumLiveMockAccess = isPremium && !isTrialingPremium;
+  const { isTrialing, hasPaidPremiumLiveMockAccess } = membership;
+  const hasPremiumLiveMockAccess = hasPaidPremiumLiveMockAccess;
   const [loading, setLoading] = useState(true);
   const [starting, setStarting] = useState(false);
   const [registeringBothSubjects, setRegisteringBothSubjects] = useState(false);
@@ -525,8 +524,10 @@ export default function LiveMockExams() {
                     <h2 className="mt-5 text-2xl font-black tracking-tight">Join this mock</h2>
                     <p className="mt-2 text-sm leading-6 text-slate-600">
                       {hasPremiumLiveMockAccess
-                        ? "Register free with Premium, then start the mock."
-                        : `Pay ${formatLiveMockPrice(liveMockPriceGbp)} once to register and sit ${COMBINED_MOCK_DISPLAY_TITLE}.`}
+                        ? "Register free with paying Premium, then start the mock."
+                        : isTrialing
+                          ? `Premium trials do not include live mocks. Pay ${formatLiveMockPrice(liveMockPriceGbp)} once to register, or upgrade to paid Premium.`
+                          : `Pay ${formatLiveMockPrice(liveMockPriceGbp)} once to register and sit ${COMBINED_MOCK_DISPLAY_TITLE}.`}
                     </p>
                     <Button
                       className="mt-6 h-12 w-full rounded-xl bg-[linear-gradient(90deg,#ea580c_0%,#f59e0b_100%)] text-base font-black text-white shadow-[0_12px_24px_rgba(234,88,12,0.24)] hover:brightness-105"

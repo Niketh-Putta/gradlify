@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { getPremiumStatus } from '@/lib/premiumStatus';
+import { getPremiumStatus, hasPaidPremiumLiveMockAccess } from '@/lib/premiumStatus';
 import { syncBillingStatus } from '@/lib/billingSync';
 import { isAbortLikeError } from '@/lib/errors';
 import { ULTRA_PLAN_ENABLED } from '@/lib/featureFlags';
@@ -26,6 +26,8 @@ type ProfileUpdatePayload = {
 
 export function useMembership() {
   const [data, setData] = useState<MembershipData | null>(null);
+  const [hasPaidPremiumLiveMockAccessFlag, setHasPaidPremiumLiveMockAccessFlag] = useState(false);
+  const [isTrialingFlag, setIsTrialingFlag] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const refreshTimerRef = useRef<number | null>(null);
@@ -74,6 +76,8 @@ export function useMembership() {
 
           console.debug('[useMembership:data]', { data: membershipData, error: null });
           setData(membershipData);
+          setHasPaidPremiumLiveMockAccessFlag(hasPaidPremiumLiveMockAccess(premiumStatus));
+          setIsTrialingFlag(Boolean(premiumStatus.isTrialing));
           setLoading(false);
         }
       } catch (err: unknown) {
@@ -142,6 +146,8 @@ export function useMembership() {
     founderTrack: data?.founderTrack ?? null,
     isFounder: data?.founderTrack === 'founder',
     isPremium: data?.hasPremiumSubscription ?? false,
+    isTrialing: isTrialingFlag,
+    hasPaidPremiumLiveMockAccess: hasPaidPremiumLiveMockAccessFlag,
     isUltra: ULTRA_PLAN_ENABLED && (data?.isUltra ?? false),
     statusLabel: data?.founderTrack === 'founder' ? 'Founder' : (ULTRA_PLAN_ENABLED && data?.isUltra) ? 'Ultra' : data?.hasPremiumSubscription ? 'Premium' : 'Free'
   };
