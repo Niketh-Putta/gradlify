@@ -15,7 +15,6 @@ import {
   LogOut,
   Menu,
   X,
-  Users,
   ChevronDown,
   ChevronRight,
   MoreHorizontal,
@@ -167,7 +166,6 @@ export function Navigation({ user, profile, onSettings, onSignOut }: NavigationP
 
   const moreNavigationItems = [
     ...(AI_FEATURE_ENABLED ? [{ path: '/chat', icon: MessageSquare, label: 'AI Chat' }] : []),
-    { path: '/connect', icon: Users, label: 'Leaderboard' },
     { path: '/live-mock-exams', icon: Calendar, label: 'Live Mock Exams' },
   ];
 
