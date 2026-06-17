@@ -1,25 +1,43 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, CalendarClock, CheckCircle2, Clock3, Lock, Sparkles } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ArrowRight, CalendarClock, CheckCircle2, Clock3, Lock, Sparkles, UsersRound } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { useMembership } from "@/hooks/useMembership";
+import { supabase } from "@/integrations/supabase/client";
 import { PREMIUM_PRICING } from "@/lib/pricing";
 import { cn } from "@/lib/utils";
 import {
+  formatLiveMockPrice,
+  getDisplayedLiveMockSignupCount,
+  LIVE_MOCK_STANDARD_PRICE_GBP,
+  SECOND_MOCK_MIN_DISPLAYED_SIGNUPS,
+  SECOND_MOCK_PROMO_CODE,
+  SECOND_MOCK_PROMO_SPOTS_REMAINING,
+} from "@/lib/liveMockPricing";
+import {
   COMBINED_MOCK_DISPLAY_TITLE,
+  COMBINED_MOCK_EVENT_SLUG,
   SECOND_MOCK_DISPLAY_TITLE,
+  SECOND_MOCK_EVENT_SLUG,
   SECOND_MOCK_RELEASE_AT,
   isCombinedMockReleased,
   isSecondMockReleased,
 } from "@/lib/liveMockCombinedConfig";
 
 type MockCard = {
+  slug: string;
   title: string;
   blurb: string;
   href: string;
   live: boolean;
-  /** Shown on the CTA + status pill when the mock is not yet open. */
   opensAt?: Date;
+};
+
+type MockCardStats = {
+  displayedCount: number;
+  promoCode: string | null;
+  promoSpotsRemaining: number;
 };
 
 /** "Sat 21 Jun" style label for an upcoming mock's open date. */
@@ -51,8 +69,18 @@ function StatusPill({ live, opensAt }: { live: boolean; opensAt?: Date }) {
   );
 }
 
-function MockExamCard({ card }: { card: MockCard }) {
-  const { title, blurb, href, live, opensAt } = card;
+function MockExamCard({
+  card,
+  stats,
+  hasPaidPremiumLiveMockAccess,
+}: {
+  card: MockCard;
+  stats: MockCardStats;
+  hasPaidPremiumLiveMockAccess: boolean;
+}) {
+  const { slug, title, blurb, href, live, opensAt } = card;
+  const isMock2 = slug === SECOND_MOCK_EVENT_SLUG;
+  const showPromo = !hasPaidPremiumLiveMockAccess && stats.promoSpotsRemaining > 0 && stats.promoCode;
 
   return (
     <div
@@ -102,10 +130,45 @@ function MockExamCard({ card }: { card: MockCard }) {
           )}
         </div>
 
+        <div className="mt-4 inline-flex max-w-full items-center gap-2 rounded-[14px] border border-orange-100 bg-orange-50/60 px-3 py-2 text-xs font-semibold text-slate-700 sm:text-sm">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white text-orange-700">
+            <UsersRound className="h-4 w-4" />
+          </span>
+          <span className="min-w-0">
+            <span className="font-black text-orange-700">{stats.displayedCount}</span>{" "}
+            {isMock2 ? "families have already secured their spot" : "people have already enrolled so far"}.
+          </span>
+        </div>
+
         {!live ? (
           <p className="mt-4 text-sm text-slate-500">
-            Free for paid Gradlify Premium members only. 3-day trial accounts and everyone else can reserve a place for £14.99.
+            Free for paid Gradlify Premium members only. 3-day trial accounts and everyone else can reserve a place for{" "}
+            {formatLiveMockPrice(LIVE_MOCK_STANDARD_PRICE_GBP)}.
           </p>
+        ) : null}
+
+        {showPromo ? (
+          <div className="mt-4 rounded-[14px] border border-orange-200 bg-[linear-gradient(135deg,#fff4e6_0%,#fff_70%)] px-3 py-2.5">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-orange-600 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-white">
+              <Sparkles className="h-3 w-3" />
+              Use code {stats.promoCode}
+            </span>
+            <p className="mt-2 text-sm leading-6 text-slate-700">
+              {isMock2 ? (
+                <>
+                  <span className="font-black text-orange-700">{stats.promoSpotsRemaining} more uses</span> of discount
+                  code <span className="font-black text-slate-950">{stats.promoCode}</span> remain — otherwise back to full
+                  price ({formatLiveMockPrice(LIVE_MOCK_STANDARD_PRICE_GBP)}).
+                </>
+              ) : (
+                <>
+                  Enter <span className="font-black text-slate-950">{stats.promoCode}</span> at checkout for a discount.
+                  Only <span className="font-black text-orange-700">{stats.promoSpotsRemaining} uses</span> left before
+                  full price.
+                </>
+              )}
+            </p>
+          </div>
         ) : null}
 
         <Button
@@ -195,6 +258,16 @@ function PremiumBanner({
   );
 }
 
+const defaultStatsForSlug = (slug: string): MockCardStats => ({
+  displayedCount:
+    slug === SECOND_MOCK_EVENT_SLUG
+      ? SECOND_MOCK_MIN_DISPLAYED_SIGNUPS
+      : getDisplayedLiveMockSignupCount(0, slug),
+  promoCode: slug === SECOND_MOCK_EVENT_SLUG ? SECOND_MOCK_PROMO_CODE : null,
+  promoSpotsRemaining:
+    slug === SECOND_MOCK_EVENT_SLUG ? SECOND_MOCK_PROMO_SPOTS_REMAINING : 0,
+});
+
 /**
  * Live mock landing at `/live-mock-exams`. Lists each mock with a clear status
  * (open now vs upcoming) driven by the release dates in liveMockCombinedConfig,
@@ -204,12 +277,14 @@ export default function LiveMockHub() {
   const { isTrialing, hasPaidPremiumLiveMockAccess } = useMembership();
   const cards: MockCard[] = [
     {
+      slug: COMBINED_MOCK_EVENT_SLUG,
       title: COMBINED_MOCK_DISPLAY_TITLE,
       blurb: "A full, timed 11+ live mock exam. Marked papers, explanations and how you compare.",
       href: "/live-mock-exams/local-preview",
       live: isCombinedMockReleased(),
     },
     {
+      slug: SECOND_MOCK_EVENT_SLUG,
       title: SECOND_MOCK_DISPLAY_TITLE,
       blurb: "Our next full, timed 11+ live mock exam. Reserve your place now.",
       href: "/live-mock-exams/local-preview2",
@@ -217,6 +292,41 @@ export default function LiveMockHub() {
       opensAt: SECOND_MOCK_RELEASE_AT,
     },
   ];
+
+  const [statsBySlug, setStatsBySlug] = useState<Record<string, MockCardStats>>(() =>
+    Object.fromEntries(cards.map((card) => [card.slug, defaultStatsForSlug(card.slug)])),
+  );
+
+  useEffect(() => {
+    void Promise.all(
+      cards.map(async (card) => {
+        try {
+          const { data, error } = await supabase.functions.invoke("live-mock-signup-count", {
+            body: { mockSlug: card.slug },
+          });
+          if (error) throw error;
+          return [
+            card.slug,
+            {
+              displayedCount:
+                typeof data?.displayedCount === "number"
+                  ? data.displayedCount
+                  : defaultStatsForSlug(card.slug).displayedCount,
+              promoCode: typeof data?.promoCode === "string" ? data.promoCode : defaultStatsForSlug(card.slug).promoCode,
+              promoSpotsRemaining:
+                typeof data?.promoSpotsRemaining === "number"
+                  ? data.promoSpotsRemaining
+                  : defaultStatsForSlug(card.slug).promoSpotsRemaining,
+            } satisfies MockCardStats,
+          ] as const;
+        } catch {
+          return [card.slug, defaultStatsForSlug(card.slug)] as const;
+        }
+      }),
+    ).then((entries) => {
+      setStatsBySlug(Object.fromEntries(entries));
+    });
+  }, []);
 
   return (
     <main className="min-h-screen bg-[#faf9f4] text-slate-950">
@@ -241,7 +351,12 @@ export default function LiveMockHub() {
 
         <div className="flex flex-col gap-6">
           {cards.map((card) => (
-            <MockExamCard key={card.href} card={card} />
+            <MockExamCard
+              key={card.href}
+              card={card}
+              stats={statsBySlug[card.slug] ?? defaultStatsForSlug(card.slug)}
+              hasPaidPremiumLiveMockAccess={hasPaidPremiumLiveMockAccess}
+            />
           ))}
         </div>
       </section>

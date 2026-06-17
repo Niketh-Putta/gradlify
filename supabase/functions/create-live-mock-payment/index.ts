@@ -1,6 +1,13 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import Stripe from "https://esm.sh/stripe@14.21.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import {
+  BOTH_SUBJECTS_LIVE_MOCK_SLUG,
+  getLiveMockPromoConfig,
+  getPromoSpotsRemaining,
+  LIVE_MOCK_STANDARD_PRICE_GBP,
+  SECOND_LIVE_MOCK_SLUG,
+} from "../shared/liveMockPromoConfig.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -8,12 +15,7 @@ const corsHeaders = {
 };
 
 const readEnv = (name: string) => Deno.env.get(name)?.trim() || "";
-const BOTH_SUBJECTS_LIVE_MOCK_SLUG = "both_subjects_live_mock";
-const SECOND_LIVE_MOCK_SLUG = "both_subjects_live_mock_2";
 
-// Only these two known live-mock slugs may be charged for; anything else falls
-// back to mock 1. This keeps Stripe metadata (and the signup it later creates)
-// locked to a tight allowlist instead of an arbitrary caller-supplied slug.
 const LIVE_MOCK_PRODUCTS: Record<string, string> = {
   [BOTH_SUBJECTS_LIVE_MOCK_SLUG]: "Gradlify 11+ maths and english mock 1",
   [SECOND_LIVE_MOCK_SLUG]: "Gradlify 11+ maths and english mock 2",
@@ -26,9 +28,6 @@ const resolveMockSlug = (value: unknown): string => {
 
 const metadataValue = (value: unknown) =>
   typeof value === "string" && value.trim().length > 0 ? value.trim() : undefined;
-
-// Hardcoded so the charged price can't be overridden by a stale secret or Stripe price ID.
-const STANDARD_PRICE_GBP = 14.99;
 
 const buildInlineLiveMockLineItem = (amountGbp: number, productName: string) => ({
   quantity: 1,
@@ -57,6 +56,37 @@ const isLocalBaseUrl = (value: string) => {
     return false;
   }
 };
+
+async function getPromoCheckoutState(
+  stripe: Stripe,
+  mockSlug: string,
+): Promise<{ allowPromotionCodes: boolean; allowedPromoCode: string | null; promoSpotsRemaining: number }> {
+  const promoConfig = getLiveMockPromoConfig(mockSlug);
+  if (!promoConfig) {
+    return { allowPromotionCodes: false, allowedPromoCode: null, promoSpotsRemaining: 0 };
+  }
+
+  const promotionCodes = await stripe.promotionCodes.list({
+    code: promoConfig.promoCode,
+    active: true,
+    limit: 1,
+  });
+  const promotionCode = promotionCodes.data[0];
+  if (!promotionCode) {
+    return {
+      allowPromotionCodes: false,
+      allowedPromoCode: promoConfig.promoCode,
+      promoSpotsRemaining: 0,
+    };
+  }
+
+  const promoSpotsRemaining = getPromoSpotsRemaining(promotionCode.times_redeemed ?? 0, mockSlug);
+  return {
+    allowPromotionCodes: promoSpotsRemaining > 0,
+    allowedPromoCode: promoConfig.promoCode,
+    promoSpotsRemaining,
+  };
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -93,7 +123,7 @@ serve(async (req) => {
       throw new Error("Stripe is not configured.");
     }
 
-    const amountGbp = STANDARD_PRICE_GBP;
+    const amountGbp = LIVE_MOCK_STANDARD_PRICE_GBP;
 
     const body = await req.json().catch(() => ({}));
     const datafastMetadata = {
@@ -115,14 +145,13 @@ serve(async (req) => {
     const mockSlug = resolveMockSlug(body.mockSlug);
     const productName = LIVE_MOCK_PRODUCTS[mockSlug];
     const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
+    const promoCheckout = await getPromoCheckoutState(stripe, mockSlug);
 
-    // Always charge the inline £14.99 amount so a stale Stripe price ID secret
-    // can't keep charging the old price.
     const lineItem = buildInlineLiveMockLineItem(amountGbp, productName);
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
-      allow_promotion_codes: true,
+      allow_promotion_codes: promoCheckout.allowPromotionCodes,
       customer_email: user.email ?? undefined,
       client_reference_id: user.id,
       line_items: [lineItem],
@@ -132,7 +161,8 @@ serve(async (req) => {
         mock_slug: mockSlug,
         mock_starts_at: new Date().toISOString(),
         amount_gbp: String(amountGbp),
-        promo_code_enabled: "true",
+        promo_code_enabled: promoCheckout.allowPromotionCodes ? "true" : "false",
+        allowed_promo_code: promoCheckout.allowedPromoCode ?? "",
         ...datafastMetadata,
       },
       success_url: `${baseUrl}/pay/success?session_id={CHECKOUT_SESSION_ID}&returnTo=${encodeURIComponent(returnTo)}`,
@@ -143,10 +173,19 @@ serve(async (req) => {
       throw new Error("Stripe Checkout session URL was not returned.");
     }
 
-    return new Response(JSON.stringify({ url: session.url, sessionId: session.id, amountGbp }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 200,
-    });
+    return new Response(
+      JSON.stringify({
+        url: session.url,
+        sessionId: session.id,
+        amountGbp,
+        promoCode: promoCheckout.allowedPromoCode,
+        promoSpotsRemaining: promoCheckout.promoSpotsRemaining,
+      }),
+      {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      },
+    );
   } catch (error) {
     const message = error instanceof Error ? error.message : "Failed to start registration.";
     return new Response(JSON.stringify({ error: message }), {

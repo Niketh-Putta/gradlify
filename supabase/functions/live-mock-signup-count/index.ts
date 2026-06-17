@@ -1,26 +1,20 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import Stripe from "https://esm.sh/stripe@14.21.0";
+import {
+  BOTH_SUBJECTS_LIVE_MOCK_SLUG,
+  getDisplayedLiveMockSignupCount,
+  getLiveMockPromoConfig,
+  getPromoSpotsRemaining,
+  LIVE_MOCK_STANDARD_PRICE_GBP,
+} from "../shared/liveMockPromoConfig.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const DEFAULT_MOCK_SLUG = "both_subjects_live_mock";
 const readEnv = (name: string) => Deno.env.get(name)?.trim() ?? "";
-
-const SIGNUP_DISPLAY_OFFSET = Number(readEnv("LIVE_MOCK_SIGNUP_DISPLAY_OFFSET") || "55");
-const MIN_DISPLAYED_SIGNUPS = Number(readEnv("LIVE_MOCK_MIN_DISPLAYED_SIGNUPS") || "76");
-// Hardcoded so the displayed price can't be overridden by a stale secret.
-const STANDARD_PRICE_GBP = 14.99;
-const PROMO_CODE = readEnv("LIVE_MOCK_PROMO_CODE") || "LEVELFIELD";
-// Authoritative discount-spot cap. Hardcoded (not env-driven) so the displayed
-// scarcity stays controllable from code and isn't overridden by stale secrets.
-const PROMO_MAX_REDEMPTIONS = 3;
-
-const getDisplayedSignupCount = (count: number) =>
-  Math.max(MIN_DISPLAYED_SIGNUPS, count + SIGNUP_DISPLAY_OFFSET);
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -32,7 +26,9 @@ serve(async (req) => {
     const mockSlug =
       typeof body?.mockSlug === "string" && body.mockSlug.trim().length > 0
         ? body.mockSlug.trim()
-        : DEFAULT_MOCK_SLUG;
+        : BOTH_SUBJECTS_LIVE_MOCK_SLUG;
+
+    const promoConfig = getLiveMockPromoConfig(mockSlug);
 
     const supabaseUrl = readEnv("SUPABASE_URL");
     const serviceRoleKey = readEnv("SUPABASE_SERVICE_ROLE_KEY");
@@ -52,32 +48,33 @@ serve(async (req) => {
     if (error) throw error;
 
     const realCount = count ?? 0;
-    const displayedCount = getDisplayedSignupCount(realCount);
-    let promoSpotsRemaining = PROMO_MAX_REDEMPTIONS;
+    const displayedCount = getDisplayedLiveMockSignupCount(realCount, mockSlug);
+    let promoSpotsRemaining = promoConfig?.promoMaxRedemptions ?? 0;
+    let promoCode = promoConfig?.promoCode ?? null;
+
     const stripeKey = readEnv("STRIPE_SECRET_KEY_LIVE") || readEnv("STRIPE_SECRET_KEY");
-    if (stripeKey) {
+    if (stripeKey && promoConfig) {
       const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
       const promotionCodes = await stripe.promotionCodes.list({
-        code: PROMO_CODE,
+        code: promoConfig.promoCode,
         active: true,
         limit: 1,
       });
       const promotionCode = promotionCodes.data[0];
-      const coupon = promotionCode?.coupon;
-      const timesRedeemed = promotionCode?.times_redeemed ?? coupon?.times_redeemed ?? 0;
-      // Use the configured cap as the source of truth so the displayed scarcity
-      // is controllable, while still decrementing with real Stripe redemptions.
-      promoSpotsRemaining = Math.max(0, PROMO_MAX_REDEMPTIONS - timesRedeemed);
+      const timesRedeemed = promotionCode?.times_redeemed ?? 0;
+      promoSpotsRemaining = getPromoSpotsRemaining(timesRedeemed, mockSlug);
+      promoCode = promoConfig.promoCode;
     }
 
     return new Response(
       JSON.stringify({
+        mockSlug,
         count: realCount,
         displayedCount,
-        currentPriceGbp: STANDARD_PRICE_GBP,
-        promoCode: PROMO_CODE,
+        currentPriceGbp: LIVE_MOCK_STANDARD_PRICE_GBP,
+        promoCode,
         promoSpotsRemaining,
-        standardPriceGbp: STANDARD_PRICE_GBP,
+        standardPriceGbp: LIVE_MOCK_STANDARD_PRICE_GBP,
       }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },

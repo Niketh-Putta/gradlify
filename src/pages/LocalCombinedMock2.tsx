@@ -11,6 +11,8 @@ import {
   Loader2,
   LockKeyhole,
   ShieldCheck,
+  Sparkles,
+  UsersRound,
 } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
@@ -20,7 +22,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAppContext } from "@/hooks/useAppContext";
 import { useMembership } from "@/hooks/useMembership";
 import { cn } from "@/lib/utils";
-import { formatLiveMockPrice, LIVE_MOCK_STANDARD_PRICE_GBP } from "@/lib/liveMockPricing";
+import {
+  formatLiveMockPrice,
+  LIVE_MOCK_STANDARD_PRICE_GBP,
+  SECOND_MOCK_MIN_DISPLAYED_SIGNUPS,
+  SECOND_MOCK_PROMO_CODE,
+  SECOND_MOCK_PROMO_SPOTS_REMAINING,
+} from "@/lib/liveMockPricing";
 import { fetchSecondMockSignup, registerForSecondMock } from "@/lib/liveMockRegistration";
 import {
   BREAK_MINUTES,
@@ -66,6 +74,22 @@ export default function LocalCombinedMock2() {
   });
   const [registering, setRegistering] = useState(false);
   const [released, setReleased] = useState<boolean>(() => isSecondMockReleased());
+  const [signupCount, setSignupCount] = useState(SECOND_MOCK_MIN_DISPLAYED_SIGNUPS);
+  const [promoSpotsRemaining, setPromoSpotsRemaining] = useState(SECOND_MOCK_PROMO_SPOTS_REMAINING);
+
+  useEffect(() => {
+    void supabase.functions
+      .invoke("live-mock-signup-count", { body: { mockSlug: MOCK_SLUG } })
+      .then(({ data }) => {
+        if (typeof data?.displayedCount === "number") {
+          setSignupCount(data.displayedCount);
+        }
+        if (typeof data?.promoSpotsRemaining === "number") {
+          setPromoSpotsRemaining(data.promoSpotsRemaining);
+        }
+      })
+      .catch(() => null);
+  }, []);
 
   // Flip to "open" automatically the moment the Saturday release time passes.
   useEffect(() => {
@@ -246,6 +270,31 @@ export default function LocalCombinedMock2() {
                 <p className="mt-1 text-sm text-slate-500">{item.detail}</p>
               </div>
             ))}
+          </div>
+
+          <div className="border-t border-slate-100 px-6 py-5 sm:px-9">
+            <div className="inline-flex max-w-full items-center gap-2 rounded-[14px] border border-orange-100 bg-orange-50/60 px-3 py-2 text-xs font-semibold text-slate-700 sm:text-sm">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white text-orange-700">
+                <UsersRound className="h-4 w-4" />
+              </span>
+              <span>
+                <span className="font-black text-orange-700">{signupCount}</span> families have already secured their
+                spot.
+              </span>
+            </div>
+            {!hasPaidPremiumLiveMockAccess && promoSpotsRemaining > 0 ? (
+              <div className="mt-4 rounded-[14px] border border-orange-200 bg-[linear-gradient(135deg,#fff4e6_0%,#fff_70%)] px-3 py-2.5">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-orange-600 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-white">
+                  <Sparkles className="h-3 w-3" />
+                  Use code {SECOND_MOCK_PROMO_CODE}
+                </span>
+                <p className="mt-2 text-sm leading-6 text-slate-700">
+                  <span className="font-black text-orange-700">{promoSpotsRemaining} more uses</span> of discount code{" "}
+                  <span className="font-black text-slate-950">{SECOND_MOCK_PROMO_CODE}</span> remain — otherwise back to
+                  full price ({formatLiveMockPrice(LIVE_MOCK_STANDARD_PRICE_GBP)}).
+                </p>
+              </div>
+            ) : null}
           </div>
 
           <div className="border-t border-slate-100 px-6 py-6 sm:px-9">

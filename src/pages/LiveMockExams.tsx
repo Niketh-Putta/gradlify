@@ -641,7 +641,7 @@ export default function LiveMockExams() {
             </span>
             <span className="min-w-0">
               <span className="font-black text-orange-700">{bothSubjectsSignupCount}</span>{" "}
-              people have already saved their spot. You can too.
+              people have already enrolled so far. You can too.
             </span>
           </div>
           <div className="mt-3 flex flex-wrap items-center gap-2 text-[10px] font-semibold text-slate-500 sm:text-xs">

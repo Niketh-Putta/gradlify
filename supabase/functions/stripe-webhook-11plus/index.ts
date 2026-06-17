@@ -13,6 +13,11 @@ import {
   PremiumTrack,
   StripeMode
 } from "../shared/stripeConfig.ts";
+import {
+  BOTH_SUBJECTS_LIVE_MOCK_SLUG,
+  getLiveMockPromoConfig,
+  SECOND_LIVE_MOCK_SLUG,
+} from "../shared/liveMockPromoConfig.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -86,10 +91,58 @@ const resolveCustomerId = (
 // Tight allowlist of the live-mock slugs whose paid checkouts create a signup
 // row. Keep this in sync with create-live-mock-payment; never match arbitrary
 // slugs so an unrelated payment can't mint a live-mock registration.
-const LIVE_MOCK_SLUGS = new Set(['both_subjects_live_mock', 'both_subjects_live_mock_2']);
+const LIVE_MOCK_SLUGS = new Set([BOTH_SUBJECTS_LIVE_MOCK_SLUG, SECOND_LIVE_MOCK_SLUG]);
 const isLiveMockSession = (session: Stripe.Checkout.Session) =>
   LIVE_MOCK_SLUGS.has(session.metadata?.mock_slug ?? '') ||
   LIVE_MOCK_SLUGS.has(session.metadata?.mock_type ?? '');
+
+const resolveUsedPromotionCode = async (
+  stripe: Stripe,
+  session: Stripe.Checkout.Session,
+): Promise<string | null> => {
+  const expanded = await stripe.checkout.sessions.retrieve(session.id, {
+    expand: ['discounts', 'discounts.promotion_code'],
+  });
+  const discounts = expanded.discounts ?? [];
+  for (const discount of discounts) {
+    const promotionCode = discount.promotion_code;
+    if (typeof promotionCode === 'string') {
+      const promo = await stripe.promotionCodes.retrieve(promotionCode);
+      if (promo?.code) return promo.code.toUpperCase();
+      continue;
+    }
+    if (promotionCode && typeof promotionCode === 'object' && 'code' in promotionCode) {
+      const code = (promotionCode as Stripe.PromotionCode).code;
+      if (code) return code.toUpperCase();
+    }
+  }
+  return null;
+};
+
+const assertLiveMockPromotionAllowed = async (
+  stripe: Stripe,
+  session: Stripe.Checkout.Session,
+) => {
+  const mockSlug =
+    session.metadata?.mock_slug ??
+    session.metadata?.mock_type ??
+    BOTH_SUBJECTS_LIVE_MOCK_SLUG;
+  const promoConfig = getLiveMockPromoConfig(mockSlug);
+  if (!promoConfig) return;
+
+  const usedCode = await resolveUsedPromotionCode(stripe, session);
+  if (!usedCode) return;
+
+  if (usedCode !== promoConfig.promoCode.toUpperCase()) {
+    logStep('Live mock checkout used disallowed promotion code', {
+      sessionId: session.id,
+      mockSlug,
+      usedCode,
+      allowedCode: promoConfig.promoCode,
+    });
+    throw new Error(`Promotion code ${usedCode} is not valid for this mock.`);
+  }
+};
 
 const recordPaidLiveMockSignup = async (session: Stripe.Checkout.Session) => {
   const userId =
@@ -406,6 +459,7 @@ serve(async (req: Request): Promise<Response> => {
         case 'checkout.session.completed': {
           const session = event.data.object as Stripe.Checkout.Session;
           if (session.mode === 'payment' && isLiveMockSession(session)) {
+            await assertLiveMockPromotionAllowed(stripe, session);
             result = await recordPaidLiveMockSignup(session);
             break;
           }
