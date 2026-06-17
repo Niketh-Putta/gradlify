@@ -11,7 +11,6 @@ import {
   formatLiveMockPrice,
   getDisplayedLiveMockSignupCount,
   LIVE_MOCK_STANDARD_PRICE_GBP,
-  SECOND_MOCK_MIN_DISPLAYED_SIGNUPS,
   SECOND_MOCK_PROMO_CODE,
   SECOND_MOCK_PROMO_SPOTS_REMAINING,
 } from "@/lib/liveMockPricing";
@@ -21,6 +20,7 @@ import {
   SECOND_MOCK_DISPLAY_TITLE,
   SECOND_MOCK_EVENT_SLUG,
   SECOND_MOCK_RELEASE_AT,
+  SECOND_MOCK_RELEASE_SCHEDULE,
   isCombinedMockReleased,
   isSecondMockReleased,
 } from "@/lib/liveMockCombinedConfig";
@@ -49,7 +49,15 @@ function formatOpensLabel(date: Date): string {
   });
 }
 
-function StatusPill({ live, opensAt }: { live: boolean; opensAt?: Date }) {
+function StatusPill({
+  live,
+  opensAt,
+  releaseSchedule,
+}: {
+  live: boolean;
+  opensAt?: Date;
+  releaseSchedule?: string;
+}) {
   if (live) {
     return (
       <span className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1 text-[11px] font-black uppercase tracking-[0.14em] text-white">
@@ -64,7 +72,7 @@ function StatusPill({ live, opensAt }: { live: boolean; opensAt?: Date }) {
   return (
     <span className="inline-flex items-center gap-1.5 rounded-full bg-white/20 px-3 py-1 text-[11px] font-black uppercase tracking-[0.14em] text-white">
       <CalendarClock className="h-3.5 w-3.5" />
-      {opensAt ? `Opens ${formatOpensLabel(opensAt)}` : "Coming soon"}
+      {releaseSchedule ? `Opens ${releaseSchedule}` : opensAt ? `Opens ${formatOpensLabel(opensAt)}` : "Coming soon"}
     </span>
   );
 }
@@ -103,7 +111,11 @@ function MockExamCard({
           <span className="rounded-full bg-white/15 px-3 py-1 text-[11px] font-black uppercase tracking-[0.14em]">
             Live mock exam
           </span>
-          <StatusPill live={live} opensAt={opensAt} />
+          <StatusPill
+            live={live}
+            opensAt={opensAt}
+            releaseSchedule={isMock2 ? SECOND_MOCK_RELEASE_SCHEDULE : undefined}
+          />
         </div>
         <h2 className="mt-4 text-2xl font-black capitalize tracking-tight sm:text-3xl">{title}</h2>
         <p className={cn("mt-2 text-sm font-medium sm:text-base", live ? "text-orange-50" : "text-slate-200")}>
@@ -140,6 +152,13 @@ function MockExamCard({
           </span>
         </div>
 
+        {!live && isMock2 ? (
+          <p className="mt-4 rounded-[14px] border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm font-semibold text-slate-700">
+            Released on{" "}
+            <span className="font-black text-slate-950">{SECOND_MOCK_RELEASE_SCHEDULE}</span>.
+          </p>
+        ) : null}
+
         {!live ? (
           <p className="mt-4 text-sm text-slate-500">
             Free for paid Gradlify Premium members only. 3-day trial accounts and everyone else can reserve a place for{" "}
@@ -157,8 +176,8 @@ function MockExamCard({
               {isMock2 ? (
                 <>
                   <span className="font-black text-orange-700">{stats.promoSpotsRemaining} more uses</span> of discount
-                  code <span className="font-black text-slate-950">{stats.promoCode}</span> remain — otherwise back to full
-                  price ({formatLiveMockPrice(LIVE_MOCK_STANDARD_PRICE_GBP)}).
+                  code <span className="font-black text-slate-950">{stats.promoCode}</span> remain. After that,
+                  full price ({formatLiveMockPrice(LIVE_MOCK_STANDARD_PRICE_GBP)}).
                 </>
               ) : (
                 <>
@@ -234,7 +253,7 @@ function PremiumBanner({
         {hasPaidPremiumLiveMockAccess ? (
           <div className="inline-flex h-12 shrink-0 items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-6 text-base font-bold text-emerald-700">
             <CheckCircle2 className="h-5 w-5" />
-            Paying Premium — mocks included
+            Paying Premium. Mocks included
           </div>
         ) : isTrialing ? (
           <Button
@@ -259,10 +278,7 @@ function PremiumBanner({
 }
 
 const defaultStatsForSlug = (slug: string): MockCardStats => ({
-  displayedCount:
-    slug === SECOND_MOCK_EVENT_SLUG
-      ? SECOND_MOCK_MIN_DISPLAYED_SIGNUPS
-      : getDisplayedLiveMockSignupCount(0, slug),
+  displayedCount: getDisplayedLiveMockSignupCount(0, slug),
   promoCode: slug === SECOND_MOCK_EVENT_SLUG ? SECOND_MOCK_PROMO_CODE : null,
   promoSpotsRemaining:
     slug === SECOND_MOCK_EVENT_SLUG ? SECOND_MOCK_PROMO_SPOTS_REMAINING : 0,
@@ -286,7 +302,7 @@ export default function LiveMockHub() {
     {
       slug: SECOND_MOCK_EVENT_SLUG,
       title: SECOND_MOCK_DISPLAY_TITLE,
-      blurb: "Our next full, timed 11+ live mock exam. Reserve your place now.",
+      blurb: `Our next full, timed 11+ live mock exam. Released on ${SECOND_MOCK_RELEASE_SCHEDULE}. Reserve your place now.`,
       href: "/live-mock-exams/local-preview2",
       live: isSecondMockReleased(),
       opensAt: SECOND_MOCK_RELEASE_AT,

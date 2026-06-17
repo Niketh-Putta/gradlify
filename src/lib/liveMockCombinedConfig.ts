@@ -33,7 +33,7 @@ export const isCombinedMockReleased = (now: Date = new Date()): boolean =>
  *
  * Additive and fully isolated from mock 1: its own slug so registrations,
  * payments and signups never touch mock 1's data, scoring or saved scores.
- * Mock 2 is registration/reservation only until it goes live on Saturday — no
+ * Mock 2 is registration/reservation only until it goes live on Sunday — no
  * questions are seeded and the exam engine never runs for this slug yet.
  * ─────────────────────────────────────────────────────────────────────────── */
 
@@ -43,12 +43,35 @@ export const SECOND_MOCK_EVENT_SLUG = "both_subjects_live_mock_2";
 export const SECOND_MOCK_DISPLAY_TITLE = "11+ maths and english mock 2";
 
 /**
- * Scheduled go-live for mock 2: Saturday 20 June 2026, 9:00am UK time. UK is on
+ * Scheduled go-live for mock 2: Sunday 21 June 2026, 10:00am UK time. UK is on
  * BST (UTC+1) in June, so the explicit +01:00 offset avoids timezone ambiguity.
  * Before this instant the reservation page lets people register/pay to save a
  * spot, but the exam itself cannot be sat.
  */
-export const SECOND_MOCK_RELEASE_AT = new Date("2026-06-20T09:00:00+01:00");
+export const SECOND_MOCK_RELEASE_AT = new Date("2026-06-21T10:00:00+01:00");
+
+/** User-facing release schedule, e.g. "Sunday at 10am". */
+export const formatSecondMockReleaseSchedule = (
+  date: Date = SECOND_MOCK_RELEASE_AT,
+): string => {
+  const weekday = date.toLocaleDateString("en-GB", {
+    weekday: "long",
+    timeZone: "Europe/London",
+  });
+  const time = date
+    .toLocaleTimeString("en-GB", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+      timeZone: "Europe/London",
+    })
+    .replace(":00", "")
+    .replace(/\s/g, "")
+    .toLowerCase();
+  return `${weekday} at ${time}`;
+};
+
+export const SECOND_MOCK_RELEASE_SCHEDULE = formatSecondMockReleaseSchedule();
 
 /** True once the second mock has gone live (defaults to the current time). */
 export const isSecondMockReleased = (now: Date = new Date()): boolean =>

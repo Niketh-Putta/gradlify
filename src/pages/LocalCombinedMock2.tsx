@@ -25,7 +25,6 @@ import { cn } from "@/lib/utils";
 import {
   formatLiveMockPrice,
   LIVE_MOCK_STANDARD_PRICE_GBP,
-  SECOND_MOCK_MIN_DISPLAYED_SIGNUPS,
   SECOND_MOCK_PROMO_CODE,
   SECOND_MOCK_PROMO_SPOTS_REMAINING,
 } from "@/lib/liveMockPricing";
@@ -38,13 +37,14 @@ import {
   paperQuestionCount,
   SECOND_MOCK_DISPLAY_TITLE,
   SECOND_MOCK_EVENT_SLUG,
+  SECOND_MOCK_RELEASE_SCHEDULE,
 } from "@/lib/liveMockCombinedConfig";
 
 /**
  * Mock 2 registration / reservation page.
  *
  * IMPORTANT: this page is registration + reservation ONLY. Mock 2 has no seeded
- * questions and does not go live until Saturday, so the exam engine is never run
+ * questions and does not go live until Sunday at 10am, so the exam engine is never run
  * here and nothing about mock 1 (slug `both_subjects_live_mock`), its scoring or
  * saved scores is touched. Everything keys off SECOND_MOCK_EVENT_SLUG.
  *
@@ -74,7 +74,7 @@ export default function LocalCombinedMock2() {
   });
   const [registering, setRegistering] = useState(false);
   const [released, setReleased] = useState<boolean>(() => isSecondMockReleased());
-  const [signupCount, setSignupCount] = useState(SECOND_MOCK_MIN_DISPLAYED_SIGNUPS);
+  const [signupCount, setSignupCount] = useState(0);
   const [promoSpotsRemaining, setPromoSpotsRemaining] = useState(SECOND_MOCK_PROMO_SPOTS_REMAINING);
 
   useEffect(() => {
@@ -91,7 +91,7 @@ export default function LocalCombinedMock2() {
       .catch(() => null);
   }, []);
 
-  // Flip to "open" automatically the moment the Saturday release time passes.
+  // Flip to "open" automatically the moment the Sunday 10am release time passes.
   useEffect(() => {
     if (released) return;
     const interval = window.setInterval(() => {
@@ -134,7 +134,7 @@ export default function LocalCombinedMock2() {
   }, [checkEligibility]);
 
   // After returning from Stripe (`?upgraded=true`), the webhook records the
-  // signup asynchronously — poll briefly until the reservation row appears.
+  // signup asynchronously. Poll briefly until the reservation row appears.
   useEffect(() => {
     if (!user?.id || eligibility.registered) return;
     if (searchParams.get("upgraded") !== "true") return;
@@ -246,7 +246,7 @@ export default function LocalCombinedMock2() {
             </p>
             <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1.5 text-xs font-bold text-white">
               <CalendarDays className="h-4 w-4" />
-              {released ? "Now open" : "Available from Saturday"}
+              {released ? "Now open" : `Released on ${SECOND_MOCK_RELEASE_SCHEDULE}`}
             </div>
           </div>
 
@@ -290,7 +290,7 @@ export default function LocalCombinedMock2() {
                 </span>
                 <p className="mt-2 text-sm leading-6 text-slate-700">
                   <span className="font-black text-orange-700">{promoSpotsRemaining} more uses</span> of discount code{" "}
-                  <span className="font-black text-slate-950">{SECOND_MOCK_PROMO_CODE}</span> remain — otherwise back to
+                  <span className="font-black text-slate-950">{SECOND_MOCK_PROMO_CODE}</span> remain. After that,
                   full price ({formatLiveMockPrice(LIVE_MOCK_STANDARD_PRICE_GBP)}).
                 </p>
               </div>
@@ -315,10 +315,10 @@ export default function LocalCombinedMock2() {
               <p className="mt-1 text-xs text-slate-600">
                 {eligibility.registered
                   ? released
-                    ? `${user.email} is registered. The mock is open — come back to sit it.`
-                    : `${user.email} is registered. This mock opens Saturday — we'll have your place saved.`
+                    ? `${user.email} is registered. The mock is open. Come back to sit it.`
+                    : `${user.email} is registered. This mock opens ${SECOND_MOCK_RELEASE_SCHEDULE}. We'll have your place saved.`
                   : isTrialing
-                    ? "Reserve your place now. Your 3-day trial does not include live mocks — pay once or upgrade to paid Premium."
+                    ? "Reserve your place now. Your 3-day trial does not include live mocks. Pay once or upgrade to paid Premium."
                     : "Reserve your place now. Paid Premium members reserve free; everyone else pays once."}
               </p>
             </div>
@@ -333,7 +333,7 @@ export default function LocalCombinedMock2() {
                   <>You're registered and the mock is now open. Reload this page if the exam does not appear yet.</>
                 ) : (
                   <>
-                    You're registered — opens Saturday. There's nothing more to do for now; we'll keep your place
+                    You're registered. Opens {SECOND_MOCK_RELEASE_SCHEDULE}. There's nothing more to do for now; we'll keep your place
                     saved and you can start the mock from here once it goes live.
                   </>
                 )}
@@ -343,7 +343,7 @@ export default function LocalCombinedMock2() {
                 <p className="text-sm leading-6 text-slate-600">
                   {released
                     ? "Register to unlock this mock. "
-                    : "This mock goes live on Saturday — reserve your place now. "}
+                    : `This mock is released on ${SECOND_MOCK_RELEASE_SCHEDULE}. Reserve your place now. `}
                   {isTrialing ? (
                     <>
                       Your 3-day Premium trial does not include live mocks. Pay{" "}

@@ -583,8 +583,8 @@ export default function LiveMockExams() {
               </h3>
               <p className="mt-1 text-xs leading-5 text-emerald-700 sm:text-sm">
                 {combinedMockLive
-                  ? "Your spot is locked in. The mock is live — tap Start below to begin (Maths first, then break, then English)."
-                  : `Your spot for ${COMBINED_MOCK_DISPLAY_TITLE} is locked in. Come back here on the day to sit it — no further action needed.`}
+                  ? "Your spot is locked in. The mock is live. Tap Start below to begin (Maths first, then break, then English)."
+                  : `Your spot for ${COMBINED_MOCK_DISPLAY_TITLE} is locked in. Come back here on the day to sit it. No further action needed.`}
               </p>
               {combinedMockLive && (
                 <Button

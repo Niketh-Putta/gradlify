@@ -19,12 +19,12 @@ export const LIVE_MOCK_SIGNUP_CONFIG: Record<string, LiveMockSignupPromoConfig> 
   [SECOND_MOCK_EVENT_SLUG]: {
     promoCode: "MOCK2",
     promoMaxRedemptions: 7,
-    signupDisplayOffset: 36,
-    minDisplayedSignups: 43,
+    signupDisplayOffset: 0,
+    minDisplayedSignups: 0,
   },
 };
 
-/** Mock 1 promo — kept for existing registration UI. */
+/** Mock 1 promo. Kept for existing registration UI. */
 export const LIVE_MOCK_PROMO_CODE = LIVE_MOCK_SIGNUP_CONFIG[COMBINED_MOCK_EVENT_SLUG].promoCode;
 export const LIVE_MOCK_PROMO_SPOTS_REMAINING =
   LIVE_MOCK_SIGNUP_CONFIG[COMBINED_MOCK_EVENT_SLUG].promoMaxRedemptions;
