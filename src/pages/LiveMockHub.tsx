@@ -11,6 +11,7 @@ import {
   formatLiveMockPrice,
   getDisplayedLiveMockSignupCount,
   LIVE_MOCK_STANDARD_PRICE_GBP,
+  SECOND_MOCK_MIN_DISPLAYED_SIGNUPS,
   SECOND_MOCK_PROMO_CODE,
   SECOND_MOCK_PROMO_SPOTS_REMAINING,
 } from "@/lib/liveMockPricing";
@@ -148,7 +149,7 @@ function MockExamCard({
           </span>
           <span className="min-w-0">
             <span className="font-black text-orange-700">{stats.displayedCount}</span>{" "}
-            {isMock2 ? "families have already secured their spot" : "people have already enrolled so far"}.
+            {isMock2 ? "families have enrolled so far" : "people have already enrolled so far"}.
           </span>
         </div>
 
@@ -278,7 +279,10 @@ function PremiumBanner({
 }
 
 const defaultStatsForSlug = (slug: string): MockCardStats => ({
-  displayedCount: getDisplayedLiveMockSignupCount(0, slug),
+  displayedCount:
+    slug === SECOND_MOCK_EVENT_SLUG
+      ? SECOND_MOCK_MIN_DISPLAYED_SIGNUPS
+      : getDisplayedLiveMockSignupCount(0, slug),
   promoCode: slug === SECOND_MOCK_EVENT_SLUG ? SECOND_MOCK_PROMO_CODE : null,
   promoSpotsRemaining:
     slug === SECOND_MOCK_EVENT_SLUG ? SECOND_MOCK_PROMO_SPOTS_REMAINING : 0,

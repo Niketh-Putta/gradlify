@@ -25,6 +25,7 @@ import { cn } from "@/lib/utils";
 import {
   formatLiveMockPrice,
   LIVE_MOCK_STANDARD_PRICE_GBP,
+  SECOND_MOCK_MIN_DISPLAYED_SIGNUPS,
   SECOND_MOCK_PROMO_CODE,
   SECOND_MOCK_PROMO_SPOTS_REMAINING,
 } from "@/lib/liveMockPricing";
@@ -74,7 +75,7 @@ export default function LocalCombinedMock2() {
   });
   const [registering, setRegistering] = useState(false);
   const [released, setReleased] = useState<boolean>(() => isSecondMockReleased());
-  const [signupCount, setSignupCount] = useState(0);
+  const [signupCount, setSignupCount] = useState(SECOND_MOCK_MIN_DISPLAYED_SIGNUPS);
   const [promoSpotsRemaining, setPromoSpotsRemaining] = useState(SECOND_MOCK_PROMO_SPOTS_REMAINING);
 
   useEffect(() => {
@@ -278,8 +279,7 @@ export default function LocalCombinedMock2() {
                 <UsersRound className="h-4 w-4" />
               </span>
               <span>
-                <span className="font-black text-orange-700">{signupCount}</span> families have already secured their
-                spot.
+                <span className="font-black text-orange-700">{signupCount}</span> families have enrolled so far.
               </span>
             </div>
             {!hasPaidPremiumLiveMockAccess && promoSpotsRemaining > 0 ? (

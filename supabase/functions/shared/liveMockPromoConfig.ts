@@ -20,8 +20,8 @@ export const LIVE_MOCK_PROMO_BY_SLUG: Record<string, LiveMockPromoConfig> = {
   [SECOND_LIVE_MOCK_SLUG]: {
     promoCode: "MOCK2",
     promoMaxRedemptions: 7,
-    signupDisplayOffset: 0,
-    minDisplayedSignups: 0,
+    signupDisplayOffset: 36,
+    minDisplayedSignups: 43,
   },
 };
 
