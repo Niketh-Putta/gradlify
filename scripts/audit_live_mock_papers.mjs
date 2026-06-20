@@ -154,6 +154,32 @@ async function auditMock(mock) {
   }
 }
 
+async function comparePaperParity() {
+  console.log("\n=== MOCK 1 vs MOCK 2 STRUCTURAL PARITY ===");
+  for (const subject of ["maths", "english"]) {
+    const slug1 = MOCK1[subject];
+    const slug2 = MOCK2[subject];
+    const [{ paper: p1, questions: q1 }, { paper: p2, questions: q2 }] = await Promise.all([
+      loadPaperQuestions(slug1),
+      loadPaperQuestions(slug2),
+    ]);
+    const checks = [
+      ["question_count", p1.question_count, p2.question_count],
+      ["loaded questions", q1.length, q2.length],
+    ];
+    let ok = true;
+    for (const [label, a, b] of checks) {
+      if (a !== b) {
+        ok = false;
+        console.log(`  ${subject.toUpperCase()} mismatch (${label}): mock1=${a}, mock2=${b}`);
+      }
+    }
+    if (ok) {
+      console.log(`  ${subject.toUpperCase()}: ✓ ${q1.length} questions each, configs aligned`);
+    }
+  }
+}
+
 async function compareMocks() {
   console.log("\n=== MOCK 1 vs MOCK 2 CONTENT DIVIDE ===");
   const pairs = [
@@ -200,5 +226,6 @@ async function compareMocks() {
 
 await auditMock(MOCK1);
 await auditMock(MOCK2);
+await comparePaperParity();
 await compareMocks();
 console.log("\nDone.\n");

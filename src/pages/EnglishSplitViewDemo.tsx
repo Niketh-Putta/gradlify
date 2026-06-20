@@ -2081,11 +2081,28 @@ export function EnglishSplitViewDemo() {
           <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
             You have already submitted this live mock. Each account may complete it only once.
           </p>
-          <Link to="/live-mock-exams" className="mt-6 block">
-            <Button type="button" variant="outline" className="w-full rounded-xl">
-              Back to Live Mock page
-            </Button>
-          </Link>
+          {combinedMockEventSlug ? (
+            <>
+              <Button
+                type="button"
+                className="mt-6 w-full rounded-xl bg-amber-600 text-white hover:bg-amber-700"
+                onClick={() => navigate(analyticsPath)}
+              >
+                See how you did
+              </Button>
+              <Link to={combinedMockRegisterHref} className="mt-3 block">
+                <Button type="button" variant="outline" className="w-full rounded-xl">
+                  Back to {liveMockHeaderTitle}
+                </Button>
+              </Link>
+            </>
+          ) : (
+            <Link to="/live-mock-exams" className="mt-6 block">
+              <Button type="button" variant="outline" className="w-full rounded-xl">
+                Back to Live Mock page
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
     );

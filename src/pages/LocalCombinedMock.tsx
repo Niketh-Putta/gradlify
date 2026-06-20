@@ -208,11 +208,12 @@ const NOT_AFFECTED: AffectedMathsState = { affected: false, attemptId: null, mat
  * The check runs against the DB (not client/localStorage state) every time.
  */
 async function detectAffectedMathsAttempt(userId: string): Promise<AffectedMathsState> {
+  const mock1MathsSlug = mathsPaperForEvent(COMBINED_MOCK_EVENT_SLUG).slug;
   try {
     const { data: paper, error: paperError } = await supabase
       .from("live_mock_papers" as never)
       .select("id")
-      .eq("slug", MATHS_PAPER.slug)
+      .eq("slug", mock1MathsSlug)
       .maybeSingle();
     if (paperError) return NOT_AFFECTED;
     const mathsPaperId = (paper as { id?: string } | null)?.id ?? null;
@@ -1282,42 +1283,59 @@ export default function LocalCombinedMock({
                 </Button>
               ) : (
                 <div className="mt-6 space-y-3">
-                  <p className="text-sm leading-6 text-slate-600">
-                    {isTrialing ? (
-                      <>
-                        Your 3-day Premium trial does not include live mocks. Pay{" "}
-                        <span className="font-black text-orange-700">{formatLiveMockPrice(liveMockPriceGbp)}</span> once
-                        to register, or upgrade to paid Premium for free access to every mock.
-                      </>
-                    ) : (
-                      <>
-                        Register to unlock this mock. Paid Premium members register free. Everyone else pays{" "}
-                        <span className="font-black text-orange-700">{formatLiveMockPrice(liveMockPriceGbp)}</span> once.
-                      </>
-                    )}
-                  </p>
-                  <Button
-                    className={mockPrimaryBtnLg}
-                    disabled={registering}
-                    onClick={() => void handleRegister()}
-                  >
-                    {registering ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Opening checkout...
-                      </>
-                    ) : hasPaidPremiumLiveMockAccess ? (
-                      <>
-                        <ShieldCheck className="mr-2 h-4 w-4" />
-                        Register with Premium
-                      </>
-                    ) : (
-                      <>
-                        <CreditCard className="mr-2 h-4 w-4" />
-                        Pay {formatLiveMockPrice(liveMockPriceGbp)} and register
-                      </>
-                    )}
-                  </Button>
+                  {isMock2 ? (
+                    <>
+                      <p className="text-sm leading-6 text-slate-600">
+                        Reserve your place on the mock 2 registration page first. Registration, payment and your saved
+                        score stay separate from mock 1.
+                      </p>
+                      <Button asChild className={mockPrimaryBtnLg}>
+                        <Link to="/live-mock-exams/local-preview2">
+                          Go to mock 2 registration
+                          <ArrowRight className="ml-2 h-4 w-4" />
+                        </Link>
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-sm leading-6 text-slate-600">
+                        {isTrialing ? (
+                          <>
+                            Your 3-day Premium trial does not include live mocks. Pay{" "}
+                            <span className="font-black text-orange-700">{formatLiveMockPrice(liveMockPriceGbp)}</span> once
+                            to register, or upgrade to paid Premium for free access to every mock.
+                          </>
+                        ) : (
+                          <>
+                            Register to unlock this mock. Paid Premium members register free. Everyone else pays{" "}
+                            <span className="font-black text-orange-700">{formatLiveMockPrice(liveMockPriceGbp)}</span> once.
+                          </>
+                        )}
+                      </p>
+                      <Button
+                        className={mockPrimaryBtnLg}
+                        disabled={registering}
+                        onClick={() => void handleRegister()}
+                      >
+                        {registering ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Opening checkout...
+                          </>
+                        ) : hasPaidPremiumLiveMockAccess ? (
+                          <>
+                            <ShieldCheck className="mr-2 h-4 w-4" />
+                            Register with Premium
+                          </>
+                        ) : (
+                          <>
+                            <CreditCard className="mr-2 h-4 w-4" />
+                            Pay {formatLiveMockPrice(liveMockPriceGbp)} and register
+                          </>
+                        )}
+                      </Button>
+                    </>
+                  )}
                 </div>
               )}
             </div>
