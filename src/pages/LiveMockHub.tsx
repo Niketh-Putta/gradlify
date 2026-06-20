@@ -12,6 +12,7 @@ import {
   getDefaultPromoSpotsRemaining,
   getDisplayedLiveMockSignupCount,
   LIVE_MOCK_STANDARD_PRICE_GBP,
+  resolveLiveMockSignupDisplay,
   SECOND_MOCK_MIN_DISPLAYED_SIGNUPS,
   SECOND_MOCK_PROMO_CODE,
 } from "@/lib/liveMockPricing";

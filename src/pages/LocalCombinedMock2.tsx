@@ -29,6 +29,7 @@ import {
   SECOND_MOCK_MIN_DISPLAYED_SIGNUPS,
   SECOND_MOCK_PROMO_CODE,
   SECOND_MOCK_PROMO_SPOTS_REMAINING,
+  resolveLiveMockSignupDisplay,
 } from "@/lib/liveMockPricing";
 import { fetchSecondMockSignup, registerForSecondMock } from "@/lib/liveMockRegistration";
 import {
@@ -83,11 +84,15 @@ export default function LocalCombinedMock2() {
     void supabase.functions
       .invoke("live-mock-signup-count", { body: { mockSlug: MOCK_SLUG } })
       .then(({ data }) => {
-        if (typeof data?.displayedCount === "number") {
+        if (typeof data?.count === "number") {
+          const display = resolveLiveMockSignupDisplay(data.count, MOCK_SLUG);
+          setSignupCount(display.displayedCount);
+          setPromoSpotsRemaining(display.promoSpotsRemaining);
+        } else if (typeof data?.displayedCount === "number") {
           setSignupCount(data.displayedCount);
-        }
-        if (typeof data?.promoSpotsRemaining === "number") {
-          setPromoSpotsRemaining(data.promoSpotsRemaining);
+          if (typeof data?.promoSpotsRemaining === "number") {
+            setPromoSpotsRemaining(data.promoSpotsRemaining);
+          }
         }
       })
       .catch(() => null);

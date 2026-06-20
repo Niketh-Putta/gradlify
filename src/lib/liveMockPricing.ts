@@ -60,6 +60,12 @@ export const getDefaultPromoSpotsRemaining = (mockSlug: string, realSignupCount 
   return config.promoMaxRedemptions;
 };
 
+/** Prefer client-side display math so UI stays in sync with pricing.ts before edge deploy. */
+export const resolveLiveMockSignupDisplay = (realSignupCount: number, mockSlug: string) => ({
+  displayedCount: getDisplayedLiveMockSignupCount(realSignupCount, mockSlug),
+  promoSpotsRemaining: getDefaultPromoSpotsRemaining(mockSlug, realSignupCount),
+});
+
 export const SECOND_MOCK_PROMO_CODE = LIVE_MOCK_SIGNUP_CONFIG[SECOND_MOCK_EVENT_SLUG].promoCode;
 export const SECOND_MOCK_PROMO_SPOTS_REMAINING = getDefaultPromoSpotsRemaining(SECOND_MOCK_EVENT_SLUG);
 export const SECOND_MOCK_MIN_DISPLAYED_SIGNUPS =
