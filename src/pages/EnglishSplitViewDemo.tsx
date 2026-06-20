@@ -12,9 +12,10 @@ import { useAppContext } from '@/hooks/useAppContext';
 import { startPremiumCheckout } from '@/lib/checkout';
 import { toast } from 'sonner';
 import {
-  COMBINED_MOCK_DISPLAY_TITLE,
   COMBINED_MOCK_EVENT_SLUG,
-  SECOND_MOCK_DISPLAY_TITLE,
+  combinedMockAnalyticsUrl,
+  combinedMockDisplayTitleForEvent,
+  combinedMockLobbyPathForEvent,
   SECOND_MOCK_EVENT_SLUG,
 } from '@/lib/liveMockCombinedConfig';
 import {
@@ -658,10 +659,9 @@ export function EnglishSplitViewDemo() {
   const isLiveMock = Boolean(liveMockSlug);
   const combinedMockEventSlug = COMBINED_ENGLISH_EVENT_BY_SLUG[liveMockSlug] ?? null;
   const devBypass = searchParams.get("dev") === "1" && import.meta.env.DEV;
-  const combinedMockRegisterHref =
-    combinedMockEventSlug === SECOND_MOCK_EVENT_SLUG
-      ? "/live-mock-exams/local-preview2"
-      : "/live-mock-exams/local-preview";
+  const combinedMockRegisterHref = combinedMockEventSlug
+    ? combinedMockLobbyPathForEvent(combinedMockEventSlug)
+    : "/live-mock-exams";
   // Slugs that use the full authored-paper styling: single-line SPaG sections
   // and full-passage comprehension highlighting. The combined Maths+English
   // mock reuses this exact English experience for its English paper.
@@ -671,18 +671,12 @@ export function EnglishSplitViewDemo() {
     'both_subjects_english_mock_2',
   ]);
   const isTargetLiveMock = FULL_STYLED_LIVE_MOCK_SLUGS.has(liveMockSlug);
-  const liveMockHeaderTitle =
-    liveMockSlug === "both_subjects_english_mock_2"
-      ? SECOND_MOCK_DISPLAY_TITLE
-      : liveMockSlug === "both_subjects_english"
-        ? COMBINED_MOCK_DISPLAY_TITLE
-        : "11+ English Complete Mock Exam";
-  const analyticsPath =
-    liveMockSlug === "both_subjects_english_mock_2"
-      ? "/live-mock-exams/analytics?combined=1&subject=english&mock=both_subjects_live_mock_2"
-      : liveMockSlug === "both_subjects_english"
-        ? "/live-mock-exams/analytics?combined=1&subject=english&mock=both_subjects_live_mock"
-        : "/live-mock-exams/analytics";
+  const liveMockHeaderTitle = combinedMockEventSlug
+    ? combinedMockDisplayTitleForEvent(combinedMockEventSlug)
+    : "11+ English Complete Mock Exam";
+  const analyticsPath = combinedMockEventSlug
+    ? combinedMockAnalyticsUrl(combinedMockEventSlug, "english")
+    : "/live-mock-exams/analytics";
   // Topics usually arrives comma separated from MockExams, e.g., "Comprehension,SPaG"
   const rawTopics = searchParams.get('topics') || 'Comprehension';
   const selectedTopics = rawTopics.toLowerCase();

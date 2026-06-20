@@ -51,8 +51,10 @@ import {
   type LiveMockScoreRank,
 } from "@/lib/liveMockAnalytics";
 import {
-  COMBINED_MOCK_DISPLAY_TITLE,
   COMBINED_MOCK_EVENT_SLUG,
+  combinedMockDisplayTitleForEvent,
+  combinedMockLobbyPathForEvent,
+  combinedMockSitPathForEvent,
   combinedPaperSlugsForEvent,
   SECOND_MOCK_EVENT_SLUG,
 } from "@/lib/liveMockCombinedConfig";
@@ -147,6 +149,9 @@ export default function LiveMockAnalytics() {
     searchParams.get("subject") === "maths" ? "maths" : "english";
   const mockEventSlug =
     searchParams.get("mock") === SECOND_MOCK_EVENT_SLUG ? SECOND_MOCK_EVENT_SLUG : COMBINED_MOCK_EVENT_SLUG;
+  const combinedEventTitle = combinedMockDisplayTitleForEvent(mockEventSlug);
+  const combinedLobbyPath = combinedMockLobbyPathForEvent(mockEventSlug);
+  const combinedSitPath = combinedMockSitPathForEvent(mockEventSlug);
   const combinedSubjectSlugs = useMemo(
     () => combinedPaperSlugsForEvent(mockEventSlug),
     [mockEventSlug],
@@ -444,13 +449,19 @@ export default function LiveMockAnalytics() {
         <div className="flex flex-col gap-3 border-b border-slate-200 pb-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0 flex-1">
             <p className="text-[9px] font-black uppercase tracking-[0.16em] text-blue-700">
-              {isCombined ? `${COMBINED_MOCK_DISPLAY_TITLE} results` : "Live mock results"}
+              {isCombined ? `${combinedEventTitle} results` : "Live mock results"}
             </p>
             <h1 className="mt-1 break-words font-serif text-xl font-bold tracking-tight text-slate-950 sm:text-2xl md:text-[30px]">
               Hi, {displayName}
             </h1>
             <p className="mt-1 break-words text-base font-semibold leading-snug text-slate-800">{paperTitle}</p>
             <p className="mt-3 max-w-2xl text-xs leading-5 text-slate-500 sm:text-sm">
+              {mockEventSlug === SECOND_MOCK_EVENT_SLUG ? (
+                <>
+                  Mock 2 is separate from mock 1. Scores, cohort rank and saved answers here are for mock 2 only.
+                </>
+              ) : null}
+              {mockEventSlug === SECOND_MOCK_EVENT_SLUG ? " " : null}
               Numbers refresh automatically every few seconds so they stay aligned with your saved attempt.
               {updatedAt ? (
                 <span className="ml-1 text-slate-400">
@@ -611,8 +622,10 @@ export default function LiveMockAnalytics() {
               <strong className="font-semibold text-slate-800">{paperTitle}</strong> yet. Submit the mock to see your
               score, section breakdown, and question review below.
             </p>
-            <Link to="/live-mock-exams/local-preview?dev=1" className="mt-3 inline-block">
-              <Button className="rounded-xl bg-blue-600 hover:bg-blue-700">Go to combined mock</Button>
+            <Link to={combinedLobbyPath} className="mt-3 inline-block">
+              <Button className="rounded-xl bg-blue-600 hover:bg-blue-700">
+                Go to {combinedEventTitle}
+              </Button>
             </Link>
           </div>
         ) : inProgress && answers.length === 0 ? (
@@ -623,7 +636,9 @@ export default function LiveMockAnalytics() {
             <Link
               to={
                 isCombined
-                  ? `/live-mock-exams/session?track=11plus&subject=english&topics=Comprehension,SPaG&mode=mock-exam&questions=60&duration=50&liveMockSlug=${encodeURIComponent(combinedSubjectSlugs.english)}`
+                  ? combinedSubject === "english"
+                    ? `/live-mock-exams/session?track=11plus&subject=english&topics=Comprehension,SPaG&mode=mock-exam&questions=60&duration=50&liveMockSlug=${encodeURIComponent(combinedSubjectSlugs.english)}`
+                    : combinedSitPath
                   : buildLiveMockSessionPath()
               }
             >
@@ -1055,11 +1070,11 @@ export default function LiveMockAnalytics() {
 
         <div className="mt-3 flex flex-col gap-3 border-t border-slate-200 pt-3 sm:flex-row sm:items-center sm:justify-between">
           <Link
-            to="/live-mock-exams"
+            to={combinedLobbyPath}
             className="inline-flex items-center justify-center gap-2 text-sm font-medium text-blue-700 hover:underline sm:justify-start"
           >
             <ArrowLeft className="h-4 w-4 shrink-0" />
-            Back to live mock
+            Back to {combinedEventTitle}
           </Link>
           <Button
             type="button"

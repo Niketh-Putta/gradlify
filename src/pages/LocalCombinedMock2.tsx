@@ -34,25 +34,30 @@ import {
 import { fetchSecondMockSignup, registerForSecondMock } from "@/lib/liveMockRegistration";
 import {
   BREAK_MINUTES,
-  ENGLISH_PAPER,
+  englishPaperForEvent,
   isSecondMockReleased,
-  MATHS_PAPER,
+  mathsPaperForEvent,
   paperQuestionCount,
   SECOND_MOCK_DISPLAY_TITLE,
   SECOND_MOCK_EVENT_SLUG,
   SECOND_MOCK_RELEASE_SCHEDULE,
 } from "@/lib/liveMockCombinedConfig";
 
+const MOCK_SLUG = SECOND_MOCK_EVENT_SLUG;
+const MOCK2_MATHS = mathsPaperForEvent(MOCK_SLUG);
+const MOCK2_ENGLISH = englishPaperForEvent(MOCK_SLUG);
+
 /**
  * Mock 2 registration page. Maths and English papers load from Supabase
  * (`both_subjects_maths_mock_2` / `both_subjects_english_mock_2`).
+ *
+ * Fully separate from mock 1: own signup rows, paper slugs, attempts and results.
  *
  * Access model (mirrors mock 1):
  *  - Paying Gradlify Premium: registers free via a direct signup row.
  *  - Trial Premium: must pay the one-off fee (trials do not include live mocks).
  *  - Everyone else: pays £14.99 via Stripe Checkout; the webhook records the row.
  */
-const MOCK_SLUG = SECOND_MOCK_EVENT_SLUG;
 
 const MOCK2_PRIMARY_BUTTON =
   "h-12 w-full rounded-xl bg-slate-900 text-base font-bold text-white hover:bg-slate-800";
@@ -269,13 +274,13 @@ export default function LocalCombinedMock2() {
               {
                 icon: Calculator,
                 title: "1. Maths",
-                detail: `Non-calculator · ${paperQuestionCount(MATHS_PAPER)} questions · ${MATHS_PAPER.durationMinutes} minutes`,
+                detail: `Non-calculator · ${paperQuestionCount(MOCK2_MATHS)} questions · ${MOCK2_MATHS.durationMinutes} minutes`,
               },
               { icon: Coffee, title: "2. Break", detail: `${BREAK_MINUTES} minutes · automatic` },
               {
                 icon: BookOpen,
                 title: "3. English",
-                detail: `${paperQuestionCount(ENGLISH_PAPER)} questions · ${ENGLISH_PAPER.durationMinutes} minutes`,
+                detail: `${paperQuestionCount(MOCK2_ENGLISH)} questions · ${MOCK2_ENGLISH.durationMinutes} minutes`,
               },
             ].map((item) => (
               <div key={item.title} className="rounded-2xl border border-slate-200 bg-slate-50/70 p-5">

@@ -169,6 +169,28 @@ export const ENGLISH_PAPER_MOCK2: MockPaper = {
 export const englishPaperForEvent = (eventSlug: string): MockPaper =>
   eventSlug === SECOND_MOCK_EVENT_SLUG ? ENGLISH_PAPER_MOCK2 : ENGLISH_PAPER;
 
+export const isSecondMockEvent = (eventSlug: string): boolean =>
+  eventSlug === SECOND_MOCK_EVENT_SLUG;
+
+/** User-facing title for a combined mock event (mock 1 vs mock 2). */
+export const combinedMockDisplayTitleForEvent = (eventSlug: string): string =>
+  isSecondMockEvent(eventSlug) ? SECOND_MOCK_DISPLAY_TITLE : COMBINED_MOCK_DISPLAY_TITLE;
+
+/** Registration / info lobby path for a combined mock event. */
+export const combinedMockLobbyPathForEvent = (eventSlug: string): string =>
+  isSecondMockEvent(eventSlug) ? "/live-mock-exams/local-preview2" : "/live-mock-exams/local-preview";
+
+/** Timed sitting route for a combined mock event. */
+export const combinedMockSitPathForEvent = (eventSlug: string): string =>
+  `${combinedMockLobbyPathForEvent(eventSlug)}/sit`;
+
+/** Analytics URL scoped to one combined mock event (never mixes mock 1 and mock 2). */
+export const combinedMockAnalyticsUrl = (
+  eventSlug: string,
+  subject: "maths" | "english" = "english",
+): string =>
+  `/live-mock-exams/analytics?combined=1&subject=${subject}&mock=${encodeURIComponent(eventSlug)}`;
+
 /** Paper slugs for combined mock analytics / session routing. */
 export const combinedPaperSlugsForEvent = (eventSlug: string) => ({
   maths: mathsPaperForEvent(eventSlug).slug,

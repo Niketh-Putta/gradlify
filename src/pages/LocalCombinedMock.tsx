@@ -35,6 +35,7 @@ import { fetchCombinedMockSignup, registerForCombinedMock } from "@/lib/liveMock
 import {
   BREAK_MINUTES,
   BREAK_SECONDS,
+  combinedMockAnalyticsUrl,
   COMBINED_MOCK_EVENT_SLUG,
   COMBINED_MOCK_DISPLAY_TITLE,
   ENGLISH_PAPER,
@@ -333,8 +334,8 @@ export default function LocalCombinedMock({
       }).toString()}`,
     [activeEnglishPaper],
   );
-  const combinedAnalyticsUrl = `/live-mock-exams/analytics?combined=1&subject=english&mock=${encodeURIComponent(mockEventSlug)}`;
-  const mathsAnalyticsUrl = `/live-mock-exams/analytics?combined=1&subject=maths&mock=${encodeURIComponent(mockEventSlug)}`;
+  const combinedAnalyticsUrl = combinedMockAnalyticsUrl(mockEventSlug, "english");
+  const mathsAnalyticsUrl = combinedMockAnalyticsUrl(mockEventSlug, "maths");
   const mockPrimaryBtn = cn(
     "text-white",
     isMock2 ? "bg-slate-900 hover:bg-slate-800" : "bg-orange-600 hover:bg-orange-700",
@@ -506,10 +507,13 @@ export default function LocalCombinedMock({
     };
   }, [activeEnglishPaper.slug, activeMathsPaper.slug, user?.id]);
 
-  // Post-English remediation gate. Fresh DB check on every visit to this page.
-  // Affected users see the apology popup each time until they redo Maths and
-  // submit a real score ("Not now" only closes it for the current view).
+  // Mock 1 only: apology + maths re-sit for the affected cohort. Never run on mock 2.
   useEffect(() => {
+    if (mockEventSlug !== COMBINED_MOCK_EVENT_SLUG) {
+      setRemediation(NOT_AFFECTED);
+      setRemediationOpen(false);
+      return;
+    }
     if (!user?.id || !hasFullyCompleted || resitMode) return;
     let cancelled = false;
     void (async () => {
@@ -521,7 +525,7 @@ export default function LocalCombinedMock({
     return () => {
       cancelled = true;
     };
-  }, [user?.id, hasFullyCompleted, resitMode, location.key]);
+  }, [hasFullyCompleted, mockEventSlug, resitMode, user?.id, location.key]);
 
   useEffect(() => {
     void supabase.functions
@@ -1113,6 +1117,7 @@ export default function LocalCombinedMock({
               >
                 Paper order: non-calculator Maths first, then a break, then English. Full marked papers with answers,
                 explanations and a results comparison.
+                {isMock2 ? " Mock 2 is completely separate from mock 1: own registration, questions, score and rank." : ""}
               </p>
             </div>
 
