@@ -1,21 +1,23 @@
 #!/usr/bin/env node
 /**
- * Seed 17 realistic mock 2 cohort results (maths + english) for leaderboard / analytics.
+ * Seed mock 2 submitted results for the early cohort (maths + english).
  *
- * Scores are defined in docs/live-mock-2-cohort-scores.json and mirror mock 1 sitter spread.
- * Bot user_ids use 00000000-0000-4000-8000-* so real students always rank above them.
+ * Participant names, emails and scores: docs/live-mock-2-cohort-scores.json
  *
  * Usage:
  *   node scripts/seed_live_mock2_cohort_results.mjs
  *   node scripts/seed_live_mock2_cohort_results.mjs --force
+ *   node scripts/seed_live_mock2_cohort_results.mjs --remove-legacy
  */
 import { readFileSync, existsSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { randomBytes } from "node:crypto";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(__dirname, "..");
 const force = process.argv.includes("--force");
+const removeLegacy = process.argv.includes("--remove-legacy");
 
 function loadEnv() {
   for (const name of [".env", ".env.functions"]) {
@@ -41,7 +43,6 @@ loadEnv();
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const MOCK2_EVENT_SLUG = "both_subjects_live_mock_2";
-const BOT_PASSWORD = "Mock2Cohort-Bot-Seed!";
 
 if (!SUPABASE_URL || !SERVICE_KEY) {
   console.error("Missing SUPABASE_URL and/or SUPABASE_SERVICE_ROLE_KEY");
@@ -87,15 +88,6 @@ async function rest(path, { method = "GET", body, prefer } = {}) {
   return text ? JSON.parse(text) : null;
 }
 
-function botUserId(index) {
-  const hex = (0x101 + index - 1).toString(16).padStart(12, "0");
-  return `00000000-0000-4000-8000-${hex}`;
-}
-
-function botEmail(index) {
-  return `mock2bot-${index}@gradlify-cohort.local`;
-}
-
 function shuffle(arr) {
   const copy = [...arr];
   for (let i = copy.length - 1; i > 0; i -= 1) {
@@ -118,42 +110,50 @@ function optionsSnapshot(options) {
   }));
 }
 
-async function ensureBotUser(index, displayName) {
-  const id = botUserId(index);
-  const email = botEmail(index);
+async function findUserIdByEmail(email) {
+  const listed = await adminFetch(`/auth/v1/admin/users?email=${encodeURIComponent(email)}`);
+  return listed?.users?.[0]?.id ?? null;
+}
 
-  try {
-    await adminFetch("/auth/v1/admin/users", {
-      method: "POST",
-      body: JSON.stringify({
-        id,
-        email,
-        password: BOT_PASSWORD,
-        email_confirm: true,
-        user_metadata: { full_name: displayName, name: displayName },
-      }),
-    });
-  } catch (error) {
-    const msg = String(error.message || error);
-    if (!msg.includes("already") && !msg.includes("422") && !msg.includes("duplicate")) {
-      throw error;
+async function ensureParticipantUser(participant) {
+  const { name, email } = participant;
+  let userId = await findUserIdByEmail(email);
+
+  if (!userId) {
+    const password = `Gk-${randomBytes(12).toString("base64url")}!`;
+    try {
+      const created = await adminFetch("/auth/v1/admin/users", {
+        method: "POST",
+        body: JSON.stringify({
+          email,
+          password,
+          email_confirm: true,
+          user_metadata: { full_name: name, name, preferredName: name.split(" ")[0] },
+        }),
+      });
+      userId = created?.id ?? created?.user?.id ?? null;
+    } catch (error) {
+      userId = await findUserIdByEmail(email);
+      if (!userId) throw error;
     }
   }
 
+  const preferredName = name.split(" ")[0];
   await rest("profiles", {
     method: "POST",
     prefer: "resolution=merge-duplicates,return=minimal",
     body: {
-      user_id: id,
-      full_name: displayName,
+      user_id: userId,
+      full_name: name,
       track: "11plus",
       tier: "free",
       plan: "free",
+      onboarding: { preferredName },
       updated_at: new Date().toISOString(),
     },
   }).catch(() => {});
 
-  return { id, email };
+  return { id: userId, email };
 }
 
 async function ensureSignup(userId, email) {
@@ -210,13 +210,41 @@ async function loadPaperBundle(slug) {
   };
 }
 
-async function deleteExistingAttempts(userId, paperId) {
+async function deleteAttemptsForUser(userId, paperId) {
   const attempts = await rest(
     `live_mock_attempts?paper_id=eq.${paperId}&user_id=eq.${userId}&select=id`,
   );
   for (const row of attempts ?? []) {
     await rest(`live_mock_answers?attempt_id=eq.${row.id}`, { method: "DELETE", prefer: "return=minimal" });
     await rest(`live_mock_attempts?id=eq.${row.id}`, { method: "DELETE", prefer: "return=minimal" });
+  }
+}
+
+async function deleteAllAttemptsForUser(userId) {
+  const attempts = await rest(`live_mock_attempts?user_id=eq.${userId}&select=id`);
+  for (const row of attempts ?? []) {
+    await rest(`live_mock_answers?attempt_id=eq.${row.id}`, { method: "DELETE", prefer: "return=minimal" });
+    await rest(`live_mock_attempts?id=eq.${row.id}`, { method: "DELETE", prefer: "return=minimal" });
+  }
+}
+
+async function removeLegacyPlaceholderAccounts() {
+  const listed = await adminFetch("/auth/v1/admin/users?per_page=200");
+  const legacy = (listed?.users ?? []).filter((u) =>
+    typeof u.email === "string" && u.email.endsWith("@gradlify-cohort.local") && u.email.startsWith("mock2bot-"),
+  );
+
+  if (legacy.length === 0) {
+    console.log("No legacy placeholder accounts to remove.");
+    return;
+  }
+
+  console.log(`Removing ${legacy.length} legacy placeholder accounts…`);
+  for (const user of legacy) {
+    await deleteAllAttemptsForUser(user.id);
+    await rest(`live_mock_exam_signups?user_id=eq.${user.id}`, { method: "DELETE", prefer: "return=minimal" }).catch(() => {});
+    await adminFetch(`/auth/v1/admin/users/${user.id}`, { method: "DELETE" });
+    console.log(`  removed ${user.email}`);
   }
 }
 
@@ -258,18 +286,17 @@ async function seedPaperAttempt({
   durationSeconds,
 }) {
   if (force) {
-    await deleteExistingAttempts(userId, paper.paperId);
+    await deleteAttemptsForUser(userId, paper.paperId);
   }
 
   const existing = await rest(
     `live_mock_attempts?paper_id=eq.${paper.paperId}&user_id=eq.${userId}&select=id,status`,
   );
   if (existing?.length && !force) {
-    console.log(`  skip ${paper.paperId} (attempt exists)`);
+    console.log(`  skip ${displayName} on ${paper.paperId.slice(0, 8)} (attempt exists)`);
     return;
   }
 
-  const answeredCount = paper.questionCount;
   const attemptRows = await rest("live_mock_attempts", {
     method: "POST",
     prefer: "return=representation",
@@ -281,7 +308,7 @@ async function seedPaperAttempt({
       submitted_at: submittedAt,
       duration_seconds: durationSeconds,
       question_count: paper.questionCount,
-      answered_count: answeredCount,
+      answered_count: paper.questionCount,
     },
   });
 
@@ -297,37 +324,36 @@ async function seedPaperAttempt({
     submittedAt,
   });
 
-  const chunkSize = 60;
-  for (let i = 0; i < answerRows.length; i += chunkSize) {
-    await rest("live_mock_answers", {
-      method: "POST",
-      prefer: "return=minimal",
-      body: answerRows.slice(i, i + chunkSize),
-    });
-  }
+  await rest("live_mock_answers", {
+    method: "POST",
+    prefer: "return=minimal",
+    body: answerRows,
+  });
 
   const actualCorrect = answerRows.filter((r) => r.is_correct).length;
-  console.log(`  ${displayName}: ${actualCorrect}/${paper.questionCount} on paper ${paper.paperId.slice(0, 8)}…`);
+  console.log(`  ${displayName}: ${actualCorrect}/${paper.questionCount}`);
 }
 
 async function main() {
-  console.log(`Seeding ${participants.length} mock 2 cohort results…`);
+  if (removeLegacy || force) {
+    await removeLegacyPlaceholderAccounts();
+  }
+
+  console.log(`Seeding ${participants.length} mock 2 results…`);
 
   const mathsPaper = await loadPaperBundle(cohort.maths_paper_slug);
   const englishPaper = await loadPaperBundle(cohort.english_paper_slug);
-
   const baseSubmitted = new Date("2026-06-21T10:15:00+01:00").getTime();
 
   for (let i = 0; i < participants.length; i += 1) {
     const p = participants[i];
-    const index = i + 1;
-    const { id, email } = await ensureBotUser(index, p.name);
+    const { id, email } = await ensureParticipantUser(p);
     await ensureSignup(id, email);
 
     const submittedAt = new Date(baseSubmitted + i * 7 * 60 * 1000).toISOString();
     const durationSeconds = 2400 + Math.floor(Math.random() * 480);
 
-    console.log(`${index}. ${p.name} — target maths ${p.maths}/60, english ${p.english}/60`);
+    console.log(`${i + 1}. ${p.name} (${email}) — maths ${p.maths}/60, english ${p.english}/60`);
 
     await seedPaperAttempt({
       userId: id,
@@ -350,12 +376,7 @@ async function main() {
     });
   }
 
-  console.log("\nDone. Cohort summary:");
-  for (const p of participants) {
-    console.log(
-      `  ${p.name.padEnd(6)} — Maths ${p.maths}/60 (${Math.round((p.maths / 60) * 100)}%), English ${p.english}/60 (${Math.round((p.english / 60) * 100)}%)`,
-    );
-  }
+  console.log("\nDone.");
 }
 
 main().catch((error) => {
