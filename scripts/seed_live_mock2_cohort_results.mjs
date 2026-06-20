@@ -346,7 +346,7 @@ async function seedPaperAttempt({
 }
 
 async function main() {
-  if (cleanupStale || force) {
+  if (cleanupStale) {
     await removeStaleLocalAccounts();
   }
 
