@@ -7,7 +7,7 @@
  * Usage:
  *   node scripts/seed_live_mock2_cohort_results.mjs
  *   node scripts/seed_live_mock2_cohort_results.mjs --force
- *   node scripts/seed_live_mock2_cohort_results.mjs --remove-legacy
+ *   node scripts/seed_live_mock2_cohort_results.mjs --cleanup-stale
  */
 import { readFileSync, existsSync } from "node:fs";
 import { resolve, dirname } from "node:path";
@@ -17,7 +17,7 @@ import { randomBytes } from "node:crypto";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(__dirname, "..");
 const force = process.argv.includes("--force");
-const removeLegacy = process.argv.includes("--remove-legacy");
+const cleanupStale = process.argv.includes("--cleanup-stale");
 
 function loadEnv() {
   for (const name of [".env", ".env.functions"]) {
@@ -111,8 +111,15 @@ function optionsSnapshot(options) {
 }
 
 async function findUserIdByEmail(email) {
-  const listed = await adminFetch(`/auth/v1/admin/users?email=${encodeURIComponent(email)}`);
-  return listed?.users?.[0]?.id ?? null;
+  const target = email.toLowerCase();
+  for (let page = 1; page <= 50; page += 1) {
+    const listed = await adminFetch(`/auth/v1/admin/users?page=${page}&per_page=200`);
+    const users = listed?.users ?? [];
+    const match = users.find((u) => u.email?.toLowerCase() === target);
+    if (match?.id) return match.id;
+    if (users.length < 200) break;
+  }
+  return null;
 }
 
 async function ensureParticipantUser(participant) {
@@ -133,8 +140,17 @@ async function ensureParticipantUser(participant) {
       });
       userId = created?.id ?? created?.user?.id ?? null;
     } catch (error) {
+      const msg = String(error.message || error);
+      if (!msg.includes("email_exists") && !msg.includes("422")) {
+        throw error;
+      }
       userId = await findUserIdByEmail(email);
-      if (!userId) throw error;
+    }
+    if (!userId) {
+      userId = await findUserIdByEmail(email);
+    }
+    if (!userId) {
+      throw new Error(`Could not create or resolve user for ${email}`);
     }
   }
 
