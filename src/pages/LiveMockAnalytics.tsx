@@ -147,7 +147,10 @@ export default function LiveMockAnalytics() {
     searchParams.get("subject") === "maths" ? "maths" : "english";
   const mockEventSlug =
     searchParams.get("mock") === SECOND_MOCK_EVENT_SLUG ? SECOND_MOCK_EVENT_SLUG : COMBINED_MOCK_EVENT_SLUG;
-  const combinedSubjectSlugs = combinedPaperSlugsForEvent(mockEventSlug);
+  const combinedSubjectSlugs = useMemo(
+    () => combinedPaperSlugsForEvent(mockEventSlug),
+    [mockEventSlug],
+  );
   const activeSlug = isCombined ? combinedSubjectSlugs[combinedSubject] : LIVE_MOCK_PAPER_SLUG;
   const fallbackTitle = isCombined
     ? COMBINED_SUBJECT_TITLES[combinedSubject]
@@ -276,7 +279,7 @@ export default function LiveMockAnalytics() {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [user?.id, activeSlug, combinedSubjectSlugs, fallbackTitle, isCombined, combinedSubject, mockEventSlug]);
+  }, [user?.id, activeSlug, combinedSubjectSlugs.maths, combinedSubjectSlugs.english, fallbackTitle, isCombined, combinedSubject]);
 
   useEffect(() => {
     void loadAll(false);
