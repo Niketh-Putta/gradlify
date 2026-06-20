@@ -48,6 +48,13 @@ import {
   paperSeconds,
   sectionForQuestion,
 } from "@/lib/liveMockCombinedConfig";
+import { assertLiveMockPaperScorable, normalizeLiveMockOptions } from "@/lib/liveMockScoringGuard";
+import {
+  ensureLiveMockInProgressAttempt,
+  fetchLiveMockAttempt,
+  loadLiveMockSavedAnswers,
+  type LiveMockAttemptStatus,
+} from "@/lib/liveMockAttemptResume";
 
 export type LocalCombinedMockProps = {
   mockEventSlug?: string;
@@ -280,6 +287,7 @@ export default function LocalCombinedMock({
   });
   const [hasFullyCompleted, setHasFullyCompleted] = useState(false);
   const [awaitingEnglish, setAwaitingEnglish] = useState(false);
+  const [mathsAttemptStatus, setMathsAttemptStatus] = useState<LiveMockAttemptStatus>("none");
   const [phase, setPhase] = useState<Phase>("instructions");
   const [currentQuestion, setCurrentQuestion] = useState(1);
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -392,7 +400,7 @@ export default function LocalCombinedMock({
           supabase.from("live_mock_sections" as never).select("id, section_key").eq("paper_id", pid),
           supabase
             .from("live_mock_questions" as never)
-            .select("id, section_id, question_number, question_type, stem, options")
+            .select("id, section_id, question_number, question_type, stem, options, correct_answer")
             .eq("paper_id", pid)
             .order("question_number", { ascending: true }),
         ]);
@@ -409,13 +417,11 @@ export default function LocalCombinedMock({
         sectionKey: keyBySection.get(String(q.section_id)) ?? null,
         questionType: String(q.question_type || "maths"),
         stem: String(q.stem || ""),
-        options: (Array.isArray(q.options) ? (q.options as Record<string, unknown>[]) : []).map((o) => ({
-          id: String(o.id),
-          text: String(o.text),
-          correct: Boolean(o.correct),
-        })),
+        options: normalizeLiveMockOptions(q.options, q.correct_answer as string | null),
       }));
       if (mapped.length === 0) throw new Error("Maths paper returned no questions");
+      const scorable = assertLiveMockPaperScorable(mapped);
+      if (!scorable.ok) throw new Error(scorable.reason);
       setMathsPaperId(pid);
       return mapped;
     };
@@ -476,16 +482,23 @@ export default function LocalCombinedMock({
         .eq("user_id", user.id);
 
       const attemptRows = (attempts as { paper_id: string; status: string }[] | null) || [];
-      const mathsSubmitted = attemptRows.some(
-        (row) => row.paper_id === mathsPaperId && row.status === "submitted",
-      );
+      const mathsRow = attemptRows.find((row) => row.paper_id === mathsPaperId);
+      const mathsSubmitted = mathsRow?.status === "submitted";
       const englishSubmitted = attemptRows.some(
         (row) => row.paper_id === englishPaperId && row.status === "submitted",
       );
+      const mathsStatus: LiveMockAttemptStatus = mathsRow
+        ? mathsRow.status === "submitted"
+          ? "submitted"
+          : mathsRow.status === "in_progress"
+            ? "in_progress"
+            : "none"
+        : "none";
 
       if (!cancelled) {
         setHasFullyCompleted(englishSubmitted);
         setAwaitingEnglish(mathsSubmitted && !englishSubmitted);
+        setMathsAttemptStatus(mathsStatus);
       }
     })();
     return () => {
@@ -554,6 +567,15 @@ export default function LocalCombinedMock({
   }, [devBypass, eligibility.registered, mockEventSlug, searchParams, user?.id]);
 
   useEffect(() => {
+    if (mathsAttemptStatus === "submitted" && !resitMode) {
+      window.localStorage.removeItem(storageKey);
+      if (phase === "maths" || phase === "break") {
+        setPhase("instructions");
+        setPhaseEndsAt(null);
+      }
+      return;
+    }
+
     const raw = window.localStorage.getItem(storageKey);
     if (!raw) return;
     try {
@@ -564,6 +586,7 @@ export default function LocalCombinedMock({
         window.localStorage.removeItem(storageKey);
         return;
       }
+      if (mathsAttemptStatus === "none" && !saved.resit) return;
       setPhase(saved.phase);
       setCurrentQuestion(saved.currentQuestion);
       setAnswers(migrateSavedAnswers(saved.answers || {}));
@@ -575,7 +598,7 @@ export default function LocalCombinedMock({
     } catch {
       window.localStorage.removeItem(storageKey);
     }
-  }, [storageKey]);
+  }, [mathsAttemptStatus, phase, resitMode, storageKey]);
 
   useEffect(() => {
     const saved: SavedMockState = { phase, currentQuestion, answers, flagged, phaseEndsAt, resit: resitMode };
@@ -615,29 +638,22 @@ export default function LocalCombinedMock({
     if (!user?.id || !mathsPaperId) return null;
     const userEmail =
       typeof user.email === "string" && user.email.trim().length > 0 ? user.email.trim() : null;
-    const { data, error } = await supabase
-      .from("live_mock_attempts" as never)
-      .upsert(
-        {
-          paper_id: mathsPaperId,
-          user_id: user.id,
-          user_email: userEmail,
-          status: "in_progress",
-          question_count: mathsQuestions.length || paperQuestionCount(activeMathsPaper),
-          answered_count: 0,
-        } as never,
-        { onConflict: "paper_id,user_id" },
-      )
-      .select("id")
-      .single();
-    if (error) {
-      console.error("autosave: ensureInProgressAttempt", error);
+    const result = await ensureLiveMockInProgressAttempt({
+      paperId: mathsPaperId,
+      userId: user.id,
+      userEmail,
+      questionCount: mathsQuestions.length || paperQuestionCount(activeMathsPaper),
+      allowResetSubmitted: resitMode,
+    });
+    if (!result.ok) {
+      if (result.reason === "submitted") {
+        console.warn("autosave: maths attempt already submitted");
+      }
       return null;
     }
-    const id = (data as { id: string }).id;
-    autosaveAttemptIdRef.current = id;
-    return id;
-  }, [mathsPaperId, mathsQuestions.length, user]);
+    autosaveAttemptIdRef.current = result.attemptId;
+    return result.attemptId;
+  }, [activeMathsPaper, mathsPaperId, mathsQuestions.length, resitMode, user]);
 
   // Flush queued answer selections to live_mock_answers (overwrite in place via
   // onConflict attempt_id,question_id). Debounced from the option click handler.
@@ -700,6 +716,21 @@ export default function LocalCombinedMock({
       .eq("id", attemptId);
   }, [ensureInProgressAttempt, mathsPaperId, mathsQuestions, user]);
 
+  useEffect(() => {
+    const flushOnHide = () => {
+      void flushAutosave();
+    };
+    window.addEventListener("pagehide", flushOnHide);
+    const onVisibility = () => {
+      if (document.visibilityState === "hidden") void flushAutosave();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      window.removeEventListener("pagehide", flushOnHide);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [flushAutosave]);
+
   // Submit Maths (paper 1) to Supabase so the combined analytics Maths tab shows
   // the real score, placement and per-question review, then move to the break.
   const submitMaths = useCallback(async () => {
@@ -712,9 +743,23 @@ export default function LocalCombinedMock({
       clearTimeout(autosaveTimerRef.current);
       autosaveTimerRef.current = null;
     }
-    pendingAutosaveRef.current.clear();
+    let savedOk = false;
     try {
       if (user?.id && mathsPaperId && mathsQuestions.length > 0) {
+        if (!resitMode) {
+          const existing = await fetchLiveMockAttempt(mathsPaperId, user.id);
+          if (existing?.status === "submitted") {
+            throw new Error("You have already submitted the Maths paper.");
+          }
+        }
+
+        await flushAutosave();
+
+        const scorable = assertLiveMockPaperScorable(mathsQuestions);
+        if (!scorable.ok) {
+          throw new Error(scorable.reason);
+        }
+
         const userEmail =
           typeof user.email === "string" && user.email.trim().length > 0 ? user.email.trim() : null;
         const allocated = durations.maths;
@@ -749,36 +794,52 @@ export default function LocalCombinedMock({
         if (attemptError) throw attemptError;
         const attemptId = (attempt as { id: string }).id;
 
-        const answerRows = rows.map((r) => ({
-          attempt_id: attemptId,
-          paper_id: mathsPaperId,
-          question_id: r.q.dbQuestionId,
-          user_id: user.id,
-          question_number: r.q.questionNumber,
-          section_key: r.q.sectionKey,
-          question_type: r.q.questionType,
-          stem_snapshot: r.q.stem,
-          correct_option_id: r.correct?.id ?? null,
-          correct_option_label: r.correct?.text ?? null,
-          selected_option: r.selected,
-          selected_option_label: r.selectedChoice?.text ?? null,
-          options_snapshot: r.q.options.map((o) => ({ id: o.id, text: o.text, correct: o.correct })),
-          is_correct: r.selected ? Boolean(r.correct && r.selected === r.correct.id) : null,
-          answered_at: new Date().toISOString(),
-        }));
+        const answerRows = rows.map((r) => {
+          if (!r.q.dbQuestionId?.trim()) {
+            throw new Error(`Question ${r.q.questionNumber} is missing a database id.`);
+          }
+          if (!r.correct?.id) {
+            throw new Error(`Question ${r.q.questionNumber} has no scorable correct answer.`);
+          }
+          return {
+            attempt_id: attemptId,
+            paper_id: mathsPaperId,
+            question_id: r.q.dbQuestionId,
+            user_id: user.id,
+            question_number: r.q.questionNumber,
+            section_key: r.q.sectionKey,
+            question_type: r.q.questionType,
+            stem_snapshot: r.q.stem,
+            correct_option_id: r.correct.id,
+            correct_option_label: r.correct.text ?? null,
+            selected_option: r.selected,
+            selected_option_label: r.selectedChoice?.text ?? null,
+            options_snapshot: r.q.options.map((o) => ({ id: o.id, text: o.text, correct: o.correct })),
+            is_correct: r.selected ? r.selected === r.correct.id : null,
+            answered_at: new Date().toISOString(),
+          };
+        });
+
+        if (answerRows.length !== mathsQuestions.length) {
+          throw new Error("Could not build a full answer set for this paper.");
+        }
 
         const { error: answersError } = await supabase
           .from("live_mock_answers" as never)
           .upsert(answerRows as never, { onConflict: "attempt_id,question_id" });
         if (answersError) throw answersError;
+        savedOk = true;
+      } else if (!user?.id || !mathsPaperId || mathsQuestions.length === 0) {
+        throw new Error("Maths paper is not ready to submit.");
       }
     } catch (error) {
       console.error("Maths submit error:", error);
       mathsSubmittedRef.current = false;
-      toast.error("Could not save your Maths answers. You can still continue to the break.");
+      toast.error("Could not save your Maths answers. Please refresh and try again.");
     } finally {
       setSubmittingMaths(false);
       autosaveAttemptIdRef.current = null;
+      if (!savedOk) return;
       if (resitMode) {
         // Maths-only re-sit: English is already done — show the maths results
         // screen instead of routing back through the break / English paper.
@@ -791,7 +852,7 @@ export default function LocalCombinedMock({
         goToBreak();
       }
     }
-  }, [answers, durations.maths, goToBreak, mathsPaperId, mathsQuestions, resitMode, secondsLeft, storageKey, submittingMaths, user]);
+  }, [answers, durations.maths, flushAutosave, goToBreak, mathsPaperId, mathsQuestions, resitMode, secondsLeft, storageKey, submittingMaths, user]);
 
   useEffect(() => {
     if (!phaseEndsAt || !["maths", "break"].includes(phase)) return;
@@ -831,7 +892,67 @@ export default function LocalCombinedMock({
     return countMathsAnswers(answers);
   }, [answers, phase]);
 
+  const mathsInProgress = mathsAttemptStatus === "in_progress" && !hasFullyCompleted && !awaitingEnglish;
+
+  const continueMock = useCallback(async () => {
+    mathsSubmittedRef.current = false;
+    pendingAutosaveRef.current.clear();
+    setResitMode(false);
+
+    let restoredPhase: Phase = "maths";
+    let restoredQuestion = 1;
+    let restoredAnswers: Record<string, string> = {};
+    let restoredFlagged: string[] = [];
+    let restoredEndsAt = Date.now() + durations.maths * 1000;
+
+    const raw = window.localStorage.getItem(storageKey);
+    if (raw) {
+      try {
+        const saved = JSON.parse(raw) as SavedMockState;
+        if (saved.phase === "maths" || saved.phase === "break") {
+          restoredPhase = saved.phase;
+          restoredQuestion = saved.currentQuestion;
+          restoredAnswers = migrateSavedAnswers(saved.answers || {});
+          restoredFlagged = migrateFlaggedKeys(saved.flagged || []);
+          if (saved.phaseEndsAt) restoredEndsAt = saved.phaseEndsAt;
+        }
+      } catch {
+        window.localStorage.removeItem(storageKey);
+      }
+    }
+
+    if (user?.id && mathsPaperId) {
+      const attempt = await fetchLiveMockAttempt(mathsPaperId, user.id);
+      if (attempt?.status === "in_progress") {
+        autosaveAttemptIdRef.current = attempt.id;
+        const dbRows = await loadLiveMockSavedAnswers(attempt.id);
+        for (const row of dbRows) {
+          if (row.question_number != null && row.selected_option) {
+            restoredAnswers[mathsAnswerKey(row.question_number)] = row.selected_option;
+          }
+        }
+      }
+    }
+
+    setAnswers(restoredAnswers);
+    setFlagged(restoredFlagged);
+    setCurrentQuestion(restoredQuestion);
+    setPhase(restoredPhase);
+    setPhaseEndsAt(restoredEndsAt);
+    setStartDialogOpen(false);
+    void ensureInProgressAttempt();
+  }, [durations.maths, ensureInProgressAttempt, mathsPaperId, storageKey, user?.id]);
+
   const startMock = () => {
+    if (mathsAttemptStatus === "submitted" && !resitMode) {
+      toast.error("You have already submitted the Maths paper.");
+      return;
+    }
+    if (mathsInProgress) {
+      void continueMock();
+      return;
+    }
+
     mathsSubmittedRef.current = false;
     autosaveAttemptIdRef.current = null;
     pendingAutosaveRef.current.clear();
@@ -1025,7 +1146,7 @@ export default function LocalCombinedMock({
                 </div>
                 <p className="mt-1 text-xs text-slate-600">
                   {eligibility.registered
-                    ? `${user.email} is registered. The mock is live — start when you are ready.`
+                    ? `${user.email} is registered. The mock is live. Start when you are ready.`
                     : "This account is not registered yet. Register below to unlock the mock (free with paid Premium, or one fixed payment)."}
                 </p>
               </div>
@@ -1044,7 +1165,7 @@ export default function LocalCombinedMock({
                           Your Maths paper needs redoing
                         </div>
                         <p className="mt-1 text-xs text-slate-600">
-                          A technical fault meant your Maths answers were not saved. Your English paper is safe. Redo Maths now and it will score correctly — your result updates in place.
+                          A technical fault meant your Maths answers were not saved. Your English paper is safe. Redo Maths now and it will score correctly. Your result updates in place.
                         </p>
                       </div>
                       <Button
@@ -1088,7 +1209,7 @@ export default function LocalCombinedMock({
                   <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
                     <div className="flex items-center gap-2 font-bold text-amber-900">
                       <CheckCircle2 className="h-5 w-5 text-amber-600" />
-                      Maths complete — English paper next
+                      Maths complete. English paper next
                     </div>
                     <p className="mt-1 text-xs text-slate-600">
                       You finished the Maths paper. Tap below to continue to the English section and complete your mock.
@@ -1099,6 +1220,26 @@ export default function LocalCombinedMock({
                     onClick={launchEnglish}
                   >
                     Continue to English
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </div>
+              ) : eligible && mathsInProgress ? (
+                <div className="mt-6 space-y-3">
+                  <div className="rounded-xl border border-blue-200 bg-blue-50 p-4">
+                    <div className="flex items-center gap-2 font-bold text-blue-900">
+                      <Clock3 className="h-5 w-5 text-blue-600" />
+                      Mock in progress
+                    </div>
+                    <p className="mt-1 text-xs text-slate-600">
+                      You started this mock already. Continue where you left off. Your answers are saved as you go.
+                    </p>
+                  </div>
+                  <Button
+                    className={mockPrimaryBtnLg}
+                    disabled={questionsLoading || mathsQuestions.length === 0}
+                    onClick={() => void continueMock()}
+                  >
+                    Continue mock
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </div>
@@ -1179,10 +1320,11 @@ export default function LocalCombinedMock({
         <Dialog open={startDialogOpen} onOpenChange={setStartDialogOpen}>
           <DialogContent className="rounded-2xl sm:max-w-md">
             <DialogHeader>
-              <DialogTitle>Start the full mock?</DialogTitle>
+              <DialogTitle>{mathsInProgress ? "Continue your mock?" : "Start the full mock?"}</DialogTitle>
               <DialogDescription>
-                Non-calculator Maths is paper 1. Your {fastMode ? "30-second" : "50-minute"} timer begins immediately
-                after you confirm.
+                {mathsInProgress
+                  ? "Your Maths timer and saved answers will be restored. One attempt per student."
+                  : `Non-calculator Maths is paper 1. Your ${fastMode ? "30-second" : "50-minute"} timer begins immediately after you confirm.`}
               </DialogDescription>
             </DialogHeader>
             <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950">
@@ -1190,7 +1332,9 @@ export default function LocalCombinedMock({
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setStartDialogOpen(false)}>Not yet</Button>
-              <Button className={mockPrimaryBtn} onClick={startMock}>Begin Maths</Button>
+              <Button className={mockPrimaryBtn} onClick={startMock}>
+                {mathsInProgress ? "Continue Maths" : "Begin Maths"}
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

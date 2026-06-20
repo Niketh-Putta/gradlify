@@ -336,6 +336,24 @@ export async function enrichLiveMockAnswerDetails(
       const bankPatch = deriveLabelsFromQuestionBank(next, q);
       next = { ...next, ...bankPatch };
     }
+
+    if (next.is_correct == null && next.selected_option) {
+      if (next.correct_option_id) {
+        next = { ...next, is_correct: next.selected_option === next.correct_option_id };
+      } else {
+        const opts = parseLiveMockOptionsSnapshot(next.options_snapshot);
+        const correctFromSnap = opts.find((o) => o.correct);
+        if (correctFromSnap) {
+          next = {
+            ...next,
+            is_correct: next.selected_option === correctFromSnap.id,
+            correct_option_id: next.correct_option_id || correctFromSnap.id,
+            correct_option_label: next.correct_option_label || correctFromSnap.text,
+          };
+        }
+      }
+    }
+
     return next;
   });
 

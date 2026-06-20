@@ -334,18 +334,14 @@ export default function LiveMockHub() {
             body: { mockSlug: card.slug },
           });
           if (error) throw error;
+          const realCount = typeof data?.count === "number" ? data.count : 0;
+          const display = resolveLiveMockSignupDisplay(realCount, card.slug);
           return [
             card.slug,
             {
-              displayedCount:
-                typeof data?.displayedCount === "number"
-                  ? data.displayedCount
-                  : defaultStatsForSlug(card.slug).displayedCount,
+              displayedCount: display.displayedCount,
               promoCode: typeof data?.promoCode === "string" ? data.promoCode : defaultStatsForSlug(card.slug).promoCode,
-              promoSpotsRemaining:
-                typeof data?.promoSpotsRemaining === "number"
-                  ? data.promoSpotsRemaining
-                  : defaultStatsForSlug(card.slug).promoSpotsRemaining,
+              promoSpotsRemaining: display.promoSpotsRemaining,
             } satisfies MockCardStats,
           ] as const;
         } catch {

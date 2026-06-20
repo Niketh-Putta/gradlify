@@ -17,6 +17,12 @@ import {
   SECOND_MOCK_DISPLAY_TITLE,
   SECOND_MOCK_EVENT_SLUG,
 } from '@/lib/liveMockCombinedConfig';
+import {
+  ensureLiveMockInProgressAttempt,
+  fetchLiveMockAttempt,
+  loadLiveMockSavedAnswers,
+} from '@/lib/liveMockAttemptResume';
+import { assertLiveMockPaperScorable, normalizeLiveMockOptions } from '@/lib/liveMockScoringGuard';
 
 /** Combined English papers require a matching event registration row. */
 const COMBINED_ENGLISH_EVENT_BY_SLUG: Record<string, string> = {
@@ -837,7 +843,7 @@ export function EnglishSplitViewDemo() {
             .order('section_order', { ascending: true }),
           supabase
             .from('live_mock_questions' as any)
-            .select('id, section_id, question_number, question_type, stem, options, explanation, topic, subtopic, difficulty')
+            .select('id, section_id, question_number, question_type, stem, options, explanation, topic, subtopic, difficulty, correct_answer')
             .eq('paper_id', paper.id)
             .order('question_number', { ascending: true })
         ]);
@@ -943,18 +949,39 @@ export function EnglishSplitViewDemo() {
                   ? `q-${qNum}`
                   : inferComprehensionEvidenceLine(stemText, passageBlocks),
                 explanation: question.explanation || undefined,
-                options: (Array.isArray(question.options) ? question.options : []).map((option: any) => ({
-                  id: String(option.id),
+                options: normalizeLiveMockOptions(question.options, question.correct_answer).map((option) => ({
+                  id: option.id,
                   text: isTargetSpagSection && qType !== 'grammar'
                     ? normalizeSpagOptionText(String(option.id), String(option.text), spagFragments)
                     : String(option.text),
-                  trap: option.trap ?? null,
-                  correct: Boolean(option.correct),
+                  trap: (Array.isArray(question.options)
+                    ? question.options.find((raw: { id?: string; trap?: unknown }) => String(raw.id) === option.id)
+                    : undefined)?.trap ?? null,
+                  correct: option.correct,
                 })),
               };
             })
           };
         });
+
+        const scorableQuestions = mapped.flatMap((section) =>
+          section.questions.map((question) => ({
+            questionNumber:
+              typeof question.questionNumber === 'number' && Number.isFinite(question.questionNumber)
+                ? question.questionNumber
+                : parseInt(String(question.id), 10) || 0,
+            dbQuestionId: question.dbQuestionId,
+            options: question.options.map((option) => ({
+              id: option.id,
+              text: option.text,
+              correct: option.correct,
+            })),
+          })),
+        );
+        const scorable = assertLiveMockPaperScorable(scorableQuestions);
+        if (!scorable.ok) {
+          throw new Error(scorable.reason);
+        }
 
         setLiveMockPaperId(paper.id);
         setLiveMockSections(mapped);
@@ -1204,6 +1231,10 @@ export function EnglishSplitViewDemo() {
   /** Prevents double auto-submit when `timeLeft` hits 0; reset when the mock timer is recalibrated. */
   const mockTimerExpiredHandledRef = useRef(false);
   const submitLiveMockRef = useRef<() => Promise<void>>(async () => {});
+  const liveMockAttemptIdRef = useRef<string | null>(null);
+  const pendingEnglishAutosaveRef = useRef<Map<string, string>>(new Map());
+  const englishAutosaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const selectedAnswersRef = useRef<Record<string, string>>({});
 
   // Dynamically calibrate Mock Timer based on Passage Loads, Pedagogy, and 11+ Recommended Norms
   useEffect(() => {
@@ -1215,7 +1246,23 @@ export function EnglishSplitViewDemo() {
     if (timerInitialized.current === bundleSignature) return; // Do not hard-reset if it's the same bundle
 
     if (isLiveMock) {
-      setTimeLeft(Math.round(liveMockEffectiveDurationMinutes * 60));
+      let initialSeconds = Math.round(liveMockEffectiveDurationMinutes * 60);
+      if (user?.id) {
+        const timerKey = `gradlify_live_mock_english_timer_${liveMockSlug}_${user.id}`;
+        try {
+          const raw = window.localStorage.getItem(timerKey);
+          if (raw) {
+            const parsed = JSON.parse(raw) as { endsAt?: number };
+            if (typeof parsed.endsAt === "number") {
+              const left = Math.max(0, Math.ceil((parsed.endsAt - Date.now()) / 1000));
+              if (left > 0 && left <= initialSeconds) initialSeconds = left;
+            }
+          }
+        } catch {
+          // ignore corrupt timer snapshot
+        }
+      }
+      setTimeLeft(initialSeconds);
       mockTimerExpiredHandledRef.current = false;
       timerInitialized.current = bundleSignature;
       return;
@@ -1253,7 +1300,20 @@ export function EnglishSplitViewDemo() {
       mockTimerExpiredHandledRef.current = false;
       timerInitialized.current = bundleSignature;
     }
-  }, [activeSections, examMode, isLiveMock, liveMockSlug, liveMockEffectiveDurationMinutes]);
+  }, [activeSections, examMode, isLiveMock, liveMockSlug, liveMockEffectiveDurationMinutes, user?.id]);
+
+  useEffect(() => {
+    selectedAnswersRef.current = selectedAnswers;
+  }, [selectedAnswers]);
+
+  useEffect(() => {
+    if (!isLiveMock || !user?.id || examMode !== "mock" || isFinished) return;
+    const timerKey = `gradlify_live_mock_english_timer_${liveMockSlug}_${user.id}`;
+    window.localStorage.setItem(
+      timerKey,
+      JSON.stringify({ endsAt: Date.now() + timeLeft * 1000 }),
+    );
+  }, [examMode, isFinished, isLiveMock, liveMockSlug, timeLeft, user?.id]);
 
   // Timer logic for Mock Mode
   useEffect(() => {
@@ -1286,10 +1346,119 @@ export function EnglishSplitViewDemo() {
     });
   };
 
+  const ensureEnglishInProgressAttempt = useCallback(async (): Promise<string | null> => {
+    if (liveMockAttemptIdRef.current) return liveMockAttemptIdRef.current;
+    if (!isLiveMock || !liveMockPaperId || !user?.id) return null;
+    const userEmail =
+      typeof user.email === "string" && user.email.trim().length > 0 ? user.email.trim() : null;
+    const result = await ensureLiveMockInProgressAttempt({
+      paperId: liveMockPaperId,
+      userId: user.id,
+      userEmail,
+      questionCount: liveMockPaperQuestionCount,
+    });
+    if (!result.ok) return null;
+    liveMockAttemptIdRef.current = result.attemptId;
+    return result.attemptId;
+  }, [isLiveMock, liveMockPaperId, liveMockPaperQuestionCount, user]);
+
+  const flushEnglishAutosave = useCallback(async () => {
+    if (englishAutosaveTimerRef.current) {
+      clearTimeout(englishAutosaveTimerRef.current);
+      englishAutosaveTimerRef.current = null;
+    }
+    const pending = pendingEnglishAutosaveRef.current;
+    if (pending.size === 0 || !isLiveMock || !liveMockPaperId || !user?.id) return;
+
+    const attemptId = await ensureEnglishInProgressAttempt();
+    if (!attemptId) return;
+
+    const entries = Array.from(pending.entries());
+    pending.clear();
+
+    const rows = entries.flatMap(([qKey, optionId]) => {
+      for (const section of liveMockSections) {
+        for (const question of section.questions) {
+          if (`${section.uniqueId}_${question.id}` !== qKey) continue;
+          const correct = question.options.find((option) => option.correct);
+          const selectedChoice = question.options.find((option) => option.id === optionId);
+          const qn =
+            typeof question.questionNumber === "number" && Number.isFinite(question.questionNumber)
+              ? question.questionNumber
+              : parseInt(String(question.id).replace(/^q-/i, ""), 10);
+          return [
+            {
+              attempt_id: attemptId,
+              paper_id: liveMockPaperId,
+              question_id: question.dbQuestionId,
+              user_id: user.id,
+              question_number: Number.isFinite(qn) ? qn : null,
+              section_key: section.sectionKey ?? null,
+              question_type: question.tag,
+              stem_snapshot: question.stemSnapshot?.trim() ? question.stemSnapshot : question.text,
+              correct_option_id: correct?.id ?? null,
+              correct_option_label: correct?.text ?? null,
+              selected_option: optionId,
+              selected_option_label: selectedChoice?.text ?? null,
+              options_snapshot: question.options.map((option) => ({
+                id: option.id,
+                text: option.text,
+                correct: option.correct,
+              })),
+              is_correct: Boolean(correct && optionId === correct.id),
+              answered_at: new Date().toISOString(),
+            },
+          ];
+        }
+      }
+      return [];
+    }).filter((row) => Boolean(row.question_id));
+
+    if (rows.length === 0) return;
+
+    const { error } = await supabase
+      .from("live_mock_answers" as never)
+      .upsert(rows as never, { onConflict: "attempt_id,question_id" });
+    if (error) {
+      console.error("English autosave flush", error);
+      entries.forEach(([qKey, optId]) => pending.set(qKey, optId));
+      return;
+    }
+
+    const answeredCount = Object.values(selectedAnswersRef.current).filter(Boolean).length;
+    void supabase
+      .from("live_mock_attempts" as never)
+      .update({ answered_count: answeredCount } as never)
+      .eq("id", attemptId);
+  }, [ensureEnglishInProgressAttempt, isLiveMock, liveMockPaperId, liveMockSections, user]);
+
+  useEffect(() => {
+    if (!isLiveMock) return;
+    const flushOnHide = () => {
+      void flushEnglishAutosave();
+    };
+    window.addEventListener("pagehide", flushOnHide);
+    const onVisibility = () => {
+      if (document.visibilityState === "hidden") void flushEnglishAutosave();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      window.removeEventListener("pagehide", flushOnHide);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [flushEnglishAutosave, isLiveMock]);
+
   const handleSelectAnswer = (qId: string, optId: string) => {
     setSelectedAnswers(prev => ({ ...prev, [qId]: optId }));
     if (examMode === 'practice') {
       setShowTrap(qId);
+    }
+    if (isLiveMock) {
+      pendingEnglishAutosaveRef.current.set(qId, optId);
+      if (englishAutosaveTimerRef.current) clearTimeout(englishAutosaveTimerRef.current);
+      englishAutosaveTimerRef.current = setTimeout(() => {
+        void flushEnglishAutosave();
+      }, 400);
     }
   };
 
@@ -1362,40 +1531,99 @@ export function EnglishSplitViewDemo() {
     container.scrollTo({ top: container.scrollTop + delta, behavior: "smooth" });
   }, [activeQuestionId, activeSections, isFinished]);
 
-  // First visit to session (including deep links): ensure an in_progress attempt exists so the hub page can lock "Start".
+  // First visit to session: ensure an in_progress attempt exists (never if already submitted).
   useEffect(() => {
     if (!isLiveMock || !liveMockPaperId || !user?.id || isLoadingLiveMock) return;
 
     let cancelled = false;
 
     void (async () => {
-      const { data: existing, error: selErr } = await supabase
-        .from('live_mock_attempts' as never)
-        .select('id')
-        .eq('paper_id', liveMockPaperId)
-        .eq('user_id', user.id)
-        .maybeSingle();
-
-      if (cancelled || selErr || existing) return;
-
-      const { error: insErr } = await supabase.from('live_mock_attempts' as never).insert({
-        paper_id: liveMockPaperId,
-        user_id: user.id,
-        status: 'in_progress',
-        question_count: liveMockPaperQuestionCount,
-        answered_count: 0,
-      });
-
-      const code = insErr && typeof insErr === 'object' && 'code' in insErr ? String((insErr as { code?: string }).code) : '';
-      if (insErr && code !== '23505') {
-        console.error('Live mock: could not create in-progress attempt', insErr);
+      const existing = await fetchLiveMockAttempt(liveMockPaperId, user.id);
+      if (cancelled) return;
+      if (existing?.status === "submitted") return;
+      if (existing?.status === "in_progress") {
+        liveMockAttemptIdRef.current = existing.id;
+        return;
       }
+
+      const userEmail =
+        typeof user.email === "string" && user.email.trim().length > 0 ? user.email.trim() : null;
+      const result = await ensureLiveMockInProgressAttempt({
+        paperId: liveMockPaperId,
+        userId: user.id,
+        userEmail,
+        questionCount: liveMockPaperQuestionCount,
+      });
+      if (cancelled || !result.ok) return;
+      liveMockAttemptIdRef.current = result.attemptId;
     })();
 
     return () => {
       cancelled = true;
     };
   }, [isLiveMock, liveMockPaperId, user?.id, isLoadingLiveMock, liveMockPaperQuestionCount]);
+
+  // Resume saved English answers from the DB when continuing an in-progress attempt.
+  useEffect(() => {
+    if (
+      !isLiveMock ||
+      !liveMockPaperId ||
+      !user?.id ||
+      isLoadingLiveMock ||
+      liveMockSections.length === 0 ||
+      liveMockSubmittedBlocked
+    ) {
+      return;
+    }
+
+    let cancelled = false;
+    void (async () => {
+      const attempt = await fetchLiveMockAttempt(liveMockPaperId, user.id);
+      if (cancelled || attempt?.status !== "in_progress") return;
+
+      liveMockAttemptIdRef.current = attempt.id;
+      const dbRows = await loadLiveMockSavedAnswers(attempt.id);
+      if (cancelled || dbRows.length === 0) return;
+
+      const byQuestionNumber = new Map<number, string>();
+      const byQuestionId = new Map<string, string>();
+      for (const row of dbRows) {
+        if (!row.selected_option) continue;
+        if (row.question_number != null) byQuestionNumber.set(row.question_number, row.selected_option);
+        byQuestionId.set(row.question_id, row.selected_option);
+      }
+
+      setSelectedAnswers((prev) => {
+        const next = { ...prev };
+        for (const section of liveMockSections) {
+          for (const question of section.questions) {
+            const qKey = `${section.uniqueId}_${question.id}`;
+            if (next[qKey]) continue;
+            const qn =
+              typeof question.questionNumber === "number" && Number.isFinite(question.questionNumber)
+                ? question.questionNumber
+                : parseInt(String(question.id).replace(/^q-/i, ""), 10);
+            const fromDb =
+              (question.dbQuestionId ? byQuestionId.get(question.dbQuestionId) : undefined) ??
+              (Number.isFinite(qn) ? byQuestionNumber.get(qn) : undefined);
+            if (fromDb) next[qKey] = fromDb;
+          }
+        }
+        return next;
+      });
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    isLiveMock,
+    liveMockPaperId,
+    user?.id,
+    isLoadingLiveMock,
+    liveMockSections,
+    liveMockSubmittedBlocked,
+  ]);
 
   // Live mock: block session URL if already submitted or not registered (combined mocks).
   useEffect(() => {
@@ -1646,10 +1874,18 @@ export function EnglishSplitViewDemo() {
 
     if (isSubmittingLiveMock) return;
 
+    let savedOk = false;
     try {
       setIsSubmittingLiveMock(true);
 
       if (user && liveMockPaperId && activeSections.length > 0) {
+        const existing = await fetchLiveMockAttempt(liveMockPaperId, user.id);
+        if (existing?.status === "submitted") {
+          throw new Error("You have already submitted this live mock.");
+        }
+
+        await flushEnglishAutosave();
+
         const userEmail =
           typeof user.email === 'string' && user.email.trim().length > 0 ? user.email.trim() : null;
 
@@ -1672,6 +1908,24 @@ export function EnglishSplitViewDemo() {
             };
           })
         );
+
+        const scorable = assertLiveMockPaperScorable(
+          allQuestions.map((item) => ({
+            questionNumber:
+              typeof item.question.questionNumber === 'number' && Number.isFinite(item.question.questionNumber)
+                ? item.question.questionNumber
+                : parseInt(String(item.question.id).replace(/^q-/i, ''), 10) || 0,
+            dbQuestionId: item.question.dbQuestionId,
+            options: item.question.options.map((option) => ({
+              id: option.id,
+              text: option.text,
+              correct: option.correct,
+            })),
+          })),
+        );
+        if (!scorable.ok) {
+          throw new Error(scorable.reason);
+        }
 
         const answeredCount = allQuestions.filter(item => item.selectedOption).length;
         const totalSecondsAllocated = Math.round(liveMockEffectiveDurationMinutes * 60);
@@ -1697,48 +1951,48 @@ export function EnglishSplitViewDemo() {
         const optionsPayload = (opts: EnglishOption[]) =>
           opts.map(o => ({ id: o.id, text: o.text, correct: o.correct }));
 
-        const answerRows = allQuestions
-          .filter(item => {
-            if (!item.question.dbQuestionId) {
-              console.warn('Live mock submit: missing dbQuestionId for question', item.question.id);
-              return false;
-            }
-            return true;
-          })
-          .map(item => {
-            const qn =
-              typeof item.question.questionNumber === "number" && Number.isFinite(item.question.questionNumber)
-                ? item.question.questionNumber
-                : parseInt(String(item.question.id).replace(/^q-/i, ""), 10);
-            const stemForAnalytics = item.question.stemSnapshot?.trim()
-              ? item.question.stemSnapshot
-              : item.question.text;
-            return {
-              attempt_id: attempt.id,
-              paper_id: liveMockPaperId,
-              question_id: item.question.dbQuestionId,
-              user_id: user.id,
-              question_number: Number.isFinite(qn) ? qn : null,
-              section_key: item.sectionKey,
-              question_type: item.question.tag,
-              stem_snapshot: stemForAnalytics,
-              correct_option_id: item.correctOptionId,
-              correct_option_label: item.correctOptionLabel,
-              selected_option: item.selectedOption,
-              selected_option_label: item.selectedOptionLabel,
-              options_snapshot: optionsPayload(item.question.options),
-              is_correct: item.selectedOption ? item.isCorrect : null,
-              answered_at: new Date().toISOString()
-            };
-          });
+        const answerRows = allQuestions.map(item => {
+          if (!item.question.dbQuestionId?.trim()) {
+            throw new Error(`Question ${item.question.id} is missing a database id.`);
+          }
+          if (!item.correctOptionId) {
+            throw new Error(`Question ${item.question.id} has no scorable correct answer.`);
+          }
+          const qn =
+            typeof item.question.questionNumber === "number" && Number.isFinite(item.question.questionNumber)
+              ? item.question.questionNumber
+              : parseInt(String(item.question.id).replace(/^q-/i, ""), 10);
+          const stemForAnalytics = item.question.stemSnapshot?.trim()
+            ? item.question.stemSnapshot
+            : item.question.text;
+          return {
+            attempt_id: attempt.id,
+            paper_id: liveMockPaperId,
+            question_id: item.question.dbQuestionId,
+            user_id: user.id,
+            question_number: Number.isFinite(qn) ? qn : null,
+            section_key: item.sectionKey,
+            question_type: item.question.tag,
+            stem_snapshot: stemForAnalytics,
+            correct_option_id: item.correctOptionId,
+            correct_option_label: item.correctOptionLabel,
+            selected_option: item.selectedOption,
+            selected_option_label: item.selectedOptionLabel,
+            options_snapshot: optionsPayload(item.question.options),
+            is_correct: item.selectedOption ? item.isCorrect : null,
+            answered_at: new Date().toISOString()
+          };
+        });
 
-        if (answerRows.length > 0) {
-          const { error: answersError } = await supabase
-            .from('live_mock_answers' as any)
-            .upsert(answerRows, { onConflict: 'attempt_id,question_id' });
-
-          if (answersError) throw answersError;
+        if (answerRows.length !== allQuestions.length) {
+          throw new Error('Could not build a full answer set for this paper.');
         }
+
+        const { error: answersError } = await supabase
+          .from('live_mock_answers' as any)
+          .upsert(answerRows, { onConflict: 'attempt_id,question_id' });
+
+        if (answersError) throw answersError;
 
         const { data: sprint } = await supabase
           .from('sprint_windows')
@@ -1754,12 +2008,21 @@ export function EnglishSplitViewDemo() {
           });
           await supabase.rpc('capture_sprint_top10', { p_sprint_id: sprint.id });
         }
+        savedOk = true;
+        if (user?.id) {
+          window.localStorage.removeItem(`gradlify_live_mock_english_timer_${liveMockSlug}_${user.id}`);
+        }
+      } else {
+        throw new Error('English paper is not ready to submit.');
       }
     } catch (error) {
       console.error('Live mock submit error:', error);
+      toast.error('Could not save your English answers. Please refresh and try again.');
     } finally {
       setIsSubmittingLiveMock(false);
-      setIsFinished(true);
+      if (savedOk) {
+        setIsFinished(true);
+      }
     }
   }, [
     isLiveMock,
@@ -1769,7 +2032,9 @@ export function EnglishSplitViewDemo() {
     activeSections,
     selectedAnswers,
     liveMockEffectiveDurationMinutes,
-    timeLeft
+    timeLeft,
+    flushEnglishAutosave,
+    liveMockSlug,
   ]);
 
   submitLiveMockRef.current = submitLiveMock;
