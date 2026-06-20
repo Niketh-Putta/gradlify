@@ -24,8 +24,8 @@ export const LIVE_MOCK_PROMO_BY_SLUG: Record<string, LiveMockPromoConfig> = {
     promoCode: "MOCK2",
     promoMaxRedemptions: 50,
     promoDisplayCap: 50,
-    signupDisplayOffset: 36,
-    minDisplayedSignups: 43,
+    signupDisplayOffset: 17,
+    minDisplayedSignups: 44,
   },
 };
 
