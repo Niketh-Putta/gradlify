@@ -458,10 +458,13 @@ export default function LiveMockAnalytics() {
             <p className="mt-3 max-w-2xl text-xs leading-5 text-slate-500 sm:text-sm">
               {mockEventSlug === SECOND_MOCK_EVENT_SLUG ? (
                 <>
-                  Mock 2 is separate from mock 1. Scores, cohort rank and saved answers here are for mock 2 only.
+                  Mock 2 only. Separate questions, registration, rank and saved answers from mock 1.
                 </>
-              ) : null}
-              {mockEventSlug === SECOND_MOCK_EVENT_SLUG ? " " : null}
+              ) : (
+                <>
+                  Mock 1 only. Separate questions, registration, rank and saved answers from mock 2.
+                </>
+              )}{" "}
               Numbers refresh automatically every few seconds so they stay aligned with your saved attempt.
               {updatedAt ? (
                 <span className="ml-1 text-slate-400">

@@ -308,14 +308,14 @@ export default function LiveMockHub() {
     {
       slug: COMBINED_MOCK_EVENT_SLUG,
       title: COMBINED_MOCK_DISPLAY_TITLE,
-      blurb: "A full, timed 11+ live mock exam. Marked papers, explanations and how you compare.",
+      blurb: "Mock 1: full timed 11+ exam with marked papers and cohort comparison. Separate questions from mock 2.",
       href: "/live-mock-exams/local-preview",
       live: isCombinedMockReleased(),
     },
     {
       slug: SECOND_MOCK_EVENT_SLUG,
       title: SECOND_MOCK_DISPLAY_TITLE,
-      blurb: `Our next full, timed 11+ live mock exam. Released on ${SECOND_MOCK_RELEASE_SCHEDULE}. Reserve your place now.`,
+      blurb: `Mock 2: our next full timed 11+ exam (${SECOND_MOCK_RELEASE_SCHEDULE}). Completely separate from mock 1.`,
       href: "/live-mock-exams/local-preview2",
       live: isSecondMockReleased(),
       opensAt: SECOND_MOCK_RELEASE_AT,

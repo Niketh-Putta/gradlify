@@ -1117,7 +1117,9 @@ export default function LocalCombinedMock({
               >
                 Paper order: non-calculator Maths first, then a break, then English. Full marked papers with answers,
                 explanations and a results comparison.
-                {isMock2 ? " Mock 2 is completely separate from mock 1: own registration, questions, score and rank." : ""}
+                {isMock2
+                  ? " Mock 2 is completely separate from mock 1: own registration, questions, score and rank."
+                  : " Mock 1 is completely separate from mock 2: own registration, questions, score and rank."}
               </p>
             </div>
 

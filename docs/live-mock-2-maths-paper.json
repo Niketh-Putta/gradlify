@@ -1383,41 +1383,41 @@
           "topic": "Maths",
           "subtopic": "shapes_properties",
           "difficulty": 1,
-          "stem": "How many lines of symmetry does a regular hexagon have?",
+          "stem": "How many faces does a triangular prism have?",
           "options": [
             {
               "id": "A",
               "text": "3",
               "correct": false,
-              "trap": "Confused with equilateral triangle"
+              "trap": "Counted only the triangular faces"
             },
             {
               "id": "B",
               "text": "4",
               "correct": false,
-              "trap": "Confused with rectangle or square"
+              "trap": "Forgot one of the rectangular faces"
             },
             {
               "id": "C",
-              "text": "8",
-              "correct": false,
-              "trap": "Doubled the correct answer"
-            },
-            {
-              "id": "D",
-              "text": "6",
+              "text": "5",
               "correct": true,
               "trap": null
             },
             {
-              "id": "E",
-              "text": "12",
+              "id": "D",
+              "text": "6",
               "correct": false,
-              "trap": "Multiplied number of sides by 2"
+              "trap": "Confused with a cube"
+            },
+            {
+              "id": "E",
+              "text": "8",
+              "correct": false,
+              "trap": "Added edges or vertices instead of faces"
             }
           ],
-          "correct_answer": "D",
-          "explanation": "A regular hexagon has 6 sides. It also has 6 lines of symmetry: 3 through opposite vertices and 3 through midpoints of opposite sides. Final answer: 6."
+          "correct_answer": "C",
+          "explanation": "A triangular prism has 2 triangular faces (top and bottom) and 3 rectangular faces joining the sides, giving 2 + 3 = 5 faces in total. Final answer: 5."
         },
         {
           "question_number": 34,

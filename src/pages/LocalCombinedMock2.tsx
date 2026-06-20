@@ -264,8 +264,8 @@ export default function LocalCombinedMock2() {
             </div>
             <h1 className="mt-4 text-3xl font-black tracking-tight sm:text-4xl">{SECOND_MOCK_DISPLAY_TITLE}</h1>
             <p className="mt-2 max-w-2xl text-sm font-medium text-slate-200 sm:text-base">
-              Paper order: non-calculator Maths first, then a break, then English. Reserve your place now and sit it
-              when it opens.
+              Paper order: non-calculator Maths first, then a break, then English. This is mock 2 only: completely
+              separate questions, registration and results from mock 1.
             </p>
           </div>
 
