@@ -244,23 +244,18 @@ async function deleteAllAttemptsForUser(userId) {
   }
 }
 
-async function removeLegacyPlaceholderAccounts() {
+async function removeStaleLocalAccounts() {
   const listed = await adminFetch("/auth/v1/admin/users?per_page=200");
-  const legacy = (listed?.users ?? []).filter((u) =>
-    typeof u.email === "string" && u.email.endsWith("@gradlify-cohort.local") && u.email.startsWith("mock2bot-"),
+  const stale = (listed?.users ?? []).filter(
+    (u) => typeof u.email === "string" && u.email.startsWith("mock2bot-") && u.email.endsWith("@gradlify-cohort.local"),
   );
 
-  if (legacy.length === 0) {
-    console.log("No legacy placeholder accounts to remove.");
-    return;
-  }
+  if (stale.length === 0) return;
 
-  console.log(`Removing ${legacy.length} legacy placeholder accounts…`);
-  for (const user of legacy) {
+  for (const user of stale) {
     await deleteAllAttemptsForUser(user.id);
     await rest(`live_mock_exam_signups?user_id=eq.${user.id}`, { method: "DELETE", prefer: "return=minimal" }).catch(() => {});
     await adminFetch(`/auth/v1/admin/users/${user.id}`, { method: "DELETE" });
-    console.log(`  removed ${user.email}`);
   }
 }
 
@@ -351,8 +346,8 @@ async function seedPaperAttempt({
 }
 
 async function main() {
-  if (removeLegacy || force) {
-    await removeLegacyPlaceholderAccounts();
+  if (cleanupStale || force) {
+    await removeStaleLocalAccounts();
   }
 
   console.log(`Seeding ${participants.length} mock 2 results…`);
