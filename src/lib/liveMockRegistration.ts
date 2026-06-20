@@ -46,9 +46,14 @@ export async function startCombinedMockCheckout(
   returnTo: string,
   mockSlug: string = BOTH_SUBJECTS_MOCK_SLUG,
 ) {
+  const safeReturn = returnTo.startsWith("/") && !returnTo.startsWith("/pay/") ? returnTo : "/live-mock-exams";
+  if (typeof window !== "undefined") {
+    window.localStorage.setItem("gradlify:checkout:returnTo", safeReturn);
+  }
+
   const { data, error } = await supabase.functions.invoke("create-live-mock-payment", {
     body: {
-      returnTo,
+      returnTo: safeReturn,
       baseUrl: window.location.origin,
       mockSlug,
       ...getDataFastIds(),

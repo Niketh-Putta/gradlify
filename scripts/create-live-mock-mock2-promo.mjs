@@ -10,10 +10,16 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
 function loadEnv() {
   const env = {};
-  for (const line of fs.readFileSync(path.join(root, ".env"), "utf8").split("\n")) {
-    const m = line.match(/^([^#=]+)=(.*)$/);
-    if (!m) continue;
-    env[m[1].trim()] = m[2].trim().replace(/^"|"$/g, "");
+  for (const name of [".env.functions", ".env"]) {
+    const envPath = path.join(root, name);
+    if (!fs.existsSync(envPath)) continue;
+    for (const line of fs.readFileSync(envPath, "utf8").split("\n")) {
+      const m = line.match(/^([^#=]+)=(.*)$/);
+      if (!m) continue;
+      const key = m[1].trim();
+      if (env[key]) continue;
+      env[key] = m[2].trim().replace(/^"|"$/g, "");
+    }
   }
   return env;
 }
