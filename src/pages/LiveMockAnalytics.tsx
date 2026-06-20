@@ -182,6 +182,9 @@ export default function LiveMockAnalytics() {
   // polls we only refresh the live cohort numbers and skip re-fetching the
   // (static) answer review. This keeps DB load low when many people are viewing.
   const loadedAnswersAttemptRef = useRef<string | null>(null);
+  const loadInFlightRef = useRef(false);
+  const hasLoadedOnceRef = useRef(false);
+  const loadAllRef = useRef<(isPoll: boolean) => Promise<void>>(async () => {});
 
   const loadAll = useCallback(async (isPoll: boolean) => {
     if (!user?.id) {
@@ -190,7 +193,11 @@ export default function LiveMockAnalytics() {
       return;
     }
 
-    if (isPoll) setRefreshing(true);
+    if (loadInFlightRef.current) return;
+    loadInFlightRef.current = true;
+
+    const showFullScreenLoader = !isPoll && !hasLoadedOnceRef.current;
+    if (isPoll || hasLoadedOnceRef.current) setRefreshing(true);
     else setLoading(true);
 
     try {
@@ -272,30 +279,39 @@ export default function LiveMockAnalytics() {
       }
 
       setUpdatedAt(new Date());
+      hasLoadedOnceRef.current = true;
     } catch (e) {
       console.error(e);
       setError("Something went wrong loading your results.");
     } finally {
-      setLoading(false);
+      loadInFlightRef.current = false;
+      if (showFullScreenLoader) setLoading(false);
       setRefreshing(false);
     }
-  }, [user?.id, activeSlug, combinedSubjectSlugs.maths, combinedSubjectSlugs.english, fallbackTitle, isCombined, combinedSubject]);
+  }, [user?.id, activeSlug, combinedSubjectSlugs.maths, combinedSubjectSlugs.english, isCombined, combinedSubject]);
+
+  loadAllRef.current = loadAll;
 
   useEffect(() => {
-    void loadAll(false);
-  }, [loadAll]);
+    hasLoadedOnceRef.current = false;
+    loadedAnswersAttemptRef.current = null;
+  }, [user?.id, mockEventSlug, isCombined, activeSlug]);
+
+  useEffect(() => {
+    void loadAllRef.current(false);
+  }, [user?.id, activeSlug, combinedSubjectSlugs.maths, combinedSubjectSlugs.english, isCombined, combinedSubject]);
 
   useEffect(() => {
     if (!user?.id) return;
-    const id = window.setInterval(() => void loadAll(true), POLL_MS);
+    const id = window.setInterval(() => void loadAllRef.current(true), POLL_MS);
     return () => window.clearInterval(id);
-  }, [user?.id, loadAll]);
+  }, [user?.id, activeSlug, combinedSubjectSlugs.maths, combinedSubjectSlugs.english, isCombined, combinedSubject]);
 
   useEffect(() => {
-    const onFocus = () => void loadAll(true);
+    const onFocus = () => void loadAllRef.current(true);
     window.addEventListener("focus", onFocus);
     return () => window.removeEventListener("focus", onFocus);
-  }, [loadAll]);
+  }, []);
 
   const sectionStats = useMemo(() => {
     const map = new Map<string, { correct: number; total: number }>();
