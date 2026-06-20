@@ -1,0 +1,1333 @@
+{
+  "paper": {
+    "slug": "both_subjects_english_mock_2",
+    "title": "11+ English",
+    "track": "11plus",
+    "subject": "english",
+    "duration_minutes": 50,
+    "question_count": 60,
+    "calculator": "non-calculator"
+  },
+  "sections": [
+    {
+      "section_order": 1,
+      "section_key": "fiction_comprehension",
+      "title": "Section 1: Fiction Comprehension",
+      "instructions": "Read the passage carefully, then answer questions 1 to 15.",
+      "passage_title": "The Lighthouse at Gull Point",
+      "passage_blocks": [
+        {
+          "id": "p1-1",
+          "text": "Mara had lived at Gull Point lighthouse for eleven years, but she had never once climbed the tower during a storm. Tonight, with her grandfather laid up in bed with a fever, there was no one else to keep the lamp turning. She pulled on her oilskin coat and pressed her palm against the cold stone wall before beginning the long spiral climb, counting the steps the way her grandfather always did. Forty-two, forty-three, forty-four. The wind found every gap in the old tower and shrieked through it like something alive, and twice she had to stop and brace herself against the rail as the whole structure seemed to lean and shudder beneath her feet. Rain hammered sideways against the narrow windows, and somewhere far below she could hear the sea hurling itself against the rocks with a sound like distant thunder. By the time she reached the lamp room, her hands were trembling so badly she could barely grip the brass handle of the mechanism, and she had to pause, gasping, before she trusted herself to move at all."
+        },
+        {
+          "id": "p1-2",
+          "text": "The great lens sat dark and silent, an enormous glass eye waiting to be woken. Mara had watched her grandfather wind the clockwork a thousand times, yet now, alone, every gear and chain looked unfamiliar, almost hostile. She forced herself to remember his calm voice: wind the weight to the top, release the brake gently, never let the flame gutter. Her fingers found the crank and she turned it, slowly at first, then faster, until the great chain rattled upward and the mechanism gave a satisfied click. When she lit the wick and the lens caught the flame, the beam swept out across the black water in one long, golden stroke, and for a moment Mara forgot to breathe. Somewhere out there, she knew, a fishing boat called the Merry Kestrel was fighting its way home through the same storm that was battering her tower."
+        },
+        {
+          "id": "p1-3",
+          "text": "She kept the lamp turning through the worst of the night, feeding the mechanism, trimming the wick, watching the beam fall again and again on the churning sea. Twice the flame dipped low and she feared it would die altogether, but each time she cupped her hands around it and coaxed it back to life, just as her grandfather had shown her years before. Near dawn, when the wind finally dropped to a low, exhausted moan, she spotted a single light bobbing far out on the water, answering her own beam with three short flashes. It was the Merry Kestrel, limping but afloat, turning at last towards the safety of the harbour. Mara sat down hard on the cold floor of the lamp room, her legs giving way beneath her, and laughed until tears ran down her face. Her grandfather had always told her that the lighthouse keeper's job was simply to be a promise kept night after night, and now, for the first time, she understood exactly what he meant, with the grey light of morning creeping slowly across the water below."
+        }
+      ],
+      "questions": [
+        {
+          "question_number": 1,
+          "question_type": "comprehension",
+          "topic": "English",
+          "subtopic": "vocabulary_in_context",
+          "difficulty": 1,
+          "stem": "In paragraph 1, what does the word \"shrieked\" suggest about the wind?",
+          "options": [
+            {
+              "id": "A",
+              "text": "It was loud and high-pitched, almost like a scream",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "B",
+              "text": "It was warm and gentle",
+              "correct": false,
+              "trap": "Opposite meaning; the passage describes a violent storm, not gentle weather."
+            },
+            {
+              "id": "C",
+              "text": "It was completely silent",
+              "correct": false,
+              "trap": "Contradicts the sound imagery the verb creates."
+            },
+            {
+              "id": "D",
+              "text": "It smelled unpleasant",
+              "correct": false,
+              "trap": "Confuses a sound word with a smell, the wrong sense entirely."
+            },
+            {
+              "id": "E",
+              "text": "It moved very slowly",
+              "correct": false,
+              "trap": "Shrieking suggests a sharp, sudden sound, not slow movement."
+            }
+          ],
+          "correct_answer": "A",
+          "explanation": "\"Shrieked\" is normally used to describe a sharp, high-pitched human or animal scream, so applying it to the wind suggests a piercing, alarming sound. Option C wrongly assumes the opposite of what a shriek implies. Final answer: A — It was loud and high-pitched, almost like a scream."
+        },
+        {
+          "question_number": 2,
+          "question_type": "comprehension",
+          "topic": "English",
+          "subtopic": "literary_device",
+          "difficulty": 2,
+          "stem": "\"The wind found every gap in the old tower and shrieked through it\" is an example of which literary device?",
+          "options": [
+            {
+              "id": "A",
+              "text": "Alliteration",
+              "correct": false,
+              "trap": "There is no repeated initial consonant sound across these words."
+            },
+            {
+              "id": "B",
+              "text": "Personification",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "C",
+              "text": "Simile",
+              "correct": false,
+              "trap": "A simile needs 'like' or 'as'; this sentence gives the wind human actions without that comparison."
+            },
+            {
+              "id": "D",
+              "text": "Rhyme",
+              "correct": false,
+              "trap": "There is no matching of end sounds in this sentence."
+            },
+            {
+              "id": "E",
+              "text": "Hyperbole",
+              "correct": false,
+              "trap": "This is not an exaggerated claim for effect, but language that gives the wind lifelike qualities."
+            }
+          ],
+          "correct_answer": "B",
+          "explanation": "The wind is described as finding gaps and shrieking, actions normally associated with living things, which is personification. Simile is a trap because students may think of the full sentence in the passage, but this quoted line does not use 'like' or 'as'. Final answer: B — Personification."
+        },
+        {
+          "question_number": 3,
+          "question_type": "comprehension",
+          "topic": "English",
+          "subtopic": "inference",
+          "difficulty": 2,
+          "stem": "What can be inferred about Mara's relationship with the lighthouse before this night?",
+          "options": [
+            {
+              "id": "A",
+              "text": "She had never been inside the lighthouse before",
+              "correct": false,
+              "trap": "She has lived there eleven years, so she clearly knows the building well."
+            },
+            {
+              "id": "B",
+              "text": "She had always operated the lamp alone, without her grandfather",
+              "correct": false,
+              "trap": "The text states this is the first time she has climbed the tower during a storm, implying her grandfather usually managed it."
+            },
+            {
+              "id": "C",
+              "text": "She was familiar with the lighthouse but had relied on her grandfather to manage it during storms",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "D",
+              "text": "She disliked living at the lighthouse and wanted to leave",
+              "correct": false,
+              "trap": "No evidence in the passage supports this; her feelings about living there are not mentioned."
+            },
+            {
+              "id": "E",
+              "text": "She had only recently moved to Gull Point",
+              "correct": false,
+              "trap": "Contradicts the stated eleven years she has lived there."
+            }
+          ],
+          "correct_answer": "C",
+          "explanation": "Mara has lived at the lighthouse for eleven years and knows its routines, including counting the steps her grandfather always counted, but the text says she had never climbed it during a storm, implying he normally handled that task. Option B is close but goes too far by claiming she always worked entirely alone. Final answer: C — She was familiar with the lighthouse but had relied on her grandfather to manage it during storms."
+        },
+        {
+          "question_number": 4,
+          "question_type": "comprehension",
+          "topic": "English",
+          "subtopic": "evidence",
+          "difficulty": 2,
+          "stem": "Which phrase from paragraph 1 best shows that Mara was frightened during her climb?",
+          "options": [
+            {
+              "id": "A",
+              "text": "\"she pulled on her oilskin coat\"",
+              "correct": false,
+              "trap": "This is a practical action, not evidence of fear."
+            },
+            {
+              "id": "B",
+              "text": "\"counting the steps the way her grandfather always did\"",
+              "correct": false,
+              "trap": "This shows habit and routine rather than fear directly."
+            },
+            {
+              "id": "C",
+              "text": "\"her hands were trembling so badly she could barely grip the brass handle\"",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "D",
+              "text": "\"laid up in bed with a fever\"",
+              "correct": false,
+              "trap": "This describes the grandfather's illness, not Mara's emotional state."
+            },
+            {
+              "id": "E",
+              "text": "\"the long spiral climb\"",
+              "correct": false,
+              "trap": "This simply describes the physical journey, not an emotional reaction."
+            }
+          ],
+          "correct_answer": "C",
+          "explanation": "Trembling hands that can barely grip a handle is a direct physical sign of fear or nervousness. Counting steps is a routine, comforting habit rather than proof of fear, which makes option B a tempting but weaker choice. Final answer: C — \"her hands were trembling so badly she could barely grip the brass handle\"."
+        },
+        {
+          "question_number": 5,
+          "question_type": "comprehension",
+          "topic": "English",
+          "subtopic": "tone",
+          "difficulty": 1,
+          "stem": "What is the overall mood of paragraph 1?",
+          "options": [
+            {
+              "id": "A",
+              "text": "Calm and peaceful",
+              "correct": false,
+              "trap": "Contradicts the storm imagery and the description of a shuddering tower."
+            },
+            {
+              "id": "B",
+              "text": "Tense and frightening",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "C",
+              "text": "Light-hearted and comic",
+              "correct": false,
+              "trap": "Nothing in the paragraph is intended to be amusing."
+            },
+            {
+              "id": "D",
+              "text": "Bored and uneventful",
+              "correct": false,
+              "trap": "The paragraph describes a dramatic, dangerous climb, the opposite of boredom."
+            },
+            {
+              "id": "E",
+              "text": "Romantic and dreamy",
+              "correct": false,
+              "trap": "There is no romantic content; the focus is on danger and effort."
+            }
+          ],
+          "correct_answer": "B",
+          "explanation": "The shrieking wind, shuddering tower and trembling hands all build a sense of danger and fear, creating a tense, frightening mood. None of the other options match the storm and struggle described. Final answer: B — Tense and frightening."
+        },
+        {
+          "question_number": 6,
+          "question_type": "comprehension",
+          "topic": "English",
+          "subtopic": "vocabulary_in_context",
+          "difficulty": 2,
+          "stem": "In paragraph 2, what does \"hostile\" most nearly mean as it is used to describe the gears and chains?",
+          "options": [
+            {
+              "id": "A",
+              "text": "Friendly and welcoming",
+              "correct": false,
+              "trap": "Opposite meaning to the intended sense in this context."
+            },
+            {
+              "id": "B",
+              "text": "Brightly coloured",
+              "correct": false,
+              "trap": "Confuses the word with a description of appearance, not attitude."
+            },
+            {
+              "id": "C",
+              "text": "Unfamiliar and unwelcoming",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "D",
+              "text": "Extremely heavy",
+              "correct": false,
+              "trap": "Hostile refers to feeling rather than physical weight."
+            },
+            {
+              "id": "E",
+              "text": "Old and rusted",
+              "correct": false,
+              "trap": "The passage does not describe the mechanism as rusted, only unfamiliar to Mara."
+            }
+          ],
+          "correct_answer": "C",
+          "explanation": "\"Hostile\" here describes how the mechanism feels to Mara, strange and almost unwelcoming because she normally is not the one operating it alone. It does not describe physical qualities like weight or rust. Final answer: C — Unfamiliar and unwelcoming."
+        },
+        {
+          "question_number": 7,
+          "question_type": "comprehension",
+          "topic": "English",
+          "subtopic": "literary_device",
+          "difficulty": 3,
+          "stem": "Why does the author describe the lens as \"an enormous glass eye waiting to be woken\"?",
+          "options": [
+            {
+              "id": "A",
+              "text": "To suggest the lens is literally alive",
+              "correct": false,
+              "trap": "The comparison is figurative, not a literal claim about the lens."
+            },
+            {
+              "id": "B",
+              "text": "To compare the unlit lamp to something dormant that needs activating, building anticipation",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "C",
+              "text": "To show that the lens is broken and needs repair",
+              "correct": false,
+              "trap": "Nothing in the passage suggests the lens is damaged."
+            },
+            {
+              "id": "D",
+              "text": "To explain how the lens was manufactured",
+              "correct": false,
+              "trap": "This is a figurative description, not a technical explanation."
+            },
+            {
+              "id": "E",
+              "text": "To describe the colour of the glass",
+              "correct": false,
+              "trap": "The comparison is about a state of dormancy, not colour."
+            }
+          ],
+          "correct_answer": "B",
+          "explanation": "Comparing the unlit lens to an eye \"waiting to be woken\" suggests something dormant and powerful that is about to be activated, which builds tension before Mara lights the lamp. This is a figurative device, so taking it literally, as in option A, misses the point. Final answer: B — To compare the unlit lamp to something dormant that needs activating, building anticipation."
+        },
+        {
+          "question_number": 8,
+          "question_type": "comprehension",
+          "topic": "English",
+          "subtopic": "inference",
+          "difficulty": 2,
+          "stem": "What does Mara's memory of her grandfather's instructions suggest about him?",
+          "options": [
+            {
+              "id": "A",
+              "text": "He had taught her carefully how the lamp mechanism worked, even though she rarely used it herself",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "B",
+              "text": "He had never explained the mechanism to her",
+              "correct": false,
+              "trap": "Contradicts the fact she recalls his specific instructions clearly."
+            },
+            {
+              "id": "C",
+              "text": "He disliked teaching her about the lighthouse",
+              "correct": false,
+              "trap": "No evidence suggests reluctance; in fact his instructions are precise and caring."
+            },
+            {
+              "id": "D",
+              "text": "He was often too unwell to work the lamp",
+              "correct": false,
+              "trap": "The fever is a one-time event in the story, not a pattern described in the text."
+            },
+            {
+              "id": "E",
+              "text": "He had recently retired from lighthouse keeping",
+              "correct": false,
+              "trap": "There is no mention of retirement; he is simply ill on this occasion."
+            }
+          ],
+          "correct_answer": "A",
+          "explanation": "Mara recalls his calm, specific instructions in detail, showing he had clearly taught her the process even though she had not needed to use it alone before. There is no suggestion in the text that he was frequently ill or reluctant to teach her. Final answer: A — He had taught her carefully how the lamp mechanism worked, even though she rarely used it herself."
+        },
+        {
+          "question_number": 9,
+          "question_type": "comprehension",
+          "topic": "English",
+          "subtopic": "author_technique",
+          "difficulty": 3,
+          "stem": "Why does the author choose to mention the Merry Kestrel by name rather than simply referring to \"a boat\"?",
+          "options": [
+            {
+              "id": "A",
+              "text": "To make the danger feel more specific and personal, rather than abstract",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "B",
+              "text": "To confuse the reader about which vessel is being described",
+              "correct": false,
+              "trap": "Naming the boat clarifies rather than confuses."
+            },
+            {
+              "id": "C",
+              "text": "Because the boat's name is unimportant to the story",
+              "correct": false,
+              "trap": "If it were unimportant, the author would not have named it specifically."
+            },
+            {
+              "id": "D",
+              "text": "To introduce a new main character",
+              "correct": false,
+              "trap": "A boat is not a character; this misunderstands the role of the detail."
+            },
+            {
+              "id": "E",
+              "text": "To show that Mara owns the boat",
+              "correct": false,
+              "trap": "Nothing in the passage suggests ownership; the boat is simply at sea in the storm."
+            }
+          ],
+          "correct_answer": "A",
+          "explanation": "Giving the boat a specific name makes the danger feel real and immediate, helping the reader connect emotionally with the unseen sailors rather than thinking of a generic vessel. It does not introduce a character or imply ownership. Final answer: A — To make the danger feel more specific and personal, rather than abstract."
+        },
+        {
+          "question_number": 10,
+          "question_type": "comprehension",
+          "topic": "English",
+          "subtopic": "fact_retrieval",
+          "difficulty": 1,
+          "stem": "According to the passage, what was wrong with Mara's grandfather on this particular night?",
+          "options": [
+            {
+              "id": "A",
+              "text": "He had broken his leg",
+              "correct": false,
+              "trap": "Not mentioned in the passage; this detail is invented."
+            },
+            {
+              "id": "B",
+              "text": "He had gone out fishing",
+              "correct": false,
+              "trap": "Confuses the grandfather with the crew of the Merry Kestrel."
+            },
+            {
+              "id": "C",
+              "text": "He was laid up in bed with a fever",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "D",
+              "text": "He had fallen asleep",
+              "correct": false,
+              "trap": "The text specifies illness, not simply sleep."
+            },
+            {
+              "id": "E",
+              "text": "He was away visiting family",
+              "correct": false,
+              "trap": "Not mentioned anywhere in the passage."
+            }
+          ],
+          "correct_answer": "C",
+          "explanation": "The passage states directly that he was laid up in bed with a fever, which is why Mara had to climb the tower alone. The other options introduce details that simply do not appear in the text. Final answer: C — He was laid up in bed with a fever."
+        },
+        {
+          "question_number": 11,
+          "question_type": "comprehension",
+          "topic": "English",
+          "subtopic": "vocabulary_in_context",
+          "difficulty": 1,
+          "stem": "In paragraph 3, what does \"churning\" most nearly mean when describing the sea?",
+          "options": [
+            {
+              "id": "A",
+              "text": "Perfectly still",
+              "correct": false,
+              "trap": "Opposite of the turbulent motion implied by churning."
+            },
+            {
+              "id": "B",
+              "text": "Violently moving and swirling",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "C",
+              "text": "Frozen solid",
+              "correct": false,
+              "trap": "Churning describes motion, not temperature or state."
+            },
+            {
+              "id": "D",
+              "text": "Brightly lit",
+              "correct": false,
+              "trap": "Confuses motion with appearance or light."
+            },
+            {
+              "id": "E",
+              "text": "Shallow and calm",
+              "correct": false,
+              "trap": "Contradicts the turbulent storm context of the passage."
+            }
+          ],
+          "correct_answer": "B",
+          "explanation": "\"Churning\" describes water being stirred up violently, fitting the stormy, dangerous sea described throughout the passage. Calm or still would directly contradict the storm setting. Final answer: B — Violently moving and swirling."
+        },
+        {
+          "question_number": 12,
+          "question_type": "comprehension",
+          "topic": "English",
+          "subtopic": "inference",
+          "difficulty": 3,
+          "stem": "What does the three short flashes from the Merry Kestrel most likely suggest?",
+          "options": [
+            {
+              "id": "A",
+              "text": "The boat was sinking and beyond rescue",
+              "correct": false,
+              "trap": "Contradicts the next sentence describing the boat as limping but afloat."
+            },
+            {
+              "id": "B",
+              "text": "The crew were responding to Mara's beam to confirm they had seen it and were heading to safety",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "C",
+              "text": "The boat was signalling for Mara to switch off the lighthouse lamp",
+              "correct": false,
+              "trap": "This would be a strange and illogical request during a storm rescue."
+            },
+            {
+              "id": "D",
+              "text": "The flashes were simply reflections of the lighthouse beam with no meaning",
+              "correct": false,
+              "trap": "The text frames the flashes as a deliberate \"answer\" to Mara's beam, not a random reflection."
+            },
+            {
+              "id": "E",
+              "text": "The crew were asking Mara to send help immediately",
+              "correct": false,
+              "trap": "Nothing in the text suggests the boat needed rescuing; it is described as turning safely towards harbour."
+            }
+          ],
+          "correct_answer": "B",
+          "explanation": "The text says the light \"answered\" Mara's beam and the boat was \"turning at last towards the safety of the harbour,\" implying the flashes were a signal of acknowledgement and safety rather than distress. Option A and E both wrongly assume the boat was in serious danger after this point. Final answer: B — The crew were responding to Mara's beam to confirm they had seen it and were heading to safety."
+        },
+        {
+          "question_number": 13,
+          "question_type": "comprehension",
+          "topic": "English",
+          "subtopic": "evidence",
+          "difficulty": 2,
+          "stem": "Which phrase best shows that Mara felt overwhelming relief at the end of the passage?",
+          "options": [
+            {
+              "id": "A",
+              "text": "\"the wind finally dropped to a low, exhausted moan\"",
+              "correct": false,
+              "trap": "This describes the weather, not Mara's emotional state."
+            },
+            {
+              "id": "B",
+              "text": "\"she spotted a single light bobbing far out on the water\"",
+              "correct": false,
+              "trap": "This is an observation, not a description of her feelings."
+            },
+            {
+              "id": "C",
+              "text": "\"her legs giving way beneath her, and laughed until tears ran down her face\"",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "D",
+              "text": "\"turning at last towards the safety of the harbour\"",
+              "correct": false,
+              "trap": "This describes the boat's action, not Mara's reaction."
+            },
+            {
+              "id": "E",
+              "text": "\"the grey light of morning creeping slowly across the water\"",
+              "correct": false,
+              "trap": "This is a description of the setting, not of Mara's emotions."
+            }
+          ],
+          "correct_answer": "C",
+          "explanation": "Mara's legs giving way and her laughing until she cries are direct physical expressions of overwhelming relief after the tension of the night. The other options describe the weather, the boat or the setting rather than her internal feelings. Final answer: C — \"her legs giving way beneath her, and laughed until tears ran down her face\"."
+        },
+        {
+          "question_number": 14,
+          "question_type": "comprehension",
+          "topic": "English",
+          "subtopic": "structure",
+          "difficulty": 2,
+          "stem": "What is the major shift that occurs between paragraph 1 and paragraph 3?",
+          "options": [
+            {
+              "id": "A",
+              "text": "The setting changes from the lighthouse to the harbour",
+              "correct": false,
+              "trap": "Mara remains in the lamp room throughout; only the boat moves towards the harbour."
+            },
+            {
+              "id": "B",
+              "text": "The mood shifts from fear and tension to relief and triumph",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "C",
+              "text": "A new character is introduced who takes over from Mara",
+              "correct": false,
+              "trap": "No new character takes over; Mara remains the one tending the lamp throughout."
+            },
+            {
+              "id": "D",
+              "text": "The story moves backwards in time to before Mara's grandfather became ill",
+              "correct": false,
+              "trap": "The story moves forward through the night, not backwards."
+            },
+            {
+              "id": "E",
+              "text": "The lighthouse stops working completely",
+              "correct": false,
+              "trap": "The lighthouse continues working successfully throughout the passage."
+            }
+          ],
+          "correct_answer": "B",
+          "explanation": "The passage moves from Mara's frightened, trembling climb in paragraph 1 to her relieved, triumphant laughter in paragraph 3 once the boat is safe. No new setting, character or time shift occurs, only an emotional one. Final answer: B — The mood shifts from fear and tension to relief and triumph."
+        },
+        {
+          "question_number": 15,
+          "question_type": "comprehension",
+          "topic": "English",
+          "subtopic": "inference",
+          "difficulty": 1,
+          "stem": "What does the final sentence of the passage suggest Mara now understands?",
+          "options": [
+            {
+              "id": "A",
+              "text": "That being a lighthouse keeper means reliably protecting others, even when it is difficult",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "B",
+              "text": "That she never wants to climb the tower again",
+              "correct": false,
+              "trap": "Not supported; her reaction is one of relief and understanding, not refusal to repeat the task."
+            },
+            {
+              "id": "C",
+              "text": "That her grandfather was wrong about the importance of the job",
+              "correct": false,
+              "trap": "The passage shows her finally agreeing with him, not disagreeing."
+            },
+            {
+              "id": "D",
+              "text": "That the lighthouse will soon be closed down",
+              "correct": false,
+              "trap": "Nothing in the passage suggests this; it is an invented detail."
+            },
+            {
+              "id": "E",
+              "text": "That the Merry Kestrel will never sail again",
+              "correct": false,
+              "trap": "Contradicts the description of the boat safely turning towards harbour."
+            }
+          ],
+          "correct_answer": "A",
+          "explanation": "The final sentence connects directly to her grandfather's idea that being a keeper means being \"a promise kept night after night,\" which Mara now understands through her own experience of keeping the lamp lit for the boat's sake. None of the other options are supported by the text. Final answer: A — That being a lighthouse keeper means reliably protecting others, even when it is difficult."
+        }
+      ]
+    },
+    {
+      "section_order": 2,
+      "section_key": "nonfiction_comprehension",
+      "title": "Section 2: Non-Fiction Comprehension",
+      "instructions": "Read the passage carefully, then answer questions 16 to 30.",
+      "passage_title": "The Secret Life of Honeybees",
+      "passage_blocks": [
+        {
+          "id": "p2-1",
+          "text": "A single honeybee colony can contain as many as sixty thousand bees, yet the entire hive operates with a precision that has fascinated scientists for centuries. At the centre of this society is the queen, the only bee capable of laying fertilised eggs, who may produce up to two thousand eggs in a single day during the height of summer. Surrounding her is an army of worker bees, all female, who take on a strict sequence of jobs as they age: cleaning cells in their first days of life, then nursing larvae, then building wax comb, then guarding the hive entrance, and finally, in the last weeks of their short lives, flying out to forage for nectar and pollen. This careful division of labour means that, at any given moment, a hive has exactly the right number of nurses, builders and guards to keep the whole colony running smoothly. Male bees, called drones, exist for a single purpose, to mate with a new queen, and they are turned out of the hive once autumn arrives and food becomes scarce."
+        },
+        {
+          "id": "p2-2",
+          "text": "Perhaps the most remarkable feature of bee society is the waggle dance, a kind of living map that forager bees perform to share information with their hivemates. A returning forager who has discovered a rich patch of flowers will move in a figure-of-eight pattern on the vertical comb, waggling her body rapidly along the central stretch of the figure. The angle of this waggling run, measured against the position of the sun, tells other bees the precise direction to fly, while the length of the waggle indicates the distance, roughly one second of waggling for every kilometre travelled. It is an astonishingly efficient system: a single dance can direct dozens of bees to a food source several kilometres away within minutes, with remarkably little energy wasted on aimless searching."
+        },
+        {
+          "id": "p2-3",
+          "text": "Bees are also essential to human food production, since roughly one in every three mouthfuls of food eaten worldwide depends, at least in part, on pollination by bees and other insects. Crops such as apples, almonds and strawberries rely heavily on honeybee visits to produce fruit at all, and a single hive can visit several million flowers in just one day of foraging. In recent decades, however, beekeepers have reported troubling declines in colony numbers, caused by a combination of pesticide exposure, habitat loss and a parasitic mite that weakens entire colonies from within. Some beekeepers have lost more than a third of their hives in a single winter, a rate of loss that would have been almost unheard of a century ago. Scientists and farmers alike now regard the health of honeybee populations as a question not just of curiosity, but of food security, since a serious decline in pollinators would have consequences far beyond the hive."
+        }
+      ],
+      "questions": [
+        {
+          "question_number": 16,
+          "question_type": "comprehension",
+          "topic": "English",
+          "subtopic": "fact_retrieval",
+          "difficulty": 1,
+          "stem": "According to the passage, how many bees can a single honeybee colony contain?",
+          "options": [
+            {
+              "id": "A",
+              "text": "Up to six thousand",
+              "correct": false,
+              "trap": "Misreads the figure by one decimal place."
+            },
+            {
+              "id": "B",
+              "text": "Up to sixty thousand",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "C",
+              "text": "Up to six hundred",
+              "correct": false,
+              "trap": "Far too small a figure compared to the passage."
+            },
+            {
+              "id": "D",
+              "text": "Up to six hundred thousand",
+              "correct": false,
+              "trap": "Far too large a figure compared to the passage."
+            },
+            {
+              "id": "E",
+              "text": "Up to sixteen thousand",
+              "correct": false,
+              "trap": "Close-sounding but incorrect number not stated in the text."
+            }
+          ],
+          "correct_answer": "B",
+          "explanation": "The passage states directly that a colony can contain as many as sixty thousand bees. The other options are numbers that sound similar but do not match the figure given in the text. Final answer: B — Up to sixty thousand."
+        },
+        {
+          "question_number": 17,
+          "question_type": "comprehension",
+          "topic": "English",
+          "subtopic": "vocabulary_in_context",
+          "difficulty": 1,
+          "stem": "In paragraph 1, what does \"forage\" most nearly mean?",
+          "options": [
+            {
+              "id": "A",
+              "text": "To search for and collect food",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "B",
+              "text": "To build a nest",
+              "correct": false,
+              "trap": "Confuses foraging with the building stage of a worker bee's duties."
+            },
+            {
+              "id": "C",
+              "text": "To fight off predators",
+              "correct": false,
+              "trap": "Foraging relates to gathering food, not defence."
+            },
+            {
+              "id": "D",
+              "text": "To sleep through winter",
+              "correct": false,
+              "trap": "Unrelated to the meaning of forage and not described in the text."
+            },
+            {
+              "id": "E",
+              "text": "To clean the hive",
+              "correct": false,
+              "trap": "Confuses foraging with the cleaning stage described earlier in the bee's life cycle."
+            }
+          ],
+          "correct_answer": "A",
+          "explanation": "In context, \"forage for nectar and pollen\" clearly means searching for and collecting these food sources. The wrong options confuse foraging with other tasks worker bees perform earlier in their lives, such as cleaning or building. Final answer: A — To search for and collect food."
+        },
+        {
+          "question_number": 18,
+          "question_type": "comprehension",
+          "topic": "English",
+          "subtopic": "inference",
+          "difficulty": 2,
+          "stem": "What can be inferred about why drones are turned out of the hive in autumn?",
+          "options": [
+            {
+              "id": "A",
+              "text": "Because they have completed their only purpose and become a drain on scarce winter resources",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "B",
+              "text": "Because they attack the queen during the winter months",
+              "correct": false,
+              "trap": "Not mentioned anywhere in the passage; this is an invented reason."
+            },
+            {
+              "id": "C",
+              "text": "Because they are needed to guard the hive entrance in winter",
+              "correct": false,
+              "trap": "Guarding is a worker bee task, not a drone task, according to the passage."
+            },
+            {
+              "id": "D",
+              "text": "Because they migrate to warmer countries",
+              "correct": false,
+              "trap": "Not supported by the text; bees do not migrate in this way."
+            },
+            {
+              "id": "E",
+              "text": "Because the queen no longer needs to mate at all",
+              "correct": false,
+              "trap": "Overstates the text, which only says food becomes scarce, not that mating needs disappear entirely."
+            }
+          ],
+          "correct_answer": "A",
+          "explanation": "The passage explains that drones exist solely to mate with a new queen and are turned out once food becomes scarce, implying the hive cannot afford to support bees that no longer serve an immediate purpose. The other options invent reasons not found in the text. Final answer: A — Because they have completed their only purpose and become a drain on scarce winter resources."
+        },
+        {
+          "question_number": 19,
+          "question_type": "comprehension",
+          "topic": "English",
+          "subtopic": "author_technique",
+          "difficulty": 2,
+          "stem": "Why does the author use the phrase \"army of worker bees\" instead of simply \"group of worker bees\"?",
+          "options": [
+            {
+              "id": "A",
+              "text": "To suggest the organised, disciplined nature of the workers' roles within the hive",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "B",
+              "text": "To suggest the bees are violent towards each other",
+              "correct": false,
+              "trap": "The passage describes cooperation, not internal conflict."
+            },
+            {
+              "id": "C",
+              "text": "Because the bees are literally trained soldiers",
+              "correct": false,
+              "trap": "This takes a figurative comparison literally."
+            },
+            {
+              "id": "D",
+              "text": "Because the word group would be grammatically incorrect here",
+              "correct": false,
+              "trap": "Both words are grammatically correct; the choice is about effect, not grammar."
+            },
+            {
+              "id": "E",
+              "text": "To describe the colour of the bees' bodies",
+              "correct": false,
+              "trap": "Unrelated to appearance; the word choice is about structure and discipline."
+            }
+          ],
+          "correct_answer": "A",
+          "explanation": "\"Army\" suggests order, discipline and clear roles, fitting the structured division of labour described afterwards. The comparison is figurative, so reading it literally as actual soldiers misunderstands the technique. Final answer: A — To suggest the organised, disciplined nature of the workers' roles within the hive."
+        },
+        {
+          "question_number": 20,
+          "question_type": "comprehension",
+          "topic": "English",
+          "subtopic": "evidence",
+          "difficulty": 2,
+          "stem": "Which phrase from paragraph 1 best shows that a hive's workforce changes smoothly as bees age?",
+          "options": [
+            {
+              "id": "A",
+              "text": "\"may produce up to two thousand eggs in a single day\"",
+              "correct": false,
+              "trap": "This refers to the queen's egg-laying, not the workers' changing roles."
+            },
+            {
+              "id": "B",
+              "text": "\"this careful division of labour means... exactly the right number of nurses, builders and guards\"",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "C",
+              "text": "\"exist for a single purpose, to mate with a new queen\"",
+              "correct": false,
+              "trap": "This describes drones, not the changing roles of worker bees."
+            },
+            {
+              "id": "D",
+              "text": "\"turned out of the hive once autumn arrives\"",
+              "correct": false,
+              "trap": "This refers to the removal of drones, not workforce balance."
+            },
+            {
+              "id": "E",
+              "text": "\"at the centre of this society is the queen\"",
+              "correct": false,
+              "trap": "This introduces the queen's position, not the workforce balance described later."
+            }
+          ],
+          "correct_answer": "B",
+          "explanation": "This phrase directly explains that the hive always has the right balance of nurses, builders and guards, demonstrating a smooth, well-organised workforce. The other options describe different parts of bee society unrelated to this balance. Final answer: B — \"this careful division of labour means... exactly the right number of nurses, builders and guards\"."
+        },
+        {
+          "question_number": 21,
+          "question_type": "comprehension",
+          "topic": "English",
+          "subtopic": "vocabulary_in_context",
+          "difficulty": 2,
+          "stem": "In paragraph 2, what does \"remarkable\" most nearly mean?",
+          "options": [
+            {
+              "id": "A",
+              "text": "Worthy of attention or notice because it is impressive",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "B",
+              "text": "Extremely common and ordinary",
+              "correct": false,
+              "trap": "Opposite meaning to the intended sense of the word."
+            },
+            {
+              "id": "C",
+              "text": "Difficult to see clearly",
+              "correct": false,
+              "trap": "Confuses remarkable with a word about visibility."
+            },
+            {
+              "id": "D",
+              "text": "Dangerous to other bees",
+              "correct": false,
+              "trap": "Not related to the meaning of the word in this context."
+            },
+            {
+              "id": "E",
+              "text": "Recently discovered",
+              "correct": false,
+              "trap": "Remarkable describes how impressive something is, not how new it is."
+            }
+          ],
+          "correct_answer": "A",
+          "explanation": "\"Remarkable\" describes the waggle dance as especially impressive and worth noticing, fitting the admiring tone of the paragraph. It does not refer to how common, visible, dangerous or new the behaviour is. Final answer: A — Worthy of attention or notice because it is impressive."
+        },
+        {
+          "question_number": 22,
+          "question_type": "comprehension",
+          "topic": "English",
+          "subtopic": "literary_device",
+          "difficulty": 2,
+          "stem": "The phrase \"a kind of living map\" used to describe the waggle dance is an example of which device?",
+          "options": [
+            {
+              "id": "A",
+              "text": "Simile",
+              "correct": false,
+              "trap": "A simile would use 'like' or 'as'; this phrase makes a direct comparison without those words."
+            },
+            {
+              "id": "B",
+              "text": "Metaphor",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "C",
+              "text": "Onomatopoeia",
+              "correct": false,
+              "trap": "There is no sound-imitating word in this phrase."
+            },
+            {
+              "id": "D",
+              "text": "Alliteration",
+              "correct": false,
+              "trap": "There is no repetition of initial consonant sounds here."
+            },
+            {
+              "id": "E",
+              "text": "Rhyme",
+              "correct": false,
+              "trap": "There is no matching of end sounds in this phrase."
+            }
+          ],
+          "correct_answer": "B",
+          "explanation": "Describing the dance directly as \"a living map\" without using \"like\" or \"as\" makes this a metaphor rather than a simile. None of the other devices involve this kind of direct comparison. Final answer: B — Metaphor."
+        },
+        {
+          "question_number": 23,
+          "question_type": "comprehension",
+          "topic": "English",
+          "subtopic": "inference",
+          "difficulty": 3,
+          "stem": "What does the passage suggest about the efficiency of the waggle dance compared to bees searching randomly for food?",
+          "options": [
+            {
+              "id": "A",
+              "text": "It allows bees to find food far more quickly and with much less wasted effort",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "B",
+              "text": "It makes no real difference to how quickly bees find food",
+              "correct": false,
+              "trap": "Contradicts the passage's description of the dance directing bees within minutes."
+            },
+            {
+              "id": "C",
+              "text": "It only works for food sources very close to the hive",
+              "correct": false,
+              "trap": "The passage explicitly mentions sources several kilometres away."
+            },
+            {
+              "id": "D",
+              "text": "It slows bees down because the dance itself takes a long time",
+              "correct": false,
+              "trap": "The passage emphasises efficiency and speed, not delay."
+            },
+            {
+              "id": "E",
+              "text": "It only tells bees the distance to food, not the direction",
+              "correct": false,
+              "trap": "The passage states the dance communicates both angle and distance."
+            }
+          ],
+          "correct_answer": "A",
+          "explanation": "The passage describes the dance as directing dozens of bees to a distant food source within minutes, with little energy wasted on aimless searching, showing a clear efficiency advantage over random searching. The other options each contradict specific details given in the text. Final answer: A — It allows bees to find food far more quickly and with much less wasted effort."
+        },
+        {
+          "question_number": 24,
+          "question_type": "comprehension",
+          "topic": "English",
+          "subtopic": "calculation",
+          "difficulty": 3,
+          "stem": "According to the passage, the waggle lasts roughly one second for every kilometre of distance to the food. If a forager bee waggles for 4 seconds, approximately how far away is the food source?",
+          "options": [
+            {
+              "id": "A",
+              "text": "1 kilometre",
+              "correct": false,
+              "trap": "Confuses the rate with the total time given in the question."
+            },
+            {
+              "id": "B",
+              "text": "4 kilometres",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "C",
+              "text": "8 kilometres",
+              "correct": false,
+              "trap": "Doubles the distance incorrectly."
+            },
+            {
+              "id": "D",
+              "text": "40 kilometres",
+              "correct": false,
+              "trap": "Misplaces a decimal point in the calculation."
+            },
+            {
+              "id": "E",
+              "text": "0.4 kilometres",
+              "correct": false,
+              "trap": "Misplaces a decimal point in the opposite direction."
+            }
+          ],
+          "correct_answer": "B",
+          "explanation": "Since the rate is one second of waggling per kilometre, a 4-second waggle corresponds directly to 4 kilometres of distance. The other options apply incorrect multiplication or decimal errors to this simple rate. Final answer: B — 4 kilometres."
+        },
+        {
+          "question_number": 25,
+          "question_type": "comprehension",
+          "topic": "English",
+          "subtopic": "fact_retrieval",
+          "difficulty": 1,
+          "stem": "According to paragraph 3, roughly what proportion of food eaten worldwide depends at least partly on pollination by bees and other insects?",
+          "options": [
+            {
+              "id": "A",
+              "text": "One in ten",
+              "correct": false,
+              "trap": "Underestimates the proportion stated in the passage."
+            },
+            {
+              "id": "B",
+              "text": "One in three",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "C",
+              "text": "Half of all food",
+              "correct": false,
+              "trap": "Overestimates the proportion stated in the passage."
+            },
+            {
+              "id": "D",
+              "text": "Almost none",
+              "correct": false,
+              "trap": "Directly contradicts the significant proportion described in the text."
+            },
+            {
+              "id": "E",
+              "text": "Nearly all food",
+              "correct": false,
+              "trap": "Greatly overstates the figure given in the passage."
+            }
+          ],
+          "correct_answer": "B",
+          "explanation": "The passage states clearly that roughly one in every three mouthfuls of food depends at least in part on pollination by bees and other insects. The other fractions given do not match this figure. Final answer: B — One in three."
+        },
+        {
+          "question_number": 26,
+          "question_type": "comprehension",
+          "topic": "English",
+          "subtopic": "evidence",
+          "difficulty": 2,
+          "stem": "Which phrase from paragraph 3 best supports the idea that bee decline is a serious, widespread problem?",
+          "options": [
+            {
+              "id": "A",
+              "text": "\"crops such as apples, almonds and strawberries\"",
+              "correct": false,
+              "trap": "This lists examples of crops, not evidence of decline."
+            },
+            {
+              "id": "B",
+              "text": "\"a single hive can visit several million flowers in just one day\"",
+              "correct": false,
+              "trap": "This shows how productive bees are, not evidence of their decline."
+            },
+            {
+              "id": "C",
+              "text": "\"some beekeepers have lost more than a third of their hives in a single winter\"",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "D",
+              "text": "\"roughly one in every three mouthfuls of food\"",
+              "correct": false,
+              "trap": "This explains bees' importance to food, not the scale of their decline."
+            },
+            {
+              "id": "E",
+              "text": "\"a question not just of curiosity, but of food security\"",
+              "correct": false,
+              "trap": "This explains why decline matters, but does not itself provide evidence of the scale of the decline."
+            }
+          ],
+          "correct_answer": "C",
+          "explanation": "Losing more than a third of hives in a single winter is a specific, striking statistic that directly demonstrates the seriousness of colony decline. The final option explains the significance of decline but is not itself evidence that decline is happening on a large scale. Final answer: C — \"some beekeepers have lost more than a third of their hives in a single winter\"."
+        },
+        {
+          "question_number": 27,
+          "question_type": "comprehension",
+          "topic": "English",
+          "subtopic": "tone",
+          "difficulty": 1,
+          "stem": "What is the overall tone of paragraph 3?",
+          "options": [
+            {
+              "id": "A",
+              "text": "Informative but concerned",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "B",
+              "text": "Humorous and light-hearted",
+              "correct": false,
+              "trap": "The paragraph deals with a serious issue, not comedy."
+            },
+            {
+              "id": "C",
+              "text": "Entirely hopeless and despairing",
+              "correct": false,
+              "trap": "Overstates the tone; the paragraph presents facts and concern, not total despair."
+            },
+            {
+              "id": "D",
+              "text": "Dismissive of the issue's importance",
+              "correct": false,
+              "trap": "Contradicts the paragraph's emphasis on food security as a serious concern."
+            },
+            {
+              "id": "E",
+              "text": "Purely celebratory",
+              "correct": false,
+              "trap": "The paragraph raises a problem rather than celebrating an achievement."
+            }
+          ],
+          "correct_answer": "A",
+          "explanation": "The paragraph presents clear facts about bees' importance to food production while also expressing genuine concern about colony decline, making \"informative but concerned\" the most accurate description. It does not slip into total despair, dismissal or celebration. Final answer: A — Informative but concerned."
+        },
+        {
+          "question_number": 28,
+          "question_type": "comprehension",
+          "topic": "English",
+          "subtopic": "structure",
+          "difficulty": 2,
+          "stem": "How does the focus of the passage shift across the three paragraphs?",
+          "options": [
+            {
+              "id": "A",
+              "text": "From the structure of a hive, to how bees communicate, to why bees matter to humans",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "B",
+              "text": "From human food production, to hive structure, to bee communication",
+              "correct": false,
+              "trap": "Reverses the actual order in which these topics are presented."
+            },
+            {
+              "id": "C",
+              "text": "From bee communication, to human food production, to hive structure",
+              "correct": false,
+              "trap": "Mismatches the order in which the topics actually appear."
+            },
+            {
+              "id": "D",
+              "text": "The passage repeats the same point three times without development",
+              "correct": false,
+              "trap": "Each paragraph introduces a distinct new topic, so this is inaccurate."
+            },
+            {
+              "id": "E",
+              "text": "From a single bee's life story, to the queen's biography, to a history of beekeeping",
+              "correct": false,
+              "trap": "Invents a narrative structure not present in this factual passage."
+            }
+          ],
+          "correct_answer": "A",
+          "explanation": "Paragraph 1 explains roles within the hive, paragraph 2 explains the waggle dance and communication, and paragraph 3 explains bees' importance to human food and the threats they face. This shows a logical progression rather than repetition or a narrative biography. Final answer: A — From the structure of a hive, to how bees communicate, to why bees matter to humans."
+        },
+        {
+          "question_number": 29,
+          "question_type": "comprehension",
+          "topic": "English",
+          "subtopic": "inference",
+          "difficulty": 2,
+          "stem": "What does the passage imply about the relationship between pesticide use and food security?",
+          "options": [
+            {
+              "id": "A",
+              "text": "Pesticides may contribute to bee decline, which could in turn threaten the food supply that depends on pollination",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "B",
+              "text": "Pesticides have no connection to bee health at all",
+              "correct": false,
+              "trap": "Contradicts the passage, which lists pesticide exposure as a cause of decline."
+            },
+            {
+              "id": "C",
+              "text": "Pesticides only affect drones, not worker bees",
+              "correct": false,
+              "trap": "The passage does not distinguish between drones and workers when discussing pesticide effects."
+            },
+            {
+              "id": "D",
+              "text": "Pesticides improve crop pollination rates",
+              "correct": false,
+              "trap": "Contradicts the passage, which presents pesticides as a threat, not a benefit."
+            },
+            {
+              "id": "E",
+              "text": "Pesticides are the only cause of bee decline mentioned in the passage",
+              "correct": false,
+              "trap": "The passage lists pesticide exposure alongside habitat loss and a parasitic mite, not as the sole cause."
+            }
+          ],
+          "correct_answer": "A",
+          "explanation": "The passage links pesticide exposure to colony decline and separately explains that pollinator decline threatens food security, so the implied connection runs from pesticides, to fewer bees, to risks for food supply. It explicitly lists multiple causes of decline, so treating pesticides as the only cause is inaccurate. Final answer: A — Pesticides may contribute to bee decline, which could in turn threaten the food supply that depends on pollination."
+        },
+        {
+          "question_number": 30,
+          "question_type": "comprehension",
+          "topic": "English",
+          "subtopic": "calculation",
+          "difficulty": 3,
+          "stem": "The passage states a single hive can visit several million flowers in one day. If one hive visits exactly 2 million flowers in a day, approximately how many flowers would it visit over a 7 day week, assuming the same daily rate?",
+          "options": [
+            {
+              "id": "A",
+              "text": "2 million",
+              "correct": false,
+              "trap": "Forgets to multiply by the number of days in the week."
+            },
+            {
+              "id": "B",
+              "text": "9 million",
+              "correct": false,
+              "trap": "Incorrectly adds rather than multiplies the daily figure."
+            },
+            {
+              "id": "C",
+              "text": "14 million",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "D",
+              "text": "20 million",
+              "correct": false,
+              "trap": "Multiplies by 10 instead of 7."
+            },
+            {
+              "id": "E",
+              "text": "21 million",
+              "correct": false,
+              "trap": "Mistakenly multiplies by 10.5 instead of 7."
+            }
+          ],
+          "correct_answer": "C",
+          "explanation": "Multiplying the daily rate of 2 million flowers by 7 days gives 14 million flowers visited over the week. The other options either fail to multiply correctly or use the wrong multiplier. Final answer: C — 14 million."
+        }
+      ]
+    }
+  ],
+  "qa_review": {
+    "status": "approved",
+    "fit_for_11plus_english": true,
+    "reviewed_at": "2026-06-14",
+    "scope": "comprehension only (questions 1-30)",
+    "fixes_applied": [
+      {
+        "question": 2,
+        "issue": "Quoted line mixed simile ('like something alive') with personification, making two answers defensible",
+        "resolution": "Shortened quote to personification-only wording; replaced Onomatopoeia option with Simile trap; updated explanation"
+      }
+    ],
+    "verification": "All 30 questions checked: stems, options, answer keys and explanations match passage evidence. British English. Passage lengths 508 + 466 words."
+  }
+}

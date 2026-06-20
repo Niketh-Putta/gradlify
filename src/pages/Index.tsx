@@ -48,6 +48,11 @@ import { PaymentFailedGate } from '@/components/PaymentFailedGate';
 import { usePaymentFailedBlock } from '@/hooks/usePaymentFailedBlock';
 import { isPaymentGateExemptPath } from '@/lib/paymentBlocklist';
 import { useCombinedMockReleased } from '@/hooks/useCombinedMockReleased';
+import {
+  isSecondMockReleased,
+  SECOND_MOCK_DISPLAY_TITLE,
+  SECOND_MOCK_EVENT_SLUG,
+} from '@/lib/liveMockCombinedConfig';
 
 /**
  * `/live-mock-exams`: minimal live mock landing (the replacement for the old hub).
@@ -68,6 +73,21 @@ const LocalCombinedMockRoute = () => {
   const released = useCombinedMockReleased();
   if (import.meta.env.DEV || released) return <LocalCombinedMock />;
   return <Navigate to="/live-mock-exams" replace />;
+};
+
+/** Mock 2 exam lobby — registration check uses `both_subjects_live_mock_2`. */
+const LocalCombinedMock2SitRoute = () => {
+  if (import.meta.env.DEV || isSecondMockReleased()) {
+    return (
+      <LocalCombinedMock
+        mockEventSlug={SECOND_MOCK_EVENT_SLUG}
+        displayTitle={SECOND_MOCK_DISPLAY_TITLE}
+        backHref="/live-mock-exams/local-preview2"
+        checkReleased={isSecondMockReleased}
+      />
+    );
+  }
+  return <Navigate to="/live-mock-exams/local-preview2" replace />;
 };
 
 // Loading Fallback Component
@@ -135,7 +155,7 @@ const Index = () => {
                 // send people straight back to it. Mock 1's lobby needs the
                 // released/registration gate, so it returns to the hub instead.
                 path: currentPath.startsWith('/live-mock-exams/local-preview2')
-                  ? '/live-mock-exams/local-preview2'
+                  ? currentPath
                   : currentPath.startsWith('/live-mock-exams/local-preview')
                     ? '/live-mock-exams'
                     : currentPath,
@@ -367,6 +387,7 @@ const Index = () => {
               <Route path="live-mock-exams/details" element={<LiveMockExamsDetailsRoute />} />
               <Route path="live-mock-exams/local-preview" element={<LocalCombinedMockRoute />} />
               {/* Mock 2 reservation page handles its own pre-release state, so no released gate here. */}
+              <Route path="live-mock-exams/local-preview2/sit" element={<LocalCombinedMock2SitRoute />} />
               <Route path="live-mock-exams/local-preview2" element={<LocalCombinedMock2 />} />
               <Route path="practice-page" element={<Navigate to="/mocks" replace />} />
               <Route path="practice/maths" element={<Navigate to="/mocks/maths" replace />} />

@@ -50,7 +50,12 @@ import {
   type LiveMockPublicCohortSummary,
   type LiveMockScoreRank,
 } from "@/lib/liveMockAnalytics";
-import { COMBINED_MOCK_DISPLAY_TITLE } from "@/lib/liveMockCombinedConfig";
+import {
+  COMBINED_MOCK_DISPLAY_TITLE,
+  COMBINED_MOCK_EVENT_SLUG,
+  combinedPaperSlugsForEvent,
+  SECOND_MOCK_EVENT_SLUG,
+} from "@/lib/liveMockCombinedConfig";
 
 const POLL_MS = 15_000;
 
@@ -127,11 +132,6 @@ async function loadSubjectPaperStats(paperId: string): Promise<SubjectPaperStats
   };
 }
 
-/** Combined Maths+English mock: each tab maps to its own seeded paper. */
-const COMBINED_SUBJECT_SLUGS: Record<"maths" | "english", string> = {
-  maths: "both_subjects_maths",
-  english: "both_subjects_english",
-};
 const COMBINED_SUBJECT_TITLES: Record<"maths" | "english", string> = {
   maths: "11+ Maths",
   english: "11+ English",
@@ -145,7 +145,10 @@ export default function LiveMockAnalytics() {
   const isCombined = searchParams.get("combined") === "1";
   const combinedSubject: "maths" | "english" =
     searchParams.get("subject") === "maths" ? "maths" : "english";
-  const activeSlug = isCombined ? COMBINED_SUBJECT_SLUGS[combinedSubject] : LIVE_MOCK_PAPER_SLUG;
+  const mockEventSlug =
+    searchParams.get("mock") === SECOND_MOCK_EVENT_SLUG ? SECOND_MOCK_EVENT_SLUG : COMBINED_MOCK_EVENT_SLUG;
+  const combinedSubjectSlugs = combinedPaperSlugsForEvent(mockEventSlug);
+  const activeSlug = isCombined ? combinedSubjectSlugs[combinedSubject] : LIVE_MOCK_PAPER_SLUG;
   const fallbackTitle = isCombined
     ? COMBINED_SUBJECT_TITLES[combinedSubject]
     : "11+ English complete mock exam";
@@ -155,9 +158,10 @@ export default function LiveMockAnalytics() {
       const next = new URLSearchParams(searchParams);
       next.set("combined", "1");
       next.set("subject", subject);
+      next.set("mock", mockEventSlug);
       setSearchParams(next, { replace: true });
     },
-    [searchParams, setSearchParams],
+    [mockEventSlug, searchParams, setSearchParams],
   );
 
   const [paperTitle, setPaperTitle] = useState<string>("11+ English complete mock exam");
@@ -191,8 +195,8 @@ export default function LiveMockAnalytics() {
 
       if (isCombined) {
         const [mathsPaper, englishPaper] = await Promise.all([
-          getLiveMockPaperBySlug(COMBINED_SUBJECT_SLUGS.maths),
-          getLiveMockPaperBySlug(COMBINED_SUBJECT_SLUGS.english),
+          getLiveMockPaperBySlug(combinedSubjectSlugs.maths),
+          getLiveMockPaperBySlug(combinedSubjectSlugs.english),
         ]);
 
         if (!mathsPaper || !englishPaper) {
@@ -272,7 +276,7 @@ export default function LiveMockAnalytics() {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [user?.id, activeSlug, fallbackTitle, isCombined, combinedSubject]);
+  }, [user?.id, activeSlug, combinedSubjectSlugs, fallbackTitle, isCombined, combinedSubject, mockEventSlug]);
 
   useEffect(() => {
     void loadAll(false);
@@ -600,7 +604,7 @@ export default function LiveMockAnalytics() {
             <Link
               to={
                 isCombined
-                  ? `/live-mock-exams/session?track=11plus&subject=english&topics=Comprehension,SPaG&mode=mock-exam&questions=60&duration=50&liveMockSlug=both_subjects_english`
+                  ? `/live-mock-exams/session?track=11plus&subject=english&topics=Comprehension,SPaG&mode=mock-exam&questions=60&duration=50&liveMockSlug=${encodeURIComponent(combinedSubjectSlugs.english)}`
                   : buildLiveMockSessionPath()
               }
             >

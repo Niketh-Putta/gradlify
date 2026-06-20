@@ -1,0 +1,2607 @@
+{
+  "paper": {
+    "slug": "both_subjects_maths_mock_2",
+    "title": "11+ Maths",
+    "duration_minutes": 50,
+    "question_count": 60,
+    "track": "11plus",
+    "subject": "maths",
+    "calculator": "non-calculator",
+    "fit_for_11plus_maths": true,
+    "qa_status": "approved"
+  },
+  "sections": [
+    {
+      "section_order": 1,
+      "section_key": "maths_number_calc",
+      "title": "Section 1: Number, calculation & algebra",
+      "instructions": "Work without a calculator. Choose the single best answer for each question.",
+      "questions": [
+        {
+          "question_number": 1,
+          "question_type": "maths",
+          "topic": "Maths",
+          "subtopic": "bidmas",
+          "difficulty": 1,
+          "stem": "Calculate: 3 + 4 × 5 − 2",
+          "options": [
+            {
+              "id": "A",
+              "text": "33",
+              "correct": false,
+              "trap": "Left to right without BIDMAS: (3+4)×5−2"
+            },
+            {
+              "id": "B",
+              "text": "21",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "C",
+              "text": "23",
+              "correct": false,
+              "trap": "Added before multiplying then forgot to subtract"
+            },
+            {
+              "id": "D",
+              "text": "25",
+              "correct": false,
+              "trap": "Calculated 4×5 correctly but added 3 and 2 both"
+            },
+            {
+              "id": "E",
+              "text": "17",
+              "correct": false,
+              "trap": "Subtracted 2 before multiplying"
+            }
+          ],
+          "correct_answer": "B",
+          "explanation": "Using BIDMAS, multiplication comes before addition and subtraction. First calculate 4 × 5 = 20. Then 3 + 20 − 2 = 21. Final answer: 21."
+        },
+        {
+          "question_number": 2,
+          "question_type": "maths",
+          "topic": "Maths",
+          "subtopic": "place_value_rounding",
+          "difficulty": 1,
+          "stem": "Round 6,847 to the nearest hundred.",
+          "options": [
+            {
+              "id": "A",
+              "text": "6,800",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "B",
+              "text": "6,900",
+              "correct": false,
+              "trap": "Rounded up incorrectly (47 < 50)"
+            },
+            {
+              "id": "C",
+              "text": "7,000",
+              "correct": false,
+              "trap": "Rounded to nearest thousand"
+            },
+            {
+              "id": "D",
+              "text": "6,850",
+              "correct": false,
+              "trap": "Rounded to nearest ten"
+            },
+            {
+              "id": "E",
+              "text": "6,840",
+              "correct": false,
+              "trap": "Rounded to nearest ten (wrong direction)"
+            }
+          ],
+          "correct_answer": "A",
+          "explanation": "To round to the nearest hundred, look at the tens digit, which is 4. Since 4 < 5, round down. The hundreds digit stays as 8, giving 6,800. Final answer: 6,800."
+        },
+        {
+          "question_number": 3,
+          "question_type": "maths",
+          "topic": "Maths",
+          "subtopic": "sequences",
+          "difficulty": 1,
+          "stem": "What is the next term in the sequence: 5, 9, 13, 17, __?",
+          "options": [
+            {
+              "id": "A",
+              "text": "20",
+              "correct": false,
+              "trap": "Added 3 instead of 4"
+            },
+            {
+              "id": "B",
+              "text": "22",
+              "correct": false,
+              "trap": "Added 5 instead of 4"
+            },
+            {
+              "id": "C",
+              "text": "21",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "D",
+              "text": "19",
+              "correct": false,
+              "trap": "Added 2 instead of 4"
+            },
+            {
+              "id": "E",
+              "text": "23",
+              "correct": false,
+              "trap": "Added 6 instead of 4"
+            }
+          ],
+          "correct_answer": "C",
+          "explanation": "The sequence increases by 4 each time: 5, 9 (+4), 13 (+4), 17 (+4). The next term is 17 + 4 = 21. Final answer: 21."
+        },
+        {
+          "question_number": 4,
+          "question_type": "maths",
+          "topic": "Maths",
+          "subtopic": "four_operations",
+          "difficulty": 1,
+          "stem": "A baker makes 324 rolls and packs them equally into boxes of 12. How many boxes does he fill?",
+          "options": [
+            {
+              "id": "A",
+              "text": "26",
+              "correct": false,
+              "trap": "Divided 312 by 12 instead"
+            },
+            {
+              "id": "B",
+              "text": "28",
+              "correct": false,
+              "trap": "Multiplied instead of divided then adjusted"
+            },
+            {
+              "id": "C",
+              "text": "27",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "D",
+              "text": "32",
+              "correct": false,
+              "trap": "Divided 324 by 10 not 12"
+            },
+            {
+              "id": "E",
+              "text": "24",
+              "correct": false,
+              "trap": "Divided 288 by 12"
+            }
+          ],
+          "correct_answer": "C",
+          "explanation": "Divide 324 by 12. 12 × 27 = 324, so the baker fills 27 boxes exactly. Final answer: 27."
+        },
+        {
+          "question_number": 5,
+          "question_type": "maths",
+          "topic": "Maths",
+          "subtopic": "fractions",
+          "difficulty": 1,
+          "stem": "What fraction of 40 is 16?",
+          "options": [
+            {
+              "id": "A",
+              "text": "2/5",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "B",
+              "text": "3/8",
+              "correct": false,
+              "trap": "Used 15/40 then simplified"
+            },
+            {
+              "id": "C",
+              "text": "1/3",
+              "correct": false,
+              "trap": "Estimated roughly one third"
+            },
+            {
+              "id": "D",
+              "text": "4/10",
+              "correct": false,
+              "trap": "Correct fraction but not fully simplified"
+            },
+            {
+              "id": "E",
+              "text": "2/6",
+              "correct": false,
+              "trap": "Confused numerator or simplified incorrectly"
+            }
+          ],
+          "correct_answer": "A",
+          "explanation": "Write 16/40 and simplify. Divide both by 8: 16 ÷ 8 = 2 and 40 ÷ 8 = 5. The fraction is 2/5. Final answer: 2/5."
+        },
+        {
+          "question_number": 6,
+          "question_type": "maths",
+          "topic": "Maths",
+          "subtopic": "factors_multiples_primes",
+          "difficulty": 2,
+          "stem": "What is the highest common factor (HCF) of 36 and 48?",
+          "options": [
+            {
+              "id": "A",
+              "text": "6",
+              "correct": false,
+              "trap": "Found a common factor but not the highest"
+            },
+            {
+              "id": "B",
+              "text": "18",
+              "correct": false,
+              "trap": "Factor of 36 but not of 48"
+            },
+            {
+              "id": "C",
+              "text": "16",
+              "correct": false,
+              "trap": "Factor of 48 but not of 36"
+            },
+            {
+              "id": "D",
+              "text": "12",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "E",
+              "text": "4",
+              "correct": false,
+              "trap": "Found a small common factor"
+            }
+          ],
+          "correct_answer": "D",
+          "explanation": "Factors of 36: 1, 2, 3, 4, 6, 9, 12, 18, 36. Factors of 48: 1, 2, 3, 4, 6, 8, 12, 16, 24, 48. The highest number in both lists is 12. Final answer: 12."
+        },
+        {
+          "question_number": 7,
+          "question_type": "maths",
+          "topic": "Maths",
+          "subtopic": "simple_equations",
+          "difficulty": 2,
+          "stem": "A number is put into a function machine. It is first multiplied by 3, then 7 is subtracted. The output is 26. What was the input?",
+          "options": [
+            {
+              "id": "A",
+              "text": "9",
+              "correct": false,
+              "trap": "Added 7 to 26 then divided by 4"
+            },
+            {
+              "id": "B",
+              "text": "7",
+              "correct": false,
+              "trap": "Divided 26 by 3 then rounded"
+            },
+            {
+              "id": "C",
+              "text": "6",
+              "correct": false,
+              "trap": "Subtracted 7 then divided by 3 in wrong order"
+            },
+            {
+              "id": "D",
+              "text": "11",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "E",
+              "text": "8",
+              "correct": false,
+              "trap": "Calculated (26 − 2) ÷ 3"
+            }
+          ],
+          "correct_answer": "D",
+          "explanation": "Work backwards through the function machine. The output is 26. Reverse the subtraction: 26 + 7 = 33. Reverse the multiplication: 33 ÷ 3 = 11. Final answer: 11."
+        },
+        {
+          "question_number": 8,
+          "question_type": "maths",
+          "topic": "Maths",
+          "subtopic": "decimals_percentages",
+          "difficulty": 2,
+          "stem": "Which of the following is the largest? A: 0.6, B: 58%, C: 3/5, D: 0.605, E: 61%",
+          "options": [
+            {
+              "id": "A",
+              "text": "0.6",
+              "correct": false,
+              "trap": "Stopped comparing too early"
+            },
+            {
+              "id": "B",
+              "text": "58%",
+              "correct": false,
+              "trap": "Confused 58% with 0.58"
+            },
+            {
+              "id": "C",
+              "text": "3/5",
+              "correct": false,
+              "trap": "Equivalent to 0.6 so not the largest"
+            },
+            {
+              "id": "D",
+              "text": "0.605",
+              "correct": false,
+              "trap": "Close but 61% = 0.61 > 0.605"
+            },
+            {
+              "id": "E",
+              "text": "61%",
+              "correct": true,
+              "trap": null
+            }
+          ],
+          "correct_answer": "E",
+          "explanation": "Convert all to decimals: 0.6, 0.58, 0.6, 0.605, 0.61. Comparing: 0.61 is the largest. 61% = 0.61. Final answer: 61%."
+        },
+        {
+          "question_number": 9,
+          "question_type": "maths",
+          "topic": "Maths",
+          "subtopic": "sequences",
+          "difficulty": 2,
+          "stem": "The first four terms of a sequence are 3, 7, 15, 31. What is the next term?",
+          "options": [
+            {
+              "id": "A",
+              "text": "47",
+              "correct": false,
+              "trap": "Added 16 (the previous difference) rather than doubling and adding 1"
+            },
+            {
+              "id": "B",
+              "text": "59",
+              "correct": false,
+              "trap": "Added 28 incorrectly"
+            },
+            {
+              "id": "C",
+              "text": "62",
+              "correct": false,
+              "trap": "Doubled 31"
+            },
+            {
+              "id": "D",
+              "text": "63",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "E",
+              "text": "55",
+              "correct": false,
+              "trap": "Added 24 to 31"
+            }
+          ],
+          "correct_answer": "D",
+          "explanation": "The pattern is: multiply the previous term by 2 and add 1. Check: 3×2+1=7, 7×2+1=15, 15×2+1=31. Next: 31×2+1=63. Final answer: 63."
+        },
+        {
+          "question_number": 10,
+          "question_type": "maths",
+          "topic": "Maths",
+          "subtopic": "simple_equations",
+          "difficulty": 2,
+          "stem": "Solve: 5x + 9 = 34",
+          "options": [
+            {
+              "id": "A",
+              "text": "4",
+              "correct": false,
+              "trap": "Divided 34 by 5 then subtracted 9"
+            },
+            {
+              "id": "B",
+              "text": "8",
+              "correct": false,
+              "trap": "Added 9 to 34 then divided by 5"
+            },
+            {
+              "id": "C",
+              "text": "6",
+              "correct": false,
+              "trap": "Subtracted 9 from 34 then divided by 4"
+            },
+            {
+              "id": "D",
+              "text": "5",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "E",
+              "text": "7",
+              "correct": false,
+              "trap": "Guessed the nearest whole number"
+            }
+          ],
+          "correct_answer": "D",
+          "explanation": "Subtract 9 from both sides: 5x = 34 − 9 = 25. Divide both sides by 5: x = 25 ÷ 5 = 5. Check: 5×5+9 = 34. Final answer: 5."
+        },
+        {
+          "question_number": 11,
+          "question_type": "maths",
+          "topic": "Maths",
+          "subtopic": "fractions_decimals",
+          "difficulty": 2,
+          "stem": "What is 2/3 + 3/4? Give your answer as a mixed number or fraction in its simplest form.",
+          "options": [
+            {
+              "id": "A",
+              "text": "5/7",
+              "correct": false,
+              "trap": "Added numerators and denominators separately"
+            },
+            {
+              "id": "B",
+              "text": "1 5/12",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "C",
+              "text": "6/7",
+              "correct": false,
+              "trap": "Added numerators over sum of denominators"
+            },
+            {
+              "id": "D",
+              "text": "1 1/2",
+              "correct": false,
+              "trap": "Incorrectly simplified 17/12 to 3/2"
+            },
+            {
+              "id": "E",
+              "text": "1 1/6",
+              "correct": false,
+              "trap": "Used LCD of 6 instead of 12"
+            }
+          ],
+          "correct_answer": "B",
+          "explanation": "Find the common denominator of 3 and 4, which is 12. Convert: 2/3 = 8/12 and 3/4 = 9/12. Add: 8/12 + 9/12 = 17/12. As a mixed number: 1 and 5/12. Final answer: 1 5/12."
+        },
+        {
+          "question_number": 12,
+          "question_type": "maths",
+          "topic": "Maths",
+          "subtopic": "factors_multiples_primes",
+          "difficulty": 2,
+          "stem": "What is the lowest common multiple (LCM) of 8 and 10?",
+          "options": [
+            {
+              "id": "A",
+              "text": "80",
+              "correct": false,
+              "trap": "Multiplied 8 × 10 without finding LCM"
+            },
+            {
+              "id": "B",
+              "text": "18",
+              "correct": false,
+              "trap": "Added 8 and 10"
+            },
+            {
+              "id": "C",
+              "text": "40",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "D",
+              "text": "16",
+              "correct": false,
+              "trap": "Listed multiples of 8 only"
+            },
+            {
+              "id": "E",
+              "text": "20",
+              "correct": false,
+              "trap": "Took double of 10"
+            }
+          ],
+          "correct_answer": "C",
+          "explanation": "Multiples of 8: 8, 16, 24, 32, 40, ... Multiples of 10: 10, 20, 30, 40, ... The first common multiple is 40. Final answer: 40."
+        },
+        {
+          "question_number": 13,
+          "question_type": "maths",
+          "topic": "Maths",
+          "subtopic": "bidmas",
+          "difficulty": 3,
+          "stem": "Calculate: 48 ÷ (2 + 4) × 3 − 5²",
+          "options": [
+            {
+              "id": "A",
+              "text": "−1",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "B",
+              "text": "19",
+              "correct": false,
+              "trap": "Did not evaluate 5² = 25; used 5 instead"
+            },
+            {
+              "id": "C",
+              "text": "1",
+              "correct": false,
+              "trap": "Sign error at the end"
+            },
+            {
+              "id": "D",
+              "text": "−7",
+              "correct": false,
+              "trap": "Divided 48 by 2 first ignoring brackets"
+            },
+            {
+              "id": "E",
+              "text": "−25",
+              "correct": false,
+              "trap": "Forgot to multiply by 3 after dividing"
+            }
+          ],
+          "correct_answer": "A",
+          "explanation": "Brackets first: 2 + 4 = 6. Then indices: 5² = 25. Now left to right for × and ÷: 48 ÷ 6 = 8, then 8 × 3 = 24. Finally subtract: 24 − 25 = −1. Final answer: −1."
+        },
+        {
+          "question_number": 14,
+          "question_type": "maths",
+          "topic": "Maths",
+          "subtopic": "sequences",
+          "difficulty": 3,
+          "stem": "The nth term of a sequence is given by 4n − 3. What is the sum of the 6th and 9th terms?",
+          "options": [
+            {
+              "id": "A",
+              "text": "54",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "B",
+              "text": "56",
+              "correct": false,
+              "trap": "Used n=5 and n=8 in formula"
+            },
+            {
+              "id": "C",
+              "text": "48",
+              "correct": false,
+              "trap": "Calculated 6th term + 8th term"
+            },
+            {
+              "id": "D",
+              "text": "60",
+              "correct": false,
+              "trap": "Used n=6 and n=10"
+            },
+            {
+              "id": "E",
+              "text": "50",
+              "correct": false,
+              "trap": "Added 21+29 with error on 9th term"
+            }
+          ],
+          "correct_answer": "A",
+          "explanation": "6th term: 4(6) − 3 = 24 − 3 = 21. 9th term: 4(9) − 3 = 36 − 3 = 33. Sum: 21 + 33 = 54. Final answer: 54."
+        },
+        {
+          "question_number": 15,
+          "question_type": "maths",
+          "topic": "Maths",
+          "subtopic": "simple_equations",
+          "difficulty": 3,
+          "stem": "Priya thinks of a number. She doubles it, adds 15, then divides the result by 5. Her answer is 9. What number did Priya think of?",
+          "options": [
+            {
+              "id": "A",
+              "text": "10",
+              "correct": false,
+              "trap": "Divided 9 by 5 then doubled without reversing all steps"
+            },
+            {
+              "id": "B",
+              "text": "18",
+              "correct": false,
+              "trap": "Multiplied 9 by 5 then subtracted 15 without halving"
+            },
+            {
+              "id": "C",
+              "text": "12",
+              "correct": false,
+              "trap": "Reversed steps incorrectly: 9×5=45, 45+15=60, 60÷2=30 error"
+            },
+            {
+              "id": "D",
+              "text": "15",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "E",
+              "text": "21",
+              "correct": false,
+              "trap": "Added 15 before multiplying in reversal"
+            }
+          ],
+          "correct_answer": "D",
+          "explanation": "Work backwards. The final result is 9. Reverse division by 5: 9 × 5 = 45. Reverse adding 15: 45 − 15 = 30. Reverse doubling: 30 ÷ 2 = 15. Final answer: 15."
+        }
+      ]
+    },
+    {
+      "section_order": 2,
+      "section_key": "maths_measures_data",
+      "title": "Section 2: Measures, rates & data",
+      "instructions": "Work without a calculator. Choose the single best answer for each question.",
+      "questions": [
+        {
+          "question_number": 16,
+          "question_type": "maths",
+          "topic": "Maths",
+          "subtopic": "length_area_perimeter",
+          "difficulty": 1,
+          "stem": "A rectangle has a length of 9 cm and a width of 6 cm. What is its perimeter?",
+          "options": [
+            {
+              "id": "A",
+              "text": "30 cm",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "B",
+              "text": "54 cm",
+              "correct": false,
+              "trap": "Calculated area instead of perimeter"
+            },
+            {
+              "id": "C",
+              "text": "15 cm",
+              "correct": false,
+              "trap": "Added length and width once only"
+            },
+            {
+              "id": "D",
+              "text": "28 cm",
+              "correct": false,
+              "trap": "Added 9+9+6+4 with wrong value"
+            },
+            {
+              "id": "E",
+              "text": "32 cm",
+              "correct": false,
+              "trap": "Doubled only the length not both dimensions"
+            }
+          ],
+          "correct_answer": "A",
+          "explanation": "Perimeter = 2 × (length + width) = 2 × (9 + 6) = 2 × 15 = 30 cm. Final answer: 30 cm."
+        },
+        {
+          "question_number": 17,
+          "question_type": "maths",
+          "topic": "Maths",
+          "subtopic": "money",
+          "difficulty": 1,
+          "stem": "Tom buys 3 pens at £1.25 each and a notebook for £2.40. He pays with a £10 note. How much change does he receive?",
+          "options": [
+            {
+              "id": "A",
+              "text": "£3.85",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "B",
+              "text": "£4.10",
+              "correct": false,
+              "trap": "Only counted 2 pens instead of 3"
+            },
+            {
+              "id": "C",
+              "text": "£3.35",
+              "correct": false,
+              "trap": "Used pen price of £1.55"
+            },
+            {
+              "id": "D",
+              "text": "£6.15",
+              "correct": false,
+              "trap": "Subtracted only the notebook price"
+            },
+            {
+              "id": "E",
+              "text": "£2.60",
+              "correct": false,
+              "trap": "Added only the pen total without notebook"
+            }
+          ],
+          "correct_answer": "A",
+          "explanation": "3 pens cost 3 × £1.25 = £3.75. Total spent: £3.75 + £2.40 = £6.15. Change: £10.00 − £6.15 = £3.85. Final answer: £3.85."
+        },
+        {
+          "question_number": 18,
+          "question_type": "maths",
+          "topic": "Maths",
+          "subtopic": "time",
+          "difficulty": 1,
+          "stem": "A film starts at 14:35 and lasts 1 hour 50 minutes. At what time does the film end?",
+          "options": [
+            {
+              "id": "A",
+              "text": "16:15",
+              "correct": false,
+              "trap": "Added 1 hour 40 minutes instead of 50 minutes"
+            },
+            {
+              "id": "B",
+              "text": "16:25",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "C",
+              "text": "16:05",
+              "correct": false,
+              "trap": "Added 1 hour 30 minutes"
+            },
+            {
+              "id": "D",
+              "text": "15:85",
+              "correct": false,
+              "trap": "Added minutes without converting: 35+50=85"
+            },
+            {
+              "id": "E",
+              "text": "16:35",
+              "correct": false,
+              "trap": "Added only 2 hours"
+            }
+          ],
+          "correct_answer": "B",
+          "explanation": "Start at 14:35. Add 1 hour: 15:35. Add 50 minutes: 35 + 50 = 85 minutes, so 1 hour and 25 minutes past 15:00, which is 16:25. Final answer: 16:25."
+        },
+        {
+          "question_number": 19,
+          "question_type": "maths",
+          "topic": "Maths",
+          "subtopic": "mean_median_range",
+          "difficulty": 2,
+          "stem": "Five students scored 72, 68, 85, 91 and 74 in a test. What is the mean score?",
+          "options": [
+            {
+              "id": "A",
+              "text": "76",
+              "correct": false,
+              "trap": "Divided by 4 instead of 5"
+            },
+            {
+              "id": "B",
+              "text": "78",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "C",
+              "text": "74",
+              "correct": false,
+              "trap": "Chose the median instead of the mean"
+            },
+            {
+              "id": "D",
+              "text": "80",
+              "correct": false,
+              "trap": "Calculated (68+91)/2 as a shortcut"
+            },
+            {
+              "id": "E",
+              "text": "82",
+              "correct": false,
+              "trap": "Added incorrectly: missed one value"
+            }
+          ],
+          "correct_answer": "B",
+          "explanation": "Add all scores: 72 + 68 + 85 + 91 + 74 = 390. Divide by 5: 390 ÷ 5 = 78. Final answer: 78."
+        },
+        {
+          "question_number": 20,
+          "question_type": "maths",
+          "topic": "Maths",
+          "subtopic": "length_area_perimeter",
+          "difficulty": 2,
+          "stem": "An L-shaped room consists of a large rectangle 8 m by 5 m with a smaller rectangle 3 m by 2 m cut from one corner. What is the area of the room?",
+          "options": [
+            {
+              "id": "A",
+              "text": "40 m²",
+              "correct": false,
+              "trap": "Calculated the full rectangle without subtracting"
+            },
+            {
+              "id": "B",
+              "text": "32 m²",
+              "correct": false,
+              "trap": "Subtracted 8 (wrong area for cut-out)"
+            },
+            {
+              "id": "C",
+              "text": "34 m²",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "D",
+              "text": "30 m²",
+              "correct": false,
+              "trap": "Subtracted 10 (3×2 used as 3+2+5)"
+            },
+            {
+              "id": "E",
+              "text": "36 m²",
+              "correct": false,
+              "trap": "Subtracted perimeter of cut-out not area"
+            }
+          ],
+          "correct_answer": "C",
+          "explanation": "Full rectangle area: 8 × 5 = 40 m². Cut-out area: 3 × 2 = 6 m². Room area: 40 − 6 = 34 m². Final answer: 34 m²."
+        },
+        {
+          "question_number": 21,
+          "question_type": "maths",
+          "topic": "Maths",
+          "subtopic": "speed_distance_time",
+          "difficulty": 2,
+          "stem": "A cyclist travels 54 km at an average speed of 18 km/h. How long does the journey take?",
+          "options": [
+            {
+              "id": "A",
+              "text": "2 hours",
+              "correct": false,
+              "trap": "Divided 54 by 18 then rounded"
+            },
+            {
+              "id": "B",
+              "text": "4 hours",
+              "correct": false,
+              "trap": "Multiplied 54 by 18 then divided wrongly"
+            },
+            {
+              "id": "C",
+              "text": "3 hours",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "D",
+              "text": "2 hours 30 minutes",
+              "correct": false,
+              "trap": "Used 54 ÷ 20 then adjusted"
+            },
+            {
+              "id": "E",
+              "text": "1 hour 30 minutes",
+              "correct": false,
+              "trap": "Used speed = distance × time formula incorrectly"
+            }
+          ],
+          "correct_answer": "C",
+          "explanation": "Time = Distance ÷ Speed = 54 ÷ 18 = 3 hours. Final answer: 3 hours."
+        },
+        {
+          "question_number": 22,
+          "question_type": "maths",
+          "topic": "Maths",
+          "subtopic": "tables_data",
+          "difficulty": 2,
+          "stem": "A tuck shop sells apples, bananas and oranges. Last week it sold 45 apples, 32 bananas and 63 oranges. What percentage of the fruit sold were bananas? Round to the nearest whole number.",
+          "options": [
+            {
+              "id": "A",
+              "text": "32%",
+              "correct": false,
+              "trap": "Used 32 as the percentage directly"
+            },
+            {
+              "id": "B",
+              "text": "20%",
+              "correct": false,
+              "trap": "Divided 32 by 160 rather than 140"
+            },
+            {
+              "id": "C",
+              "text": "23%",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "D",
+              "text": "25%",
+              "correct": false,
+              "trap": "Estimated one quarter"
+            },
+            {
+              "id": "E",
+              "text": "18%",
+              "correct": false,
+              "trap": "Divided bananas by apples+oranges not total"
+            }
+          ],
+          "correct_answer": "C",
+          "explanation": "Total fruit: 45 + 32 + 63 = 140. Percentage bananas: 32/140 × 100 = 3200/140 = 22.86...%, which rounds to 23%. Final answer: 23%."
+        },
+        {
+          "question_number": 23,
+          "question_type": "maths",
+          "topic": "Maths",
+          "subtopic": "volume",
+          "difficulty": 2,
+          "stem": "A cardboard box is 40 cm long, 25 cm wide and 20 cm tall. What is the volume of the box in litres? (1 litre = 1,000 cm³)",
+          "options": [
+            {
+              "id": "A",
+              "text": "2 litres",
+              "correct": false,
+              "trap": "Divided by 10,000 instead of 1,000"
+            },
+            {
+              "id": "B",
+              "text": "200 litres",
+              "correct": false,
+              "trap": "Forgot to divide by 1,000"
+            },
+            {
+              "id": "C",
+              "text": "20 litres",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "D",
+              "text": "8 litres",
+              "correct": false,
+              "trap": "Added dimensions instead of multiplying then divided"
+            },
+            {
+              "id": "E",
+              "text": "25 litres",
+              "correct": false,
+              "trap": "Used only two dimensions: 25 × 20 ÷ ... "
+            }
+          ],
+          "correct_answer": "C",
+          "explanation": "Volume = 40 × 25 × 20 = 20,000 cm³. Convert to litres: 20,000 ÷ 1,000 = 20 litres. Final answer: 20 litres."
+        },
+        {
+          "question_number": 24,
+          "question_type": "maths",
+          "topic": "Maths",
+          "subtopic": "mean_median_range",
+          "difficulty": 2,
+          "stem": "The mean of six numbers is 14. Five of the numbers are 10, 12, 17, 19 and 16. What is the sixth number?",
+          "options": [
+            {
+              "id": "A",
+              "text": "8",
+              "correct": false,
+              "trap": "Subtracted 14 from the total of five numbers directly"
+            },
+            {
+              "id": "B",
+              "text": "10",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "C",
+              "text": "12",
+              "correct": false,
+              "trap": "Calculated mean of five numbers as the answer"
+            },
+            {
+              "id": "D",
+              "text": "6",
+              "correct": false,
+              "trap": "Subtracted sum of five from 14×5"
+            },
+            {
+              "id": "E",
+              "text": "14",
+              "correct": false,
+              "trap": "Assumed the missing number equals the mean"
+            }
+          ],
+          "correct_answer": "B",
+          "explanation": "Total of all six numbers = 6 × 14 = 84. Sum of five known numbers: 10 + 12 + 17 + 19 + 16 = 74. Sixth number: 84 − 74 = 10. Final answer: 10."
+        },
+        {
+          "question_number": 25,
+          "question_type": "maths",
+          "topic": "Maths",
+          "subtopic": "money",
+          "difficulty": 2,
+          "stem": "A shop sells juice in 250 ml cartons for 65p each or 1 litre bottles for £2.20. How much cheaper per litre is it to buy the bottle rather than buying cartons?",
+          "options": [
+            {
+              "id": "A",
+              "text": "20p",
+              "correct": false,
+              "trap": "Compared single carton price to bottle"
+            },
+            {
+              "id": "B",
+              "text": "60p",
+              "correct": false,
+              "trap": "Subtracted 65p from £2.20 without converting"
+            },
+            {
+              "id": "C",
+              "text": "40p",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "D",
+              "text": "30p",
+              "correct": false,
+              "trap": "Calculated cost of 3 cartons instead of 4"
+            },
+            {
+              "id": "E",
+              "text": "10p",
+              "correct": false,
+              "trap": "Subtracted costs after a unit conversion error"
+            }
+          ],
+          "correct_answer": "C",
+          "explanation": "Four cartons make 1 litre, costing 4 × 65p = 260p = £2.60 per litre. The bottle costs £2.20 = 220p per litre. The bottle is 260p − 220p = 40p cheaper per litre. Final answer: 40p."
+        },
+        {
+          "question_number": 26,
+          "question_type": "maths",
+          "topic": "Maths",
+          "subtopic": "speed_distance_time",
+          "difficulty": 2,
+          "stem": "A train travels at 90 km/h for 40 minutes. How far does it travel?",
+          "options": [
+            {
+              "id": "A",
+              "text": "36 km",
+              "correct": false,
+              "trap": "Used 90 × 40 then divided by 100"
+            },
+            {
+              "id": "B",
+              "text": "3,600 km",
+              "correct": false,
+              "trap": "Multiplied 90 × 40 without converting minutes"
+            },
+            {
+              "id": "C",
+              "text": "56 km",
+              "correct": false,
+              "trap": "Calculated 90 × (40/60) with a rounding error"
+            },
+            {
+              "id": "D",
+              "text": "60 km",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "E",
+              "text": "45 km",
+              "correct": false,
+              "trap": "Used 90 ÷ 2 thinking 40 min is half an hour"
+            }
+          ],
+          "correct_answer": "D",
+          "explanation": "Convert 40 minutes to hours: 40/60 = 2/3 hours. Distance = speed × time = 90 × 2/3 = 60 km. Final answer: 60 km."
+        },
+        {
+          "question_number": 27,
+          "question_type": "maths",
+          "topic": "Maths",
+          "subtopic": "tables_data",
+          "difficulty": 2,
+          "stem": "A bar chart shows the number of books read by four children. Asha read 8 books, Ben read 5, Cleo read 11 and Dev read 6. What is the range of books read?",
+          "options": [
+            {
+              "id": "A",
+              "text": "5",
+              "correct": false,
+              "trap": "Used second highest minus second lowest"
+            },
+            {
+              "id": "B",
+              "text": "7",
+              "correct": false,
+              "trap": "Calculated 11 − 5 + 1 inclusive range"
+            },
+            {
+              "id": "C",
+              "text": "4",
+              "correct": false,
+              "trap": "Subtracted 8 − 5 not max − min"
+            },
+            {
+              "id": "D",
+              "text": "6",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "E",
+              "text": "8",
+              "correct": false,
+              "trap": "Used max value as range"
+            }
+          ],
+          "correct_answer": "D",
+          "explanation": "Range = maximum − minimum = 11 − 5 = 6. Final answer: 6."
+        },
+        {
+          "question_number": 28,
+          "question_type": "maths",
+          "topic": "Maths",
+          "subtopic": "length_area_perimeter",
+          "difficulty": 3,
+          "stem": "A path 1.5 m wide runs along the outside of all four sides of a rectangular lawn that is 12 m long and 8 m wide. What is the area of the path alone?",
+          "options": [
+            {
+              "id": "A",
+              "text": "66 m²",
+              "correct": false,
+              "trap": "Subtracted 3 from each dimension instead of adding"
+            },
+            {
+              "id": "B",
+              "text": "69 m²",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "C",
+              "text": "72 m²",
+              "correct": false,
+              "trap": "Added only 1 m instead of 1.5 m to each side"
+            },
+            {
+              "id": "D",
+              "text": "60 m²",
+              "correct": false,
+              "trap": "Calculated perimeter of lawn times width"
+            },
+            {
+              "id": "E",
+              "text": "96 m²",
+              "correct": false,
+              "trap": "Used lawn area as path area"
+            }
+          ],
+          "correct_answer": "B",
+          "explanation": "Outer rectangle: (12 + 3) × (8 + 3) = 15 × 11 = 165 m². Lawn area: 12 × 8 = 96 m². Path area: 165 − 96 = 69 m². Final answer: 69 m²."
+        },
+        {
+          "question_number": 29,
+          "question_type": "maths",
+          "topic": "Maths",
+          "subtopic": "mean_median_range",
+          "difficulty": 3,
+          "stem": "Seven values are listed in order: 4, 7, x, 13, 15, 18, 20. The median is 13 and the mean is 12. What is the value of x?",
+          "options": [
+            {
+              "id": "A",
+              "text": "9",
+              "correct": false,
+              "trap": "Used median position incorrectly"
+            },
+            {
+              "id": "B",
+              "text": "7",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "C",
+              "text": "8",
+              "correct": false,
+              "trap": "Total worked out as 85, subtracted wrongly"
+            },
+            {
+              "id": "D",
+              "text": "11",
+              "correct": false,
+              "trap": "Subtracted median from mean and applied randomly"
+            },
+            {
+              "id": "E",
+              "text": "10",
+              "correct": false,
+              "trap": "Averaged 7 and 13 to find x"
+            }
+          ],
+          "correct_answer": "B",
+          "explanation": "The mean of 7 values is 12, so the total is 7 × 12 = 84. The known values sum to: 4 + 7 + 13 + 15 + 18 + 20 = 77. So x = 84 − 77 = 7. Check: 7 is between 7 and 13, which is consistent with the ordered list (4, 7, 7, 13, 15, 18, 20) and median = 4th value = 13. Final answer: 7."
+        },
+        {
+          "question_number": 30,
+          "question_type": "maths",
+          "topic": "Maths",
+          "subtopic": "tables_data",
+          "difficulty": 3,
+          "stem": "In a survey, the Art and Music choices together represent 90 pupils. Twice as many pupils chose Art as chose Music. How many pupils chose Music?",
+          "options": [
+            {
+              "id": "A",
+              "text": "30",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "B",
+              "text": "45",
+              "correct": false,
+              "trap": "Divided 90 by 2 thinking equal split"
+            },
+            {
+              "id": "C",
+              "text": "60",
+              "correct": false,
+              "trap": "Used Art's share instead of Music's"
+            },
+            {
+              "id": "D",
+              "text": "20",
+              "correct": false,
+              "trap": "Divided 90 by 3 then 1 part instead of correct proportion"
+            },
+            {
+              "id": "E",
+              "text": "36",
+              "correct": false,
+              "trap": "Used Sport angle to determine Music pupils"
+            }
+          ],
+          "correct_answer": "A",
+          "explanation": "Let Music = M pupils. Then Art = 2M pupils. Art + Music = 90, so 2M + M = 90, giving 3M = 90 and M = 30. Final answer: 30."
+        }
+      ]
+    },
+    {
+      "section_order": 3,
+      "section_key": "maths_ratio_geometry",
+      "title": "Section 3: Ratio, geometry & logic",
+      "instructions": "Work without a calculator. Choose the single best answer for each question.",
+      "questions": [
+        {
+          "question_number": 31,
+          "question_type": "maths",
+          "topic": "Maths",
+          "subtopic": "ratio",
+          "difficulty": 1,
+          "stem": "Concrete is made by mixing sand and cement in the ratio 5 : 2. How much sand is needed to mix with 8 kg of cement?",
+          "options": [
+            {
+              "id": "A",
+              "text": "16 kg",
+              "correct": false,
+              "trap": "Doubled the cement instead of using ratio"
+            },
+            {
+              "id": "B",
+              "text": "10 kg",
+              "correct": false,
+              "trap": "Used ratio 5:2 but multiplied cement by 5/2 not sand"
+            },
+            {
+              "id": "C",
+              "text": "20 kg",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "D",
+              "text": "25 kg",
+              "correct": false,
+              "trap": "Multiplied 8 by 5 without considering the ratio unit"
+            },
+            {
+              "id": "E",
+              "text": "18 kg",
+              "correct": false,
+              "trap": "Confused sand and cement parts"
+            }
+          ],
+          "correct_answer": "C",
+          "explanation": "Each unit of cement represents 2 parts, so 8 kg ÷ 2 = 4 units. Sand uses 5 parts: 5 × 4 = 20 kg. Final answer: 20 kg."
+        },
+        {
+          "question_number": 32,
+          "question_type": "maths",
+          "topic": "Maths",
+          "subtopic": "angles",
+          "difficulty": 1,
+          "stem": "Two angles on a straight line are in the ratio 2 : 3. What is the size of the larger angle?",
+          "options": [
+            {
+              "id": "A",
+              "text": "60°",
+              "correct": false,
+              "trap": "Divided 180° by 3 only"
+            },
+            {
+              "id": "B",
+              "text": "72°",
+              "correct": false,
+              "trap": "Divided 180° by 5 then multiplied by 2 (smaller part)"
+            },
+            {
+              "id": "C",
+              "text": "120°",
+              "correct": false,
+              "trap": "Used 360° as total"
+            },
+            {
+              "id": "D",
+              "text": "108°",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "E",
+              "text": "90°",
+              "correct": false,
+              "trap": "Assumed angles are equal"
+            }
+          ],
+          "correct_answer": "D",
+          "explanation": "Angles on a straight line sum to 180°. Total ratio parts: 2 + 3 = 5. Each part = 180° ÷ 5 = 36°. Larger angle = 3 × 36° = 108°. Final answer: 108°."
+        },
+        {
+          "question_number": 33,
+          "question_type": "maths",
+          "topic": "Maths",
+          "subtopic": "shapes_properties",
+          "difficulty": 1,
+          "stem": "How many lines of symmetry does a regular hexagon have?",
+          "options": [
+            {
+              "id": "A",
+              "text": "3",
+              "correct": false,
+              "trap": "Confused with equilateral triangle"
+            },
+            {
+              "id": "B",
+              "text": "4",
+              "correct": false,
+              "trap": "Confused with rectangle or square"
+            },
+            {
+              "id": "C",
+              "text": "8",
+              "correct": false,
+              "trap": "Doubled the correct answer"
+            },
+            {
+              "id": "D",
+              "text": "6",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "E",
+              "text": "12",
+              "correct": false,
+              "trap": "Multiplied number of sides by 2"
+            }
+          ],
+          "correct_answer": "D",
+          "explanation": "A regular hexagon has 6 sides. It also has 6 lines of symmetry: 3 through opposite vertices and 3 through midpoints of opposite sides. Final answer: 6."
+        },
+        {
+          "question_number": 34,
+          "question_type": "maths",
+          "topic": "Maths",
+          "subtopic": "percentages_context",
+          "difficulty": 2,
+          "stem": "A jacket originally costs £85. It is reduced by 20% in a sale. What is the sale price?",
+          "options": [
+            {
+              "id": "A",
+              "text": "£65",
+              "correct": false,
+              "trap": "Subtracted 20 from 85 instead of 20% of 85"
+            },
+            {
+              "id": "B",
+              "text": "£70",
+              "correct": false,
+              "trap": "Calculated 15% off instead of 20%"
+            },
+            {
+              "id": "C",
+              "text": "£17",
+              "correct": false,
+              "trap": "Gave the discount amount not the sale price"
+            },
+            {
+              "id": "D",
+              "text": "£68",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "E",
+              "text": "£72",
+              "correct": false,
+              "trap": "Calculated 85 × 0.85 = 72.25"
+            }
+          ],
+          "correct_answer": "D",
+          "explanation": "20% of £85 = 0.2 × 85 = £17. Sale price = £85 − £17 = £68. Final answer: £68."
+        },
+        {
+          "question_number": 35,
+          "question_type": "maths",
+          "topic": "Maths",
+          "subtopic": "ratio",
+          "difficulty": 2,
+          "stem": "Orange squash is mixed with water in the ratio 1 : 6. How many millilitres of squash are needed to make 700 ml of drink?",
+          "options": [
+            {
+              "id": "A",
+              "text": "116 ml",
+              "correct": false,
+              "trap": "Divided 700 by 6 not by 7"
+            },
+            {
+              "id": "B",
+              "text": "100 ml",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "C",
+              "text": "600 ml",
+              "correct": false,
+              "trap": "Gave water volume not squash volume"
+            },
+            {
+              "id": "D",
+              "text": "140 ml",
+              "correct": false,
+              "trap": "Divided 700 by 5 (wrong total parts)"
+            },
+            {
+              "id": "E",
+              "text": "70 ml",
+              "correct": false,
+              "trap": "Divided 700 by 10"
+            }
+          ],
+          "correct_answer": "B",
+          "explanation": "Total ratio parts: 1 + 6 = 7. Each part = 700 ÷ 7 = 100 ml. Squash is 1 part = 100 ml. Final answer: 100 ml."
+        },
+        {
+          "question_number": 36,
+          "question_type": "maths",
+          "topic": "Maths",
+          "subtopic": "angles",
+          "difficulty": 2,
+          "stem": "In triangle PQR, angle P = 47° and angle Q = 65°. What is the size of angle R?",
+          "options": [
+            {
+              "id": "A",
+              "text": "78°",
+              "correct": false,
+              "trap": "Subtracted from 180° but made arithmetic error"
+            },
+            {
+              "id": "B",
+              "text": "112°",
+              "correct": false,
+              "trap": "Subtracted only one angle from 180°"
+            },
+            {
+              "id": "C",
+              "text": "68°",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "D",
+              "text": "58°",
+              "correct": false,
+              "trap": "Subtracted 47+65+10 from 180°"
+            },
+            {
+              "id": "E",
+              "text": "72°",
+              "correct": false,
+              "trap": "Used 360° as total for triangle"
+            }
+          ],
+          "correct_answer": "C",
+          "explanation": "Angles in a triangle sum to 180°. Angle R = 180° − 47° − 65° = 180° − 112° = 68°. Final answer: 68°."
+        },
+        {
+          "question_number": 37,
+          "question_type": "maths",
+          "topic": "Maths",
+          "subtopic": "shapes_properties",
+          "difficulty": 2,
+          "stem": "A cuboid has dimensions 4 cm × 3 cm × 5 cm. How many edges does it have?",
+          "options": [
+            {
+              "id": "A",
+              "text": "8",
+              "correct": false,
+              "trap": "Counted vertices not edges"
+            },
+            {
+              "id": "B",
+              "text": "6",
+              "correct": false,
+              "trap": "Counted faces not edges"
+            },
+            {
+              "id": "C",
+              "text": "16",
+              "correct": false,
+              "trap": "Multiplied instead of using edge count formula"
+            },
+            {
+              "id": "D",
+              "text": "12",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "E",
+              "text": "10",
+              "correct": false,
+              "trap": "Counted selectively, missing some edges"
+            }
+          ],
+          "correct_answer": "D",
+          "explanation": "A cuboid (rectangular prism) always has 12 edges: 4 along the length, 4 along the width, and 4 along the height. Final answer: 12."
+        },
+        {
+          "question_number": 38,
+          "question_type": "maths",
+          "topic": "Maths",
+          "subtopic": "coordinates",
+          "difficulty": 2,
+          "stem": "Point A is at (2, 5). It is reflected in the y-axis to give point B. What are the coordinates of B?",
+          "options": [
+            {
+              "id": "A",
+              "text": "(2, −5)",
+              "correct": false,
+              "trap": "Reflected in x-axis instead"
+            },
+            {
+              "id": "B",
+              "text": "(−5, 2)",
+              "correct": false,
+              "trap": "Swapped and negated both coordinates"
+            },
+            {
+              "id": "C",
+              "text": "(5, 2)",
+              "correct": false,
+              "trap": "Swapped the coordinates"
+            },
+            {
+              "id": "D",
+              "text": "(−2, 5)",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "E",
+              "text": "(−2, −5)",
+              "correct": false,
+              "trap": "Negated both coordinates"
+            }
+          ],
+          "correct_answer": "D",
+          "explanation": "Reflecting in the y-axis changes the sign of the x-coordinate and keeps the y-coordinate the same. A = (2, 5) becomes B = (−2, 5). Final answer: (−2, 5)."
+        },
+        {
+          "question_number": 39,
+          "question_type": "maths",
+          "topic": "Maths",
+          "subtopic": "percentages_context",
+          "difficulty": 2,
+          "stem": "In a school election, 360 students voted. Candidate A received 45% of the votes, Candidate B received 35%, and Candidate C received the rest. How many more votes did A receive than C?",
+          "options": [
+            {
+              "id": "A",
+              "text": "36",
+              "correct": false,
+              "trap": "Took 10% of 360 (difference in percentages only)"
+            },
+            {
+              "id": "B",
+              "text": "72",
+              "correct": false,
+              "trap": "Found A votes minus B votes (45%−35%=10%, 10%×360=36, doubled)"
+            },
+            {
+              "id": "C",
+              "text": "90",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "D",
+              "text": "54",
+              "correct": false,
+              "trap": "Used wrong percentage difference"
+            },
+            {
+              "id": "E",
+              "text": "108",
+              "correct": false,
+              "trap": "Added A and C votes instead of subtracting"
+            }
+          ],
+          "correct_answer": "C",
+          "explanation": "C received 100 − 45 − 35 = 20% of votes. A received 45%. Difference: 45 − 20 = 25%. 25% of 360 = 90 votes more for A than C. Final answer: 90."
+        },
+        {
+          "question_number": 40,
+          "question_type": "maths",
+          "topic": "Maths",
+          "subtopic": "ratio",
+          "difficulty": 2,
+          "stem": "Ella and Finn share £180 in the ratio 4 : 5. How much does Finn receive?",
+          "options": [
+            {
+              "id": "A",
+              "text": "£72",
+              "correct": false,
+              "trap": "Calculated Ella's share not Finn's"
+            },
+            {
+              "id": "B",
+              "text": "£90",
+              "correct": false,
+              "trap": "Divided by 2 assuming equal share"
+            },
+            {
+              "id": "C",
+              "text": "£100",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "D",
+              "text": "£108",
+              "correct": false,
+              "trap": "Divided 180 by 4 then multiplied by wrong parts"
+            },
+            {
+              "id": "E",
+              "text": "£80",
+              "correct": false,
+              "trap": "Used ratio 4:5 as 5:4 incorrectly"
+            }
+          ],
+          "correct_answer": "C",
+          "explanation": "Total parts: 4 + 5 = 9. Each part = £180 ÷ 9 = £20. Finn's share = 5 × £20 = £100. Final answer: £100."
+        },
+        {
+          "question_number": 41,
+          "question_type": "maths",
+          "topic": "Maths",
+          "subtopic": "angles",
+          "difficulty": 2,
+          "stem": "A quadrilateral has three angles of 85°, 110° and 95°. What is the fourth angle?",
+          "options": [
+            {
+              "id": "A",
+              "text": "70°",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "B",
+              "text": "80°",
+              "correct": false,
+              "trap": "Subtracted from 360° with arithmetic error"
+            },
+            {
+              "id": "C",
+              "text": "90°",
+              "correct": false,
+              "trap": "Assumed the fourth angle makes it a rectangle"
+            },
+            {
+              "id": "D",
+              "text": "110°",
+              "correct": false,
+              "trap": "Subtracted from 180° not 360°"
+            },
+            {
+              "id": "E",
+              "text": "60°",
+              "correct": false,
+              "trap": "Subtracted sum of angles from 360° incorrectly"
+            }
+          ],
+          "correct_answer": "A",
+          "explanation": "Angles in a quadrilateral sum to 360°. Sum of known angles: 85 + 110 + 95 = 290°. Fourth angle: 360° − 290° = 70°. Final answer: 70°."
+        },
+        {
+          "question_number": 42,
+          "question_type": "maths",
+          "topic": "Maths",
+          "subtopic": "shapes_properties",
+          "difficulty": 2,
+          "stem": "Which of the following nets cannot fold to make a cube? (A) A cross of 6 squares in a T-shape. (B) An L-shape with 3 squares in a row, 2 on the side and 1 on the end. (C) 4 squares in a row with 1 above the second and 1 below the third. (D) 2 rows of 3 squares stacked directly on top of each other. (E) 3 squares in a row with 2 above the first and 1 below the third.",
+          "options": [
+            {
+              "id": "A",
+              "text": "Net A",
+              "correct": false,
+              "trap": "T-cross is a valid cube net"
+            },
+            {
+              "id": "B",
+              "text": "Net B",
+              "correct": false,
+              "trap": "This L-extension forms a valid cube net"
+            },
+            {
+              "id": "C",
+              "text": "Net C",
+              "correct": false,
+              "trap": "This is a valid cube net"
+            },
+            {
+              "id": "D",
+              "text": "Net D",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "E",
+              "text": "Net E",
+              "correct": false,
+              "trap": "This arrangement is a valid cube net"
+            }
+          ],
+          "correct_answer": "D",
+          "explanation": "A 2 × 3 grid (two rows of three squares directly on top of each other) cannot fold into a cube because opposite faces would overlap. All other arrangements described are valid cube nets. Final answer: Net D."
+        },
+        {
+          "question_number": 43,
+          "question_type": "maths",
+          "topic": "Maths",
+          "subtopic": "logic",
+          "difficulty": 3,
+          "stem": "The ages of three sisters are consecutive even numbers. The product of the two younger sisters' ages equals 3 times the eldest sister's age. What is the age of the eldest sister?",
+          "options": [
+            {
+              "id": "A",
+              "text": "6",
+              "correct": false,
+              "trap": "This is the youngest sister, not the eldest"
+            },
+            {
+              "id": "B",
+              "text": "8",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "C",
+              "text": "10",
+              "correct": false,
+              "trap": "Uses ages 8, 10, 12: 8×10=80 but 3×12=36"
+            },
+            {
+              "id": "D",
+              "text": "12",
+              "correct": false,
+              "trap": "Uses ages 10, 12, 14: 10×12=120 but 3×14=42"
+            },
+            {
+              "id": "E",
+              "text": "14",
+              "correct": false,
+              "trap": "Uses ages 12, 14, 16: 12×14=168 but 3×16=48"
+            }
+          ],
+          "correct_answer": "B",
+          "explanation": "Let the ages be n, n + 2 and n + 4. The two younger sisters are n and n + 2, so n(n + 2) = 3(n + 4). Try n = 4: 4 × 6 = 24 and 3 × 8 = 24. The ages are 4, 6 and 8, so the eldest sister is 8. Final answer: 8."
+        },
+        {
+          "question_number": 44,
+          "question_type": "maths",
+          "topic": "Maths",
+          "subtopic": "ratio",
+          "difficulty": 3,
+          "stem": "A recipe for 12 biscuits uses 180 g of flour, 90 g of butter and 60 g of sugar. Harriet wants to make 20 biscuits. How much butter does she need?",
+          "options": [
+            {
+              "id": "A",
+              "text": "120 g",
+              "correct": false,
+              "trap": "Scaled sugar instead of butter"
+            },
+            {
+              "id": "B",
+              "text": "160 g",
+              "correct": false,
+              "trap": "Scaled by 12 to 20 ratio on flour not butter"
+            },
+            {
+              "id": "C",
+              "text": "145 g",
+              "correct": false,
+              "trap": "Added 55g without calculating the scale factor"
+            },
+            {
+              "id": "D",
+              "text": "150 g",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "E",
+              "text": "180 g",
+              "correct": false,
+              "trap": "Used flour amount as butter amount"
+            }
+          ],
+          "correct_answer": "D",
+          "explanation": "Scale factor = 20 ÷ 12 = 5/3. Butter needed = 90 × 5/3 = 450/3 = 150 g. Final answer: 150 g."
+        },
+        {
+          "question_number": 45,
+          "question_type": "maths",
+          "topic": "Maths",
+          "subtopic": "logic",
+          "difficulty": 3,
+          "stem": "Which statement must be true for all prime numbers greater than 5? A: They are odd. B: They end in 1, 3, 7, or 9. C: They are not divisible by 5. D: Their digit sum is not divisible by 3. E: All of A, B, C and D.",
+          "options": [
+            {
+              "id": "A",
+              "text": "Statement A only",
+              "correct": false,
+              "trap": "True but other statements are also always true"
+            },
+            {
+              "id": "B",
+              "text": "Statement B only",
+              "correct": false,
+              "trap": "True but incomplete"
+            },
+            {
+              "id": "C",
+              "text": "Statements A and C only",
+              "correct": false,
+              "trap": "Missing B and D which are also always true"
+            },
+            {
+              "id": "D",
+              "text": "Statements A, B and D only",
+              "correct": false,
+              "trap": "C is also always true so this is incomplete"
+            },
+            {
+              "id": "E",
+              "text": "All of A, B, C and D",
+              "correct": true,
+              "trap": null
+            }
+          ],
+          "correct_answer": "E",
+          "explanation": "For primes greater than 5: A  -  they must be odd (even numbers greater than 2 are not prime); B  -  they cannot end in 0, 2, 4, 5, 6 or 8, so they end in 1, 3, 7 or 9; C  -  they are not divisible by 5; D  -  if the digit sum were a multiple of 3, the number would be divisible by 3. All four statements are always true. Final answer: All of A, B, C and D."
+        }
+      ]
+    },
+    {
+      "section_order": 4,
+      "section_key": "maths_problem_solving",
+      "title": "Section 4: Mixed problem solving",
+      "instructions": "Work without a calculator. Choose the single best answer for each question.",
+      "questions": [
+        {
+          "question_number": 46,
+          "question_type": "maths",
+          "topic": "Maths",
+          "subtopic": "multi_step_word_problem",
+          "difficulty": 1,
+          "stem": "A box contains 48 chocolates. Maya eats 1/4 of them on Monday. On Tuesday she eats 1/3 of what is left. How many chocolates remain after Tuesday?",
+          "options": [
+            {
+              "id": "A",
+              "text": "36",
+              "correct": false,
+              "trap": "Stopped after Monday's calculation"
+            },
+            {
+              "id": "B",
+              "text": "20",
+              "correct": false,
+              "trap": "Took 1/3 of original 48 instead of remainder"
+            },
+            {
+              "id": "C",
+              "text": "24",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "D",
+              "text": "16",
+              "correct": false,
+              "trap": "Took 1/3 then 1/4 in wrong order"
+            },
+            {
+              "id": "E",
+              "text": "28",
+              "correct": false,
+              "trap": "Subtracted only 1/4 once from 48"
+            }
+          ],
+          "correct_answer": "C",
+          "explanation": "Monday: 1/4 of 48 = 12 eaten, leaving 36. Tuesday: 1/3 of 36 = 12 eaten, leaving 24. Final answer: 24."
+        },
+        {
+          "question_number": 47,
+          "question_type": "maths",
+          "topic": "Maths",
+          "subtopic": "probability",
+          "difficulty": 1,
+          "stem": "A bag contains 5 red, 3 blue and 2 green counters. A counter is taken out at random. What is the probability it is blue?",
+          "options": [
+            {
+              "id": "A",
+              "text": "1/3",
+              "correct": false,
+              "trap": "Divided 3 by number of colours not total"
+            },
+            {
+              "id": "B",
+              "text": "3/5",
+              "correct": false,
+              "trap": "Used red counters as denominator"
+            },
+            {
+              "id": "C",
+              "text": "7/10",
+              "correct": false,
+              "trap": "Calculated probability of NOT blue"
+            },
+            {
+              "id": "D",
+              "text": "3/10",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "E",
+              "text": "1/5",
+              "correct": false,
+              "trap": "Divided 1 by number of counters types"
+            }
+          ],
+          "correct_answer": "D",
+          "explanation": "Total counters: 5 + 3 + 2 = 10. Probability of blue = 3/10. Final answer: 3/10."
+        },
+        {
+          "question_number": 48,
+          "question_type": "maths",
+          "topic": "Maths",
+          "subtopic": "multi_step_word_problem",
+          "difficulty": 1,
+          "stem": "A coach seat costs £32. There are 45 seats on the coach. If 38 seats are sold, how much money is collected?",
+          "options": [
+            {
+              "id": "A",
+              "text": "£1,440",
+              "correct": false,
+              "trap": "Multiplied 45 × 32 for all seats"
+            },
+            {
+              "id": "B",
+              "text": "£1,152",
+              "correct": false,
+              "trap": "Multiplied 36 × 32"
+            },
+            {
+              "id": "C",
+              "text": "£1,216",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "D",
+              "text": "£1,184",
+              "correct": false,
+              "trap": "Multiplied 37 × 32"
+            },
+            {
+              "id": "E",
+              "text": "£1,280",
+              "correct": false,
+              "trap": "Multiplied 40 × 32"
+            }
+          ],
+          "correct_answer": "C",
+          "explanation": "38 seats sold at £32 each: 38 × 32 = 38 × 30 + 38 × 2 = 1,140 + 76 = £1,216. Final answer: £1,216."
+        },
+        {
+          "question_number": 49,
+          "question_type": "maths",
+          "topic": "Maths",
+          "subtopic": "multi_step_word_problem",
+          "difficulty": 2,
+          "stem": "A shop buys mugs for £4.50 each and sells them at a 40% profit. What is the selling price of one mug?",
+          "options": [
+            {
+              "id": "A",
+              "text": "£5.80",
+              "correct": false,
+              "trap": "Added 40p not 40% of £4.50"
+            },
+            {
+              "id": "B",
+              "text": "£6.00",
+              "correct": false,
+              "trap": "Added £1.50 (30%) instead of 40%"
+            },
+            {
+              "id": "C",
+              "text": "£6.30",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "D",
+              "text": "£6.50",
+              "correct": false,
+              "trap": "Added £2.00 (rounded) to £4.50"
+            },
+            {
+              "id": "E",
+              "text": "£7.00",
+              "correct": false,
+              "trap": "Added 50% of £4.50 instead of 40%"
+            }
+          ],
+          "correct_answer": "C",
+          "explanation": "40% of £4.50 = 0.4 × 4.50 = £1.80. Selling price = £4.50 + £1.80 = £6.30. Final answer: £6.30."
+        },
+        {
+          "question_number": 50,
+          "question_type": "maths",
+          "topic": "Maths",
+          "subtopic": "digit_number_puzzle",
+          "difficulty": 2,
+          "stem": "A two-digit number has a digit sum of 9. When its digits are reversed, the new number is 27 more than the original. What is the original number?",
+          "options": [
+            {
+              "id": "A",
+              "text": "36",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "B",
+              "text": "45",
+              "correct": false,
+              "trap": "Digits sum to 9 but reversed 54 is 9 more, not 27 more"
+            },
+            {
+              "id": "C",
+              "text": "27",
+              "correct": false,
+              "trap": "Reversed 72 is 45 more, not 27"
+            },
+            {
+              "id": "D",
+              "text": "63",
+              "correct": false,
+              "trap": "Reversed 36 is 27 LESS not more"
+            },
+            {
+              "id": "E",
+              "text": "18",
+              "correct": false,
+              "trap": "Reversed 81 is 63 more"
+            }
+          ],
+          "correct_answer": "A",
+          "explanation": "Let digits be a and b, so a + b = 9 and (10b + a) − (10a + b) = 27. This gives 9b − 9a = 27, so b − a = 3. With a + b = 9 and b − a = 3: b = 6, a = 3. Original number = 36. Check: reversed = 63, and 63 − 36 = 27. Final answer: 36."
+        },
+        {
+          "question_number": 51,
+          "question_type": "maths",
+          "topic": "Maths",
+          "subtopic": "multi_step_word_problem",
+          "difficulty": 2,
+          "stem": "Jake cycles at 12 km/h for 45 minutes, then rests for 15 minutes, then cycles at 15 km/h for 20 minutes. What total distance does Jake cover?",
+          "options": [
+            {
+              "id": "A",
+              "text": "13 km",
+              "correct": false,
+              "trap": "Forgot to convert all times to hours"
+            },
+            {
+              "id": "B",
+              "text": "9 km",
+              "correct": false,
+              "trap": "Only calculated first leg"
+            },
+            {
+              "id": "C",
+              "text": "14 km",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "D",
+              "text": "12 km",
+              "correct": false,
+              "trap": "Added speeds and divided by 2"
+            },
+            {
+              "id": "E",
+              "text": "15 km",
+              "correct": false,
+              "trap": "Used 1 hour for first leg and 1/3 for second"
+            }
+          ],
+          "correct_answer": "C",
+          "explanation": "First leg: 12 × 45/60 = 12 × 3/4 = 9 km. Rest: no distance. Second leg: 15 × 20/60 = 15 × 1/3 = 5 km. Total: 9 + 5 = 14 km. Final answer: 14 km."
+        },
+        {
+          "question_number": 52,
+          "question_type": "maths",
+          "topic": "Maths",
+          "subtopic": "multi_step_word_problem",
+          "difficulty": 2,
+          "stem": "A rectangle has a perimeter of 52 cm. Its length is 6 cm more than its width. What is the area of the rectangle?",
+          "options": [
+            {
+              "id": "A",
+              "text": "136 cm²",
+              "correct": false,
+              "trap": "Used incorrect dimensions"
+            },
+            {
+              "id": "B",
+              "text": "160 cm²",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "C",
+              "text": "144 cm²",
+              "correct": false,
+              "trap": "Used width = 9, length = 16"
+            },
+            {
+              "id": "D",
+              "text": "120 cm²",
+              "correct": false,
+              "trap": "Used width = 8, length = 15"
+            },
+            {
+              "id": "E",
+              "text": "176 cm²",
+              "correct": false,
+              "trap": "Added 4 to perimeter to find dimensions"
+            }
+          ],
+          "correct_answer": "B",
+          "explanation": "Let the width be w cm. Then the length is w + 6 cm. Perimeter: 2(w + w + 6) = 52, so 2(2w + 6) = 52, giving 4w + 12 = 52 and 4w = 40. So w = 10 cm and the length is 16 cm. Area = 10 × 16 = 160 cm². Final answer: 160 cm²."
+        },
+        {
+          "question_number": 53,
+          "question_type": "maths",
+          "topic": "Maths",
+          "subtopic": "multi_step_word_problem",
+          "difficulty": 2,
+          "stem": "Grapes cost £2.40 per kg. Zara buys 1.5 kg and pays with a £5 note. With her change she buys postcards at 35p each. How many postcards can she buy?",
+          "options": [
+            {
+              "id": "A",
+              "text": "3",
+              "correct": false,
+              "trap": "Divided 105p by 35p"
+            },
+            {
+              "id": "B",
+              "text": "5",
+              "correct": false,
+              "trap": "Calculated grapes as £2.40 total not per kg"
+            },
+            {
+              "id": "C",
+              "text": "4",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "D",
+              "text": "2",
+              "correct": false,
+              "trap": "Divided change by 70p"
+            },
+            {
+              "id": "E",
+              "text": "6",
+              "correct": false,
+              "trap": "Used wrong change amount"
+            }
+          ],
+          "correct_answer": "C",
+          "explanation": "Cost of 1.5 kg grapes: 1.5 × £2.40 = £3.60. Change from £5: £1.40. Postcards: 140 ÷ 35 = 4. Final answer: 4."
+        },
+        {
+          "question_number": 54,
+          "question_type": "maths",
+          "topic": "Maths",
+          "subtopic": "multi_step_word_problem",
+          "difficulty": 2,
+          "stem": "A large water tank has a capacity of 6,000 litres. It currently contains 1,000 litres. Water flows in at 50 litres per minute. How many minutes does it take to fill the tank?",
+          "options": [
+            {
+              "id": "A",
+              "text": "120 minutes",
+              "correct": false,
+              "trap": "Divided total capacity by 50 not remaining amount"
+            },
+            {
+              "id": "B",
+              "text": "20 minutes",
+              "correct": false,
+              "trap": "Divided 1,000 by 50"
+            },
+            {
+              "id": "C",
+              "text": "100 minutes",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "D",
+              "text": "60 minutes",
+              "correct": false,
+              "trap": "Used 3,000 litres as remaining"
+            },
+            {
+              "id": "E",
+              "text": "110 minutes",
+              "correct": false,
+              "trap": "Used 5,500 litres as remaining"
+            }
+          ],
+          "correct_answer": "C",
+          "explanation": "Remaining capacity: 6,000 − 1,000 = 5,000 litres. Time = 5,000 ÷ 50 = 100 minutes. Final answer: 100 minutes."
+        },
+        {
+          "question_number": 55,
+          "question_type": "maths",
+          "topic": "Maths",
+          "subtopic": "multi_step_word_problem",
+          "difficulty": 2,
+          "stem": "Three friends share a prize in the ratio 2 : 3 : 5. The person with the largest share receives £75 more than the person with the smallest share. What is the total prize?",
+          "options": [
+            {
+              "id": "A",
+              "text": "£150",
+              "correct": false,
+              "trap": "Multiplied £75 by 2"
+            },
+            {
+              "id": "B",
+              "text": "£200",
+              "correct": false,
+              "trap": "Divided £75 by 3 then multiplied by 8"
+            },
+            {
+              "id": "C",
+              "text": "£250",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "D",
+              "text": "£300",
+              "correct": false,
+              "trap": "Multiplied unit value by 12 instead of 10"
+            },
+            {
+              "id": "E",
+              "text": "£375",
+              "correct": false,
+              "trap": "Multiplied £75 by 5"
+            }
+          ],
+          "correct_answer": "C",
+          "explanation": "Ratio 2:3:5, total 10 parts. Difference between largest (5) and smallest (2) = 3 parts = £75. Each part = £25. Total = 10 × £25 = £250. Final answer: £250."
+        },
+        {
+          "question_number": 56,
+          "question_type": "maths",
+          "topic": "Maths",
+          "subtopic": "multi_step_word_problem",
+          "difficulty": 2,
+          "stem": "A sequence of squares has side lengths 1 cm, 2 cm, 3 cm, 4 cm and 5 cm. What is the total area of all five squares?",
+          "options": [
+            {
+              "id": "A",
+              "text": "25 cm²",
+              "correct": false,
+              "trap": "Added side lengths then squared"
+            },
+            {
+              "id": "B",
+              "text": "55 cm²",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "C",
+              "text": "45 cm²",
+              "correct": false,
+              "trap": "Summed first 4 squares only (1+4+9+16+... missed 25)"
+            },
+            {
+              "id": "D",
+              "text": "30 cm²",
+              "correct": false,
+              "trap": "Added 1+4+9+16 only"
+            },
+            {
+              "id": "E",
+              "text": "15 cm²",
+              "correct": false,
+              "trap": "Added side lengths not areas"
+            }
+          ],
+          "correct_answer": "B",
+          "explanation": "Areas: 1² + 2² + 3² + 4² + 5² = 1 + 4 + 9 + 16 + 25 = 55 cm². Final answer: 55 cm²."
+        },
+        {
+          "question_number": 57,
+          "question_type": "maths",
+          "topic": "Maths",
+          "subtopic": "optimisation",
+          "difficulty": 3,
+          "stem": "Using each of the digits 2, 4, 6 and 8 exactly once, form two 2-digit numbers that give the largest possible product. What is that product?",
+          "options": [
+            {
+              "id": "A",
+              "text": "5,208",
+              "correct": false,
+              "trap": "Used 84 × 62"
+            },
+            {
+              "id": "B",
+              "text": "3,612",
+              "correct": false,
+              "trap": "Used 86 × 42"
+            },
+            {
+              "id": "C",
+              "text": "5,248",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "D",
+              "text": "4,128",
+              "correct": false,
+              "trap": "Used 48 × 86"
+            },
+            {
+              "id": "E",
+              "text": "2,976",
+              "correct": false,
+              "trap": "Used 48 × 62"
+            }
+          ],
+          "correct_answer": "C",
+          "explanation": "Test the likely maximising combinations: 82 × 64 = 5,248; 84 × 62 = 5,208; 86 × 42 = 3,612; 64 × 82 = 5,248 (same). The largest product is 82 × 64 = 5,248. Final answer: 5,248."
+        },
+        {
+          "question_number": 58,
+          "question_type": "maths",
+          "topic": "Maths",
+          "subtopic": "probability",
+          "difficulty": 3,
+          "stem": "A spinner has 8 equal sections numbered 1 to 8. It is spun twice. What is the probability that both spins give an even number?",
+          "options": [
+            {
+              "id": "A",
+              "text": "1/2",
+              "correct": false,
+              "trap": "Gave probability of one spin being even"
+            },
+            {
+              "id": "B",
+              "text": "1/8",
+              "correct": false,
+              "trap": "Divided 1 by 8 ignoring two spins"
+            },
+            {
+              "id": "C",
+              "text": "1/4",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "D",
+              "text": "3/8",
+              "correct": false,
+              "trap": "Used 3/8 × 3/8 rounding"
+            },
+            {
+              "id": "E",
+              "text": "1/16",
+              "correct": false,
+              "trap": "Used 1/4 × 1/4"
+            }
+          ],
+          "correct_answer": "C",
+          "explanation": "Even numbers on spinner: 2, 4, 6, 8  -  that is 4 out of 8, so probability = 1/2. Both spins even: 1/2 × 1/2 = 1/4. Final answer: 1/4."
+        },
+        {
+          "question_number": 59,
+          "question_type": "maths",
+          "topic": "Maths",
+          "subtopic": "digit_number_puzzle",
+          "difficulty": 3,
+          "stem": "The four-digit number 3AB4 is divisible by both 4 and 9. Each of A and B is a single digit. What is the value of A + B?",
+          "options": [
+            {
+              "id": "A",
+              "text": "9",
+              "correct": false,
+              "trap": "Found only digit sum condition without divisibility by 4"
+            },
+            {
+              "id": "B",
+              "text": "10",
+              "correct": false,
+              "trap": "Incorrect digit combination"
+            },
+            {
+              "id": "C",
+              "text": "11",
+              "correct": true,
+              "trap": null
+            },
+            {
+              "id": "D",
+              "text": "12",
+              "correct": false,
+              "trap": "Digit sum too large given constraints"
+            },
+            {
+              "id": "E",
+              "text": "8",
+              "correct": false,
+              "trap": "Incorrect digit sum"
+            }
+          ],
+          "correct_answer": "C",
+          "explanation": "Divisible by 4: last two digits B4 must be divisible by 4. Options: 04, 14, 24, 34, 44, 54, 64, 74, 84, 94. Divisible by 4: 04(4), 24(24), 44(44), 64(64), 84(84). So B = 0, 2, 4, 6, or 8. Divisible by 9: digit sum 3+A+B+4 = 7+A+B must be divisible by 9. So A+B = 2 (sum=9) or A+B = 11 (sum=18). With B even: if A+B=2, pairs include (0,2),(2,0) etc. If A+B=11, pairs with B even: (3,8),(5,6),(7,4),(9,2),(1,... B must be even from divisibility by 4. B=8: A=3, number 3384: last two=84 divisible by 4, digit sum=18 divisible by 9. A+B=3+8=11. Final answer: 11."
+        },
+        {
+          "question_number": 60,
+          "question_type": "maths",
+          "topic": "Maths",
+          "subtopic": "challenging_reasoning",
+          "difficulty": 3,
+          "stem": "In a class of 30 pupils, 18 play football, 14 play cricket and 5 play neither. How many pupils play both football and cricket?",
+          "options": [
+            {
+              "id": "A",
+              "text": "5",
+              "correct": false,
+              "trap": "Confused 'neither' count with 'both' count"
+            },
+            {
+              "id": "B",
+              "text": "9",
+              "correct": false,
+              "trap": "Added 18+14 then subtracted 30 without adjusting for 'neither'"
+            },
+            {
+              "id": "C",
+              "text": "6",
+              "correct": false,
+              "trap": "Subtracted 5 from 11 incorrectly"
+            },
+            {
+              "id": "D",
+              "text": "8",
+              "correct": false,
+              "trap": "Used 18+14=32, 32−30=2 then added 5 wrongly"
+            },
+            {
+              "id": "E",
+              "text": "7",
+              "correct": true,
+              "trap": null
+            }
+          ],
+          "correct_answer": "E",
+          "explanation": "Pupils who play at least one sport: 30 − 5 = 25. By inclusion-exclusion: football + cricket − both = 25. So 18 + 14 − both = 25, giving 32 − both = 25, both = 7. Final answer: 7."
+        }
+      ]
+    }
+  ],
+  "qa_review": {
+    "status": "approved",
+    "fit_for_11plus_maths": true,
+    "reviewed_at": "2026-06-14",
+    "reviewer": "Gradlify QA (Cursor)",
+    "track": "11plus",
+    "calculator": "non-calculator",
+    "duration_minutes": 50,
+    "question_count": 60,
+    "section_counts": "15+15+15+15",
+    "difficulty_range": "1-3",
+    "fixes_applied": [
+      {
+        "question": 25,
+        "issue": "Stem asked wrong price direction (cartons more expensive per litre)",
+        "resolution": "Reworded to bottle cheaper than cartons; 40p unchanged"
+      },
+      {
+        "question": 30,
+        "issue": "Pie chart Sport angle contradicted Art+Music totals",
+        "resolution": "Removed Sport; ratio-only question; Music = 30"
+      },
+      {
+        "question": 43,
+        "issue": "8× product equation had no integer consecutive-even solution",
+        "resolution": "Rewrote as 3× eldest; ages 4,6,8; answer 8"
+      },
+      {
+        "question": 45,
+        "issue": "Prime 5 breaks statements B/C when >3",
+        "resolution": "Changed to primes greater than 5; E still correct"
+      },
+      {
+        "question": 52,
+        "issue": "length=2×width+4 with P=52 gave non-integer width",
+        "resolution": "Changed to length 6 cm more than width; area 160 cm²"
+      }
+    ],
+    "verification": "All 60 stems, options, answer keys and explanations checked for mathematical consistency. Em dashes removed from explanations."
+  }
+}

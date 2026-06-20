@@ -38,15 +38,24 @@ import {
   COMBINED_MOCK_EVENT_SLUG,
   COMBINED_MOCK_DISPLAY_TITLE,
   ENGLISH_PAPER,
+  englishPaperForEvent,
   isCombinedMockReleased,
   MATHS_PAPER,
+  mathsPaperForEvent,
+  SECOND_MOCK_EVENT_SLUG,
   type MockPaper,
   paperQuestionCount,
   paperSeconds,
   sectionForQuestion,
 } from "@/lib/liveMockCombinedConfig";
 
-const MOCK_SLUG = COMBINED_MOCK_EVENT_SLUG;
+export type LocalCombinedMockProps = {
+  mockEventSlug?: string;
+  displayTitle?: string;
+  backHref?: string;
+  checkReleased?: () => boolean;
+};
+
 const MATHS_SECONDS = paperSeconds(MATHS_PAPER);
 const ENGLISH_SECONDS = paperSeconds(ENGLISH_PAPER);
 /** Short timers for localhost flow testing (?fast=1). Order stays maths → break → english. */
@@ -234,21 +243,14 @@ async function detectAffectedMathsAttempt(userId: string): Promise<AffectedMaths
 
 /**
  * The English paper reuses the EXACT app split-view (EnglishSplitViewDemo) via
- * the live-mock session route, pointed at the seeded `both_subjects_english`
- * paper: left = comprehension passage, right = questions, with the same SPaG
- * styling. Maths/break run in this prototype; English hands off to that page.
+ * the live-mock session route. Maths/break run here; English hands off to that page.
  */
-const ENGLISH_SESSION_URL = `/live-mock-exams/session?${new URLSearchParams({
-  track: "11plus",
-  subject: "english",
-  topics: "Comprehension,SPaG",
-  mode: "mock-exam",
-  questions: String(paperQuestionCount(ENGLISH_PAPER)),
-  duration: String(ENGLISH_PAPER.durationMinutes),
-  liveMockSlug: ENGLISH_PAPER.slug,
-}).toString()}`;
-
-export default function LocalCombinedMock() {
+export default function LocalCombinedMock({
+  mockEventSlug = COMBINED_MOCK_EVENT_SLUG,
+  displayTitle = COMBINED_MOCK_DISPLAY_TITLE,
+  backHref = "/live-mock-exams",
+  checkReleased = isCombinedMockReleased,
+}: LocalCombinedMockProps = {}) {
   const { user } = useAppContext();
   const navigate = useNavigate();
   const membership = useMembership();
@@ -257,7 +259,9 @@ export default function LocalCombinedMock() {
   const fastMode = searchParams.get("fast") === "1" && import.meta.env.DEV;
   // `?dev=1` skips the registration/payment check, so it must never work in production.
   const devBypass = searchParams.get("dev") === "1" && import.meta.env.DEV;
-  const storageKey = user ? `gradlify_local_combined_mock_${user.id}` : "gradlify_local_combined_mock_anon";
+  const storageKey = user
+    ? `gradlify_local_combined_mock_${mockEventSlug}_${user.id}`
+    : `gradlify_local_combined_mock_${mockEventSlug}_anon`;
   const [registering, setRegistering] = useState(false);
   const [liveMockPriceGbp, setLiveMockPriceGbp] = useState(LIVE_MOCK_STANDARD_PRICE_GBP);
 
@@ -276,8 +280,6 @@ export default function LocalCombinedMock() {
   });
   const [hasFullyCompleted, setHasFullyCompleted] = useState(false);
   const [awaitingEnglish, setAwaitingEnglish] = useState(false);
-  const combinedAnalyticsUrl = "/live-mock-exams/analytics?combined=1&subject=english";
-  const mathsAnalyticsUrl = "/live-mock-exams/analytics?combined=1&subject=maths";
   const [phase, setPhase] = useState<Phase>("instructions");
   const [currentQuestion, setCurrentQuestion] = useState(1);
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -307,6 +309,30 @@ export default function LocalCombinedMock() {
   const autosaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Mirror of `answers` for stable reads inside debounced autosave callbacks.
   const answersRef = useRef<Record<string, string>>({});
+  const isMock2 = mockEventSlug === SECOND_MOCK_EVENT_SLUG;
+  const activeMathsPaper = mathsPaperForEvent(mockEventSlug);
+  const activeEnglishPaper = englishPaperForEvent(mockEventSlug);
+  const englishSessionUrl = useMemo(
+    () =>
+      `/live-mock-exams/session?${new URLSearchParams({
+        track: "11plus",
+        subject: "english",
+        topics: "Comprehension,SPaG",
+        mode: "mock-exam",
+        questions: String(paperQuestionCount(activeEnglishPaper)),
+        duration: String(activeEnglishPaper.durationMinutes),
+        liveMockSlug: activeEnglishPaper.slug,
+      }).toString()}`,
+    [activeEnglishPaper],
+  );
+  const combinedAnalyticsUrl = `/live-mock-exams/analytics?combined=1&subject=english&mock=${encodeURIComponent(mockEventSlug)}`;
+  const mathsAnalyticsUrl = `/live-mock-exams/analytics?combined=1&subject=maths&mock=${encodeURIComponent(mockEventSlug)}`;
+  const mockPrimaryBtn = cn(
+    "text-white",
+    isMock2 ? "bg-slate-900 hover:bg-slate-800" : "bg-orange-600 hover:bg-orange-700",
+  );
+  const mockPrimaryBtnLg = cn("h-12 w-full rounded-xl text-base font-bold", mockPrimaryBtn);
+  const mockPrimaryBtnLgMt = cn("mt-6", mockPrimaryBtnLg);
 
   const checkEligibility = useCallback(async () => {
     if (!user) {
@@ -321,7 +347,7 @@ export default function LocalCombinedMock() {
     const signupResult = await supabase
       .from("live_mock_exam_signups" as never)
       .select("id")
-      .eq("mock_slug", MOCK_SLUG)
+      .eq("mock_slug", mockEventSlug)
       .eq("user_id", user.id)
       .maybeSingle();
 
@@ -339,7 +365,7 @@ export default function LocalCombinedMock() {
       registered: Boolean(signupResult.data),
       error: null,
     });
-  }, [devBypass, user]);
+  }, [devBypass, mockEventSlug, user]);
 
   useEffect(() => {
     void checkEligibility();
@@ -355,11 +381,11 @@ export default function LocalCombinedMock() {
       const { data: paper, error: paperError } = await supabase
         .from("live_mock_papers" as never)
         .select("id")
-        .eq("slug", MATHS_PAPER.slug)
+        .eq("slug", activeMathsPaper.slug)
         .maybeSingle();
       if (paperError) throw paperError;
       const pid = (paper as { id?: string } | null)?.id ?? null;
-      if (!pid) throw new Error("Maths paper not found");
+      if (!pid) throw new Error(`Maths paper not found (${activeMathsPaper.slug})`);
 
       const [{ data: sections, error: sectionsError }, { data: questions, error: questionsError }] =
         await Promise.all([
@@ -422,7 +448,7 @@ export default function LocalCombinedMock() {
     return () => {
       cancelled = true;
     };
-  }, [reloadKey]);
+  }, [activeMathsPaper.slug, reloadKey]);
 
   // Fully complete only once the English paper is submitted. Maths submits mid-sitting
   // (before the break), so we must NOT treat a submitted Maths attempt as finished.
@@ -437,10 +463,10 @@ export default function LocalCombinedMock() {
       const { data: papers } = await supabase
         .from("live_mock_papers" as never)
         .select("id, slug")
-        .in("slug", [MATHS_PAPER.slug, ENGLISH_PAPER.slug]);
+        .in("slug", [activeMathsPaper.slug, activeEnglishPaper.slug]);
       const rows = (papers as { id: string; slug: string }[] | null) || [];
-      const mathsPaperId = rows.find((p) => p.slug === MATHS_PAPER.slug)?.id;
-      const englishPaperId = rows.find((p) => p.slug === ENGLISH_PAPER.slug)?.id;
+      const mathsPaperId = rows.find((p) => p.slug === activeMathsPaper.slug)?.id;
+      const englishPaperId = rows.find((p) => p.slug === activeEnglishPaper.slug)?.id;
       if (!mathsPaperId || !englishPaperId || cancelled) return;
 
       const { data: attempts } = await supabase
@@ -465,7 +491,7 @@ export default function LocalCombinedMock() {
     return () => {
       cancelled = true;
     };
-  }, [user?.id]);
+  }, [activeEnglishPaper.slug, activeMathsPaper.slug, user?.id]);
 
   // Post-English remediation gate. Fresh DB check on every visit to this page.
   // Affected users see the apology popup each time until they redo Maths and
@@ -486,7 +512,7 @@ export default function LocalCombinedMock() {
 
   useEffect(() => {
     void supabase.functions
-      .invoke("live-mock-signup-count", { body: { mockSlug: MOCK_SLUG } })
+      .invoke("live-mock-signup-count", { body: { mockSlug: mockEventSlug } })
       .then(({ data }) => {
         if (typeof data?.currentPriceGbp === "number") {
           setLiveMockPriceGbp(data.currentPriceGbp);
@@ -505,7 +531,7 @@ export default function LocalCombinedMock() {
     const pollSignup = async () => {
       attempt += 1;
       try {
-        const row = await fetchCombinedMockSignup(user.id);
+        const row = await fetchCombinedMockSignup(user.id, mockEventSlug);
         if (cancelled) return;
         if (row) {
           setEligibility({ loading: false, registered: true, error: null });
@@ -525,7 +551,7 @@ export default function LocalCombinedMock() {
     return () => {
       cancelled = true;
     };
-  }, [devBypass, eligibility.registered, searchParams, user?.id]);
+  }, [devBypass, eligibility.registered, mockEventSlug, searchParams, user?.id]);
 
   useEffect(() => {
     const raw = window.localStorage.getItem(storageKey);
@@ -571,7 +597,7 @@ export default function LocalCombinedMock() {
   const launchEnglish = useCallback(() => {
     // Hand off to the real split-view English paper (same code as the app).
     window.localStorage.removeItem(storageKey);
-    navigate(ENGLISH_SESSION_URL);
+    navigate(englishSessionUrl);
   }, [navigate, storageKey]);
 
   const goToBreak = useCallback(() => {
@@ -597,7 +623,7 @@ export default function LocalCombinedMock() {
           user_id: user.id,
           user_email: userEmail,
           status: "in_progress",
-          question_count: mathsQuestions.length || paperQuestionCount(MATHS_PAPER),
+          question_count: mathsQuestions.length || paperQuestionCount(activeMathsPaper),
           answered_count: 0,
         } as never,
         { onConflict: "paper_id,user_id" },
@@ -787,12 +813,12 @@ export default function LocalCombinedMock() {
 
   const eligible = eligibility.registered;
   const paperOrder = phase === "english" ? 2 : 1;
-  const currentPaper: MockPaper = phase === "english" ? ENGLISH_PAPER : MATHS_PAPER;
+  const currentPaper: MockPaper = phase === "english" ? activeEnglishPaper : activeMathsPaper;
   const subject = phase === "english" ? "English" : "Non-calculator Maths";
   const questionsThisPaper =
     phase === "english"
-      ? paperQuestionCount(ENGLISH_PAPER)
-      : mathsQuestions.length || paperQuestionCount(MATHS_PAPER);
+      ? paperQuestionCount(activeEnglishPaper)
+      : mathsQuestions.length || paperQuestionCount(activeMathsPaper);
   const currentSection = sectionForQuestion(currentPaper, currentQuestion);
   const currentMathsQuestion = mathsQuestions.find((q) => q.questionNumber === currentQuestion) || null;
   const questionKey = answerKeyForPhase(phase, currentQuestion);
@@ -864,6 +890,7 @@ export default function LocalCombinedMock() {
         userId: user.id,
         email: user.email,
         hasPaidPremiumLiveMockAccess,
+        mockSlug: mockEventSlug,
         returnTo: `${window.location.pathname}${window.location.search}${window.location.hash}`,
       });
       if (result === "registered") {
@@ -889,16 +916,8 @@ export default function LocalCombinedMock() {
     setSecondsLeft(durations.maths);
   };
 
-  const devBanner = (fastMode || devBypass) ? (
-    <div className="border-b border-amber-200 bg-amber-50 px-4 py-2 text-center text-xs font-semibold text-amber-950">
-      Localhost only
-      {fastMode ? " · fast timers (30s maths / 10s break / 30s english)" : ""}
-      {devBypass ? " · registration check bypassed" : ""}
-    </div>
-  ) : null;
-
   // Available in local dev, and in production once the mock has gone live.
-  if (!import.meta.env.DEV && !isCombinedMockReleased()) {
+  if (!import.meta.env.DEV && !checkReleased()) {
     return (
       <div className="flex min-h-[70vh] items-center justify-center bg-[#faf9f4] p-6">
         <div className="max-w-md rounded-2xl border bg-white p-8 text-center shadow-sm">
@@ -919,7 +938,7 @@ export default function LocalCombinedMock() {
           <p className="mt-2 text-sm text-slate-600">
             Sign in with the account you used to register for this live mock.
           </p>
-          <Button asChild className="mt-6 bg-orange-600 text-white hover:bg-orange-700">
+          <Button asChild className={cn("mt-6", mockPrimaryBtn)}>
             <Link to="/11-plus">Sign in</Link>
           </Button>
         </div>
@@ -939,20 +958,38 @@ export default function LocalCombinedMock() {
   if (phase === "instructions") {
     return (
       <main className="min-h-screen bg-[#faf9f4] text-slate-950">
-        {devBanner}
         <section className="mx-auto max-w-4xl px-4 py-8">
-          <Link to="/live-mock-exams" className="inline-flex items-center gap-2 text-sm font-semibold text-slate-500 transition hover:text-slate-700">
+          <Link to={backHref} className="inline-flex items-center gap-2 text-sm font-semibold text-slate-500 transition hover:text-slate-700">
             <ArrowLeft className="h-4 w-4" />
             Back
           </Link>
 
-          <div className="mt-5 overflow-hidden rounded-[24px] border border-orange-200 bg-white shadow-[0_20px_60px_rgba(124,45,18,0.08)]">
-            <div className="border-b border-orange-100 bg-gradient-to-r from-orange-600 to-amber-500 px-6 py-7 text-white sm:px-9">
+          <div
+            className={cn(
+              "mt-5 overflow-hidden rounded-[24px] border bg-white",
+              isMock2
+                ? "border-slate-200 shadow-[0_12px_40px_rgba(15,23,42,0.05)]"
+                : "border-orange-200 shadow-[0_20px_60px_rgba(124,45,18,0.08)]",
+            )}
+          >
+            <div
+              className={cn(
+                "border-b px-6 py-7 text-white sm:px-9",
+                isMock2
+                  ? "border-slate-600/30 bg-gradient-to-r from-slate-700 to-slate-500"
+                  : "border-orange-100 bg-gradient-to-r from-orange-600 to-amber-500",
+              )}
+            >
               <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-black uppercase tracking-[0.14em]">
                 Live mock exam
               </span>
-              <h1 className="mt-4 text-3xl font-black tracking-tight sm:text-4xl">{COMBINED_MOCK_DISPLAY_TITLE}</h1>
-              <p className="mt-2 max-w-2xl text-sm font-medium text-orange-50 sm:text-base">
+              <h1 className="mt-4 text-3xl font-black tracking-tight sm:text-4xl">{displayTitle}</h1>
+              <p
+                className={cn(
+                  "mt-2 max-w-2xl text-sm font-medium sm:text-base",
+                  isMock2 ? "text-slate-200" : "text-orange-50",
+                )}
+              >
                 Paper order: non-calculator Maths first, then a break, then English. Full marked papers with answers,
                 explanations and a results comparison.
               </p>
@@ -963,13 +1000,13 @@ export default function LocalCombinedMock() {
                 {
                   icon: Calculator,
                   title: "1. Maths",
-                  detail: `Non-calculator · ${paperQuestionCount(MATHS_PAPER)} questions · ${MATHS_PAPER.durationMinutes} minutes`,
+                  detail: `Non-calculator · ${paperQuestionCount(activeMathsPaper)} questions · ${activeMathsPaper.durationMinutes} minutes`,
                 },
                 { icon: Coffee, title: "2. Break", detail: `${BREAK_MINUTES} minutes · automatic` },
                 {
                   icon: BookOpen,
                   title: "3. English",
-                  detail: `${paperQuestionCount(ENGLISH_PAPER)} questions · ${ENGLISH_PAPER.durationMinutes} minutes`,
+                  detail: `${paperQuestionCount(activeEnglishPaper)} questions · ${activeEnglishPaper.durationMinutes} minutes`,
                 },
               ].map((item) => (
                 <div key={item.title} className="rounded-2xl border border-slate-200 bg-slate-50/70 p-5">
@@ -1011,7 +1048,7 @@ export default function LocalCombinedMock() {
                         </p>
                       </div>
                       <Button
-                        className="h-12 w-full rounded-xl bg-orange-600 text-base font-bold text-white hover:bg-orange-700"
+                        className={mockPrimaryBtnLg}
                         onClick={startMathsResit}
                       >
                         Restart Maths paper
@@ -1037,7 +1074,7 @@ export default function LocalCombinedMock() {
                         </p>
                       </div>
                       <Button
-                        className="h-12 w-full rounded-xl bg-orange-600 text-base font-bold text-white hover:bg-orange-700"
+                        className={mockPrimaryBtnLg}
                         onClick={() => navigate(combinedAnalyticsUrl)}
                       >
                         See how you did
@@ -1058,7 +1095,7 @@ export default function LocalCombinedMock() {
                     </p>
                   </div>
                   <Button
-                    className="h-12 w-full rounded-xl bg-orange-600 text-base font-bold text-white hover:bg-orange-700"
+                    className={mockPrimaryBtnLg}
                     onClick={launchEnglish}
                   >
                     Continue to English
@@ -1071,7 +1108,7 @@ export default function LocalCombinedMock() {
                     We could not load the mock questions just now. This is usually a brief connection hiccup.
                   </div>
                   <Button
-                    className="h-12 w-full rounded-xl bg-orange-600 text-base font-bold text-white hover:bg-orange-700"
+                    className={mockPrimaryBtnLg}
                     onClick={() => setReloadKey((value) => value + 1)}
                   >
                     Try again
@@ -1079,7 +1116,7 @@ export default function LocalCombinedMock() {
                 </div>
               ) : eligible ? (
                 <Button
-                  className="mt-6 h-12 w-full rounded-xl bg-orange-600 text-base font-bold text-white hover:bg-orange-700"
+                  className={mockPrimaryBtnLgMt}
                   disabled={questionsLoading || mathsQuestions.length === 0}
                   onClick={() => setStartDialogOpen(true)}
                 >
@@ -1112,7 +1149,7 @@ export default function LocalCombinedMock() {
                     )}
                   </p>
                   <Button
-                    className="h-12 w-full rounded-xl bg-orange-600 text-base font-bold text-white hover:bg-orange-700"
+                    className={mockPrimaryBtnLg}
                     disabled={registering}
                     onClick={() => void handleRegister()}
                   >
@@ -1153,7 +1190,7 @@ export default function LocalCombinedMock() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setStartDialogOpen(false)}>Not yet</Button>
-              <Button className="bg-orange-600 text-white hover:bg-orange-700" onClick={startMock}>Begin Maths</Button>
+              <Button className={mockPrimaryBtn} onClick={startMock}>Begin Maths</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -1185,7 +1222,7 @@ export default function LocalCombinedMock() {
                 <Button variant="outline" onClick={dismissRemediation}>
                   {REMEDIATION_POPUP_COPY.dismissButton}
                 </Button>
-                <Button className="bg-orange-600 text-white hover:bg-orange-700" onClick={startMathsResit}>
+                <Button className={mockPrimaryBtn} onClick={startMathsResit}>
                   {REMEDIATION_POPUP_COPY.restartButton}
                 </Button>
               </DialogFooter>
@@ -1199,7 +1236,6 @@ export default function LocalCombinedMock() {
   if (phase === "break") {
     return (
       <main className="min-h-screen bg-[#faf9f4] text-slate-950">
-        {devBanner}
         <section className="flex min-h-[calc(100vh-2.5rem)] items-center justify-center p-6">
         <div className="w-full max-w-xl rounded-[24px] border border-amber-200 bg-white p-8 text-center shadow-[0_20px_60px_rgba(124,45,18,0.08)]">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-amber-100 text-amber-700">
@@ -1211,7 +1247,7 @@ export default function LocalCombinedMock() {
           <p className="mt-4 text-sm leading-6 text-slate-500">
             English (paper 2) opens automatically when the break ends.
           </p>
-          <Button className="mt-6 bg-orange-600 text-white hover:bg-orange-700" onClick={launchEnglish}>
+          <Button className={cn("mt-6", mockPrimaryBtn)} onClick={launchEnglish}>
             Start English paper now
             <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
@@ -1231,10 +1267,10 @@ export default function LocalCombinedMock() {
           <h1 className="mt-5 text-3xl font-black">Mock complete</h1>
           <p className="mt-2 text-sm text-slate-500">Both papers submitted. See your marks, explanations and how you compare.</p>
           <div className="mt-6 grid grid-cols-2 gap-3">
-            <div className="rounded-xl bg-slate-50 p-4"><strong>{mathsAnswered}/{paperQuestionCount(MATHS_PAPER)}</strong><p className="text-xs text-slate-500">Maths answered</p></div>
-            <div className="rounded-xl bg-slate-50 p-4"><strong>{englishAnswered}/{paperQuestionCount(ENGLISH_PAPER)}</strong><p className="text-xs text-slate-500">English answered</p></div>
+            <div className="rounded-xl bg-slate-50 p-4"><strong>{mathsAnswered}/{paperQuestionCount(activeMathsPaper)}</strong><p className="text-xs text-slate-500">Maths answered</p></div>
+            <div className="rounded-xl bg-slate-50 p-4"><strong>{englishAnswered}/{paperQuestionCount(activeEnglishPaper)}</strong><p className="text-xs text-slate-500">English answered</p></div>
           </div>
-          <Button className="mt-6 w-full bg-orange-600 text-white hover:bg-orange-700" onClick={() => navigate(combinedAnalyticsUrl)}>
+          <Button className={cn("mt-6 w-full", mockPrimaryBtn)} onClick={() => navigate(combinedAnalyticsUrl)}>
             See how you did
             <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
@@ -1261,12 +1297,12 @@ export default function LocalCombinedMock() {
           </p>
           <div className="mt-6 rounded-xl bg-slate-50 p-4">
             <strong>
-              {mathsAnswered}/{paperQuestionCount(MATHS_PAPER)}
+              {mathsAnswered}/{paperQuestionCount(activeMathsPaper)}
             </strong>
             <p className="text-xs text-slate-500">Maths answered</p>
           </div>
           <Button
-            className="mt-6 w-full bg-orange-600 text-white hover:bg-orange-700"
+            className={cn("mt-6 w-full", mockPrimaryBtn)}
             onClick={() => navigate(mathsAnalyticsUrl)}
           >
             See your Maths results
@@ -1279,7 +1315,6 @@ export default function LocalCombinedMock() {
 
   return (
     <main className="min-h-screen bg-[#f6f5f0] text-slate-950">
-      {devBanner}
       <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 px-3 py-3 backdrop-blur sm:px-4">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3">
           <div className="min-w-0 flex-1">
@@ -1404,7 +1439,7 @@ export default function LocalCombinedMock() {
             </Button>
             {currentQuestion === questionsThisPaper ? (
               <Button
-                className="w-full bg-orange-600 text-white hover:bg-orange-700 sm:w-auto"
+                className={cn("w-full sm:w-auto", mockPrimaryBtn)}
                 disabled={submittingMaths}
                 onClick={() => setSubmitConfirmOpen(true)}
               >
@@ -1418,7 +1453,7 @@ export default function LocalCombinedMock() {
                 )}
               </Button>
             ) : (
-              <Button className="w-full bg-orange-600 text-white hover:bg-orange-700 sm:w-auto" onClick={() => setCurrentQuestion((value) => Math.min(questionsThisPaper, value + 1))}>
+              <Button className={cn("w-full sm:w-auto", mockPrimaryBtn)} onClick={() => setCurrentQuestion((value) => Math.min(questionsThisPaper, value + 1))}>
                 Next
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
@@ -1438,7 +1473,7 @@ export default function LocalCombinedMock() {
               <Button variant="outline" onClick={() => setSubmitConfirmOpen(false)}>
                 Keep working
               </Button>
-              <Button className="bg-orange-600 text-white hover:bg-orange-700" disabled={submittingMaths} onClick={confirmSubmitMaths}>
+              <Button className={mockPrimaryBtn} disabled={submittingMaths} onClick={confirmSubmitMaths}>
                 {submittingMaths ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />

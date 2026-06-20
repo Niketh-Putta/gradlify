@@ -33,8 +33,8 @@ export const isCombinedMockReleased = (now: Date = new Date()): boolean =>
  *
  * Additive and fully isolated from mock 1: its own slug so registrations,
  * payments and signups never touch mock 1's data, scoring or saved scores.
- * Mock 2 is registration/reservation only until it goes live on Sunday — no
- * questions are seeded and the exam engine never runs for this slug yet.
+ * Mock 2 opens on Sunday 21 June; papers are seeded in Supabase as
+ * `both_subjects_maths_mock_2` and `both_subjects_english_mock_2`.
  * ─────────────────────────────────────────────────────────────────────────── */
 
 export const SECOND_MOCK_EVENT_SLUG = "both_subjects_live_mock_2";
@@ -106,36 +106,76 @@ export type MockPaper = {
  * rows for `both_subjects_maths` (4 x 15 = 60); only the 60 total and the
  * 50-minute timer are locked.
  */
+const MATHS_PAPER_SECTIONS: MockSection[] = [
+  { key: "maths_number_calc", title: "Number, calculation & algebra", count: 15 },
+  { key: "maths_measures_data", title: "Measures, rates & data", count: 15 },
+  { key: "maths_ratio_geometry", title: "Ratio, geometry & logic", count: 15 },
+  { key: "maths_problem_solving", title: "Mixed problem solving", count: 15 },
+];
+
+/** Mock 1 maths paper (`both_subjects_live_mock`). */
 export const MATHS_PAPER: MockPaper = {
   slug: "both_subjects_maths",
   subject: "maths",
   title: "11+ Maths",
   durationMinutes: 50,
-  sections: [
-    { key: "maths_number_calc", title: "Number, calculation & algebra", count: 15 },
-    { key: "maths_measures_data", title: "Measures, rates & data", count: 15 },
-    { key: "maths_ratio_geometry", title: "Ratio, geometry & logic", count: 15 },
-    { key: "maths_problem_solving", title: "Mixed problem solving", count: 15 },
-  ],
+  sections: MATHS_PAPER_SECTIONS,
 };
 
 /**
- * English paper. Section split follows the agreed distribution
- * (15 / 15 / 10 / 10 / 10 = 60).
+ * Mock 2 maths paper (`both_subjects_live_mock_2`). Content lives in
+ * `docs/live-mock-2-maths-paper.json` — QA-approved, imported to Supabase.
+ */
+export const MATHS_PAPER_MOCK2: MockPaper = {
+  slug: "both_subjects_maths_mock_2",
+  subject: "maths",
+  title: "11+ Maths",
+  durationMinutes: 50,
+  sections: MATHS_PAPER_SECTIONS,
+};
+
+/** Returns the maths paper config for a combined mock event slug. */
+export const mathsPaperForEvent = (eventSlug: string): MockPaper =>
+  eventSlug === SECOND_MOCK_EVENT_SLUG ? MATHS_PAPER_MOCK2 : MATHS_PAPER;
+
+const ENGLISH_PAPER_SECTIONS: MockSection[] = [
+  { key: "fiction_comprehension", title: "Fiction comprehension", count: 15 },
+  { key: "nonfiction_comprehension", title: "Non-fiction comprehension", count: 15 },
+  { key: "spelling", title: "Spelling", count: 10 },
+  { key: "punctuation", title: "Punctuation", count: 10 },
+  { key: "grammar", title: "Grammar", count: 10 },
+];
+
+/**
+ * English paper. Section keys mirror Supabase `live_mock_sections.section_key`
+ * rows (15 / 15 / 10 / 10 / 10 = 60).
  */
 export const ENGLISH_PAPER: MockPaper = {
   slug: "both_subjects_english",
   subject: "english",
   title: "11+ English",
   durationMinutes: 50,
-  sections: [
-    { key: "english_fiction", title: "Fiction comprehension", count: 15 },
-    { key: "english_non_fiction", title: "Non-fiction comprehension", count: 15 },
-    { key: "english_spelling", title: "Spelling", count: 10 },
-    { key: "english_punctuation", title: "Punctuation", count: 10 },
-    { key: "english_grammar", title: "Grammar", count: 10 },
-  ],
+  sections: ENGLISH_PAPER_SECTIONS,
 };
+
+/** Mock 2 English paper (`both_subjects_live_mock_2`). */
+export const ENGLISH_PAPER_MOCK2: MockPaper = {
+  slug: "both_subjects_english_mock_2",
+  subject: "english",
+  title: "11+ English",
+  durationMinutes: 50,
+  sections: ENGLISH_PAPER_SECTIONS,
+};
+
+/** Returns the English paper config for a combined mock event slug. */
+export const englishPaperForEvent = (eventSlug: string): MockPaper =>
+  eventSlug === SECOND_MOCK_EVENT_SLUG ? ENGLISH_PAPER_MOCK2 : ENGLISH_PAPER;
+
+/** Paper slugs for combined mock analytics / session routing. */
+export const combinedPaperSlugsForEvent = (eventSlug: string) => ({
+  maths: mathsPaperForEvent(eventSlug).slug,
+  english: englishPaperForEvent(eventSlug).slug,
+});
 
 /** Mandatory break between the two papers. No questions, no answers. */
 export const BREAK_MINUTES = 15;

@@ -6,6 +6,7 @@ import {
   getDisplayedLiveMockSignupCount,
   getLiveMockPromoConfig,
   getPromoSpotsRemaining,
+  getPromoSpotsRemainingFromDisplay,
   LIVE_MOCK_STANDARD_PRICE_GBP,
 } from "../shared/liveMockPromoConfig.ts";
 
@@ -49,11 +50,13 @@ serve(async (req) => {
 
     const realCount = count ?? 0;
     const displayedCount = getDisplayedLiveMockSignupCount(realCount, mockSlug);
-    let promoSpotsRemaining = promoConfig?.promoMaxRedemptions ?? 0;
+    let promoSpotsRemaining = promoConfig?.promoDisplayCap
+      ? getPromoSpotsRemainingFromDisplay(displayedCount, mockSlug)
+      : promoConfig?.promoMaxRedemptions ?? 0;
     let promoCode = promoConfig?.promoCode ?? null;
 
     const stripeKey = readEnv("STRIPE_SECRET_KEY_LIVE") || readEnv("STRIPE_SECRET_KEY");
-    if (stripeKey && promoConfig) {
+    if (stripeKey && promoConfig && !promoConfig.promoDisplayCap) {
       const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
       const promotionCodes = await stripe.promotionCodes.list({
         code: promoConfig.promoCode,

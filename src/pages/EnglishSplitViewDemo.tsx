@@ -11,7 +11,18 @@ import { PremiumPaywall } from '@/components/PremiumPaywall';
 import { useAppContext } from '@/hooks/useAppContext';
 import { startPremiumCheckout } from '@/lib/checkout';
 import { toast } from 'sonner';
-import { COMBINED_MOCK_DISPLAY_TITLE } from '@/lib/liveMockCombinedConfig';
+import {
+  COMBINED_MOCK_DISPLAY_TITLE,
+  COMBINED_MOCK_EVENT_SLUG,
+  SECOND_MOCK_DISPLAY_TITLE,
+  SECOND_MOCK_EVENT_SLUG,
+} from '@/lib/liveMockCombinedConfig';
+
+/** Combined English papers require a matching event registration row. */
+const COMBINED_ENGLISH_EVENT_BY_SLUG: Record<string, string> = {
+  both_subjects_english: COMBINED_MOCK_EVENT_SLUG,
+  both_subjects_english_mock_2: SECOND_MOCK_EVENT_SLUG,
+};
 import {
   AlertDialog,
   AlertDialogAction,
@@ -639,24 +650,33 @@ export function EnglishSplitViewDemo() {
   const modeParam = searchParams.get('mode') || 'practice';
   const liveMockSlug = searchParams.get('liveMockSlug') || '';
   const isLiveMock = Boolean(liveMockSlug);
+  const combinedMockEventSlug = COMBINED_ENGLISH_EVENT_BY_SLUG[liveMockSlug] ?? null;
+  const devBypass = searchParams.get("dev") === "1" && import.meta.env.DEV;
+  const combinedMockRegisterHref =
+    combinedMockEventSlug === SECOND_MOCK_EVENT_SLUG
+      ? "/live-mock-exams/local-preview2"
+      : "/live-mock-exams/local-preview";
   // Slugs that use the full authored-paper styling: single-line SPaG sections
   // and full-passage comprehension highlighting. The combined Maths+English
   // mock reuses this exact English experience for its English paper.
   const FULL_STYLED_LIVE_MOCK_SLUGS = new Set([
     'live-11plus-english-mock-2026-05-09-1700',
     'both_subjects_english',
+    'both_subjects_english_mock_2',
   ]);
   const isTargetLiveMock = FULL_STYLED_LIVE_MOCK_SLUGS.has(liveMockSlug);
   const liveMockHeaderTitle =
-    liveMockSlug === "both_subjects_english"
-      ? COMBINED_MOCK_DISPLAY_TITLE
-      : "11+ English Complete Mock Exam";
-  // The combined Maths+English mock has its own results page (two tabs); the
-  // English paper here routes there. Other live mocks use the standard page.
+    liveMockSlug === "both_subjects_english_mock_2"
+      ? SECOND_MOCK_DISPLAY_TITLE
+      : liveMockSlug === "both_subjects_english"
+        ? COMBINED_MOCK_DISPLAY_TITLE
+        : "11+ English Complete Mock Exam";
   const analyticsPath =
-    liveMockSlug === "both_subjects_english"
-      ? "/live-mock-exams/analytics?combined=1&subject=english"
-      : "/live-mock-exams/analytics";
+    liveMockSlug === "both_subjects_english_mock_2"
+      ? "/live-mock-exams/analytics?combined=1&subject=english&mock=both_subjects_live_mock_2"
+      : liveMockSlug === "both_subjects_english"
+        ? "/live-mock-exams/analytics?combined=1&subject=english&mock=both_subjects_live_mock"
+        : "/live-mock-exams/analytics";
   // Topics usually arrives comma separated from MockExams, e.g., "Comprehension,SPaG"
   const rawTopics = searchParams.get('topics') || 'Comprehension';
   const selectedTopics = rawTopics.toLowerCase();
@@ -974,6 +994,7 @@ export function EnglishSplitViewDemo() {
   const [isOpeningCheckout, setIsOpeningCheckout] = useState<boolean>(false);
   const [endMockConfirmOpen, setEndMockConfirmOpen] = useState(false);
   const [liveMockSubmittedBlocked, setLiveMockSubmittedBlocked] = useState(false);
+  const [liveMockNotRegistered, setLiveMockNotRegistered] = useState(false);
   const [liveMockGateResolved, setLiveMockGateResolved] = useState(() => !isLiveMock);
   const [reviewViewedOptions, setReviewViewedOptions] = useState<Record<string, string>>({});
 
@@ -1376,15 +1397,17 @@ export function EnglishSplitViewDemo() {
     };
   }, [isLiveMock, liveMockPaperId, user?.id, isLoadingLiveMock, liveMockPaperQuestionCount]);
 
-  // Live mock: one submission per user per paper - block session URL if already submitted.
+  // Live mock: block session URL if already submitted or not registered (combined mocks).
   useEffect(() => {
     if (!isLiveMock) {
       setLiveMockSubmittedBlocked(false);
+      setLiveMockNotRegistered(false);
       setLiveMockGateResolved(true);
       return;
     }
     if (!user?.id) {
       setLiveMockSubmittedBlocked(false);
+      setLiveMockNotRegistered(false);
       setLiveMockGateResolved(true);
       return;
     }
@@ -1394,6 +1417,7 @@ export function EnglishSplitViewDemo() {
     }
     if (!liveMockPaperId) {
       setLiveMockSubmittedBlocked(false);
+      setLiveMockNotRegistered(false);
       setLiveMockGateResolved(true);
       return;
     }
@@ -1401,28 +1425,60 @@ export function EnglishSplitViewDemo() {
     let cancelled = false;
     setLiveMockGateResolved(false);
 
-    void supabase
-      .from('live_mock_attempts' as never)
-      .select('status')
-      .eq('paper_id', liveMockPaperId)
-      .eq('user_id', user.id)
-      .maybeSingle()
-      .then(({ data, error }) => {
-        if (cancelled) return;
-        if (error) {
-          console.error('Live mock attempt check failed:', error);
-          setLiveMockSubmittedBlocked(false);
-        } else {
-          const row = data as { status?: string } | null;
-          setLiveMockSubmittedBlocked(row?.status === 'submitted');
-        }
-        setLiveMockGateResolved(true);
-      });
+    void (async () => {
+      const attemptPromise = supabase
+        .from('live_mock_attempts' as never)
+        .select('status')
+        .eq('paper_id', liveMockPaperId)
+        .eq('user_id', user.id)
+        .maybeSingle()
+        .then(({ data, error }) => {
+          if (cancelled) return;
+          if (error) {
+            console.error('Live mock attempt check failed:', error);
+            setLiveMockSubmittedBlocked(false);
+          } else {
+            const row = data as { status?: string } | null;
+            setLiveMockSubmittedBlocked(row?.status === 'submitted');
+          }
+        });
+
+      let registrationPromise: Promise<void> = Promise.resolve();
+      if (combinedMockEventSlug && !devBypass) {
+        registrationPromise = supabase
+          .from("live_mock_exam_signups" as never)
+          .select("id")
+          .eq("mock_slug", combinedMockEventSlug)
+          .eq("user_id", user.id)
+          .maybeSingle()
+          .then(({ data, error }) => {
+            if (cancelled) return;
+            if (error) {
+              console.error("Live mock registration check failed:", error);
+              setLiveMockNotRegistered(true);
+            } else {
+              setLiveMockNotRegistered(!data);
+            }
+          });
+      } else {
+        setLiveMockNotRegistered(false);
+      }
+
+      await Promise.all([attemptPromise, registrationPromise]);
+      if (!cancelled) setLiveMockGateResolved(true);
+    })();
 
     return () => {
       cancelled = true;
     };
-  }, [isLiveMock, liveMockPaperId, user?.id, isLoadingLiveMock]);
+  }, [
+    combinedMockEventSlug,
+    devBypass,
+    isLiveMock,
+    isLoadingLiveMock,
+    liveMockPaperId,
+    user?.id,
+  ]);
 
   // Compute actual results upon finishing
   const results = useMemo(() => {
@@ -1735,6 +1791,25 @@ export function EnglishSplitViewDemo() {
       <div className="flex min-h-[calc(100vh-80px)] flex-col items-center justify-center gap-4 bg-background p-6">
         <Loader2 className="h-10 w-10 animate-spin text-amber-500" aria-hidden />
         <p className="text-sm text-muted-foreground">Checking mock access…</p>
+      </div>
+    );
+  }
+
+  if (isLiveMock && liveMockNotRegistered) {
+    return (
+      <div className="flex min-h-[calc(100vh-80px)] items-center justify-center bg-background p-6">
+        <div className="w-full max-w-md rounded-2xl border border-border bg-card p-8 text-center shadow-lg">
+          <Lock className="mx-auto h-8 w-8 text-amber-600" aria-hidden />
+          <h2 className="mt-4 text-xl font-bold tracking-tight text-foreground">Registration required</h2>
+          <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+            This live mock is only available to registered students. Register or sign in with the account you used to pay.
+          </p>
+          <Link to={combinedMockRegisterHref} className="mt-6 block">
+            <Button type="button" className="w-full rounded-xl bg-amber-600 text-white hover:bg-amber-700">
+              Go to mock registration
+            </Button>
+          </Link>
+        </div>
       </div>
     );
   }

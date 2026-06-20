@@ -5,7 +5,10 @@ export const LIVE_MOCK_STANDARD_PRICE_GBP = 14.99;
 
 export type LiveMockPromoConfig = {
   promoCode: string;
+  /** Stripe hard cap when not using display-based remaining. */
   promoMaxRedemptions: number;
+  /** When set, UI/checkout remaining = promoDisplayCap − displayed signup count. */
+  promoDisplayCap?: number;
   signupDisplayOffset: number;
   minDisplayedSignups: number;
 };
@@ -19,7 +22,8 @@ export const LIVE_MOCK_PROMO_BY_SLUG: Record<string, LiveMockPromoConfig> = {
   },
   [SECOND_LIVE_MOCK_SLUG]: {
     promoCode: "MOCK2",
-    promoMaxRedemptions: 7,
+    promoMaxRedemptions: 50,
+    promoDisplayCap: 50,
     signupDisplayOffset: 36,
     minDisplayedSignups: 43,
   },
@@ -38,4 +42,14 @@ export const getPromoSpotsRemaining = (timesRedeemed: number, mockSlug: string):
   const config = getLiveMockPromoConfig(mockSlug);
   if (!config) return 0;
   return Math.max(0, config.promoMaxRedemptions - timesRedeemed);
+};
+
+/** MOCK2: remaining discount uses = cap (50) minus families shown enrolled in UI. */
+export const getPromoSpotsRemainingFromDisplay = (
+  displayedSignupCount: number,
+  mockSlug: string,
+): number => {
+  const config = getLiveMockPromoConfig(mockSlug);
+  if (!config?.promoDisplayCap) return 0;
+  return Math.max(0, config.promoDisplayCap - displayedSignupCount);
 };

@@ -3,8 +3,10 @@ import Stripe from "https://esm.sh/stripe@14.21.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import {
   BOTH_SUBJECTS_LIVE_MOCK_SLUG,
+  getDisplayedLiveMockSignupCount,
   getLiveMockPromoConfig,
   getPromoSpotsRemaining,
+  getPromoSpotsRemainingFromDisplay,
   LIVE_MOCK_STANDARD_PRICE_GBP,
   SECOND_LIVE_MOCK_SLUG,
 } from "../shared/liveMockPromoConfig.ts";
@@ -60,10 +62,26 @@ const isLocalBaseUrl = (value: string) => {
 async function getPromoCheckoutState(
   stripe: Stripe,
   mockSlug: string,
+  supabaseService: ReturnType<typeof createClient> | null,
 ): Promise<{ allowPromotionCodes: boolean; allowedPromoCode: string | null; promoSpotsRemaining: number }> {
   const promoConfig = getLiveMockPromoConfig(mockSlug);
   if (!promoConfig) {
     return { allowPromotionCodes: false, allowedPromoCode: null, promoSpotsRemaining: 0 };
+  }
+
+  if (promoConfig.promoDisplayCap && supabaseService) {
+    const { count, error } = await supabaseService
+      .from("live_mock_exam_signups")
+      .select("id", { count: "exact", head: true })
+      .eq("mock_slug", mockSlug);
+    if (error) throw error;
+    const displayedCount = getDisplayedLiveMockSignupCount(count ?? 0, mockSlug);
+    const promoSpotsRemaining = getPromoSpotsRemainingFromDisplay(displayedCount, mockSlug);
+    return {
+      allowPromotionCodes: promoSpotsRemaining > 0,
+      allowedPromoCode: promoConfig.promoCode,
+      promoSpotsRemaining,
+    };
   }
 
   const promotionCodes = await stripe.promotionCodes.list({
@@ -101,10 +119,15 @@ serve(async (req) => {
 
     const supabaseUrl = readEnv("SUPABASE_URL");
     const supabaseAnonKey = readEnv("SUPABASE_ANON_KEY");
+    const supabaseServiceKey = readEnv("SUPABASE_SERVICE_ROLE_KEY");
     const supabase = createClient(supabaseUrl, supabaseAnonKey, {
       global: { headers: { Authorization: authHeader } },
       auth: { persistSession: false },
     });
+    const supabaseService =
+      supabaseUrl && supabaseServiceKey
+        ? createClient(supabaseUrl, supabaseServiceKey, { auth: { persistSession: false } })
+        : null;
 
     const {
       data: { user },
@@ -145,7 +168,7 @@ serve(async (req) => {
     const mockSlug = resolveMockSlug(body.mockSlug);
     const productName = LIVE_MOCK_PRODUCTS[mockSlug];
     const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
-    const promoCheckout = await getPromoCheckoutState(stripe, mockSlug);
+    const promoCheckout = await getPromoCheckoutState(stripe, mockSlug, supabaseService);
 
     const lineItem = buildInlineLiveMockLineItem(amountGbp, productName);
 

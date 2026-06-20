@@ -9,11 +9,11 @@ import { PREMIUM_PRICING } from "@/lib/pricing";
 import { cn } from "@/lib/utils";
 import {
   formatLiveMockPrice,
+  getDefaultPromoSpotsRemaining,
   getDisplayedLiveMockSignupCount,
   LIVE_MOCK_STANDARD_PRICE_GBP,
   SECOND_MOCK_MIN_DISPLAYED_SIGNUPS,
   SECOND_MOCK_PROMO_CODE,
-  SECOND_MOCK_PROMO_SPOTS_REMAINING,
 } from "@/lib/liveMockPricing";
 import {
   COMBINED_MOCK_DISPLAY_TITLE,
@@ -95,17 +95,19 @@ function MockExamCard({
     <div
       className={cn(
         "overflow-hidden rounded-[24px] border bg-white transition-shadow",
-        live
-          ? "border-orange-200 shadow-[0_20px_60px_rgba(124,45,18,0.10)]"
-          : "border-slate-200 shadow-[0_12px_40px_rgba(15,23,42,0.05)]",
+        isMock2
+          ? "border-slate-200 shadow-[0_12px_40px_rgba(15,23,42,0.05)]"
+          : live
+            ? "border-orange-200 shadow-[0_20px_60px_rgba(124,45,18,0.10)]"
+            : "border-slate-200 shadow-[0_12px_40px_rgba(15,23,42,0.05)]",
       )}
     >
       <div
         className={cn(
           "px-6 py-8 text-white sm:px-9 sm:py-10",
-          live
-            ? "bg-gradient-to-r from-orange-600 to-amber-500"
-            : "bg-gradient-to-r from-slate-700 to-slate-500",
+          isMock2 || !live
+            ? "bg-gradient-to-r from-slate-700 to-slate-500"
+            : "bg-gradient-to-r from-orange-600 to-amber-500",
         )}
       >
         <div className="flex items-center justify-between gap-3">
@@ -119,7 +121,7 @@ function MockExamCard({
           />
         </div>
         <h2 className="mt-4 text-2xl font-black capitalize tracking-tight sm:text-3xl">{title}</h2>
-        <p className={cn("mt-2 text-sm font-medium sm:text-base", live ? "text-orange-50" : "text-slate-200")}>
+        <p className={cn("mt-2 text-sm font-medium sm:text-base", isMock2 || !live ? "text-slate-200" : "text-orange-50")}>
           {blurb}
         </p>
       </div>
@@ -195,7 +197,11 @@ function MockExamCard({
           asChild
           className={cn(
             "mt-6 h-12 w-full rounded-xl text-base font-bold text-white",
-            live ? "bg-orange-600 hover:bg-orange-700" : "bg-slate-900 hover:bg-slate-800",
+            isMock2
+              ? "bg-slate-900 hover:bg-slate-800"
+              : live
+                ? "bg-orange-600 hover:bg-orange-700"
+                : "bg-slate-900 hover:bg-slate-800",
           )}
         >
           <Link to={href}>
@@ -285,7 +291,9 @@ const defaultStatsForSlug = (slug: string): MockCardStats => ({
       : getDisplayedLiveMockSignupCount(0, slug),
   promoCode: slug === SECOND_MOCK_EVENT_SLUG ? SECOND_MOCK_PROMO_CODE : null,
   promoSpotsRemaining:
-    slug === SECOND_MOCK_EVENT_SLUG ? SECOND_MOCK_PROMO_SPOTS_REMAINING : 0,
+    slug === SECOND_MOCK_EVENT_SLUG
+      ? getDefaultPromoSpotsRemaining(SECOND_MOCK_EVENT_SLUG)
+      : 0,
 });
 
 /**

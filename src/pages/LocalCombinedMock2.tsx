@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import {
   ArrowLeft,
+  ArrowRight,
   BookOpen,
   Calculator,
   CalendarDays,
@@ -42,12 +43,8 @@ import {
 } from "@/lib/liveMockCombinedConfig";
 
 /**
- * Mock 2 registration / reservation page.
- *
- * IMPORTANT: this page is registration + reservation ONLY. Mock 2 has no seeded
- * questions and does not go live until Sunday at 10am, so the exam engine is never run
- * here and nothing about mock 1 (slug `both_subjects_live_mock`), its scoring or
- * saved scores is touched. Everything keys off SECOND_MOCK_EVENT_SLUG.
+ * Mock 2 registration page. Maths and English papers load from Supabase
+ * (`both_subjects_maths_mock_2` / `both_subjects_english_mock_2`).
  *
  * Access model (mirrors mock 1):
  *  - Paying Gradlify Premium: registers free via a direct signup row.
@@ -55,6 +52,10 @@ import {
  *  - Everyone else: pays £14.99 via Stripe Checkout; the webhook records the row.
  */
 const MOCK_SLUG = SECOND_MOCK_EVENT_SLUG;
+
+const MOCK2_PRIMARY_BUTTON =
+  "h-12 w-full rounded-xl bg-slate-900 text-base font-bold text-white hover:bg-slate-800";
+const MOCK2_SIGN_IN_BUTTON = "mt-6 bg-slate-900 text-white hover:bg-slate-800";
 
 type Eligibility = {
   loading: boolean;
@@ -198,6 +199,11 @@ export default function LocalCombinedMock2() {
     }
   };
 
+  const canStartMock = eligibility.registered && (released || import.meta.env.DEV);
+  const sitUrl = import.meta.env.DEV
+    ? "/live-mock-exams/local-preview2/sit?fast=1"
+    : "/live-mock-exams/local-preview2/sit";
+
   if (!user) {
     return (
       <div className="flex min-h-[70vh] items-center justify-center bg-[#faf9f4] p-6">
@@ -207,7 +213,7 @@ export default function LocalCombinedMock2() {
           <p className="mt-2 text-sm text-slate-600">
             Sign in to reserve your place for this live mock.
           </p>
-          <Button asChild className="mt-6 bg-orange-600 text-white hover:bg-orange-700">
+          <Button asChild className={MOCK2_SIGN_IN_BUTTON}>
             <Link to="/11-plus">Sign in</Link>
           </Button>
         </div>
@@ -235,20 +241,22 @@ export default function LocalCombinedMock2() {
           Back
         </Link>
 
-        <div className="mt-5 overflow-hidden rounded-[24px] border border-orange-200 bg-white shadow-[0_20px_60px_rgba(124,45,18,0.08)]">
-          <div className="border-b border-orange-100 bg-gradient-to-r from-orange-600 to-amber-500 px-6 py-7 text-white sm:px-9">
-            <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-black uppercase tracking-[0.14em]">
-              Live mock exam
-            </span>
+        <div className="mt-5 overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-[0_12px_40px_rgba(15,23,42,0.05)]">
+          <div className="border-b border-slate-600/30 bg-gradient-to-r from-slate-700 to-slate-500 px-6 py-7 text-white sm:px-9">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-black uppercase tracking-[0.14em]">
+                Live mock exam
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-[11px] font-black uppercase tracking-[0.14em]">
+                <CalendarDays className="h-3.5 w-3.5" />
+                {released ? "Open now" : `Opens ${SECOND_MOCK_RELEASE_SCHEDULE}`}
+              </span>
+            </div>
             <h1 className="mt-4 text-3xl font-black tracking-tight sm:text-4xl">{SECOND_MOCK_DISPLAY_TITLE}</h1>
-            <p className="mt-2 max-w-2xl text-sm font-medium text-orange-50 sm:text-base">
+            <p className="mt-2 max-w-2xl text-sm font-medium text-slate-200 sm:text-base">
               Paper order: non-calculator Maths first, then a break, then English. Reserve your place now and sit it
               when it opens.
             </p>
-            <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1.5 text-xs font-bold text-white">
-              <CalendarDays className="h-4 w-4" />
-              {released ? "Now open" : `Released on ${SECOND_MOCK_RELEASE_SCHEDULE}`}
-            </div>
           </div>
 
           <div className="grid gap-4 p-6 sm:grid-cols-3 sm:p-9">
@@ -328,16 +336,24 @@ export default function LocalCombinedMock2() {
             )}
 
             {eligibility.registered ? (
-              <div className="mt-6 rounded-xl border border-slate-200 bg-slate-50/70 p-4 text-sm leading-6 text-slate-600">
-                {released ? (
-                  <>You're registered and the mock is now open. Reload this page if the exam does not appear yet.</>
-                ) : (
-                  <>
-                    You're registered. Opens {SECOND_MOCK_RELEASE_SCHEDULE}. There's nothing more to do for now; we'll keep your place
-                    saved and you can start the mock from here once it goes live.
-                  </>
-                )}
-              </div>
+              canStartMock ? (
+                <div className="mt-6 space-y-3">
+                  <p className="text-sm leading-6 text-slate-600">
+                    You're registered. Start the full mock when you're ready. Maths first, then a break, then English.
+                  </p>
+                  <Button asChild className={MOCK2_PRIMARY_BUTTON}>
+                    <Link to={sitUrl}>
+                      Start mock (Maths first)
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                  </Button>
+                </div>
+              ) : (
+                <div className="mt-6 rounded-xl border border-slate-200 bg-slate-50/70 p-4 text-sm leading-6 text-slate-600">
+                  You're registered. Opens {SECOND_MOCK_RELEASE_SCHEDULE}. We'll keep your place saved and you can start
+                  the mock from here once it goes live.
+                </div>
+              )
             ) : (
               <div className="mt-6 space-y-3">
                 <p className="text-sm leading-6 text-slate-600">
@@ -363,7 +379,7 @@ export default function LocalCombinedMock2() {
                   )}
                 </p>
                 <Button
-                  className="h-12 w-full rounded-xl bg-orange-600 text-base font-bold text-white hover:bg-orange-700"
+                  className={MOCK2_PRIMARY_BUTTON}
                   disabled={registering}
                   onClick={() => void handleRegister()}
                 >
