@@ -574,14 +574,15 @@ export default function LocalCombinedMock({
   }, [devBypass, eligibility.registered, mockEventSlug, searchParams, user?.id]);
 
   useEffect(() => {
-    if (mathsAttemptStatus === "submitted" && !resitMode) {
+    // Only clear saved progress once maths is submitted and the student is back on the
+    // lobby — never yank them off the maths paper or break screen mid-sitting.
+    if (mathsAttemptStatus === "submitted" && !resitMode && phase === "instructions") {
       window.localStorage.removeItem(storageKey);
-      if (phase === "maths" || phase === "break") {
-        setPhase("instructions");
-        setPhaseEndsAt(null);
-      }
-      return;
     }
+  }, [mathsAttemptStatus, phase, resitMode, storageKey]);
+
+  useEffect(() => {
+    if (mathsAttemptStatus === "submitted" && !resitMode) return;
 
     const raw = window.localStorage.getItem(storageKey);
     if (!raw) return;
@@ -605,7 +606,7 @@ export default function LocalCombinedMock({
     } catch {
       window.localStorage.removeItem(storageKey);
     }
-  }, [mathsAttemptStatus, phase, resitMode, storageKey]);
+  }, [mathsAttemptStatus, resitMode, storageKey]);
 
   useEffect(() => {
     const saved: SavedMockState = { phase, currentQuestion, answers, flagged, phaseEndsAt, resit: resitMode };
@@ -780,26 +781,10 @@ export default function LocalCombinedMock({
         });
         const answeredCount = rows.filter((r) => r.selected).length;
 
-        const { data: attempt, error: attemptError } = await supabase
-          .from("live_mock_attempts" as never)
-          .upsert(
-            {
-              paper_id: mathsPaperId,
-              user_id: user.id,
-              user_email: userEmail,
-              status: "submitted",
-              submitted_at: new Date().toISOString(),
-              duration_seconds: elapsedSeconds,
-              question_count: mathsQuestions.length,
-              answered_count: answeredCount,
-            } as never,
-            { onConflict: "paper_id,user_id" },
-          )
-          .select("id")
-          .single();
-
-        if (attemptError) throw attemptError;
-        const attemptId = (attempt as { id: string }).id;
+        const attemptId = await ensureInProgressAttempt();
+        if (!attemptId) {
+          throw new Error("Could not open your Maths attempt to submit.");
+        }
 
         const answerRows = rows.map((r) => {
           if (!r.q.dbQuestionId?.trim()) {
@@ -835,6 +820,24 @@ export default function LocalCombinedMock({
           .from("live_mock_answers" as never)
           .upsert(answerRows as never, { onConflict: "attempt_id,question_id" });
         if (answersError) throw answersError;
+
+        const { error: attemptError } = await supabase
+          .from("live_mock_attempts" as never)
+          .update(
+            {
+              user_email: userEmail,
+              status: "submitted",
+              submitted_at: new Date().toISOString(),
+              duration_seconds: elapsedSeconds,
+              question_count: mathsQuestions.length,
+              answered_count: answeredCount,
+            } as never,
+          )
+          .eq("id", attemptId);
+        if (attemptError) throw attemptError;
+
+        setMathsAttemptStatus("submitted");
+        setAwaitingEnglish(true);
         savedOk = true;
       } else if (!user?.id || !mathsPaperId || mathsQuestions.length === 0) {
         throw new Error("Maths paper is not ready to submit.");
@@ -862,7 +865,7 @@ export default function LocalCombinedMock({
         goToBreak();
       }
     }
-  }, [answers, durations.maths, flushAutosave, goToBreak, mathsPaperId, mathsQuestions, resitMode, secondsLeft, storageKey, submittingMaths, user]);
+  }, [answers, durations.maths, ensureInProgressAttempt, flushAutosave, goToBreak, mathsPaperId, mathsQuestions, resitMode, secondsLeft, storageKey, submittingMaths, user]);
 
   useEffect(() => {
     if (!phaseEndsAt || !["maths", "break"].includes(phase)) return;
