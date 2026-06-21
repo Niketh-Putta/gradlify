@@ -317,6 +317,8 @@ export default function LocalCombinedMock({
   const autosaveAttemptIdRef = useRef<string | null>(null);
   const pendingAutosaveRef = useRef<Map<number, string>>(new Map());
   const autosaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  /** Lets auto-submit retry if the DB write fails when the maths timer hits zero. */
+  const phaseExpiryHandledRef = useRef(false);
   // Mirror of `answers` for stable reads inside debounced autosave callbacks.
   const answersRef = useRef<Record<string, string>>({});
   const isMock2 = mockEventSlug === SECOND_MOCK_EVENT_SLUG;
@@ -844,7 +846,10 @@ export default function LocalCombinedMock({
     } finally {
       setSubmittingMaths(false);
       autosaveAttemptIdRef.current = null;
-      if (!savedOk) return;
+      if (!savedOk) {
+        if (secondsLeft <= 0) phaseExpiryHandledRef.current = false;
+        return;
+      }
       if (resitMode) {
         // Maths-only re-sit: English is already done — show the maths results
         // screen instead of routing back through the break / English paper.
@@ -861,13 +866,13 @@ export default function LocalCombinedMock({
 
   useEffect(() => {
     if (!phaseEndsAt || !["maths", "break"].includes(phase)) return;
+    phaseExpiryHandledRef.current = false;
 
-    let expiredHandled = false;
     const tick = () => {
       const left = Math.max(0, Math.ceil((phaseEndsAt - Date.now()) / 1000));
       setSecondsLeft(left);
-      if (left === 0 && !expiredHandled) {
-        expiredHandled = true;
+      if (left === 0 && !phaseExpiryHandledRef.current) {
+        phaseExpiryHandledRef.current = true;
         if (phase === "maths") void submitMaths();
         else if (phase === "break") launchEnglish();
       }
@@ -876,6 +881,15 @@ export default function LocalCombinedMock({
     const interval = window.setInterval(tick, 1000);
     return () => window.clearInterval(interval);
   }, [launchEnglish, phase, phaseEndsAt, submitMaths]);
+
+  // If maths auto-submit fails at 0:00 (network blip), retry until it saves or the student submits manually.
+  useEffect(() => {
+    if (phase !== "maths" || secondsLeft > 0 || resitMode) return;
+    const retry = window.setInterval(() => {
+      if (!submittingMaths && !mathsSubmittedRef.current) void submitMaths();
+    }, 4000);
+    return () => window.clearInterval(retry);
+  }, [phase, resitMode, secondsLeft, submitMaths, submittingMaths]);
 
   const eligible = eligibility.registered;
   const paperOrder = phase === "english" ? 2 : 1;

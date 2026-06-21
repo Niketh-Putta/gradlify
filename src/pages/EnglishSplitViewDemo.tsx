@@ -2016,6 +2016,8 @@ export function EnglishSplitViewDemo() {
       setIsSubmittingLiveMock(false);
       if (savedOk) {
         setIsFinished(true);
+      } else if (timeLeft <= 0) {
+        mockTimerExpiredHandledRef.current = false;
       }
     }
   }, [
@@ -2044,6 +2046,15 @@ export function EnglishSplitViewDemo() {
       setIsFinished(true);
     }
   }, [examMode, isFinished, isReviewMode, timeLeft, isLiveMock]);
+
+  // Retry English auto-submit at 0:00 if the first save fails (same pattern as maths).
+  useEffect(() => {
+    if (!isLiveMock || examMode !== "mock" || isFinished || isReviewMode || timeLeft > 0) return;
+    const retry = window.setInterval(() => {
+      if (!isSubmittingLiveMock && !isFinished) void submitLiveMockRef.current();
+    }, 4000);
+    return () => window.clearInterval(retry);
+  }, [examMode, isFinished, isLiveMock, isReviewMode, isSubmittingLiveMock, timeLeft]);
 
   if (isLiveMock && user?.id && !liveMockGateResolved) {
     return (
