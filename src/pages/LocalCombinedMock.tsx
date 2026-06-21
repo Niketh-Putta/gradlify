@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowLeft,
   ArrowRight,
@@ -645,9 +645,9 @@ export default function LocalCombinedMock({
   }, [mathsAttemptStatus, phase, resitMode, storageKey]);
 
   // Hydrate sitting progress once per storage key when attempt status is known.
-  // Re-running this on every status tick was resetting question navigation and
-  // flashing the lobby over the live paper (reported around Q45+).
-  useEffect(() => {
+  // useLayoutEffect runs before paint so a resumed sitting does not flash the lobby.
+  // Re-running restore on every status tick was resetting navigation (reported around Q45+).
+  useLayoutEffect(() => {
     if (hydratedStorageKeyRef.current === storageKey) return;
     if (mathsAttemptStatus === "submitted" && !resitMode) {
       hydratedStorageKeyRef.current = storageKey;
@@ -684,16 +684,7 @@ export default function LocalCombinedMock({
     );
     skipPersistRef.current = false;
     hydratedStorageKeyRef.current = storageKey;
-  }, [
-    mathsAttemptStatus,
-    resitMode,
-    storageKey,
-    phase,
-    currentQuestion,
-    answers,
-    flagged,
-    phaseEndsAt,
-  ]);
+  }, [mathsAttemptStatus, resitMode, storageKey]);
 
   useEffect(() => {
     if (skipPersistRef.current) return;
@@ -1054,6 +1045,7 @@ export default function LocalCombinedMock({
     setPhase(restoredPhase);
     setPhaseEndsAt(restoredEndsAt);
     setStartDialogOpen(false);
+    hydratedStorageKeyRef.current = storageKey;
     void ensureInProgressAttempt();
   }, [durations.maths, ensureInProgressAttempt, mathsPaperId, storageKey, user?.id]);
 
@@ -1077,6 +1069,7 @@ export default function LocalCombinedMock({
     setPhase("maths");
     setPhaseEndsAt(Date.now() + durations.maths * 1000);
     setStartDialogOpen(false);
+    hydratedStorageKeyRef.current = storageKey;
     // Create the in_progress attempt up front so the autosave safety net is armed
     // from the very first answer.
     void ensureInProgressAttempt();
@@ -1097,6 +1090,7 @@ export default function LocalCombinedMock({
     setCurrentQuestion(1);
     setPhase("maths");
     setPhaseEndsAt(Date.now() + durations.maths * 1000);
+    hydratedStorageKeyRef.current = storageKey;
     void ensureInProgressAttempt();
   };
 
@@ -1129,6 +1123,7 @@ export default function LocalCombinedMock({
         returnTo: `${window.location.pathname}${window.location.search}${window.location.hash}`,
       });
       if (result === "registered") {
+        eligibilityResolvedRef.current = true;
         setEligibility({ loading: false, registered: true, error: null });
         toast.success("You're registered for the mock.");
       }

@@ -17,7 +17,8 @@
     "supabase:setup": "node scripts/setup-supabase-connection.mjs",
     "stripe:ultra-prices": "node scripts/create-ultra-stripe-prices.mjs",
     "stripe:sync-secrets": "./scripts/sync-ultra-stripe-secrets.sh",
-    "verify:11plus": "node scripts/verify-11plus.mjs"
+    "verify:11plus": "node scripts/verify-11plus.mjs",
+    "verify:mock-session": "node scripts/verify_mock_session_stability.mjs"
   },
   "reactSnap": {
     "source": "dist",
