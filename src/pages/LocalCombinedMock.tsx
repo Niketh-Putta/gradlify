@@ -27,6 +27,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  readLiveMockLocalState,
+  shouldPersistLiveMockSession,
+} from "@/lib/liveMockSessionGuard";
 import { useAppContext } from "@/hooks/useAppContext";
 import { useMembership } from "@/hooks/useMembership";
 import { cn } from "@/lib/utils";
@@ -164,14 +168,7 @@ function countMathsAnswers(answers: Record<string, string>): number {
 }
 
 function readSavedMockState(storageKey: string): SavedMockState | null {
-  if (typeof window === "undefined") return null;
-  try {
-    const raw = window.localStorage.getItem(storageKey);
-    if (!raw) return null;
-    return JSON.parse(raw) as SavedMockState;
-  } catch {
-    return null;
-  }
+  return readLiveMockLocalState<SavedMockState>(storageKey);
 }
 
 function isResumableSavedPhase(phase: Phase): phase is "maths" | "break" {
@@ -687,10 +684,16 @@ export default function LocalCombinedMock({
   }, [mathsAttemptStatus, resitMode, storageKey]);
 
   useEffect(() => {
-    if (skipPersistRef.current) return;
-    if (hydratedStorageKeyRef.current !== storageKey) return;
-    // Don't overwrite an in-progress sitting with the default lobby snapshot.
-    if (phase === "instructions" && mathsAttemptStatus === "none") return;
+    if (
+      !shouldPersistLiveMockSession(
+        skipPersistRef,
+        hydratedStorageKeyRef,
+        storageKey,
+        phase === "instructions" && mathsAttemptStatus === "none",
+      )
+    ) {
+      return;
+    }
 
     const saved: SavedMockState = { phase, currentQuestion, answers, flagged, phaseEndsAt, resit: resitMode };
     window.localStorage.setItem(storageKey, JSON.stringify(saved));

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useRef, useMemo, useCallback } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, BookOpen, AlertTriangle, Lock, Search, Highlighter, MapPin, Sparkles, ChevronRight, Flag, Timer, Zap, Trophy, ShieldAlert, Check, Type, SpellCheck, TextCursorInput, ListChecks, Languages, CheckCircle, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -23,6 +23,10 @@ import {
   fetchLiveMockAttempt,
   loadLiveMockSavedAnswers,
 } from '@/lib/liveMockAttemptResume';
+import {
+  readLiveMockLocalState,
+  shouldPersistLiveMockSession,
+} from '@/lib/liveMockSessionGuard';
 import { assertLiveMockPaperScorable, normalizeLiveMockOptions } from '@/lib/liveMockScoringGuard';
 
 /** Combined English papers require a matching event registration row. */
@@ -1229,38 +1233,53 @@ export function EnglishSplitViewDemo() {
   const pendingEnglishAutosaveRef = useRef<Map<string, string>>(new Map());
   const englishAutosaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const selectedAnswersRef = useRef<Record<string, string>>({});
+  /** One-time English timer hydrate per user+slug (prevents persist/restore flicker). */
+  const englishTimerHydratedKeyRef = useRef<string | null>(null);
+  const englishTimerSkipPersistRef = useRef(false);
+  /** Silent re-checks mid-exam must not flash the access gate loader. */
+  const liveMockRegisteredRef = useRef(false);
+  const englishAnswersHydratedKeyRef = useRef<string | null>(null);
 
-  // Dynamically calibrate Mock Timer based on Passage Loads, Pedagogy, and 11+ Recommended Norms
+  // Dynamically calibrate Mock Timer based on Passage Loads, Pedagogy, and 11+ Recommended Norms.
+  // Live mock: hydrate timer from localStorage in layout effect so persist cannot overwrite first.
+  useLayoutEffect(() => {
+    if (examMode !== 'mock' || activeSections.length === 0 || !isLiveMock) return;
+
+    const bundleSignature = `${liveMockSlug}|${activeSections.map(s => s.title).join('|')}|m=${liveMockEffectiveDurationMinutes}`;
+    const timerKey = user?.id ? `gradlify_live_mock_english_timer_${liveMockSlug}_${user.id}` : null;
+    if (
+      timerInitialized.current === bundleSignature &&
+      (!timerKey || englishTimerHydratedKeyRef.current === timerKey)
+    ) {
+      return;
+    }
+
+    let initialSeconds = Math.round(liveMockEffectiveDurationMinutes * 60);
+    if (timerKey && englishTimerHydratedKeyRef.current !== timerKey) {
+      const parsed = readLiveMockLocalState<{ endsAt?: number }>(timerKey);
+      if (parsed && typeof parsed.endsAt === "number") {
+        const left = Math.max(0, Math.ceil((parsed.endsAt - Date.now()) / 1000));
+        if (left > 0 && left <= initialSeconds) initialSeconds = left;
+      }
+      englishTimerSkipPersistRef.current = true;
+      englishTimerHydratedKeyRef.current = timerKey;
+    }
+
+    setTimeLeft(initialSeconds);
+    mockTimerExpiredHandledRef.current = false;
+    timerInitialized.current = bundleSignature;
+    englishTimerSkipPersistRef.current = false;
+  }, [activeSections, examMode, isLiveMock, liveMockSlug, liveMockEffectiveDurationMinutes, user?.id]);
+
   useEffect(() => {
     if (examMode !== 'mock' || activeSections.length === 0) return;
 
     const bundleSignature = isLiveMock
       ? `${liveMockSlug}|${activeSections.map(s => s.title).join('|')}|m=${liveMockEffectiveDurationMinutes}`
       : activeSections.map(s => s.title).join('|');
-    if (timerInitialized.current === bundleSignature) return; // Do not hard-reset if it's the same bundle
+    if (timerInitialized.current === bundleSignature) return;
 
-    if (isLiveMock) {
-      let initialSeconds = Math.round(liveMockEffectiveDurationMinutes * 60);
-      if (user?.id) {
-        const timerKey = `gradlify_live_mock_english_timer_${liveMockSlug}_${user.id}`;
-        try {
-          const raw = window.localStorage.getItem(timerKey);
-          if (raw) {
-            const parsed = JSON.parse(raw) as { endsAt?: number };
-            if (typeof parsed.endsAt === "number") {
-              const left = Math.max(0, Math.ceil((parsed.endsAt - Date.now()) / 1000));
-              if (left > 0 && left <= initialSeconds) initialSeconds = left;
-            }
-          }
-        } catch {
-          // ignore corrupt timer snapshot
-        }
-      }
-      setTimeLeft(initialSeconds);
-      mockTimerExpiredHandledRef.current = false;
-      timerInitialized.current = bundleSignature;
-      return;
-    }
+    if (isLiveMock) return;
     
     let totalSeconds = 0;
     activeSections.forEach(sec => {
@@ -1303,6 +1322,16 @@ export function EnglishSplitViewDemo() {
   useEffect(() => {
     if (!isLiveMock || !user?.id || examMode !== "mock" || isFinished) return;
     const timerKey = `gradlify_live_mock_english_timer_${liveMockSlug}_${user.id}`;
+    if (
+      !shouldPersistLiveMockSession(
+        englishTimerSkipPersistRef,
+        englishTimerHydratedKeyRef,
+        timerKey,
+        false,
+      )
+    ) {
+      return;
+    }
     window.localStorage.setItem(
       timerKey,
       JSON.stringify({ endsAt: Date.now() + timeLeft * 1000 }),
@@ -1557,7 +1586,7 @@ export function EnglishSplitViewDemo() {
     };
   }, [isLiveMock, liveMockPaperId, user?.id, isLoadingLiveMock, liveMockPaperQuestionCount]);
 
-  // Resume saved English answers from the DB when continuing an in-progress attempt.
+  // Resume saved English answers from the DB when continuing an in-progress attempt (once per paper).
   useEffect(() => {
     if (
       !isLiveMock ||
@@ -1570,14 +1599,22 @@ export function EnglishSplitViewDemo() {
       return;
     }
 
+    const hydrateKey = `${liveMockPaperId}_${user.id}`;
+    if (englishAnswersHydratedKeyRef.current === hydrateKey) return;
+
     let cancelled = false;
     void (async () => {
       const attempt = await fetchLiveMockAttempt(liveMockPaperId, user.id);
-      if (cancelled || attempt?.status !== "in_progress") return;
+      if (cancelled || attempt?.status !== "in_progress") {
+        if (!cancelled) englishAnswersHydratedKeyRef.current = hydrateKey;
+        return;
+      }
 
       liveMockAttemptIdRef.current = attempt.id;
       const dbRows = await loadLiveMockSavedAnswers(attempt.id);
-      if (cancelled || dbRows.length === 0) return;
+      if (cancelled) return;
+      englishAnswersHydratedKeyRef.current = hydrateKey;
+      if (dbRows.length === 0) return;
 
       const byQuestionNumber = new Map<number, string>();
       const byQuestionId = new Map<string, string>();
@@ -1631,10 +1668,13 @@ export function EnglishSplitViewDemo() {
       setLiveMockSubmittedBlocked(false);
       setLiveMockNotRegistered(false);
       setLiveMockGateResolved(true);
+      liveMockRegisteredRef.current = false;
       return;
     }
     if (isLoadingLiveMock) {
-      setLiveMockGateResolved(false);
+      if (!liveMockRegisteredRef.current && !devBypass) {
+        setLiveMockGateResolved(false);
+      }
       return;
     }
     if (!liveMockPaperId) {
@@ -1645,7 +1685,9 @@ export function EnglishSplitViewDemo() {
     }
 
     let cancelled = false;
-    setLiveMockGateResolved(false);
+    if (!liveMockRegisteredRef.current && !devBypass) {
+      setLiveMockGateResolved(false);
+    }
 
     void (async () => {
       const attemptPromise = supabase
@@ -1680,10 +1722,12 @@ export function EnglishSplitViewDemo() {
               setLiveMockNotRegistered(true);
             } else {
               setLiveMockNotRegistered(!data);
+              if (data) liveMockRegisteredRef.current = true;
             }
           });
       } else {
         setLiveMockNotRegistered(false);
+        if (devBypass) liveMockRegisteredRef.current = true;
       }
 
       await Promise.all([attemptPromise, registrationPromise]);
@@ -2056,7 +2100,7 @@ export function EnglishSplitViewDemo() {
     return () => window.clearInterval(retry);
   }, [examMode, isFinished, isLiveMock, isReviewMode, isSubmittingLiveMock, timeLeft]);
 
-  if (isLiveMock && user?.id && !liveMockGateResolved) {
+  if (isLiveMock && user?.id && !liveMockGateResolved && !liveMockRegisteredRef.current) {
     return (
       <div className="flex min-h-[calc(100vh-80px)] flex-col items-center justify-center gap-4 bg-background p-6">
         <Loader2 className="h-10 w-10 animate-spin text-amber-500" aria-hidden />

@@ -24,3 +24,6 @@ alwaysApply: true
 
 ## Full reference
 See `docs/NIKETH-KNOWLEDGE.md` for revenue breakdown, competitors, and growth priorities.
+
+## Live mock sitting flows
+Before editing maths/break/English sitting code, read `docs/LIVE-MOCK-ENGINEERING.md` and run `npm run verify:mock-session`.

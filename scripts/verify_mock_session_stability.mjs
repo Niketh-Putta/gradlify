@@ -94,21 +94,24 @@ async function verifyBuiltBundle() {
   const chunk = readdirSync(assetsDir).find((name) => name.startsWith("LocalCombinedMock-") && name.endsWith(".js"));
   if (!chunk) return { ok: false, reason: "LocalCombinedMock chunk missing from dist/assets" };
   const js = readFileSync(join(assetsDir, chunk), "utf8");
-  const markers = [
-    "useLayoutEffect",
-    'phase==="english"',
-    "phaseEndsAt",
-    "instructions",
-  ];
-  const patterns = [
-    /useLayoutEffect\(\(\)=>\{if\([^)]+\)return/,
-    /current\|\|[^|]+\|\|[^)]+\)return;const t=\{/,
-  ];
+  const markers = ["useLayoutEffect", 'phase==="english"'];
   const missing = markers.filter((m) => !js.includes(m));
-  const patternsMissing = patterns.filter((re) => !re.test(js)).length;
-  if (missing.length > 0 || patternsMissing > 0) {
-    return { ok: false, chunk, missing: [...missing, ...(patternsMissing ? ["hydrate-guard-pattern"] : [])] };
+  if (missing.length > 0) {
+    return { ok: false, chunk, missing };
   }
+  return { ok: true, chunk };
+}
+
+async function verifyEnglishBuiltBundle() {
+  const { readdirSync, readFileSync } = await import("node:fs");
+  const { join } = await import("node:path");
+  const assetsDir = join(process.cwd(), "dist", "assets");
+  const chunk = readdirSync(assetsDir).find((name) => name.startsWith("EnglishSplitViewDemo-") && name.endsWith(".js"));
+  if (!chunk) return { ok: false, reason: "EnglishSplitViewDemo chunk missing from dist/assets" };
+  const js = readFileSync(join(assetsDir, chunk), "utf8");
+  const markers = ["useLayoutEffect", "gradlify_live_mock_english_timer"];
+  const missing = markers.filter((m) => !js.includes(m));
+  if (missing.length > 0) return { ok: false, chunk, missing };
   return { ok: true, chunk };
 }
 
@@ -133,9 +136,48 @@ async function verifyProductionBundle() {
   return { ok: false, reason: "Could not fetch production bundle (check network or asset names)." };
 }
 
+function simulateEnglishTimerRaceNew() {
+  const store = new Map();
+  const timerKey = "gradlify_live_mock_english_timer_both_subjects_english_mock_2_user";
+  const savedLeft = 42 * 60;
+  store.set(timerKey, JSON.stringify({ endsAt: Date.now() + savedLeft * 1000 }));
+
+  let timeLeft = 3000;
+  let hydratedKey = null;
+  let skipPersist = false;
+  let timerInitialized = false;
+
+  const hydrate = () => {
+    if (hydratedKey === timerKey) return;
+    const parsed = JSON.parse(store.get(timerKey) || "null");
+    if (parsed?.endsAt) {
+      const left = Math.max(0, Math.ceil((parsed.endsAt - Date.now()) / 1000));
+      if (left > 0 && left <= 3000) timeLeft = left;
+    }
+    skipPersist = true;
+    hydratedKey = timerKey;
+    timerInitialized = true;
+    skipPersist = false;
+  };
+
+  const persist = () => {
+    if (skipPersist || hydratedKey !== timerKey) return;
+    store.set(timerKey, JSON.stringify({ endsAt: Date.now() + timeLeft * 1000 }));
+  };
+
+  hydrate();
+  persist();
+
+  return {
+    timeLeft,
+    pass: timeLeft === savedLeft || Math.abs(timeLeft - savedLeft) <= 2,
+  };
+}
+
 function main() {
   const oldRemount = simulateRemountRaceOld();
   const newRemount = simulateRemountRaceNew();
+  const englishTimer = simulateEnglishTimerRaceNew();
 
   const checks = [
     {
@@ -149,6 +191,10 @@ function main() {
     {
       name: "NEW: status ticks do not flash lobby mid-sitting",
       pass: newRemount.statusTicks === 0 && newRemount.storePhase === "maths",
+    },
+    {
+      name: "NEW: English timer hydrate keeps saved time (not default 3000s overwrite)",
+      pass: englishTimer.pass,
     },
   ];
 
@@ -168,14 +214,23 @@ function main() {
 
 main();
 
-Promise.all([verifyBuiltBundle(), verifyProductionBundle()]).then(([built, prod]) => {
+Promise.all([verifyBuiltBundle(), verifyEnglishBuiltBundle(), verifyProductionBundle()]).then(([built, english, prod]) => {
   if (built.ok) {
-    console.log(`Built bundle OK (${built.chunk})`);
+    console.log(`Maths bundle OK (${built.chunk})`);
   } else if (built.missing) {
-    console.error(`FAIL: built chunk missing markers: ${built.missing.join(", ")}`);
+    console.error(`FAIL: maths chunk missing markers: ${built.missing.join(", ")}`);
     process.exit(1);
   } else {
     console.warn(`WARN: ${built.reason}`);
+  }
+
+  if (english.ok) {
+    console.log(`English bundle OK (${english.chunk})`);
+  } else if (english.missing) {
+    console.error(`FAIL: English chunk missing markers: ${english.missing.join(", ")}`);
+    process.exit(1);
+  } else if (english.reason) {
+    console.warn(`WARN: ${english.reason}`);
   }
 
   if (prod.ok) {

@@ -51,3 +51,12 @@ Synced from Codex knowledge interview. Cursor reads this for all Gradlify work.
 6. Tutor/partner affiliates with tracking.
 7. Test annual bundles / family plans.
 8. Know exactly where each payer came from.
+
+## Live mock engineering (do not repeat incidents)
+
+**14 Jun / Mock 2 sitting flows** — Maths → break → English must never flicker back to the registration lobby mid-exam.
+
+- **Incident (21 Jun 2026):** Mock 2 maths flicker at Q45 — localStorage restore/persist loop + eligibility spinner during sitting. Fixed in `LocalCombinedMock.tsx` + hardened in `EnglishSplitViewDemo.tsx`.
+- **Before changing sitting code:** read `docs/LIVE-MOCK-ENGINEERING.md` and run `npm run verify:mock-session`.
+- **Mandatory pattern:** hydrate localStorage once (`useLayoutEffect`), block persist until hydrated, no blocking loaders after registration mid-exam.
+- **Shared helpers:** `src/lib/liveMockSessionGuard.ts`.
