@@ -163,6 +163,53 @@ function countMathsAnswers(answers: Record<string, string>): number {
   return seen.size;
 }
 
+function readSavedMockState(storageKey: string): SavedMockState | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(storageKey);
+    if (!raw) return null;
+    return JSON.parse(raw) as SavedMockState;
+  } catch {
+    return null;
+  }
+}
+
+function isResumableSavedPhase(phase: Phase): phase is "maths" | "break" {
+  return phase === "maths" || phase === "break";
+}
+
+/** Apply saved sitting state without redundant setState calls (prevents flicker loops). */
+function applySavedMockState(
+  saved: SavedMockState,
+  setters: {
+    setPhase: (phase: Phase) => void;
+    setCurrentQuestion: (n: number) => void;
+    setAnswers: (a: Record<string, string>) => void;
+    setFlagged: (f: string[]) => void;
+    setPhaseEndsAt: (t: number | null) => void;
+    setResitMode: (r: boolean) => void;
+  },
+  current: {
+    phase: Phase;
+    currentQuestion: number;
+    answers: Record<string, string>;
+    flagged: string[];
+    phaseEndsAt: number | null;
+    resitMode: boolean;
+  },
+) {
+  const nextAnswers = migrateSavedAnswers(saved.answers || {});
+  const nextFlagged = migrateFlaggedKeys(saved.flagged || []);
+  const nextResit = Boolean(saved.resit);
+
+  if (saved.phase !== current.phase) setters.setPhase(saved.phase);
+  if (saved.currentQuestion !== current.currentQuestion) setters.setCurrentQuestion(saved.currentQuestion);
+  if (JSON.stringify(nextAnswers) !== JSON.stringify(current.answers)) setters.setAnswers(nextAnswers);
+  if (JSON.stringify(nextFlagged) !== JSON.stringify(current.flagged)) setters.setFlagged(nextFlagged);
+  if (saved.phaseEndsAt !== current.phaseEndsAt) setters.setPhaseEndsAt(saved.phaseEndsAt);
+  if (nextResit !== current.resitMode) setters.setResitMode(nextResit);
+}
+
 /*
  * ───────────────────────────────────────────────────────────────────────────
  * REMEDIATION POPUP COPY — EDIT THE WORDING HERE (single source of truth).
@@ -305,6 +352,10 @@ export default function LocalCombinedMock({
   const [reloadKey, setReloadKey] = useState(0);
   const [submittingMaths, setSubmittingMaths] = useState(false);
   const mathsSubmittedRef = useRef(false);
+  /** Which storage key we already hydrated from (prevents restore/save flicker loops). */
+  const hydratedStorageKeyRef = useRef<string | null>(null);
+  const skipPersistRef = useRef(false);
+  const eligibilityResolvedRef = useRef(false);
 
   // Remediation (apology popup) + maths-only re-sit state for the affected cohort.
   const [remediation, setRemediation] = useState<AffectedMathsState>(NOT_AFFECTED);
@@ -349,13 +400,21 @@ export default function LocalCombinedMock({
   const checkEligibility = useCallback(async () => {
     if (!user) {
       setEligibility({ loading: false, registered: false, error: null });
+      eligibilityResolvedRef.current = false;
       return;
     }
     if (devBypass) {
       setEligibility({ loading: false, registered: true, error: null });
+      eligibilityResolvedRef.current = true;
       return;
     }
-    setEligibility((current) => ({ ...current, loading: true, error: null }));
+    setEligibility((current) => {
+      // Never flash the full-page loader mid-exam on silent re-checks (auth refresh, etc.).
+      if (current.registered || eligibilityResolvedRef.current) {
+        return { ...current, loading: false, error: null };
+      }
+      return { ...current, loading: true, error: null };
+    });
     const signupResult = await supabase
       .from("live_mock_exam_signups" as never)
       .select("id")
@@ -372,9 +431,11 @@ export default function LocalCombinedMock({
       return;
     }
 
+    const registered = Boolean(signupResult.data);
+    if (registered) eligibilityResolvedRef.current = true;
     setEligibility({
       loading: false,
-      registered: Boolean(signupResult.data),
+      registered,
       error: null,
     });
   }, [devBypass, mockEventSlug, user]);
@@ -554,6 +615,7 @@ export default function LocalCombinedMock({
         const row = await fetchCombinedMockSignup(user.id, mockEventSlug);
         if (cancelled) return;
         if (row) {
+          eligibilityResolvedRef.current = true;
           setEligibility({ loading: false, registered: true, error: null });
           toast.success("You're registered for the mock.");
           window.history.replaceState({}, "", window.location.pathname + window.location.search.replace(/[?&]upgraded=true/, ""));
@@ -578,40 +640,70 @@ export default function LocalCombinedMock({
     // lobby — never yank them off the maths paper or break screen mid-sitting.
     if (mathsAttemptStatus === "submitted" && !resitMode && phase === "instructions") {
       window.localStorage.removeItem(storageKey);
+      hydratedStorageKeyRef.current = storageKey;
     }
   }, [mathsAttemptStatus, phase, resitMode, storageKey]);
 
+  // Hydrate sitting progress once per storage key when attempt status is known.
+  // Re-running this on every status tick was resetting question navigation and
+  // flashing the lobby over the live paper (reported around Q45+).
   useEffect(() => {
-    if (mathsAttemptStatus === "submitted" && !resitMode) return;
-
-    const raw = window.localStorage.getItem(storageKey);
-    if (!raw) return;
-    try {
-      const saved = JSON.parse(raw) as SavedMockState;
-      // English is handed off to the real split-view page; never resume into it here.
-      // The maths re-sit success screen is terminal, so never resume into it either.
-      if (saved.phase === "english" || saved.phase === "complete" || saved.phase === "maths_resit_complete") {
-        window.localStorage.removeItem(storageKey);
-        return;
-      }
-      if (mathsAttemptStatus === "none" && !saved.resit) return;
-      setPhase(saved.phase);
-      setCurrentQuestion(saved.currentQuestion);
-      setAnswers(migrateSavedAnswers(saved.answers || {}));
-      setFlagged(migrateFlaggedKeys(saved.flagged || []));
-      setPhaseEndsAt(saved.phaseEndsAt);
-      // Resume an in-flight maths-only re-sit so submit still routes to the
-      // maths results screen (not back through break/English).
-      setResitMode(Boolean(saved.resit));
-    } catch {
-      window.localStorage.removeItem(storageKey);
+    if (hydratedStorageKeyRef.current === storageKey) return;
+    if (mathsAttemptStatus === "submitted" && !resitMode) {
+      hydratedStorageKeyRef.current = storageKey;
+      return;
     }
-  }, [mathsAttemptStatus, resitMode, storageKey]);
+
+    const saved = readSavedMockState(storageKey);
+    if (!saved) {
+      if (mathsAttemptStatus !== "none" || resitMode) {
+        hydratedStorageKeyRef.current = storageKey;
+      }
+      return;
+    }
+
+    if (
+      saved.phase === "english" ||
+      saved.phase === "complete" ||
+      saved.phase === "maths_resit_complete"
+    ) {
+      window.localStorage.removeItem(storageKey);
+      hydratedStorageKeyRef.current = storageKey;
+      return;
+    }
+
+    const canResume =
+      saved.resit || mathsAttemptStatus === "in_progress" || isResumableSavedPhase(saved.phase);
+    if (!canResume) return;
+
+    skipPersistRef.current = true;
+    applySavedMockState(
+      saved,
+      { setPhase, setCurrentQuestion, setAnswers, setFlagged, setPhaseEndsAt, setResitMode },
+      { phase, currentQuestion, answers, flagged, phaseEndsAt, resitMode },
+    );
+    skipPersistRef.current = false;
+    hydratedStorageKeyRef.current = storageKey;
+  }, [
+    mathsAttemptStatus,
+    resitMode,
+    storageKey,
+    phase,
+    currentQuestion,
+    answers,
+    flagged,
+    phaseEndsAt,
+  ]);
 
   useEffect(() => {
+    if (skipPersistRef.current) return;
+    if (hydratedStorageKeyRef.current !== storageKey) return;
+    // Don't overwrite an in-progress sitting with the default lobby snapshot.
+    if (phase === "instructions" && mathsAttemptStatus === "none") return;
+
     const saved: SavedMockState = { phase, currentQuestion, answers, flagged, phaseEndsAt, resit: resitMode };
     window.localStorage.setItem(storageKey, JSON.stringify(saved));
-  }, [answers, currentQuestion, flagged, phase, phaseEndsAt, resitMode, storageKey]);
+  }, [answers, currentQuestion, flagged, mathsAttemptStatus, phase, phaseEndsAt, resitMode, storageKey]);
 
   useEffect(() => {
     answersRef.current = answers;
@@ -1089,7 +1181,7 @@ export default function LocalCombinedMock({
     );
   }
 
-  if (eligibility.loading) {
+  if (eligibility.loading && !eligibility.registered && !eligibilityResolvedRef.current) {
     return (
       <div className="flex min-h-[70vh] items-center justify-center gap-3 bg-[#faf9f4]">
         <Loader2 className="h-6 w-6 animate-spin text-orange-600" />
