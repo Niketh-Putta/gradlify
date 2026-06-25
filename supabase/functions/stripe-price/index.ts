@@ -86,7 +86,7 @@ serve(async (req) => {
     
     // Return fallback price data based on the requested plan
     const fallbackData = {
-      unit_amount: plan === 'yearly' ? 19999 : 899, // GBP pence fallback (£8.99/wk, £199.99/yr offer)
+      unit_amount: plan === 'yearly' ? 24999 : 899, // GBP pence fallback (£8.99/wk, £249.99/yr)
       currency: 'gbp',
       interval: plan === 'yearly' ? 'year' : 'week',
     };

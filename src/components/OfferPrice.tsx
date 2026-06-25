@@ -39,7 +39,7 @@ type AnnualOfferPriceProps = {
   compact?: boolean;
   align?: "left" | "right" | "center";
   tone?: "light" | "dark";
-  /** When true, shows "Billed yearly at £199.99" under the per-week headline. */
+  /** When true, shows "Billed yearly at £249.99" under the per-week headline. */
   showAnnualBilling?: boolean;
 };
 

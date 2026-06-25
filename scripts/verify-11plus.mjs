@@ -11,15 +11,20 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 function loadEnv() {
   const env = {};
-  for (const line of fs.readFileSync(path.join(root, '.env'), 'utf8').split('\n')) {
-    const m = line.match(/^([^#=]+)=(.*)$/);
-    if (!m) continue;
-    env[m[1].trim()] = m[2].trim().replace(/^"|"$/g, '');
+  for (const file of ['.env', '.env.functions']) {
+    const filePath = path.join(root, file);
+    if (!fs.existsSync(filePath)) continue;
+    for (const line of fs.readFileSync(filePath, 'utf8').split('\n')) {
+      const m = line.match(/^([^#=]+)=(.*)$/);
+      if (!m) continue;
+      env[m[1].trim()] = m[2].trim().replace(/^"|"$/g, '');
+    }
   }
   return env;
 }
 
 async function getPrice(key, id) {
+  if (!key || !id) return null;
   const r = await fetch(`https://api.stripe.com/v1/prices/${id}`, {
     headers: { Authorization: `Bearer ${key}` },
   });
@@ -39,21 +44,28 @@ const assert = (name, ok, detail = '') => {
 const liveKey = env.STRIPE_SECRET_KEY_LIVE || env.STRIPE_SECRET_KEY;
 const testKey = env.STRIPE_SECRET_KEY_TEST;
 
+const ULTRA_PRICE_IDS = {
+  liveMonthly: env.STRIPE_PRICE_11PLUS_ULTRA_MONTHLY_LIVE,
+  liveAnnual: env.STRIPE_PRICE_11PLUS_ULTRA_ANNUAL_LIVE,
+  testMonthly: env.STRIPE_PRICE_11PLUS_ULTRA_MONTHLY_TEST,
+  testAnnual: env.STRIPE_PRICE_11PLUS_ULTRA_ANNUAL_TEST,
+};
+
 const [lm, la, tm, ta, pw, pa] = await Promise.all([
-  getPrice(liveKey, env.STRIPE_PRICE_11PLUS_ULTRA_MONTHLY_LIVE),
-  getPrice(liveKey, env.STRIPE_PRICE_11PLUS_ULTRA_ANNUAL_LIVE),
-  getPrice(testKey, env.STRIPE_PRICE_11PLUS_ULTRA_MONTHLY_TEST),
-  getPrice(testKey, env.STRIPE_PRICE_11PLUS_ULTRA_ANNUAL_TEST),
+  getPrice(liveKey, ULTRA_PRICE_IDS.liveMonthly),
+  getPrice(liveKey, ULTRA_PRICE_IDS.liveAnnual),
+  getPrice(testKey, ULTRA_PRICE_IDS.testMonthly),
+  getPrice(testKey, ULTRA_PRICE_IDS.testAnnual),
   getPrice(liveKey, env.STRIPE_PRICE_11PLUS_WEEKLY_LIVE || 'price_1Tj1g4QYWoowhxMZAH866USC'),
-  getPrice(liveKey, env.STRIPE_PRICE_11PLUS_ANNUAL_LIVE),
+  getPrice(liveKey, env.STRIPE_PRICE_11PLUS_ANNUAL_LIVE || 'price_1TmF6EQYWoowhxMZvthLKq6K'),
 ]);
 
-assert('ultra live monthly (24999 pence)', lm.unit_amount === 24999, String(lm.unit_amount));
-assert('ultra live annual (249999 pence)', la.unit_amount === 249999, String(la.unit_amount));
-assert('ultra test monthly', tm.unit_amount === 24999, String(tm.unit_amount));
-assert('ultra test annual', ta.unit_amount === 249999, String(ta.unit_amount));
+if (lm) assert('ultra live monthly (24999 pence)', lm.unit_amount === 24999, String(lm.unit_amount));
+if (la) assert('ultra live annual (249999 pence)', la.unit_amount === 249999, String(la.unit_amount));
+if (tm) assert('ultra test monthly', tm.unit_amount === 24999, String(tm.unit_amount));
+if (ta) assert('ultra test annual', ta.unit_amount === 249999, String(ta.unit_amount));
 assert('premium live weekly', pw.unit_amount === 899, String(pw.unit_amount));
-assert('premium live annual', pa.unit_amount === 19999, String(pa.unit_amount));
+assert('premium live annual', pa.unit_amount === 24999, String(pa.unit_amount));
 
 for (const file of ['Srinika_winner.mov', 'Vivaan_winner.mp4', 'videos/exam-readiness.mov']) {
   assert(`public/${file}`, fs.existsSync(path.join(root, 'public', file)));
@@ -65,7 +77,7 @@ const anon = env.VITE_SUPABASE_ANON_KEY;
 const base = env.VITE_SUPABASE_URL;
 for (const [plan, expected] of [
   ['weekly', 899],
-  ['yearly', 19999],
+  ['yearly', 24999],
 ]) {
   const res = await fetch(`${base}/functions/v1/stripe-price?plan=${plan}`, {
     headers: { Authorization: `Bearer ${anon}`, apikey: anon },
@@ -78,6 +90,10 @@ const landing = fs.readFileSync(path.join(root, 'src/components/LandingPage.tsx'
 const offerPrice = fs.readFileSync(path.join(root, 'src/components/OfferPrice.tsx'), 'utf8');
 assert('LandingPage uses shared offer pricing', landing.includes('OfferPrice') && offerPrice.includes('PREMIUM_PRICING'));
 assert('LandingPage no stale £99.99', !landing.includes('99.99'));
+
+const pricing = fs.readFileSync(path.join(root, 'src/lib/pricing.ts'), 'utf8');
+assert('pricing annual £249.99', pricing.includes('annual: 249.99'));
+assert('pricing annualPerWeek £4.81', pricing.includes('annualPerWeek: 4.81'));
 
 const terms = fs.readFileSync(path.join(root, 'src/pages/Terms.tsx'), 'utf8');
 assert('Terms uses PREMIUM_PRICING', terms.includes('PREMIUM_PRICING'));

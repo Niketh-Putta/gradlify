@@ -79,7 +79,7 @@ export interface StripePriceIds {
 
 // Price IDs come from Supabase/Deno env (STRIPE_PRICE_*). Amounts live in Stripe - create new Prices to change billing.
 // Premium weekly: £8.99/wk (899 pence). Legacy monthly kept for existing subs only.
-// 11+ Premium annual offer: £199.99/yr (19999 pence).
+// 11+ Premium annual: £249.99/yr (24999 pence).
 // Ultra: £249.99/mo (24999 pence), £2499.99/yr (249999 pence) as of May 2026.
 // After creating new Stripe Prices, update STRIPE_PRICE_11PLUS_* (and Supabase edge-function secrets).
 export type PremiumTrack = 'gcse' | 'eleven_plus';
@@ -98,8 +98,8 @@ const PREMIUM_WEEKLY_PRICE_IDS: Record<StripeMode, string> = {
 };
 
 const PREMIUM_ANNUAL_OFFER_PRICE_IDS: Record<StripeMode, string> = {
-  LIVE: "price_1TeW1iQYWoowhxMZ7f3MlPcR",
-  TEST: "price_1TeW1jHZeiDDkqObqPFnObVn",
+  LIVE: "price_1TmF6EQYWoowhxMZvthLKq6K",
+  TEST: "price_1TmF6FHZeiDDkqObwynk4FQi",
 };
 
 export const getStripePriceIdsForMode = (mode: StripeMode): StripePriceIds => ({

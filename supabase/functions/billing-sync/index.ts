@@ -21,8 +21,8 @@ const PREMIUM_WEEKLY_PRICE_IDS: Record<string, string> = {
 };
 
 const PREMIUM_ANNUAL_OFFER_PRICE_IDS: Record<string, string> = {
-  live: "price_1TeW1iQYWoowhxMZ7f3MlPcR",
-  test: "price_1TeW1jHZeiDDkqObqPFnObVn",
+  live: "price_1TmF6EQYWoowhxMZvthLKq6K",
+  test: "price_1TmF6FHZeiDDkqObwynk4FQi",
 };
 
 const stripeKeyPrefix = (key: string) =>

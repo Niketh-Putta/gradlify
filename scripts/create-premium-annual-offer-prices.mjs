@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Creates new Stripe annual Prices for Gradlify Premium (£199.99/yr) in TEST and LIVE.
+ * Creates new Stripe annual Prices for Gradlify Premium (£249.99/yr) in TEST and LIVE.
  * Stripe Price objects are immutable, so changing billing requires creating new Prices
  * and updating Supabase Edge Function secrets to use the new price IDs.
  */
@@ -12,10 +12,14 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 function loadEnv() {
   const env = {};
-  for (const line of fs.readFileSync(path.join(root, '.env'), 'utf8').split('\n')) {
-    const m = line.match(/^([^#=]+)=(.*)$/);
-    if (!m) continue;
-    env[m[1].trim()] = m[2].trim().replace(/^"|"$/g, '');
+  for (const file of ['.env', '.env.functions']) {
+    const filePath = path.join(root, file);
+    if (!fs.existsSync(filePath)) continue;
+    for (const line of fs.readFileSync(filePath, 'utf8').split('\n')) {
+      const m = line.match(/^([^#=]+)=(.*)$/);
+      if (!m) continue;
+      env[m[1].trim()] = m[2].trim().replace(/^"|"$/g, '');
+    }
   }
   return env;
 }
@@ -43,18 +47,18 @@ async function getProduct(key, priceId) {
   return json.product;
 }
 
-async function createAnnual(mode, key, monthlyRef) {
-  if (!key || !monthlyRef) return null;
-  const product = await getProduct(key, monthlyRef);
+async function createAnnual(mode, key, priceRef) {
+  if (!key || !priceRef) return null;
+  const product = await getProduct(key, priceRef);
   const annual = await stripe(key, '/prices', {
     product,
     currency: 'gbp',
     'recurring[interval]': 'year',
-    unit_amount: '19999',
-    nickname: `Gradlify Premium Annual Limited Time Offer (${mode})`,
+    unit_amount: '24999',
+    nickname: `Gradlify Premium Annual (${mode})`,
     'metadata[plan]': 'premium',
     'metadata[interval]': 'annual',
-    'metadata[offer]': 'limited_time_199_99',
+    'metadata[offer]': 'annual_249_99',
   });
   return { product, annual: annual.id };
 }
@@ -63,12 +67,16 @@ const env = loadEnv();
 const live = await createAnnual(
   'LIVE',
   env.STRIPE_SECRET_KEY_LIVE || env.STRIPE_SECRET_KEY,
-  env.STRIPE_PRICE_11PLUS_MONTHLY_LIVE || env.STRIPE_PRICE_MONTHLY_LIVE,
+  env.STRIPE_PRICE_11PLUS_WEEKLY_LIVE ||
+    env.STRIPE_PRICE_WEEKLY_LIVE ||
+    'price_1Tj1g4QYWoowhxMZAH866USC',
 );
 const test = await createAnnual(
   'TEST',
   env.STRIPE_SECRET_KEY_TEST || env.STRIPE_SECRET_KEY,
-  env.STRIPE_PRICE_11PLUS_MONTHLY_TEST || env.STRIPE_PRICE_MONTHLY_TEST,
+  env.STRIPE_PRICE_11PLUS_WEEKLY_TEST ||
+    env.STRIPE_PRICE_WEEKLY_TEST ||
+    'price_1Tj1g5HZeiDDkqObijVVbv6C',
 );
 
 console.log(JSON.stringify({ LIVE: live, TEST: test }, null, 2));

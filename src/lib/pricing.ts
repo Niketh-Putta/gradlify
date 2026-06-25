@@ -4,11 +4,15 @@ export const PREMIUM_PRICING = {
   weekly: 8.99,
   /** Strikethrough anchor in-app - keep modest; never £40 (scares parents). */
   weeklyOriginal: 11.99,
-  annual: 199.99,
-  annualOriginal: 249.99,
+  annual: 249.99,
+  /** Strikethrough vs paying weekly for 52 weeks (8.99 × 52). */
+  annualOriginal: 467.48,
   /** Annual ÷ 52 — shown as the headline rate when annual billing is selected. */
-  annualPerWeek: 3.85,
-  annualSavings: 50,
+  annualPerWeek: 4.81,
+  /** Annual ÷ 12 — shown where monthly equivalent is useful. */
+  annualPerMonth: 20.83,
+  /** Weekly × 52 − annual (marketing). Rounded for SAVE badges. */
+  annualSavings: 217,
 } as const;
 
 export const ULTRA_PRICING = {
