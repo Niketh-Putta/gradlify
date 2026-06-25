@@ -10,6 +10,29 @@
 
 export const COMBINED_MOCK_EVENT_SLUG = "both_subjects_live_mock";
 
+/**
+ * Retired May 2026 English-only live mock. Not shown on the hub; no new
+ * registrations or sittings. Existing signup rows are kept for records only.
+ */
+export const LEGACY_ENGLISH_ONLY_LIVE_MOCK_SLUG = "live-11plus-english-mock-2026-05-09-1700";
+
+/** Registration / payment slugs customers can buy today (mock 1 and mock 2 only). */
+export const ACTIVE_LIVE_MOCK_EVENT_SLUGS = [
+  COMBINED_MOCK_EVENT_SLUG,
+  SECOND_MOCK_EVENT_SLUG,
+] as const;
+
+export type ActiveLiveMockEventSlug = (typeof ACTIVE_LIVE_MOCK_EVENT_SLUGS)[number];
+
+export const isLegacyEnglishOnlyLiveMockSlug = (slug: string): boolean =>
+  slug.trim() === LEGACY_ENGLISH_ONLY_LIVE_MOCK_SLUG;
+
+export const isActiveLiveMockEventSlug = (slug: string): slug is ActiveLiveMockEventSlug =>
+  (ACTIVE_LIVE_MOCK_EVENT_SLUGS as readonly string[]).includes(slug.trim());
+
+/** Slugs that require Stripe (or Premium) before a signup row is valid. */
+export const PAID_LIVE_MOCK_EVENT_SLUGS = ACTIVE_LIVE_MOCK_EVENT_SLUGS;
+
 /** User-facing name for the combined live mock everywhere in the app. */
 export const COMBINED_MOCK_DISPLAY_TITLE = "11+ maths and english mock 1";
 

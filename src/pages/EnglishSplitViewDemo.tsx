@@ -16,6 +16,7 @@ import {
   combinedMockAnalyticsUrl,
   combinedMockDisplayTitleForEvent,
   combinedMockLobbyPathForEvent,
+  isLegacyEnglishOnlyLiveMockSlug,
   SECOND_MOCK_EVENT_SLUG,
 } from '@/lib/liveMockCombinedConfig';
 import {
@@ -661,6 +662,13 @@ export function EnglishSplitViewDemo() {
   const modeParam = searchParams.get('mode') || 'practice';
   const liveMockSlug = searchParams.get('liveMockSlug') || '';
   const isLiveMock = Boolean(liveMockSlug);
+
+  useEffect(() => {
+    if (isLegacyEnglishOnlyLiveMockSlug(liveMockSlug)) {
+      navigate("/live-mock-exams", { replace: true });
+    }
+  }, [liveMockSlug, navigate]);
+
   const combinedMockEventSlug = COMBINED_ENGLISH_EVENT_BY_SLUG[liveMockSlug] ?? null;
   const devBypass = searchParams.get("dev") === "1" && import.meta.env.DEV;
   const combinedMockRegisterHref = combinedMockEventSlug
@@ -670,7 +678,6 @@ export function EnglishSplitViewDemo() {
   // and full-passage comprehension highlighting. The combined Maths+English
   // mock reuses this exact English experience for its English paper.
   const FULL_STYLED_LIVE_MOCK_SLUGS = new Set([
-    'live-11plus-english-mock-2026-05-09-1700',
     'both_subjects_english',
     'both_subjects_english_mock_2',
   ]);

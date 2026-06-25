@@ -1,13 +1,21 @@
 import { supabase } from "@/integrations/supabase/client";
 
-/** Must match `LiveMockExams` / session `liveMockSlug` for the scheduled English mock. */
-export const LIVE_MOCK_PAPER_SLUG = "live-11plus-english-mock-2026-05-09-1700";
+import {
+  COMBINED_MOCK_EVENT_SLUG,
+  combinedMockAnalyticsUrl,
+  englishPaperForEvent,
+  LEGACY_ENGLISH_ONLY_LIVE_MOCK_SLUG,
+} from "@/lib/liveMockCombinedConfig";
 
-const LIVE_MOCK_QUESTIONS = 70;
+/** @deprecated Legacy English-only mock — use combined mock 1 paper slugs instead. */
+export const LIVE_MOCK_PAPER_SLUG = LEGACY_ENGLISH_ONLY_LIVE_MOCK_SLUG;
+
+const LIVE_MOCK_QUESTIONS = 60;
 const LIVE_MOCK_DURATION = 50;
 
-/** Same query string as the hub "Start mock exam" button. */
+/** Resume English paper for combined mock 1 (replaces retired English-only session). */
 export function buildLiveMockSessionPath(): string {
+  const englishSlug = englishPaperForEvent(COMBINED_MOCK_EVENT_SLUG).slug;
   const params = new URLSearchParams({
     track: "11plus",
     subject: "english",
@@ -15,9 +23,14 @@ export function buildLiveMockSessionPath(): string {
     mode: "mock-exam",
     questions: String(LIVE_MOCK_QUESTIONS),
     duration: String(LIVE_MOCK_DURATION),
-    liveMockSlug: LIVE_MOCK_PAPER_SLUG,
+    liveMockSlug: englishSlug,
   });
   return `/live-mock-exams/session?${params.toString()}`;
+}
+
+/** Default analytics URL for live mock results (mock 1 combined). */
+export function defaultLiveMockAnalyticsPath(): string {
+  return combinedMockAnalyticsUrl(COMBINED_MOCK_EVENT_SLUG, "english");
 }
 
 /** Summary JSON from `get_my_live_mock_attempt_summary` - extend as you add fields in SQL. */

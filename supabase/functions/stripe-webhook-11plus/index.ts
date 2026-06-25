@@ -152,6 +152,12 @@ const recordPaidLiveMockSignup = async (session: Stripe.Checkout.Session) => {
     return { success: true, ignored: true };
   }
 
+  const allowedSlugs = new Set(['both_subjects_live_mock', 'both_subjects_live_mock_2']);
+  if (!allowedSlugs.has(mockSlug)) {
+    logStep('Ignored live mock payment for retired slug', { sessionId: session.id, mockSlug });
+    return { success: true, ignored: true };
+  }
+
   const { error } = await getSupabaseClient()
     .from('live_mock_exam_signups')
     .upsert(

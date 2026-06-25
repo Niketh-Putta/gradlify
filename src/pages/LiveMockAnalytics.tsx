@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, Navigate, useSearchParams } from "react-router-dom";
 import {
   ArrowLeft,
   BarChart3,
@@ -31,6 +31,7 @@ import {
 import { useAppContext } from "@/hooks/useAppContext";
 import {
   buildLiveMockSessionPath,
+  defaultLiveMockAnalyticsPath,
   getLiveMockPaperBySlug,
   getLiveMockPassageContextForQuestion,
   getLiveMockPublicCohortSummary,
@@ -437,6 +438,10 @@ export default function LiveMockAnalytics() {
   const wrong = summary?.wrong_count ?? 0;
   const blank = summary?.unanswered_count ?? 0;
   const pct = summary?.score_percent;
+
+  if (!isCombined) {
+    return <Navigate to={defaultLiveMockAnalyticsPath()} replace />;
+  }
 
   if (!user?.id) {
     return (
