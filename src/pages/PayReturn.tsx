@@ -1,11 +1,17 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Loader2 } from 'lucide-react';
 import { syncBillingStatus } from '@/lib/billingSync';
+import {
+  confirmLiveMockRegistrationAfterPayment,
+  mockEventSlugFromReturnPath,
+} from '@/lib/liveMockCheckoutFlow';
 
 const GRADLIFY_STORAGE_KEY = 'gradlify:checkout:returnTo';
 
 const PayReturn = () => {
   const navigate = useNavigate();
+  const [statusLine, setStatusLine] = useState('Returning to your account...');
 
   useEffect(() => {
     const isSuccessReturn = window.location.pathname === '/pay/success';
@@ -34,24 +40,33 @@ const PayReturn = () => {
       navigate(`${targetUrl.pathname}${targetUrl.search}${targetUrl.hash}`, { replace: true });
     };
 
-    if (isSuccessReturn) {
-      syncBillingStatus()
-        .catch(() => null)
-        .finally(() => {
+    const run = async () => {
+      if (isSuccessReturn) {
+        const liveMockSlug = mockEventSlugFromReturnPath(baseTarget);
+        if (liveMockSlug) {
+          setStatusLine('Payment received. Confirming your mock registration...');
+          const { registered } = await confirmLiveMockRegistrationAfterPayment(baseTarget);
+          if (registered) {
+            setStatusLine('Registration confirmed. Opening your mock...');
+          } else {
+            setStatusLine('Payment received. Finishing setup...');
+          }
+        } else {
+          await syncBillingStatus().catch(() => null);
           window.dispatchEvent(new CustomEvent('gradlify:profile-updated'));
-          finishReturn();
-        });
-      return;
-    }
+        }
+      }
+      finishReturn();
+    };
 
-    finishReturn();
+    void run();
   }, [navigate]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="text-center space-y-2">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-        <p>Returning to your account...</p>
+    <div className="min-h-screen flex items-center justify-center bg-[#faf9f4] px-4">
+      <div className="text-center space-y-3 max-w-md">
+        <Loader2 className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600 mx-auto" />
+        <p className="text-sm font-semibold text-slate-700">{statusLine}</p>
       </div>
     </div>
   );

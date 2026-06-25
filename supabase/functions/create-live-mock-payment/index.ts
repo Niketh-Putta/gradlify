@@ -137,12 +137,14 @@ serve(async (req) => {
       if (existingSignup) {
         return new Response(
           JSON.stringify({
-            error: "You are already registered for this mock.",
             alreadyRegistered: true,
+            url: null,
+            sessionId: null,
+            amountGbp,
           }),
           {
             headers: { ...corsHeaders, "Content-Type": "application/json" },
-            status: 409,
+            status: 200,
           },
         );
       }

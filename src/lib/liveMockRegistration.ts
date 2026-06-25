@@ -1,6 +1,10 @@
 import { supabase } from "@/integrations/supabase/client";
 import { getDataFastIds } from "@/lib/datafast";
 import { COMBINED_MOCK_EVENT_SLUG, SECOND_MOCK_EVENT_SLUG } from "@/lib/liveMockCombinedConfig";
+import {
+  LiveMockAlreadyRegisteredError,
+  markLiveMockCheckoutPending,
+} from "@/lib/liveMockCheckoutFlow";
 
 export const BOTH_SUBJECTS_MOCK_SLUG = COMBINED_MOCK_EVENT_SLUG;
 
@@ -56,12 +60,13 @@ export async function startCombinedMockCheckout(
 
   const existing = await fetchCombinedMockSignup(user.id, mockSlug);
   if (existing) {
-    throw new Error("You are already registered for this mock.");
+    throw new LiveMockAlreadyRegisteredError();
   }
 
   const safeReturn = returnTo.startsWith("/") && !returnTo.startsWith("/pay/") ? returnTo : "/live-mock-exams";
   if (typeof window !== "undefined") {
     window.localStorage.setItem("gradlify:checkout:returnTo", safeReturn);
+    markLiveMockCheckoutPending(mockSlug);
   }
 
   const { data, error } = await supabase.functions.invoke("create-live-mock-payment", {
@@ -74,10 +79,10 @@ export async function startCombinedMockCheckout(
   });
 
   if (error) throw error;
+  if (data?.alreadyRegistered) {
+    throw new LiveMockAlreadyRegisteredError();
+  }
   if (data?.error) {
-    if (data.alreadyRegistered) {
-      throw new Error("You are already registered for this mock.");
-    }
     throw new Error(data.error);
   }
   if (!data?.url) throw new Error("Registration checkout URL was not returned.");

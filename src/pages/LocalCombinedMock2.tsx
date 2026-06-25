@@ -29,7 +29,12 @@ import {
   resolveLiveMockSignupDisplay,
   SECOND_MOCK_MIN_DISPLAYED_SIGNUPS,
 } from "@/lib/liveMockPricing";
-import { fetchSecondMockSignup, registerForSecondMock } from "@/lib/liveMockRegistration";
+import { registerForSecondMock } from "@/lib/liveMockRegistration";
+import {
+  isLiveMockAlreadyRegisteredError,
+  isLiveMockCheckoutPending,
+  pollLiveMockSignupUntilReady,
+} from "@/lib/liveMockCheckoutFlow";
 import {
   BREAK_MINUTES,
   englishPaperForEvent,
@@ -79,6 +84,7 @@ export default function LocalCombinedMock2() {
     error: null,
   });
   const [registering, setRegistering] = useState(false);
+  const [confirmingPayment, setConfirmingPayment] = useState(false);
   const [released, setReleased] = useState<boolean>(() => isSecondMockReleased());
   const [signupCount, setSignupCount] = useState(SECOND_MOCK_MIN_DISPLAYED_SIGNUPS);
 
@@ -138,39 +144,30 @@ export default function LocalCombinedMock2() {
     void checkEligibility();
   }, [checkEligibility]);
 
-  // After returning from Stripe (`?upgraded=true`), the webhook records the
-  // signup asynchronously. Poll briefly until the reservation row appears.
   useEffect(() => {
     if (!user?.id || eligibility.registered) return;
-    if (searchParams.get("upgraded") !== "true") return;
+    const shouldPoll =
+      searchParams.get("upgraded") === "true" || isLiveMockCheckoutPending(MOCK_SLUG);
+    if (!shouldPoll) return;
 
     let cancelled = false;
-    let attempt = 0;
+    setConfirmingPayment(true);
 
-    const pollSignup = async () => {
-      attempt += 1;
-      try {
-        const row = await fetchSecondMockSignup(user.id);
-        if (cancelled) return;
-        if (row) {
-          setEligibility({ loading: false, registered: true, error: null });
-          toast.success("Your place is reserved for mock 2.");
-          window.history.replaceState(
-            {},
-            "",
-            window.location.pathname + window.location.search.replace(/[?&]upgraded=true/, ""),
-          );
-          return;
-        }
-      } catch {
-        // keep polling
+    void pollLiveMockSignupUntilReady(user.id, MOCK_SLUG).then((registered) => {
+      if (cancelled) return;
+      setConfirmingPayment(false);
+      if (registered) {
+        setEligibility({ loading: false, registered: true, error: null });
+        toast.success("Your place is reserved for mock 2.");
+        const cleaned = window.location.search.replace(/[?&]upgraded=true/, "");
+        window.history.replaceState(
+          {},
+          "",
+          window.location.pathname + (cleaned === "?" ? "" : cleaned),
+        );
       }
-      if (attempt < 30 && !cancelled) {
-        window.setTimeout(pollSignup, 1000);
-      }
-    };
+    });
 
-    void pollSignup();
     return () => {
       cancelled = true;
     };
@@ -179,6 +176,14 @@ export default function LocalCombinedMock2() {
   const handleRegister = async () => {
     if (!user?.id || !user.email) {
       toast.error("Please sign in to reserve your place for this mock.");
+      return;
+    }
+    if (eligibility.registered) {
+      toast.info("You're already registered for mock 2.");
+      return;
+    }
+    if (confirmingPayment || isLiveMockCheckoutPending(MOCK_SLUG)) {
+      toast.info("We're confirming your payment. Please wait a moment.");
       return;
     }
 
@@ -195,6 +200,11 @@ export default function LocalCombinedMock2() {
         toast.success("Your place is reserved for mock 2.");
       }
     } catch (error) {
+      if (isLiveMockAlreadyRegisteredError(error)) {
+        setEligibility({ loading: false, registered: true, error: null });
+        toast.success("You're already registered for mock 2.");
+        return;
+      }
       const message = error instanceof Error ? error.message : "Could not open registration checkout.";
       toast.error(message);
     } finally {
@@ -325,6 +335,18 @@ export default function LocalCombinedMock2() {
               <p className="mt-4 text-sm font-semibold text-rose-600">{eligibility.error}</p>
             )}
 
+            {!eligibility.registered && (confirmingPayment || isLiveMockCheckoutPending(MOCK_SLUG)) ? (
+              <div className="mt-4 rounded-xl border border-blue-200 bg-blue-50 p-4">
+                <div className="flex items-center gap-2 font-bold text-blue-900">
+                  <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
+                  Confirming your payment
+                </div>
+                <p className="mt-1 text-xs text-slate-600">
+                  Payment received. We are saving your registration now. The pay button stays locked until this finishes.
+                </p>
+              </div>
+            ) : null}
+
             {eligibility.registered ? (
               canStartMock ? (
                 <div className="mt-6 space-y-3">
@@ -370,13 +392,18 @@ export default function LocalCombinedMock2() {
                 </p>
                 <Button
                   className={MOCK2_PRIMARY_BUTTON}
-                  disabled={registering}
+                  disabled={registering || confirmingPayment || isLiveMockCheckoutPending(MOCK_SLUG)}
                   onClick={() => void handleRegister()}
                 >
                   {registering ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       Opening checkout...
+                    </>
+                  ) : confirmingPayment || isLiveMockCheckoutPending(MOCK_SLUG) ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Confirming payment...
                     </>
                   ) : hasPaidPremiumLiveMockAccess ? (
                     <>
