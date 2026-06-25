@@ -195,22 +195,50 @@ export async function getLiveMockQuestionStemOptionsFallback(
   };
 }
 
+type LiveMockPaperRow = { id: string; title: string; question_count: number };
+
+const liveMockPaperBySlugCache = new Map<string, LiveMockPaperRow>();
+const liveMockPaperBySlugInflight = new Map<string, Promise<LiveMockPaperRow | null>>();
+const liveMockPaperBySlugFailed = new Set<string>();
+
 export async function getLiveMockPaperBySlug(
   slug: string,
-): Promise<{ id: string; title: string; question_count: number } | null> {
-  const { data, error } = await supabase
-    .from("live_mock_papers" as never)
-    .select("id, title, question_count")
-    .eq("slug", slug)
-    .maybeSingle();
+): Promise<LiveMockPaperRow | null> {
+  const key = slug.trim();
+  if (!key) return null;
 
-  if (error || !data) {
-    console.error("getLiveMockPaperBySlug", error);
-    return null;
+  const cached = liveMockPaperBySlugCache.get(key);
+  if (cached) return cached;
+
+  const inflight = liveMockPaperBySlugInflight.get(key);
+  if (inflight) return inflight;
+
+  const promise = (async (): Promise<LiveMockPaperRow | null> => {
+    const { data, error } = await supabase
+      .from("live_mock_papers" as never)
+      .select("id, title, question_count")
+      .eq("slug", key)
+      .maybeSingle();
+
+    if (error || !data) {
+      if (!liveMockPaperBySlugFailed.has(key)) {
+        liveMockPaperBySlugFailed.add(key);
+        console.error("getLiveMockPaperBySlug", error);
+      }
+      return null;
+    }
+
+    const row = data as LiveMockPaperRow;
+    liveMockPaperBySlugCache.set(key, row);
+    return row;
+  })();
+
+  liveMockPaperBySlugInflight.set(key, promise);
+  try {
+    return await promise;
+  } finally {
+    liveMockPaperBySlugInflight.delete(key);
   }
-
-  const row = data as { id: string; title: string; question_count: number };
-  return row;
 }
 
 export async function getMyLiveMockAnswerDetails(attemptId: string): Promise<LiveMockAnswerDetail[]> {

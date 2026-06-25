@@ -160,6 +160,28 @@ export default function LiveMockAnalytics() {
   const fallbackTitle = isCombined
     ? COMBINED_SUBJECT_TITLES[combinedSubject]
     : "11+ English complete mock exam";
+  /** Stable key for fetch effects — avoids reload loops from unstable object deps. */
+  const analyticsScopeKey = useMemo(
+    () =>
+      [
+        user?.id ?? "",
+        isCombined ? "1" : "0",
+        mockEventSlug,
+        combinedSubject,
+        activeSlug,
+        combinedSubjectSlugs.maths,
+        combinedSubjectSlugs.english,
+      ].join("|"),
+    [
+      user?.id,
+      isCombined,
+      mockEventSlug,
+      combinedSubject,
+      activeSlug,
+      combinedSubjectSlugs.maths,
+      combinedSubjectSlugs.english,
+    ],
+  );
 
   const selectCombinedSubject = useCallback(
     (subject: "maths" | "english") => {
@@ -189,6 +211,7 @@ export default function LiveMockAnalytics() {
   const loadedAnswersAttemptRef = useRef<string | null>(null);
   const loadInFlightRef = useRef(false);
   const hasLoadedOnceRef = useRef(false);
+  const analyticsScopeKeyRef = useRef<string | null>(null);
   const loadAllRef = useRef<(isPoll: boolean) => Promise<void>>(async () => {});
 
   const loadAll = useCallback(async (isPoll: boolean) => {
@@ -298,19 +321,18 @@ export default function LiveMockAnalytics() {
   loadAllRef.current = loadAll;
 
   useEffect(() => {
+    if (analyticsScopeKeyRef.current === analyticsScopeKey) return;
+    analyticsScopeKeyRef.current = analyticsScopeKey;
     hasLoadedOnceRef.current = false;
     loadedAnswersAttemptRef.current = null;
-  }, [user?.id, mockEventSlug, isCombined, activeSlug]);
-
-  useEffect(() => {
     void loadAllRef.current(false);
-  }, [user?.id, activeSlug, combinedSubjectSlugs.maths, combinedSubjectSlugs.english, isCombined, combinedSubject]);
+  }, [analyticsScopeKey]);
 
   useEffect(() => {
     if (!user?.id) return;
     const id = window.setInterval(() => void loadAllRef.current(true), POLL_MS);
     return () => window.clearInterval(id);
-  }, [user?.id, activeSlug, combinedSubjectSlugs.maths, combinedSubjectSlugs.english, isCombined, combinedSubject]);
+  }, [analyticsScopeKey, user?.id]);
 
   useEffect(() => {
     const onFocus = () => void loadAllRef.current(true);
