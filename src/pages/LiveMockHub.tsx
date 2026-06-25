@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { ArrowRight, CalendarClock, CheckCircle2, Clock3, Lock, UsersRound } from "lucide-react";
+import { ArrowRight, CalendarClock, CheckCircle2, Clock3, Lock, Sparkles, UsersRound } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { useMembership } from "@/hooks/useMembership";
