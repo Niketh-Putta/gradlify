@@ -119,6 +119,35 @@ serve(async (req) => {
     const returnTo = sanitizeReturnPath(String(body.returnTo ?? "/live-mock-exams"));
     const mockSlug = resolveMockSlug(body.mockSlug);
     const productName = LIVE_MOCK_PRODUCTS[mockSlug];
+
+    const serviceRoleKey = readEnv("SUPABASE_SERVICE_ROLE_KEY");
+    if (serviceRoleKey) {
+      const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey, {
+        auth: { persistSession: false },
+      });
+      const { data: existingSignup, error: existingError } = await supabaseAdmin
+        .from("live_mock_exam_signups")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("mock_slug", mockSlug)
+        .maybeSingle();
+      if (existingError) {
+        throw existingError;
+      }
+      if (existingSignup) {
+        return new Response(
+          JSON.stringify({
+            error: "You are already registered for this mock.",
+            alreadyRegistered: true,
+          }),
+          {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+            status: 409,
+          },
+        );
+      }
+    }
+
     const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
     const promoCheckout = await getPromoCheckoutState();
 

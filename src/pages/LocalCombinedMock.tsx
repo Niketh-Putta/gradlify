@@ -621,7 +621,7 @@ export default function LocalCombinedMock({
       } catch {
         // keep polling
       }
-      if (attempt < 12 && !cancelled) {
+      if (attempt < 30 && !cancelled) {
         window.setTimeout(pollSignup, 1000);
       }
     };

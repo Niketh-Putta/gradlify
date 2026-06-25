@@ -46,6 +46,19 @@ export async function startCombinedMockCheckout(
   returnTo: string,
   mockSlug: string = BOTH_SUBJECTS_MOCK_SLUG,
 ) {
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+  if (userError || !user?.id) {
+    throw new Error("Please sign in before registering.");
+  }
+
+  const existing = await fetchCombinedMockSignup(user.id, mockSlug);
+  if (existing) {
+    throw new Error("You are already registered for this mock.");
+  }
+
   const safeReturn = returnTo.startsWith("/") && !returnTo.startsWith("/pay/") ? returnTo : "/live-mock-exams";
   if (typeof window !== "undefined") {
     window.localStorage.setItem("gradlify:checkout:returnTo", safeReturn);
@@ -61,7 +74,12 @@ export async function startCombinedMockCheckout(
   });
 
   if (error) throw error;
-  if (data?.error) throw new Error(data.error);
+  if (data?.error) {
+    if (data.alreadyRegistered) {
+      throw new Error("You are already registered for this mock.");
+    }
+    throw new Error(data.error);
+  }
   if (!data?.url) throw new Error("Registration checkout URL was not returned.");
 
   window.location.href = data.url;
@@ -76,6 +94,12 @@ export async function registerForCombinedMock(options: {
   mockSlug?: string;
 }) {
   const mockSlug = options.mockSlug ?? BOTH_SUBJECTS_MOCK_SLUG;
+
+  const existing = await fetchCombinedMockSignup(options.userId, mockSlug);
+  if (existing) {
+    return "registered" as const;
+  }
+
   if (options.hasPaidPremiumLiveMockAccess) {
     await recordCombinedMockSignup(options.userId, options.email, mockSlug);
     return "registered" as const;

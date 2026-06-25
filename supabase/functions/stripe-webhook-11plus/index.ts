@@ -158,7 +158,31 @@ const recordPaidLiveMockSignup = async (session: Stripe.Checkout.Session) => {
     return { success: true, ignored: true };
   }
 
-  const { error } = await getSupabaseClient()
+  const supabase = getSupabaseClient();
+  const { data: existingSignup, error: existingError } = await supabase
+    .from('live_mock_exam_signups')
+    .select('id, registered_at')
+    .eq('user_id', userId)
+    .eq('mock_slug', mockSlug)
+    .maybeSingle();
+
+  if (existingError) {
+    throw existingError;
+  }
+
+  if (existingSignup) {
+    logStep('Duplicate live mock payment — signup already exists', {
+      sessionId: session.id,
+      userId,
+      mockSlug,
+      existingSignupId: existingSignup.id,
+      existingRegisteredAt: existingSignup.registered_at,
+      amountTotal: session.amount_total,
+    });
+    return { success: true, ignored: true, duplicatePayment: true };
+  }
+
+  const { error } = await supabase
     .from('live_mock_exam_signups')
     .upsert(
       {
