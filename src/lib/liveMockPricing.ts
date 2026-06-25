@@ -2,37 +2,23 @@ import { COMBINED_MOCK_EVENT_SLUG, SECOND_MOCK_EVENT_SLUG } from "@/lib/liveMock
 
 export const LIVE_MOCK_STANDARD_PRICE_GBP = 14.99;
 
-export type LiveMockSignupPromoConfig = {
-  promoCode: string;
-  promoMaxRedemptions: number;
-  /** When set, remaining uses = promoDisplayCap − displayed signup count. */
-  promoDisplayCap?: number;
+export type LiveMockSignupDisplayConfig = {
   signupDisplayOffset: number;
   minDisplayedSignups: number;
 };
 
-export const LIVE_MOCK_SIGNUP_CONFIG: Record<string, LiveMockSignupPromoConfig> = {
+export const LIVE_MOCK_SIGNUP_CONFIG: Record<string, LiveMockSignupDisplayConfig> = {
   [COMBINED_MOCK_EVENT_SLUG]: {
-    promoCode: "LEVELFIELD",
-    promoMaxRedemptions: 3,
     signupDisplayOffset: 55,
     minDisplayedSignups: 76,
   },
   [SECOND_MOCK_EVENT_SLUG]: {
-    promoCode: "MOCK2",
-    promoMaxRedemptions: 50,
-    promoDisplayCap: 50,
     signupDisplayOffset: 17,
     minDisplayedSignups: 44,
   },
 };
 
-/** Mock 1 promo. Kept for existing registration UI. */
-export const LIVE_MOCK_PROMO_CODE = LIVE_MOCK_SIGNUP_CONFIG[COMBINED_MOCK_EVENT_SLUG].promoCode;
-export const LIVE_MOCK_PROMO_SPOTS_REMAINING =
-  LIVE_MOCK_SIGNUP_CONFIG[COMBINED_MOCK_EVENT_SLUG].promoMaxRedemptions;
-
-export const getLiveMockSignupConfig = (mockSlug: string): LiveMockSignupPromoConfig | null =>
+export const getLiveMockSignupConfig = (mockSlug: string): LiveMockSignupDisplayConfig | null =>
   LIVE_MOCK_SIGNUP_CONFIG[mockSlug] ?? null;
 
 export const getDisplayedLiveMockSignupCount = (count: number, mockSlug: string) => {
@@ -41,33 +27,11 @@ export const getDisplayedLiveMockSignupCount = (count: number, mockSlug: string)
   return Math.max(config.minDisplayedSignups, count + config.signupDisplayOffset);
 };
 
-/** MOCK2: discount uses left = 50 minus families shown enrolled. */
-export const getPromoSpotsRemainingFromDisplay = (displayedSignupCount: number, mockSlug: string) => {
-  const config = getLiveMockSignupConfig(mockSlug);
-  if (!config?.promoDisplayCap) return 0;
-  return Math.max(0, config.promoDisplayCap - displayedSignupCount);
-};
-
-export const getDefaultPromoSpotsRemaining = (mockSlug: string, realSignupCount = 0) => {
-  const config = getLiveMockSignupConfig(mockSlug);
-  if (!config) return 0;
-  if (config.promoDisplayCap) {
-    return getPromoSpotsRemainingFromDisplay(
-      getDisplayedLiveMockSignupCount(realSignupCount, mockSlug),
-      mockSlug,
-    );
-  }
-  return config.promoMaxRedemptions;
-};
-
-/** Prefer client-side display math so UI stays in sync with pricing.ts before edge deploy. */
+/** Client-side display math so UI stays in sync before edge deploy. Promos are disabled. */
 export const resolveLiveMockSignupDisplay = (realSignupCount: number, mockSlug: string) => ({
   displayedCount: getDisplayedLiveMockSignupCount(realSignupCount, mockSlug),
-  promoSpotsRemaining: getDefaultPromoSpotsRemaining(mockSlug, realSignupCount),
 });
 
-export const SECOND_MOCK_PROMO_CODE = LIVE_MOCK_SIGNUP_CONFIG[SECOND_MOCK_EVENT_SLUG].promoCode;
-export const SECOND_MOCK_PROMO_SPOTS_REMAINING = getDefaultPromoSpotsRemaining(SECOND_MOCK_EVENT_SLUG);
 export const SECOND_MOCK_MIN_DISPLAYED_SIGNUPS =
   LIVE_MOCK_SIGNUP_CONFIG[SECOND_MOCK_EVENT_SLUG].minDisplayedSignups;
 

@@ -74,3 +74,7 @@ Mock 1 and mock 2 use **separate slugs**, storage keys, and papers — never mix
 - [ ] Timer persist blocked until timer hydrated (English)
 - [ ] Submit order: answers upsert → attempt `submitted` → phase change
 - [ ] Timer expiry auto-submit retries on failed save (maths + English)
+
+## Pricing / discount codes
+
+Live mock registration is **full price only** (£14.99). Promo codes (`LEVELFIELD`, `MOCK2`, etc.) are **disabled** — no UI copy, no Stripe `allow_promotion_codes`, webhook rejects any checkout that used a promotion code. Do not re-enable without explicit product sign-off.

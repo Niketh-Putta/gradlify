@@ -57,18 +57,6 @@ async function invokeSignupCount(mockSlug) {
   return json;
 }
 
-async function stripePromoStatus(key, code) {
-  const res = await fetch(`https://api.stripe.com/v1/promotion_codes?code=${encodeURIComponent(code)}&limit=5`, {
-    headers: { Authorization: `Bearer ${key}` },
-  });
-  const json = await res.json();
-  if (!res.ok) throw new Error(JSON.stringify(json));
-  const row = json.data?.find((r) => r.code?.toUpperCase() === code.toUpperCase() && r.active);
-  return row
-    ? { active: true, timesRedeemed: row.times_redeemed ?? 0, id: row.id }
-    : { active: false };
-}
-
 console.log("Live mock payment verification\n");
 
 for (const mockSlug of MOCKS) {
@@ -78,14 +66,14 @@ for (const mockSlug of MOCKS) {
       data.currentPriceGbp === 14.99 &&
       typeof data.count === "number" &&
       typeof data.displayedCount === "number" &&
-      typeof data.promoSpotsRemaining === "number";
+      data.promoCode == null &&
+      data.promoSpotsRemaining === 0;
 
     console.log(`${mockSlug}:`);
     console.log(`  signups (real): ${data.count}`);
     console.log(`  displayed: ${data.displayedCount}`);
     console.log(`  price: £${data.currentPriceGbp}`);
-    console.log(`  promo: ${data.promoCode ?? "none"} (${data.promoSpotsRemaining} checkout slots)`);
-    console.log(`  checkout promo field: ${data.promoSpotsRemaining > 0 ? "enabled" : "full price only"}`);
+    console.log(`  promos: disabled (full price only)`);
     console.log(ok ? "  ✓ edge function OK" : "  ✗ unexpected response shape");
 
     if (!ok) failed = true;
@@ -93,30 +81,6 @@ for (const mockSlug of MOCKS) {
     failed = true;
     console.log(`${mockSlug}: ✗ ${error instanceof Error ? error.message : error}`);
   }
-}
-
-const liveKey = process.env.STRIPE_SECRET_KEY_LIVE || process.env.STRIPE_SECRET_KEY;
-if (liveKey) {
-  for (const [code, slug] of [
-    ["MOCK2", "both_subjects_live_mock_2"],
-    ["LEVELFIELD", "both_subjects_live_mock"],
-  ]) {
-    try {
-      const promo = await stripePromoStatus(liveKey, code);
-      console.log(`\nStripe LIVE promo ${code} (${slug}):`);
-      if (promo.active) {
-        console.log(`  ✓ active, redeemed ${promo.timesRedeemed}x (${promo.id})`);
-      } else {
-        console.log("  ✗ not found or inactive");
-        failed = true;
-      }
-    } catch (error) {
-      failed = true;
-      console.log(`\nStripe LIVE promo ${code}: ✗ ${error instanceof Error ? error.message : error}`);
-    }
-  }
-} else {
-  console.log("\n(stripe live key not in env — skipped Stripe promo check)");
 }
 
 console.log(failed ? "\nFAILED — fix before go-live.\n" : "\nAll payment checks passed.\n");

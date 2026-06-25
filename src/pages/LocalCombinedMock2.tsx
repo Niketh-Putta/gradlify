@@ -26,10 +26,8 @@ import { cn } from "@/lib/utils";
 import {
   formatLiveMockPrice,
   LIVE_MOCK_STANDARD_PRICE_GBP,
-  SECOND_MOCK_MIN_DISPLAYED_SIGNUPS,
-  SECOND_MOCK_PROMO_CODE,
-  SECOND_MOCK_PROMO_SPOTS_REMAINING,
   resolveLiveMockSignupDisplay,
+  SECOND_MOCK_MIN_DISPLAYED_SIGNUPS,
 } from "@/lib/liveMockPricing";
 import { fetchSecondMockSignup, registerForSecondMock } from "@/lib/liveMockRegistration";
 import {
@@ -83,7 +81,6 @@ export default function LocalCombinedMock2() {
   const [registering, setRegistering] = useState(false);
   const [released, setReleased] = useState<boolean>(() => isSecondMockReleased());
   const [signupCount, setSignupCount] = useState(SECOND_MOCK_MIN_DISPLAYED_SIGNUPS);
-  const [promoSpotsRemaining, setPromoSpotsRemaining] = useState(SECOND_MOCK_PROMO_SPOTS_REMAINING);
 
   useEffect(() => {
     void supabase.functions
@@ -92,12 +89,8 @@ export default function LocalCombinedMock2() {
         if (typeof data?.count === "number") {
           const display = resolveLiveMockSignupDisplay(data.count, MOCK_SLUG);
           setSignupCount(display.displayedCount);
-          setPromoSpotsRemaining(display.promoSpotsRemaining);
         } else if (typeof data?.displayedCount === "number") {
           setSignupCount(data.displayedCount);
-          if (typeof data?.promoSpotsRemaining === "number") {
-            setPromoSpotsRemaining(data.promoSpotsRemaining);
-          }
         }
       })
       .catch(() => null);
@@ -300,19 +293,6 @@ export default function LocalCombinedMock2() {
                 <span className="font-black text-orange-700">{signupCount}</span> families have enrolled so far.
               </span>
             </div>
-            {!hasPaidPremiumLiveMockAccess && promoSpotsRemaining > 0 ? (
-              <div className="mt-4 rounded-[14px] border border-orange-200 bg-[linear-gradient(135deg,#fff4e6_0%,#fff_70%)] px-3 py-2.5">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-orange-600 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-white">
-                  <Sparkles className="h-3 w-3" />
-                  Use code {SECOND_MOCK_PROMO_CODE}
-                </span>
-                <p className="mt-2 text-sm leading-6 text-slate-700">
-                  <span className="font-black text-orange-700">{promoSpotsRemaining} more uses</span> of discount code{" "}
-                  <span className="font-black text-slate-950">{SECOND_MOCK_PROMO_CODE}</span> remain. After that,
-                  full price ({formatLiveMockPrice(LIVE_MOCK_STANDARD_PRICE_GBP)}).
-                </p>
-              </div>
-            ) : null}
           </div>
 
           <div className="border-t border-slate-100 px-6 py-6 sm:px-9">

@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { ArrowRight, CalendarClock, CheckCircle2, Clock3, Lock, Sparkles, UsersRound } from "lucide-react";
+import { ArrowRight, CalendarClock, CheckCircle2, Clock3, Lock, UsersRound } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { useMembership } from "@/hooks/useMembership";
@@ -9,12 +9,10 @@ import { PREMIUM_PRICING } from "@/lib/pricing";
 import { cn } from "@/lib/utils";
 import {
   formatLiveMockPrice,
-  getDefaultPromoSpotsRemaining,
   getDisplayedLiveMockSignupCount,
   LIVE_MOCK_STANDARD_PRICE_GBP,
   resolveLiveMockSignupDisplay,
   SECOND_MOCK_MIN_DISPLAYED_SIGNUPS,
-  SECOND_MOCK_PROMO_CODE,
 } from "@/lib/liveMockPricing";
 import {
   COMBINED_MOCK_DISPLAY_TITLE,
@@ -38,8 +36,6 @@ type MockCard = {
 
 type MockCardStats = {
   displayedCount: number;
-  promoCode: string | null;
-  promoSpotsRemaining: number;
 };
 
 /** "Sat 21 Jun" style label for an upcoming mock's open date. */
@@ -82,15 +78,12 @@ function StatusPill({
 function MockExamCard({
   card,
   stats,
-  hasPaidPremiumLiveMockAccess,
 }: {
   card: MockCard;
   stats: MockCardStats;
-  hasPaidPremiumLiveMockAccess: boolean;
 }) {
   const { slug, title, blurb, href, live, opensAt } = card;
   const isMock2 = slug === SECOND_MOCK_EVENT_SLUG;
-  const showPromo = !hasPaidPremiumLiveMockAccess && stats.promoSpotsRemaining > 0 && stats.promoCode;
 
   return (
     <div
@@ -168,30 +161,6 @@ function MockExamCard({
             Free for paid Gradlify Premium members only. 3-day trial accounts and everyone else can reserve a place for{" "}
             {formatLiveMockPrice(LIVE_MOCK_STANDARD_PRICE_GBP)}.
           </p>
-        ) : null}
-
-        {showPromo ? (
-          <div className="mt-4 rounded-[14px] border border-orange-200 bg-[linear-gradient(135deg,#fff4e6_0%,#fff_70%)] px-3 py-2.5">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-orange-600 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-white">
-              <Sparkles className="h-3 w-3" />
-              Use code {stats.promoCode}
-            </span>
-            <p className="mt-2 text-sm leading-6 text-slate-700">
-              {isMock2 ? (
-                <>
-                  <span className="font-black text-orange-700">{stats.promoSpotsRemaining} more uses</span> of discount
-                  code <span className="font-black text-slate-950">{stats.promoCode}</span> remain. After that,
-                  full price ({formatLiveMockPrice(LIVE_MOCK_STANDARD_PRICE_GBP)}).
-                </>
-              ) : (
-                <>
-                  Enter <span className="font-black text-slate-950">{stats.promoCode}</span> at checkout for a discount.
-                  Only <span className="font-black text-orange-700">{stats.promoSpotsRemaining} uses</span> left before
-                  full price.
-                </>
-              )}
-            </p>
-          </div>
         ) : null}
 
         <Button
@@ -290,11 +259,6 @@ const defaultStatsForSlug = (slug: string): MockCardStats => ({
     slug === SECOND_MOCK_EVENT_SLUG
       ? SECOND_MOCK_MIN_DISPLAYED_SIGNUPS
       : getDisplayedLiveMockSignupCount(0, slug),
-  promoCode: slug === SECOND_MOCK_EVENT_SLUG ? SECOND_MOCK_PROMO_CODE : null,
-  promoSpotsRemaining:
-    slug === SECOND_MOCK_EVENT_SLUG
-      ? getDefaultPromoSpotsRemaining(SECOND_MOCK_EVENT_SLUG)
-      : 0,
 });
 
 /**
@@ -340,8 +304,6 @@ export default function LiveMockHub() {
             card.slug,
             {
               displayedCount: display.displayedCount,
-              promoCode: typeof data?.promoCode === "string" ? data.promoCode : defaultStatsForSlug(card.slug).promoCode,
-              promoSpotsRemaining: display.promoSpotsRemaining,
             } satisfies MockCardStats,
           ] as const;
         } catch {
@@ -380,7 +342,6 @@ export default function LiveMockHub() {
               key={card.href}
               card={card}
               stats={statsBySlug[card.slug] ?? defaultStatsForSlug(card.slug)}
-              hasPaidPremiumLiveMockAccess={hasPaidPremiumLiveMockAccess}
             />
           ))}
         </div>

@@ -60,3 +60,4 @@ Synced from Codex knowledge interview. Cursor reads this for all Gradlify work.
 - **Before changing sitting code:** read `docs/LIVE-MOCK-ENGINEERING.md` and run `npm run verify:mock-session`.
 - **Mandatory pattern:** hydrate localStorage once (`useLayoutEffect`), block persist until hydrated, no blocking loaders after registration mid-exam.
 - **Shared helpers:** `src/lib/liveMockSessionGuard.ts`.
+- **Pricing:** Live mocks are **£14.99 full price only** — discount/promo codes (LEVELFIELD, MOCK2) are disabled in UI and Stripe checkout.

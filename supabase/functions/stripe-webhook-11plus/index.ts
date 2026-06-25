@@ -15,7 +15,6 @@ import {
 } from "../shared/stripeConfig.ts";
 import {
   BOTH_SUBJECTS_LIVE_MOCK_SLUG,
-  getLiveMockPromoConfig,
   SECOND_LIVE_MOCK_SLUG,
 } from "../shared/liveMockPromoConfig.ts";
 
@@ -123,25 +122,15 @@ const assertLiveMockPromotionAllowed = async (
   stripe: Stripe,
   session: Stripe.Checkout.Session,
 ) => {
-  const mockSlug =
-    session.metadata?.mock_slug ??
-    session.metadata?.mock_type ??
-    BOTH_SUBJECTS_LIVE_MOCK_SLUG;
-  const promoConfig = getLiveMockPromoConfig(mockSlug);
-  if (!promoConfig) return;
-
   const usedCode = await resolveUsedPromotionCode(stripe, session);
   if (!usedCode) return;
 
-  if (usedCode !== promoConfig.promoCode.toUpperCase()) {
-    logStep('Live mock checkout used disallowed promotion code', {
-      sessionId: session.id,
-      mockSlug,
-      usedCode,
-      allowedCode: promoConfig.promoCode,
-    });
-    throw new Error(`Promotion code ${usedCode} is not valid for this mock.`);
-  }
+  logStep('Live mock checkout used disallowed promotion code', {
+    sessionId: session.id,
+    mockSlug: session.metadata?.mock_slug ?? session.metadata?.mock_type,
+    usedCode,
+  });
+  throw new Error(`Promotion codes are not available for live mock registration.`);
 };
 
 const recordPaidLiveMockSignup = async (session: Stripe.Checkout.Session) => {

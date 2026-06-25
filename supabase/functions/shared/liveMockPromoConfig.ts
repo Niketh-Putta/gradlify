@@ -3,53 +3,37 @@ export const SECOND_LIVE_MOCK_SLUG = "both_subjects_live_mock_2";
 
 export const LIVE_MOCK_STANDARD_PRICE_GBP = 14.99;
 
-export type LiveMockPromoConfig = {
-  promoCode: string;
-  /** Stripe hard cap when not using display-based remaining. */
-  promoMaxRedemptions: number;
-  /** When set, UI/checkout remaining = promoDisplayCap − displayed signup count. */
-  promoDisplayCap?: number;
+/** Display-only signup counters (not promo / discount codes). */
+export type LiveMockSignupDisplayConfig = {
   signupDisplayOffset: number;
   minDisplayedSignups: number;
 };
 
-export const LIVE_MOCK_PROMO_BY_SLUG: Record<string, LiveMockPromoConfig> = {
+export const LIVE_MOCK_SIGNUP_DISPLAY_BY_SLUG: Record<string, LiveMockSignupDisplayConfig> = {
   [BOTH_SUBJECTS_LIVE_MOCK_SLUG]: {
-    promoCode: "LEVELFIELD",
-    promoMaxRedemptions: 3,
     signupDisplayOffset: 55,
     minDisplayedSignups: 76,
   },
   [SECOND_LIVE_MOCK_SLUG]: {
-    promoCode: "MOCK2",
-    promoMaxRedemptions: 50,
-    promoDisplayCap: 50,
     signupDisplayOffset: 17,
     minDisplayedSignups: 44,
   },
 };
 
-export const getLiveMockPromoConfig = (mockSlug: string): LiveMockPromoConfig | null =>
-  LIVE_MOCK_PROMO_BY_SLUG[mockSlug] ?? null;
+export const getLiveMockSignupDisplayConfig = (mockSlug: string): LiveMockSignupDisplayConfig | null =>
+  LIVE_MOCK_SIGNUP_DISPLAY_BY_SLUG[mockSlug] ?? null;
+
+/** @deprecated Promos disabled — always null. */
+export const getLiveMockPromoConfig = (_mockSlug: string): null => null;
 
 export const getDisplayedLiveMockSignupCount = (realCount: number, mockSlug: string): number => {
-  const config = getLiveMockPromoConfig(mockSlug);
+  const config = getLiveMockSignupDisplayConfig(mockSlug);
   if (!config) return realCount;
   return Math.max(config.minDisplayedSignups, realCount + config.signupDisplayOffset);
 };
 
-export const getPromoSpotsRemaining = (timesRedeemed: number, mockSlug: string): number => {
-  const config = getLiveMockPromoConfig(mockSlug);
-  if (!config) return 0;
-  return Math.max(0, config.promoMaxRedemptions - timesRedeemed);
-};
+/** @deprecated Promos disabled — always 0. */
+export const getPromoSpotsRemaining = (_timesRedeemed: number, _mockSlug: string): number => 0;
 
-/** MOCK2: remaining discount uses = cap (50) minus families shown enrolled in UI. */
-export const getPromoSpotsRemainingFromDisplay = (
-  displayedSignupCount: number,
-  mockSlug: string,
-): number => {
-  const config = getLiveMockPromoConfig(mockSlug);
-  if (!config?.promoDisplayCap) return 0;
-  return Math.max(0, config.promoDisplayCap - displayedSignupCount);
-};
+/** @deprecated Promos disabled — always 0. */
+export const getPromoSpotsRemainingFromDisplay = (_displayedSignupCount: number, _mockSlug: string): number => 0;

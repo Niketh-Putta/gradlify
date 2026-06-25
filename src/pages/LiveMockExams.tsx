@@ -27,8 +27,6 @@ import { getDataFastIds } from "@/lib/datafast";
 import {
   formatLiveMockPrice,
   LIVE_MOCK_MIN_DISPLAYED_SIGNUPS,
-  LIVE_MOCK_PROMO_CODE,
-  LIVE_MOCK_PROMO_SPOTS_REMAINING,
   LIVE_MOCK_STANDARD_PRICE_GBP,
 } from "@/lib/liveMockPricing";
 import { COMBINED_MOCK_DISPLAY_TITLE, isCombinedMockReleased } from "@/lib/liveMockCombinedConfig";
@@ -85,7 +83,6 @@ export default function LiveMockExams() {
   const [signup, setSignup] = useState<SignupRow | null>(null);
   const [bothSubjectsSignup, setBothSubjectsSignup] = useState<SignupRow | null>(null);
   const [bothSubjectsSignupCount, setBothSubjectsSignupCount] = useState(MIN_DISPLAYED_BOTH_SUBJECTS_SIGNUPS);
-  const [promoSpotsRemaining, setPromoSpotsRemaining] = useState(LIVE_MOCK_PROMO_SPOTS_REMAINING);
   const [liveMockPriceGbp, setLiveMockPriceGbp] = useState(LIVE_MOCK_STANDARD_PRICE_GBP);
   /** Locks "Start" once an attempt row exists (created on first Start click). */
   const [attemptStatus, setAttemptStatus] = useState<LiveMockAttemptStatus>("none");
@@ -105,9 +102,6 @@ export default function LiveMockExams() {
       setBothSubjectsSignupCount(displayedCount);
       setLiveMockPriceGbp(
         typeof data?.currentPriceGbp === "number" ? data.currentPriceGbp : LIVE_MOCK_STANDARD_PRICE_GBP,
-      );
-      setPromoSpotsRemaining(
-        typeof data?.promoSpotsRemaining === "number" ? data.promoSpotsRemaining : LIVE_MOCK_PROMO_SPOTS_REMAINING,
       );
     } catch (error) {
       console.error("Failed to load live mock signup count", error);
@@ -619,22 +613,6 @@ export default function LiveMockExams() {
             creators for top-school preparation. Paid Gradlify Premium members get this mock included. 3-day free
             trial accounts are excluded from free live-mock access. Everyone else registers with one upfront payment.
           </p>
-          {!hasPremiumLiveMockAccess && (
-            <div className="mt-3 rounded-[14px] border border-orange-200 bg-[linear-gradient(135deg,#fff4e6_0%,#fff_70%)] px-3 py-2.5 shadow-[0_8px_18px_rgba(234,88,12,0.08)]">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-orange-600 px-2.5 py-1 text-[8px] font-black uppercase tracking-[0.14em] text-white">
-                <Sparkles className="h-3 w-3" />
-                Use code {LIVE_MOCK_PROMO_CODE}
-              </span>
-              <p className="mt-2 text-xs leading-5 text-slate-700 sm:text-sm">
-                <span className="font-black text-orange-700">{bothSubjectsSignupCount} spots have already been taken.</span>{" "}
-                Enter <span className="font-black text-slate-950">{LIVE_MOCK_PROMO_CODE}</span> at checkout for a discount.
-              </p>
-              <p className="mt-1.5 text-xs leading-5 text-slate-600 sm:text-sm">
-                Only <span className="font-black text-orange-700">{promoSpotsRemaining} discount spots</span>{" "}
-                remain before the promo code stops working.
-              </p>
-            </div>
-          )}
           <div className="mt-3 inline-flex max-w-full items-center gap-2 rounded-[14px] border border-orange-100 bg-white/80 px-3 py-2 text-xs font-semibold text-slate-700 shadow-[0_8px_18px_rgba(234,88,12,0.07)] sm:text-sm">
             <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-orange-50 text-orange-700">
               <UsersRound className="h-4 w-4" />
@@ -673,12 +651,6 @@ export default function LiveMockExams() {
                     : formatLiveMockPrice(liveMockPriceGbp)}
                 </div>
               </div>
-              {!hasPremiumLiveMockAccess && (
-                <div className="mt-1 inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.08em] text-orange-700">
-                  <Sparkles className="h-3 w-3" />
-                  Use code {LIVE_MOCK_PROMO_CODE} - {promoSpotsRemaining} uses left
-                </div>
-              )}
             </div>
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-amber-50 text-amber-700">
               <CreditCard className="h-5 w-5" />
