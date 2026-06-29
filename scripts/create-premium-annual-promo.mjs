@@ -1,7 +1,9 @@
 #!/usr/bin/env node
 /**
- * Creates Stripe promotion code for Premium annual (£50 off first year).
- * Restricted to checkout totals >= £200 so weekly plans cannot use it.
+ * Premium annual promo: £50 off first paid year.
+ * No minimum cart — annual-only is enforced in create-checkout-11plus
+ * (allow_promotion_codes only when plan is annual). Minimum amount breaks
+ * trial checkouts where total due today is £0.
  */
 import fs from "node:fs";
 import path from "node:path";
@@ -9,7 +11,6 @@ import { fileURLToPath } from "node:url";
 
 const PROMO_CODE = "ANNUAL50";
 const AMOUNT_OFF_PENCE = "5000";
-const MIN_AMOUNT_PENCE = "20000";
 const MAX_REDEMPTIONS = "25";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -56,22 +57,23 @@ async function stripePost(key, pathSuffix, body) {
 async function ensureAnnualPromo(key, mode) {
   const existing = await stripeGet(
     key,
-    `/promotion_codes?code=${encodeURIComponent(PROMO_CODE)}&limit=10`,
+    `/promotion_codes?code=${encodeURIComponent(PROMO_CODE)}&limit=20`,
   );
-  const active = existing?.data?.find((row) => row.code === PROMO_CODE && row.active);
-  if (active) {
-    const couponId = typeof active.coupon === "string" ? active.coupon : active.coupon?.id;
-    const coupon = couponId ? await stripeGet(key, `/coupons/${couponId}`) : null;
+  const rows = existing?.data?.filter((row) => row.code === PROMO_CODE) ?? [];
+  const active = rows.find((row) => row.active);
+
+  if (active && !active.restrictions?.minimum_amount) {
     return {
       mode,
-      status: "exists",
+      status: "exists_ok",
       code: PROMO_CODE,
       promotionCodeId: active.id,
-      couponId,
-      amountOff: coupon?.amount_off,
       timesRedeemed: active.times_redeemed,
-      maxRedemptions: active.max_redemptions,
     };
+  }
+
+  for (const row of rows.filter((r) => r.active)) {
+    await stripePost(key, `/promotion_codes/${row.id}`, { active: "false" });
   }
 
   const coupon = await stripePost(key, "/coupons", {
@@ -87,19 +89,18 @@ async function ensureAnnualPromo(key, mode) {
     coupon: coupon.id,
     code: PROMO_CODE,
     max_redemptions: MAX_REDEMPTIONS,
-    "restrictions[minimum_amount]": MIN_AMOUNT_PENCE,
-    "restrictions[minimum_amount_currency]": "gbp",
     "metadata[plan]": "premium_annual",
   });
 
   return {
     mode,
-    status: "created",
+    status: active ? "recreated" : "created",
     code: PROMO_CODE,
     promotionCodeId: promotionCode.id,
     couponId: coupon.id,
     amountOff: Number(AMOUNT_OFF_PENCE),
     maxRedemptions: Number(MAX_REDEMPTIONS),
+    minimumAmount: null,
   };
 }
 
