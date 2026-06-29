@@ -16,8 +16,8 @@ const jsonResponse = (body: Record<string, unknown>, status = 200) =>
 const readEnv = (name: string) => Deno.env.get(name)?.trim() ?? "";
 
 const PREMIUM_WEEKLY_PRICE_IDS: Record<string, string> = {
-  live: "price_1Tj1g4QYWoowhxMZAH866USC",
-  test: "price_1Tj1g5HZeiDDkqObijVVbv6C",
+  live: "price_1TnilZQYWoowhxMZFRVNfCv2",
+  test: "price_1TnilaHZeiDDkqObfHHcBIwk",
 };
 
 const PREMIUM_ANNUAL_OFFER_PRICE_IDS: Record<string, string> = {

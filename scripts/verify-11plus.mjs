@@ -56,7 +56,7 @@ const [lm, la, tm, ta, pw, pa] = await Promise.all([
   getPrice(liveKey, ULTRA_PRICE_IDS.liveAnnual),
   getPrice(testKey, ULTRA_PRICE_IDS.testMonthly),
   getPrice(testKey, ULTRA_PRICE_IDS.testAnnual),
-  getPrice(liveKey, env.STRIPE_PRICE_11PLUS_WEEKLY_LIVE || 'price_1Tj1g4QYWoowhxMZAH866USC'),
+  getPrice(liveKey, env.STRIPE_PRICE_11PLUS_WEEKLY_LIVE || 'price_1TnilZQYWoowhxMZFRVNfCv2'),
   getPrice(liveKey, env.STRIPE_PRICE_11PLUS_ANNUAL_LIVE || 'price_1TmF6EQYWoowhxMZvthLKq6K'),
 ]);
 
@@ -64,7 +64,7 @@ if (lm) assert('ultra live monthly (24999 pence)', lm.unit_amount === 24999, Str
 if (la) assert('ultra live annual (249999 pence)', la.unit_amount === 249999, String(la.unit_amount));
 if (tm) assert('ultra test monthly', tm.unit_amount === 24999, String(tm.unit_amount));
 if (ta) assert('ultra test annual', ta.unit_amount === 249999, String(ta.unit_amount));
-assert('premium live weekly', pw.unit_amount === 899, String(pw.unit_amount));
+assert('premium live weekly', pw.unit_amount === 999, String(pw.unit_amount));
 assert('premium live annual', pa.unit_amount === 24999, String(pa.unit_amount));
 
 for (const file of ['Srinika_winner.mov', 'Vivaan_winner.mp4', 'videos/exam-readiness.mov']) {
@@ -76,7 +76,7 @@ assert('no duplicate root Vivaan', !fs.existsSync(path.join(root, 'Vivaan_winner
 const anon = env.VITE_SUPABASE_ANON_KEY;
 const base = env.VITE_SUPABASE_URL;
 for (const [plan, expected] of [
-  ['weekly', 899],
+  ['weekly', 999],
   ['yearly', 24999],
 ]) {
   const res = await fetch(`${base}/functions/v1/stripe-price?plan=${plan}`, {
@@ -92,6 +92,7 @@ assert('LandingPage uses shared offer pricing', landing.includes('OfferPrice') &
 assert('LandingPage no stale £99.99', !landing.includes('99.99'));
 
 const pricing = fs.readFileSync(path.join(root, 'src/lib/pricing.ts'), 'utf8');
+assert('pricing weekly £9.99', pricing.includes('weekly: 9.99'));
 assert('pricing annual £249.99', pricing.includes('annual: 249.99'));
 assert('pricing annualPerWeek £4.81', pricing.includes('annualPerWeek: 4.81'));
 

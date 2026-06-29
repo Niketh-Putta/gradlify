@@ -54,8 +54,8 @@ const normalizeEnv = (raw: string) => {
 };
 
 const PREMIUM_WEEKLY_PRICE_IDS = {
-  live: "price_1Tj1g4QYWoowhxMZAH866USC",
-  test: "price_1Tj1g5HZeiDDkqObijVVbv6C",
+  live: "price_1TnilZQYWoowhxMZFRVNfCv2",
+  test: "price_1TnilaHZeiDDkqObfHHcBIwk",
 } as const;
 
 const PREMIUM_ANNUAL_OFFER_PRICE_IDS = {
