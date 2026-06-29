@@ -376,6 +376,7 @@ serve(async (req) => {
         },
       ],
       mode: "subscription",
+      allow_promotion_codes: normalizedPlan === "annual",
       automatic_tax: { enabled: false },
       payment_method_collection: "always",
       custom_text: {
