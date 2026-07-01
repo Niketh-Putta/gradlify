@@ -11,6 +11,18 @@ const sanitizeReturnPath = (value: string) => {
   return value;
 };
 
+const getCheckoutPromoCode = () => {
+  if (typeof window === "undefined") return null;
+  const params = new URLSearchParams(window.location.search);
+  return (
+    params.get("promoCode") ||
+    params.get("promo") ||
+    params.get("discountCode") ||
+    params.get("discount") ||
+    null
+  );
+};
+
 export async function startPremiumCheckout(
   plan: "weekly" | "annual" | "ultra" | "ultra_annual" = "weekly",
   premiumTrack?: PremiumTrack,
@@ -62,6 +74,7 @@ export async function startPremiumCheckout(
       returnTo: sanitizeReturnPath(returnTo),
       premiumTrack: requestedTrack,
       baseUrl: window.location.origin,
+      promoCode: getCheckoutPromoCode(),
     };
     console.log("Supabase edge function payload:", payload);
 

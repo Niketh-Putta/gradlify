@@ -72,6 +72,9 @@ const isMatchingWeeklyPromoCoupon = (coupon: Stripe.Coupon) =>
   coupon.amount_off === WEEKLY_PROMO_DISCOUNT_PENCE &&
   coupon.currency?.toLowerCase() === WEEKLY_PROMO_CURRENCY;
 
+const normalizePromoCode = (value: unknown) =>
+  typeof value === "string" ? value.trim().toLowerCase() : "";
+
 const ensureWeeklyPromoCode = async (stripe: Stripe) => {
   const existingCodes = await stripe.promotionCodes.list({
     code: WEEKLY_PROMO_CODE,
@@ -85,7 +88,7 @@ const ensureWeeklyPromoCode = async (stripe: Stripe) => {
       isMatchingWeeklyPromoCoupon(promotionCode.coupon),
   );
   if (activeCompatibleCode) {
-    return activeCompatibleCode.code ?? WEEKLY_PROMO_CODE;
+    return activeCompatibleCode.id;
   }
 
   const inactiveCompatibleCode = existingCodes.data.find(
@@ -96,7 +99,7 @@ const ensureWeeklyPromoCode = async (stripe: Stripe) => {
   );
   if (inactiveCompatibleCode) {
     const reactivated = await stripe.promotionCodes.update(inactiveCompatibleCode.id, { active: true });
-    return reactivated.code ?? WEEKLY_PROMO_CODE;
+    return reactivated.id;
   }
 
   const conflictingActiveCode = existingCodes.data.find((promotionCode) => promotionCode.active);
@@ -117,7 +120,7 @@ const ensureWeeklyPromoCode = async (stripe: Stripe) => {
     active: true,
   });
 
-  return promotionCode.code ?? WEEKLY_PROMO_CODE;
+  return promotionCode.id;
 };
 
 const customerHasUsedTrial = async (stripe: Stripe, customerId: string) => {
@@ -361,6 +364,7 @@ serve(async (req) => {
       returnTo: rawReturnTo,
       premiumTrack: requestedPremiumTrackRaw,
       baseUrl: clientBaseUrl,
+      promoCode: rawPromoCode,
     } = await req.json();
     const requestedPremiumTrack = normalizePremiumTrack(requestedPremiumTrackRaw);
     if (requestedPremiumTrack && requestedPremiumTrack !== activeTrack) {
@@ -409,11 +413,23 @@ serve(async (req) => {
     if (!priceId) {
       throw new Error(`Missing Stripe price ID for ${normalizedPlan} plan`);
     }
-    logStep("Creating checkout with plan", { plan: normalizedPlan, track: checkoutTrack, priceId: priceId.slice(0, 8) });
-    if (normalizedPlan === "weekly") {
-      const promoCode = await ensureWeeklyPromoCode(stripe);
-      logStep("Weekly promo code ready", { promoCode });
+    const requestedPromoCode = normalizePromoCode(rawPromoCode);
+    let appliedPromotionCodeId: string | null = null;
+    if (requestedPromoCode) {
+      if (requestedPromoCode !== WEEKLY_PROMO_CODE) {
+        throw new Error("This promo code is not valid.");
+      }
+      if (normalizedPlan !== "weekly") {
+        throw new Error(`Promo code "${WEEKLY_PROMO_CODE}" is only valid for weekly subscriptions.`);
+      }
+      appliedPromotionCodeId = await ensureWeeklyPromoCode(stripe);
     }
+    logStep("Creating checkout with plan", {
+      plan: normalizedPlan,
+      track: checkoutTrack,
+      priceId: priceId.slice(0, 8),
+      promoCodeApplied: Boolean(appliedPromotionCodeId),
+    });
 
     const candidateBaseUrl =
       clientBaseUrl ||
@@ -437,7 +453,8 @@ serve(async (req) => {
         },
       ],
       mode: "subscription",
-      allow_promotion_codes: normalizedPlan === "weekly" || normalizedPlan === "annual",
+      allow_promotion_codes: false,
+      ...(appliedPromotionCodeId ? { discounts: [{ promotion_code: appliedPromotionCodeId }] } : {}),
       automatic_tax: { enabled: false },
       payment_method_collection: "always",
       custom_text: {
