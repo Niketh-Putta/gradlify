@@ -171,7 +171,6 @@ export function Settings({ user, onBackToChat, onSignOut }: SettingsProps) {
 
   const [showPremiumOptions, setShowPremiumOptions] = useState(false);
   const [showUltraOptions, setShowUltraOptions] = useState(false);
-  const [weeklyPromoCode, setWeeklyPromoCode] = useState("");
   const [supportRequests, setSupportRequests] = useState<SupportRequest[]>([]);
   const [supportLoading, setSupportLoading] = useState(false);
   const [selectedTrack, setSelectedTrack] = useState<UserTrack>('gcse');
@@ -611,13 +610,10 @@ export function Settings({ user, onBackToChat, onSignOut }: SettingsProps) {
     );
   };
 
-  const handleUpgradeToPremium = async (
-    plan: 'weekly' | 'annual' | 'ultra' | 'ultra_annual',
-    promoCode?: string | null,
-  ) => {
+  const handleUpgradeToPremium = async (plan: 'weekly' | 'annual' | 'ultra' | 'ultra_annual') => {
     setIsCreatingCheckout(true);
     try {
-      await startPremiumCheckout(plan, undefined, plan === 'weekly' ? promoCode : null);
+      await startPremiumCheckout(plan);
     } catch (error) {
       console.error('Checkout error:', error);
       const message = error instanceof Error ? error.message : "Couldn't open checkout page.";
@@ -1049,7 +1045,10 @@ export function Settings({ user, onBackToChat, onSignOut }: SettingsProps) {
               </div>
             </div>
 
-            <div className="rounded-2xl border bg-card p-4 transition-all">
+            <div 
+              onClick={() => { setShowPremiumOptions(false); handleUpgradeToPremium('weekly'); }}
+              className="cursor-pointer rounded-2xl border bg-card hover:bg-muted/50 p-4 transition-all"
+            >
               <h4 className="font-semibold text-base mb-1">Weekly Billing</h4>
               <OfferPrice
                 compact
@@ -1057,28 +1056,6 @@ export function Settings({ user, onBackToChat, onSignOut }: SettingsProps) {
                 currentClassName="text-xl text-foreground"
               />
               <p className="text-xs text-muted-foreground mt-1">Pay as you go, cancel anytime.</p>
-              <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50/70 p-3">
-                <Label htmlFor="settings-weekly-promo" className="text-[10px] font-black uppercase tracking-[0.16em] text-amber-700">
-                  Weekly promo code
-                </Label>
-                <Input
-                  id="settings-weekly-promo"
-                  value={weeklyPromoCode}
-                  onChange={(event) => setWeeklyPromoCode(event.target.value)}
-                  placeholder="20percent"
-                  className="mt-2 h-10 border-amber-200 bg-white font-semibold"
-                />
-                <p className="mt-2 text-[11px] font-semibold text-amber-700">
-                  20percent gives £2 off the first weekly payment only.
-                </p>
-              </div>
-              <Button
-                onClick={() => { setShowPremiumOptions(false); handleUpgradeToPremium('weekly', weeklyPromoCode); }}
-                disabled={isCreatingCheckout}
-                className="mt-3 w-full rounded-xl"
-              >
-                {isCreatingCheckout ? "Loading..." : "Continue weekly"}
-              </Button>
             </div>
           </div>
         </DialogContent>

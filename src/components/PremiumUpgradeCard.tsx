@@ -15,7 +15,6 @@ import { AnnualOfferPrice, OfferPrice } from "@/components/OfferPrice";
 export function PremiumUpgradeCard() {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<'weekly' | 'annual' | 'ultra'>(ULTRA_PLAN_ENABLED ? 'ultra' : 'weekly');
-  const [weeklyPromoCode, setWeeklyPromoCode] = useState("");
   const { tier, isPremium, isUltra, isFounder } = useMembership();
   const sprintCopy = getSprintUpgradeCopy();
 
@@ -27,11 +26,7 @@ export function PremiumUpgradeCard() {
   const handleUpgrade = async () => {
     try {
       setIsLoading(true);
-      await startPremiumCheckout(
-        selectedPlan,
-        undefined,
-        selectedPlan === "weekly" ? weeklyPromoCode : null,
-      );
+      await startPremiumCheckout(selectedPlan);
     } catch (error) {
       console.error('Error creating checkout:', error);
       const message = error instanceof Error ? error.message : 'Failed to start checkout. Please try again.';
@@ -152,24 +147,6 @@ export function PremiumUpgradeCard() {
               </div>
             )}
 
-            {selectedPlan === 'weekly' && (
-              <div className="mb-3 rounded-xl border border-white/25 bg-white/15 p-3">
-                <label htmlFor="upgrade-card-weekly-promo" className="text-[10px] font-black uppercase tracking-[0.16em] text-white/90">
-                  Weekly promo code
-                </label>
-                <input
-                  id="upgrade-card-weekly-promo"
-                  value={weeklyPromoCode}
-                  onChange={(event) => setWeeklyPromoCode(event.target.value)}
-                  placeholder="20percent"
-                  className="mt-2 h-10 w-full rounded-lg border border-white/30 bg-white px-3 text-sm font-semibold text-slate-900 outline-none focus:border-amber-300"
-                />
-                <p className="mt-2 text-[11px] font-semibold text-white/80">
-                  20percent gives £2 off the first weekly payment only.
-                </p>
-              </div>
-            )}
-            
             {(isPremium && selectedPlan !== 'ultra') ? (
               <Button disabled className="w-full bg-white/50 text-foreground font-semibold min-h-[44px] text-responsive-sm" size="lg">
                 <Check className="h-4 w-4 mr-2" />

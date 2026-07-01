@@ -72,9 +72,6 @@ const isMatchingWeeklyPromoCoupon = (coupon: Stripe.Coupon) =>
   coupon.amount_off === WEEKLY_PROMO_DISCOUNT_PENCE &&
   coupon.currency?.toLowerCase() === WEEKLY_PROMO_CURRENCY;
 
-const normalizePromoCode = (value: unknown) =>
-  typeof value === "string" ? value.trim().toLowerCase() : "";
-
 const ensureWeeklyPromoCode = async (stripe: Stripe) => {
   const existingCodes = await stripe.promotionCodes.list({
     code: WEEKLY_PROMO_CODE,
@@ -364,7 +361,6 @@ serve(async (req) => {
       returnTo: rawReturnTo,
       premiumTrack: requestedPremiumTrackRaw,
       baseUrl: clientBaseUrl,
-      promoCode: rawPromoCode,
     } = await req.json();
     const requestedPremiumTrack = normalizePremiumTrack(requestedPremiumTrackRaw);
     if (requestedPremiumTrack && requestedPremiumTrack !== activeTrack) {
@@ -413,22 +409,15 @@ serve(async (req) => {
     if (!priceId) {
       throw new Error(`Missing Stripe price ID for ${normalizedPlan} plan`);
     }
-    const requestedPromoCode = normalizePromoCode(rawPromoCode);
-    let appliedPromotionCodeId: string | null = null;
-    if (requestedPromoCode) {
-      if (requestedPromoCode !== WEEKLY_PROMO_CODE) {
-        throw new Error("This promo code is not valid.");
-      }
-      if (normalizedPlan !== "weekly") {
-        throw new Error(`Promo code "${WEEKLY_PROMO_CODE}" is only valid for weekly subscriptions.`);
-      }
-      appliedPromotionCodeId = await ensureWeeklyPromoCode(stripe);
+    const stripePromotionCodeEntryEnabled = normalizedPlan === "weekly";
+    if (stripePromotionCodeEntryEnabled) {
+      await ensureWeeklyPromoCode(stripe);
     }
     logStep("Creating checkout with plan", {
       plan: normalizedPlan,
       track: checkoutTrack,
       priceId: priceId.slice(0, 8),
-      promoCodeApplied: Boolean(appliedPromotionCodeId),
+      stripePromotionCodeEntryEnabled,
     });
 
     const candidateBaseUrl =
@@ -453,8 +442,7 @@ serve(async (req) => {
         },
       ],
       mode: "subscription",
-      allow_promotion_codes: false,
-      ...(appliedPromotionCodeId ? { discounts: [{ promotion_code: appliedPromotionCodeId }] } : {}),
+      allow_promotion_codes: stripePromotionCodeEntryEnabled,
       automatic_tax: { enabled: false },
       payment_method_collection: "always",
       custom_text: {
