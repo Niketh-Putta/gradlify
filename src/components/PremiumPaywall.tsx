@@ -38,6 +38,7 @@ export function PremiumPaywall({
   
   const [billingCycle, setBillingCycle] = useState<'weekly' | 'annual'>('weekly');
   const [selectedTier, setSelectedTier] = useState<'premium' | 'ultra'>('premium');
+  const [weeklyPromoCode, setWeeklyPromoCode] = useState("");
 
   useEffect(() => {
     if (isFounder && open) {
@@ -60,7 +61,11 @@ export function PremiumPaywall({
     }
 
     try {
-      await startPremiumCheckout(planId);
+      await startPremiumCheckout(
+        planId,
+        undefined,
+        planId === "weekly" ? weeklyPromoCode : null,
+      );
     } catch (error) {
       console.error("Failed to start checkout:", error);
       const message = error instanceof Error ? error.message : "Failed to start checkout. Please try again.";
@@ -204,6 +209,23 @@ export function PremiumPaywall({
           </div>
 
           <div className="mt-8 sm:mt-10 flex flex-col items-center space-y-4 sm:space-y-5">
+            {selectedTier === "premium" && billingCycle === "weekly" && (
+              <div className="w-full max-w-sm rounded-2xl border border-amber-200 bg-amber-50/70 p-3">
+                <label htmlFor="premium-weekly-promo" className="text-[10px] font-black uppercase tracking-[0.18em] text-amber-700">
+                  Weekly promo code
+                </label>
+                <input
+                  id="premium-weekly-promo"
+                  value={weeklyPromoCode}
+                  onChange={(event) => setWeeklyPromoCode(event.target.value)}
+                  placeholder="20percent"
+                  className="mt-2 h-11 w-full rounded-xl border border-amber-200 bg-white px-3 text-sm font-semibold text-slate-900 outline-none focus:border-amber-500"
+                />
+                <p className="mt-2 text-[11px] font-semibold text-amber-700">
+                  20percent gives £2 off the first weekly payment only.
+                </p>
+              </div>
+            )}
             <Button
               onClick={handleUpgrade}
               disabled={isUpgrading}

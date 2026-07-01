@@ -26,6 +26,7 @@ const getCheckoutPromoCode = () => {
 export async function startPremiumCheckout(
   plan: "weekly" | "annual" | "ultra" | "ultra_annual" = "weekly",
   premiumTrack?: PremiumTrack,
+  promoCodeOverride?: string | null,
 ) {
   if (!ULTRA_PLAN_ENABLED && (plan === "ultra" || plan === "ultra_annual")) {
     throw new Error("This plan is not currently available.");
@@ -74,7 +75,7 @@ export async function startPremiumCheckout(
       returnTo: sanitizeReturnPath(returnTo),
       premiumTrack: requestedTrack,
       baseUrl: window.location.origin,
-      promoCode: getCheckoutPromoCode(),
+      promoCode: plan === "weekly" ? promoCodeOverride ?? getCheckoutPromoCode() : null,
     };
     console.log("Supabase edge function payload:", payload);
 
