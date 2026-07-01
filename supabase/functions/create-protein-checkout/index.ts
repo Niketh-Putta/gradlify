@@ -93,7 +93,7 @@ serve(async (req) => {
 
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
-      allow_promotion_codes: true,
+      allow_promotion_codes: false,
       customer_email: user.email ?? undefined,
       client_reference_id: user.id,
       line_items: [buildInlineProteinLineItem(PROTEIN_PREMIUM_PRICE_GBP)],
