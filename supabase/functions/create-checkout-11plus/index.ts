@@ -63,6 +63,63 @@ const PREMIUM_ANNUAL_OFFER_PRICE_IDS = {
   test: "price_1TmF6FHZeiDDkqObwynk4FQi",
 } as const;
 
+const WEEKLY_PROMO_CODE = "20percent";
+const WEEKLY_PROMO_DISCOUNT_PENCE = 200;
+const WEEKLY_PROMO_CURRENCY = "gbp";
+
+const isMatchingWeeklyPromoCoupon = (coupon: Stripe.Coupon) =>
+  coupon.duration === "once" &&
+  coupon.amount_off === WEEKLY_PROMO_DISCOUNT_PENCE &&
+  coupon.currency?.toLowerCase() === WEEKLY_PROMO_CURRENCY;
+
+const ensureWeeklyPromoCode = async (stripe: Stripe) => {
+  const existingCodes = await stripe.promotionCodes.list({
+    code: WEEKLY_PROMO_CODE,
+    limit: 20,
+  });
+
+  const activeCompatibleCode = existingCodes.data.find(
+    (promotionCode) =>
+      promotionCode.active &&
+      promotionCode.coupon &&
+      isMatchingWeeklyPromoCoupon(promotionCode.coupon),
+  );
+  if (activeCompatibleCode) {
+    return activeCompatibleCode.code ?? WEEKLY_PROMO_CODE;
+  }
+
+  const inactiveCompatibleCode = existingCodes.data.find(
+    (promotionCode) =>
+      !promotionCode.active &&
+      promotionCode.coupon &&
+      isMatchingWeeklyPromoCoupon(promotionCode.coupon),
+  );
+  if (inactiveCompatibleCode) {
+    const reactivated = await stripe.promotionCodes.update(inactiveCompatibleCode.id, { active: true });
+    return reactivated.code ?? WEEKLY_PROMO_CODE;
+  }
+
+  const conflictingActiveCode = existingCodes.data.find((promotionCode) => promotionCode.active);
+  if (conflictingActiveCode) {
+    throw new Error(`Promo code "${WEEKLY_PROMO_CODE}" exists with a different Stripe setup.`);
+  }
+
+  const coupon = await stripe.coupons.create({
+    amount_off: WEEKLY_PROMO_DISCOUNT_PENCE,
+    currency: WEEKLY_PROMO_CURRENCY,
+    duration: "once",
+    name: "Weekly first week £2 off",
+    metadata: { gradlify_offer: "weekly_first_week_2gbp_off" },
+  });
+  const promotionCode = await stripe.promotionCodes.create({
+    code: WEEKLY_PROMO_CODE,
+    coupon: coupon.id,
+    active: true,
+  });
+
+  return promotionCode.code ?? WEEKLY_PROMO_CODE;
+};
+
 const customerHasUsedTrial = async (stripe: Stripe, customerId: string) => {
   let startingAfter: string | undefined;
 
@@ -353,6 +410,10 @@ serve(async (req) => {
       throw new Error(`Missing Stripe price ID for ${normalizedPlan} plan`);
     }
     logStep("Creating checkout with plan", { plan: normalizedPlan, track: checkoutTrack, priceId: priceId.slice(0, 8) });
+    if (normalizedPlan === "weekly") {
+      const promoCode = await ensureWeeklyPromoCode(stripe);
+      logStep("Weekly promo code ready", { promoCode });
+    }
 
     const candidateBaseUrl =
       clientBaseUrl ||
@@ -376,7 +437,7 @@ serve(async (req) => {
         },
       ],
       mode: "subscription",
-      allow_promotion_codes: normalizedPlan === "annual",
+      allow_promotion_codes: normalizedPlan === "weekly",
       automatic_tax: { enabled: false },
       payment_method_collection: "always",
       custom_text: {
