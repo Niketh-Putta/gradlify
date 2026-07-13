@@ -26,6 +26,7 @@ const Auth = lazyWithRetry(() => import("@/pages/Auth"));
 const AuthCallback = lazyWithRetry(() => import("@/pages/AuthCallback").then(m => ({ default: m.AuthCallback })));
 const EnglishSplitViewDemo = lazyWithRetry(() => import('@/pages/EnglishSplitViewDemo'));
 const UpdatePassword = lazyWithRetry(() => import('@/pages/UpdatePassword'));
+const ResetConfirm = lazyWithRetry(() => import('@/pages/ResetConfirm'));
 const FoundersCircle = lazyWithRetry(() => import('@/pages/FoundersCircle'));
 const SprintHowItWorks = lazyWithRetry(() => import('@/pages/SprintHowItWorks').then(m => ({ default: m.SprintHowItWorks })));
 const SprintDetails = lazyWithRetry(() => import("./SprintDetails"));
@@ -408,7 +409,9 @@ const Index = () => {
         <Route path="/tools" element={<Tools />} />
         <Route path="/free-resources" element={<Tools />} />
         <Route path="/compare" element={<Compare />} />
-        <Route path="/reset-password" element={renderLanding(<UpdatePassword />)} />
+        <Route path="/auth/reset-confirm" element={<ResetConfirm />} />
+        <Route path="/update-password" element={<UpdatePassword />} />
+        <Route path="/reset-password" element={renderLanding()} />
         <Route path="/founders-circle" element={<FoundersCircle />} />
         <Route path="/sprint" element={<SprintHowItWorks />} />
         <Route path="/sprint-details" element={<SprintDetails />} />

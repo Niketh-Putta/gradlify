@@ -45,6 +45,12 @@ export function AuthCallback() {
           }
 
           if (data.session) {
+            if (type === 'recovery') {
+              toast.success('Reset link verified. Choose a new password.');
+              navigate('/update-password', { replace: true });
+              return;
+            }
+
             await applySignupTrack(data.session.user.id);
             try {
               await claimStoredReferral(data.session.user.created_at);
@@ -86,6 +92,10 @@ export function AuthCallback() {
           console.error('Auth callback error:', error);
           const { data: { session } } = await supabase.auth.getSession();
           if (session) {
+            if (type === 'recovery') {
+              navigate('/update-password', { replace: true });
+              return;
+            }
             if (!redirectAfterAuth()) {
               navigate(getDashboardPath(), { replace: true });
             }
@@ -97,6 +107,12 @@ export function AuthCallback() {
         }
 
         if (data.session) {
+          if (type === 'recovery') {
+            toast.success('Reset link verified. Choose a new password.');
+            navigate('/update-password', { replace: true });
+            return;
+          }
+
           // Ensure profile exists for the user
           const { data: profile } = await supabase
             .from('profiles')

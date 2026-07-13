@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Mail } from "lucide-react";
 import { z } from "zod";
+import { getPasswordResetRedirectUrl } from "@/lib/supabaseAuthHelpers";
 
 type MessageLikeError = {
   message?: unknown;
@@ -61,7 +62,7 @@ export default function ResetPassword() {
       }
 
       const { error } = await supabase.auth.resetPasswordForEmail(normalizedEmail, {
-        redirectTo: `${window.location.origin}/update-password`,
+        redirectTo: getPasswordResetRedirectUrl(),
       });
 
       if (error) throw error;

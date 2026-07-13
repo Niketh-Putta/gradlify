@@ -21,6 +21,7 @@ const NotFound = lazyWithRetry(() => import("./pages/NotFound"));
 const Debug = lazyWithRetry(() => import("./pages/Debug"));
 const ResetPassword = lazyWithRetry(() => import("./pages/ResetPassword"));
 const UpdatePassword = lazyWithRetry(() => import("./pages/UpdatePassword"));
+const ResetConfirm = lazyWithRetry(() => import("./pages/ResetConfirm"));
 const AdminQuestions = lazyWithRetry(() => import("./pages/AdminQuestions"));
 const AdminAnalytics = lazyWithRetry(() => import("./pages/AdminAnalytics"));
 const Tools = lazyWithRetry(() => import("./pages/Tools"));
@@ -62,6 +63,7 @@ const GradlifyAppContent = () => (
                 <Route path="/privacy" element={<Privacy />} />
                 <Route path="/terms" element={<Terms />} />
                 <Route path="/reset-password" element={<ResetPassword />} />
+                <Route path="/auth/reset-confirm" element={<ResetConfirm />} />
                 <Route path="/update-password" element={<UpdatePassword />} />
                 <Route path="/debug/progress" element={<Debug />} />
                 <Route path="/mini-mock" element={<div>Mini-Mock Coming Soon</div>} />

@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
+import { getPasswordResetRedirectUrl } from "@/lib/supabaseAuthHelpers";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -54,14 +55,6 @@ export function ResetPasswordForm({
     if (initialEmail !== undefined) setEmail(initialEmail);
   }, [initialEmail]);
 
-  const redirectTo = useMemo(() => {
-    try {
-      return new URL("/update-password", window.location.origin).toString();
-    } catch {
-      return `${window.location.origin}/update-password`;
-    }
-  }, []);
-
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -101,7 +94,7 @@ export function ResetPasswordForm({
       }
 
       const { error } = await supabase.auth.resetPasswordForEmail(normalizedEmail, {
-        redirectTo,
+        redirectTo: getPasswordResetRedirectUrl(),
       });
 
       if (error) throw error;

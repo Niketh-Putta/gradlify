@@ -8,6 +8,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { toast } from 'sonner';
 import { Loader2, ArrowLeft } from 'lucide-react';
 import { z } from 'zod';
+import {
+  clearAuthParamsFromUrl,
+  establishPasswordRecoverySession,
+} from '@/lib/supabaseAuthHelpers';
 
 const passwordSchema = z.string()
   .min(8, 'Password must be at least 8 characters')
@@ -21,20 +25,28 @@ export default function UpdatePassword() {
   const [confirmPassword, setConfirmPassword] = useState('');
 
   useEffect(() => {
-    const checkAuth = async () => {
-      // Supabase automatically handles hash fragments and sets the session
-      const { data: { session }, error } = await supabase.auth.getSession();
+    let cancelled = false;
 
-      if (error || !session) {
-        toast.error('Invalid or expired reset link');
-        navigate('/reset-password');
+    const checkAuth = async () => {
+      const session = await establishPasswordRecoverySession();
+
+      if (cancelled) return;
+
+      if (!session) {
+        toast.error('Invalid or expired reset link. Request a new one.');
+        clearAuthParamsFromUrl('/reset-password');
+        navigate('/reset-password', { replace: true });
         return;
       }
 
       setIsValidating(false);
     };
 
-    checkAuth();
+    void checkAuth();
+
+    return () => {
+      cancelled = true;
+    };
   }, [navigate]);
 
   const handleUpdatePassword = async (e: React.FormEvent) => {
