@@ -2,6 +2,8 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.56.1';
 import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
 
 const RESET_CONFIRM_URL = 'https://gradlify.com/auth/reset-confirm';
+const DEFAULT_SUPABASE_ANON_KEY =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdrbm5mYmFsaWp4eWtxeWNvcGljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2MzgxMzEsImV4cCI6MjA3MjIxNDEzMX0.nbJ6GgZmJ5ZPiTkYa_Y5C2G6Sep9IF8juXv4uU_CMDU';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -108,7 +110,7 @@ Deno.serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY') || DEFAULT_SUPABASE_ANON_KEY;
     if (!supabaseUrl || !supabaseServiceKey) {
       return jsonResponse({ ok: false, code: 'CONFIG', message: 'Server misconfigured' }, 500);
     }
@@ -154,9 +156,6 @@ Deno.serve(async (req) => {
       await sendRecoveryEmail({ to: email, resetUrl });
     } catch (resendError) {
       console.error('request-password-reset Resend failed, falling back to Supabase recover:', resendError);
-      if (!supabaseAnonKey) {
-        throw resendError;
-      }
       await sendSupabaseRecoveryEmail({
         supabaseUrl,
         anonKey: supabaseAnonKey,
