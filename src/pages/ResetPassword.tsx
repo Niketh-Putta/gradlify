@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Mail } from "lucide-react";
 import { z } from "zod";
-import { getPasswordResetRedirectUrl } from "@/lib/supabaseAuthHelpers";
+import { getPasswordResetRedirectUrl, requestPasswordResetEmail } from "@/lib/supabaseAuthHelpers";
 
 type MessageLikeError = {
   message?: unknown;
@@ -61,11 +61,25 @@ export default function ResetPassword() {
         // If check fails, fall through to privacy-safe reset flow.
       }
 
-      const { error } = await supabase.auth.resetPasswordForEmail(normalizedEmail, {
-        redirectTo: getPasswordResetRedirectUrl(),
-      });
+      let resetSent = false;
+      try {
+        const resetResult = await requestPasswordResetEmail(normalizedEmail);
+        if (resetResult.exists === false || !resetResult.sent) {
+          setNoAccount(true);
+          setEmail(normalizedEmail);
+          toast.error("No account found for this email. You're a new user - create an account.");
+          return;
+        }
+        resetSent = true;
+      } catch {
+        const { error } = await supabase.auth.resetPasswordForEmail(normalizedEmail, {
+          redirectTo: getPasswordResetRedirectUrl(),
+        });
+        if (error) throw error;
+        resetSent = true;
+      }
 
-      if (error) throw error;
+      if (!resetSent) return;
 
       setEmailSent(true);
       setEmail(normalizedEmail);

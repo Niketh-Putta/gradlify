@@ -126,3 +126,36 @@ export async function establishPasswordRecoverySession(
     return null;
   }
 }
+
+type PasswordResetResponse = {
+  ok?: boolean;
+  sent?: boolean;
+  exists?: boolean;
+  code?: string;
+  message?: string;
+};
+
+export async function requestPasswordResetEmail(email: string): Promise<{
+  sent: boolean;
+  exists: boolean | null;
+}> {
+  const normalizedEmail = email.trim().toLowerCase();
+
+  const { data, error } = await supabase.functions.invoke('request-password-reset', {
+    body: { email: normalizedEmail },
+  });
+
+  if (error) {
+    throw error;
+  }
+
+  const payload = (data ?? {}) as PasswordResetResponse;
+  if (!payload.ok) {
+    throw new Error(payload.message || 'Failed to send reset email');
+  }
+
+  return {
+    sent: Boolean(payload.sent),
+    exists: typeof payload.exists === 'boolean' ? payload.exists : null,
+  };
+}

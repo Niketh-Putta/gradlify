@@ -3,7 +3,7 @@ import { z } from "zod";
 import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
-import { getPasswordResetRedirectUrl } from "@/lib/supabaseAuthHelpers";
+import { getPasswordResetRedirectUrl, requestPasswordResetEmail } from "@/lib/supabaseAuthHelpers";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -93,11 +93,30 @@ export function ResetPasswordForm({
         return;
       }
 
-      const { error } = await supabase.auth.resetPasswordForEmail(normalizedEmail, {
-        redirectTo: getPasswordResetRedirectUrl(),
-      });
+      let resetResult: { sent: boolean; exists: boolean | null };
+      try {
+        resetResult = await requestPasswordResetEmail(normalizedEmail);
+      } catch {
+        const { error } = await supabase.auth.resetPasswordForEmail(normalizedEmail, {
+          redirectTo: getPasswordResetRedirectUrl(),
+        });
+        if (error) throw error;
+        resetResult = { sent: true, exists: exists };
+      }
 
-      if (error) throw error;
+      if (resetResult.exists === false) {
+        setEmail(normalizedEmail);
+        setNoAccountEmail(normalizedEmail);
+        toast.error("No account found for this email. You're a new user - create an account.");
+        return;
+      }
+
+      if (!resetResult.sent) {
+        setEmail(normalizedEmail);
+        setNoAccountEmail(normalizedEmail);
+        toast.error("No account found for this email. You're a new user - create an account.");
+        return;
+      }
 
       setEmail(normalizedEmail);
       setEmailSentTo(normalizedEmail);
