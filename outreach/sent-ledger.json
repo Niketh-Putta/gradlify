@@ -1,0 +1,103 @@
+{
+  "version": 1,
+  "lastAudit": null,
+  "kimiAvailable": false,
+  "channels": {
+    "level_field": {
+      "group": "The Level Field",
+      "audience": 450,
+      "knownContext": [
+        "Sprint + Premium already announced to group (do not re-launch)",
+        "Date locked: Sun 14 Jun 4:00-6:30pm",
+        "Poll flow skipped - date pre-confirmed",
+        "Live metrics (Jun 2026): 22 mock enrolled real, 77 displayed, mock cash TBD from Stripe, 3 LEVELFIELD spots left"
+      ],
+      "sends": [
+        {
+          "type": "sprint_launch",
+          "status": "sent",
+          "source": "repo",
+          "note": "Per sent-ledger + level-field-ops"
+        },
+        {
+          "type": "poll",
+          "status": "skipped",
+          "source": "repo",
+          "note": "Date locked; poll not needed"
+        },
+        {
+          "type": "mock_poster",
+          "status": "unknown",
+          "source": "repo",
+          "note": "Kimi audit required - check poster+caption sent"
+        },
+        {
+          "type": "forward_ask",
+          "status": "unknown",
+          "source": "repo"
+        },
+        {
+          "type": "mock_reminder",
+          "status": "not_sent",
+          "source": "repo"
+        },
+        {
+          "type": "spots_fomo",
+          "status": "not_sent",
+          "source": "repo"
+        }
+      ]
+    },
+    "partners": {
+      "tier_a_contacted": true,
+      "tier_a_chased_7jun": true,
+      "calls_booked": 0,
+      "parked_no_reply": ["David (11 Plus Hub)", "Chris (Eleven Plus Success)"],
+      "do_not_contact": [
+        "Sutton 11 Plus",
+        "Robert Lomax",
+        "Sassy"
+      ],
+      "notes": "Sassy asked to stop contact. David + Chris never replied to slot emails — no more chase until inbound. Cecile only if she messages re login.",
+      "wave1_cold_sent": 7,
+      "wave2_cold_sent": 3
+    },
+    "distribution": {
+      "plan": "outreach/execute/DISTRIBUTION-6DAY.md",
+      "paying_subs_referral_dm": false,
+      "paying_subs_targets": [
+        "pavan.nov14@gmail.com",
+        "vineela.angel@gmail.com",
+        "harinishuj@gmail.com",
+        "vivek.botcha@gmail.com"
+      ],
+      "trialing_targets": ["hhspk@yahoo.com", "avikvara4@gmail.com"],
+      "personal_gcs": [],
+      "fb_groups_posted": [],
+      "fb_paid_post_pending": true,
+      "fb_paid_post_files": "outreach/fb/paid-group-admin-email.txt + paid-group-post.txt",
+      "mock_buyer_referral_dm": false,
+      "fb_reminder": false
+    }
+  },
+  "nextAction": {
+    "channel": "level_field",
+    "action": "fomo_reframe_post",
+    "steps": [
+      "Optional 15s voice: outreach/wa/level-field-fomo-voice-note.txt",
+      "Post outreach/wa/level-field-fomo-post.txt (NOT mock-spots-reminder — new angle)",
+      "DM within 2h everyone who replies LEVELFIELD with checkout link + code",
+      "90 min DM sweep on existing threads — warmer than group spam"
+    ],
+    "doNot": [
+      "Sassy",
+      "David",
+      "Chris",
+      "partner_emails",
+      "poll",
+      "sprint_launch"
+    ]
+  },
+  "auditNote": "Browser automation PAUSED — do not open Gmail or Gradlify via Kimi until Niketh says resume.",
+  "browserAutomationPaused": true
+}

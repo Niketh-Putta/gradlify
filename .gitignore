@@ -41,3 +41,4 @@ supabase/.temp/
 tmp/
 src/assets/notes section.mov
 public/sprint-mock.png
+__pycache__/

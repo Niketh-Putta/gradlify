@@ -7,9 +7,13 @@ alwaysApply: true
 
 Niketh wants partnership Gmail replies handled **automatically** by the agent.
 
+## PAUSE CHECK (run first)
+
+If `outreach/BROWSER-AUTOMATION-PAUSED.json` has `"paused": true`, **do not** run any Kimi script, open Gmail, or open Gradlify in the browser. Niketh asked to stop continuous tab opening.
+
 ## When to run (no permission needed)
 
-Run at the end of any turn that touches outreach, Block 2, partners, or inbox - and at session start if Kimi may be up:
+Only when pause file is absent or `"paused": false`:
 
 ```bash
 python3 scripts/gradlify-email-agent.py --send --limit 10

@@ -1,0 +1,15 @@
+{
+  "paused": true,
+  "pausedAt": "2026-06-09",
+  "reason": "Niketh asked to stop agents continuously opening Gmail and Gradlify in Atlas.",
+  "blockedActions": [
+    "gradlify-email-agent.py",
+    "partner-reply-agent.py",
+    "kimi-state-audit.py",
+    "dm-sweep-agent.py",
+    "marketing-daily-ops.py browser steps",
+    "kimi-yc-startup-school-apply.py",
+    "any Kimi navigate to mail.google.com or gradlify.com unless Niketh explicitly asks"
+  ],
+  "resumeWhen": "Niketh says resume browser automation"
+}
