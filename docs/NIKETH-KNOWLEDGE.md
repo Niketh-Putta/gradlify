@@ -15,9 +15,12 @@ Synced from Codex knowledge interview. Cursor reads this for all Gradlify work.
 - Founder edge: you recently got into top schools via 11+.
 
 ## Numbers (baseline)
-- ~**£121 MRR** → target **£2k @ 3mo**, **£10k @ 6mo**.
-- 5 × £20/mo + 1 annual (Vivek Botcha, £250/yr).
-- Pricing in wild: £20/mo, £200/yr annual; paid mock was £9.99 (prod now £10).
+- **Always refresh:** `python3 scripts/fetch-metrics-snapshot.py` (do not trust stale docs).
+- **~£120 MRR** (5×£19.99/mo + 1 annual £250/yr → ~£21/mo equiv). **Mock ticket cash is separate** (one-off, not MRR).
+- **6 paying** (5 Premium monthly + 1 Premium annual) + **3 trialing**. Run `python3 scripts/fetch-metrics-snapshot.py`.
+- **22 mock enrolled** (includes free Premium seats). **Mock cash = Stripe checkout total only** (deploy `revenue-audit` for exact £). Price **£19.99** + **LEVELFIELD** promo.
+- **Premium:** **£19.99/mo** or **annual** (~£200 list today; legacy **£250/yr** — annualize for MRR, never count as £250/mo).
+- **Mock:** one-off **£9.99–£19.99** (promo-dependent) — track as mock cash, not subscription MRR.
 - **10 hrs/day** on Gradlify. Priority: **cash now**. SaaS only.
 
 ## Acquisition reality

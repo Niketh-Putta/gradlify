@@ -1,0 +1,85 @@
+{
+  "version": 1,
+  "lastAudit": null,
+  "kimiAvailable": false,
+  "channels": {
+    "level_field": {
+      "group": "The Level Field",
+      "audience": 450,
+      "knownContext": [
+        "Sprint + Premium already announced to group (do not re-launch)",
+        "Date locked: Sun 14 Jun 4:00-6:30pm",
+        "Poll flow skipped - date pre-confirmed",
+        "Live metrics (Jun 2026): 22 mock enrolled real, 77 displayed, mock cash TBD from Stripe, 3 LEVELFIELD spots left"
+      ],
+      "sends": [
+        {
+          "type": "sprint_launch",
+          "status": "sent",
+          "source": "repo",
+          "note": "Per progress/data.js + level-field-ops"
+        },
+        {
+          "type": "poll",
+          "status": "skipped",
+          "source": "repo",
+          "note": "Date locked; poll not needed"
+        },
+        {
+          "type": "mock_poster",
+          "status": "unknown",
+          "source": "repo",
+          "note": "Kimi audit required - check poster+caption sent"
+        },
+        {
+          "type": "forward_ask",
+          "status": "unknown",
+          "source": "repo"
+        },
+        {
+          "type": "mock_reminder",
+          "status": "not_sent",
+          "source": "repo"
+        },
+        {
+          "type": "spots_fomo",
+          "status": "not_sent",
+          "source": "repo"
+        }
+      ]
+    },
+    "partners": {
+      "tier_a_contacted": true,
+      "tier_a_chased_7jun": true,
+      "calls_booked": 0,
+      "wave1_cold_sent": 7,
+      "wave2_cold_sent": 3,
+      "do_not_contact": [
+        "Sutton 11 Plus",
+        "Robert Lomax"
+      ]
+    },
+    "distribution": {
+      "paying_subs_referral_dm": false,
+      "mock_buyer_referral_dm": false,
+      "personal_gc_posts": false,
+      "fb_reminder": false
+    }
+  },
+  "nextAction": {
+    "channel": "level_field",
+    "action": "viral_sequence",
+    "steps": [
+      "15s voice note (outreach/wa/mock-viral-share-playbook.md)",
+      "Poster PNG + outreach/wa/mock-gc-caption.txt",
+      "2 min later: outreach/wa/mock-forward-ask.txt"
+    ],
+    "doNot": [
+      "poll",
+      "sprint_launch",
+      "y4y5y6",
+      "mock-14-june-announce.txt"
+    ]
+  },
+  "auditNote": "Kimi down - seeded from repo. Re-run when WebBridge is up."
+}

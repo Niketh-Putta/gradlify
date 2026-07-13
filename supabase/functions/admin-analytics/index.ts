@@ -145,7 +145,7 @@ const nameFromEmail = (email: string | null | undefined) => {
     .join(' ');
 };
 
-const fetchElevenPlusStripeSubscriptions = async (stripe: Stripe, elevenPlusPrices: string[]) => {
+const fetchStripeSubscriptionsByPrices = async (stripe: Stripe, priceIds: string[]) => {
   const rows: Stripe.Subscription[] = [];
   let startingAfter: string | undefined;
 
@@ -158,7 +158,7 @@ const fetchElevenPlusStripeSubscriptions = async (stripe: Stripe, elevenPlusPric
     });
 
     const matched = subscriptions.data.filter((subscription: Stripe.Subscription) =>
-      subscription.items.data.some((item: Stripe.SubscriptionItem) => elevenPlusPrices.includes(item.price.id))
+      subscription.items.data.some((item: Stripe.SubscriptionItem) => priceIds.includes(item.price.id))
     );
     rows.push(...matched);
 
@@ -167,6 +167,50 @@ const fetchElevenPlusStripeSubscriptions = async (stripe: Stripe, elevenPlusPric
   }
 
   return rows;
+};
+
+const isElevenPlusAttributedPrice = (
+  priceId: string | undefined,
+  elevenPlusPrices: string[],
+  legacyOtherPrices: string[],
+) => Boolean(priceId && (elevenPlusPrices.includes(priceId) || legacyOtherPrices.includes(priceId)));
+
+const BOTH_SUBJECTS_LIVE_MOCK_SLUG = 'both_subjects_live_mock';
+
+const monthlyEquivalentGbp = (subscription: Stripe.Subscription) => {
+  const price = subscription.items.data[0]?.price;
+  if (!price?.unit_amount) return 0;
+  const amount = price.unit_amount / 100;
+  const interval = price.recurring?.interval;
+  if (interval === 'year') return amount / 12;
+  return amount;
+};
+
+const fetchLiveMockCheckoutRevenue = async (stripe: Stripe) => {
+  let totalGbp = 0;
+  let paidSessions = 0;
+  let startingAfter: string | undefined;
+
+  for (let page = 0; page < 20; page += 1) {
+    const sessions = await stripe.checkout.sessions.list({
+      limit: STRIPE_PAGE_SIZE,
+      ...(startingAfter ? { starting_after: startingAfter } : {}),
+    });
+
+    for (const session of sessions.data) {
+      const isLiveMock =
+        session.metadata?.mock_slug === BOTH_SUBJECTS_LIVE_MOCK_SLUG ||
+        session.metadata?.mock_type === BOTH_SUBJECTS_LIVE_MOCK_SLUG;
+      if (!isLiveMock || session.payment_status !== 'paid') continue;
+      totalGbp += (session.amount_total ?? 0) / 100;
+      paidSessions += 1;
+    }
+
+    if (!sessions.has_more || sessions.data.length === 0) break;
+    startingAfter = sessions.data[sessions.data.length - 1].id;
+  }
+
+  return { totalGbp, paidSessions };
 };
 
 Deno.serve(async (req) => {
@@ -217,11 +261,12 @@ Deno.serve(async (req) => {
       practice7dCount,
       practice30dCount,
       priceResponse,
+      liveMockSignupSummary,
     ] = await Promise.all([
       supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('track', '11plus'),
-      supabase.from('profiles').select('id, user_id, full_name, plan, premium_track, onboarding, created_at, stripe_customer_id_live, stripe_subscription_id_live, stripe_subscription_status, cancel_at_period_end, current_period_end', { count: 'exact' })
+      supabase.from('profiles').select('id, user_id, full_name, plan, premium_track, track, subscription_interval, onboarding, created_at, stripe_customer_id_live, stripe_subscription_id_live, stripe_subscription_status, cancel_at_period_end, current_period_end', { count: 'exact' })
         .not('stripe_subscription_id_live', 'is', null)
-        .in('premium_track', ['eleven_plus', '11plus']),
+        .eq('track', '11plus'),
       supabase.from('profiles').select('id, user_id, full_name, onboarding, created_at, stripe_customer_id_live, stripe_customer_id_test, premium_track, track').eq('track', '11plus').limit(2000),
       supabase.from('study_sessions').select('id, profiles!inner(track)', { count: 'exact', head: true }).eq('profiles.track', '11plus'),
       supabase.from('mock_attempts').select('id', { count: 'exact', head: true }).eq('status', 'completed').eq('track', '11plus'),
@@ -238,6 +283,10 @@ Deno.serve(async (req) => {
       supabase.from('practice_results').select('id', { count: 'exact', head: true }).gte('created_at', start7dIso).eq('track', '11plus'),
       supabase.from('practice_results').select('id', { count: 'exact', head: true }).gte('created_at', start30dIso).eq('track', '11plus'),
       supabase.functions.invoke('stripe-price'),
+      supabase
+        .from('live_mock_exam_signups')
+        .select('id', { count: 'exact', head: true })
+        .eq('mock_slug', BOTH_SUBJECTS_LIVE_MOCK_SLUG),
     ]);
 
     const [activityRows, signupRows, practiceRows, questionEvents] = await Promise.all([
@@ -371,7 +420,10 @@ Deno.serve(async (req) => {
     const minutesPrev7d = prev7.reduce((sum, point) => sum + point.minutes, 0);
 
     const stripeSubscriptionsById = new Map<string, Stripe.Subscription>();
+    const legacyOtherPriceIds = new Set<string>();
     let exactMrr = 0;
+    let liveMockRevenueGbp = 0;
+    let liveMockPaidSessions = 0;
     try {
       const stripeSecret = Deno.env.get('STRIPE_SECRET_KEY_LIVE') || Deno.env.get('STRIPE_SECRET_KEY');
       if (stripeSecret) {
@@ -384,17 +436,27 @@ Deno.serve(async (req) => {
           priceIds.eleven_plus.ultra,
           priceIds.eleven_plus.ultra_annual
         ].filter((priceId): priceId is string => Boolean(priceId));
-        const subs = await fetchElevenPlusStripeSubscriptions(stripe, elevenPlusPrices);
+        const legacyOtherPrices = [
+          priceIds.gcse.monthly,
+          priceIds.gcse.annual,
+        ].filter((priceId): priceId is string => Boolean(priceId));
+        legacyOtherPrices.forEach((priceId) => legacyOtherPriceIds.add(priceId));
+        const attributedPrices = [...new Set([...elevenPlusPrices, ...legacyOtherPrices])];
+        const subs = await fetchStripeSubscriptionsByPrices(stripe, attributedPrices);
 
         subs.forEach(sub => {
           stripeSubscriptionsById.set(sub.id, sub);
           if (sub.status === 'active' && !sub.cancel_at_period_end && sub.items.data.length > 0) {
             const priceId = sub.items.data[0].price.id;
-            if (elevenPlusPrices.includes(priceId)) {
-              exactMrr += (sub.items.data[0].price.unit_amount || 0) / 100;
+            if (isElevenPlusAttributedPrice(priceId, elevenPlusPrices, legacyOtherPrices)) {
+              exactMrr += monthlyEquivalentGbp(sub);
             }
           }
         });
+
+        const mockRevenue = await fetchLiveMockCheckoutRevenue(stripe);
+        liveMockRevenueGbp = mockRevenue.totalGbp;
+        liveMockPaidSessions = mockRevenue.paidSessions;
       }
     } catch (err) {
       console.error('Stripe exact MRR match failed', err);
@@ -441,13 +503,34 @@ Deno.serve(async (req) => {
           }
         } catch (err) { /* intentionally left empty */ }
       }
+
+      const stripePrice = stripeSubscription?.items.data[0]?.price;
+      const stripeInterval = stripePrice?.recurring?.interval === 'year' ? 'annual' : 'monthly';
+      const profileInterval = (p as { subscription_interval?: string | null }).subscription_interval;
+      const billingInterval =
+        profileInterval === 'annual' || profileInterval === 'monthly'
+          ? profileInterval
+          : stripeInterval;
+      const monthlyAmountGbp = stripeSubscription ? monthlyEquivalentGbp(stripeSubscription) : null;
+      const annualCashGbp =
+        billingInterval === 'annual' && stripePrice?.unit_amount
+          ? stripePrice.unit_amount / 100
+          : null;
+      const billingTier =
+        billingInterval === 'annual'
+          ? 'premium_annual'
+          : 'premium_monthly';
       
       return {
         id: p.id,
         name: getProfileName(p) || getAuthUserName(authUserById.get(p.user_id)) || nameFromEmail(email),
         email,
-        plan: p.plan || "premium",
-        track: p.premium_track || "unknown",
+        plan: billingInterval === 'annual' ? 'premium_annual' : (p.plan || 'premium_monthly'),
+        track: p.premium_track === 'gcse' ? 'eleven_plus_legacy' : (p.premium_track || p.track || "unknown"),
+        billing_tier: billingTier,
+        billing_interval: billingInterval,
+        monthly_amount_gbp: monthlyAmountGbp,
+        annual_cash_gbp: annualCashGbp,
         created_at: p.created_at,
         subscription_id: p.stripe_subscription_id_live,
         status: stripeSubscription?.status || p.stripe_subscription_status || 'unknown',
@@ -466,6 +549,7 @@ Deno.serve(async (req) => {
       .filter((subscription) => hasDefaultPaymentMethod(subscription))
       .map((subscription) => {
         const price = subscription.items.data[0]?.price;
+        const priceId = price?.id;
         const interval = price?.recurring?.interval === 'year' ? 'annual' : 'monthly';
         const customer = subscription.customer as Stripe.Customer | string | null;
         const customerId = typeof customer === 'string' ? customer : customer?.id ?? null;
@@ -475,13 +559,14 @@ Deno.serve(async (req) => {
           (customerId ? profileByCustomerId.get(customerId) : null) ||
           (authUser ? profileByUserId.get(authUser.id) : null) ||
           null;
+        const isLegacyOther = Boolean(priceId && legacyOtherPriceIds.has(priceId));
 
         return {
           id: subscription.id,
           name: getCustomerName(subscription) || getProfileName(matchedProfile) || getAuthUserName(authUser) || nameFromEmail(email),
           email: email || "unknown",
           plan: price?.metadata?.plan || (interval === 'annual' ? 'premium annual' : 'premium'),
-          track: 'eleven_plus',
+          track: isLegacyOther ? 'eleven_plus_legacy' : 'eleven_plus',
           created_at: toIsoFromStripeSeconds(subscription.start_date) || toIsoFromStripeSeconds(subscription.created) || new Date().toISOString(),
           subscription_id: subscription.id,
           status: subscription.status || 'unknown',
@@ -499,6 +584,31 @@ Deno.serve(async (req) => {
     const activeElevenPlusSubscribers = payingUsersDetails.filter(
       (user) => user.status === 'active' && !user.cancel_at_period_end
     ).length;
+    const trialingElevenPlusSubscribers = payingUsersDetails.filter(
+      (user) => user.status === 'trialing'
+    ).length;
+    const monthlyPaying = payingUsersDetails.filter(
+      (user) =>
+        user.status === 'active' &&
+        !user.cancel_at_period_end &&
+        user.billing_tier === 'premium_monthly'
+    ).length;
+    const annualPaying = payingUsersDetails.filter(
+      (user) =>
+        user.status === 'active' &&
+        !user.cancel_at_period_end &&
+        user.billing_tier === 'premium_annual'
+    ).length;
+    const legacyOtherPaying = payingUsersDetails.filter(
+      (user) =>
+        user.status === 'active' &&
+        !user.cancel_at_period_end &&
+        user.track === 'eleven_plus_legacy'
+    ).length;
+    const liveMockEnrolled = liveMockSignupSummary.count ?? 0;
+    const liveMockSignupDisplayOffset = Number(Deno.env.get('LIVE_MOCK_SIGNUP_DISPLAY_OFFSET') || '49');
+    const liveMockMinDisplayed = Number(Deno.env.get('LIVE_MOCK_MIN_DISPLAYED_SIGNUPS') || '68');
+    const liveMockDisplayedEnrolled = Math.max(liveMockMinDisplayed, liveMockEnrolled + liveMockSignupDisplayOffset);
 
     return new Response(
       JSON.stringify({
@@ -562,12 +672,32 @@ Deno.serve(async (req) => {
               currency: 'gbp',
               interval: 'month',
             },
+            subscriptions: {
+              activePaying: activeElevenPlusSubscribers,
+              trialing: trialingElevenPlusSubscribers,
+              premiumFunnel: activeElevenPlusSubscribers + trialingElevenPlusSubscribers,
+              monthlyPaying,
+              annualPaying,
+              legacyOtherPaying,
+              stripeLinkedTotal: payingUsersDetails.length,
+            },
+            liveMock: {
+              slug: BOTH_SUBJECTS_LIVE_MOCK_SLUG,
+              enrolledReal: liveMockEnrolled,
+              enrolledDisplayed: liveMockDisplayedEnrolled,
+              paidCheckoutSessions: liveMockPaidSessions,
+              revenueGbp: Math.round(liveMockRevenueGbp * 100) / 100,
+              currentPriceGbp: 19.99,
+              promoCode: 'LEVELFIELD',
+            },
           },
           totals: {
             totalSignups: profileSummary.count ?? 0,
             premiumSignups: activeElevenPlusSubscribers,
+            trialingSubscribers: trialingElevenPlusSubscribers,
             sessionCount: sessionSummary.count ?? 0,
             mockAttempts: mockSummary.count ?? 0,
+            liveMockEnrolled,
           },
           payingUsers: payingUsersDetails,
           startDate,
