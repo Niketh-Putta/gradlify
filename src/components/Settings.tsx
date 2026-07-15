@@ -57,13 +57,12 @@ const EditOnboardingDetailsModal = React.lazy(() =>
 );
 
 import { startPremiumCheckout } from "@/lib/checkout";
-import { PREMIUM_PRICING, ULTRA_PRICING } from "@/lib/pricing";
+import { PREMIUM_PRICING, ULTRA_PRICING, formatGbp } from "@/lib/pricing";
 import { AI_FEATURE_ENABLED, ULTRA_PLAN_ENABLED } from "@/lib/featureFlags";
 import { UserTrack } from "@/lib/track";
 import { getTrackCopy } from "@/lib/trackContent";
 import { isAbortLikeError } from "@/lib/errors";
 import { ReferralCard } from "@/components/ReferralCard";
-import { AnnualOfferPrice, OfferPrice } from "@/components/OfferPrice";
 
 interface Profile {
   id: string;
@@ -199,7 +198,7 @@ export function Settings({ user, onBackToChat, onSignOut }: SettingsProps) {
   const isSupportAdmin = user?.email?.toLowerCase() === 'team@gradlify.com';
   const premiumSettingsTitle = "Upgrade to Gradlify Premium";
   const premiumSettingsDescription =
-    "Choose weekly or annual billing to unlock Premium access for your current track.";
+    "One payment for lifetime Gradlify Premium on your current track.";
   const premiumSettingsCta = "Upgrade to Gradlify Premium";
   const TRACK_FEATURES: Record<UserTrack, string[]> = {
     gcse: [
@@ -610,10 +609,10 @@ export function Settings({ user, onBackToChat, onSignOut }: SettingsProps) {
     );
   };
 
-  const handleUpgradeToPremium = async (plan: 'weekly' | 'annual' | 'ultra' | 'ultra_annual') => {
+  const handleUpgradeToPremium = async (plan: 'lifetime' | 'weekly' | 'annual' | 'ultra' | 'ultra_annual' = 'lifetime') => {
     setIsCreatingCheckout(true);
     try {
-      await startPremiumCheckout(plan);
+      await startPremiumCheckout(plan === 'ultra' || plan === 'ultra_annual' ? plan : 'lifetime');
     } catch (error) {
       console.error('Checkout error:', error);
       const message = error instanceof Error ? error.message : "Couldn't open checkout page.";
@@ -904,29 +903,24 @@ export function Settings({ user, onBackToChat, onSignOut }: SettingsProps) {
                           </h3>
                           <p className="text-xs text-slate-400 mt-1">Foundational mastery and readiness tools.</p>
                         </div>
-                        <OfferPrice
-                          compact
-                          align="right"
-                          tone="dark"
-                          suffix="/week"
-                          currentClassName="text-lg text-white"
-                          originalClassName="text-slate-300"
-                          labelClassName="border-white/25 bg-white/10 text-white text-[8px] tracking-[0.08em]"
-                        />
+                        <div className="text-right mt-1">
+                          <span className="text-xl font-bold text-white">{formatGbp(PREMIUM_PRICING.lifetime)}</span>
+                          <span className="text-[10px] text-slate-400 block mt-0.5 font-medium tracking-wide">lifetime · one-time</span>
+                        </div>
                       </div>
                       
                       <ul className="space-y-2 mb-6 text-xs text-slate-300 whitespace-normal">
                         <li className="flex gap-2 items-start"><Shield className="h-3.5 w-3.5 text-primary shrink-0 mt-[2px]" /> <span>Unlimited mock exams and challenge questions</span></li>
                         <li className="flex gap-2 items-start"><Shield className="h-3.5 w-3.5 text-primary shrink-0 mt-[2px]" /> <span>Unlimited mock exam size</span></li>
-                        <li className="flex gap-2 items-start"><Shield className="h-3.5 w-3.5 text-primary shrink-0 mt-[2px]" /> <span>Weekly content handwritten by tutor and founder team</span></li>
+                        <li className="flex gap-2 items-start"><Shield className="h-3.5 w-3.5 text-primary shrink-0 mt-[2px]" /> <span>Lifetime Premium — pay once, keep access</span></li>
                       </ul>
 
                       <Button 
-                        onClick={() => setShowPremiumOptions(true)}
+                        onClick={() => handleUpgradeToPremium('lifetime')}
                         disabled={isCreatingCheckout}
                         className="w-full bg-white text-slate-900 hover:bg-slate-100 rounded-xl h-10 text-sm font-semibold transition-all"
                       >
-                        {isCreatingCheckout ? "Loading..." : "Get Premium"}
+                        {isCreatingCheckout ? "Loading..." : "Get Lifetime Premium"}
                       </Button>
                     </div>
                   </div>
@@ -970,17 +964,25 @@ export function Settings({ user, onBackToChat, onSignOut }: SettingsProps) {
                    <div className="absolute top-0 right-0 w-48 h-48 bg-primary/5 blur-[40px] rounded-full translate-x-12 -translate-y-12 pointer-events-none transition-transform group-hover:scale-110 duration-700" />
                    <div className="relative z-10 space-y-5">
                      <div>
-                       <h3 className="text-lg font-bold text-foreground mb-1">Active Subscription</h3>
+                       <h3 className="text-lg font-bold text-foreground mb-1">
+                         {profile?.subscription_interval === 'lifetime' || profile?.plan === 'premium_lifetime'
+                           ? 'Lifetime Premium'
+                           : 'Active Subscription'}
+                       </h3>
                        <p className="text-sm text-muted-foreground font-medium">
-                         You are currently on the <strong className="text-primary">{accessLabel}</strong> tier.
+                         {profile?.subscription_interval === 'lifetime' || profile?.plan === 'premium_lifetime'
+                           ? 'You have lifetime Gradlify Premium access. No renewals.'
+                           : <>You are currently on the <strong className="text-primary">{accessLabel}</strong> tier.</>}
                        </p>
                      </div>
+                     {profile?.subscription_interval === 'lifetime' || profile?.plan === 'premium_lifetime' ? null : (
                      <Button 
                        onClick={handleManageSubscription}
                        className="w-full h-11 rounded-xl font-semibold shadow-sm transition-all"
                      >
                        Manage Billing
                      </Button>
+                     )}
                    </div>
                 </div>
               )}
@@ -1020,42 +1022,23 @@ export function Settings({ user, onBackToChat, onSignOut }: SettingsProps) {
       <Dialog open={showPremiumOptions} onOpenChange={setShowPremiumOptions}>
         <DialogContent className="sm:max-w-[425px] rounded-2xl">
           <DialogHeader>
-            <DialogTitle>Choose Your Premium Plan</DialogTitle>
+            <DialogTitle>Gradlify Premium Lifetime</DialogTitle>
             <DialogDescription>
-              Select the billing cycle that works best for you. Annual is a limited time offer just for you.
+              One payment of {formatGbp(PREMIUM_PRICING.lifetime)} for lifetime access. No weekly or annual renewals.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4 mt-2">
             <div 
-              onClick={() => { setShowPremiumOptions(false); handleUpgradeToPremium('annual'); }}
+              onClick={() => { setShowPremiumOptions(false); void handleUpgradeToPremium('lifetime'); }}
               className="group cursor-pointer rounded-2xl border-2 border-primary/20 hover:border-primary p-4 transition-all relative overflow-hidden"
             >
-              <div className="absolute top-0 right-0 bg-primary text-primary-foreground text-[10px] font-bold px-2 py-1 rounded-bl-xl z-10">
-                SAVE £{PREMIUM_PRICING.annualSavings}
-              </div>
-              <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="relative z-10">
-                <h4 className="font-bold text-lg mb-1">Annual Billing</h4>
-                <AnnualOfferPrice
-                  compact
-                  showAnnualBilling
-                  suffix="/week"
-                  currentClassName="text-2xl text-foreground"
-                />
+                <h4 className="font-bold text-lg mb-1">Lifetime Premium</h4>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-2xl font-bold text-foreground">{formatGbp(PREMIUM_PRICING.lifetime)}</span>
+                  <span className="text-sm text-muted-foreground">one-time</span>
+                </div>
               </div>
-            </div>
-
-            <div 
-              onClick={() => { setShowPremiumOptions(false); handleUpgradeToPremium('weekly'); }}
-              className="cursor-pointer rounded-2xl border bg-card hover:bg-muted/50 p-4 transition-all"
-            >
-              <h4 className="font-semibold text-base mb-1">Weekly Billing</h4>
-              <OfferPrice
-                compact
-                suffix="/week"
-                currentClassName="text-xl text-foreground"
-              />
-              <p className="text-xs text-muted-foreground mt-1">Pay as you go, cancel anytime.</p>
             </div>
           </div>
         </DialogContent>

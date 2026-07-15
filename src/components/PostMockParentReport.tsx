@@ -2,7 +2,6 @@ import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { PREMIUM_PRICING } from '@/lib/pricing';
 
 type TopicBreakdown = Record<string, { earned: number; total: number }>;
 
@@ -92,7 +91,7 @@ export function PostMockParentReport({
           className="flex-1 rounded-xl border-primary/30"
           onClick={() => navigate('/select-subject?intent=plans')}
         >
-          Unlimited mocks - £{PREMIUM_PRICING.weekly}/wk trial
+          Unlimited mocks · Lifetime Premium
         </Button>
       </div>
       <p className="text-xs text-muted-foreground mt-3">

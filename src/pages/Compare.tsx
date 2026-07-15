@@ -58,7 +58,7 @@ const providers: Provider[] = [
   {
     name: "Gradlify",
     label: "Best all-round focused 11+ system",
-    price: `${formatGbp(PREMIUM_PRICING.weekly)}/wk`,
+    price: `${formatGbp(PREMIUM_PRICING.lifetime)} lifetime`,
     bestFor: "Families who want the full improvement loop: daily practice, full mocks, weak-topic diagnosis, parent reports, and founder-led 11+ strategy without tutor-level pricing.",
     caveat: "The strongest choice when your child can practise independently and parents want clear proof of what to fix next.",
     source: "/11-plus",
@@ -227,7 +227,7 @@ export default function Compare() {
 
         <section className="mt-12 grid gap-4 sm:grid-cols-3">
           {[
-            ["Clear winner for focused prep", `${formatGbp(PREMIUM_PRICING.weekly)}/wk for the full practice loop`],
+            ["Clear winner for focused prep", `${formatGbp(PREMIUM_PRICING.lifetime)} lifetime for the full practice loop`],
             ["Built around outcomes", "Mocks, weak topics, parent reports, next steps"],
             ["Founder-led advantage", "Built from real QE Boys and selective-school experience"],
           ].map(([label, value]) => (
@@ -258,7 +258,7 @@ export default function Compare() {
               </thead>
               <tbody>
                 <tr className="border-b border-slate-200">
-                  <td className="px-3 py-3 text-xs font-black leading-snug text-slate-950 sm:px-5 sm:py-4 sm:text-sm">Under £10/wk</td>
+                  <td className="px-3 py-3 text-xs font-black leading-snug text-slate-950 sm:px-5 sm:py-4 sm:text-sm">£149.99 lifetime</td>
                   {providers.map((provider) => (
                     <td key={`${provider.name}-price`} className={`px-1 py-3 text-center align-top sm:px-3 sm:py-4 ${provider.highlighted ? "bg-orange-50/50" : ""}`}>
                       <StatusPill verdict={provider.name === "Gradlify" || provider.name === "Bond Online" || provider.name === "Books and PDFs" ? "yes" : "no"} />

@@ -34,12 +34,12 @@ const stripeKeyPrefix = (key: string) =>
 const ACTIVE_STATUSES = new Set(['active', 'trialing']);
 const PRICE_LOG_LIMIT = 3;
 
-type BillingInterval = 'weekly' | 'monthly' | 'annual';
+type BillingInterval = 'weekly' | 'monthly' | 'annual' | 'lifetime';
 
 type ProfileUpdatePayload = {
   mode: StripeMode;
   stripeCustomerId: string;
-  subscriptionId: string;
+  subscriptionId: string | null;
   status: string | null;
   plan: 'premium' | 'ultra' | 'free';
   billingInterval: BillingInterval;
@@ -271,19 +271,20 @@ const buildUpdateData = ({
   cancelAtPeriodEnd,
 }: ProfileUpdatePayload) => {
   const normalizedStatus = status?.toLowerCase() ?? null;
-  const isActive = normalizedStatus ? ACTIVE_STATUSES.has(normalizedStatus) : false;
+  const isLifetime = billingInterval === 'lifetime';
+  const isActive = isLifetime || (normalizedStatus ? ACTIVE_STATUSES.has(normalizedStatus) : false);
   const tier = isActive ? 'premium' : 'free';
 
   return {
     tier,
-    plan: isActive ? plan : 'free',
-    current_period_end: currentPeriodEnd,
-    premium_until: currentPeriodEnd,
+    plan: isActive ? (isLifetime ? 'premium_lifetime' : plan) : 'free',
+    current_period_end: isLifetime ? null : currentPeriodEnd,
+    premium_until: isLifetime ? null : currentPeriodEnd,
     is_premium: isActive,
-    cancel_at_period_end: cancelAtPeriodEnd,
+    cancel_at_period_end: isLifetime ? false : cancelAtPeriodEnd,
     subscription_interval: isActive ? billingInterval : null,
-    subscription_status: normalizedStatus,
-    stripe_subscription_status: normalizedStatus,
+    subscription_status: isLifetime ? 'lifetime' : normalizedStatus,
+    stripe_subscription_status: isLifetime ? 'lifetime' : normalizedStatus,
   } as Record<string, unknown>;
 };
 
@@ -294,8 +295,10 @@ const updateProfile = async (payload: ProfileUpdatePayload): Promise<{ success: 
   const updateData = {
     ...buildUpdateData(payload),
     [customerColumn]: payload.stripeCustomerId,
-    [subscriptionColumn]: payload.subscriptionId,
   };
+  if (payload.subscriptionId) {
+    updateData[subscriptionColumn] = payload.subscriptionId;
+  }
   if (payload.premiumTrack) {
     updateData.premium_track = payload.premiumTrack;
   }
@@ -485,6 +488,53 @@ serve(async (req: Request): Promise<Response> => {
 
           if (session.metadata?.product_type === 'protein_premium') {
             result = await recordProteinPremium(session, true);
+            break;
+          }
+
+          const isLifetimePremium =
+            session.mode === 'payment' &&
+            (session.metadata?.product_type === 'premium_lifetime' ||
+              session.metadata?.plan_interval === 'lifetime');
+
+          if (isLifetimePremium) {
+            const customerId = resolveCustomerId(session.customer);
+            const metadataUserId =
+              session.metadata?.userId ??
+              session.metadata?.user_id ??
+              session.metadata?.supabase_user_id ??
+              null;
+            const clientReferenceId = session.client_reference_id ?? null;
+            const premiumTrack =
+              normalizePremiumTrack(session.metadata?.premium_track) ?? 'eleven_plus';
+
+            if (!customerId) {
+              throw new Error('Customer missing from lifetime premium checkout session');
+            }
+
+            logStep('Processing lifetime premium checkout', {
+              sessionId: session.id,
+              customerId,
+              clientReferenceId,
+              metadataUserId,
+            });
+
+            result = await updateProfile({
+              mode,
+              stripeCustomerId: customerId,
+              subscriptionId: null,
+              status: 'active',
+              plan: 'premium',
+              billingInterval: 'lifetime',
+              currentPeriodEnd: null,
+              cancelAtPeriodEnd: false,
+              metadataUserId,
+              clientReferenceId,
+              email: session.customer_details?.email ?? session.customer_email ?? null,
+              priceIds: [],
+              premiumTrack,
+              eventType: event.type,
+              eventId: event.id,
+            });
             break;
           }
 

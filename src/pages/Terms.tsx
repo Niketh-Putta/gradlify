@@ -4,7 +4,6 @@ import { ArrowLeft, FileText } from "lucide-react";
 import { Link } from "react-router-dom";
 import { AI_FEATURE_ENABLED } from "@/lib/featureFlags";
 import { PREMIUM_PRICING } from "@/lib/pricing";
-import { DiagonalStrikePrice } from "@/components/OfferPrice";
 
 export default function Terms() {
   return (
@@ -88,13 +87,7 @@ export default function Terms() {
                 </div>
                 <div className="bg-primary/10 rounded-lg p-4">
                   <h4 className="mb-2 flex flex-wrap items-center gap-1.5 font-semibold">
-                    Premium Plan (
-                    <DiagonalStrikePrice className="text-sm text-muted-foreground" />
-                    <span>£{PREMIUM_PRICING.weekly}/week</span>
-                    <span className="rounded-full bg-red-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-red-600">limited time offer</span>
-                    <span>or annual was</span>
-                    <DiagonalStrikePrice amount={PREMIUM_PRICING.annualOriginal} className="text-sm text-muted-foreground" />
-                    <span>now £{PREMIUM_PRICING.annual}/year, limited time offer just for you):</span>
+                    Premium Plan (£{PREMIUM_PRICING.lifetime} one-time for lifetime Gradlify Premium):
                   </h4>
                   <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
                     <li>{AI_FEATURE_ENABLED ? '100 AI questions per day' : '100 questions per day'}</li>
@@ -121,11 +114,11 @@ export default function Terms() {
               <section>
                 <h2 className="text-xl font-semibold mb-3">6. Payment and Subscriptions</h2>
                 <ul className="list-disc list-inside space-y-2 text-muted-foreground">
-                  <li>Subscription fees are processed securely through Stripe</li>
-                  <li>Subscriptions auto-renew weekly or annually unless cancelled</li>
-                  <li>You can cancel your subscription at any time</li>
+                  <li>New Premium purchases are a one-time {`£${PREMIUM_PRICING.lifetime}`} lifetime payment</li>
+                  <li>Existing weekly or annual subscriptions continue under their original terms until cancelled</li>
+                  <li>Payments are processed securely through Stripe</li>
                   <li>Refunds are subject to our refund policy</li>
-                  <li>Price changes will be communicated 30 days in advance</li>
+                  <li>Price changes for new purchases will be communicated clearly</li>
                 </ul>
               </section>
 

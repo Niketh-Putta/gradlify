@@ -710,7 +710,7 @@ export default function LiveMockExams() {
                 Only paid Gradlify Premium members get this mock for free.
               </h3>
               <p className="mt-2 max-w-3xl text-sm font-semibold leading-6 text-slate-600 sm:text-base">
-                Paid Premium only. 3-day free trial accounts are excluded. Premium is £{PREMIUM_PRICING.weekly}/week and includes this
+                Paid Premium only. 3-day free trial accounts are excluded. Premium is £{PREMIUM_PRICING.lifetime} lifetime and includes this
                 mock plus future Gradlify mocks.
               </p>
             </div>

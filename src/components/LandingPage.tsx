@@ -8,12 +8,11 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Button } from "@/components/ui/button";
 
 import { LogoMark } from "@/components/LogoMark";
-import { OfferPrice } from "@/components/OfferPrice";
 import { supabase } from "@/integrations/supabase/client";
 import { getSprintUpgradeCopy } from "@/lib/foundersSprint";
 import { AI_FEATURE_ENABLED, EXAM_READINESS_ENABLED, ULTRA_PLAN_ENABLED } from "@/lib/featureFlags";
 import { getDashboardPath, setSignupTrack } from "@/lib/track";
-import { PREMIUM_PRICING, ULTRA_PRICING } from "@/lib/pricing";
+import { PREMIUM_PRICING, ULTRA_PRICING, formatGbp } from "@/lib/pricing";
 import { useOfferCountdown } from "@/hooks/useOfferCountdown";
 import { setPostAuthRedirect } from "@/lib/postAuthRedirect";
 import { captureReferralFromSearch } from "@/lib/referrals";
@@ -540,7 +539,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                 <span className="rounded-full border border-amber-200/45 bg-amber-200/12 px-2.5 py-0.5 text-[9px] font-black uppercase tracking-[0.2em] text-amber-100 shadow-[0_0_18px_rgba(251,146,60,0.24)]">
                   Limited time offer
                 </span>
-                <span className="text-xs font-black sm:text-sm">Gradlify is £{PREMIUM_PRICING.weekly}/wk</span>
+                <span className="text-xs font-black sm:text-sm">Gradlify Premium is {formatGbp(PREMIUM_PRICING.lifetime)} once</span>
                 <span className="hidden h-4 w-px bg-white/20 sm:block" aria-hidden="true" />
                 <span className="text-[11px] font-semibold text-white/75 sm:text-xs">
                   about a third of one tutor hour - tutors often charge <span className="text-white">£40–60/hr</span>
@@ -548,7 +547,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
               </div>
               <div className="flex flex-wrap items-center gap-2">
                 <span className="rounded-full bg-gradient-to-r from-red-600 to-orange-500 px-2.5 py-0.5 text-[9px] font-black uppercase tracking-[0.14em] text-white shadow-[0_0_14px_rgba(249,115,22,0.38)]">
-                  3-day free trial
+                  Lifetime Premium
                 </span>
                 <span className="rounded-md border border-white/15 bg-white/10 px-2.5 py-0.5 text-[11px] font-black tabular-nums text-white sm:text-xs">
                   Ends in {offerCountdown.label}
@@ -1191,7 +1190,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                         ["Weak-topic diagnosis", "yes", "partial", "partial", "partial"],
                         ["Parent-ready report", "yes", "partial", "partial", "partial"],
                         ["Built from selective-school experience", "yes", "no", "no", "no"],
-                        ["Focused 11+ system under £9/wk", "yes", "no", "no", "yes"],
+                        ["Focused 11+ system at £149.99 lifetime", "yes", "no", "no", "yes"],
                         ["Clear next-step plan after each mock", "yes", "partial", "partial", "no"],
                       ].map(([feature, gradlify, atom, explore, bond]) => (
                         <tr key={feature} className={cn("border-b last:border-b-0", isDark ? "border-white/10" : "border-slate-100")}>
@@ -1253,9 +1252,9 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
               <motion.div variants={motionCfg.fadeUp} className="max-w-2xl">
                 <div className={`text-sm font-semibold ${accentText}`}>Pricing</div>
                 <h2 className={`mt-3 text-2xl sm:text-4xl font-semibold tracking-tight ${primaryText}`}>
-                  Start free. Begin your 3 Day Free Trial when ready.
+                  Start free. Unlock Lifetime Premium when ready.
                 </h2>
-                <p className={`mt-4 ${mutedText} leading-relaxed`}>Honest pricing, cancel anytime.</p>
+                <p className={`mt-4 ${mutedText} leading-relaxed`}>One payment. Keep Premium forever.</p>
               </motion.div>
 
               <motion.div variants={motionCfg.fadeUp} className="mt-8 sm:mt-10 grid lg:grid-cols-3 md:grid-cols-2 gap-4 sm:gap-5 max-w-6xl mx-auto">
@@ -1304,22 +1303,19 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                         Best for exams
                       </div>
                     </div>
-                    <OfferPrice
-                      className="mt-4"
-                      tone="dark"
-                      suffix="/week"
-                      currentClassName="text-white"
-                      labelClassName="border-white/30 bg-white/15 text-white"
-                    />
+                    <div className="mt-4 flex items-baseline gap-2">
+                      <span className="text-3xl sm:text-4xl font-black text-white">{formatGbp(PREMIUM_PRICING.lifetime)}</span>
+                      <span className="text-xs font-bold uppercase tracking-widest text-white/75">lifetime · one-time</span>
+                    </div>
                     <div className="mt-4 rounded-xl border border-white/25 bg-white/15 p-3 shadow-inner shadow-white/10">
                       <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
                         <div>
                           <p className="text-[11px] font-black uppercase tracking-[0.18em] text-white/80">Why parents switch</p>
-                          <p className="mt-1 text-sm font-semibold text-white">One tutor hour costs £40–60. Premium is £{PREMIUM_PRICING.weekly} per week.</p>
+                          <p className="mt-1 text-sm font-semibold text-white">One tutor hour costs £40–60. Premium is {formatGbp(PREMIUM_PRICING.lifetime)} once.</p>
                         </div>
                         <div className="text-left sm:text-right">
-                          <div className="text-2xl font-black text-white">£{PREMIUM_PRICING.weekly}</div>
-                          <div className="text-[11px] font-bold uppercase tracking-[0.14em] text-white/75">per week</div>
+                          <div className="text-2xl font-black text-white">{formatGbp(PREMIUM_PRICING.lifetime)}</div>
+                          <div className="text-[11px] font-bold uppercase tracking-[0.14em] text-white/75">lifetime</div>
                         </div>
                       </div>
                     </div>
@@ -1345,10 +1341,10 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                       onClick={handleSignup}
                       className="w-full rounded-full bg-white text-orange-700 font-semibold py-4 sm:py-6 hover:bg-white shadow-lg"
                     >
-                      Purchase plan
+                      Get Lifetime Premium
                       <ArrowRight className="ml-2 h-5 w-5" />
                     </Button>
-                    <div className="mt-2 sm:mt-3 text-[11px] sm:text-xs text-white/80 text-center">Cancel anytime</div>
+                    <div className="mt-2 sm:mt-3 text-[11px] sm:text-xs text-white/80 text-center">One payment · keep access forever</div>
                   </div>
                 </motion.div>
 

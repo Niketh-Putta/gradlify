@@ -1,6 +1,4 @@
-import { useState } from "react";
 import { PremiumPaywall } from "@/components/PremiumPaywall";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FREE_CHALLENGE_LIMIT } from "@/lib/limits";
 
 interface ChallengeLimitModalProps {
@@ -26,29 +24,17 @@ export function ChallengeLimitModal({
   onOpenChange,
   onComeBack,
 }: ChallengeLimitModalProps) {
-  const [selectedPlan, setSelectedPlan] = useState<'weekly' | 'annual'>('weekly');
-
   return (
     <PremiumPaywall
       open={open}
       onOpenChange={onOpenChange}
       title="Daily Challenge limit reached"
-      description="You’ve reached today’s Challenge limit. Premium removes this limit so you can keep competing and improving."
+      description="You’ve reached today’s Challenge limit. Premium Lifetime removes this limit so you can keep competing and improving."
       freeFeatures={freeFeatures}
       premiumFeatures={premiumFeatures}
       secondaryLabel="Come back tomorrow"
       onComeBack={onComeBack}
-      primaryLabel={`Start Your 3 Day Free Trial (${selectedPlan === 'weekly' ? 'Weekly' : 'Annual'})`}
-      children={
-        <div className="w-full flex flex-col items-center mb-4">
-          <Tabs value={selectedPlan} onValueChange={(v) => setSelectedPlan(v as 'weekly' | 'annual')} className="w-full mb-2">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="weekly">Weekly</TabsTrigger>
-              <TabsTrigger value="annual">Annual</TabsTrigger>
-            </TabsList>
-          </Tabs>
-        </div>
-      }
+      primaryLabel="Unlock Lifetime Premium"
     />
   );
 }

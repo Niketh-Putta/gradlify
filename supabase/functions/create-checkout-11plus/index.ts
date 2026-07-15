@@ -53,6 +53,8 @@ const normalizeEnv = (raw: string) => {
   return "test";
 };
 
+const LIFETIME_PRICE_GBP = 149.99;
+
 const PREMIUM_WEEKLY_PRICE_IDS = {
   live: "price_1TnilZQYWoowhxMZFRVNfCv2",
   test: "price_1TnilaHZeiDDkqObfHHcBIwk",
@@ -357,7 +359,7 @@ serve(async (req) => {
 
     const {
       plan_interval: planInterval,
-      plan = "weekly",
+      plan = "lifetime",
       returnTo: rawReturnTo,
       premiumTrack: requestedPremiumTrackRaw,
       baseUrl: clientBaseUrl,
@@ -366,58 +368,21 @@ serve(async (req) => {
     if (requestedPremiumTrack && requestedPremiumTrack !== activeTrack) {
       logStep("Track mismatch ignored for 11plus dedicated checkout", { requestedPremiumTrack, activeTrack });
     }
-    const normalizedPlan = planInterval === "ultra_annual"
-      ? "ultra_annual"
-      : planInterval === "annual"
-      ? "annual"
-      : planInterval === "yearly"
-      ? "annual"
-      : planInterval === "weekly"
-      ? "weekly"
-      : plan === "ultra_annual"
-      ? "ultra_annual"
-      : plan === "annual"
-      ? "annual"
-      : plan === "yearly"
-      ? "annual"
-      : plan === "ultra"
-      ? "ultra"
-      : plan === "monthly"
-      ? "weekly"
-      : "weekly";
-    if (normalizedPlan === "ultra" || normalizedPlan === "ultra_annual") {
+
+    // Public offer is lifetime-only. Coerce legacy weekly/annual requests so
+    // old client bundles still reach checkout during rollout.
+    const requestedPlan = String(planInterval ?? plan ?? "lifetime").toLowerCase();
+    if (requestedPlan === "ultra" || requestedPlan === "ultra_annual") {
       throw new Error("This plan is not currently available.");
     }
+    const normalizedPlan = "lifetime";
 
     const checkoutTrack = "eleven_plus";
-    const trackPrices = config.prices[checkoutTrack as keyof typeof config.prices];
-    let priceId = trackPrices?.weekly;
-    if (normalizedPlan === "annual") {
-        priceId = trackPrices?.annual;
-    } else if (normalizedPlan === "ultra") {
-        priceId = trackPrices?.ultra;
-        if (!priceId) {
-            throw new Error(`Ultra pricing not configured for track: ${checkoutTrack}`);
-        }
-    } else if (normalizedPlan === "ultra_annual") {
-        priceId = trackPrices?.ultra_annual;
-        if (!priceId) {
-            throw new Error(`Ultra Annual pricing not configured for track: ${checkoutTrack}`);
-        }
-    }
-    
-    if (!priceId) {
-      throw new Error(`Missing Stripe price ID for ${normalizedPlan} plan`);
-    }
-    const stripePromotionCodeEntryEnabled = normalizedPlan === "weekly";
-    if (stripePromotionCodeEntryEnabled) {
-      await ensureWeeklyPromoCode(stripe);
-    }
     logStep("Creating checkout with plan", {
       plan: normalizedPlan,
+      requestedPlan,
       track: checkoutTrack,
-      priceId: priceId.slice(0, 8),
-      stripePromotionCodeEntryEnabled,
+      amountGbp: LIFETIME_PRICE_GBP,
     });
 
     const candidateBaseUrl =
@@ -437,39 +402,35 @@ serve(async (req) => {
       customer: customerId,
       line_items: [
         {
-          price: priceId,
           quantity: 1,
+          price_data: {
+            currency: "gbp",
+            unit_amount: Math.round(LIFETIME_PRICE_GBP * 100),
+            product_data: {
+              name: "Gradlify Premium Lifetime",
+              description: "One-time payment for lifetime Gradlify Premium access.",
+            },
+          },
         },
       ],
-      mode: "subscription",
-      allow_promotion_codes: stripePromotionCodeEntryEnabled,
+      mode: "payment",
+      allow_promotion_codes: false,
       automatic_tax: { enabled: false },
       payment_method_collection: "always",
       custom_text: {
         submit: {
-          message: hasUsedTrial ? "Continue to Premium" : "Start Your 3 Day Free Trial",
+          message: "Unlock lifetime Premium",
         },
       },
       client_reference_id: user.id,
-      subscription_data: {
-        ...(hasUsedTrial ? {} : { trial_period_days: 3 }),
-        metadata: {
-          userId: user.id,
-          user_id: user.id,
-          supabase_user_id: user.id,
-          plan_interval: normalizedPlan,
-          premium_track: checkoutTrack,
-          client_reference_id: user.id,
-          has_used_trial: hasUsedTrial ? "true" : "false",
-        },
-      },
       metadata: {
         userId: user.id,
         user_id: user.id,
         supabase_user_id: user.id,
         plan_interval: normalizedPlan,
         premium_track: checkoutTrack,
-        has_used_trial: hasUsedTrial ? "true" : "false",
+        product_type: "premium_lifetime",
+        client_reference_id: user.id,
       },
       success_url: `${baseUrl}/pay/success?session_id={CHECKOUT_SESSION_ID}&returnTo=${encodedReturnTo}`,
       cancel_url: `${baseUrl}/pay/cancelled?returnTo=${encodedReturnTo}`,

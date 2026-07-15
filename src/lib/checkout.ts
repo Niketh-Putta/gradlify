@@ -4,6 +4,13 @@ import { resolveUserTrack } from "@/lib/track";
 
 type PremiumTrack = "gcse" | "eleven_plus";
 
+export type PremiumCheckoutPlan =
+  | "lifetime"
+  | "weekly"
+  | "annual"
+  | "ultra"
+  | "ultra_annual";
+
 const sanitizeReturnPath = (value: string) => {
   if (!value) return "/home";
   if (!value.startsWith("/")) return "/home";
@@ -11,8 +18,9 @@ const sanitizeReturnPath = (value: string) => {
   return value;
 };
 
+/** Public checkout is lifetime-only. Legacy plan names are coerced server-side too. */
 export async function startPremiumCheckout(
-  plan: "weekly" | "annual" | "ultra" | "ultra_annual" = "weekly",
+  plan: PremiumCheckoutPlan = "lifetime",
   premiumTrack?: PremiumTrack,
 ) {
   if (!ULTRA_PLAN_ENABLED && (plan === "ultra" || plan === "ultra_annual")) {
@@ -55,10 +63,13 @@ export async function startPremiumCheckout(
     );
   }
 
+  const checkoutPlan: PremiumCheckoutPlan =
+    plan === "ultra" || plan === "ultra_annual" ? plan : "lifetime";
+
   try {
-    console.log("Starting checkout function call for plan:", plan);
+    console.log("Starting checkout function call for plan:", checkoutPlan);
     const payload = {
-      plan,
+      plan: checkoutPlan,
       returnTo: sanitizeReturnPath(returnTo),
       premiumTrack: requestedTrack,
       baseUrl: window.location.origin,

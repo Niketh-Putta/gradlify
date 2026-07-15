@@ -154,12 +154,28 @@ serve(async (req) => {
 
     const { data: profile, error: profileError } = await admin
       .from("profiles")
-      .select("stripe_customer_id_test, stripe_customer_id_live, stripe_subscription_id_test, stripe_subscription_id_live, stripe_subscription_status, is_premium, premium_track")
+      .select("stripe_customer_id_test, stripe_customer_id_live, stripe_subscription_id_test, stripe_subscription_id_live, stripe_subscription_status, is_premium, premium_track, plan, subscription_interval")
       .eq("user_id", user.id)
       .maybeSingle();
 
     if (profileError) {
       return jsonResponse({ error: "profile_fetch_failed" }, 500);
+    }
+
+    const isLifetimePremium =
+      profile?.subscription_interval === "lifetime" ||
+      profile?.plan === "premium_lifetime" ||
+      profile?.stripe_subscription_status === "lifetime";
+
+    if (isLifetimePremium && profile?.is_premium) {
+      return jsonResponse({
+        updated: false,
+        reason: "lifetime_premium",
+        db_is_premium: true,
+        db_stripe_subscription_status: profile?.stripe_subscription_status ?? "lifetime",
+        stripe_key_prefix: stripeKeyPrefix(stripeKey),
+        environment,
+      });
     }
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });

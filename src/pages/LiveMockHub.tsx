@@ -222,7 +222,7 @@ function PremiumBanner({
             ) : (
               <>
                 Paid Premium members sit all previous and upcoming live mocks at no extra cost, for just{" "}
-                <span className="font-bold text-slate-900">£{PREMIUM_PRICING.weekly} a week</span>. Free trials are not included.
+                <span className="font-bold text-slate-900">£{PREMIUM_PRICING.lifetime} lifetime</span>. Free trials are not included.
               </>
             )}
           </p>
