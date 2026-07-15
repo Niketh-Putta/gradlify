@@ -83,5 +83,5 @@ for (const mockSlug of MOCKS) {
   }
 }
 
-console.log(failed ? "\nFAILED — fix before go-live.\n" : "\nAll payment checks passed.\n");
+console.log(failed ? "\nFAILED - fix before go-live.\n" : "\nAll payment checks passed.\n");
 process.exit(failed ? 1 : 0);

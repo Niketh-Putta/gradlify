@@ -4,7 +4,7 @@ Background: dark navy blue gradient (#0f172a to #0c4a6e), subtle amber glow top-
 
 Layout (large readable text for parents on mobile):
 
-TOP — small amber pill badge: "WEEKEND ONLY"
+TOP - small amber pill badge: "WEEKEND ONLY"
 
 HEADLINE (huge, white, bold):
 "11+ LIVE MOCK"
@@ -13,7 +13,7 @@ HEADLINE (huge, white, bold):
 SUBHEAD (light grey):
 "4:00 – 6:30pm · ~2h 30m · Maths + English"
 
-MIDDLE — two price lines (urgency):
+MIDDLE - two price lines (urgency):
 "£9.99 this weekend" in bright green
 "Then £13.99 from Monday" in white, slightly smaller
 

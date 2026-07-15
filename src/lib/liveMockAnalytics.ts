@@ -7,7 +7,7 @@ import {
   LEGACY_ENGLISH_ONLY_LIVE_MOCK_SLUG,
 } from "@/lib/liveMockCombinedConfig";
 
-/** @deprecated Legacy English-only mock — use combined mock 1 paper slugs instead. */
+/** @deprecated Legacy English-only mock - use combined mock 1 paper slugs instead. */
 export const LIVE_MOCK_PAPER_SLUG = LEGACY_ENGLISH_ONLY_LIVE_MOCK_SLUG;
 
 const LIVE_MOCK_QUESTIONS = 60;

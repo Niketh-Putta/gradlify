@@ -1,4 +1,4 @@
--- Live mocks are free for paying Premium members only — not free trials.
+-- Live mocks are free for paying Premium members only - not free trials.
 -- Mirrors src/lib/premiumStatus.ts -> hasPaidPremiumLiveMockAccess().
 
 CREATE OR REPLACE FUNCTION public.has_live_mock_premium_access(p_user_id uuid)
@@ -43,4 +43,4 @@ $function$;
 GRANT EXECUTE ON FUNCTION public.has_live_mock_premium_access(uuid) TO authenticated;
 
 COMMENT ON FUNCTION public.has_live_mock_premium_access(uuid) IS
-  'True for founders and paying Premium (active subscription). False for free trials — they must pay the one-off mock fee.';
+  'True for founders and paying Premium (active subscription). False for free trials - they must pay the one-off mock fee.';

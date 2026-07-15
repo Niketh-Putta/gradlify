@@ -429,10 +429,10 @@ serve(async (req) => {
       mode: "payment",
       allow_promotion_codes: true,
       automatic_tax: { enabled: false },
-      // Do not set payment_method_collection — Stripe only allows it for recurring/subscription prices.
+      // Do not set payment_method_collection - Stripe only allows it for recurring/subscription prices.
       custom_text: {
         submit: {
-          message: `Unlock lifetime Premium — use code ${LIFETIME_PROMO_CODE} for £50 off`,
+          message: `Unlock lifetime Premium - use code ${LIFETIME_PROMO_CODE} for £50 off`,
         },
       },
       client_reference_id: user.id,

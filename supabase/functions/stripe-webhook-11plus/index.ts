@@ -171,7 +171,7 @@ const recordPaidLiveMockSignup = async (session: Stripe.Checkout.Session) => {
   }
 
   if (existingSignup) {
-    logStep('Duplicate live mock payment — signup already exists', {
+    logStep('Duplicate live mock payment - signup already exists', {
       sessionId: session.id,
       userId,
       mockSlug,

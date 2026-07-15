@@ -1,7 +1,7 @@
 -- Align both-subjects live mock registration RLS with the app's premium definition.
 -- Previously the policy only admitted users with is_premium=true AND an active/trialing
 -- Stripe status. That rejected founders (founder_track='founder'), premium-tier users,
--- and paid-plan users whose is_premium flag was not set — even though the UI (getPremiumStatus)
+-- and paid-plan users whose is_premium flag was not set - even though the UI (getPremiumStatus)
 -- treats all of them as premium. This caused "new row violates row-level security policy".
 --
 -- This helper mirrors src/lib/premiumStatus.ts -> isPremium so the DB and UI agree.

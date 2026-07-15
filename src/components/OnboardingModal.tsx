@@ -988,7 +988,7 @@ export function OnboardingModal({ isOpen, userId, tier, premiumTrack, founderTra
                           </span>
                         </div>
                         <p className="mt-2 max-w-md text-[11px] font-medium leading-4 text-white/90 sm:mt-3 sm:text-base sm:leading-6">
-                          More mocks, deeper analytics, higher limits — pay once, keep Premium forever.
+                          More mocks, deeper analytics, higher limits - pay once, keep Premium forever.
                         </p>
                       </div>
 

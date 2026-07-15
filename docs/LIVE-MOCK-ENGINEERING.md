@@ -2,7 +2,7 @@
 
 Operational and engineering knowledge for combined live mocks (Maths → break → English). Read before changing sitting flows.
 
-## 2026-06-21 — Mid-exam lobby flicker (Mock 2 maths, ~Q45)
+## 2026-06-21 - Mid-exam lobby flicker (Mock 2 maths, ~Q45)
 
 ### Symptom
 During an active maths sitting, the UI flickered between the **exam paper** and the **registration lobby** (“Mock in progress → Continue mock”). Timer kept running (~49:35 left). Reported on mock 2 sit (`/live-mock-exams/local-preview2/sit`).
@@ -12,7 +12,7 @@ A **localStorage restore ↔ persist race** on remount/re-render:
 
 1. Component remounts with default `phase: "instructions"` (lobby).
 2. **Persist effect** immediately wrote that lobby snapshot to localStorage.
-3. **Restore effect** re-ran on `mathsAttemptStatus` / auth ticks and re-applied storage — sometimes the corrupted lobby snapshot.
+3. **Restore effect** re-ran on `mathsAttemptStatus` / auth ticks and re-applied storage - sometimes the corrupted lobby snapshot.
 4. **Eligibility re-check** set `loading: true` mid-exam → full-page spinner flash.
 5. (Earlier) Submitting maths while still on the paper forced `phase: "instructions"` when attempt became `submitted`.
 
@@ -23,22 +23,22 @@ Use `src/lib/liveMockSessionGuard.ts` and mirror in any new sitting UI:
 | Rule | Why |
 |------|-----|
 | **Hydrate once** per storage key (`hydratedKeyRef`) | Stop restore loops on status/auth ticks |
-| **`useLayoutEffect`** for hydrate | Resume before paint — no lobby flash on reload |
+| **`useLayoutEffect`** for hydrate | Resume before paint - no lobby flash on reload |
 | **Block persist** until hydrated (`skipPersistRef` + `shouldPersistLiveMockSession`) | Default lobby state must never overwrite an in-progress sitting |
 | **Silent re-checks** once registered (`eligibilityResolvedRef` / `liveMockRegisteredRef`) | Auth refresh must not show blocking loaders mid-exam |
 | **Never set `phase: "instructions"`** while student is on maths/break | Submit saves answers first; only clear storage on lobby |
 | **Mark hydrated** on manual start/resume (`startMock`, `continueMock`) | Manual navigation must not fight restore |
 
 ### Files touched
-- `src/pages/LocalCombinedMock.tsx` — maths + break sitting
-- `src/pages/EnglishSplitViewDemo.tsx` — English paper (timer hydrate, gate loader, answer resume)
-- `src/lib/liveMockSessionGuard.ts` — shared helpers
-- `scripts/verify_mock_session_stability.mjs` — regression simulation
+- `src/pages/LocalCombinedMock.tsx` - maths + break sitting
+- `src/pages/EnglishSplitViewDemo.tsx` - English paper (timer hydrate, gate loader, answer resume)
+- `src/lib/liveMockSessionGuard.ts` - shared helpers
+- `scripts/verify_mock_session_stability.mjs` - regression simulation
 
 ### Commits
-- `fa8a0e9` — core maths hydrate/persist guard
-- `5cc1fe6` — stop forcing lobby on maths `submitted` mid-sitting
-- `825ee74` — layout-effect hydrate + regression script
+- `fa8a0e9` - core maths hydrate/persist guard
+- `5cc1fe6` - stop forcing lobby on maths `submitted` mid-sitting
+- `825ee74` - layout-effect hydrate + regression script
 
 ### Verification
 ```bash
@@ -63,7 +63,7 @@ npm run verify:mock-session
 | English | `EnglishSplitViewDemo` via session URL | localStorage timer + DB autosave |
 | Results | `LiveMockAnalytics` | Supabase attempts (submitted) |
 
-Mock 1 and mock 2 use **separate slugs**, storage keys, and papers — never mix cohorts.
+Mock 1 and mock 2 use **separate slugs**, storage keys, and papers - never mix cohorts.
 
 ---
 
@@ -77,4 +77,4 @@ Mock 1 and mock 2 use **separate slugs**, storage keys, and papers — never mix
 
 ## Pricing / discount codes
 
-Live mock registration is **full price only** (£14.99). Promo codes (`LEVELFIELD`, `MOCK2`, etc.) are **disabled** — no UI copy, no Stripe `allow_promotion_codes`, webhook rejects any checkout that used a promotion code. Do not re-enable without explicit product sign-off.
+Live mock registration is **full price only** (£14.99). Promo codes (`LEVELFIELD`, `MOCK2`, etc.) are **disabled** - no UI copy, no Stripe `allow_promotion_codes`, webhook rejects any checkout that used a promotion code. Do not re-enable without explicit product sign-off.

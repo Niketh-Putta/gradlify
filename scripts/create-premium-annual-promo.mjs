@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Premium annual promo: £50 off first paid year.
- * No minimum cart — annual-only is enforced in create-checkout-11plus
+ * No minimum cart - annual-only is enforced in create-checkout-11plus
  * (allow_promotion_codes only when plan is annual). Minimum amount breaks
  * trial checkouts where total due today is £0.
  */

@@ -1,7 +1,7 @@
 /** Display amounts for Gradlify 11+ plans (GBP). Checkout uses Stripe Price IDs / price_data. */
 
 export const PREMIUM_PRICING = {
-  /** One-time lifetime Gradlify Premium — the only public offer. */
+  /** One-time lifetime Gradlify Premium - the only public offer. */
   lifetime: 149.99,
   /** Kept for copy about existing weekly subscribers; not offered at checkout. */
   weekly: 9.99,
@@ -11,9 +11,9 @@ export const PREMIUM_PRICING = {
   annual: 249.99,
   /** Strikethrough vs paying weekly for 52 weeks (9.99 × 52). */
   annualOriginal: 519.48,
-  /** Annual ÷ 52 — shown as the headline rate when annual billing is selected. */
+  /** Annual ÷ 52 - shown as the headline rate when annual billing is selected. */
   annualPerWeek: 4.81,
-  /** Annual ÷ 12 — shown where monthly equivalent is useful. */
+  /** Annual ÷ 12 - shown where monthly equivalent is useful. */
   annualPerMonth: 20.83,
   /** Weekly × 52 − annual (marketing). Rounded for SAVE badges. */
   annualSavings: 269,

@@ -1,5 +1,5 @@
 -- ============================================================================
--- Affected-cohort refund list — combined live mock "Maths key-mismatch" bug.
+-- Affected-cohort refund list - combined live mock "Maths key-mismatch" bug.
 --
 -- WHAT THIS IS
 --   A read-only admin query that lists every user hit by the bug where Maths
@@ -21,7 +21,7 @@
 --   AND attempt.answered_count = 0
 --   AND no live_mock_answers row for the attempt has a non-null selected_option.
 -- A re-sit fixes a user in place (same attempt row), so once they redo Maths
--- they drop OUT of this list automatically — re-run any time to see who is left.
+-- they drop OUT of this list automatically - re-run any time to see who is left.
 -- ============================================================================
 
 WITH maths_paper AS (

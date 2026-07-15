@@ -93,7 +93,7 @@ export function PremiumPaywall({
                   "Full practice bank access",
                   "Unlimited mock exams",
                   "Revision notes and tracked readiness",
-                  "Lifetime Premium — no renewals",
+                  "Lifetime Premium - no renewals",
                 ].map((feat) => (
                   <li key={feat} className="flex items-start gap-3">
                     <Check className="w-3.5 h-3.5 text-orange-500 stroke-[3px] shrink-0 mt-0.5" />

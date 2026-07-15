@@ -197,7 +197,7 @@ export function Settings({ user, onBackToChat, onSignOut }: SettingsProps) {
   const isSupportAdmin = user?.email?.toLowerCase() === 'team@gradlify.com';
   const premiumSettingsTitle = "Upgrade to Gradlify Premium";
   const premiumSettingsDescription =
-    `One payment for lifetime Gradlify Premium — ${formatGbp(PREMIUM_PRICING.lifetime)}.`;
+    `One payment for lifetime Gradlify Premium - ${formatGbp(PREMIUM_PRICING.lifetime)}.`;
   const premiumSettingsCta = "Upgrade to Gradlify Premium";
   const TRACK_FEATURES: Record<UserTrack, string[]> = {
     gcse: [
@@ -913,7 +913,7 @@ export function Settings({ user, onBackToChat, onSignOut }: SettingsProps) {
                       <ul className="space-y-2 mb-4 text-xs text-slate-300 whitespace-normal">
                         <li className="flex gap-2 items-start"><Shield className="h-3.5 w-3.5 text-primary shrink-0 mt-[2px]" /> <span>Unlimited mock exams and challenge questions</span></li>
                         <li className="flex gap-2 items-start"><Shield className="h-3.5 w-3.5 text-primary shrink-0 mt-[2px]" /> <span>Unlimited mock exam size</span></li>
-                        <li className="flex gap-2 items-start"><Shield className="h-3.5 w-3.5 text-primary shrink-0 mt-[2px]" /> <span>Lifetime Premium — pay once, keep access</span></li>
+                        <li className="flex gap-2 items-start"><Shield className="h-3.5 w-3.5 text-primary shrink-0 mt-[2px]" /> <span>Lifetime Premium - pay once, keep access</span></li>
                       </ul>
 
                       <Button 
@@ -1025,7 +1025,7 @@ export function Settings({ user, onBackToChat, onSignOut }: SettingsProps) {
           <DialogHeader>
             <DialogTitle>Gradlify Premium Lifetime</DialogTitle>
             <DialogDescription>
-              {formatGbp(PREMIUM_PRICING.lifetime)} one-time. One payment — keep access forever.
+              {formatGbp(PREMIUM_PRICING.lifetime)} one-time. One payment - keep access forever.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4 mt-2">

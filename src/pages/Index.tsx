@@ -77,7 +77,7 @@ const LocalCombinedMockRoute = () => {
   return <Navigate to="/live-mock-exams" replace />;
 };
 
-/** Mock 2 exam lobby — registration check uses `both_subjects_live_mock_2`. */
+/** Mock 2 exam lobby - registration check uses `both_subjects_live_mock_2`. */
 const LocalCombinedMock2SitRoute = () => {
   if (import.meta.env.DEV || isSecondMockReleased()) {
     return (

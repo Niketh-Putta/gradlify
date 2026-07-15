@@ -200,7 +200,7 @@ function main() {
 
   console.log("Mock session stability simulation\n");
   for (const check of checks) {
-    console.log(`${check.pass ? "PASS" : "FAIL"} — ${check.name}`);
+    console.log(`${check.pass ? "PASS" : "FAIL"} - ${check.name}`);
   }
 
   const failed = checks.filter((c) => !c.pass);

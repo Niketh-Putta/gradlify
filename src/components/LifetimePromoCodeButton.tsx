@@ -5,6 +5,6 @@ import { LIFETIME_PROMO } from "@/lib/pricing";
 export async function copyLifetimePromoCode() {
   await navigator.clipboard.writeText(LIFETIME_PROMO.code);
   toast.success(
-    `Copied ${LIFETIME_PROMO.code} — paste it at checkout for £${LIFETIME_PROMO.amountOffGbp} off`,
+    `Copied ${LIFETIME_PROMO.code} - paste it at checkout for £${LIFETIME_PROMO.amountOffGbp} off`,
   );
 }

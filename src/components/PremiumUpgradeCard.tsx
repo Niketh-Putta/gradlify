@@ -75,7 +75,7 @@ export function PremiumUpgradeCard() {
             </div>
             <div className="flex items-start gap-3 text-foreground">
               <Check className="h-4 w-4 shrink-0 mt-0.5 text-foreground" />
-              <span className="text-responsive-sm">Lifetime Premium — pay once, keep access</span>
+              <span className="text-responsive-sm">Lifetime Premium - pay once, keep access</span>
             </div>
           </div>
 

@@ -1,6 +1,6 @@
-DESIGN A PREMIUM WHATSAPP POSTER FROM SCRATCH — 1080×1080px square.
+DESIGN A PREMIUM WHATSAPP POSTER FROM SCRATCH - 1080×1080px square.
 
-Brand: Gradlify (UK 11+ exam prep). Audience: parents of Year 4/5 children. Tone: trustworthy, editorial, professional — like a high-end UK education company or private school notice. NOT a gaming ad, NOT a flash-sale banner, NOT childish.
+Brand: Gradlify (UK 11+ exam prep). Audience: parents of Year 4/5 children. Tone: trustworthy, editorial, professional - like a high-end UK education company or private school notice. NOT a gaming ad, NOT a flash-sale banner, NOT childish.
 
 ---
 
@@ -12,8 +12,8 @@ Primary text: graphite black #1D1D1D
 Muted text: slate grey #64748B
 Primary blue: #2563EB (headlines accents, thin rules, small badges)
 Primary blue light: #3B82F6 (subtle gradient only)
-Success green: #059669 (price highlight — muted emerald, NOT neon lime)
-Warning amber: #F59E0B (small urgency badge only — one element max)
+Success green: #059669 (price highlight - muted emerald, NOT neon lime)
+Warning amber: #F59E0B (small urgency badge only - one element max)
 Borders: #E2E8F0 light grey hairlines
 
 DO NOT USE: dark navy full-bleed background, neon green, bright gold pills, orange glow, cartoon icons, emoji, stock photos of children, drop shadows on everything, gradient text.
@@ -22,10 +22,10 @@ DO NOT USE: dark navy full-bleed background, neon green, bright gold pills, oran
 
 ## TYPOGRAPHY
 
-Headline font: elegant serif like Playfair Display or Cormorant Garamond — refined, confident
-Body font: clean sans-serif like Inter or DM Sans — neutral, readable
+Headline font: elegant serif like Playfair Display or Cormorant Garamond - refined, confident
+Body font: clean sans-serif like Inter or DM Sans - neutral, readable
 Letter-spacing: slightly tight on headline, generous line-height on body
-Hierarchy: clear editorial layout — think Monocle magazine or premium tutoring centre flyer
+Hierarchy: clear editorial layout - think Monocle magazine or premium tutoring centre flyer
 
 ---
 
@@ -33,7 +33,7 @@ Hierarchy: clear editorial layout — think Monocle magazine or premium tutoring
 
 TOP ROW:
 - Small wordmark area: "Gradlify" in semibold sans #1D1D1D, tagline underneath in tiny grey: "11+ Practised Properly."
-- Top-right: minimal pill badge — thin border #2563EB, text "Weekend offer" in blue, white fill (NOT solid yellow)
+- Top-right: minimal pill badge - thin border #2563EB, text "Weekend offer" in blue, white fill (NOT solid yellow)
 
 HERO BLOCK (largest element):
 - Serif headline, graphite:
@@ -68,7 +68,7 @@ FOOTER:
 
 ## STYLE RULES
 
-- 70% negative space — airy, calm, expensive
+- 70% negative space - airy, calm, expensive
 - No icons except optional minimal clock or single thin line divider
 - No arrows, no "REGISTER NOW" buttons, no 3D effects
 - Subtle blue radial wash in top-left corner only (5% opacity) for depth

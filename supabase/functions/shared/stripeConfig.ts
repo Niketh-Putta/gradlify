@@ -70,7 +70,7 @@ export const getStripeWebhookSecretForMode = (mode: StripeMode): string =>
 
 export interface StripePriceIds {
   weekly: string;
-  /** Legacy monthly price — existing subscribers only; not offered at checkout. */
+  /** Legacy monthly price - existing subscribers only; not offered at checkout. */
   monthly: string;
   annual: string;
   ultra?: string;

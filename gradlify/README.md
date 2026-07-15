@@ -1,6 +1,6 @@
 # Gradlify demo video
 
-**File:** `Gradlify demo video.mp4` — investor product walkthrough (final cut only).
+**File:** `Gradlify demo video.mp4` - investor product walkthrough (final cut only).
 
 ## Open on your Mac
 

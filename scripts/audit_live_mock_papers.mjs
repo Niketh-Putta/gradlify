@@ -103,7 +103,7 @@ function auditQuestion(q, paperSlug) {
 
   if (!String(q.stem || "").trim()) issues.push(`Q${q.question_number}: empty stem`);
   if (!String(q.explanation || "").trim()) issues.push(`Q${q.question_number}: missing explanation`);
-  if (String(q.explanation || "").includes("—")) issues.push(`Q${q.question_number}: em dash in explanation`);
+  if (String(q.explanation || "").includes("-")) issues.push(`Q${q.question_number}: em dash in explanation`);
 
   if (paperSlug.includes("english") && String(q.explanation || "").length < 40) {
     issues.push(`Q${q.question_number}: explanation very short (${String(q.explanation).length} chars)`);

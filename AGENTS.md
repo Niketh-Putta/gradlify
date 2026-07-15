@@ -31,12 +31,12 @@ Headless Chrome may hit `ERR_INSUFFICIENT_RESOURCES` on first load. Relaunch wit
 `--disable-gpu --no-sandbox --disable-dev-shm-usage --disable-setuid-sandbox`
 
 ### Optional (not needed for core app dev)
-- **Supabase CLI** (`supabase start`) for local DB — app defaults to remote project `gknnfbalijxykqycopic`
+- **Supabase CLI** (`supabase start`) for local DB - app defaults to remote project `gknnfbalijxykqycopic`
 - **Kimi WebBridge** (`http://127.0.0.1:10086`) for Gmail/partnership scripts only
 - **Python** `gemini_venv/` for question-bank import scripts under `supabase/import/`
 
 ### Investor demo video (always)
 - **Save final cuts only** as `Gradlify demo video.mp4` in `gradlify/` and copy to repo root.
 - **Cloud VM cannot write to Niketh's Mac Finder.** After each final cut: push to `main`, update GitHub release `gradlify-demo-v1` asset, tell Niketh the **HTTPS download link** (works in browser).
-- **Niketh's Finder Favourites folder** (has `Codes/`, `Gradlify-Partner-Overview.pptx`): `~/Downloads/Projects/Gradlify/` — he saves/downloads the video there.
+- **Niketh's Finder Favourites folder** (has `Codes/`, `Gradlify-Partner-Overview.pptx`): `~/Downloads/Projects/Gradlify/` - he saves/downloads the video there.
 - **Do not use `file://` links** from Cloud Agent chat.

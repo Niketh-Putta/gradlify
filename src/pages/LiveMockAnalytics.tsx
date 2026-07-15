@@ -161,7 +161,7 @@ export default function LiveMockAnalytics() {
   const fallbackTitle = isCombined
     ? COMBINED_SUBJECT_TITLES[combinedSubject]
     : "11+ English complete mock exam";
-  /** Stable key for fetch effects — avoids reload loops from unstable object deps. */
+  /** Stable key for fetch effects - avoids reload loops from unstable object deps. */
   const analyticsScopeKey = useMemo(
     () =>
       [
@@ -554,7 +554,7 @@ export default function LiveMockAnalytics() {
           <p className="mt-3 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-900">{error}</p>
         ) : null}
 
-        {/* Cohort stats — always visible (submissions, mean, your placement) */}
+        {/* Cohort stats - always visible (submissions, mean, your placement) */}
         {isCombined && combinedBoth ? (
           <div className="mt-3 pt-3">
             <div className="mb-3 flex items-start justify-between gap-3">
