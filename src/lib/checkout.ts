@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import { ULTRA_PLAN_ENABLED } from "@/lib/featureFlags";
+import { setPostAuthRedirect } from "@/lib/postAuthRedirect";
 import { resolveUserTrack } from "@/lib/track";
 
 type PremiumTrack = "gcse" | "eleven_plus";
@@ -11,11 +12,22 @@ export type PremiumCheckoutPlan =
   | "ultra"
   | "ultra_annual";
 
+const CHECKOUT_AFTER_AUTH = "/select-subject?intent=checkout";
+
 const sanitizeReturnPath = (value: string) => {
   if (!value) return "/home";
   if (!value.startsWith("/")) return "/home";
   if (value.startsWith("/pay/")) return "/home";
   return value;
+};
+
+const redirectToAuthForCheckout = () => {
+  setPostAuthRedirect({
+    path: CHECKOUT_AFTER_AUTH,
+    message: "Sign in to continue to Lifetime Premium checkout.",
+  });
+  const authUrl = `/auth?mode=signin&redirect=${encodeURIComponent(CHECKOUT_AFTER_AUTH)}&message=${encodeURIComponent("Sign in to continue to Lifetime Premium checkout.")}`;
+  window.location.assign(authUrl);
 };
 
 /** Public checkout is lifetime-only. Legacy plan names are coerced server-side too. */
@@ -33,7 +45,8 @@ export async function startPremiumCheckout(
 
   const sessionResponse = await supabase.auth.getSession();
   if (!sessionResponse?.data?.session) {
-    throw new Error("Please log in first");
+    redirectToAuthForCheckout();
+    return;
   }
 
   const returnTo = `${window.location.pathname}${window.location.search}${window.location.hash}`;
@@ -43,7 +56,8 @@ export async function startPremiumCheckout(
     data: { user },
   } = await supabase.auth.getUser();
   if (!user?.id) {
-    throw new Error("Please log in first");
+    redirectToAuthForCheckout();
+    return;
   }
 
   const { data: profile, error: profileError } = await supabase
