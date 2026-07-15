@@ -8,18 +8,12 @@ import { useMembership } from '@/hooks/useMembership';
 import { getSprintUpgradeCopy } from '@/lib/foundersSprint';
 import { startPremiumCheckout } from "@/lib/checkout";
 import { AI_FEATURE_ENABLED } from "@/lib/featureFlags";
-import { LIFETIME_PROMO, formatGbp, lifetimePriceWithPromo } from "@/lib/pricing";
-import {
-  LifetimePromoCodeButton,
-  LifetimePromoPrice,
-  lifetimePromoHint,
-} from "@/components/LifetimePromoCodeButton";
+import { PREMIUM_PRICING, formatGbp } from "@/lib/pricing";
 
 export function PremiumUpgradeCard() {
   const [isLoading, setIsLoading] = useState(false);
   const { isPremium, isUltra, isFounder } = useMembership();
   const sprintCopy = getSprintUpgradeCopy();
-  const promoPrice = lifetimePriceWithPromo();
 
   if (isUltra || isFounder || isPremium) {
     return null;
@@ -55,7 +49,7 @@ export function PremiumUpgradeCard() {
                   </span>
                   <Badge variant="secondary" className="bg-white/20 text-foreground border-white/30 w-fit text-xs">
                     <Sparkles className="h-3 w-3 mr-1" />
-                    Lifetime · {formatGbp(promoPrice)} with {LIFETIME_PROMO.code}
+                    Lifetime · {formatGbp(PREMIUM_PRICING.lifetime)}
                   </Badge>
                 </div>
               </div>
@@ -86,12 +80,14 @@ export function PremiumUpgradeCard() {
           </div>
 
           <div className="pt-2 space-y-3">
-            <LifetimePromoPrice
-              priceClassName="text-responsive-xl text-foreground"
-              strikeClassName="text-responsive-sm text-foreground/60"
-              suffixClassName="text-foreground/70"
-            />
-            <LifetimePromoCodeButton tone="onGradient" />
+            <div className="flex items-baseline gap-2">
+              <span className="text-responsive-xl font-black tabular-nums text-foreground">
+                {formatGbp(PREMIUM_PRICING.lifetime)}
+              </span>
+              <span className="text-xs font-bold uppercase tracking-widest text-foreground/70">
+                lifetime
+              </span>
+            </div>
 
             <Button
               onClick={handleUpgrade}
@@ -111,7 +107,6 @@ export function PremiumUpgradeCard() {
                 </>
               )}
             </Button>
-            <p className="text-[10px] font-semibold text-foreground/75 text-center">{lifetimePromoHint()}</p>
           </div>
         </CardContent>
       </div>

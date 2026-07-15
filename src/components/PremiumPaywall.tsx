@@ -5,13 +5,7 @@ import { Loader2, Check } from "lucide-react";
 import { toast } from "sonner";
 import { startPremiumCheckout } from "@/lib/checkout";
 import { useMembership } from "@/hooks/useMembership";
-import { LIFETIME_PROMO } from "@/lib/pricing";
-import {
-  LifetimePromoCodeButton,
-  LifetimePromoPrice,
-  lifetimePromoHint,
-} from "@/components/LifetimePromoCodeButton";
-import { LifetimePromoBanner } from "@/components/LifetimePromoBanner";
+import { PREMIUM_PRICING, formatGbp } from "@/lib/pricing";
 
 interface PaywallProps {
   open: boolean;
@@ -65,12 +59,6 @@ export function PremiumPaywall({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-[96vw] max-w-lg mx-auto p-0 rounded-[2rem] border-none bg-background dark:bg-slate-900 shadow-2xl overflow-y-auto max-h-[90dvh] md:max-h-[85vh]">
-        <LifetimePromoBanner
-          compact
-          className="rounded-t-[2rem]"
-          onCta={() => void handleUpgrade()}
-          ctaLabel="Get Premium"
-        />
         <div className="relative px-6 py-6 sm:px-8 sm:py-8">
           <DialogHeader className="text-center space-y-2 mb-6 sm:mb-8">
             <DialogTitle className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white">
@@ -90,15 +78,15 @@ export function PremiumPaywall({
                   Gradlify Premium Lifetime
                 </h3>
                 <p className="text-[10px] font-bold text-orange-600/70 uppercase tracking-[0.15em] mt-1">
-                  £{LIFETIME_PROMO.amountOffGbp} off · one payment · forever
+                  One payment · forever
                 </p>
               </div>
-              <LifetimePromoPrice
-                priceClassName="text-3xl sm:text-4xl text-slate-900"
-                strikeClassName="text-base text-slate-400"
-                suffixClassName="text-slate-400"
-              />
-              <LifetimePromoCodeButton tone="pill" className="w-fit" />
+              <div className="flex items-baseline gap-2">
+                <span className="text-3xl sm:text-4xl font-black tabular-nums text-slate-900">
+                  {formatGbp(PREMIUM_PRICING.lifetime)}
+                </span>
+                <span className="text-sm font-semibold text-slate-400">lifetime</span>
+              </div>
               <div className="h-px w-full bg-slate-100" />
               <ul className="space-y-3">
                 {[
@@ -128,7 +116,6 @@ export function PremiumPaywall({
                 primaryLabel
               )}
             </Button>
-            <p className="text-[10px] font-bold text-slate-400 text-center max-w-sm">{lifetimePromoHint()}</p>
             <button
               onClick={() => {
                 onComeBack?.();

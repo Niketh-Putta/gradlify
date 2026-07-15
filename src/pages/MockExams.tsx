@@ -25,9 +25,6 @@ import { FREE_CHALLENGE_LIMIT } from '@/lib/limits';
 import { AI_FEATURE_ENABLED } from '@/lib/featureFlags';
 import { resolveUserTrack } from '@/lib/track';
 import { is11Plus, isGCSE } from '@/lib/track-config';
-import { ReferralInviteDialog } from '@/components/ReferralInviteDialog';
-import { ReferralMockBalanceCard } from '@/components/ReferralMockBalanceCard';
-
 type ExamTier = 'higher' | 'foundation';
 type PaperType = 'calculator' | 'non-calculator';
 type ExamMode = 'practice' | 'mock-exam' | 'challenge';
@@ -86,7 +83,7 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
   }, [userTrack, currentSubject]);
   
   const navigate = useNavigate();
-  const { isPremium, canStartMockExam, canStartChallengeSession, dailyMockUses, dailyMockLimit, bonusMockCredits, dailyChallengeUses, dailyChallengeLimit, refreshUsage, canUse10Questions, canUse20Questions, canUse30Questions, canUse40Questions, canUseFullPaper, incrementMockUsage } = usePremium(userTrack, currentSubject);
+  const { isPremium, canStartMockExam, canStartChallengeSession, dailyMockUses, dailyMockLimit, dailyChallengeUses, dailyChallengeLimit, refreshUsage, canUse10Questions, canUse20Questions, canUse30Questions, canUse40Questions, canUseFullPaper, incrementMockUsage } = usePremium(userTrack, currentSubject);
   const challengeLimitForDisplay = dailyChallengeLimit ?? FREE_CHALLENGE_LIMIT;
 
   const storageKey = `mock_settings_${currentSubject}`;
@@ -446,14 +443,14 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
                     <>
                       {`${dailyMockUses}/${dailyMockLimit}`}
                       <span className="text-2xl font-bold text-slate-400 dark:text-slate-500 ml-3 italic">
-                        { dailyMockUses === 0 ? 'available today' : bonusMockCredits > 0 ? `${bonusMockCredits} bonus left` : 'used today' }
+                        {dailyMockUses === 0 ? 'available today' : 'used today'}
                       </span>
                     </>
                   )}
                 </h3>
               </div>
               <p className="text-[11px] font-black text-slate-400 dark:text-slate-600 uppercase tracking-widest opacity-80 pt-2">
-                {bonusMockCredits > 0 && !isPremium ? 'Daily attempt plus referral bonus mocks' : 'Mock exam attempts'}
+                Mock exam attempts
               </p>
             </div>
             
@@ -492,13 +489,6 @@ export default function MockExams({ forcedSubject }: { forcedSubject?: 'maths' |
             )}
           </div>
         </div>
-
-        {user && !isPremium && (
-          <div className="mb-8 space-y-3">
-            <ReferralInviteDialog accent={isEnglish ? 'english' : 'maths'} compact />
-            <ReferralMockBalanceCard accent={isEnglish ? 'english' : 'maths'} />
-          </div>
-        )}
 
         <div className="space-y-8 sm:space-y-10 pb-16">
           <section>

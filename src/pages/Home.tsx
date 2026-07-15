@@ -48,7 +48,6 @@ import { resolveUserTrack, UserTrack } from "@/lib/track";
 import { isAbortLikeError } from "@/lib/errors";
 import { buildTrackReadinessRows, getTrackLabel, getTrackReadinessSummaryLabel, getTrackReadinessSections } from "@/lib/trackCurriculum";
 import { isForcedStarterUser } from "@/lib/starterOverrides";
-import { ReferralInviteDialog } from "@/components/ReferralInviteDialog";
 
 const TOPIC_ICONS = {
   number: Calculator,
@@ -487,12 +486,6 @@ export function Home() {
             </div>
           </div>
         </div>
-
-        {!isPremium && (
-          <div className="mb-8">
-            <ReferralInviteDialog accent={currentSubject === 'english' ? 'english' : 'maths'} />
-          </div>
-        )}
 
         {/* Stats Cards Row */}
         <div className={cn("grid grid-cols-1 gap-6 mb-8", EXAM_READINESS_ENABLED ? "md:grid-cols-3" : "md:grid-cols-2")}>

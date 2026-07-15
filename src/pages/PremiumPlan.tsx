@@ -2,21 +2,16 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Check, Loader2, ShieldCheck, Sparkles } from "lucide-react";
 import { LogoMark } from "@/components/LogoMark";
-import { LifetimePromoBanner } from "@/components/LifetimePromoBanner";
-import { LifetimePromoCodeButton } from "@/components/LifetimePromoCodeButton";
 import { Button } from "@/components/ui/button";
 import { setPostAuthRedirect } from "@/lib/postAuthRedirect";
 import { setSignupTrack } from "@/lib/track";
 import {
-  LIFETIME_PROMO,
   PREMIUM_PRICING,
   PREMIUM_VALUE_ITEMS,
   formatGbp,
-  lifetimePriceWithPromo,
   premiumTotalValueGbp,
 } from "@/lib/pricing";
 import { supabase } from "@/integrations/supabase/client";
-import { useOfferCountdown } from "@/hooks/useOfferCountdown";
 
 const CHECKOUT_AFTER_ONBOARDING = "/select-subject?intent=checkout";
 
@@ -35,14 +30,12 @@ type PremiumPlanPageProps = {
 
 export default function PremiumPlanPage({ onAuthAction }: PremiumPlanPageProps) {
   const navigate = useNavigate();
-  const countdown = useOfferCountdown();
   const [loading, setLoading] = useState(false);
   const [checkingSession, setCheckingSession] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const totalValue = premiumTotalValueGbp();
   const listPrice = PREMIUM_PRICING.lifetime;
-  const promoPrice = lifetimePriceWithPromo();
   const savings = Math.round((totalValue - listPrice) * 100) / 100;
 
   useEffect(() => {
@@ -84,8 +77,6 @@ export default function PremiumPlanPage({ onAuthAction }: PremiumPlanPageProps) 
 
   return (
     <div className="min-h-screen bg-[#faf7f4] text-slate-900">
-      <LifetimePromoBanner onCta={() => void handleGetPremium()} ctaLabel="Get Premium" />
-
       <header className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4 sm:px-6">
         <Link to="/11-plus" className="flex items-center gap-2.5">
           <LogoMark className="h-8 w-8 shadow-sm" variant="light" />
@@ -101,11 +92,6 @@ export default function PremiumPlanPage({ onAuthAction }: PremiumPlanPageProps) 
 
       <main className="mx-auto max-w-3xl px-4 pb-20 pt-6 sm:px-6 sm:pt-10">
         <div className="mx-auto mb-8 max-w-xl text-center">
-          <div className="mx-auto mb-4 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3.5 py-1.5 text-[12px] font-medium text-slate-600 shadow-sm">
-            <span className="font-mono tabular-nums text-slate-800">{countdown.label}</span>
-            <span className="text-slate-300">·</span>
-            <span>£{LIFETIME_PROMO.amountOffGbp} off with {LIFETIME_PROMO.code}</span>
-          </div>
           <h1 className="text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
             Choose your 11+ prep plan.
           </h1>
@@ -157,12 +143,6 @@ export default function PremiumPlanPage({ onAuthAction }: PremiumPlanPageProps) 
                 </span>
               </div>
               <p className="mt-1 text-sm text-slate-500">one-time payment · lifetime access</p>
-              <p className="mt-2 text-sm font-semibold text-orange-700">
-                Or {formatGbp(promoPrice)} with code {LIFETIME_PROMO.code}
-              </p>
-              <div className="mt-3 flex justify-center">
-                <LifetimePromoCodeButton />
-              </div>
             </div>
 
             <div className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50/80 px-4 py-3 text-left text-sm text-emerald-900">
@@ -230,9 +210,7 @@ export default function PremiumPlanPage({ onAuthAction }: PremiumPlanPageProps) 
               )}
             </Button>
             <p className="mt-3 text-center text-[12px] text-slate-500">
-              Apple Pay, Google Pay or card · Have a code? Apply{" "}
-              <span className="font-mono font-semibold text-slate-700">{LIFETIME_PROMO.code}</span> at
-              checkout for £{LIFETIME_PROMO.amountOffGbp} off.
+              Apple Pay, Google Pay or card · {formatGbp(listPrice)} one-time lifetime access
             </p>
           </div>
         </section>

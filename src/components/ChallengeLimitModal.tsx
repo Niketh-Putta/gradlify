@@ -1,6 +1,5 @@
 import { PremiumPaywall } from "@/components/PremiumPaywall";
 import { FREE_CHALLENGE_LIMIT } from "@/lib/limits";
-import { LIFETIME_PROMO } from "@/lib/pricing";
 
 interface ChallengeLimitModalProps {
   open: boolean;
@@ -30,7 +29,7 @@ export function ChallengeLimitModal({
       open={open}
       onOpenChange={onOpenChange}
       title="Daily Challenge limit reached"
-      description={`You’ve reached today’s Challenge limit. Lifetime Premium (£${LIFETIME_PROMO.amountOffGbp} off with ${LIFETIME_PROMO.code}) removes this limit so you can keep competing and improving.`}
+      description="You’ve reached today’s Challenge limit. Lifetime Premium removes this limit so you can keep competing and improving."
       freeFeatures={freeFeatures}
       premiumFeatures={premiumFeatures}
       secondaryLabel="Come back tomorrow"

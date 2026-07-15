@@ -1,18 +1,10 @@
 import { supabase } from '@/integrations/supabase/client';
 
 const STORED_REFERRAL_KEY = 'gradlify:pendingReferral';
-export const REFERRAL_MOCK_REWARD = 2;
 
 type StoredReferral = {
   code: string;
   capturedAt: number;
-};
-
-export type ReferralSummary = {
-  code: string;
-  bonusMockCredits: number;
-  earnedMockCredits: number;
-  successfulReferrals: number;
 };
 
 const normalizeReferralCode = (value: string | null | undefined) =>
@@ -75,21 +67,4 @@ export const claimStoredReferral = async (userCreatedAt?: string | null) => {
     reason: typeof data?.reason === 'string' ? data.reason : null,
     rewardedCredits: Number(data?.rewarded_credits ?? 0),
   };
-};
-
-export const getReferralSummary = async (): Promise<ReferralSummary> => {
-  const { data, error } = await (supabase as any).rpc('get_referral_summary');
-  if (error) throw error;
-
-  return {
-    code: String(data?.code ?? ''),
-    bonusMockCredits: Number(data?.bonus_mock_credits ?? 0),
-    earnedMockCredits: Number(data?.earned_mock_credits ?? 0),
-    successfulReferrals: Number(data?.successful_referrals ?? 0),
-  };
-};
-
-export const buildReferralUrl = (code: string) => {
-  const origin = typeof window === 'undefined' ? 'https://gradlify.com' : window.location.origin;
-  return `${origin}/11-plus?ref=${encodeURIComponent(code)}`;
 };
