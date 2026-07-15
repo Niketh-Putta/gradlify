@@ -26,6 +26,10 @@ function getStoredExpiry() {
   return storeExpiry(getFreshExpiry());
 }
 
+function pad2(n: number) {
+  return String(n).padStart(2, "0");
+}
+
 function formatRemaining(ms: number) {
   const totalSeconds = Math.max(0, Math.floor(ms / 1000));
   const hours = Math.floor(totalSeconds / 3600);
@@ -39,7 +43,8 @@ function formatRemaining(ms: number) {
     totalSeconds,
     remainingMs: Math.max(0, ms),
     progressPercent: Math.max(0, Math.min(100, (ms / DAY_MS) * 100)),
-    label: `${hours}h ${String(minutes).padStart(2, "0")}m ${String(seconds).padStart(2, "0")}s left`,
+    /** e.g. "16:45:37 left" */
+    label: `${pad2(hours)}:${pad2(minutes)}:${pad2(seconds)} left`,
   };
 }
 

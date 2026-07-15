@@ -19,6 +19,15 @@ export const PREMIUM_PRICING = {
   annualSavings: 269,
 } as const;
 
+/** Landing banner code: £50 off lifetime Premium at Stripe Checkout. */
+export const LIFETIME_PROMO = {
+  code: "LIFETIME50",
+  amountOffGbp: 50,
+} as const;
+
+export const lifetimePriceWithPromo = () =>
+  Math.round((PREMIUM_PRICING.lifetime - LIFETIME_PROMO.amountOffGbp) * 100) / 100;
+
 export const ULTRA_PRICING = {
   monthly: 249.99,
   annual: 2499.99,

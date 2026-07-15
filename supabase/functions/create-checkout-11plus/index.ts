@@ -65,56 +65,58 @@ const PREMIUM_ANNUAL_OFFER_PRICE_IDS = {
   test: "price_1TmF6FHZeiDDkqObwynk4FQi",
 } as const;
 
-const WEEKLY_PROMO_CODE = "20percent";
-const WEEKLY_PROMO_DISCOUNT_PENCE = 200;
-const WEEKLY_PROMO_CURRENCY = "gbp";
+/** Landing banner code: £50 off lifetime Premium (£149.99 → £99.99). */
+const LIFETIME_PROMO_CODE = "LIFETIME50";
+const LIFETIME_PROMO_DISCOUNT_PENCE = 5000;
+const LIFETIME_PROMO_CURRENCY = "gbp";
 
-const isMatchingWeeklyPromoCoupon = (coupon: Stripe.Coupon) =>
+const resolveCoupon = async (
+  stripe: Stripe,
+  coupon: string | Stripe.Coupon | null | undefined,
+): Promise<Stripe.Coupon | null> => {
+  if (!coupon) return null;
+  if (typeof coupon === "string") {
+    return await stripe.coupons.retrieve(coupon);
+  }
+  return coupon;
+};
+
+const isMatchingLifetimePromoCoupon = (coupon: Stripe.Coupon) =>
   coupon.duration === "once" &&
-  coupon.amount_off === WEEKLY_PROMO_DISCOUNT_PENCE &&
-  coupon.currency?.toLowerCase() === WEEKLY_PROMO_CURRENCY;
+  coupon.amount_off === LIFETIME_PROMO_DISCOUNT_PENCE &&
+  coupon.currency?.toLowerCase() === LIFETIME_PROMO_CURRENCY;
 
-const ensureWeeklyPromoCode = async (stripe: Stripe) => {
+const ensureLifetimePromoCode = async (stripe: Stripe) => {
   const existingCodes = await stripe.promotionCodes.list({
-    code: WEEKLY_PROMO_CODE,
+    code: LIFETIME_PROMO_CODE,
     limit: 20,
+    expand: ["data.coupon"],
   });
 
-  const activeCompatibleCode = existingCodes.data.find(
-    (promotionCode) =>
-      promotionCode.active &&
-      promotionCode.coupon &&
-      isMatchingWeeklyPromoCoupon(promotionCode.coupon),
-  );
-  if (activeCompatibleCode) {
-    return activeCompatibleCode.id;
-  }
-
-  const inactiveCompatibleCode = existingCodes.data.find(
-    (promotionCode) =>
-      !promotionCode.active &&
-      promotionCode.coupon &&
-      isMatchingWeeklyPromoCoupon(promotionCode.coupon),
-  );
-  if (inactiveCompatibleCode) {
-    const reactivated = await stripe.promotionCodes.update(inactiveCompatibleCode.id, { active: true });
+  for (const promotionCode of existingCodes.data) {
+    const coupon = await resolveCoupon(stripe, promotionCode.coupon);
+    if (!coupon || !isMatchingLifetimePromoCoupon(coupon)) continue;
+    if (promotionCode.active) {
+      return promotionCode.id;
+    }
+    const reactivated = await stripe.promotionCodes.update(promotionCode.id, { active: true });
     return reactivated.id;
   }
 
   const conflictingActiveCode = existingCodes.data.find((promotionCode) => promotionCode.active);
   if (conflictingActiveCode) {
-    throw new Error(`Promo code "${WEEKLY_PROMO_CODE}" exists with a different Stripe setup.`);
+    throw new Error(`Promo code "${LIFETIME_PROMO_CODE}" exists with a different Stripe setup.`);
   }
 
   const coupon = await stripe.coupons.create({
-    amount_off: WEEKLY_PROMO_DISCOUNT_PENCE,
-    currency: WEEKLY_PROMO_CURRENCY,
+    amount_off: LIFETIME_PROMO_DISCOUNT_PENCE,
+    currency: LIFETIME_PROMO_CURRENCY,
     duration: "once",
-    name: "Weekly first week £2 off",
-    metadata: { gradlify_offer: "weekly_first_week_2gbp_off" },
+    name: "Lifetime Premium £50 off",
+    metadata: { gradlify_offer: "lifetime_50gbp_off" },
   });
   const promotionCode = await stripe.promotionCodes.create({
-    code: WEEKLY_PROMO_CODE,
+    code: LIFETIME_PROMO_CODE,
     coupon: coupon.id,
     active: true,
   });
@@ -398,6 +400,17 @@ serve(async (req) => {
     }
     const returnTo = sanitizeReturnPath(rawReturnTo);
     const encodedReturnTo = encodeURIComponent(returnTo);
+
+    // Ensure LIFETIME50 (£50 off) exists so parents can paste it on Checkout.
+    try {
+      const promoId = await ensureLifetimePromoCode(stripe);
+      logStep("Lifetime promo ready", { promoId, code: LIFETIME_PROMO_CODE });
+    } catch (promoError) {
+      logStep("Warning: could not ensure lifetime promo code", {
+        message: promoError instanceof Error ? promoError.message : String(promoError),
+      });
+    }
+
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       line_items: [
@@ -414,12 +427,12 @@ serve(async (req) => {
         },
       ],
       mode: "payment",
-      allow_promotion_codes: false,
+      allow_promotion_codes: true,
       automatic_tax: { enabled: false },
       payment_method_collection: "always",
       custom_text: {
         submit: {
-          message: "Unlock lifetime Premium",
+          message: `Unlock lifetime Premium — use code ${LIFETIME_PROMO_CODE} for £50 off`,
         },
       },
       client_reference_id: user.id,
