@@ -207,7 +207,7 @@ async function main() {
   }
 
   await linkMock2Event(paperId);
-  console.log(`Done — ${inserted} inserted, ${updated} updated (${inserted + updated} total).`);
+  console.log(`Done - ${inserted} inserted, ${updated} updated (${inserted + updated} total).`);
   if (payload.qa_review?.fit_for_11plus_maths || payload.qa_review?.fit_for_11plus_english) {
     console.log("QA status:", payload.qa_review.status);
   }

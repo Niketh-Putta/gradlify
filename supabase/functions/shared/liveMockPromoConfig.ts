@@ -23,7 +23,7 @@ export const LIVE_MOCK_SIGNUP_DISPLAY_BY_SLUG: Record<string, LiveMockSignupDisp
 export const getLiveMockSignupDisplayConfig = (mockSlug: string): LiveMockSignupDisplayConfig | null =>
   LIVE_MOCK_SIGNUP_DISPLAY_BY_SLUG[mockSlug] ?? null;
 
-/** @deprecated Promos disabled — always null. */
+/** @deprecated Promos disabled - always null. */
 export const getLiveMockPromoConfig = (_mockSlug: string): null => null;
 
 export const getDisplayedLiveMockSignupCount = (realCount: number, mockSlug: string): number => {
@@ -32,8 +32,8 @@ export const getDisplayedLiveMockSignupCount = (realCount: number, mockSlug: str
   return Math.max(config.minDisplayedSignups, realCount + config.signupDisplayOffset);
 };
 
-/** @deprecated Promos disabled — always 0. */
+/** @deprecated Promos disabled - always 0. */
 export const getPromoSpotsRemaining = (_timesRedeemed: number, _mockSlug: string): number => 0;
 
-/** @deprecated Promos disabled — always 0. */
+/** @deprecated Promos disabled - always 0. */
 export const getPromoSpotsRemainingFromDisplay = (_displayedSignupCount: number, _mockSlug: string): number => 0;

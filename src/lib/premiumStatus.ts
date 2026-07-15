@@ -106,7 +106,7 @@ export async function getPremiumStatus(userId: string): Promise<PremiumStatus> {
 }
 
 /**
- * Live mocks are included for paying Premium members only — not free trials.
+ * Live mocks are included for paying Premium members only - not free trials.
  * Founders and active (non-trial) subscribers get free registration; trial users
  * must pay the one-off mock fee or upgrade to paid Premium first.
  */

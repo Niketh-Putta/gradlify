@@ -93,7 +93,7 @@ export async function startCombinedMockCheckout(
 export async function registerForCombinedMock(options: {
   userId: string;
   email: string;
-  /** Paying Premium (not trial) — gets free registration. */
+  /** Paying Premium (not trial) - gets free registration. */
   hasPaidPremiumLiveMockAccess: boolean;
   returnTo?: string;
   mockSlug?: string;
@@ -133,7 +133,7 @@ export async function fetchCombinedMockSignup(
 }
 
 /* ───────────────────────────────────────────────────────────────────────────
- * Second combined mock ("mock 2") — thin wrappers around the generalised
+ * Second combined mock ("mock 2") - thin wrappers around the generalised
  * helpers above, bound to SECOND_MOCK_EVENT_SLUG so callers never risk passing
  * the wrong slug and touching mock 1.
  * ─────────────────────────────────────────────────────────────────────────── */

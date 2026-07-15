@@ -1,7 +1,7 @@
 /**
  * Single source of truth for the combined 11+ live mock (Maths + break + English).
  *
- * STRUCTURE ONLY — question content is added later. Section names/counts are
+ * STRUCTURE ONLY - question content is added later. Section names/counts are
  * placeholders that can change once the real papers are finalised, but the
  * totals here drive the local prototype, the (future) Supabase seed, and the
  * authoritative timers, so keep them consistent everywhere by importing from
@@ -145,7 +145,7 @@ export const MATHS_PAPER: MockPaper = {
 
 /**
  * Mock 2 maths paper (`both_subjects_live_mock_2`). Content lives in
- * `docs/live-mock-2-maths-paper.json` — QA-approved, imported to Supabase.
+ * `docs/live-mock-2-maths-paper.json` - QA-approved, imported to Supabase.
  */
 export const MATHS_PAPER_MOCK2: MockPaper = {
   slug: "both_subjects_maths_mock_2",

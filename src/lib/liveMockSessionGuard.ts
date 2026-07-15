@@ -1,5 +1,5 @@
 /**
- * Live mock sitting — localStorage hydrate/persist guards.
+ * Live mock sitting - localStorage hydrate/persist guards.
  *
  * Pattern: hydrate once per storage key (prefer useLayoutEffect), block persist
  * until hydrated, never show blocking loaders on silent re-checks mid-exam.

@@ -26,7 +26,7 @@ const INCLUDED = [
   "Unlimited Challenge questions",
   "Revision notes and readiness tracking",
   "Parent-friendly weak-topic reports",
-  "Lifetime access — no renewals",
+  "Lifetime access - no renewals",
 ] as const;
 
 type PremiumPlanPageProps = {
@@ -110,11 +110,11 @@ export default function PremiumPlanPage({ onAuthAction }: PremiumPlanPageProps) 
             Choose your 11+ prep plan.
           </h1>
           <p className="mt-3 text-[15px] leading-relaxed text-slate-600">
-            Lifetime Gradlify Premium is the full self-study system for selective-school prep —
+            Lifetime Gradlify Premium is the full self-study system for selective-school prep -
             mocks, weak-topic diagnosis, and parent clarity in one place.
           </p>
           <ul className="mt-5 flex flex-col items-center gap-2 text-[13px] font-medium text-slate-700 sm:flex-row sm:flex-wrap sm:justify-center sm:gap-x-5">
-            {["Unlimited mocks & practice", "Parent readiness reports", "Pay once — keep forever"].map(
+            {["Unlimited mocks & practice", "Parent readiness reports", "Pay once - keep forever"].map(
               (line) => (
                 <li key={line} className="inline-flex items-center gap-1.5">
                   <Check className="h-3.5 w-3.5 text-orange-500" strokeWidth={3} />

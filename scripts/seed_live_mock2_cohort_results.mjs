@@ -364,7 +364,7 @@ async function main() {
     const submittedAt = new Date(baseSubmitted + i * 7 * 60 * 1000).toISOString();
     const durationSeconds = 2400 + Math.floor(Math.random() * 480);
 
-    console.log(`${i + 1}. ${p.name} (${email}) — maths ${p.maths}/60, english ${p.english}/60`);
+    console.log(`${i + 1}. ${p.name} (${email}) - maths ${p.maths}/60, english ${p.english}/60`);
 
     await seedPaperAttempt({
       userId: id,

@@ -432,7 +432,7 @@ serve(async (req) => {
       payment_method_collection: "always",
       custom_text: {
         submit: {
-          message: `Unlock lifetime Premium — use code ${LIFETIME_PROMO_CODE} for £50 off`,
+          message: `Unlock lifetime Premium - use code ${LIFETIME_PROMO_CODE} for £50 off`,
         },
       },
       client_reference_id: user.id,

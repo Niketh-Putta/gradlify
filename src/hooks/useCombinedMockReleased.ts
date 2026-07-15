@@ -6,7 +6,7 @@ const MAX_TIMEOUT_MS = 2_147_483_647;
 
 /**
  * Returns whether the combined live mock has gone live, and flips to `true`
- * automatically the moment the release time passes — no page reload required.
+ * automatically the moment the release time passes - no page reload required.
  */
 export function useCombinedMockReleased(): boolean {
   const [released, setReleased] = useState<boolean>(() => isCombinedMockReleased());

@@ -54,10 +54,10 @@ Synced from Codex knowledge interview. Cursor reads this for all Gradlify work.
 
 ## Live mock engineering (do not repeat incidents)
 
-**14 Jun / Mock 2 sitting flows** — Maths → break → English must never flicker back to the registration lobby mid-exam.
+**14 Jun / Mock 2 sitting flows** - Maths → break → English must never flicker back to the registration lobby mid-exam.
 
-- **Incident (21 Jun 2026):** Mock 2 maths flicker at Q45 — localStorage restore/persist loop + eligibility spinner during sitting. Fixed in `LocalCombinedMock.tsx` + hardened in `EnglishSplitViewDemo.tsx`.
+- **Incident (21 Jun 2026):** Mock 2 maths flicker at Q45 - localStorage restore/persist loop + eligibility spinner during sitting. Fixed in `LocalCombinedMock.tsx` + hardened in `EnglishSplitViewDemo.tsx`.
 - **Before changing sitting code:** read `docs/LIVE-MOCK-ENGINEERING.md` and run `npm run verify:mock-session`.
 - **Mandatory pattern:** hydrate localStorage once (`useLayoutEffect`), block persist until hydrated, no blocking loaders after registration mid-exam.
 - **Shared helpers:** `src/lib/liveMockSessionGuard.ts`.
-- **Pricing:** Live mocks are **£14.99 full price only** — discount/promo codes (LEVELFIELD, MOCK2) are disabled in UI and Stripe checkout.
+- **Pricing:** Live mocks are **£14.99 full price only** - discount/promo codes (LEVELFIELD, MOCK2) are disabled in UI and Stripe checkout.

@@ -15,7 +15,7 @@ type LifetimePromoBannerProps = {
 };
 
 /**
- * Minimal dark promo strip — same pattern as common SaaS top bars:
+ * Minimal dark promo strip - same pattern as common SaaS top bars:
  * copy → code pill → accent CTA, plus a live countdown.
  * Content group is centered horizontally as one unit.
  */

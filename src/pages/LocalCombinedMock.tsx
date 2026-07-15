@@ -115,7 +115,7 @@ function formatTime(totalSeconds: number) {
   return `${minutes}:${String(seconds % 60).padStart(2, "0")}`;
 }
 
-/** Stable localStorage keys — must match submitMaths lookup (not display labels like "Non-calculator Maths"). */
+/** Stable localStorage keys - must match submitMaths lookup (not display labels like "Non-calculator Maths"). */
 const MATHS_ANSWER_PREFIX = "maths";
 const ENGLISH_ANSWER_PREFIX = "english";
 /** Buggy prefix used before fix; still read on submit so in-flight sittings are not lost. */
@@ -214,7 +214,7 @@ function applySavedMockState(
 
 /*
  * ───────────────────────────────────────────────────────────────────────────
- * REMEDIATION POPUP COPY — EDIT THE WORDING HERE (single source of truth).
+ * REMEDIATION POPUP COPY - EDIT THE WORDING HERE (single source of truth).
  *
  * Niketh: this is the ONLY place the apology popup wording lives. Change the
  * title, body (including the £5 refund line) and button labels here and it
@@ -242,7 +242,7 @@ type AffectedMathsState = {
 const NOT_AFFECTED: AffectedMathsState = { affected: false, attemptId: null, mathsPaperId: null };
 
 /**
- * AFFECTED-COHORT DETECTION — designed for ZERO false positives.
+ * AFFECTED-COHORT DETECTION - designed for ZERO false positives.
  *
  * A user is "affected" by the key-mismatch Maths bug ONLY when their
  * `both_subjects_maths` attempt satisfies ALL of:
@@ -253,7 +253,7 @@ const NOT_AFFECTED: AffectedMathsState = { affected: false, attemptId: null, mat
  *
  * Anyone with a real score (answered_count > 0 or any non-null selected_option),
  * an in-progress attempt, no Maths attempt at all, or ANY read error returns
- * `affected: false` — so the apology popup can never show to the wrong person.
+ * `affected: false` - so the apology popup can never show to the wrong person.
  * The check runs against the DB (not client/localStorage state) every time.
  */
 async function detectAffectedMathsAttempt(userId: string): Promise<AffectedMathsState> {
@@ -279,7 +279,7 @@ async function detectAffectedMathsAttempt(userId: string): Promise<AffectedMaths
     const row = attempt as { id: string; status: string; answered_count: number | null } | null;
     // Condition 1 + 2: must have a SUBMITTED Maths attempt. (Never sat / in-progress => safe.)
     if (!row || row.status !== "submitted") return { ...NOT_AFFECTED, mathsPaperId };
-    // Condition 3: a real score means answered_count > 0 — definitely not affected.
+    // Condition 3: a real score means answered_count > 0 - definitely not affected.
     if ((row.answered_count ?? 0) !== 0) return { ...NOT_AFFECTED, mathsPaperId };
 
     // Condition 4 (authoritative final guard): confirm against raw answer rows that
@@ -637,7 +637,7 @@ export default function LocalCombinedMock({
 
   useEffect(() => {
     // Only clear saved progress once maths is submitted and the student is back on the
-    // lobby — never yank them off the maths paper or break screen mid-sitting.
+    // lobby - never yank them off the maths paper or break screen mid-sitting.
     if (mathsAttemptStatus === "submitted" && !resitMode && phase === "instructions") {
       window.localStorage.removeItem(storageKey);
       hydratedStorageKeyRef.current = storageKey;
@@ -728,7 +728,7 @@ export default function LocalCombinedMock({
 
   // Ensure there is an `in_progress` both_subjects_maths attempt to attach answers
   // to. Reuses the single row per (paper_id, user_id) via upsert onConflict, so a
-  // re-sit RESETS the existing (blank, broken) attempt in place — it never creates
+  // re-sit RESETS the existing (blank, broken) attempt in place - it never creates
   // a second attempt row, which keeps cohort counts and rank to one row per user.
   const ensureInProgressAttempt = useCallback(async (): Promise<string | null> => {
     if (autosaveAttemptIdRef.current) return autosaveAttemptIdRef.current;
@@ -943,7 +943,7 @@ export default function LocalCombinedMock({
         return;
       }
       if (resitMode) {
-        // Maths-only re-sit: English is already done — show the maths results
+        // Maths-only re-sit: English is already done - show the maths results
         // screen instead of routing back through the break / English paper.
         window.localStorage.removeItem(storageKey);
         setResitMode(false);
@@ -1084,7 +1084,7 @@ export default function LocalCombinedMock({
   // Maths-only re-sit for an affected user. English is already done, so this runs
   // ONLY the Maths phase and ends on the maths results screen. ensureInProgressAttempt
   // upserts the SAME attempt row (onConflict paper_id,user_id), resetting the blank
-  // broken attempt in place — no second attempt row, so cohort counts / rank stay 1:1.
+  // broken attempt in place - no second attempt row, so cohort counts / rank stay 1:1.
   const startMathsResit = () => {
     setRemediationOpen(false);
     mathsSubmittedRef.current = false;
@@ -1301,7 +1301,7 @@ export default function LocalCombinedMock({
                 <div className="mt-6 space-y-3">
                   {remediation.affected ? (
                     <>
-                      {/* Persistent redo entry point for affected users — always
+                      {/* Persistent redo entry point for affected users - always
                           available on return visits, even if the popup was dismissed. */}
                       <div className="rounded-xl border border-amber-300 bg-amber-50 p-4">
                         <div className="flex items-center gap-2 font-bold text-amber-900">

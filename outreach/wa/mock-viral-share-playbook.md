@@ -13,19 +13,19 @@
 
 ## Send sequence
 
-### Message 1 — Voice note (15 sec)
+### Message 1 - Voice note (15 sec)
 
 > "Quick one. Sunday's live mock has about 10 spots left at £9.99. After that it's £14.99. Nearly 50 families already in. Forward the next message to one parent in your year chat if they'll find it useful."
 
-### Message 2 — Poster + caption
+### Message 2 - Poster + caption
 
 `mock-gc-caption.txt` + poster image.
 
-### Message 3 — Forward ask (2 min later)
+### Message 3 - Forward ask (2 min later)
 
 `mock-forward-ask.txt`
 
-### Message 4 — When spots are low or gone
+### Message 4 - When spots are low or gone
 
 `mock-spots-reminder.txt` (gets forwarded again).
 
@@ -44,6 +44,6 @@
 
 ## Multipliers
 
-1. DM 5 engaged parents: "10 spots left at £9.99 — mind forwarding to your year chat?"
+1. DM 5 engaged parents: "10 spots left at £9.99 - mind forwarding to your year chat?"
 2. Post in 2–3 year-group chats you're already in
 3. Instagram story when spots hit 5, 3, 1
