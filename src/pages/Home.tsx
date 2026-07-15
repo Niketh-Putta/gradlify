@@ -898,7 +898,7 @@ export function Home() {
                   </div>
 
                   <div className="w-full lg:w-auto">
-                    <PremiumUpgradeButton variant="homeBanner" label="Get Lifetime Premium" />
+                    <PremiumUpgradeButton variant="homeBanner" />
                   </div>
                 </div>
 

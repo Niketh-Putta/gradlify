@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, FileText } from "lucide-react";
 import { Link } from "react-router-dom";
 import { AI_FEATURE_ENABLED } from "@/lib/featureFlags";
-import { PREMIUM_PRICING } from "@/lib/pricing";
+import { PREMIUM_PRICING, LIFETIME_PROMO, lifetimePriceWithPromo } from "@/lib/pricing";
 
 export default function Terms() {
   return (
@@ -87,7 +87,7 @@ export default function Terms() {
                 </div>
                 <div className="bg-primary/10 rounded-lg p-4">
                   <h4 className="mb-2 flex flex-wrap items-center gap-1.5 font-semibold">
-                    Premium Plan (£{PREMIUM_PRICING.lifetime} one-time for lifetime Gradlify Premium):
+                    Premium Plan (£{PREMIUM_PRICING.lifetime} one-time for lifetime Gradlify Premium; limited-time code {LIFETIME_PROMO.code} for £{LIFETIME_PROMO.amountOffGbp} off = £{lifetimePriceWithPromo()}):
                   </h4>
                   <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
                     <li>{AI_FEATURE_ENABLED ? '100 AI questions per day' : '100 questions per day'}</li>
@@ -115,6 +115,7 @@ export default function Terms() {
                 <h2 className="text-xl font-semibold mb-3">6. Payment and Subscriptions</h2>
                 <ul className="list-disc list-inside space-y-2 text-muted-foreground">
                   <li>New Premium purchases are a one-time {`£${PREMIUM_PRICING.lifetime}`} lifetime payment</li>
+                  <li>Promo code {LIFETIME_PROMO.code} reduces the lifetime price by £{LIFETIME_PROMO.amountOffGbp} when entered at Stripe Checkout</li>
                   <li>Existing weekly or annual subscriptions continue under their original terms until cancelled</li>
                   <li>Payments are processed securely through Stripe</li>
                   <li>Refunds are subject to our refund policy</li>

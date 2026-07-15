@@ -1,5 +1,6 @@
 import { PremiumPaywall } from "@/components/PremiumPaywall";
 import { FREE_PRACTICE_LIMIT } from "@/lib/limits";
+import { LIFETIME_PROMO } from "@/lib/pricing";
 
 interface PracticeLimitModalProps {
   open: boolean;
@@ -29,7 +30,7 @@ export function PracticeLimitModal({
       open={open}
       onOpenChange={onOpenChange}
       title="Daily practice limit reached"
-      description="You’ve reached your free practice limit for today. Lifetime Premium removes the limit so you can keep building confidence."
+      description={`You’ve reached your free practice limit for today. Lifetime Premium (£${LIFETIME_PROMO.amountOffGbp} off with ${LIFETIME_PROMO.code}) removes the limit so you can keep building confidence.`}
       freeFeatures={freeFeatures}
       premiumFeatures={premiumFeatures}
       onComeBack={onComeBack}

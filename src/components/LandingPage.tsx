@@ -1,23 +1,25 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion, useReducedMotion, type Variants } from "framer-motion";
-import { ArrowRight, Check, CheckCircle, Copy, ShieldCheck, Sparkles, MousePointer2, Compass, Layers, SlidersHorizontal, AlertTriangle, Trophy, Volume2, VolumeX, Pause } from "lucide-react";
-import { toast } from "sonner";
-
-import { cn } from "@/lib/utils";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Button } from "@/components/ui/button";
-
-import { LogoMark } from "@/components/LogoMark";
-import { supabase } from "@/integrations/supabase/client";
-import { getSprintUpgradeCopy } from "@/lib/foundersSprint";
-import { AI_FEATURE_ENABLED, EXAM_READINESS_ENABLED, ULTRA_PLAN_ENABLED } from "@/lib/featureFlags";
-import { getDashboardPath, setSignupTrack } from "@/lib/track";
+import { ArrowRight, CheckCircle, ShieldCheck, Sparkles, MousePointer2, Compass, Layers, SlidersHorizontal, AlertTriangle, Trophy, Volume2, VolumeX, Pause } from "lucide-react";
 import { PREMIUM_PRICING, ULTRA_PRICING, LIFETIME_PROMO, formatGbp, lifetimePriceWithPromo } from "@/lib/pricing";
-import { useOfferCountdown } from "@/hooks/useOfferCountdown";
+import {
+  LifetimePromoCodeButton,
+  lifetimePromoHint,
+} from "@/components/LifetimePromoCodeButton";
+
 import { setPostAuthRedirect } from "@/lib/postAuthRedirect";
 import { captureReferralFromSearch } from "@/lib/referrals";
 import { getPartnerReferralLabel, readStoredReferralCode } from "@/lib/partnerRefs";
+import { useOfferCountdown } from "@/hooks/useOfferCountdown";
+import { AI_FEATURE_ENABLED, EXAM_READINESS_ENABLED, ULTRA_PLAN_ENABLED } from "@/lib/featureFlags";
+import { getDashboardPath, setSignupTrack } from "@/lib/track";
+import { getSprintUpgradeCopy } from "@/lib/foundersSprint";
+import { supabase } from "@/integrations/supabase/client";
+import { LogoMark } from "@/components/LogoMark";
+import { cn } from "@/lib/utils";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
 
 /** Same clips as in `src/assets/`, but loaded from `/public` so they are not embedded in the JS bundle. */
 const PRACTICE_SHOWCASE_VIDEO = "/videos/practice-question.mov";
@@ -246,19 +248,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
   const dashboardPath = getDashboardPath();
 
   const offerCountdown = useOfferCountdown();
-  const [promoCopied, setPromoCopied] = useState(false);
   const lifetimePromoPrice = lifetimePriceWithPromo();
-
-  const handleCopyPromoCode = async () => {
-    try {
-      await navigator.clipboard.writeText(LIFETIME_PROMO.code);
-      setPromoCopied(true);
-      toast.success(`Copied ${LIFETIME_PROMO.code} — paste it at checkout for £${LIFETIME_PROMO.amountOffGbp} off`);
-      window.setTimeout(() => setPromoCopied(false), 2000);
-    } catch {
-      toast.error("Could not copy code. Type LIFETIME50 at checkout.");
-    }
-  };
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -564,15 +554,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                 </span>
               </div>
               <div className="flex flex-wrap items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => void handleCopyPromoCode()}
-                  className="inline-flex items-center gap-1.5 rounded-md border border-amber-300/50 bg-amber-300/15 px-2.5 py-1 text-[11px] font-black uppercase tracking-[0.12em] text-amber-100 transition hover:bg-amber-300/25 sm:text-xs"
-                  aria-label={`Copy promo code ${LIFETIME_PROMO.code}`}
-                >
-                  Code <span className="font-mono tracking-normal normal-case text-white">{LIFETIME_PROMO.code}</span>
-                  {promoCopied ? <Check className="h-3.5 w-3.5 text-emerald-300" /> : <Copy className="h-3.5 w-3.5" />}
-                </button>
+                <LifetimePromoCodeButton tone="dark" />
                 <button
                   type="button"
                   onClick={handleViewPlans}
@@ -1211,7 +1193,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                         ["Weak-topic diagnosis", "yes", "partial", "partial", "partial"],
                         ["Parent-ready report", "yes", "partial", "partial", "partial"],
                         ["Built from selective-school experience", "yes", "no", "no", "no"],
-                        ["Focused 11+ system at £149.99 lifetime", "yes", "no", "no", "yes"],
+                        ["Focused 11+ system at £99.99 with LIFETIME50", "yes", "no", "no", "yes"],
                         ["Clear next-step plan after each mock", "yes", "partial", "partial", "no"],
                       ].map(([feature, gradlify, atom, explore, bond]) => (
                         <tr key={feature} className={cn("border-b last:border-b-0", isDark ? "border-white/10" : "border-slate-100")}>
@@ -1333,11 +1315,11 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                       <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
                         <div>
                           <p className="text-[11px] font-black uppercase tracking-[0.18em] text-white/80">Why parents switch</p>
-                          <p className="mt-1 text-sm font-semibold text-white">One tutor hour costs £40–60. Premium is {formatGbp(PREMIUM_PRICING.lifetime)} once.</p>
+                          <p className="mt-1 text-sm font-semibold text-white">One tutor hour costs £40–60. Premium is {formatGbp(lifetimePromoPrice)} with {LIFETIME_PROMO.code}.</p>
                         </div>
                         <div className="text-left sm:text-right">
-                          <div className="text-2xl font-black text-white">{formatGbp(PREMIUM_PRICING.lifetime)}</div>
-                          <div className="text-[11px] font-bold uppercase tracking-[0.14em] text-white/75">lifetime</div>
+                          <div className="text-2xl font-black text-white">{formatGbp(lifetimePromoPrice)}</div>
+                          <div className="text-[11px] font-bold uppercase tracking-[0.14em] text-white/75">with promo</div>
                         </div>
                       </div>
                     </div>
@@ -1367,7 +1349,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                       <ArrowRight className="ml-2 h-5 w-5" />
                     </Button>
                     <div className="mt-2 sm:mt-3 text-[11px] sm:text-xs text-white/80 text-center">
-                      Paste <span className="font-mono font-bold text-white">{LIFETIME_PROMO.code}</span> at checkout for £{LIFETIME_PROMO.amountOffGbp} off
+                      {lifetimePromoHint()}
                     </div>
                   </div>
                 </motion.div>

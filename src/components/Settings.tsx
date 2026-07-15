@@ -57,12 +57,17 @@ const EditOnboardingDetailsModal = React.lazy(() =>
 );
 
 import { startPremiumCheckout } from "@/lib/checkout";
-import { PREMIUM_PRICING, ULTRA_PRICING, formatGbp } from "@/lib/pricing";
+import { PREMIUM_PRICING, ULTRA_PRICING, formatGbp, lifetimePriceWithPromo, LIFETIME_PROMO } from "@/lib/pricing";
 import { AI_FEATURE_ENABLED, ULTRA_PLAN_ENABLED } from "@/lib/featureFlags";
 import { UserTrack } from "@/lib/track";
 import { getTrackCopy } from "@/lib/trackContent";
 import { isAbortLikeError } from "@/lib/errors";
 import { ReferralCard } from "@/components/ReferralCard";
+import {
+  LifetimePromoCodeButton,
+  LifetimePromoPrice,
+  lifetimePromoHint,
+} from "@/components/LifetimePromoCodeButton";
 
 interface Profile {
   id: string;
@@ -198,7 +203,7 @@ export function Settings({ user, onBackToChat, onSignOut }: SettingsProps) {
   const isSupportAdmin = user?.email?.toLowerCase() === 'team@gradlify.com';
   const premiumSettingsTitle = "Upgrade to Gradlify Premium";
   const premiumSettingsDescription =
-    "One payment for lifetime Gradlify Premium on your current track.";
+    `One payment for lifetime Gradlify Premium — ${formatGbp(lifetimePriceWithPromo())} with ${LIFETIME_PROMO.code} (£${LIFETIME_PROMO.amountOffGbp} off).`;
   const premiumSettingsCta = "Upgrade to Gradlify Premium";
   const TRACK_FEATURES: Record<UserTrack, string[]> = {
     gcse: [
@@ -904,16 +909,27 @@ export function Settings({ user, onBackToChat, onSignOut }: SettingsProps) {
                           <p className="text-xs text-slate-400 mt-1">Foundational mastery and readiness tools.</p>
                         </div>
                         <div className="text-right mt-1">
-                          <span className="text-xl font-bold text-white">{formatGbp(PREMIUM_PRICING.lifetime)}</span>
-                          <span className="text-[10px] text-slate-400 block mt-0.5 font-medium tracking-wide">lifetime · one-time</span>
+                          <LifetimePromoPrice
+                            className="flex-col items-end"
+                            priceClassName="text-xl text-white"
+                            strikeClassName="text-xs text-slate-500"
+                            showSuffix={false}
+                          />
+                          <span className="text-[10px] text-slate-400 block mt-0.5 font-medium tracking-wide">
+                            lifetime · {LIFETIME_PROMO.code}
+                          </span>
                         </div>
                       </div>
                       
-                      <ul className="space-y-2 mb-6 text-xs text-slate-300 whitespace-normal">
+                      <ul className="space-y-2 mb-4 text-xs text-slate-300 whitespace-normal">
                         <li className="flex gap-2 items-start"><Shield className="h-3.5 w-3.5 text-primary shrink-0 mt-[2px]" /> <span>Unlimited mock exams and challenge questions</span></li>
                         <li className="flex gap-2 items-start"><Shield className="h-3.5 w-3.5 text-primary shrink-0 mt-[2px]" /> <span>Unlimited mock exam size</span></li>
                         <li className="flex gap-2 items-start"><Shield className="h-3.5 w-3.5 text-primary shrink-0 mt-[2px]" /> <span>Lifetime Premium — pay once, keep access</span></li>
                       </ul>
+
+                      <div className="mb-3">
+                        <LifetimePromoCodeButton tone="dark" />
+                      </div>
 
                       <Button 
                         onClick={() => handleUpgradeToPremium('lifetime')}
@@ -922,6 +938,7 @@ export function Settings({ user, onBackToChat, onSignOut }: SettingsProps) {
                       >
                         {isCreatingCheckout ? "Loading..." : "Get Lifetime Premium"}
                       </Button>
+                      <p className="mt-2 text-[10px] text-slate-400 text-center">{lifetimePromoHint()}</p>
                     </div>
                   </div>
 
@@ -1024,20 +1041,22 @@ export function Settings({ user, onBackToChat, onSignOut }: SettingsProps) {
           <DialogHeader>
             <DialogTitle>Gradlify Premium Lifetime</DialogTitle>
             <DialogDescription>
-              One payment of {formatGbp(PREMIUM_PRICING.lifetime)} for lifetime access. No weekly or annual renewals.
+              {formatGbp(lifetimePriceWithPromo())} with {LIFETIME_PROMO.code} (£{LIFETIME_PROMO.amountOffGbp} off {formatGbp(PREMIUM_PRICING.lifetime)}). One payment — keep access forever.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4 mt-2">
+            <LifetimePromoCodeButton className="w-fit" />
             <div 
               onClick={() => { setShowPremiumOptions(false); void handleUpgradeToPremium('lifetime'); }}
               className="group cursor-pointer rounded-2xl border-2 border-primary/20 hover:border-primary p-4 transition-all relative overflow-hidden"
             >
               <div className="relative z-10">
                 <h4 className="font-bold text-lg mb-1">Lifetime Premium</h4>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-2xl font-bold text-foreground">{formatGbp(PREMIUM_PRICING.lifetime)}</span>
-                  <span className="text-sm text-muted-foreground">one-time</span>
-                </div>
+                <LifetimePromoPrice
+                  priceClassName="text-2xl text-foreground"
+                  strikeClassName="text-sm text-muted-foreground"
+                  suffixClassName="text-muted-foreground"
+                />
               </div>
             </div>
           </div>

@@ -14,7 +14,12 @@ import { is11Plus as is11PlusApp } from '@/lib/track-config';
 import { UK_SECONDARY_SCHOOLS } from '@/lib/schools';
 import { useNavigate } from 'react-router-dom';
 import { startPremiumCheckout } from '@/lib/checkout';
-import { PREMIUM_PRICING, ULTRA_PRICING } from '@/lib/pricing';
+import { PREMIUM_PRICING, ULTRA_PRICING, LIFETIME_PROMO, lifetimePriceWithPromo } from '@/lib/pricing';
+import {
+  LifetimePromoCodeButton,
+  LifetimePromoPrice,
+  lifetimePromoHint,
+} from '@/components/LifetimePromoCodeButton';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -980,15 +985,17 @@ export function OnboardingModal({ isOpen, userId, tier, premiumTrack, founderTra
 
                       <div className="relative z-10 mt-5 sm:mt-6">
                         <div className="flex items-baseline gap-2 flex-wrap">
-                          <span className="font-gradlify text-3xl font-semibold text-white sm:text-5xl lg:text-6xl">
-                            £{PREMIUM_PRICING.lifetime}
-                          </span>
-                          <span className="text-xs font-bold uppercase tracking-widest text-white/80">
-                            lifetime · one-time
-                          </span>
+                          <LifetimePromoPrice
+                            priceClassName="font-gradlify text-3xl font-semibold text-white sm:text-5xl lg:text-6xl"
+                            strikeClassName="text-base sm:text-xl text-white/50"
+                            suffixClassName="text-white/80"
+                          />
+                        </div>
+                        <div className="mt-3">
+                          <LifetimePromoCodeButton tone="onGradient" />
                         </div>
                         <p className="mt-2 max-w-md text-[11px] font-medium leading-4 text-white/90 sm:mt-3 sm:text-base sm:leading-6">
-                          More mocks, deeper analytics, higher limits. Pay once — keep Premium forever.
+                          More mocks, deeper analytics, higher limits. £{LIFETIME_PROMO.amountOffGbp} off with {LIFETIME_PROMO.code} — pay once, keep Premium forever.
                         </p>
                       </div>
 
@@ -1013,10 +1020,10 @@ export function OnboardingModal({ isOpen, userId, tier, premiumTrack, founderTra
                           planType="premium"
                           className="h-9 w-full rounded-full bg-white text-[10px] font-semibold text-orange-700 shadow-[0_14px_30px_rgba(194,65,12,0.16)] hover:bg-white/92 sm:h-11 sm:text-sm"
                         >
-                          Get Lifetime Premium
+                          Get Lifetime Premium · £{lifetimePriceWithPromo()}
                           <ArrowRight className="h-4 w-4" />
                         </PlanCheckoutButton>
-                        <p className="mt-2 text-center text-xs font-medium text-white/75">One payment · keep access forever</p>
+                        <p className="mt-2 text-center text-xs font-medium text-white/75">{lifetimePromoHint()}</p>
                       </div>
                     </section>
                   </div>

@@ -5,7 +5,12 @@ import { Loader2, Check } from "lucide-react";
 import { toast } from "sonner";
 import { startPremiumCheckout } from "@/lib/checkout";
 import { useMembership } from "@/hooks/useMembership";
-import { PREMIUM_PRICING, formatGbp } from "@/lib/pricing";
+import { LIFETIME_PROMO } from "@/lib/pricing";
+import {
+  LifetimePromoCodeButton,
+  LifetimePromoPrice,
+  lifetimePromoHint,
+} from "@/components/LifetimePromoCodeButton";
 
 interface PaywallProps {
   open: boolean;
@@ -78,17 +83,15 @@ export function PremiumPaywall({
                   Gradlify Premium Lifetime
                 </h3>
                 <p className="text-[10px] font-bold text-orange-600/70 uppercase tracking-[0.15em] mt-1">
-                  One payment. Keep access forever.
+                  £{LIFETIME_PROMO.amountOffGbp} off · one payment · forever
                 </p>
               </div>
-              <div className="flex items-baseline gap-2 flex-wrap">
-                <span className="text-3xl sm:text-4xl font-black text-slate-900">
-                  {formatGbp(PREMIUM_PRICING.lifetime)}
-                </span>
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">
-                  one-time
-                </span>
-              </div>
+              <LifetimePromoPrice
+                priceClassName="text-3xl sm:text-4xl text-slate-900"
+                strikeClassName="text-base text-slate-400"
+                suffixClassName="text-slate-400"
+              />
+              <LifetimePromoCodeButton className="w-fit" />
               <div className="h-px w-full bg-slate-100" />
               <ul className="space-y-3">
                 {[
@@ -118,6 +121,7 @@ export function PremiumPaywall({
                 primaryLabel
               )}
             </Button>
+            <p className="text-[10px] font-bold text-slate-400 text-center max-w-sm">{lifetimePromoHint()}</p>
             <button
               onClick={() => {
                 onComeBack?.();

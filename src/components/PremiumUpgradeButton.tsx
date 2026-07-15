@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { useMembership } from '@/hooks/useMembership';
 import { getSprintUpgradeCopy } from '@/lib/foundersSprint';
 import { startPremiumCheckout } from "@/lib/checkout";
-import { PREMIUM_PRICING, formatGbp } from "@/lib/pricing";
+import { PREMIUM_PRICING, formatGbp, lifetimePriceWithPromo, LIFETIME_PROMO } from "@/lib/pricing";
 import { AI_FEATURE_ENABLED } from "@/lib/featureFlags";
 
 export function PremiumUpgradeButton({
@@ -22,6 +22,7 @@ export function PremiumUpgradeButton({
   const [isLoading, setIsLoading] = useState(false);
   const { isPremium, isFounder } = useMembership();
   const sprintCopy = getSprintUpgradeCopy();
+  const promoPrice = lifetimePriceWithPromo();
 
   if (isFounder) {
     return null;
@@ -56,7 +57,9 @@ export function PremiumUpgradeButton({
     }
   };
 
-  const defaultLabel = label ?? `${sprintCopy.buttonPrimary} · ${formatGbp(PREMIUM_PRICING.lifetime)} lifetime`;
+  const defaultLabel =
+    label ??
+    `${sprintCopy.buttonPrimary} · ${formatGbp(promoPrice)} with ${LIFETIME_PROMO.code}`;
 
   return (
     <Button 
@@ -79,7 +82,7 @@ export function PremiumUpgradeButton({
           {variant === 'homeBanner' ? (
             <>
               <Trophy className="h-4 w-4" />
-              <span className="text-sm font-semibold">{label ?? sprintCopy.buttonSecondary}</span>
+              <span className="text-sm font-semibold">{label ?? `${sprintCopy.buttonSecondary} · ${formatGbp(promoPrice)}`}</span>
               <ArrowRight className="h-4 w-4" />
             </>
           ) : (
