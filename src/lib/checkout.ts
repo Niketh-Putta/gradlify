@@ -18,6 +18,16 @@ const sanitizeReturnPath = (value: string) => {
   if (!value) return "/home";
   if (!value.startsWith("/")) return "/home";
   if (value.startsWith("/pay/")) return "/home";
+  // Never bounce payers back into an auto-checkout loop.
+  try {
+    const url = new URL(value, "https://gradlify.local");
+    if (url.searchParams.get("intent") === "checkout") return "/home";
+    if (url.pathname === "/select-subject" && url.searchParams.get("intent") === "checkout") {
+      return "/home";
+    }
+  } catch {
+    return "/home";
+  }
   return value;
 };
 

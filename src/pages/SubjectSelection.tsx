@@ -123,6 +123,15 @@ export default function SubjectSelection() {
 
   useEffect(() => {
     if (profileLoading || !userId || !checkoutIntent || !onboardingComplete || startingCheckout) return;
+
+    const params = new URLSearchParams(location.search);
+    const justUpgraded = params.get("upgraded") === "true";
+    // After successful payment PayReturn can land here with intent=checkout - do not re-open Stripe.
+    if (justUpgraded || isPremium || isUltra) {
+      navigate("/home?upgraded=true", { replace: true });
+      return;
+    }
+
     setStartingCheckout(true);
     void (async () => {
       try {
@@ -136,7 +145,17 @@ export default function SubjectSelection() {
         navigate("/premium", { replace: true });
       }
     })();
-  }, [checkoutIntent, onboardingComplete, profileLoading, startingCheckout, userId, navigate]);
+  }, [
+    checkoutIntent,
+    onboardingComplete,
+    profileLoading,
+    startingCheckout,
+    userId,
+    navigate,
+    location.search,
+    isPremium,
+    isUltra,
+  ]);
 
   const handleSelect = (subject: 'maths' | 'english') => {
     setSubject(subject);

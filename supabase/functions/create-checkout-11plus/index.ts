@@ -17,6 +17,12 @@ const sanitizeReturnPath = (raw?: string) => {
   if (!raw) return "/home";
   if (!raw.startsWith("/")) return "/home";
   if (raw.startsWith("/pay/")) return "/home";
+  try {
+    const url = new URL(raw, "https://gradlify.local");
+    if (url.searchParams.get("intent") === "checkout") return "/home";
+  } catch {
+    return "/home";
+  }
   return raw;
 };
 
@@ -277,7 +283,13 @@ serve(async (req) => {
     const supabaseAnonKey = (Deno.env.get("SUPABASE_ANON_KEY") || Deno.env.get("VITE_SUPABASE_PUBLISHABLE_KEY") || Deno.env.get("VITE_SUPABASE_ANON_KEY")) ?? "";
     const supabaseServiceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 
-    const supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) throw new Error("No authorization header provided");
+
+    // Forward JWT so profiles RLS (auth.uid() = user_id) works for the track read.
+    const supabaseClient = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
     const supabaseAdmin = supabaseServiceRoleKey
       ? createClient(supabaseUrl, supabaseServiceRoleKey, { auth: { persistSession: false } })
       : null;
@@ -286,8 +298,6 @@ serve(async (req) => {
     const config = getStripeConfig();
     logStep("Stripe config validated", { environment: config.environment, isLive: config.isLive });
 
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader) throw new Error("No authorization header provided");
     logStep("Authorization header found");
 
     const token = authHeader.replace("Bearer ", "");
@@ -298,7 +308,9 @@ serve(async (req) => {
     logStep("User authenticated", { userId: user.id, email: user.email });
 
     const stripe = new Stripe(config.stripeSecretKey, { apiVersion: "2023-10-16" });
-    const { data: profile, error: profileError } = await supabaseClient
+    // Prefer service-role profile read so checkout never fails on RLS edge cases.
+    const profileClient = supabaseAdmin ?? supabaseClient;
+    const { data: profile, error: profileError } = await profileClient
       .from("profiles")
       .select("track, premium_track")
       .eq("user_id", user.id)
