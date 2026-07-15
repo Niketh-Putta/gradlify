@@ -115,6 +115,7 @@ export default function Terms() {
                 <h2 className="text-xl font-semibold mb-3">6. Payment and Subscriptions</h2>
                 <ul className="list-disc list-inside space-y-2 text-muted-foreground">
                   <li>New Premium purchases are a one-time {`£${PREMIUM_PRICING.lifetime}`} lifetime payment</li>
+                  <li>Lifetime Premium has no free trial and no recurring subscription renewals</li>
                   <li>Existing weekly or annual subscriptions continue under their original terms until cancelled</li>
                   <li>Payments are processed securely through Stripe</li>
                   <li>Refunds are subject to our refund policy</li>

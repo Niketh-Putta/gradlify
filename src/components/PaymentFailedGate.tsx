@@ -44,8 +44,8 @@ export function PaymentFailedGate({ user, onSignOut }: PaymentFailedGateProps) {
           </div>
           <CardTitle className="text-xl">Your payment did not go through</CardTitle>
           <CardDescription className="text-base leading-relaxed">
-            We couldn&apos;t charge your subscription after your free trial ended.
-            Update your payment method in Stripe to restore access to Gradlify.
+            We couldn&apos;t renew your subscription. Update your payment method in
+            Stripe to restore access to Gradlify.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3 pt-2">

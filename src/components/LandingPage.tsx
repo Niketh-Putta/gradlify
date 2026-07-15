@@ -1364,7 +1364,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
 
               <motion.div variants={motionCfg.fadeUp} className={`mt-6 sm:mt-8 flex items-center gap-3 text-[13px] sm:text-sm ${mutedText}`}>
                 <ShieldCheck className={`h-4 w-4 ${accentText}`} />
-                Payments are handled securely. Cancel anytime.
+                Payments are handled securely. One-time lifetime payment - no free trial, no renewals.
               </motion.div>
             </motion.div>
           </div>

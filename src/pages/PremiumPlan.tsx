@@ -142,7 +142,7 @@ export default function PremiumPlanPage({ onAuthAction }: PremiumPlanPageProps) 
                   {formatGbp(listPrice)}
                 </span>
               </div>
-              <p className="mt-1 text-sm text-slate-500">one-time payment · lifetime access</p>
+              <p className="mt-1 text-sm text-slate-500">one-time payment · lifetime access · no free trial</p>
             </div>
 
             <div className="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50/80 px-4 py-3 text-left text-sm text-emerald-900">
@@ -210,7 +210,7 @@ export default function PremiumPlanPage({ onAuthAction }: PremiumPlanPageProps) 
               )}
             </Button>
             <p className="mt-3 text-center text-[12px] text-slate-500">
-              Apple Pay, Google Pay or card · {formatGbp(listPrice)} one-time lifetime access
+              Apple Pay, Google Pay or card · {formatGbp(listPrice)} one-time · no free trial, no renewals
             </p>
           </div>
         </section>

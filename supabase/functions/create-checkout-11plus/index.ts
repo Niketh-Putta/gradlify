@@ -130,35 +130,6 @@ const ensureLifetimePromoCode = async (stripe: Stripe) => {
   return promotionCode.id;
 };
 
-const customerHasUsedTrial = async (stripe: Stripe, customerId: string) => {
-  let startingAfter: string | undefined;
-
-  while (true) {
-    const subscriptions = await stripe.subscriptions.list({
-      customer: customerId,
-      status: "all",
-      limit: 100,
-      ...(startingAfter ? { starting_after: startingAfter } : {}),
-    });
-
-    const usedTrial = subscriptions.data.some((subscription) => {
-      const trialStart = subscription.trial_start ?? null;
-      const trialEnd = subscription.trial_end ?? null;
-      return trialStart !== null || trialEnd !== null;
-    });
-
-    if (usedTrial) {
-      return true;
-    }
-
-    if (!subscriptions.has_more || subscriptions.data.length === 0) {
-      return false;
-    }
-
-    startingAfter = subscriptions.data[subscriptions.data.length - 1].id;
-  }
-};
-
 // Checkout uses STRIPE_PRICE_11PLUS_MONTHLY_* / ANNUAL_* (and ultra variants) from edge-function secrets.
 const getStripeConfig = () => {
   const envRaw = readEnv("ENVIRONMENT") || "test";
@@ -353,8 +324,8 @@ serve(async (req) => {
 
     }
 
-    const hasUsedTrial = await customerHasUsedTrial(stripe, customerId);
-    logStep("Resolved trial eligibility", { customerId, hasUsedTrial });
+    // Lifetime is a one-time payment checkout (mode: payment). Never attach
+    // trial_period_days or subscription_data - there is no free trial.
 
     if (supabaseAdmin) {
       const { error: updateError } = await supabaseAdmin
@@ -431,12 +402,13 @@ serve(async (req) => {
             unit_amount: Math.round(LIFETIME_PRICE_GBP * 100),
             product_data: {
               name: "Gradlify Premium Lifetime",
-              description: "One-time payment for lifetime Gradlify Premium access.",
+              description: "One-time payment for lifetime Gradlify Premium access. No free trial. No subscription.",
             },
           },
         },
       ],
       mode: "payment",
+      // Explicit: one-time charge only. No subscription, no trial_period_days.
       allow_promotion_codes: true,
       automatic_tax: { enabled: false },
       // Do not set payment_method_collection - Stripe only allows it for recurring/subscription prices.
@@ -449,6 +421,7 @@ serve(async (req) => {
         premium_track: checkoutTrack,
         product_type: "premium_lifetime",
         client_reference_id: user.id,
+        has_free_trial: "false",
       },
       success_url: `${baseUrl}/pay/success?session_id={CHECKOUT_SESSION_ID}&returnTo=${encodedReturnTo}`,
       cancel_url: `${baseUrl}/pay/cancelled?returnTo=${encodedReturnTo}`,
