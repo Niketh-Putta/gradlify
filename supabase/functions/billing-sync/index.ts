@@ -51,6 +51,42 @@ const mapInterval = (interval?: string | null) => {
   return interval;
 };
 
+const isLifetimeCheckoutSession = (session: Stripe.Checkout.Session) =>
+  session.mode === "payment" &&
+  session.payment_status === "paid" &&
+  (session.metadata?.product_type === "premium_lifetime" ||
+    session.metadata?.plan_interval === "lifetime");
+
+const sessionBelongsToUser = (
+  session: Stripe.Checkout.Session,
+  userId: string,
+) => {
+  const metaUserId =
+    session.metadata?.userId ??
+    session.metadata?.user_id ??
+    session.metadata?.supabase_user_id ??
+    session.client_reference_id ??
+    null;
+  return Boolean(metaUserId && metaUserId === userId);
+};
+
+const lifetimeProfilePayload = (customerColumn: string, customerId: string | null) => {
+  const payload: Record<string, unknown> = {
+    is_premium: true,
+    tier: "premium",
+    plan: "premium_lifetime",
+    subscription_interval: "lifetime",
+    subscription_status: "lifetime",
+    stripe_subscription_status: "lifetime",
+    cancel_at_period_end: false,
+    current_period_end: null,
+    premium_until: null,
+    premium_track: "eleven_plus",
+  };
+  if (customerId) payload[customerColumn] = customerId;
+  return payload;
+};
+
 const normalizePremiumTrack = (value: string | null | undefined): 'gcse' | 'eleven_plus' | null => {
   if (!value) return null;
   const normalized = value.toLowerCase();
@@ -134,6 +170,10 @@ serve(async (req) => {
     const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : authHeader;
     const adminOverrideUserId =
       typeof body?.user_id === "string" ? body.user_id : null;
+    const checkoutSessionId =
+      typeof body?.session_id === "string" && body.session_id.startsWith("cs_")
+        ? body.session_id
+        : null;
 
     let user = null as { id: string; email?: string | null } | null;
 
@@ -161,6 +201,9 @@ serve(async (req) => {
     if (profileError) {
       return jsonResponse({ error: "profile_fetch_failed" }, 500);
     }
+
+    const customerColumn = environment === "live" ? "stripe_customer_id_live" : "stripe_customer_id_test";
+    const subscriptionColumn = environment === "live" ? "stripe_subscription_id_live" : "stripe_subscription_id_test";
 
     const isLifetimePremium =
       profile?.subscription_interval === "lifetime" ||
@@ -200,9 +243,6 @@ serve(async (req) => {
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
 
-    const customerColumn = environment === "live" ? "stripe_customer_id_live" : "stripe_customer_id_test";
-    const subscriptionColumn = environment === "live" ? "stripe_subscription_id_live" : "stripe_subscription_id_test";
-
     let stripeCustomerId = profile?.[customerColumn as keyof typeof profile] as string | null ?? null;
     let stripeSubscriptionId = profile?.[subscriptionColumn as keyof typeof profile] as string | null ?? null;
 
@@ -210,6 +250,66 @@ serve(async (req) => {
       const customers = await stripe.customers.list({ email: user.email, limit: 1 });
       if (customers.data.length > 0) {
         stripeCustomerId = customers.data[0].id;
+      }
+    }
+
+    const grantLifetimeFromSession = async (
+      session: Stripe.Checkout.Session,
+      reason: string,
+    ) => {
+      const customerId = typeof session.customer === "string"
+        ? session.customer
+        : session.customer?.id ?? stripeCustomerId;
+      const { error: grantError } = await admin
+        .from("profiles")
+        .update(lifetimeProfilePayload(customerColumn, customerId))
+        .eq("user_id", user!.id);
+      if (grantError) {
+        return jsonResponse({ error: "lifetime_grant_failed", message: grantError.message }, 500);
+      }
+      return jsonResponse({
+        updated: true,
+        reason,
+        session_id: session.id,
+        db_is_premium: true,
+        db_stripe_subscription_status: "lifetime",
+        stripe_key_prefix: stripeKeyPrefix(stripeKey),
+        environment,
+      });
+    };
+
+    // PayReturn passes session_id so we can grant lifetime before/without the webhook.
+    if (checkoutSessionId) {
+      try {
+        const session = await stripe.checkout.sessions.retrieve(checkoutSessionId);
+        if (isLifetimeCheckoutSession(session) && sessionBelongsToUser(session, user.id)) {
+          return await grantLifetimeFromSession(session, "lifetime_checkout_session");
+        }
+      } catch (sessionError) {
+        console.log("[BILLING-SYNC] session_id lookup failed", {
+          sessionId: checkoutSessionId,
+          message: sessionError instanceof Error ? sessionError.message : String(sessionError),
+        });
+      }
+    }
+
+    // Recover paid lifetime checkouts if webhook missed or raced PayReturn.
+    if (stripeCustomerId) {
+      try {
+        const recentSessions = await stripe.checkout.sessions.list({
+          customer: stripeCustomerId,
+          limit: 15,
+        });
+        const lifetimeSession = recentSessions.data.find(
+          (session) => isLifetimeCheckoutSession(session) && sessionBelongsToUser(session, user!.id),
+        );
+        if (lifetimeSession) {
+          return await grantLifetimeFromSession(lifetimeSession, "lifetime_checkout_recovery");
+        }
+      } catch (listError) {
+        console.log("[BILLING-SYNC] checkout session recovery failed", {
+          message: listError instanceof Error ? listError.message : String(listError),
+        });
       }
     }
 

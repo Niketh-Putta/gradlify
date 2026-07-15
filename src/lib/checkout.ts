@@ -70,11 +70,13 @@ export async function startPremiumCheckout(
   }
 
   const activeTrack = resolveUserTrack(profile?.track ?? null) === "11plus" ? "eleven_plus" : "gcse";
-  const requestedTrack = premiumTrack ?? activeTrack;
-  if (requestedTrack !== activeTrack) {
-    throw new Error(
-      `You are currently on ${activeTrack}. Switch to ${requestedTrack} track before subscribing.`,
-    );
+  // Lifetime is one Gradlify Premium product - do not block checkout on track mismatch.
+  const requestedTrack = "eleven_plus";
+  if (premiumTrack && premiumTrack !== activeTrack) {
+    console.warn("Checkout track mismatch ignored for lifetime offer", {
+      premiumTrack,
+      activeTrack,
+    });
   }
 
   const checkoutPlan: PremiumCheckoutPlan =

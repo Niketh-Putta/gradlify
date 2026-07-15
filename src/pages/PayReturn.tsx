@@ -9,6 +9,8 @@ import {
 
 const GRADLIFY_STORAGE_KEY = 'gradlify:checkout:returnTo';
 
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 const PayReturn = () => {
   const navigate = useNavigate();
   const [statusLine, setStatusLine] = useState('Returning to your account...');
@@ -18,6 +20,7 @@ const PayReturn = () => {
     const gradlifyCheckout = localStorage.getItem(GRADLIFY_STORAGE_KEY);
     const params = new URLSearchParams(window.location.search);
     const queryReturn = params.get("returnTo") ?? "";
+    const checkoutSessionId = params.get("session_id");
     if (gradlifyCheckout) {
       localStorage.removeItem(GRADLIFY_STORAGE_KEY);
     }
@@ -40,6 +43,26 @@ const PayReturn = () => {
       navigate(`${targetUrl.pathname}${targetUrl.search}${targetUrl.hash}`, { replace: true });
     };
 
+    const syncPremiumAfterCheckout = async () => {
+      setStatusLine('Payment received. Unlocking Premium...');
+      // Webhook can lag; pass session_id so billing-sync can grant lifetime immediately.
+      let lastResult: unknown = null;
+      for (let attempt = 0; attempt < 4; attempt += 1) {
+        lastResult = await syncBillingStatus({ sessionId: checkoutSessionId }).catch(() => null);
+        const reason = (lastResult as { reason?: string } | null)?.reason;
+        const isPremium = Boolean((lastResult as { db_is_premium?: boolean } | null)?.db_is_premium);
+        if (isPremium || reason === 'lifetime_premium' || reason === 'lifetime_checkout_session' || reason === 'lifetime_checkout_recovery') {
+          break;
+        }
+        if (attempt < 3) {
+          setStatusLine('Confirming your payment...');
+          await sleep(900 * (attempt + 1));
+        }
+      }
+      window.dispatchEvent(new CustomEvent('gradlify:profile-updated'));
+      return lastResult;
+    };
+
     const run = async () => {
       if (isSuccessReturn) {
         const liveMockSlug = mockEventSlugFromReturnPath(baseTarget);
@@ -52,8 +75,7 @@ const PayReturn = () => {
             setStatusLine('Payment received. Finishing setup...');
           }
         } else {
-          await syncBillingStatus().catch(() => null);
-          window.dispatchEvent(new CustomEvent('gradlify:profile-updated'));
+          await syncPremiumAfterCheckout();
         }
       }
       finishReturn();

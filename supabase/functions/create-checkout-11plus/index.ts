@@ -236,12 +236,10 @@ const getStripeConfig = () => {
     throw new Error("Missing Stripe secret key");
   }
 
-  if (!priceGcseMonthly || !priceGcseAnnual) {
-    throw new Error("Missing Stripe GCSE price IDs");
-  }
-
-  if (!price11PlusWeekly || !price11PlusAnnual) {
-    throw new Error("Missing Stripe 11+ price IDs");
+  // Lifetime checkout uses ad-hoc price_data, so weekly/annual price IDs are
+  // only required for legacy subscription tooling - not for creating payment sessions.
+  if ((!priceGcseMonthly || !priceGcseAnnual) && (!price11PlusWeekly || !price11PlusAnnual)) {
+    logStep("Warning: legacy subscription price IDs incomplete; lifetime checkout still available");
   }
 
   return {
@@ -472,11 +470,8 @@ serve(async (req) => {
     return jsonResponse(
       {
         error: errorMessage,
-        errorStack,
-        errorType,
-        errorJson,
       },
-      200,
+      500,
     );
   }
 });
