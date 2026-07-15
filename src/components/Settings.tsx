@@ -132,6 +132,7 @@ export function Settings({ user, onBackToChat, onSignOut }: SettingsProps) {
     error: membershipError,
     isPremium: membershipIsPremium,
     isFounder: membershipIsFounder,
+    isUltra: membershipIsUltra,
     statusLabel
   } = useMembership();
   const { theme, setTheme } = useTheme();
@@ -183,14 +184,14 @@ export function Settings({ user, onBackToChat, onSignOut }: SettingsProps) {
   const hasActiveSubscription =
     membership?.subscription_status === 'active' ||
     membership?.subscription_status === 'trialing' ||
+    membership?.subscription_status === 'lifetime' ||
+    membership?.subscription === 'lifetime' ||
+    membershipIsPremium ||
     (membership?.current_period_end
       ? new Date(membership.current_period_end).getTime() > Date.now()
       : false);
-  const hasPremiumSubscription = membershipIsFounder || Boolean(
-    membership?.premiumTrack === 'gcse' || 
-    membership?.premiumTrack === '11plus' || 
-    membership?.premiumTrack === 'eleven_plus'
-  );
+  const hasPremiumSubscription =
+    membershipIsFounder || membershipIsPremium || membershipIsUltra;
   const hasPremiumOnCurrentTrack = membershipIsFounder || Boolean(membership?.hasTrackPremium || membershipIsPremium);
   const accessIsPremium = hasPremiumOnCurrentTrack || membership?.isUltra;
   const accessLabel = statusLabel || 'Free';

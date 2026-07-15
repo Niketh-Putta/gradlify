@@ -51,7 +51,12 @@ const PayReturn = () => {
         lastResult = await syncBillingStatus({ sessionId: checkoutSessionId }).catch(() => null);
         const reason = (lastResult as { reason?: string } | null)?.reason;
         const isPremium = Boolean((lastResult as { db_is_premium?: boolean } | null)?.db_is_premium);
-        if (isPremium || reason === 'lifetime_premium' || reason === 'lifetime_checkout_session' || reason === 'lifetime_checkout_recovery') {
+        if (
+          isPremium ||
+          reason === 'lifetime_premium' ||
+          reason === 'lifetime_checkout_session' ||
+          reason === 'lifetime_checkout_recovery'
+        ) {
           break;
         }
         if (attempt < 3) {
@@ -65,6 +70,10 @@ const PayReturn = () => {
 
     const run = async () => {
       if (isSuccessReturn) {
+        // Always unlock Premium first - even if returnTo is a live-mock page
+        // (user may have bought Lifetime Premium from a mock preview).
+        await syncPremiumAfterCheckout();
+
         const liveMockSlug = mockEventSlugFromReturnPath(baseTarget);
         if (liveMockSlug) {
           setStatusLine('Payment received. Confirming your mock registration...');
@@ -72,10 +81,8 @@ const PayReturn = () => {
           if (registered) {
             setStatusLine('Registration confirmed. Opening your mock...');
           } else {
-            setStatusLine('Payment received. Finishing setup...');
+            setStatusLine('Premium unlocked. Opening your mock...');
           }
-        } else {
-          await syncPremiumAfterCheckout();
         }
       }
       finishReturn();
