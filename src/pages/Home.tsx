@@ -101,8 +101,9 @@ export function Home() {
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get('upgraded') === 'true') {
-      fetchUsageData();
-      toast.success('Trial started! Premium features are now unlocked.');
+      void fetchUsageData();
+      window.dispatchEvent(new CustomEvent('gradlify:profile-updated'));
+      toast.success('Welcome to Lifetime Premium - all features unlocked.');
       window.history.replaceState({}, '', window.location.pathname);
     }
   }, [fetchUsageData]);

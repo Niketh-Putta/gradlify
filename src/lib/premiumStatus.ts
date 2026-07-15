@@ -120,6 +120,11 @@ export function hasPaidPremiumLiveMockAccess(status: PremiumStatus): boolean {
   ) {
     return true;
   }
+  // Paid Premium with no expiry (lifetime-style flags) or active period.
+  if (status.isPremium && status.tier === 'premium' && !status.isTrialing) {
+    const premiumUntil = status.premiumUntil;
+    if (!premiumUntil || new Date(premiumUntil).getTime() > Date.now()) return true;
+  }
   if (status.subscriptionStatus === 'active' && status.hasPremiumSubscription) return true;
   const premiumUntil = status.premiumUntil;
   const hasActivePeriod = premiumUntil ? new Date(premiumUntil).getTime() > Date.now() : false;

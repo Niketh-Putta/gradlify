@@ -19,6 +19,9 @@ interface Profile {
   is_premium?: boolean | null;
   premium_until?: string | null;
   plan?: string | null;
+  subscription_interval?: string | null;
+  subscription_status?: string | null;
+  stripe_subscription_status?: string | null;
   current_period_end?: string | null;
   cancel_at_period_end?: boolean | null;
   onboarding?: Record<string, unknown>;
@@ -48,6 +51,9 @@ const PROFILE_OPTIONAL_COLUMNS = [
   'is_premium',
   'premium_until',
   'plan',
+  'subscription_interval',
+  'subscription_status',
+  'stripe_subscription_status',
   'current_period_end',
   'cancel_at_period_end',
   'onboarding',

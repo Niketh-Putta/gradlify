@@ -46,8 +46,24 @@ const writeLocalChallengeUsage = (track: UserTrack, uses: number, resetAt: strin
 };
 
 
-const isPlanActive = (plan: string, currentPeriodEnd: string | null) => {
+const isLifetimePlan = (
+  plan?: string | null,
+  billingInterval?: string | null,
+  subscriptionStatus?: string | null,
+) =>
+  plan === 'premium_lifetime' ||
+  billingInterval === 'lifetime' ||
+  subscriptionStatus === 'lifetime';
+
+const isPlanActive = (
+  plan: string,
+  currentPeriodEnd: string | null,
+  billingInterval?: string | null,
+  subscriptionStatus?: string | null,
+) => {
   if (!plan || plan === 'free') return false;
+  // Lifetime has no renewal date - treat as permanently active.
+  if (isLifetimePlan(plan, billingInterval, subscriptionStatus)) return true;
   if (!currentPeriodEnd) return false;
   return new Date(currentPeriodEnd).getTime() > Date.now();
 };
@@ -70,6 +86,9 @@ interface UsageData {
   current_period_end: string | null;
   is_premium?: boolean;
   premium_until?: string | null;
+  subscription_interval?: string | null;
+  subscription_status?: string | null;
+  stripe_subscription_status?: string | null;
 }
 
 type DatabasePremiumTrack = 'gcse' | '11plus' | 'eleven_plus' | null;
@@ -287,7 +306,7 @@ export function usePremium(trackOverride?: UserTrack, subject?: 'maths' | 'engli
 
     try {
       const requiredColumns = ['daily_uses', 'daily_reset_at', 'daily_mock_uses', 'daily_mock_reset_at', 'daily_challenge_uses', 'daily_challenge_reset_at', 'founder_track', 'tier', 'plan', 'current_period_end'] as const;
-      const optionalColumns = ['premium_track', 'daily_maths_mock_uses', 'daily_maths_mock_reset_at', 'daily_english_mock_uses', 'daily_english_mock_reset_at', 'is_premium', 'premium_until'] as const;
+      const optionalColumns = ['premium_track', 'daily_maths_mock_uses', 'daily_maths_mock_reset_at', 'daily_english_mock_uses', 'daily_english_mock_reset_at', 'is_premium', 'premium_until', 'subscription_interval', 'subscription_status', 'stripe_subscription_status'] as const;
       const attemptUsageFetch = async () =>
         supabase
           .from('profiles')
@@ -347,15 +366,16 @@ export function usePremium(trackOverride?: UserTrack, subject?: 'maths' | 'engli
         const challengeResetAt = data.daily_challenge_reset_at ? new Date(data.daily_challenge_reset_at) : null;
         setFounderTrack(data.founder_track || null);
         setPremiumTrack(normalizePremiumTrack((data as UsageData).premium_track ?? null));
+        // Always refresh entitlement fields - including when daily usage resets.
+        setTier(data.tier || 'free');
+        setPlan(data.plan || 'free');
+        setCurrentPeriodEnd(data.current_period_end || null);
 
         // Check if we need to reset daily usage
         if (!resetAt || now > resetAt) {
           await resetDailyUsage();
         } else {
           setDailyUses(data.daily_uses || 0);
-          setTier(data.tier || 'free');
-          setPlan(data.plan || 'free');
-          setCurrentPeriodEnd(data.current_period_end || null);
         }
 
         if (!challengeResetAt || now > challengeResetAt) {
@@ -438,7 +458,7 @@ export function usePremium(trackOverride?: UserTrack, subject?: 'maths' | 'engli
 
   const incrementUsage = async (cost: number = 1) => {
     if (!hasUserContext) return false;
-    if (isAdmin) return true; // Admin bypasses usage tracking
+    if (isAdmin || isPremium) return true; // Premium / admin: unlimited
 
     try {
       const safeCost = Math.max(1, Math.round(cost));
@@ -488,7 +508,7 @@ export function usePremium(trackOverride?: UserTrack, subject?: 'maths' | 'engli
     try {
       // Always fetch the latest from the server
       const requiredColumns = ['daily_challenge_reset_at', 'founder_track', 'tier', 'plan', 'current_period_end'] as const;
-      const optionalColumns = ['premium_track'] as const;
+      const optionalColumns = ['premium_track', 'subscription_interval', 'subscription_status', 'stripe_subscription_status', 'is_premium'] as const;
       const attemptChallengeFetch = async () =>
         supabase
           .from('profiles')
@@ -505,11 +525,27 @@ export function usePremium(trackOverride?: UserTrack, subject?: 'maths' | 'engli
       }
       if (!error && data) {
         resetAtRaw = data.daily_challenge_reset_at || null;
-        const hasPlanAccess = isPlanActive(data.plan || 'free', data.current_period_end || null);
+        const billingInterval = (data as UsageData).subscription_interval ?? null;
+        const subStatus =
+          (data as UsageData).stripe_subscription_status ??
+          (data as UsageData).subscription_status ??
+          null;
+        const hasPlanAccess = isPlanActive(
+          data.plan || 'free',
+          data.current_period_end || null,
+          billingInterval,
+          subStatus,
+        );
         const isFounder = data.founder_track === 'founder';
-        const dbPremiumTrack = normalizePremiumTrack((data as { premium_track?: DatabasePremiumTrack }).premium_track ?? null);
-        const hasTrackPremium = dbPremiumTrack ? dbPremiumTrack === activeTrack : activeTrack === 'gcse';
-        limit = isFounder || ((hasPlanAccess || data.tier === 'premium') && hasTrackPremium) ? Infinity : FREE_CHALLENGE_LIMIT;
+        // One Gradlify Premium product unlocks all modules - no track gating.
+        limit =
+          isFounder ||
+          hasPlanAccess ||
+          data.tier === 'premium' ||
+          Boolean((data as UsageData).is_premium) ||
+          isLifetimePlan(data.plan, billingInterval, subStatus)
+            ? Infinity
+            : FREE_CHALLENGE_LIMIT;
 
         const startOfDay = new Date(now);
         startOfDay.setHours(0, 0, 0, 0);
@@ -604,18 +640,15 @@ export function usePremium(trackOverride?: UserTrack, subject?: 'maths' | 'engli
     (profile as { stripe_subscription_status?: string | null } | null)?.stripe_subscription_status ??
     (profile as { subscription_status?: string | null } | null)?.subscription_status ??
     null;
-  const isLifetime =
-    plan === 'premium_lifetime' ||
-    profilePlan === 'premium_lifetime' ||
-    profileBillingInterval === 'lifetime' ||
-    profileSubStatus === 'lifetime';
+  const isLifetime = isLifetimePlan(plan, profileBillingInterval, profileSubStatus) ||
+    isLifetimePlan(profilePlan, profileBillingInterval, profileSubStatus);
 
   const hasPremiumSubscription =
     isLifetime ||
     tier === 'premium' ||
     profileTier === 'premium' ||
-    isPlanActive(plan, currentPeriodEnd) ||
-    isPlanActive(profilePlan || 'free', profilePeriodEnd) ||
+    isPlanActive(plan, currentPeriodEnd, profileBillingInterval, profileSubStatus) ||
+    isPlanActive(profilePlan || 'free', profilePeriodEnd, profileBillingInterval, profileSubStatus) ||
     isPremiumFlag;
 
   const isUltra = false;

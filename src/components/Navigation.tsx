@@ -37,6 +37,9 @@ interface NavigationProps {
     is_premium?: boolean | null;
     premium_until?: string | null;
     plan?: string | null;
+    subscription_interval?: string | null;
+    subscription_status?: string | null;
+    stripe_subscription_status?: string | null;
     current_period_end?: string | null;
     premium_track?: 'gcse' | '11plus' | 'eleven_plus' | null;
     founder_track?: 'competitor' | 'founder' | null;
@@ -137,12 +140,23 @@ export function Navigation({ user, profile, onSettings, onSignOut }: NavigationP
 
     const premiumUntil = profile.premium_until ?? profile.current_period_end ?? null;
     const hasPlan = Boolean(profile.plan && profile.plan !== 'free');
+    const isLifetime =
+      profile.plan === 'premium_lifetime' ||
+      profile.subscription_interval === 'lifetime' ||
+      profile.stripe_subscription_status === 'lifetime' ||
+      profile.subscription_status === 'lifetime';
     const hasActivePeriod =
-      !premiumUntil || new Date(premiumUntil).getTime() > Date.now();
+      isLifetime || !premiumUntil || new Date(premiumUntil).getTime() > Date.now();
     const isPlanActive = hasPlan && hasActivePeriod;
     const isPremiumFlag = Boolean(profile.is_premium) && hasActivePeriod;
     const isUltra = ULTRA_PLAN_ENABLED && (membership.isUltra || profile.plan === 'ultra' || profile.plan === 'ultra_annual');
-    const isPremium = isUltra || profile.tier === 'premium' || isPlanActive || isPremiumFlag;
+    const isPremium =
+      isLifetime ||
+      isUltra ||
+      membership.isPremium ||
+      profile.tier === 'premium' ||
+      isPlanActive ||
+      isPremiumFlag;
     const founderTrack = profile.founder_track ?? null;
 
     return { isPremium, isUltra, founderTrack };

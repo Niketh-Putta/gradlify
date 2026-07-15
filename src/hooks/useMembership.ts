@@ -99,6 +99,11 @@ export function useMembership() {
 
     fetchMembership();
 
+    const handleProfileUpdated = () => {
+      void fetchMembership(true);
+    };
+    window.addEventListener('gradlify:profile-updated', handleProfileUpdated);
+
     // Setup realtime subscription for profile changes
     const channel = supabase
       .channel('membership-updates')
@@ -129,6 +134,7 @@ export function useMembership() {
 
     return () => {
       mounted = false;
+      window.removeEventListener('gradlify:profile-updated', handleProfileUpdated);
       if (refreshTimerRef.current) {
         window.clearTimeout(refreshTimerRef.current);
         refreshTimerRef.current = null;
