@@ -11,6 +11,7 @@ import {
   LifetimePromoPrice,
   lifetimePromoHint,
 } from "@/components/LifetimePromoCodeButton";
+import { LifetimePromoBanner } from "@/components/LifetimePromoBanner";
 
 interface PaywallProps {
   open: boolean;
@@ -64,6 +65,12 @@ export function PremiumPaywall({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-[96vw] max-w-lg mx-auto p-0 rounded-[2rem] border-none bg-background dark:bg-slate-900 shadow-2xl overflow-y-auto max-h-[90dvh] md:max-h-[85vh]">
+        <LifetimePromoBanner
+          compact
+          className="rounded-t-[2rem]"
+          onCta={() => void handleUpgrade()}
+          ctaLabel="Get Premium"
+        />
         <div className="relative px-6 py-6 sm:px-8 sm:py-8">
           <DialogHeader className="text-center space-y-2 mb-6 sm:mb-8">
             <DialogTitle className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white">
@@ -91,7 +98,7 @@ export function PremiumPaywall({
                 strikeClassName="text-base text-slate-400"
                 suffixClassName="text-slate-400"
               />
-              <LifetimePromoCodeButton className="w-fit" />
+              <LifetimePromoCodeButton tone="pill" className="w-fit" />
               <div className="h-px w-full bg-slate-100" />
               <ul className="space-y-3">
                 {[
