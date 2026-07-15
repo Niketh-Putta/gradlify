@@ -2,22 +2,24 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Link } from "react-router-dom";
 import { motion, useReducedMotion, type Variants } from "framer-motion";
 import { ArrowRight, CheckCircle, ShieldCheck, Sparkles, MousePointer2, Compass, Layers, SlidersHorizontal, AlertTriangle, Trophy, Volume2, VolumeX, Pause } from "lucide-react";
+import { PREMIUM_PRICING, ULTRA_PRICING, LIFETIME_PROMO, formatGbp, lifetimePriceWithPromo } from "@/lib/pricing";
+import {
+  LifetimePromoCodeButton,
+  lifetimePromoHint,
+} from "@/components/LifetimePromoCodeButton";
 
-import { cn } from "@/lib/utils";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Button } from "@/components/ui/button";
-
-import { LogoMark } from "@/components/LogoMark";
-import { OfferPrice } from "@/components/OfferPrice";
-import { supabase } from "@/integrations/supabase/client";
-import { getSprintUpgradeCopy } from "@/lib/foundersSprint";
-import { AI_FEATURE_ENABLED, EXAM_READINESS_ENABLED, ULTRA_PLAN_ENABLED } from "@/lib/featureFlags";
-import { getDashboardPath, setSignupTrack } from "@/lib/track";
-import { PREMIUM_PRICING, ULTRA_PRICING } from "@/lib/pricing";
-import { useOfferCountdown } from "@/hooks/useOfferCountdown";
 import { setPostAuthRedirect } from "@/lib/postAuthRedirect";
 import { captureReferralFromSearch } from "@/lib/referrals";
 import { getPartnerReferralLabel, readStoredReferralCode } from "@/lib/partnerRefs";
+import { useOfferCountdown } from "@/hooks/useOfferCountdown";
+import { AI_FEATURE_ENABLED, EXAM_READINESS_ENABLED, ULTRA_PLAN_ENABLED } from "@/lib/featureFlags";
+import { getDashboardPath, setSignupTrack } from "@/lib/track";
+import { getSprintUpgradeCopy } from "@/lib/foundersSprint";
+import { supabase } from "@/integrations/supabase/client";
+import { LogoMark } from "@/components/LogoMark";
+import { cn } from "@/lib/utils";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
 
 /** Same clips as in `src/assets/`, but loaded from `/public` so they are not embedded in the JS bundle. */
 const PRACTICE_SHOWCASE_VIDEO = "/videos/practice-question.mov";
@@ -246,6 +248,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
   const dashboardPath = getDashboardPath();
 
   const offerCountdown = useOfferCountdown();
+  const lifetimePromoPrice = lifetimePriceWithPromo();
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -535,30 +538,29 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
         {isElevenPlus && (
           <div className="relative overflow-hidden bg-[#160b08] text-white">
             <div className="absolute inset-0 bg-[radial-gradient(560px_120px_at_18%_20%,rgba(239,68,68,0.34),transparent_68%),radial-gradient(520px_120px_at_82%_0%,rgba(250,204,21,0.30),transparent_66%)]" />
-            <div className="relative mx-auto flex max-w-7xl flex-col gap-1 px-4 py-1.5 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-1">
+            <div className="relative mx-auto flex max-w-7xl flex-col gap-2 px-4 py-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:px-6 sm:py-1.5">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="rounded-full border border-amber-200/45 bg-amber-200/12 px-2.5 py-0.5 text-[9px] font-black uppercase tracking-[0.2em] text-amber-100 shadow-[0_0_18px_rgba(251,146,60,0.24)]">
-                  Limited time offer
+                  £{LIFETIME_PROMO.amountOffGbp} off Lifetime
                 </span>
-                <span className="text-xs font-black sm:text-sm">Gradlify is £{PREMIUM_PRICING.weekly}/wk</span>
+                <span className="text-xs font-black sm:text-sm">
+                  <span className="text-white/50 line-through mr-1.5">{formatGbp(PREMIUM_PRICING.lifetime)}</span>
+                  <span className="text-amber-200">{formatGbp(lifetimePromoPrice)}</span>
+                  <span className="font-semibold text-white/80"> once</span>
+                </span>
                 <span className="hidden h-4 w-px bg-white/20 sm:block" aria-hidden="true" />
-                <span className="text-[11px] font-semibold text-white/75 sm:text-xs">
-                  about a third of one tutor hour - tutors often charge <span className="text-white">£40–60/hr</span>
+                <span className="rounded-md border border-white/20 bg-black/25 px-2.5 py-0.5 text-[12px] font-black tabular-nums tracking-wide text-white sm:text-sm">
+                  {offerCountdown.label}
                 </span>
               </div>
               <div className="flex flex-wrap items-center gap-2">
-                <span className="rounded-full bg-gradient-to-r from-red-600 to-orange-500 px-2.5 py-0.5 text-[9px] font-black uppercase tracking-[0.14em] text-white shadow-[0_0_14px_rgba(249,115,22,0.38)]">
-                  3-day free trial
-                </span>
-                <span className="rounded-md border border-white/15 bg-white/10 px-2.5 py-0.5 text-[11px] font-black tabular-nums text-white sm:text-xs">
-                  Ends in {offerCountdown.label}
-                </span>
+                <LifetimePromoCodeButton tone="dark" />
                 <button
                   type="button"
                   onClick={handleViewPlans}
-                  className="rounded-md bg-white px-2.5 py-0.5 text-[11px] font-black text-[#8f1d12] shadow-md transition hover:bg-amber-100 sm:px-3 sm:text-xs"
+                  className="rounded-md bg-white px-2.5 py-1 text-[11px] font-black text-[#8f1d12] shadow-md transition hover:bg-amber-100 sm:px-3 sm:text-xs"
                 >
-                  View plans
+                  Claim offer
                 </button>
               </div>
             </div>
@@ -1191,7 +1193,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                         ["Weak-topic diagnosis", "yes", "partial", "partial", "partial"],
                         ["Parent-ready report", "yes", "partial", "partial", "partial"],
                         ["Built from selective-school experience", "yes", "no", "no", "no"],
-                        ["Focused 11+ system under £9/wk", "yes", "no", "no", "yes"],
+                        ["Focused 11+ system at £99.99 with LIFETIME50", "yes", "no", "no", "yes"],
                         ["Clear next-step plan after each mock", "yes", "partial", "partial", "no"],
                       ].map(([feature, gradlify, atom, explore, bond]) => (
                         <tr key={feature} className={cn("border-b last:border-b-0", isDark ? "border-white/10" : "border-slate-100")}>
@@ -1253,9 +1255,9 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
               <motion.div variants={motionCfg.fadeUp} className="max-w-2xl">
                 <div className={`text-sm font-semibold ${accentText}`}>Pricing</div>
                 <h2 className={`mt-3 text-2xl sm:text-4xl font-semibold tracking-tight ${primaryText}`}>
-                  Start free. Begin your 3 Day Free Trial when ready.
+                  Start free. Unlock Lifetime Premium when ready.
                 </h2>
-                <p className={`mt-4 ${mutedText} leading-relaxed`}>Honest pricing, cancel anytime.</p>
+                <p className={`mt-4 ${mutedText} leading-relaxed`}>One payment. Keep Premium forever.</p>
               </motion.div>
 
               <motion.div variants={motionCfg.fadeUp} className="mt-8 sm:mt-10 grid lg:grid-cols-3 md:grid-cols-2 gap-4 sm:gap-5 max-w-6xl mx-auto">
@@ -1304,22 +1306,20 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                         Best for exams
                       </div>
                     </div>
-                    <OfferPrice
-                      className="mt-4"
-                      tone="dark"
-                      suffix="/week"
-                      currentClassName="text-white"
-                      labelClassName="border-white/30 bg-white/15 text-white"
-                    />
+                    <div className="mt-4 flex items-baseline gap-2 flex-wrap">
+                      <span className="text-3xl sm:text-4xl font-black text-white">{formatGbp(lifetimePromoPrice)}</span>
+                      <span className="text-lg font-bold text-white/50 line-through">{formatGbp(PREMIUM_PRICING.lifetime)}</span>
+                      <span className="text-xs font-bold uppercase tracking-widest text-white/75">lifetime · with {LIFETIME_PROMO.code}</span>
+                    </div>
                     <div className="mt-4 rounded-xl border border-white/25 bg-white/15 p-3 shadow-inner shadow-white/10">
                       <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
                         <div>
                           <p className="text-[11px] font-black uppercase tracking-[0.18em] text-white/80">Why parents switch</p>
-                          <p className="mt-1 text-sm font-semibold text-white">One tutor hour costs £40–60. Premium is £{PREMIUM_PRICING.weekly} per week.</p>
+                          <p className="mt-1 text-sm font-semibold text-white">One tutor hour costs £40–60. Premium is {formatGbp(lifetimePromoPrice)} with {LIFETIME_PROMO.code}.</p>
                         </div>
                         <div className="text-left sm:text-right">
-                          <div className="text-2xl font-black text-white">£{PREMIUM_PRICING.weekly}</div>
-                          <div className="text-[11px] font-bold uppercase tracking-[0.14em] text-white/75">per week</div>
+                          <div className="text-2xl font-black text-white">{formatGbp(lifetimePromoPrice)}</div>
+                          <div className="text-[11px] font-bold uppercase tracking-[0.14em] text-white/75">with promo</div>
                         </div>
                       </div>
                     </div>
@@ -1345,10 +1345,12 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                       onClick={handleSignup}
                       className="w-full rounded-full bg-white text-orange-700 font-semibold py-4 sm:py-6 hover:bg-white shadow-lg"
                     >
-                      Purchase plan
+                      Get Lifetime Premium
                       <ArrowRight className="ml-2 h-5 w-5" />
                     </Button>
-                    <div className="mt-2 sm:mt-3 text-[11px] sm:text-xs text-white/80 text-center">Cancel anytime</div>
+                    <div className="mt-2 sm:mt-3 text-[11px] sm:text-xs text-white/80 text-center">
+                      {lifetimePromoHint()}
+                    </div>
                   </div>
                 </motion.div>
 

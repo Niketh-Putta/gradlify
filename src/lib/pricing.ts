@@ -1,9 +1,13 @@
-/** Display amounts for Gradlify 11+ plans (GBP). Checkout uses Stripe Price IDs from env. */
+/** Display amounts for Gradlify 11+ plans (GBP). Checkout uses Stripe Price IDs / price_data. */
 
 export const PREMIUM_PRICING = {
+  /** One-time lifetime Gradlify Premium — the only public offer. */
+  lifetime: 149.99,
+  /** Kept for copy about existing weekly subscribers; not offered at checkout. */
   weekly: 9.99,
   /** Strikethrough anchor in-app - keep modest; never £40 (scares parents). */
   weeklyOriginal: 11.99,
+  /** Kept for Terms / legacy subscriber references; not offered at checkout. */
   annual: 249.99,
   /** Strikethrough vs paying weekly for 52 weeks (9.99 × 52). */
   annualOriginal: 519.48,
@@ -14,6 +18,15 @@ export const PREMIUM_PRICING = {
   /** Weekly × 52 − annual (marketing). Rounded for SAVE badges. */
   annualSavings: 269,
 } as const;
+
+/** Landing banner code: £50 off lifetime Premium at Stripe Checkout. */
+export const LIFETIME_PROMO = {
+  code: "LIFETIME50",
+  amountOffGbp: 50,
+} as const;
+
+export const lifetimePriceWithPromo = () =>
+  Math.round((PREMIUM_PRICING.lifetime - LIFETIME_PROMO.amountOffGbp) * 100) / 100;
 
 export const ULTRA_PRICING = {
   monthly: 249.99,

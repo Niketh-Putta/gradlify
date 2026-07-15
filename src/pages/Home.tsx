@@ -84,7 +84,7 @@ export function Home() {
     mode: "weakness" | "general";
   }>({ topic: "", mode: "general" });
     
-  const premiumBannerTitle = "Gradlify Premium\nStart Your 3 Day Free Trial";
+  const premiumBannerTitle = "Gradlify Premium\nLifetime access";
   const premiumBannerSubtitle = AI_FEATURE_ENABLED
     ? "Get unlimited AI questions, full mock exams, and personalised revision plans."
     : "Get unlimited questions, full mock exams, and personalised revision plans.";
@@ -898,7 +898,7 @@ export function Home() {
                   </div>
 
                   <div className="w-full lg:w-auto">
-                    <PremiumUpgradeButton variant="homeBanner" label="Start Your 3 Day Free Trial" />
+                    <PremiumUpgradeButton variant="homeBanner" />
                   </div>
                 </div>
 

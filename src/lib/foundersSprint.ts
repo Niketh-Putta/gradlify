@@ -1,4 +1,5 @@
 import { AI_FEATURE_ENABLED } from '@/lib/featureFlags';
+import { LIFETIME_PROMO, formatGbp, lifetimePriceWithPromo } from '@/lib/pricing';
 import type { UserTrack } from '@/lib/track';
 
 const SPRINT_LENGTH_DAYS = 30;
@@ -221,10 +222,13 @@ export const getSprintUpgradeCopy = () => {
   const dayLabel = daysLeft === 1 ? "day" : "days";
   const countdown = `${daysLeft} ${dayLabel} left`;
 
+  const promoPrice = formatGbp(lifetimePriceWithPromo());
+  const promoLabel = `${promoPrice} with ${LIFETIME_PROMO.code}`;
+
   return {
     isActive,
     hasEnded,
-    bannerTitle: isActive ? `Sprint live - ${countdown}` : hasEnded ? "Sprint has ended" : "Gradlify Premium\nStart Your 3 Day Free Trial",
+    bannerTitle: isActive ? `Sprint live - ${countdown}` : hasEnded ? "Sprint has ended" : `Gradlify Premium\n${promoLabel}`,
     bannerSubtitle: isActive
       ? "Only full mock exams count: correct answers in mocks move the leaderboard; practice does not. After one month, the highest score wins."
       : hasEnded 
@@ -232,11 +236,11 @@ export const getSprintUpgradeCopy = () => {
         : AI_FEATURE_ENABLED
           ? "Get unlimited AI questions, full mock exams, and personalised revision plans."
           : "Get unlimited questions, full mock exams, and personalised revision plans.",
-    buttonPrimary: isActive ? "Unlock more sprint attempts" : (hasEnded ? "View Sprint Results" : "Start Your 3 Day Free Trial"),
-    buttonSecondary: isActive ? "Sprint leaderboard live" : "Start Your 3 Day Free Trial",
-    buttonTertiary: isActive ? "Remove sprint limits" : "Start Your 3 Day Free Trial",
-    listTitle: isActive ? "Sprint upgrade perks:" : "Start Your 3 Day Free Trial for:",
-    settingsTitle: isActive ? "Sprint live: unlock more attempts" : "Gradlify Premium\nStart Your 3 Day Free Trial",
+    buttonPrimary: isActive ? "Unlock more sprint attempts" : (hasEnded ? "View Sprint Results" : "Get Lifetime Premium"),
+    buttonSecondary: isActive ? "Sprint leaderboard live" : `Get Lifetime for ${promoPrice}`,
+    buttonTertiary: isActive ? "Remove sprint limits" : `Get Lifetime for ${promoPrice}`,
+    listTitle: isActive ? "Sprint upgrade perks:" : "Lifetime Premium unlocks:",
+    settingsTitle: isActive ? "Sprint live: unlock more attempts" : `Gradlify Premium\n${promoLabel}`,
     settingsDescription: isActive
       ? `Sprint is live - ${countdown}. Unlock more mock attempts so every correct answer in a full mock can count toward your score.`
       : hasEnded
@@ -245,6 +249,6 @@ export const getSprintUpgradeCopy = () => {
           ? "Get unlimited access to AI-powered study assistance, advanced mock exams, personalised study plans, and premium resources."
           : "Get unlimited access to personalised study assistance, advanced mock exams, personalised study plans, and premium resources.",
     limitTitle: isActive ? "Sprint limit reached" : (hasEnded ? "Sprint has ended" : "Daily limit reached"),
-    limitHint: isActive ? "Sprint is live - unlock more attempts" : (hasEnded ? "The competition phase is now closed." : "Resets tomorrow or start your 3 Day Free Trial"),
+    limitHint: isActive ? "Sprint is live - unlock more attempts" : (hasEnded ? "The competition phase is now closed." : `Resets tomorrow or unlock Lifetime for ${promoPrice}`),
   };
 };

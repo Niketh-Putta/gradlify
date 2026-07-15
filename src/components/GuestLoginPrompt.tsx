@@ -35,7 +35,7 @@ export function GuestLoginPrompt({ onLogin }: GuestLoginPromptProps) {
           </div>
           <div className="flex items-center gap-2 text-sm text-gray-700">
             <Crown className="h-4 w-4 text-amber-500" />
-            <span>{sprintCopy.isActive ? "Remove sprint limits with Premium" : "Start Your 3 Day Free Trial for unlimited access"}</span>
+            <span>{sprintCopy.isActive ? "Remove sprint limits with Premium" : "Unlock Lifetime Premium for unlimited access"}</span>
           </div>
         </div>
         

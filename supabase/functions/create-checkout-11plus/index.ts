@@ -53,6 +53,8 @@ const normalizeEnv = (raw: string) => {
   return "test";
 };
 
+const LIFETIME_PRICE_GBP = 149.99;
+
 const PREMIUM_WEEKLY_PRICE_IDS = {
   live: "price_1TnilZQYWoowhxMZFRVNfCv2",
   test: "price_1TnilaHZeiDDkqObfHHcBIwk",
@@ -63,56 +65,58 @@ const PREMIUM_ANNUAL_OFFER_PRICE_IDS = {
   test: "price_1TmF6FHZeiDDkqObwynk4FQi",
 } as const;
 
-const WEEKLY_PROMO_CODE = "20percent";
-const WEEKLY_PROMO_DISCOUNT_PENCE = 200;
-const WEEKLY_PROMO_CURRENCY = "gbp";
+/** Landing banner code: £50 off lifetime Premium (£149.99 → £99.99). */
+const LIFETIME_PROMO_CODE = "LIFETIME50";
+const LIFETIME_PROMO_DISCOUNT_PENCE = 5000;
+const LIFETIME_PROMO_CURRENCY = "gbp";
 
-const isMatchingWeeklyPromoCoupon = (coupon: Stripe.Coupon) =>
+const resolveCoupon = async (
+  stripe: Stripe,
+  coupon: string | Stripe.Coupon | null | undefined,
+): Promise<Stripe.Coupon | null> => {
+  if (!coupon) return null;
+  if (typeof coupon === "string") {
+    return await stripe.coupons.retrieve(coupon);
+  }
+  return coupon;
+};
+
+const isMatchingLifetimePromoCoupon = (coupon: Stripe.Coupon) =>
   coupon.duration === "once" &&
-  coupon.amount_off === WEEKLY_PROMO_DISCOUNT_PENCE &&
-  coupon.currency?.toLowerCase() === WEEKLY_PROMO_CURRENCY;
+  coupon.amount_off === LIFETIME_PROMO_DISCOUNT_PENCE &&
+  coupon.currency?.toLowerCase() === LIFETIME_PROMO_CURRENCY;
 
-const ensureWeeklyPromoCode = async (stripe: Stripe) => {
+const ensureLifetimePromoCode = async (stripe: Stripe) => {
   const existingCodes = await stripe.promotionCodes.list({
-    code: WEEKLY_PROMO_CODE,
+    code: LIFETIME_PROMO_CODE,
     limit: 20,
+    expand: ["data.coupon"],
   });
 
-  const activeCompatibleCode = existingCodes.data.find(
-    (promotionCode) =>
-      promotionCode.active &&
-      promotionCode.coupon &&
-      isMatchingWeeklyPromoCoupon(promotionCode.coupon),
-  );
-  if (activeCompatibleCode) {
-    return activeCompatibleCode.id;
-  }
-
-  const inactiveCompatibleCode = existingCodes.data.find(
-    (promotionCode) =>
-      !promotionCode.active &&
-      promotionCode.coupon &&
-      isMatchingWeeklyPromoCoupon(promotionCode.coupon),
-  );
-  if (inactiveCompatibleCode) {
-    const reactivated = await stripe.promotionCodes.update(inactiveCompatibleCode.id, { active: true });
+  for (const promotionCode of existingCodes.data) {
+    const coupon = await resolveCoupon(stripe, promotionCode.coupon);
+    if (!coupon || !isMatchingLifetimePromoCoupon(coupon)) continue;
+    if (promotionCode.active) {
+      return promotionCode.id;
+    }
+    const reactivated = await stripe.promotionCodes.update(promotionCode.id, { active: true });
     return reactivated.id;
   }
 
   const conflictingActiveCode = existingCodes.data.find((promotionCode) => promotionCode.active);
   if (conflictingActiveCode) {
-    throw new Error(`Promo code "${WEEKLY_PROMO_CODE}" exists with a different Stripe setup.`);
+    throw new Error(`Promo code "${LIFETIME_PROMO_CODE}" exists with a different Stripe setup.`);
   }
 
   const coupon = await stripe.coupons.create({
-    amount_off: WEEKLY_PROMO_DISCOUNT_PENCE,
-    currency: WEEKLY_PROMO_CURRENCY,
+    amount_off: LIFETIME_PROMO_DISCOUNT_PENCE,
+    currency: LIFETIME_PROMO_CURRENCY,
     duration: "once",
-    name: "Weekly first week £2 off",
-    metadata: { gradlify_offer: "weekly_first_week_2gbp_off" },
+    name: "Lifetime Premium £50 off",
+    metadata: { gradlify_offer: "lifetime_50gbp_off" },
   });
   const promotionCode = await stripe.promotionCodes.create({
-    code: WEEKLY_PROMO_CODE,
+    code: LIFETIME_PROMO_CODE,
     coupon: coupon.id,
     active: true,
   });
@@ -357,7 +361,7 @@ serve(async (req) => {
 
     const {
       plan_interval: planInterval,
-      plan = "weekly",
+      plan = "lifetime",
       returnTo: rawReturnTo,
       premiumTrack: requestedPremiumTrackRaw,
       baseUrl: clientBaseUrl,
@@ -366,58 +370,21 @@ serve(async (req) => {
     if (requestedPremiumTrack && requestedPremiumTrack !== activeTrack) {
       logStep("Track mismatch ignored for 11plus dedicated checkout", { requestedPremiumTrack, activeTrack });
     }
-    const normalizedPlan = planInterval === "ultra_annual"
-      ? "ultra_annual"
-      : planInterval === "annual"
-      ? "annual"
-      : planInterval === "yearly"
-      ? "annual"
-      : planInterval === "weekly"
-      ? "weekly"
-      : plan === "ultra_annual"
-      ? "ultra_annual"
-      : plan === "annual"
-      ? "annual"
-      : plan === "yearly"
-      ? "annual"
-      : plan === "ultra"
-      ? "ultra"
-      : plan === "monthly"
-      ? "weekly"
-      : "weekly";
-    if (normalizedPlan === "ultra" || normalizedPlan === "ultra_annual") {
+
+    // Public offer is lifetime-only. Coerce legacy weekly/annual requests so
+    // old client bundles still reach checkout during rollout.
+    const requestedPlan = String(planInterval ?? plan ?? "lifetime").toLowerCase();
+    if (requestedPlan === "ultra" || requestedPlan === "ultra_annual") {
       throw new Error("This plan is not currently available.");
     }
+    const normalizedPlan = "lifetime";
 
     const checkoutTrack = "eleven_plus";
-    const trackPrices = config.prices[checkoutTrack as keyof typeof config.prices];
-    let priceId = trackPrices?.weekly;
-    if (normalizedPlan === "annual") {
-        priceId = trackPrices?.annual;
-    } else if (normalizedPlan === "ultra") {
-        priceId = trackPrices?.ultra;
-        if (!priceId) {
-            throw new Error(`Ultra pricing not configured for track: ${checkoutTrack}`);
-        }
-    } else if (normalizedPlan === "ultra_annual") {
-        priceId = trackPrices?.ultra_annual;
-        if (!priceId) {
-            throw new Error(`Ultra Annual pricing not configured for track: ${checkoutTrack}`);
-        }
-    }
-    
-    if (!priceId) {
-      throw new Error(`Missing Stripe price ID for ${normalizedPlan} plan`);
-    }
-    const stripePromotionCodeEntryEnabled = normalizedPlan === "weekly";
-    if (stripePromotionCodeEntryEnabled) {
-      await ensureWeeklyPromoCode(stripe);
-    }
     logStep("Creating checkout with plan", {
       plan: normalizedPlan,
+      requestedPlan,
       track: checkoutTrack,
-      priceId: priceId.slice(0, 8),
-      stripePromotionCodeEntryEnabled,
+      amountGbp: LIFETIME_PRICE_GBP,
     });
 
     const candidateBaseUrl =
@@ -433,43 +400,50 @@ serve(async (req) => {
     }
     const returnTo = sanitizeReturnPath(rawReturnTo);
     const encodedReturnTo = encodeURIComponent(returnTo);
+
+    // Ensure LIFETIME50 (£50 off) exists so parents can paste it on Checkout.
+    try {
+      const promoId = await ensureLifetimePromoCode(stripe);
+      logStep("Lifetime promo ready", { promoId, code: LIFETIME_PROMO_CODE });
+    } catch (promoError) {
+      logStep("Warning: could not ensure lifetime promo code", {
+        message: promoError instanceof Error ? promoError.message : String(promoError),
+      });
+    }
+
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       line_items: [
         {
-          price: priceId,
           quantity: 1,
+          price_data: {
+            currency: "gbp",
+            unit_amount: Math.round(LIFETIME_PRICE_GBP * 100),
+            product_data: {
+              name: "Gradlify Premium Lifetime",
+              description: "One-time payment for lifetime Gradlify Premium access.",
+            },
+          },
         },
       ],
-      mode: "subscription",
-      allow_promotion_codes: stripePromotionCodeEntryEnabled,
+      mode: "payment",
+      allow_promotion_codes: true,
       automatic_tax: { enabled: false },
       payment_method_collection: "always",
       custom_text: {
         submit: {
-          message: hasUsedTrial ? "Continue to Premium" : "Start Your 3 Day Free Trial",
+          message: `Unlock lifetime Premium — use code ${LIFETIME_PROMO_CODE} for £50 off`,
         },
       },
       client_reference_id: user.id,
-      subscription_data: {
-        ...(hasUsedTrial ? {} : { trial_period_days: 3 }),
-        metadata: {
-          userId: user.id,
-          user_id: user.id,
-          supabase_user_id: user.id,
-          plan_interval: normalizedPlan,
-          premium_track: checkoutTrack,
-          client_reference_id: user.id,
-          has_used_trial: hasUsedTrial ? "true" : "false",
-        },
-      },
       metadata: {
         userId: user.id,
         user_id: user.id,
         supabase_user_id: user.id,
         plan_interval: normalizedPlan,
         premium_track: checkoutTrack,
-        has_used_trial: hasUsedTrial ? "true" : "false",
+        product_type: "premium_lifetime",
+        client_reference_id: user.id,
       },
       success_url: `${baseUrl}/pay/success?session_id={CHECKOUT_SESSION_ID}&returnTo=${encodedReturnTo}`,
       cancel_url: `${baseUrl}/pay/cancelled?returnTo=${encodedReturnTo}`,

@@ -14,8 +14,12 @@ import { is11Plus as is11PlusApp } from '@/lib/track-config';
 import { UK_SECONDARY_SCHOOLS } from '@/lib/schools';
 import { useNavigate } from 'react-router-dom';
 import { startPremiumCheckout } from '@/lib/checkout';
-import { PREMIUM_PRICING, ULTRA_PRICING } from '@/lib/pricing';
-import { DiagonalStrikePrice, OfferPrice } from '@/components/OfferPrice';
+import { PREMIUM_PRICING, ULTRA_PRICING, LIFETIME_PROMO, lifetimePriceWithPromo } from '@/lib/pricing';
+import {
+  LifetimePromoCodeButton,
+  LifetimePromoPrice,
+  lifetimePromoHint,
+} from '@/components/LifetimePromoCodeButton';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -250,7 +254,7 @@ const shuffle = <T,>(arr: T[]) => {
   return copy;
 };
 
-type CheckoutPlan = 'weekly' | 'annual' | 'ultra' | 'ultra_annual';
+type CheckoutPlan = 'lifetime' | 'ultra' | 'ultra_annual';
 
 function PlanCheckoutButton({
   planType,
@@ -261,91 +265,41 @@ function PlanCheckoutButton({
   className?: string;
   children: ReactNode;
 }) {
-  const [loadingPlan, setLoadingPlan] = useState<CheckoutPlan | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const handleCheckout = async (plan: CheckoutPlan) => {
+  const handleCheckout = async () => {
     try {
-      setLoadingPlan(plan);
-      await startPremiumCheckout(plan);
+      setLoading(true);
+      if (planType === 'ultra') {
+        await startPremiumCheckout('ultra');
+      } else {
+        await startPremiumCheckout('lifetime');
+      }
     } catch (error) {
       console.error('Error creating checkout:', error);
       const message = error instanceof Error ? error.message : 'Failed to start checkout. Please try again.';
       toast.error(message);
     } finally {
-      setLoadingPlan(null);
+      setLoading(false);
     }
   };
 
-  const isLoading = Boolean(loadingPlan);
-  const annualPlan = planType === 'premium' ? 'annual' : 'ultra_annual';
-  const weeklyPlan = planType === 'premium' ? 'weekly' : 'ultra';
-
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          type="button"
-          disabled={isLoading}
-          className={className}
-        >
-          {isLoading ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin" />
-              Starting checkout...
-            </>
-          ) : (
-            <>
-              {children}
-              <ChevronDown className="h-4 w-4" />
-            </>
-          )}
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="center" sideOffset={8} className="w-72 rounded-2xl p-2">
-        <DropdownMenuItem
-          onClick={() => handleCheckout(annualPlan)}
-          className="cursor-pointer rounded-xl p-3"
-        >
-          <div className="flex w-full flex-col gap-1">
-            <span className="font-semibold">
-              {planType === 'premium' ? 'Premium Annual' : 'Ultra Annual'}
-            </span>
-            {planType === 'premium' ? (
-              <>
-                <span className="flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
-                  3 Day Free Trial, then was
-                  <DiagonalStrikePrice amount={PREMIUM_PRICING.annualOriginal} className="font-semibold text-slate-400" />
-                  Annual <span className="font-semibold text-slate-900">£{PREMIUM_PRICING.annualPerWeek}/week</span>
-                </span>
-                <span className="text-xs font-semibold text-red-600">Limited time offer just for you.</span>
-              </>
-            ) : (
-              <span className="text-xs text-muted-foreground">Best value - £{ULTRA_PRICING.annual}/year</span>
-            )}
-          </div>
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => handleCheckout(weeklyPlan)}
-          className="cursor-pointer rounded-xl p-3"
-        >
-          <div className="flex w-full flex-col">
-            <span className="font-semibold">
-              {planType === 'premium' ? 'Premium Weekly' : 'Ultra Monthly'}
-            </span>
-            {planType === 'premium' ? (
-              <span className="flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
-                3 Day Free Trial, then
-                <DiagonalStrikePrice className="font-semibold text-slate-400" />
-                <span className="font-semibold text-slate-900">£{PREMIUM_PRICING.weekly}/week</span>
-                <span className="text-red-600">limited time offer</span>
-              </span>
-            ) : (
-              <span className="text-xs text-muted-foreground">£{ULTRA_PRICING.monthly}/month</span>
-            )}
-          </div>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <Button
+      type="button"
+      disabled={loading}
+      onClick={handleCheckout}
+      className={className}
+    >
+      {loading ? (
+        <>
+          <Loader2 className="h-4 w-4 animate-spin" />
+          Starting checkout...
+        </>
+      ) : (
+        children
+      )}
+    </Button>
   );
 }
 
@@ -1030,15 +984,18 @@ export function OnboardingModal({ isOpen, userId, tier, premiumTrack, founderTra
                       </div>
 
                       <div className="relative z-10 mt-5 sm:mt-6">
-                        <OfferPrice
-                          tone="dark"
-                          suffix="/week"
-                          currentClassName="font-gradlify text-3xl font-semibold text-white sm:text-5xl lg:text-6xl"
-                          originalClassName="text-white/75"
-                          labelClassName="border-white/35 bg-white/15 text-white"
-                        />
+                        <div className="flex items-baseline gap-2 flex-wrap">
+                          <LifetimePromoPrice
+                            priceClassName="font-gradlify text-3xl font-semibold text-white sm:text-5xl lg:text-6xl"
+                            strikeClassName="text-base sm:text-xl text-white/50"
+                            suffixClassName="text-white/80"
+                          />
+                        </div>
+                        <div className="mt-3">
+                          <LifetimePromoCodeButton tone="onGradient" />
+                        </div>
                         <p className="mt-2 max-w-md text-[11px] font-medium leading-4 text-white/90 sm:mt-3 sm:text-base sm:leading-6">
-                          More mocks, deeper analytics, higher limits.
+                          More mocks, deeper analytics, higher limits. £{LIFETIME_PROMO.amountOffGbp} off with {LIFETIME_PROMO.code} — pay once, keep Premium forever.
                         </p>
                       </div>
 
@@ -1063,10 +1020,10 @@ export function OnboardingModal({ isOpen, userId, tier, premiumTrack, founderTra
                           planType="premium"
                           className="h-9 w-full rounded-full bg-white text-[10px] font-semibold text-orange-700 shadow-[0_14px_30px_rgba(194,65,12,0.16)] hover:bg-white/92 sm:h-11 sm:text-sm"
                         >
-                          Start Your 3 Day Free Trial
+                          Get Lifetime Premium · £{lifetimePriceWithPromo()}
                           <ArrowRight className="h-4 w-4" />
                         </PlanCheckoutButton>
-                        <p className="mt-2 text-center text-xs font-medium text-white/75">Cancel anytime</p>
+                        <p className="mt-2 text-center text-xs font-medium text-white/75">{lifetimePromoHint()}</p>
                       </div>
                     </section>
                   </div>

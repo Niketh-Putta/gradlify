@@ -68,15 +68,20 @@ export async function getPremiumStatus(userId: string): Promise<PremiumStatus> {
   const now = Date.now();
   const hasActivePeriod = premiumUntil ? new Date(premiumUntil).getTime() > now : false;
   const subscriptionStatus = pData?.stripe_subscription_status ?? pData?.subscription_status ?? null;
+  const isLifetime =
+    subscriptionStatus === 'lifetime' ||
+    pData?.subscription_interval === 'lifetime' ||
+    pData?.plan === 'premium_lifetime';
   const isTrialing = subscriptionStatus === 'trialing';
   const hasPaidPlan = Boolean(pData?.plan && pData.plan !== 'free');
-  const isPremiumFlag = Boolean(pData?.is_premium) && (!premiumUntil || hasActivePeriod);
+  const isPremiumFlag = Boolean(pData?.is_premium) && (isLifetime || !premiumUntil || hasActivePeriod);
   const isPremiumTier = pData?.tier === 'premium';
   const currentTrack = normalizeTrack((pData as { track?: string | null } | null)?.track ?? null) ?? 'gcse';
   const premiumTrack = normalizeTrack((pData as { premium_track?: string | null } | null)?.premium_track ?? null);
   const hasTrackPremium = premiumTrack ? premiumTrack === currentTrack : currentTrack === 'gcse';
   const isActiveTrialing = isTrialing;
-  const hasPremiumSubscription = isPremiumTier || isActiveTrialing || (hasPaidPlan && hasActivePeriod) || isPremiumFlag;
+  const hasPremiumSubscription =
+    isLifetime || isPremiumTier || isActiveTrialing || (hasPaidPlan && hasActivePeriod) || isPremiumFlag;
   const isPremium = isFounder || hasPremiumSubscription;
   const isLegacyUltra = pData?.plan === 'ultra' || pData?.plan === 'ultra_annual';
   const isUltra = ULTRA_PLAN_ENABLED && isLegacyUltra;
@@ -108,6 +113,13 @@ export async function getPremiumStatus(userId: string): Promise<PremiumStatus> {
 export function hasPaidPremiumLiveMockAccess(status: PremiumStatus): boolean {
   if (status.founderTrack === 'founder') return true;
   if (status.isTrialing || status.subscriptionStatus === 'trialing') return false;
+  if (
+    status.subscriptionStatus === 'lifetime' ||
+    status.billingCycle === 'lifetime' ||
+    status.plan === 'premium_lifetime'
+  ) {
+    return true;
+  }
   if (status.subscriptionStatus === 'active' && status.hasPremiumSubscription) return true;
   const premiumUntil = status.premiumUntil;
   const hasActivePeriod = premiumUntil ? new Date(premiumUntil).getTime() > Date.now() : false;
