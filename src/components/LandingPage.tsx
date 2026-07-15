@@ -2,8 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Link, useNavigate } from "react-router-dom";
 import { motion, useReducedMotion, type Variants } from "framer-motion";
 import { ArrowRight, CheckCircle, ShieldCheck, Sparkles, MousePointer2, Compass, Layers, SlidersHorizontal, AlertTriangle, Trophy, Volume2, VolumeX, Pause } from "lucide-react";
-import { PREMIUM_PRICING, ULTRA_PRICING, LIFETIME_PROMO, formatGbp, lifetimePriceWithPromo } from "@/lib/pricing";
-import { lifetimePromoHint } from "@/components/LifetimePromoCodeButton";
+import { PREMIUM_PRICING, ULTRA_PRICING, formatGbp } from "@/lib/pricing";
 import { LifetimePromoBanner } from "@/components/LifetimePromoBanner";
 
 import { setPostAuthRedirect } from "@/lib/postAuthRedirect";
@@ -244,8 +243,6 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
   const hasSession = false;
   const sessionChecked = true;
   const dashboardPath = getDashboardPath();
-
-  const lifetimePromoPrice = lifetimePriceWithPromo();
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -1155,7 +1152,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                         ["Weak-topic diagnosis", "yes", "partial", "partial", "partial"],
                         ["Parent-ready report", "yes", "partial", "partial", "partial"],
                         ["Built from selective-school experience", "yes", "no", "no", "no"],
-                        ["Focused 11+ system at £99.99 with LIFETIME50", "yes", "no", "no", "yes"],
+                        ["Focused 11+ system at £149.99 lifetime", "yes", "no", "no", "yes"],
                         ["Clear next-step plan after each mock", "yes", "partial", "partial", "no"],
                       ].map(([feature, gradlify, atom, explore, bond]) => (
                         <tr key={feature} className={cn("border-b last:border-b-0", isDark ? "border-white/10" : "border-slate-100")}>
@@ -1269,19 +1266,18 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                       </div>
                     </div>
                     <div className="mt-4 flex items-baseline gap-2 flex-wrap">
-                      <span className="text-3xl sm:text-4xl font-black text-white">{formatGbp(lifetimePromoPrice)}</span>
-                      <span className="text-lg font-bold text-white/50 line-through">{formatGbp(PREMIUM_PRICING.lifetime)}</span>
-                      <span className="text-xs font-bold uppercase tracking-widest text-white/75">lifetime · with {LIFETIME_PROMO.code}</span>
+                      <span className="text-3xl sm:text-4xl font-black text-white">{formatGbp(PREMIUM_PRICING.lifetime)}</span>
+                      <span className="text-xs font-bold uppercase tracking-widest text-white/75">lifetime</span>
                     </div>
                     <div className="mt-4 rounded-xl border border-white/25 bg-white/15 p-3 shadow-inner shadow-white/10">
                       <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
                         <div>
                           <p className="text-[11px] font-black uppercase tracking-[0.18em] text-white/80">Why parents switch</p>
-                          <p className="mt-1 text-sm font-semibold text-white">One tutor hour costs £40–60. Premium is {formatGbp(lifetimePromoPrice)} with {LIFETIME_PROMO.code}.</p>
+                          <p className="mt-1 text-sm font-semibold text-white">One tutor hour costs £40–60. Premium is {formatGbp(PREMIUM_PRICING.lifetime)} lifetime.</p>
                         </div>
                         <div className="text-left sm:text-right">
-                          <div className="text-2xl font-black text-white">{formatGbp(lifetimePromoPrice)}</div>
-                          <div className="text-[11px] font-bold uppercase tracking-[0.14em] text-white/75">with promo</div>
+                          <div className="text-2xl font-black text-white">{formatGbp(PREMIUM_PRICING.lifetime)}</div>
+                          <div className="text-[11px] font-bold uppercase tracking-[0.14em] text-white/75">one-time</div>
                         </div>
                       </div>
                     </div>
@@ -1311,7 +1307,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                       <ArrowRight className="ml-2 h-5 w-5" />
                     </Button>
                     <div className="mt-2 sm:mt-3 text-[11px] sm:text-xs text-white/80 text-center">
-                      {lifetimePromoHint()}
+                      One-time payment · lifetime access
                     </div>
                   </div>
                 </motion.div>
