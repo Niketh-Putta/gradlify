@@ -1324,9 +1324,10 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
                         Best for exams
                       </div>
                     </div>
-                    <div className="mt-4 flex items-baseline gap-2">
-                      <span className="text-3xl sm:text-4xl font-black text-white">{formatGbp(PREMIUM_PRICING.lifetime)}</span>
-                      <span className="text-xs font-bold uppercase tracking-widest text-white/75">lifetime · one-time</span>
+                    <div className="mt-4 flex items-baseline gap-2 flex-wrap">
+                      <span className="text-3xl sm:text-4xl font-black text-white">{formatGbp(lifetimePromoPrice)}</span>
+                      <span className="text-lg font-bold text-white/50 line-through">{formatGbp(PREMIUM_PRICING.lifetime)}</span>
+                      <span className="text-xs font-bold uppercase tracking-widest text-white/75">lifetime · with {LIFETIME_PROMO.code}</span>
                     </div>
                     <div className="mt-4 rounded-xl border border-white/25 bg-white/15 p-3 shadow-inner shadow-white/10">
                       <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
