@@ -288,11 +288,26 @@ const buildUpdateData = ({
   } as Record<string, unknown>;
 };
 
+const profileLooksLifetime = (profile: {
+  plan?: string | null;
+  subscription_interval?: string | null;
+  stripe_subscription_status?: string | null;
+  subscription_status?: string | null;
+} | null | undefined) =>
+  Boolean(
+    profile &&
+      (profile.plan === 'premium_lifetime' ||
+        profile.subscription_interval === 'lifetime' ||
+        profile.stripe_subscription_status === 'lifetime' ||
+        profile.subscription_status === 'lifetime'),
+  );
+
 const updateProfile = async (payload: ProfileUpdatePayload): Promise<{ success: boolean; ignored: boolean }> => {
   const supabase = getSupabaseClient();
   const customerColumn = payload.mode === 'LIVE' ? 'stripe_customer_id_live' : 'stripe_customer_id_test';
   const subscriptionColumn = payload.mode === 'LIVE' ? 'stripe_subscription_id_live' : 'stripe_subscription_id_test';
-  const updateData = {
+  const incomingIsLifetime = payload.billingInterval === 'lifetime';
+  let updateData: Record<string, unknown> = {
     ...buildUpdateData(payload),
     [customerColumn]: payload.stripeCustomerId,
   };
@@ -318,14 +333,64 @@ const updateProfile = async (payload: ProfileUpdatePayload): Promise<{ success: 
     eventId: payload.eventId,
   };
 
-  const lookupUserId = payload.metadataUserId ?? payload.clientReferenceId ?? null;
-  if (lookupUserId) {
-    const { data: existingProfile } = await supabase
-      .from('profiles')
-      .select(`${customerColumn}, ${subscriptionColumn}, premium_track`)
-      .eq('user_id', lookupUserId)
-      .maybeSingle();
+  const resolveExistingProfile = async () => {
+    const lookupUserId = payload.metadataUserId ?? payload.clientReferenceId ?? null;
+    const selectCols = `${customerColumn}, ${subscriptionColumn}, premium_track, plan, subscription_interval, stripe_subscription_status, subscription_status, is_premium`;
+    if (lookupUserId) {
+      const { data } = await supabase
+        .from('profiles')
+        .select(selectCols)
+        .eq('user_id', lookupUserId)
+        .maybeSingle();
+      if (data) return { profile: data, lookupUserId };
+    }
+    if (payload.stripeCustomerId) {
+      const { data } = await supabase
+        .from('profiles')
+        .select(selectCols)
+        .eq(customerColumn, payload.stripeCustomerId)
+        .maybeSingle();
+      if (data) return { profile: data, lookupUserId: (data as { user_id?: string }).user_id ?? lookupUserId };
+    }
+    return { profile: null, lookupUserId };
+  };
 
+  const { profile: existingProfile, lookupUserId } = await resolveExistingProfile();
+
+  // Lifetime one-time purchases must not be demoted by later subscription
+  // cancel/delete/update events from a prior weekly/monthly/annual plan.
+  if (!incomingIsLifetime && profileLooksLifetime(existingProfile as {
+    plan?: string | null;
+    subscription_interval?: string | null;
+    stripe_subscription_status?: string | null;
+    subscription_status?: string | null;
+  })) {
+    logStep('Preserving lifetime premium against non-lifetime Stripe event', {
+      ...logContext,
+      lookupUserId,
+      existingPlan: (existingProfile as { plan?: string | null } | null)?.plan ?? null,
+    });
+    updateData = {
+      [customerColumn]: payload.stripeCustomerId,
+      is_premium: true,
+      tier: 'premium',
+      plan: 'premium_lifetime',
+      subscription_interval: 'lifetime',
+      subscription_status: 'lifetime',
+      stripe_subscription_status: 'lifetime',
+      cancel_at_period_end: false,
+      current_period_end: null,
+      premium_until: null,
+    };
+    if (
+      payload.premiumTrack ||
+      (existingProfile as { premium_track?: string | null } | null)?.premium_track
+    ) {
+      updateData.premium_track =
+        payload.premiumTrack ??
+        (existingProfile as { premium_track?: string | null }).premium_track;
+    }
+  } else if (lookupUserId || existingProfile) {
     if (payload.premiumTrack) {
       updateData.premium_track = payload.premiumTrack;
     } else if (existingProfile && (existingProfile as { premium_track?: string | null }).premium_track) {
@@ -335,8 +400,8 @@ const updateProfile = async (payload: ProfileUpdatePayload): Promise<{ success: 
     logStep('Profile id presence', {
       ...logContext,
       lookupUserId,
-      hasCustomerId: Boolean(existingProfile?.[customerColumn]),
-      hasSubscriptionId: Boolean(existingProfile?.[subscriptionColumn]),
+      hasCustomerId: Boolean(existingProfile?.[customerColumn as keyof typeof existingProfile]),
+      hasSubscriptionId: Boolean(existingProfile?.[subscriptionColumn as keyof typeof existingProfile]),
       premiumTrack: payload.premiumTrack ?? (existingProfile as { premium_track?: string | null } | null)?.premium_track ?? null,
     });
   }

@@ -167,12 +167,32 @@ serve(async (req) => {
       profile?.plan === "premium_lifetime" ||
       profile?.stripe_subscription_status === "lifetime";
 
-    if (isLifetimePremium && profile?.is_premium) {
+    // Lifetime is one-time; never sync against an old/canceled subscription.
+    if (isLifetimePremium) {
+      if (!profile?.is_premium) {
+        const { error: restoreError } = await admin
+          .from("profiles")
+          .update({
+            is_premium: true,
+            tier: "premium",
+            plan: "premium_lifetime",
+            subscription_interval: "lifetime",
+            subscription_status: "lifetime",
+            stripe_subscription_status: "lifetime",
+            cancel_at_period_end: false,
+            current_period_end: null,
+            premium_until: null,
+          })
+          .eq("user_id", user.id);
+        if (restoreError) {
+          return jsonResponse({ error: "lifetime_restore_failed" }, 500);
+        }
+      }
       return jsonResponse({
-        updated: false,
+        updated: !profile?.is_premium,
         reason: "lifetime_premium",
         db_is_premium: true,
-        db_stripe_subscription_status: profile?.stripe_subscription_status ?? "lifetime",
+        db_stripe_subscription_status: "lifetime",
         stripe_key_prefix: stripeKeyPrefix(stripeKey),
         environment,
       });

@@ -599,8 +599,19 @@ export function usePremium(trackOverride?: UserTrack, subject?: 'maths' | 'engli
   const premiumUntilStr = profilePremiumUntil ?? profilePeriodEnd ?? currentPeriodEnd ?? null;
   const hasActivePeriod = !premiumUntilStr || new Date(premiumUntilStr).getTime() > Date.now();
   const isPremiumFlag = Boolean(profileIsPremium) && hasActivePeriod;
+  const profileBillingInterval = (profile as { subscription_interval?: string | null } | null)?.subscription_interval ?? null;
+  const profileSubStatus =
+    (profile as { stripe_subscription_status?: string | null } | null)?.stripe_subscription_status ??
+    (profile as { subscription_status?: string | null } | null)?.subscription_status ??
+    null;
+  const isLifetime =
+    plan === 'premium_lifetime' ||
+    profilePlan === 'premium_lifetime' ||
+    profileBillingInterval === 'lifetime' ||
+    profileSubStatus === 'lifetime';
 
   const hasPremiumSubscription =
+    isLifetime ||
     tier === 'premium' ||
     profileTier === 'premium' ||
     isPlanActive(plan, currentPeriodEnd) ||
