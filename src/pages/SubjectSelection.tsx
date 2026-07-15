@@ -7,6 +7,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
 import { BookOpen, Calculator, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { startPremiumCheckout } from "@/lib/checkout";
+import { toast } from "sonner";
 
 interface Profile {
   user_id: string;
@@ -56,7 +58,9 @@ export default function SubjectSelection() {
   
   const displayTier = isUltra ? 'Ultra' : isPremium ? 'Premium' : 'Free';
   const planIntent = new URLSearchParams(location.search).get('intent') === 'plans';
+  const checkoutIntent = new URLSearchParams(location.search).get('intent') === 'checkout';
   const postPlanSetupPath = "/select-subject#settings";
+  const [startingCheckout, setStartingCheckout] = useState(false);
 
   const fetchProfile = useCallback(async () => {
     setProfileLoading(true);
@@ -116,6 +120,23 @@ export default function SubjectSelection() {
     if (profileLoading || !userId || !planIntent || !onboardingComplete) return;
     navigate(postPlanSetupPath, { replace: true });
   }, [onboardingComplete, planIntent, profileLoading, userId, navigate]);
+
+  useEffect(() => {
+    if (profileLoading || !userId || !checkoutIntent || !onboardingComplete || startingCheckout) return;
+    setStartingCheckout(true);
+    void (async () => {
+      try {
+        toast.message("Opening Lifetime Premium checkout…");
+        await startPremiumCheckout("lifetime");
+      } catch (error) {
+        console.error(error);
+        const message = error instanceof Error ? error.message : "Could not start checkout.";
+        toast.error(message);
+        setStartingCheckout(false);
+        navigate("/premium", { replace: true });
+      }
+    })();
+  }, [checkoutIntent, onboardingComplete, profileLoading, startingCheckout, userId, navigate]);
 
   const handleSelect = (subject: 'maths' | 'english') => {
     setSubject(subject);
@@ -222,8 +243,14 @@ export default function SubjectSelection() {
             setShowOnboarding(false);
             void fetchProfile();
           }}
-          continuePath={planIntent ? postPlanSetupPath : '/home'}
-          skipUpsell={planIntent}
+          continuePath={
+            checkoutIntent
+              ? "/select-subject?intent=checkout"
+              : planIntent
+                ? postPlanSetupPath
+                : "/home"
+          }
+          skipUpsell={planIntent || checkoutIntent}
         />
       ) : null}
     </div>

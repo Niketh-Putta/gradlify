@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion, useReducedMotion, type Variants } from "framer-motion";
 import { ArrowRight, CheckCircle, ShieldCheck, Sparkles, MousePointer2, Compass, Layers, SlidersHorizontal, AlertTriangle, Trophy, Volume2, VolumeX, Pause } from "lucide-react";
 import { PREMIUM_PRICING, ULTRA_PRICING, LIFETIME_PROMO, formatGbp, lifetimePriceWithPromo } from "@/lib/pricing";
@@ -230,6 +230,7 @@ function ResourceScrollCard({
 }
 
 export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, variant = "11plus" }: LandingPageProps) {
+  const navigate = useNavigate();
   const motionCfg = useLandingMotion();
   const isDark = false;
   const isElevenPlus = true;
@@ -319,13 +320,12 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
   const scrollTo = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
   const setPlanPostAuthRedirect = () => {
     setPostAuthRedirect({
-      path: "/select-subject?intent=plans",
-      message: "Finish your quick setup, then open Premium in Settings.",
+      path: "/select-subject?intent=checkout",
+      message: "Finish your quick setup, then we'll open Lifetime Premium checkout.",
     });
   };
   const handleViewPlans = () => {
-    setPlanPostAuthRedirect();
-    scrollTo("pricing");
+    navigate("/premium");
   };
   const handleSignup = () => {
     setSignupTrack("11plus");

@@ -28,6 +28,20 @@ export const LIFETIME_PROMO = {
 export const lifetimePriceWithPromo = () =>
   Math.round((PREMIUM_PRICING.lifetime - LIFETIME_PROMO.amountOffGbp) * 100) / 100;
 
+/** Marketing value stack shown on the /premium plan page. */
+export const PREMIUM_VALUE_ITEMS = [
+  { label: "Unlimited 11+ Maths & English practice bank", valueGbp: 120 },
+  { label: "Full timed mock exams (auto-marked)", valueGbp: 90 },
+  { label: "Unlimited Challenge questions", valueGbp: 45 },
+  { label: "Revision notes by topic", valueGbp: 40 },
+  { label: "Parent readiness tracking & weak-topic reports", valueGbp: 55 },
+  { label: "Mistake tracker and progress analytics", valueGbp: 35 },
+  { label: "GL / CEM / ISEB style coverage", valueGbp: 50 },
+] as const;
+
+export const premiumTotalValueGbp = () =>
+  PREMIUM_VALUE_ITEMS.reduce((sum, item) => sum + item.valueGbp, 0);
+
 export const ULTRA_PRICING = {
   monthly: 249.99,
   annual: 2499.99,

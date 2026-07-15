@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Check } from "lucide-react";
 import { toast } from "sonner";
-import { LIFETIME_PROMO, PREMIUM_PRICING, formatGbp, lifetimePriceWithPromo } from "@/lib/pricing";
+import { LIFETIME_PROMO } from "@/lib/pricing";
 import { cn } from "@/lib/utils";
 import { useOfferCountdown } from "@/hooks/useOfferCountdown";
 import { copyLifetimePromoCode } from "@/components/LifetimePromoCodeButton";
@@ -17,6 +17,7 @@ type LifetimePromoBannerProps = {
 /**
  * Minimal dark promo strip — same pattern as common SaaS top bars:
  * copy → code pill → accent CTA, plus a live countdown.
+ * Content group is centered horizontally as one unit.
  */
 export function LifetimePromoBanner({
   onCta,
@@ -40,14 +41,14 @@ export function LifetimePromoBanner({
   return (
     <div
       className={cn(
-        "relative w-full bg-[#0a0a0a] text-[#e8e8e8]",
+        "relative flex w-full justify-center bg-[#0a0a0a] text-[#e8e8e8]",
         compact ? "py-2" : "py-2.5",
         className,
       )}
     >
       <div
         className={cn(
-          "mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-2 gap-y-1.5 px-3 text-center sm:gap-x-2.5 sm:px-6",
+          "inline-flex max-w-full flex-wrap items-center justify-center gap-x-2 gap-y-1.5 px-3 text-center sm:gap-x-2.5 sm:px-6",
           compact ? "text-[12px] sm:text-[13px]" : "text-[13px] sm:text-[14px]",
         )}
       >
@@ -89,4 +90,3 @@ export function LifetimePromoBanner({
     </div>
   );
 }
-

@@ -38,6 +38,7 @@ const NotFound = lazyWithRetry(() => import('@/pages/NotFound'));
 const Tools = lazyWithRetry(() => import('@/pages/Tools'));
 const SubjectSelection = lazyWithRetry(() => import('@/pages/SubjectSelection'));
 const Compare = lazyWithRetry(() => import('@/pages/Compare'));
+const PremiumPlan = lazyWithRetry(() => import('@/pages/PremiumPlan'));
 
 import { User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -272,6 +273,26 @@ const Index = () => {
     </ForceTheme>
   );
 
+  const renderPremiumPlan = () => (
+    <ForceTheme theme="light">
+      <>
+        <PremiumPlan
+          onAuthAction={(action) => {
+            setAuthMode(action);
+            setShowAuthModal(true);
+          }}
+        />
+        <AuthModal
+          isOpen={showAuthModal}
+          onClose={() => setShowAuthModal(false)}
+          onAuthSuccess={handleAuthSuccess}
+          initialMode={authMode}
+          tone="light"
+        />
+      </>
+    </ForceTheme>
+  );
+
   const handleSignOut = async () => {
     try {
       // Import supabase client
@@ -351,6 +372,7 @@ const Index = () => {
             <Route path="/tools" element={<Tools />} />
             <Route path="/free-resources" element={<Tools />} />
             <Route path="/compare" element={<Compare />} />
+            <Route path="/premium" element={<PremiumPlan />} />
             <Route path="/sprint" element={<SprintHowItWorks />} />
             <Route path="/sprint-details" element={<SprintDetails />} />
             <Route path="/sprint-winning" element={<SprintWinning />} />
@@ -409,6 +431,7 @@ const Index = () => {
         <Route path="/tools" element={<Tools />} />
         <Route path="/free-resources" element={<Tools />} />
         <Route path="/compare" element={<Compare />} />
+        <Route path="/premium" element={renderPremiumPlan()} />
         <Route path="/auth/reset-confirm" element={<ResetConfirm />} />
         <Route path="/update-password" element={<UpdatePassword />} />
         <Route path="/reset-password" element={renderLanding()} />
