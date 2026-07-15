@@ -4,7 +4,6 @@ import { toast } from "sonner";
 import { LIFETIME_PROMO } from "@/lib/pricing";
 import { cn } from "@/lib/utils";
 import { useOfferCountdown } from "@/hooks/useOfferCountdown";
-import { copyLifetimePromoCode } from "@/components/LifetimePromoCodeButton";
 
 type LifetimePromoBannerProps = {
   onCta?: () => void;
@@ -15,9 +14,8 @@ type LifetimePromoBannerProps = {
 };
 
 /**
- * Minimal dark promo strip - same pattern as common SaaS top bars:
- * copy → code pill → accent CTA, plus a live countdown.
- * Content group is centered horizontally as one unit.
+ * Landing-page only dark promo strip.
+ * Do not import this outside LandingPage — LIFETIME50 must not appear elsewhere in UI.
  */
 export function LifetimePromoBanner({
   onCta,
@@ -30,7 +28,10 @@ export function LifetimePromoBanner({
 
   const handleCopy = async () => {
     try {
-      await copyLifetimePromoCode();
+      await navigator.clipboard.writeText(LIFETIME_PROMO.code);
+      toast.success(
+        `Copied ${LIFETIME_PROMO.code} - paste it at checkout for £${LIFETIME_PROMO.amountOffGbp} off`,
+      );
       setCopied(true);
       window.setTimeout(() => setCopied(false), 2000);
     } catch {

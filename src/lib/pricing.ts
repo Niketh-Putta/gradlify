@@ -19,14 +19,11 @@ export const PREMIUM_PRICING = {
   annualSavings: 269,
 } as const;
 
-/** Landing banner code: £50 off lifetime Premium at Stripe Checkout. */
+/** Landing-banner-only promo (LifetimePromoBanner). Do not surface in other UI. */
 export const LIFETIME_PROMO = {
   code: "LIFETIME50",
   amountOffGbp: 50,
 } as const;
-
-export const lifetimePriceWithPromo = () =>
-  Math.round((PREMIUM_PRICING.lifetime - LIFETIME_PROMO.amountOffGbp) * 100) / 100;
 
 /** Marketing value stack shown on the /premium plan page. */
 export const PREMIUM_VALUE_ITEMS = [
