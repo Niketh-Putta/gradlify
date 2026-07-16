@@ -16,7 +16,7 @@ const freeFeatures = [
 const premiumFeatures = [
   "Unlimited practice questions",
   "Priority mastery analytics",
-  "Track readiness across 11+ and GCSE maths",
+  "Track readiness across 11+ maths and English",
 ];
 
 export function PracticeLimitModal({

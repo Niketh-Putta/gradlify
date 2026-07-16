@@ -1,4 +1,4 @@
-# Gradlify – GCSE Maths Practised Properly
+# Gradlify – 11+ Practised Properly
 
 ## Project info
 

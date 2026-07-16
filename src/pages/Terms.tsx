@@ -50,9 +50,9 @@ export default function Terms() {
                 <h2 className="text-xl font-semibold mb-3">2. Description of Service</h2>
                 <p className="text-muted-foreground mb-4">
                   {AI_FEATURE_ENABLED
-                    ? "Gradlify is an AI-powered study buddy platform designed to help GCSE students,"
-                    : "Gradlify is a study buddy platform designed to help GCSE students,"} 
-                  particularly in GCSE Mathematics. Our service includes:
+                    ? "Gradlify is an AI-powered 11+ practice platform designed to help students and parents prepare for the 11+,"
+                    : "Gradlify is an 11+ practice platform designed to help students and parents prepare for the 11+,"}{" "}
+                  with exam-style quizzes, worked solutions, and readiness tracking. Our service includes:
                 </p>
                 <ul className="list-disc list-inside space-y-2 text-muted-foreground">
                   <li>{AI_FEATURE_ENABLED ? 'AI-powered question answering and explanations' : 'Practice questions and explanations'}</li>

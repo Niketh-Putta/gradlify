@@ -16,6 +16,7 @@ import { GoogleSignInButton } from "@/components/GoogleSignInButton";
 import { claimStoredReferral } from '@/lib/referrals';
 import { isAbortLikeError } from '@/lib/errors';
 import { buildEmailRedirectTo, isEmailNotConfirmedError, resendSignupConfirmation } from '@/lib/authEmailConfirmation';
+import { trackGoogleAdsSignup } from '@/lib/googleAds';
 
 type MessageStatusLikeError = {
   message?: unknown;
@@ -227,6 +228,7 @@ export const AuthComponent = ({ onAuthSuccess, onBack, initialMode = 'login' }: 
             } catch (referralError) {
               console.error('Referral claim failed:', referralError);
             }
+            trackGoogleAdsSignup();
             toast.success("Account created! You're signed in.");
           } else {
             try {
@@ -234,6 +236,7 @@ export const AuthComponent = ({ onAuthSuccess, onBack, initialMode = 'login' }: 
             } catch (resendError) {
               void resendError;
             }
+            trackGoogleAdsSignup();
             toast.success("Account created! If the email address is valid, you'll receive a verification email shortly.");
           }
         }

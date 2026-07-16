@@ -130,7 +130,7 @@ export default function FoundersCircle() {
               <h2 className="mt-4 text-xl font-semibold text-slate-900">Built by those who use it.</h2>
               <p className="mt-3 text-sm text-slate-600">
                 Gradlify is early and evolving. Instead of building in isolation, we&apos;re partnering with students,
-                parents, and teachers who live the GCSE challenge every day.
+                parents, and teachers who live the 11+ challenge every day.
               </p>
               <div className="mt-4 rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3 text-xs text-slate-500">
                 {AI_FEATURE_ENABLED
@@ -191,7 +191,7 @@ export default function FoundersCircle() {
                 {[
                   { label: "Students", text: "Who want a say in the tools they use for their exams." },
                   { label: "Parents", text: "Seeking effective, high-quality resources for their kids." },
-                  { label: "Teachers", text: "Dedicated to elevating GCSE practice globally." },
+                  { label: "Teachers", text: "Dedicated to elevating 11+ practice globally." },
                 ].map((item) => (
                   <li key={item.label} className="flex items-start gap-3">
                     <span className="mt-1 h-2 w-2 rounded-full bg-indigo-500" />
@@ -238,7 +238,7 @@ export default function FoundersCircle() {
               <div className="mt-2 space-y-3 text-xs text-slate-500">
                 <p>
                   We’re open to working with teachers, schools, EdTech or SaaS builders - or anyone interested in helping build
-                  an early-stage education startup focused on GCSE Maths practice.
+                  an early-stage education startup focused on 11+ practice.
                 </p>
                 <p>
                   This can involve shaping features, sharing feedback from real classroom or student use, or exploring how Gradlify

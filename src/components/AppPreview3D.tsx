@@ -94,7 +94,7 @@ export function AppPreview3D({ screenshots = [] }: AppPreview3DProps) {
             See Gradlify in Action
           </h2>
           <p className="text-sm sm:text-base md:text-lg text-gray-600 max-w-2xl mx-auto px-4">
-            Explore our powerful features designed to help you master your GCSE Maths
+            Explore our powerful features designed to help you master 11+ Maths and English
           </p>
         </div>
 

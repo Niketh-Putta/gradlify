@@ -15,6 +15,7 @@ import { applySignupTrack, clearSignupTrack, getDashboardPath, getSignupTrack, s
 import { GoogleSignInButton } from "@/components/GoogleSignInButton";
 import { captureReferralFromSearch, claimStoredReferral } from "@/lib/referrals";
 import { buildEmailRedirectTo, isEmailNotConfirmedError, resendSignupConfirmation } from "@/lib/authEmailConfirmation";
+import { trackGoogleAdsSignup } from "@/lib/googleAds";
 
 type MessageStatusLikeError = {
   message?: unknown;
@@ -137,6 +138,7 @@ export default function Auth() {
 
       // If email confirmations are disabled, a session may be returned immediately.
       if (data?.session) {
+        trackGoogleAdsSignup();
         toast.success("Account created! You're signed in.");
         await applySignupTrack(data.session.user.id);
         try {
@@ -155,6 +157,7 @@ export default function Auth() {
         void resendError;
       }
 
+      trackGoogleAdsSignup();
       toast.success("Account created! If the email address is valid, you'll receive a verification email shortly.");
       navigate("/", { replace: true });
     } catch (error: unknown) {
@@ -247,7 +250,7 @@ export default function Auth() {
         {/* Welcome Section */}
         <div className="text-center mb-6">
           <h2 className="text-2xl font-bold font-gradlify bg-gradient-gradlify bg-clip-text text-transparent mb-2">Welcome to Gradlify</h2>
-          <p className="text-gray-600 text-sm">Join thousands of students acing their GCSEs</p>
+          <p className="text-gray-600 text-sm">Join parents preparing for the 11+ with Gradlify</p>
         </div>
 
         {/* Benefits Card */}

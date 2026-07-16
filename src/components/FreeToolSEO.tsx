@@ -133,7 +133,7 @@ export function FreeToolSEO({
 
         <header className="mx-auto max-w-3xl text-center">
           <span className="text-xs font-semibold uppercase tracking-[0.2em] text-indigo-600">
-            Free GCSE Maths tool
+            Free tool by Gradlify
           </span>
           <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-900 sm:text-4xl">
             {toolName}

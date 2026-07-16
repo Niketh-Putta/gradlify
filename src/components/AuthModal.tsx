@@ -13,6 +13,7 @@ import { clearSignupTrack, getSignupTrack } from '@/lib/track';
 import { GoogleSignInButton } from "@/components/GoogleSignInButton";
 import { claimStoredReferral } from "@/lib/referrals";
 import { buildEmailRedirectTo, isEmailNotConfirmedError, resendSignupConfirmation } from '@/lib/authEmailConfirmation';
+import { trackGoogleAdsSignup } from '@/lib/googleAds';
 
 type MessageStatusLikeError = {
   message?: unknown;
@@ -239,6 +240,7 @@ export const AuthModal = ({
             } catch (referralError) {
               console.error('Referral claim failed:', referralError);
             }
+            trackGoogleAdsSignup();
             toast.success("Account created! You're signed in.");
           } else {
             try {
@@ -246,6 +248,7 @@ export const AuthModal = ({
             } catch (resendError) {
               void resendError;
             }
+            trackGoogleAdsSignup();
             toast.success("Account created! If the email address is valid, you'll receive a verification email shortly.");
           }
         }
