@@ -5,9 +5,9 @@
  */
 window.GRADLIFY_PROGRESS = {
   meta: {
-    lastUpdated: "2026-05-20",
-    updatedBy: "Cursor · Level Field voice + points sprint funnel",
-    version: 8,
+    lastUpdated: "2026-07-16",
+    updatedBy: "Cursor · Google Search campaign package + attribution",
+    version: 9,
   },
   pipeline: {
     block2: {
@@ -230,5 +230,29 @@ window.GRADLIFY_PROGRESS = {
     "Sutton 11 Plus",
     "Robert Lomax (do not contact)",
     "Cursor IDE browser for Gmail/WA (use Kimi only)",
+    "Scale Google Search above £40/day until CAC proven",
   ],
+  googleSearchCampaign: {
+    status: "ready_to_enable",
+    accountTag: "AW-18325194310",
+    signupConversion: "AW-18325194310/560aCMek9NAcEMaMkaJE",
+    dailyBudgetGbp: 20,
+    geo: "UK",
+    packagePath: "outreach/google-search-campaign/",
+    done: [
+      "gtag on site",
+      "signup conversion wired",
+      "SEO title/meta",
+      "keyword + RSA + negatives package",
+      "gclid/UTM attribution on landing",
+    ],
+    blockedOn: [
+      "Niketh enables campaign in Google Ads UI (needs login)",
+      "Confirm Sign-up conversion Active in Ads",
+    ],
+    killRules: {
+      pauseIfNoSignupsAfterSpendGbp: 50,
+      pauseIfCacAboveGbpAfterSpend: { cac: 50, spend: 150 },
+    },
+  },
 };

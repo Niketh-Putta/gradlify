@@ -46,6 +46,7 @@ import { consumePostAuthRedirect, setPostAuthRedirect } from '@/lib/postAuthRedi
 import { getDashboardPath, setSignupTrack } from '@/lib/track';
 import { isAbortLikeError } from '@/lib/errors';
 import { captureReferralFromSearch } from '@/lib/referrals';
+import { captureAdAttributionFromSearch } from '@/lib/adAttribution';
 import { PaymentFailedGate } from '@/components/PaymentFailedGate';
 import { usePaymentFailedBlock } from '@/hooks/usePaymentFailedBlock';
 import { isPaymentGateExemptPath } from '@/lib/paymentBlocklist';
@@ -198,6 +199,7 @@ const Index = () => {
   }, [location.hash]);
   useEffect(() => {
     captureReferralFromSearch(location.search);
+    captureAdAttributionFromSearch(location.search);
   }, [location.search]);
 
   useEffect(() => {

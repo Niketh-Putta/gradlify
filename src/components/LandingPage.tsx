@@ -7,6 +7,7 @@ import { LifetimePromoBanner } from "@/components/LifetimePromoBanner";
 
 import { setPostAuthRedirect } from "@/lib/postAuthRedirect";
 import { captureReferralFromSearch } from "@/lib/referrals";
+import { captureAdAttributionFromSearch } from "@/lib/adAttribution";
 import { getPartnerReferralLabel, readStoredReferralCode } from "@/lib/partnerRefs";
 import { AI_FEATURE_ENABLED, EXAM_READINESS_ENABLED, ULTRA_PLAN_ENABLED } from "@/lib/featureFlags";
 import { getDashboardPath, setSignupTrack } from "@/lib/track";
@@ -310,6 +311,7 @@ export function LandingPage({ onAuthAction, theme = "light", onThemeToggle, vari
   useEffect(() => {
     if (typeof window === "undefined") return;
     captureReferralFromSearch(window.location.search);
+    captureAdAttributionFromSearch(window.location.search);
     const code = readStoredReferralCode();
     setPartnerReferralLabel(getPartnerReferralLabel(code) ?? (code ? code : null));
   }, []);

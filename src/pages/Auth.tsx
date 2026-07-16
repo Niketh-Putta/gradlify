@@ -14,6 +14,7 @@ import { AI_FEATURE_ENABLED } from "@/lib/featureFlags";
 import { applySignupTrack, clearSignupTrack, getDashboardPath, getSignupTrack, setSignupTrack } from "@/lib/track";
 import { GoogleSignInButton } from "@/components/GoogleSignInButton";
 import { captureReferralFromSearch, claimStoredReferral } from "@/lib/referrals";
+import { captureAdAttributionFromSearch } from "@/lib/adAttribution";
 import { buildEmailRedirectTo, isEmailNotConfirmedError, resendSignupConfirmation } from "@/lib/authEmailConfirmation";
 import { trackGoogleAdsSignup } from "@/lib/googleAds";
 
@@ -62,6 +63,7 @@ export default function Auth() {
       const redirect = params.get("redirect");
       const message = params.get("message");
       captureReferralFromSearch(window.location.search);
+      captureAdAttributionFromSearch(window.location.search);
       if (mode === "signin" || mode === "signup") setActiveTab(mode);
       if (typeof urlEmail === "string" && urlEmail.trim()) setEmail(urlEmail);
       if (track === "11plus") setSignupTrack("11plus");
