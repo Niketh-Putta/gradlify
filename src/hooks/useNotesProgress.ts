@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { resolveUserTrack } from '@/lib/track';
-import { getTrackSections } from '@/lib/trackCurriculum';
-import notesData from '@/data/edexcel_gcse_notes.json';
+import { countCompletedNotesInCurriculum, getValidNoteSlugs } from '@/lib/notesProgress';
 import { useAppContext } from '@/hooks/useAppContext';
 import { useSubject } from '@/contexts/SubjectContext';
 import { isAbortLikeError } from '@/lib/errors';
@@ -12,27 +11,31 @@ export function useNotesProgress() {
   const { currentSubject } = useSubject();
   const userTrack = resolveUserTrack(profile?.track ?? null);
   const isElevenPlus = userTrack === '11plus';
-  const trackSections = getTrackSections(userTrack, currentSubject);
-  const gcseTopicCount = useMemo(
-    () => Object.values(notesData).reduce((sum, section) => sum + (Array.isArray(section) ? section.length : 0), 0),
-    [],
+  const subject = currentSubject === 'english' ? 'english' : 'maths';
+
+  const validSlugs = useMemo(
+    () => getValidNoteSlugs(userTrack, subject),
+    [userTrack, subject],
   );
-  const elevenPlusSubtopicCount = useMemo(
-    () => trackSections.reduce((sum, section) => sum + section.subtopics.length, 0),
-    [trackSections],
-  );
-  const totalNotes = isElevenPlus ? elevenPlusSubtopicCount : gcseTopicCount;
+  const totalNotes = validSlugs.size;
   const notesLabel = isElevenPlus ? 'Mini-topics' : 'Topics';
+
   const [completedCount, setCompletedCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let cancelled = false;
+
     const fetchNotesProgress = async () => {
       if (!user?.id) {
-        setCompletedCount(0);
-        setLoading(false);
+        if (!cancelled) {
+          setCompletedCount(0);
+          setLoading(false);
+        }
         return;
       }
+
+      if (!cancelled) setLoading(true);
 
       try {
         const { data, error } = await supabase
@@ -43,23 +46,33 @@ export function useNotesProgress() {
 
         if (error) throw error;
 
-        const uniqueSlugs = new Set(
-          (data ?? []).map((item) => String(item.topic_slug || '').trim()).filter(Boolean),
-        );
-        setCompletedCount(uniqueSlugs.size);
+        const doneSlugs = (data ?? [])
+          .map((item) => String(item.topic_slug || '').trim())
+          .filter(Boolean);
+
+        // Only count notes that belong to the current track/subject curriculum.
+        // Prevents GCSE leftovers showing as 49/16 on 11+.
+        const inCurriculum = countCompletedNotesInCurriculum(doneSlugs, validSlugs);
+        if (!cancelled) {
+          setCompletedCount(Math.min(inCurriculum, validSlugs.size));
+        }
       } catch (error) {
         if (isAbortLikeError(error)) return;
         console.error('Error fetching notes progress:', error);
-        setCompletedCount(0);
+        if (!cancelled) setCompletedCount(0);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
 
-    fetchNotesProgress();
-  }, [user?.id]);
+    void fetchNotesProgress();
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.id, validSlugs]);
 
-  const progressPercentage = totalNotes > 0 ? Math.round((completedCount / totalNotes) * 100) : 0;
+  const progressPercentage =
+    totalNotes > 0 ? Math.min(100, Math.round((completedCount / totalNotes) * 100)) : 0;
 
   return {
     completedCount,

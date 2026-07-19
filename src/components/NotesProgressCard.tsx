@@ -15,11 +15,16 @@ interface NotesProgressCardProps {
 }
 
 export function NotesProgressCard({ className, id, 'data-animate': dataAnimate, isVisible, onClick }: NotesProgressCardProps) {
-  const { completedCount, totalNotes, loading } = useNotesProgress();
+  const { completedCount, totalNotes, loading, progressPercentage } = useNotesProgress();
   const { profile } = useAppContext();
   const { currentSubject } = useSubject();
   const userTrack = resolveUserTrack(profile?.track ?? null);
   const focusLabel = userTrack === '11plus' ? '11+ sections' : 'GCSE sections';
+  const masteredLabel = `${Math.min(completedCount, totalNotes)}/${totalNotes}`;
+  const footerCopy =
+    completedCount > 0
+      ? `${progressPercentage}% of current notes mastered`
+      : 'Start revising notes to track your progress';
 
   return (
     <Card 
@@ -61,14 +66,14 @@ export function NotesProgressCard({ className, id, 'data-animate': dataAnimate, 
                 Notes Mastered
               </p>
               <p className="text-3xl font-bold text-foreground">
-                {completedCount}/{totalNotes}
+                {masteredLabel}
               </p>
               <p className="text-sm text-muted-foreground">
                 Current focus: {focusLabel}
               </p>
             </div>
             <p className="text-center text-xs text-muted-foreground">
-              Start revising notes to track your progress
+              {footerCopy}
             </p>
           </div>
         )}

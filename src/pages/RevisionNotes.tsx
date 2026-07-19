@@ -202,7 +202,9 @@ export default function RevisionNotes() {
   const getSectionStats = (section: string) => {
     if (isElevenPlus) {
       const match = elevenPlusSections.find((item) => item.id === section);
-      return { total: match?.subtopics.length ?? 0, completed: 0 };
+      const sectionTopics = allTopics.filter((t) => t.section === section);
+      const completed = sectionTopics.filter((t) => progress[t.slug]).length;
+      return { total: match?.subtopics.length ?? sectionTopics.length, completed };
     }
 
     const topics = boardAwareNotesData[section];
@@ -211,18 +213,23 @@ export default function RevisionNotes() {
   };
 
   const totalTopics = allTopics.length;
-  const completedTopics = allTopics.filter(t => progress[t.slug]).length;
-  const overallProgress = totalTopics > 0 ? Math.round((completedTopics / totalTopics) * 100) : 0;
+  const completedTopics = Math.min(
+    allTopics.filter(t => progress[t.slug]).length,
+    totalTopics,
+  );
+  const overallProgress = totalTopics > 0 ? Math.min(100, Math.round((completedTopics / totalTopics) * 100)) : 0;
 
   // Find next uncompleted topic
   const continueFromTopic = useMemo(() => {
-    if (isElevenPlus) return null;
-    return allTopics.find(t => !progress[t.slug]);
-  }, [allTopics, progress, isElevenPlus]);
+    return allTopics.find(t => !progress[t.slug]) ?? null;
+  }, [allTopics, progress]);
 
   // Get current unit
   const currentUnit = useMemo(() => {
-    if (isElevenPlus) return "11+ sections";
+    if (isElevenPlus) {
+      const next = allTopics.find((t) => !progress[t.slug]);
+      return next?.section ?? "Complete!";
+    }
     for (const section of sections) {
       const topics = boardAwareNotesData[section];
       if (topics.some(t => !progress[t.slug])) {
@@ -230,7 +237,7 @@ export default function RevisionNotes() {
       }
     }
     return "Complete!";
-  }, [boardAwareNotesData, sections, progress, isElevenPlus]);
+  }, [allTopics, boardAwareNotesData, sections, progress, isElevenPlus]);
 
   const handleResetProgress = async () => {
     if (!user) return;

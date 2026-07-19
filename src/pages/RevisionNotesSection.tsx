@@ -175,14 +175,17 @@ export default function RevisionNotesSection() {
     );
   }, [searchQuery, topics]);
 
-  const completedCount = topics.filter((t) => progress[t.slug]).length;
-  const sectionProgress = topics.length > 0 ? Math.round((completedCount / topics.length) * 100) : 0;
+  const completedCount = Math.min(
+    topics.filter((t) => progress[t.slug]).length,
+    topics.length,
+  );
+  const sectionProgress =
+    topics.length > 0 ? Math.min(100, Math.round((completedCount / topics.length) * 100)) : 0;
   
   // Find first uncompleted topic
   const nextTopic = useMemo(() => {
-    if (isElevenPlus) return null;
-    return topics.find((t) => !progress[t.slug]);
-  }, [topics, progress, isElevenPlus]);
+    return topics.find((t) => !progress[t.slug]) ?? null;
+  }, [topics, progress]);
 
   // Progress ring calculation
   const circumference = 2 * Math.PI * 50;
