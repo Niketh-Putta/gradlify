@@ -71,7 +71,8 @@ const ELEVEN_PLUS_SECTIONS: TrackSection[] = [
 
 const ELEVEN_PLUS_READINESS_MAP: Record<string, string[]> = {
   "Number & Arithmetic": ["Number"],
-  "Algebra & Ratio": ["Algebra", "Ratio", "Ratio & Proportion"],
+  // "Ratio" is not a readiness topic — it permanently diluted this section to ~0.
+  "Algebra & Ratio": ["Algebra", "Ratio & Proportion"],
   "Geometry & Measures": ["Geometry", "Geometry & Measures"],
   "Statistics & Data": ["Statistics", "Probability"],
 };

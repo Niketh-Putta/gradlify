@@ -18,7 +18,8 @@
     "stripe:ultra-prices": "node scripts/create-ultra-stripe-prices.mjs",
     "stripe:sync-secrets": "./scripts/sync-ultra-stripe-secrets.sh",
     "verify:11plus": "node scripts/verify-11plus.mjs",
-    "verify:mock-session": "node scripts/verify_mock_session_stability.mjs"
+    "verify:mock-session": "node scripts/verify_mock_session_stability.mjs",
+    "verify:topic-aliases": "node scripts/verify_topic_aliases.mjs"
   },
   "reactSnap": {
     "source": "dist",

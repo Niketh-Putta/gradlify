@@ -21,6 +21,7 @@ import { getTopicAndSubtopicLabels, getTrackTopicLabel } from '@/lib/subtopicDis
 import { buildBalancedMix } from '@/lib/questionMix';
 import { parseMultipartQuestion, MultipartQuestion } from '@/lib/multipart';
 import { TOPIC_SUBTOPICS, getTopicSubtopicKeys } from '@/lib/topicConstants';
+import { toStoredMockTopic } from '@/lib/canonicalTopics';
 import { parseDbArray } from '@/lib/parseDbArray';
 import { PostMockParentReport } from '@/components/PostMockParentReport';
 import { is11Plus } from '@/lib/track-config';
@@ -139,9 +140,14 @@ const formatRemainderAnswer = (ans: string) => {
   return ans.replace(/^(\d+)\s*R\s*(\d+)$/i, "$1 remainder $2");
 };
 
+/** Bank/UI labels for question fetch (Geometry keeps Measures for expandQuestionTypesForDb). */
 const TOPIC_MAPPING: Record<string, string> = {
   number: 'Number',
+  'number & arithmetic': 'Number',
+  'number and arithmetic': 'Number',
   algebra: 'Algebra',
+  'algebra & ratio': 'Algebra',
+  'algebra and ratio': 'Algebra',
   'ratio and proportion': 'Ratio & Proportion',
   'ratio & proportion': 'Ratio & Proportion',
   ratio: 'Ratio & Proportion',
@@ -150,6 +156,8 @@ const TOPIC_MAPPING: Record<string, string> = {
   'geometry and measures': 'Geometry & Measures',
   probability: 'Probability',
   statistics: 'Statistics',
+  'statistics & data': 'Statistics',
+  'statistics and data': 'Statistics',
 };
 
 const normalizeTopicName = (topic: string) => {
@@ -908,7 +916,8 @@ export default function MockExamPage() {
             idx: idx + 1,
             exam_question_id: q.id,
             prompt: q.question,
-            topic: q.question_type,
+            // Store dual-preserving labels for combined 11+ sections; others as readiness topics.
+            topic: toStoredMockTopic(q.question_type || ''),
             marks: getQuestionMarks(q),
             awarded_marks: (() => {
               const userAnswers = parseAnswerArray(answers[q.id]);

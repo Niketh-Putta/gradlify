@@ -88,7 +88,7 @@ export function LifetimePromoBanner({
         </span>
 
         <span className="text-[12px] font-medium tracking-wide text-amber-200/80 sm:text-[13px]">
-          5 days left
+          3 days left
         </span>
 
         {onCta ? (

@@ -8,12 +8,30 @@ const corsHeaders = {
 
 const normalizeCanonicalTopic = (raw: string): string => {
   const t = String(raw ?? '').trim();
-  const lower = t.toLowerCase();
+  const lower = t.toLowerCase().replace(/\s+/g, ' ');
 
-  if (lower === 'number') return 'Number';
-  if (lower === 'algebra') return 'Algebra';
+  if (
+    lower === 'number' ||
+    lower === 'number & arithmetic' ||
+    lower === 'number and arithmetic'
+  ) {
+    return 'Number';
+  }
+  if (
+    lower === 'algebra' ||
+    lower === 'algebra & ratio' ||
+    lower === 'algebra and ratio'
+  ) {
+    return 'Algebra';
+  }
   if (lower === 'probability') return 'Probability';
-  if (lower === 'statistics') return 'Statistics';
+  if (
+    lower === 'statistics' ||
+    lower === 'statistics & data' ||
+    lower === 'statistics and data'
+  ) {
+    return 'Statistics';
+  }
 
   if (
     lower === 'ratio' ||
@@ -28,6 +46,7 @@ const normalizeCanonicalTopic = (raw: string): string => {
     lower === 'geometry & measures' ||
     lower === 'geometry and measures'
   ) {
+    // readiness_history / update-readiness historically used Measures label
     return 'Geometry & Measures';
   }
 

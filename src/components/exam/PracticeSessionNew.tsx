@@ -21,42 +21,7 @@ import { PracticeLimitModal } from "@/components/PracticeLimitModal";
 import { resolveUserTrack } from "@/lib/track";
 
 // Topic mapping
-const TOPIC_MAPPING: Record<string, string> = {
-  number: "Number",
-  "number & arithmetic": "Number",
-  "number and arithmetic": "Number",
-  algebra: "Algebra",
-  "algebra & ratio": "Algebra",
-  "algebra and ratio": "Algebra",
-  "problem solving": "Problem Solving",
-  "problem solving & strategies": "Problem Solving",
-  "problem solving and strategies": "Problem Solving",
-  "problem-solving": "Problem Solving",
-  strategies: "Problem Solving",
-  "problem-solving & strategies": "Problem Solving",
-  "problem-solving and strategies": "Problem Solving",
-  "ratio and proportion": "Ratio & Proportion",
-  "ratio & proportion": "Ratio & Proportion",
-  ratio: "Ratio & Proportion",
-  geometry: "Geometry & Measures",
-  "geometry & measures": "Geometry & Measures",
-  "geometry and measures": "Geometry & Measures",
-  "statistics & data": "Statistics",
-  "statistics and data": "Statistics",
-  probability: "Probability",
-  statistics: "Statistics",
-  "word problems (rucsac)": "Problem Solving",
-  "word-problems (rucsac)": "Problem Solving",
-  "logic & reasoning": "Problem Solving",
-  "estimation & checking": "Problem Solving",
-  "logic & reasoning (level 3)": "Problem Solving",
-  "word problems": "Problem Solving",
-  "comprehension": "Comprehension",
-  "vocabulary": "Vocabulary",
-  "spag": "SPaG",
-  "grammar": "SPaG",
-  "spelling": "SPaG",
-};
+import { toStoredMockTopic } from "@/lib/canonicalTopics";
 
 const MAX_OPTIONS = 5;
 const EXTREME_SEEN_STORAGE_PREFIX = "extreme_seen_ids_v1";
@@ -67,9 +32,32 @@ const ELEVEN_PLUS_DIFFICULTY_LABELS: Record<number, string> = {
   3: "Reasoning (Level 3)",
 };
 
+/** Bank fetch + practice_results topic. Readiness aliases via toStoredReadinessTopic. */
 function normalizeTopicName(topic: string): string {
-  const normalized = TOPIC_MAPPING[topic.toLowerCase()];
-  return normalized || topic;
+  const key = String(topic ?? "").trim().toLowerCase();
+  // Keep Problem Solving / SPaG bank labels for question fetch.
+  if (
+    key === "problem solving" ||
+    key === "problem solving & strategies" ||
+    key === "problem solving and strategies" ||
+    key === "problem-solving" ||
+    key === "strategies" ||
+    key === "problem-solving & strategies" ||
+    key === "problem-solving and strategies" ||
+    key === "word problems (rucsac)" ||
+    key === "word-problems (rucsac)" ||
+    key === "logic & reasoning" ||
+    key === "estimation & checking" ||
+    key === "logic & reasoning (level 3)" ||
+    key === "word problems"
+  ) {
+    return "Problem Solving";
+  }
+  if (key === "spag" || key === "grammar" || key === "spelling") return "SPaG";
+  if (key === "geometry" || key === "geometry & measures" || key === "geometry and measures") {
+    return "Geometry & Measures";
+  }
+  return toStoredMockTopic(topic);
 }
 
 interface PracticeQuestion {

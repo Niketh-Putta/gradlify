@@ -5,53 +5,16 @@ import { computeOverallReadinessFromTopics } from '@/lib/readinessUtils';
 import { AI_FEATURE_ENABLED } from '@/lib/featureFlags';
 import { isAbortLikeError } from '@/lib/errors';
 import { is11Plus } from '@/lib/track-config';
+import {
+  CANONICAL_READINESS_TOPICS,
+  canonicalizeReadinessTopic,
+  type CanonicalReadinessTopic,
+} from '@/lib/canonicalTopics';
 
-// Canonical topics in fixed order
-const CANONICAL_TOPICS = [
-  'Number',
-  'Algebra',
-  'Ratio & Proportion',
-  'Geometry',
-  'Probability',
-  'Statistics',
-  'Comprehension',
-  'Vocabulary',
-  'Grammar',
-  'Spelling'
-] as const;
+const CANONICAL_TOPICS = CANONICAL_READINESS_TOPICS;
 
-const normalizeTopicName = (topic: string): (typeof CANONICAL_TOPICS)[number] | null => {
-  const normalized = topic.trim().toLowerCase();
-  if (!normalized) return null;
-  if (normalized === 'number') return 'Number';
-  if (normalized === 'algebra') return 'Algebra';
-  if (normalized === 'ratio & proportion' || normalized === 'ratio and proportion' || normalized === 'ratio') {
-    return 'Ratio & Proportion';
-  }
-  if (
-    normalized === 'geometry' ||
-    normalized === 'geometry & measures' ||
-    normalized === 'geometry and measures'
-  ) {
-    return 'Geometry';
-  }
-  // "Problem Solving / Exam Preparation" is intentionally not assessed as readiness.
-  if (
-    normalized === 'problem solving' ||
-    normalized === 'problem-solving' ||
-    normalized === 'problem solving & strategies' ||
-    normalized === 'exam preparation'
-  ) {
-    return null;
-  }
-  if (normalized === 'probability') return 'Probability';
-  if (normalized === 'statistics') return 'Statistics';
-  if (normalized === 'comprehension' || normalized === 'comprehension masterclass') return 'Comprehension';
-  if (normalized === 'vocabulary' || normalized === 'advanced vocabulary') return 'Vocabulary';
-  if (normalized === 'grammar' || normalized === 'grammar & syntax') return 'Grammar';
-  if (normalized === 'spelling' || normalized === 'spelling & punctuation') return 'Spelling';
-  return null;
-};
+const normalizeTopicName = (topic: string): CanonicalReadinessTopic | null =>
+  canonicalizeReadinessTopic(topic);
 
 const normalizeTrack = (track?: string | null): 'gcse' | '11plus' => {
   if (!track) return is11Plus ? '11plus' : 'gcse';
