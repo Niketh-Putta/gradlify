@@ -107,16 +107,23 @@ const ELEVEN_PLUS_TOPIC_TYPE_MAP: Record<string, string[]> = {
   'Number': ['Number', 'Number & Arithmetic', 'NUMBER & ARITHMETIC'],
   'Algebra & Ratio': ['Algebra', 'Algebra & Ratio', 'ALGEBRA & RATIO'],
   'Algebra': ['Algebra', 'Algebra & Ratio', 'ALGEBRA & RATIO'],
+  'Ratio & Proportion': ['Algebra', 'Algebra & Ratio', 'ALGEBRA & RATIO', 'Ratio & Proportion'],
+  'Ratio': ['Algebra', 'Algebra & Ratio', 'ALGEBRA & RATIO', 'Ratio & Proportion'],
   'Geometry & Measures': ['Geometry & Measures', 'GEOMETRY & MEASURES', 'Geometry'],
+  'Geometry': ['Geometry & Measures', 'GEOMETRY & MEASURES', 'Geometry'],
+  // Bank stores probability under Statistics & Data (no bare "Probability" rows).
   'Statistics & Data': ['Statistics', 'Data', 'Statistics & Data', 'STATISTICS & DATA'],
   'Statistics': ['Statistics', 'Data', 'Statistics & Data', 'STATISTICS & DATA'],
   'Data': ['Data', 'Statistics', 'Statistics & Data', 'STATISTICS & DATA'],
+  'Probability': ['Statistics & Data', 'STATISTICS & DATA', 'Statistics', 'Data', 'Probability'],
   'Problem Solving & Strategies': ['Problem Solving', 'Strategies', 'Logic', 'Problem Solving & Strategies', 'PROBLEM SOLVING & STRATEGIES'],
   'Problem Solving': ['Problem Solving', 'Strategies', 'Logic', 'Problem Solving & Strategies', 'PROBLEM SOLVING & STRATEGIES'],
   'Strategies': ['Strategies', 'Problem Solving', 'Logic', 'Problem Solving & Strategies', 'PROBLEM SOLVING & STRATEGIES'],
   'Comprehension': ['Comprehension', 'English', 'Literacy'],
   'Vocabulary': ['Vocabulary', 'Verbal Reasoning', 'English'],
   'SPaG': ['Grammar', 'Spelling', 'Punctuation', 'SPaG', 'Technical Accuracy', 'English'],
+  'Grammar': ['Grammar', 'Spelling', 'Punctuation', 'SPaG', 'Technical Accuracy', 'English'],
+  'Spelling': ['Grammar', 'Spelling', 'Punctuation', 'SPaG', 'Technical Accuracy', 'English'],
 };
 
 function addSubtopicVariants(value: string, candidates: Set<string>) {

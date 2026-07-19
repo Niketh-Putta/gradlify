@@ -70,6 +70,10 @@ const SECONDARY_ALIAS_MAP: Record<string, CanonicalReadinessTopic> = {
   'algebra and ratio': 'Ratio & Proportion',
   'statistics & data': 'Probability',
   'statistics and data': 'Probability',
+  // SPaG bank is one section; Grammar practice also moves Spelling so Target Focus isn't stuck at 0%.
+  grammar: 'Spelling',
+  spag: 'Spelling',
+  'spag (technical accuracy)': 'Spelling',
 };
 
 const PROBLEM_SOLVING_ALIASES = new Set([
@@ -143,5 +147,6 @@ export const TOPIC_ALIAS_REGRESSION_CASES: Array<{
   { input: 'Ratio & Proportion', primary: 'Ratio & Proportion', secondary: null },
   { input: 'Problem Solving', primary: null, secondary: null },
   { input: 'comprehension', primary: 'Comprehension', secondary: null },
-  { input: 'spag', primary: 'Grammar', secondary: null },
+  { input: 'spag', primary: 'Grammar', secondary: 'Spelling' },
+  { input: 'Grammar', primary: 'Grammar', secondary: 'Spelling' },
 ];

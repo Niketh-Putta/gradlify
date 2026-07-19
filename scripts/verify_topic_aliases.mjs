@@ -46,6 +46,9 @@ const SECONDARY = {
   'algebra and ratio': 'Ratio & Proportion',
   'statistics & data': 'Probability',
   'statistics and data': 'Probability',
+  grammar: 'Spelling',
+  spag: 'Spelling',
+  'spag (technical accuracy)': 'Spelling',
 };
 
 const PROBLEM = new Set([
@@ -83,10 +86,35 @@ const CASES = [
   { input: 'Ratio & Proportion', primary: 'Ratio & Proportion', secondary: null },
   { input: 'Problem Solving', primary: null, secondary: null },
   { input: 'comprehension', primary: 'Comprehension', secondary: null },
-  { input: 'spag', primary: 'Grammar', secondary: null },
+  { input: 'spag', primary: 'Grammar', secondary: 'Spelling' },
+  { input: 'Grammar', primary: 'Grammar', secondary: 'Spelling' },
+  { input: 'Vocabulary', primary: 'Vocabulary', secondary: null },
 ];
 
 let failed = 0;
+
+// Practice routing sanity (mirrors src/lib/practiceTopicRouting.ts)
+function routeMaths(topic) {
+  const lower = String(topic).toLowerCase();
+  if (lower === 'probability') return { topics: 'Statistics & Data', subtopic: 'stats|probability' };
+  if (lower === 'algebra') return { topics: 'Algebra & Ratio' };
+  if (lower === 'grammar' || lower === 'spelling') return { topics: 'SPaG' };
+  return { topics: topic };
+}
+const routeCases = [
+  { in: 'Probability', expectTopics: 'Statistics & Data', expectSub: 'stats|probability' },
+  { in: 'Algebra', expectTopics: 'Algebra & Ratio', expectSub: undefined },
+];
+for (const c of routeCases) {
+  const r = routeMaths(c.in);
+  if (r.topics !== c.expectTopics || r.subtopic !== c.expectSub) {
+    failed += 1;
+    console.error(`ROUTE FAIL ${c.in}: got`, r);
+  } else {
+    console.log(`ok  route "${c.in}" → ${r.topics}${r.subtopic ? ` (${r.subtopic})` : ''}`);
+  }
+}
+
 for (const c of CASES) {
   const p = primary(c.input);
   const s = secondary(c.input);

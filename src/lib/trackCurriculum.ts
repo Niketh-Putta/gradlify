@@ -147,8 +147,9 @@ export const ELEVEN_PLUS_ENGLISH_SECTIONS: TrackSection[] = [
 
 export const ELEVEN_PLUS_ENGLISH_READINESS_MAP: Record<string, string[]> = {
   "Comprehension": ["Comprehension"],
-  "SPaG": ["Grammar", "Spelling", "SPaG", "SPaG (Technical Accuracy)"],
-  "Vocabulary": ["Vocabulary", "Vocabulary & Verbal"],
+  // Only real readiness topics — phantom "SPaG" labels diluted this to ~0 forever.
+  "SPaG": ["Grammar", "Spelling"],
+  "Vocabulary": ["Vocabulary"],
 };
 
 export function getReadinessSourceTopics(track: UserTrack, topic: string): string[] {

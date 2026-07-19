@@ -29,6 +29,9 @@ import {
   shouldPersistLiveMockSession,
 } from '@/lib/liveMockSessionGuard';
 import { assertLiveMockPaperScorable, normalizeLiveMockOptions } from '@/lib/liveMockScoringGuard';
+import { mapEnglishSectionIds } from '@/lib/practiceTopicRouting';
+import { toStoredReadinessTopic } from '@/lib/canonicalTopics';
+import { resolveUserTrack } from '@/lib/track';
 
 /** Combined English papers require a matching event registration row. */
 const COMBINED_ENGLISH_EVENT_BY_SLUG: Record<string, string> = {
@@ -654,7 +657,7 @@ const VOCAB_PRACTICE_SET: EnglishSection[] = [
 export function EnglishSplitViewDemo() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { user } = useAppContext();
+  const { user, profile } = useAppContext();
   const { isPremium, incrementMockUsage, refreshUsage, canStartMockExam } = usePremium('11plus');
   const mockConsumedRef = useRef(false);
   
@@ -690,7 +693,10 @@ export function EnglishSplitViewDemo() {
     : "/live-mock-exams/analytics";
   // Topics usually arrives comma separated from MockExams, e.g., "Comprehension,SPaG"
   const rawTopics = searchParams.get('topics') || 'Comprehension';
-  const selectedTopics = rawTopics.toLowerCase();
+  const selectedTopicList = rawTopics.split(',').map((t) => t.trim().toLowerCase()).filter(Boolean);
+  const selectedSectionIds = mapEnglishSectionIds(selectedTopicList);
+  // Keep a joined string for legacy storage keys; section checks use selectedSectionIds.
+  const selectedTopics = selectedSectionIds.join(',');
   
   const examMode = modeParam === 'mock-exam' ? 'mock' : 'practice';
   
@@ -719,12 +725,13 @@ export function EnglishSplitViewDemo() {
         // We filter subtopics LATER in memory, keeping the DB results inclusive.
         const topicsParam = searchParams.get('topics') || "";
         const selectedTopics = topicsParam.split(',').map(t => t.trim().toLowerCase());
+        const sectionIds = mapEnglishSectionIds(selectedTopics);
         
         let query = supabase.from('english_passages' as any).select('*').eq('track', '11plus');
 
         if (selectedTopics.length > 0 && !selectedTopics.includes('all')) {
-           // If they chose specific top-level topics, restrict query to those
-           query = query.in('sectionId', selectedTopics);
+           // Map Grammar/Spelling → spag so Train Weakness finds passages
+           query = query.in('sectionId', sectionIds);
         }
         
         const diffMinParam = searchParams.get('difficultyMin');
@@ -1011,11 +1018,11 @@ export function EnglishSplitViewDemo() {
   }, [isLiveMock, liveMockSlug]);
 
   const mockConfig: Record<string, boolean> = {
-    comprehension: selectedTopics.includes('comprehension'),
-    spelling: selectedTopics.includes('spag'),
-    punctuation: selectedTopics.includes('spag'),
-    grammar: selectedTopics.includes('spag'),
-    vocab: selectedTopics.includes('vocabulary')
+    comprehension: selectedSectionIds.includes('comprehension'),
+    spelling: selectedSectionIds.includes('spag'),
+    punctuation: selectedSectionIds.includes('spag'),
+    grammar: selectedSectionIds.includes('spag'),
+    vocab: selectedSectionIds.includes('vocabulary')
   };
 
   const [practiceFocus, setPracticeFocus] = useState<string>('comprehension');
@@ -1133,7 +1140,7 @@ export function EnglishSplitViewDemo() {
     };
 
     // Slot 1: Comprehension (Exactly 1)
-    if (selectedTopics.includes('comprehension')) {
+    if (selectedSectionIds.includes('comprehension')) {
       let pool = compPool;
       const subFilter = subtopicParam.split(',').find(f => f.includes('comp|') || f.match(/fiction|poetry|non_fiction/));
       if (subFilter) {
@@ -1148,7 +1155,7 @@ export function EnglishSplitViewDemo() {
     }
 
     // Slot 2: SPaG (Exactly 1 per requested sub-topic in Mocks, or 1 total in Practice)
-    if (selectedTopics.includes('spag')) {
+    if (selectedSectionIds.includes('spag')) {
       const activeSubKeys = subtopicParam.split(',').filter(k => k.match(/spell|punct|gramm/));
       
       if (examMode === 'mock' && activeSubKeys.length > 0) {
@@ -1173,7 +1180,7 @@ export function EnglishSplitViewDemo() {
     }
 
     // Slot 3: Vocabulary (Exactly 1)
-    if (selectedTopics.includes('vocabulary')) {
+    if (selectedSectionIds.includes('vocabulary')) {
       const passage = pickOne(vocabPool);
       if (passage) {
         selection.push({ ...passage, questions: passage.questions.slice(0, 10) });
@@ -1192,7 +1199,7 @@ export function EnglishSplitViewDemo() {
         return aNum - bNum;
       })
     }));
-  }, [dbSections, selectedTopics, searchParams, sessionSeed, isLiveMock, liveMockSections]);
+  }, [dbSections, selectedSectionIds, searchParams, sessionSeed, isLiveMock, liveMockSections]);
 
   // Sync focus header with active content automatically for accurate UI titles
   useEffect(() => {
@@ -1806,7 +1813,8 @@ export function EnglishSplitViewDemo() {
         let topicLabel = 'Comprehension';
         const sType = (sec.sectionId + " " + (sec.subEngine || "")).toLowerCase();
         if (sType.includes('vocab')) topicLabel = 'Vocabulary';
-        else if (sType.includes('spag') || sType.includes('spell') || sType.includes('punct') || sType.includes('gramm')) topicLabel = 'SPaG';
+        // Store Grammar (canonical readiness topic); SPaG UI averages Grammar + Spelling.
+        else if (sType.includes('spag') || sType.includes('spell') || sType.includes('punct') || sType.includes('gramm')) topicLabel = 'Grammar';
         
         if (!topicAgg[topicLabel]) {
           topicAgg[topicLabel] = { correct: 0, total: 0 };
@@ -1822,14 +1830,15 @@ export function EnglishSplitViewDemo() {
         });
       });
 
+      const practiceTrack = resolveUserTrack(profile?.track ?? user?.user_metadata?.track ?? '11plus');
       const rowsToInsert = Object.entries(topicAgg)
         .filter(([_, data]) => data.total > 0)
         .map(([topicLabel, data]) => ({
           user_id: user.id,
-          topic: topicLabel,
+          topic: toStoredReadinessTopic(topicLabel),
           correct: data.correct,
           attempts: data.total,
-          track: user?.user_metadata?.track || '11plus'
+          track: practiceTrack === '11plus' ? '11plus' : 'gcse',
         }));
 
       if (rowsToInsert.length > 0) {
@@ -1864,7 +1873,7 @@ export function EnglishSplitViewDemo() {
                 mockQuestions.push({
                   attempt_id: attempt.id,
                   idx: mockQuestions.length + 1,
-                  topic: sec.sectionId,
+                  topic: toStoredReadinessTopic(sec.sectionId || 'comprehension'),
                   subtopic: sec.subEngine || null,
                   prompt: q.text,
                   marks: 1,
@@ -1903,7 +1912,7 @@ export function EnglishSplitViewDemo() {
         }
       }
     }
-  }, [isFinished, user, activeSections, selectedAnswers, examMode, isLiveMock]);
+  }, [isFinished, user, activeSections, selectedAnswers, examMode, isLiveMock, profile]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);

@@ -40,6 +40,7 @@ import { toast } from "sonner";
 import { PremiumUpgradeButton } from "@/components/PremiumUpgradeButton";
 import { useReadinessStore } from "@/lib/stores/useReadinessStore";
 import { PracticeConfirmationModal } from "@/components/readiness/PracticeConfirmationModal";
+import { routePracticeTopic } from "@/lib/practiceTopicRouting";
 
 import { DiscordFooterEntry } from "@/components/DiscordFooterEntry";
 import { AI_FEATURE_ENABLED, EXAM_READINESS_ENABLED } from "@/lib/featureFlags";
@@ -89,13 +90,6 @@ export function Home() {
     : "Get unlimited questions, full mock exams, and personalised revision plans.";
 
   const { topics: readinessTopics, loading: readinessLoading, overall: overallReadiness } = useReadiness(user?.id, userTrack, currentSubject);
-  const lowestReadinessTopic = useMemo(() => {
-    if (!readinessTopics?.length) return null;
-    return readinessTopics.reduce((lowest, topic) => {
-      if (!lowest) return topic;
-      return topic.readiness < lowest.readiness ? topic : lowest;
-    }, null as (typeof readinessTopics)[number] | null);
-  }, [readinessTopics]);
 
   // Handle successful upgrade from Stripe
   useEffect(() => {
@@ -251,6 +245,20 @@ export function Home() {
     [userTrack, readinessTopics, currentSubject]
   );
 
+  // English Target Focus uses section rows (Comprehension / SPaG / Vocabulary), not
+  // raw Grammar vs Spelling — otherwise Spelling stuck at 0% forever as the "weakness".
+  const lowestReadinessTopic = useMemo(() => {
+    const pool =
+      isElevenPlus && currentSubject === 'english' && activeReadinessRows.length
+        ? activeReadinessRows
+        : readinessTopics;
+    if (!pool?.length) return null;
+    return pool.reduce((lowest, topic) => {
+      if (!lowest) return topic;
+      return topic.readiness < lowest.readiness ? topic : lowest;
+    }, null as (typeof pool)[number] | null);
+  }, [readinessTopics, activeReadinessRows, isElevenPlus, currentSubject]);
+
   const topicReadinessMap = useMemo(() => {
     const map = new Map<string, number>();
     activeReadinessRows.forEach((topic) => {
@@ -327,13 +335,16 @@ export function Home() {
 
   const startFocusedPractice = () => {
     const params = new URLSearchParams();
+    const subject = currentSubject === 'english' ? 'english' : 'maths';
     if (confirmModalData.topic) {
-      params.set('topics', confirmModalData.topic);
+      const routed = routePracticeTopic(confirmModalData.topic, subject);
+      params.set('topics', routed.topics);
+      if (routed.subtopic) params.set('subtopic', routed.subtopic);
     }
     params.set('tier', 'both');
     params.set('paperType', 'both');
     params.set('mode', 'practice');
-    navigate(currentSubject === 'english' ? `/english-demo?${params.toString()}` : `/mock-exam?${params.toString()}`);
+    navigate(subject === 'english' ? `/english-demo?${params.toString()}` : `/mock-exam?${params.toString()}`);
   };
 
   const targetTrack: UserTrack = isElevenPlus ? "gcse" : "11plus";
