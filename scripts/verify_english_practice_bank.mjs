@@ -298,11 +298,26 @@ if (!demoSrc.includes('english-passage-text')) {
   console.log('ok  UI uses english-passage-text');
 }
 
-if (!demoSrc.includes('hidden lg:flex') || !demoSrc.includes('lg:hidden mb-5')) {
+if (!demoSrc.includes('english-practice-shell') || !demoSrc.includes('english-practice-source')) {
   failed += 1;
-  console.error('FAIL UI: mobile practice must use unified source+questions scroll (no dual-pane overlap)');
+  console.error('FAIL UI: practice must use english-practice-shell + sticky source (iPad landscape dual-pane bug)');
 } else {
-  console.log('ok  UI mobile practice unified scroll');
+  console.log('ok  UI practice single-scroll shell + sticky source');
+}
+
+// Dual-pane at lg+ was the Dylan tablet bug (iPad landscape ≥1024px).
+if (demoSrc.includes('practice') && /examMode === 'practice' \? "hidden lg:flex/.test(demoSrc)) {
+  failed += 1;
+  console.error('FAIL UI: practice must NEVER restore dual-pane at lg breakpoint');
+} else {
+  console.log('ok  UI practice never dual-panes at lg');
+}
+
+if (!demoSrc.includes('Source text — read this before answering')) {
+  failed += 1;
+  console.error('FAIL UI: sticky source must stay visible with clear label');
+} else {
+  console.log('ok  UI sticky source label');
 }
 
 if (!demoSrc.includes('english-cloze-blank') || !demoSrc.includes('normalizeClozeBlankText')) {
@@ -317,6 +332,15 @@ if (!demoSrc.includes('stem_option_mismatch') || !demoSrc.includes('missing_cloz
   console.error('FAIL UI: must filter stem/option and missing-cloze rows');
 } else {
   console.log('ok  UI filters incoherent bank rows');
+}
+
+const cssPath = path.join(root, 'src/index.css');
+const cssSrc = fs.readFileSync(cssPath, 'utf8');
+if (!cssSrc.includes('.english-practice-shell') || !cssSrc.includes('.english-q-card')) {
+  failed += 1;
+  console.error('FAIL CSS: missing english practice anti-ghost styles');
+} else {
+  console.log('ok  CSS practice anti-ghost styles');
 }
 
 void modPath; // reserved if we later import compiled TS

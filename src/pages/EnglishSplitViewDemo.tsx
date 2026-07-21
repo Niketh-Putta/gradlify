@@ -2398,13 +2398,18 @@ export function EnglishSplitViewDemo() {
       
       {/* Production UI start (Demo controls removed) */}
 
-      <div className="flex flex-col lg:flex-row flex-1 overflow-hidden relative english-split-shell">
+      <div className={cn(
+        "flex flex-1 overflow-hidden relative english-split-shell",
+        // Practice: always one column. iPad landscape is ≥1024px (Tailwind lg) and dual-pane
+        // independent scrolls looked like overlapping / missing-passage junk on Dylan's tablet.
+        examMode === 'practice' ? "flex-col english-practice-shell" : "flex-col lg:flex-row"
+      )}>
         
         {/* ---------------- LEFT PANE: DYNAMIC PASSAGES ---------------- */}
-        {/* On tablet/phone practice: hide dual pane (independent scrolls looked like overlapping junk). */}
+        {/* Practice never uses this pane — source is sticky in the questions scroll instead. */}
         <div className={cn(
           "w-full lg:w-[45%] lg:border-r border-b lg:border-b-0 border-border/80 flex-col bg-card/50 relative overflow-hidden transition-all duration-300 lg:h-auto shrink-0 z-10",
-          examMode === 'practice' ? "hidden lg:flex h-auto" : "flex h-[38vh] sm:h-[42vh] lg:h-auto"
+          examMode === 'practice' ? "hidden" : "flex h-[38vh] sm:h-[42vh] lg:h-auto"
         )}>
           
           <div className="px-5 lg:px-6 py-3 lg:py-4 border-b border-border flex items-center justify-between bg-card shrink-0 z-10 sticky top-0 shadow-sm">
@@ -2633,10 +2638,17 @@ export function EnglishSplitViewDemo() {
         )}
 
         {/* ---------------- RIGHT PANE: QUESTIONS ---------------- */}
-        <div className="flex-1 overflow-y-auto bg-background lg:bg-background/50 flex flex-col relative snap-y snap-mandatory shadow-[0_-10px_30px_rgba(0,0,0,0.05)] lg:shadow-none" ref={rightPaneRef}>
+        <div
+          className={cn(
+            "flex-1 overflow-y-auto bg-background flex flex-col relative shadow-[0_-10px_30px_rgba(0,0,0,0.05)] lg:shadow-none",
+            // Snap scrolling on iPad Safari stacked question cards on top of each other.
+            examMode === 'practice' ? "english-practice-scroll" : "lg:bg-background/50 snap-y snap-mandatory"
+          )}
+          ref={rightPaneRef}
+        >
           
           {examMode === 'practice' && (
-            <div className="lg:hidden sticky top-0 z-20 bg-card/95 backdrop-blur-md border-b border-border/60 px-3 py-2 flex items-center gap-2">
+            <div className="sticky top-0 z-30 bg-card border-b border-border/60 px-3 py-2 flex items-center gap-2">
               <button
                 type="button"
                 onClick={() => navigate('/practice/english')}
@@ -2747,23 +2759,29 @@ export function EnglishSplitViewDemo() {
                   : (subTopic ? `${subTopic} ${typeNoun}` : `${parentTopic} ${typeNoun}`);
 
                 return (
-                  <div key={section.uniqueId} className={cn("mb-6 sm:mb-10", secIndex === 0 && examMode === 'practice' ? "mt-2 sm:mt-4" : "")}>
-                    {/* Mobile practice: source text lives in the same scroll as questions (no dual-pane overlap). */}
+                  <div key={section.uniqueId} className={cn("mb-6 sm:mb-10 english-practice-section", secIndex === 0 && examMode === 'practice' ? "mt-2 sm:mt-4" : "")}>
+                    {/* Practice: sticky source in the SAME scroll as questions (all widths, including iPad landscape). */}
                     {examMode === 'practice' && (
-                      <div className="lg:hidden mb-5 rounded-2xl border border-border/70 bg-card p-4 english-passage-text shadow-sm">
+                      <div className="sticky top-12 z-20 mb-5 rounded-2xl border border-border bg-card p-4 english-passage-text english-practice-source shadow-md">
                         <div className="text-[10px] font-black tracking-[0.15em] uppercase text-muted-foreground mb-2">
-                          Source text
+                          Source text — read this before answering
                         </div>
-                        <div className="text-sm font-serif space-y-3 text-foreground">
-                          {section.passageBlocks.slice(0, 8).map((p) => (
-                            <p key={p.id} className="english-passage-block leading-relaxed whitespace-pre-wrap break-words">
-                              {renderHighlightedText(p.text)}
-                            </p>
-                          ))}
-                        </div>
+                        {section.passageBlocks.length === 0 ? (
+                          <p className="text-sm text-rose-600 font-medium">
+                            This drill is missing its source passage. Tap Finish and start again to load a different set.
+                          </p>
+                        ) : (
+                          <div className="text-sm font-serif space-y-3 text-foreground max-h-[38vh] overflow-y-auto overscroll-contain pr-1">
+                            {section.passageBlocks.map((p) => (
+                              <p key={p.id} className="english-passage-block leading-relaxed whitespace-pre-wrap break-words">
+                                {renderHighlightedText(p.text)}
+                              </p>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     )}
-                    <div className={cn("relative flex flex-col md:flex-row justify-between items-start md:items-end gap-2 sm:gap-4 w-full border-b border-border/60 pb-2 sm:pb-3 mb-4 sm:mb-6", secIndex === 0 ? "mt-2 sm:mt-4" : "mt-6 sm:mt-8")}>
+                    <div className={cn("relative flex flex-col md:flex-row justify-between items-start md:items-end gap-2 sm:gap-4 w-full border-b border-border/60 pb-2 sm:pb-3 mb-4 sm:mb-6 bg-background", secIndex === 0 ? "mt-2 sm:mt-4" : "mt-6 sm:mt-8")}>
                       <div className="flex flex-col gap-0.5 sm:gap-1 items-start">
                         <span className="px-1.5 py-0.5 rounded text-[8px] font-black tracking-[0.1em] uppercase bg-foreground/10 text-foreground/60">{badgeLabel}</span>
                         <span className="text-lg sm:text-xl font-bold tracking-tight text-foreground/90">{displayTitle}</span>
@@ -2813,7 +2831,8 @@ export function EnglishSplitViewDemo() {
                                 }
                               }}
                               className={cn(
-                                "p-2.5 sm:p-4 rounded-xl sm:rounded-2xl border transition-all duration-150 ease-out cursor-default scroll-m-12 sm:scroll-m-24 relative snap-start",
+                                "english-q-card p-2.5 sm:p-4 rounded-xl sm:rounded-2xl border transition-all duration-150 ease-out cursor-default scroll-m-12 sm:scroll-m-24 relative",
+                                examMode !== 'practice' && "snap-start",
                                 isSelected 
                                   ? (examMode === 'mock' ? "border-amber-500/30 dark:border-amber-500/40 bg-card shadow-lg ring-1 ring-amber-500/10" : "border-amber-500/50 bg-card shadow-xl ring-4 ring-amber-500/10")
                                   : "border-border/60 dark:border-amber-500/20 bg-card hover:bg-card hover:border-amber-500/40",
