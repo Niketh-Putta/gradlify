@@ -34,7 +34,9 @@ import { toStoredReadinessTopic } from '@/lib/canonicalTopics';
 import { resolveUserTrack } from '@/lib/track';
 import {
   ensurePassageBlocks,
+  normalizeClozeBlankText,
   practiceInstructionsForFocus,
+  spagDrillQualityScore,
   validateEnglishPassageRow,
 } from '@/lib/englishPassageQuality';
 
@@ -779,9 +781,16 @@ export function EnglishSplitViewDemo() {
                  passageBlocks: row.passageBlocks,
                  questions: row.questions,
                });
-               // Keep rows that only need block repair; drop rows with no questions / bad keys
+               // Keep rows that only need block repair; drop unusable / incoherent rows
                const fatal = issues.some((i) =>
-                 ['empty_questions', 'correct_count', 'few_options', 'blank_stem'].includes(i.code)
+                 [
+                   'empty_questions',
+                   'correct_count',
+                   'few_options',
+                   'blank_stem',
+                   'stem_option_mismatch',
+                   'missing_cloze_markers',
+                 ].includes(i.code)
                );
                if (fatal) {
                  console.warn('[english-bank] skipping broken row', row.id, issues);
@@ -1164,20 +1173,46 @@ export function EnglishSplitViewDemo() {
     const subtopicParam = (searchParams.get('subtopic') || "").toLowerCase();
     const selection: EnglishSection[] = [];
 
-    // Helper: Pick ONE fresh passage from any provided pool, strictly avoiding 'seen' list if possible
-    const pickOne = (pool: EnglishSection[]) => {
+    // Helper: Pick ONE fresh passage from any provided pool, strictly avoiding 'seen' list if possible.
+    // SPaG pools prefer slash-line / cloze drills over long prose so Train Weakness stays readable.
+    const pickOne = (pool: EnglishSection[], preferSpagQuality = false) => {
       if (pool.length === 0) return null;
-      // 1. Try strictly unseen
-      const unseen = pool.filter(p => !seen.includes(p.uniqueId));
-      if (unseen.length > 0) {
-        return unseen[Math.floor(sessionSeed * 777) % unseen.length];
+      const ranked = preferSpagQuality
+        ? [...pool].sort((a, b) => spagDrillQualityScore(b) - spagDrillQualityScore(a))
+        : pool;
+      const unseen = ranked.filter(p => !seen.includes(p.uniqueId));
+      const candidates = unseen.length > 0 ? unseen : ranked;
+      if (preferSpagQuality) {
+        const topScore = spagDrillQualityScore(candidates[0]);
+        const top = candidates.filter(c => spagDrillQualityScore(c) >= topScore - 1);
+        return top[Math.floor(sessionSeed * 777) % top.length];
       }
-      // 2. Fallback to any if all seen, but use a stable random choice
-      return pool[Math.floor(sessionSeed * 123) % pool.length];
+      return candidates[Math.floor(sessionSeed * 777) % candidates.length];
     };
 
+    // PRACTICE: never mix families in one session (tablet dual-pane desync looked like overlapping junk).
+    // MOCK: may include one of each requested family.
+    const practiceOnly =
+      examMode === 'practice'
+        ? (selectedSectionIds.includes('spag')
+            ? (['spag'] as const)
+            : selectedSectionIds.includes('vocabulary')
+              ? (['vocabulary'] as const)
+              : (['comprehension'] as const))
+        : null;
+
+    const wantsComp = practiceOnly
+      ? practiceOnly[0] === 'comprehension'
+      : selectedSectionIds.includes('comprehension');
+    const wantsSpag = practiceOnly
+      ? practiceOnly[0] === 'spag'
+      : selectedSectionIds.includes('spag');
+    const wantsVocab = practiceOnly
+      ? practiceOnly[0] === 'vocabulary'
+      : selectedSectionIds.includes('vocabulary');
+
     // Slot 1: Comprehension (Exactly 1)
-    if (selectedSectionIds.includes('comprehension')) {
+    if (wantsComp) {
       let pool = compPool;
       const subFilter = subtopicParam.split(',').find(f => f.includes('comp|') || f.match(/fiction|poetry|non_fiction/));
       if (subFilter) {
@@ -1192,7 +1227,7 @@ export function EnglishSplitViewDemo() {
     }
 
     // Slot 2: SPaG (Exactly 1 per requested sub-topic in Mocks, or 1 total in Practice)
-    if (selectedSectionIds.includes('spag')) {
+    if (wantsSpag) {
       const activeSubKeys = subtopicParam.split(',').filter(k => k.match(/spell|punct|gramm/));
       
       if (examMode === 'mock' && activeSubKeys.length > 0) {
@@ -1200,7 +1235,7 @@ export function EnglishSplitViewDemo() {
         activeSubKeys.forEach(k => {
           const type = k.split('|').pop() || k;
           const subPool = spagPool.filter(s => (s.subEngine || "").toLowerCase().includes(type));
-          const p = pickOne(subPool);
+          const p = pickOne(subPool.length ? subPool : spagPool, true);
           if (p) selection.push({ ...p, questions: p.questions.slice(0, 10) });
         });
       } else {
@@ -1211,13 +1246,13 @@ export function EnglishSplitViewDemo() {
            const filtered = spagPool.filter(s => (s.subEngine || "").toLowerCase().includes(type));
            if (filtered.length > 0) pool = filtered;
         }
-        const choice = pickOne(pool);
+        const choice = pickOne(pool, true);
         if (choice) selection.push({ ...choice, questions: choice.questions.slice(0, 10) });
       }
     }
 
     // Slot 3: Vocabulary (Exactly 1)
-    if (selectedSectionIds.includes('vocabulary')) {
+    if (wantsVocab) {
       const passage = pickOne(vocabPool);
       if (passage) {
         selection.push({ ...passage, questions: passage.questions.slice(0, 10) });
@@ -1226,9 +1261,6 @@ export function EnglishSplitViewDemo() {
 
     // Safety fallback — stay inside the requested family (never drop SPaG into a comprehension passage)
     if (selection.length === 0) {
-      const wantsSpag = selectedSectionIds.includes('spag');
-      const wantsComp = selectedSectionIds.includes('comprehension');
-      const wantsVocab = selectedSectionIds.includes('vocabulary');
       const fallbackPool = wantsSpag && !wantsComp
         ? spagPool
         : wantsVocab && !wantsComp && !wantsSpag
@@ -1236,7 +1268,7 @@ export function EnglishSplitViewDemo() {
           : wantsComp && !wantsSpag
             ? compPool
             : all;
-      const pick = pickOne(fallbackPool);
+      const pick = pickOne(fallbackPool, wantsSpag);
       if (pick) selection.push({ ...pick, questions: pick.questions.slice(0, 10) });
     }
 
@@ -1249,7 +1281,7 @@ export function EnglishSplitViewDemo() {
         return aNum - bNum;
       })
     }));
-  }, [dbSections, selectedSectionIds, searchParams, sessionSeed, isLiveMock, liveMockSections]);
+  }, [dbSections, selectedSectionIds, searchParams, sessionSeed, isLiveMock, liveMockSections, examMode]);
 
   // Sync focus header with active content automatically for accurate UI titles
   useEffect(() => {
@@ -1422,14 +1454,34 @@ export function EnglishSplitViewDemo() {
   };
 
   const renderHighlightedText = (text: string) => {
-    if (highlights.length === 0) return text;
+    const normalized = normalizeClozeBlankText(text);
     const escapeRegExp = (str: string) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const pattern = new RegExp(`(${highlights.map(escapeRegExp).join('|')})`, 'gi');
-    return text.split(pattern).map((part, i) => {
-      if (highlights.some(h => h.toLowerCase() === part.toLowerCase())) {
-        return <mark key={i} className="bg-teal-200 dark:bg-teal-500/40 text-teal-950 dark:text-teal-50 rounded-sm px-0.5">{part}</mark>;
+    // Split out cloze blanks like [1] / [ ] so they render as visible chips (never look like leaked answers).
+    const clozeSplit = normalized.split(/(\[\s*\d*\s*\])/g);
+    return clozeSplit.map((chunk, idx) => {
+      if (/^\[\s*\d*\s*\]$/.test(chunk)) {
+        const n = chunk.replace(/\D/g, '');
+        return (
+          <span
+            key={`blank-${idx}`}
+            className="english-cloze-blank inline-flex items-center justify-center mx-0.5 px-1.5 min-w-[1.6rem] h-6 rounded-md bg-amber-500/15 border border-amber-500/40 text-amber-800 dark:text-amber-200 text-[12px] sm:text-sm font-bold font-sans align-baseline"
+          >
+            {n || '—'}
+          </span>
+        );
       }
-      return part;
+      if (highlights.length === 0) return <React.Fragment key={idx}>{chunk}</React.Fragment>;
+      const pattern = new RegExp(`(${highlights.map(escapeRegExp).join('|')})`, 'gi');
+      return (
+        <React.Fragment key={idx}>
+          {chunk.split(pattern).map((part, i) => {
+            if (highlights.some(h => h.toLowerCase() === part.toLowerCase())) {
+              return <mark key={i} className="bg-teal-200 dark:bg-teal-500/40 text-teal-950 dark:text-teal-50 rounded-sm px-0.5">{part}</mark>;
+            }
+            return part;
+          })}
+        </React.Fragment>
+      );
     });
   };
 
@@ -2346,10 +2398,14 @@ export function EnglishSplitViewDemo() {
       
       {/* Production UI start (Demo controls removed) */}
 
-      <div className="flex flex-col lg:flex-row flex-1 overflow-hidden relative">
+      <div className="flex flex-col lg:flex-row flex-1 overflow-hidden relative english-split-shell">
         
         {/* ---------------- LEFT PANE: DYNAMIC PASSAGES ---------------- */}
-        <div className="w-full lg:w-[45%] lg:border-r border-b lg:border-b-0 border-border/80 flex flex-col bg-card/50 relative overflow-hidden transition-all duration-300 h-[45vh] lg:h-auto shrink-0 z-10">
+        {/* On tablet/phone practice: hide dual pane (independent scrolls looked like overlapping junk). */}
+        <div className={cn(
+          "w-full lg:w-[45%] lg:border-r border-b lg:border-b-0 border-border/80 flex-col bg-card/50 relative overflow-hidden transition-all duration-300 lg:h-auto shrink-0 z-10",
+          examMode === 'practice' ? "hidden lg:flex h-auto" : "flex h-[38vh] sm:h-[42vh] lg:h-auto"
+        )}>
           
           <div className="px-5 lg:px-6 py-3 lg:py-4 border-b border-border flex items-center justify-between bg-card shrink-0 z-10 sticky top-0 shadow-sm">
             <div className="flex items-center gap-4">
@@ -2569,13 +2625,30 @@ export function EnglishSplitViewDemo() {
         </div>
 
         {/* Mobile Split Divider */}
-        <div className="h-4 lg:hidden w-full bg-muted/40 shrink-0 border-y border-border shadow-inner relative flex justify-center items-center z-20">
-          <div className="w-12 h-1 bg-border rounded-full" />
-        </div>
+        {/* Mobile resize handle — only when dual-pane mock is visible */}
+        {examMode !== 'practice' && (
+          <div className="h-4 lg:hidden w-full bg-muted/40 shrink-0 border-y border-border shadow-inner relative flex justify-center items-center z-20">
+            <div className="w-12 h-1 bg-border rounded-full" />
+          </div>
+        )}
 
         {/* ---------------- RIGHT PANE: QUESTIONS ---------------- */}
         <div className="flex-1 overflow-y-auto bg-background lg:bg-background/50 flex flex-col relative snap-y snap-mandatory shadow-[0_-10px_30px_rgba(0,0,0,0.05)] lg:shadow-none" ref={rightPaneRef}>
           
+          {examMode === 'practice' && (
+            <div className="lg:hidden sticky top-0 z-20 bg-card/95 backdrop-blur-md border-b border-border/60 px-3 py-2 flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => navigate('/practice/english')}
+                className="p-2 -ml-1 hover:bg-muted rounded-full text-muted-foreground"
+                title="Back"
+              >
+                <ArrowLeft className="w-4 h-4" />
+              </button>
+              <span className="text-sm font-semibold truncate">{activeSections[0]?.leftTitle || 'Practice'}</span>
+            </div>
+          )}
+
           {examMode === 'mock' && (
             <div className="sticky top-0 z-20 bg-card/80 backdrop-blur-md border-b border-border/60 px-6 py-3 flex items-center justify-between shadow-sm">
               {!isReviewMode ? (
@@ -2675,6 +2748,21 @@ export function EnglishSplitViewDemo() {
 
                 return (
                   <div key={section.uniqueId} className={cn("mb-6 sm:mb-10", secIndex === 0 && examMode === 'practice' ? "mt-2 sm:mt-4" : "")}>
+                    {/* Mobile practice: source text lives in the same scroll as questions (no dual-pane overlap). */}
+                    {examMode === 'practice' && (
+                      <div className="lg:hidden mb-5 rounded-2xl border border-border/70 bg-card p-4 english-passage-text shadow-sm">
+                        <div className="text-[10px] font-black tracking-[0.15em] uppercase text-muted-foreground mb-2">
+                          Source text
+                        </div>
+                        <div className="text-sm font-serif space-y-3 text-foreground">
+                          {section.passageBlocks.slice(0, 8).map((p) => (
+                            <p key={p.id} className="english-passage-block leading-relaxed whitespace-pre-wrap break-words">
+                              {renderHighlightedText(p.text)}
+                            </p>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                     <div className={cn("relative flex flex-col md:flex-row justify-between items-start md:items-end gap-2 sm:gap-4 w-full border-b border-border/60 pb-2 sm:pb-3 mb-4 sm:mb-6", secIndex === 0 ? "mt-2 sm:mt-4" : "mt-6 sm:mt-8")}>
                       <div className="flex flex-col gap-0.5 sm:gap-1 items-start">
                         <span className="px-1.5 py-0.5 rounded text-[8px] font-black tracking-[0.1em] uppercase bg-foreground/10 text-foreground/60">{badgeLabel}</span>
