@@ -790,6 +790,7 @@ export function EnglishSplitViewDemo() {
                    'blank_stem',
                    'stem_option_mismatch',
                    'missing_cloze_markers',
+                   'contextual_without_passage',
                  ].includes(i.code)
                );
                if (fatal) {
@@ -2399,17 +2400,15 @@ export function EnglishSplitViewDemo() {
       {/* Production UI start (Demo controls removed) */}
 
       <div className={cn(
-        "flex flex-1 overflow-hidden relative english-split-shell",
-        // Practice: always one column. iPad landscape is ≥1024px (Tailwind lg) and dual-pane
-        // independent scrolls looked like overlapping / missing-passage junk on Dylan's tablet.
-        examMode === 'practice' ? "flex-col english-practice-shell" : "flex-col lg:flex-row"
+        "flex flex-1 overflow-hidden relative english-split-shell english-session-shell",
+        // Dual-pane only on wide desktops (xl=1280). iPad landscape is often 1024–1180 and
+        // dual independent scrolls stacked/ghosted text (Dylan videos). Below xl: one scroll.
+        "flex-col xl:flex-row"
       )}>
         
-        {/* ---------------- LEFT PANE: DYNAMIC PASSAGES ---------------- */}
-        {/* Practice never uses this pane — source is sticky in the questions scroll instead. */}
+        {/* ---------------- LEFT PANE: DYNAMIC PASSAGES (desktop xl+ only) ---------------- */}
         <div className={cn(
-          "w-full lg:w-[45%] lg:border-r border-b lg:border-b-0 border-border/80 flex-col bg-card/50 relative overflow-hidden transition-all duration-300 lg:h-auto shrink-0 z-10",
-          examMode === 'practice' ? "hidden" : "flex h-[38vh] sm:h-[42vh] lg:h-auto"
+          "hidden xl:flex w-full xl:w-[45%] xl:border-r border-border/80 flex-col bg-card relative overflow-hidden transition-all duration-300 xl:h-auto shrink-0 z-10"
         )}>
           
           <div className="px-5 lg:px-6 py-3 lg:py-4 border-b border-border flex items-center justify-between bg-card shrink-0 z-10 sticky top-0 shadow-sm">
@@ -2629,40 +2628,31 @@ export function EnglishSplitViewDemo() {
           </div>
         </div>
 
-        {/* Mobile Split Divider */}
-        {/* Mobile resize handle — only when dual-pane mock is visible */}
-        {examMode !== 'practice' && (
-          <div className="h-4 lg:hidden w-full bg-muted/40 shrink-0 border-y border-border shadow-inner relative flex justify-center items-center z-20">
-            <div className="w-12 h-1 bg-border rounded-full" />
-          </div>
-        )}
-
         {/* ---------------- RIGHT PANE: QUESTIONS ---------------- */}
         <div
-          className={cn(
-            "flex-1 overflow-y-auto bg-background flex flex-col relative shadow-[0_-10px_30px_rgba(0,0,0,0.05)] lg:shadow-none",
-            // Snap scrolling on iPad Safari stacked question cards on top of each other.
-            examMode === 'practice' ? "english-practice-scroll" : "lg:bg-background/50 snap-y snap-mandatory"
-          )}
+          className="flex-1 overflow-y-auto bg-background flex flex-col relative english-session-scroll shadow-[0_-10px_30px_rgba(0,0,0,0.05)] xl:shadow-none"
           ref={rightPaneRef}
         >
           
-          {examMode === 'practice' && (
-            <div className="sticky top-0 z-30 bg-card border-b border-border/60 px-3 py-2 flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => navigate('/practice/english')}
-                className="p-2 -ml-1 hover:bg-muted rounded-full text-muted-foreground"
-                title="Back"
-              >
-                <ArrowLeft className="w-4 h-4" />
-              </button>
-              <span className="text-sm font-semibold truncate">{activeSections[0]?.leftTitle || 'Practice'}</span>
-            </div>
-          )}
+          {/* Compact back bar on tablet/phone (desktop left pane already has back). */}
+          <div className="xl:hidden sticky top-0 z-30 bg-card border-b border-border/60 px-3 py-2 flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => navigate(isLiveMock ? '/live-mock-exams' : examMode === 'mock' ? '/mocks/english' : '/practice/english')}
+              className="p-2 -ml-1 hover:bg-muted rounded-full text-muted-foreground"
+              title="Back"
+            >
+              <ArrowLeft className="w-4 h-4" />
+            </button>
+            <span className="text-sm font-semibold truncate">
+              {isLiveMock
+                ? liveMockHeaderTitle
+                : (activeSections[0]?.leftTitle || (examMode === 'mock' ? 'Mock Exam' : 'Practice'))}
+            </span>
+          </div>
 
           {examMode === 'mock' && (
-            <div className="sticky top-0 z-20 bg-card/80 backdrop-blur-md border-b border-border/60 px-6 py-3 flex items-center justify-between shadow-sm">
+            <div className="sticky top-12 xl:top-0 z-20 bg-card border-b border-border/60 px-4 sm:px-6 py-3 flex items-center justify-between shadow-sm">
               {!isReviewMode ? (
                 <>
                   <div className="flex items-center gap-2 text-rose-600 font-bold font-mono">
@@ -2693,7 +2683,7 @@ export function EnglishSplitViewDemo() {
           )}
 
           <div className="max-w-xl mx-auto w-full p-3 sm:p-6 md:p-8 pb-48">
-            <div className="mb-4 md:mb-10 flex items-start justify-between gap-2 sm:gap-4 snap-start scroll-m-24">
+            <div className="mb-4 md:mb-10 flex items-start justify-between gap-2 sm:gap-4 scroll-m-24">
               <div>
                 <h1 className="text-xl sm:text-2xl font-bold tracking-tight mb-1 sm:mb-2">
                   {isLiveMock ? liveMockHeaderTitle : examMode === 'mock' ? 'Mock Exam' : (activeSections.length > 1 ? 'MIXED TOPIC DRILLS' : `${practiceFocus.toUpperCase()} DRILLS`)}
@@ -2759,28 +2749,26 @@ export function EnglishSplitViewDemo() {
                   : (subTopic ? `${subTopic} ${typeNoun}` : `${parentTopic} ${typeNoun}`);
 
                 return (
-                  <div key={section.uniqueId} className={cn("mb-6 sm:mb-10 english-practice-section", secIndex === 0 && examMode === 'practice' ? "mt-2 sm:mt-4" : "")}>
-                    {/* Practice: sticky source in the SAME scroll as questions (all widths, including iPad landscape). */}
-                    {examMode === 'practice' && (
-                      <div className="sticky top-12 z-20 mb-5 rounded-2xl border border-border bg-card p-4 english-passage-text english-practice-source shadow-md">
-                        <div className="text-[10px] font-black tracking-[0.15em] uppercase text-muted-foreground mb-2">
-                          Source text — read this before answering
-                        </div>
-                        {section.passageBlocks.length === 0 ? (
-                          <p className="text-sm text-rose-600 font-medium">
-                            This drill is missing its source passage. Tap Finish and start again to load a different set.
-                          </p>
-                        ) : (
-                          <div className="text-sm font-serif space-y-3 text-foreground max-h-[38vh] overflow-y-auto overscroll-contain pr-1">
-                            {section.passageBlocks.map((p) => (
-                              <p key={p.id} className="english-passage-block leading-relaxed whitespace-pre-wrap break-words">
-                                {renderHighlightedText(p.text)}
-                              </p>
-                            ))}
-                          </div>
-                        )}
+                  <div key={section.uniqueId} className={cn("mb-6 sm:mb-10 english-session-section", secIndex === 0 ? "mt-2 sm:mt-4" : "")}>
+                    {/* Sticky source below xl (and always useful on tablet). Desktop xl+ uses left pane. */}
+                    <div className="xl:hidden sticky top-12 z-20 mb-5 rounded-2xl border border-border bg-card p-4 english-passage-text english-session-source shadow-md">
+                      <div className="text-[10px] font-black tracking-[0.15em] uppercase text-muted-foreground mb-2">
+                        Source text — read this before answering
                       </div>
-                    )}
+                      {section.passageBlocks.length === 0 ? (
+                        <p className="text-sm text-rose-600 font-medium">
+                          This drill is missing its source passage. Tap Finish and start again to load a different set.
+                        </p>
+                      ) : (
+                        <div className="text-sm font-serif space-y-3 text-foreground max-h-[36vh] overflow-y-auto overscroll-contain pr-1">
+                          {section.passageBlocks.map((p) => (
+                            <p key={p.id} className="english-passage-block leading-relaxed whitespace-pre-wrap break-words">
+                              {renderHighlightedText(p.text)}
+                            </p>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                     <div className={cn("relative flex flex-col md:flex-row justify-between items-start md:items-end gap-2 sm:gap-4 w-full border-b border-border/60 pb-2 sm:pb-3 mb-4 sm:mb-6 bg-background", secIndex === 0 ? "mt-2 sm:mt-4" : "mt-6 sm:mt-8")}>
                       <div className="flex flex-col gap-0.5 sm:gap-1 items-start">
                         <span className="px-1.5 py-0.5 rounded text-[8px] font-black tracking-[0.1em] uppercase bg-foreground/10 text-foreground/60">{badgeLabel}</span>
@@ -2831,11 +2819,10 @@ export function EnglishSplitViewDemo() {
                                 }
                               }}
                               className={cn(
-                                "english-q-card p-2.5 sm:p-4 rounded-xl sm:rounded-2xl border transition-all duration-150 ease-out cursor-default scroll-m-12 sm:scroll-m-24 relative",
-                                examMode !== 'practice' && "snap-start",
+                                "english-q-card p-2.5 sm:p-4 rounded-xl sm:rounded-2xl border transition-all duration-150 ease-out cursor-default scroll-m-12 sm:scroll-m-24 relative bg-card",
                                 isSelected 
-                                  ? (examMode === 'mock' ? "border-amber-500/30 dark:border-amber-500/40 bg-card shadow-lg ring-1 ring-amber-500/10" : "border-amber-500/50 bg-card shadow-xl ring-4 ring-amber-500/10")
-                                  : "border-border/60 dark:border-amber-500/20 bg-card hover:bg-card hover:border-amber-500/40",
+                                  ? (examMode === 'mock' ? "border-amber-500/30 dark:border-amber-500/40 shadow-lg ring-1 ring-amber-500/10" : "border-amber-500/50 shadow-xl ring-4 ring-amber-500/10")
+                                  : "border-border/60 dark:border-amber-500/20 hover:border-amber-500/40",
                                 isPaywalledQuestion && "blur-[2px] opacity-50 select-none pointer-events-none"
                               )}
                             >
@@ -3025,7 +3012,7 @@ export function EnglishSplitViewDemo() {
               })}
 
             {activeSections.length > 0 && (
-              <div className="pt-10 border-t border-border/40 mt-12 mb-12 flex justify-end snap-end scroll-m-8">
+              <div className="pt-10 border-t border-border/40 mt-12 mb-12 flex justify-end scroll-m-8">
                 <Button 
                   onClick={() => {
                     if (isLiveMock) {

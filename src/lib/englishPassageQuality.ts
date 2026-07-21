@@ -58,6 +58,18 @@ export function isSpagRow(row: Pick<EnglishPassageRow, 'sectionId' | 'subtopic'>
   return Boolean(id.match(/spag|spell|punct|gramm/) || sub.match(/spell|punct|gramm/));
 }
 
+/**
+ * True when question stems depend on reading a real passage (not standalone SPaG lines).
+ */
+export function questionsNeedRealPassage(row: EnglishPassageRow): boolean {
+  const questions = Array.isArray(row.questions) ? row.questions : [];
+  return questions.some((q) =>
+    /\b(paragraph|passage|as (it is )?used in|in the (first|second|third|final|last) paragraph|based on (the |paragraph)|in context)\b/i.test(
+      String(q?.text ?? ''),
+    ),
+  );
+}
+
 /** Normalize cloze markers so blanks are visible and consistent in the left pane. */
 export function normalizeClozeBlankText(text: string): string {
   return String(text ?? '')
@@ -116,6 +128,12 @@ export function validateEnglishPassageRow(row: EnglishPassageRow): EnglishPassag
 
   if (blocks.length === 0) {
     issues.push({ code: 'empty_blocks', message: `${id}: no passageBlocks` });
+    if (questionsNeedRealPassage(row) && !isSpagRow(row)) {
+      issues.push({
+        code: 'contextual_without_passage',
+        message: `${id}: questions reference a paragraph/passage but passageBlocks are empty`,
+      });
+    }
   } else {
     const emptyBlock = blocks.find((b) => !String(b?.text ?? '').trim());
     if (emptyBlock) {
@@ -201,6 +219,7 @@ export function validateEnglishPassageRow(row: EnglishPassageRow): EnglishPassag
 /**
  * If a row has questions but empty/blank passage blocks, build readable source
  * lines from question stems so the left pane is never blank.
+ * Never invent a fake passage for contextual vocab/comprehension stems.
  */
 export function ensurePassageBlocks(
   row: EnglishPassageRow,
@@ -213,6 +232,11 @@ export function ensurePassageBlocks(
     .filter((b) => b.text.length > 0);
 
   if (blocks.length > 0) return blocks;
+
+  // Contextual / comprehension stems without a real passage must not fake one from stems.
+  if (questionsNeedRealPassage(row) && !isSpagRow(row)) {
+    return [];
+  }
 
   const questions = Array.isArray(row.questions) ? row.questions : [];
   return questions.slice(0, 10).map((q, i) => ({

@@ -435,21 +435,26 @@
   vertical-align: baseline;
 }
 
-/* Practice English: kill dual-pane / iOS snap ghosting. Opaque stacked cards only. */
+/* English session: tablet/phone use one scroll; kill iOS snap ghosting. Opaque cards only. */
+.english-session-shell,
 .english-practice-shell {
   isolation: isolate;
   background: hsl(var(--background));
 }
+.english-session-scroll,
 .english-practice-scroll {
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
   background: hsl(var(--background));
+  scroll-snap-type: none !important;
 }
+.english-session-source,
 .english-practice-source {
   background-color: hsl(var(--card)) !important;
   isolation: isolate;
   contain: layout paint;
 }
+.english-session-section .english-q-card,
 .english-practice-section .english-q-card {
   background-color: hsl(var(--card)) !important;
   isolation: isolate;
@@ -459,6 +464,8 @@
   transform: translateZ(0);
   -webkit-font-smoothing: antialiased;
 }
+.english-session-section .english-q-card h3,
+.english-session-section .english-q-card button,
 .english-practice-section .english-q-card h3,
 .english-practice-section .english-q-card button {
   opacity: 1 !important;

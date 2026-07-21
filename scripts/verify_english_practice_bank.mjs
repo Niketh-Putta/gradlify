@@ -42,12 +42,25 @@ function normalizeClozeBlankText(text) {
     .replace(/\(\s*Blank\s*(\d+)\s*\)/gi, '[$1]')
     .replace(/_{3,}/g, '[ ]');
 }
+function questionsNeedRealPassage(row) {
+  const questions = Array.isArray(row.questions) ? row.questions : [];
+  return questions.some((q) =>
+    /\b(paragraph|passage|as (it is )?used in|in the (first|second|third|final|last) paragraph|based on (the |paragraph)|in context)\b/i.test(
+      String(q?.text ?? ''),
+    ),
+  );
+}
 function validateEnglishPassageRow(row) {
   const issues = [];
   const id = row.id || row.title || 'unknown';
   const blocks = Array.isArray(row.passageBlocks) ? row.passageBlocks : [];
   const questions = Array.isArray(row.questions) ? row.questions : [];
-  if (blocks.length === 0) issues.push({ code: 'empty_blocks' });
+  if (blocks.length === 0) {
+    issues.push({ code: 'empty_blocks' });
+    if (questionsNeedRealPassage(row) && !isSpagRow(row)) {
+      issues.push({ code: 'contextual_without_passage' });
+    }
+  }
   if (questions.length === 0) {
     issues.push({ code: 'empty_questions' });
     return issues;
@@ -73,6 +86,7 @@ function ensurePassageBlocks(row) {
     .map((b, i) => ({ id: String(b?.id ?? `p${i + 1}`), text: normalizeClozeBlankText(String(b?.text ?? '').trim()) }))
     .filter((b) => b.text.length > 0);
   if (blocks.length > 0) return blocks;
+  if (questionsNeedRealPassage(row) && !isSpagRow(row)) return [];
   const questions = Array.isArray(row.questions) ? row.questions : [];
   return questions.slice(0, 10).map((q, i) => ({
     id: `q-${i + 1}`,
@@ -246,6 +260,35 @@ if (!validateEnglishPassageRow(missingCloze).some((i) => i.code === 'missing_clo
   console.log('ok  missing cloze markers flagged');
 }
 
+const contextualEmpty = {
+  id: 'vocab-no-pass',
+  sectionId: 'vocabulary',
+  subtopic: 'vocabulary',
+  passageBlocks: [],
+  questions: [
+    {
+      id: 'q1',
+      text: "In the first paragraph, what does the word 'lugubrious' most closely mean?",
+      options: [
+        { id: 'A', text: 'Mournful', correct: true },
+        { id: 'B', text: 'Bright', correct: false },
+      ],
+    },
+  ],
+};
+if (!validateEnglishPassageRow(contextualEmpty).some((i) => i.code === 'contextual_without_passage')) {
+  failed += 1;
+  console.error('FAIL: contextual vocab without passage not flagged');
+} else {
+  console.log('ok  contextual without passage flagged');
+}
+if (ensurePassageBlocks(contextualEmpty).length !== 0) {
+  failed += 1;
+  console.error('FAIL: must not synthesize fake passage for contextual vocab');
+} else {
+  console.log('ok  no fake passage for contextual vocab');
+}
+
 // Prefer slash-line drills
 const slash = {
   sectionId: 'spag',
@@ -298,19 +341,33 @@ if (!demoSrc.includes('english-passage-text')) {
   console.log('ok  UI uses english-passage-text');
 }
 
-if (!demoSrc.includes('english-practice-shell') || !demoSrc.includes('english-practice-source')) {
+if (!demoSrc.includes('english-session-shell') || !demoSrc.includes('english-session-source')) {
   failed += 1;
-  console.error('FAIL UI: practice must use english-practice-shell + sticky source (iPad landscape dual-pane bug)');
+  console.error('FAIL UI: must use english-session-shell + sticky source (tablet dual-pane bug)');
 } else {
-  console.log('ok  UI practice single-scroll shell + sticky source');
+  console.log('ok  UI session single-scroll shell + sticky source');
 }
 
-// Dual-pane at lg+ was the Dylan tablet bug (iPad landscape ≥1024px).
-if (demoSrc.includes('practice') && /examMode === 'practice' \? "hidden lg:flex/.test(demoSrc)) {
+// Dual-pane must only appear at xl (1280+), never at lg (1024 = iPad landscape).
+if (/examMode === 'practice' \? "hidden lg:flex/.test(demoSrc) || /flex-col lg:flex-row/.test(demoSrc)) {
   failed += 1;
-  console.error('FAIL UI: practice must NEVER restore dual-pane at lg breakpoint');
+  console.error('FAIL UI: dual-pane at lg breakpoint still present (iPad landscape bug)');
 } else {
-  console.log('ok  UI practice never dual-panes at lg');
+  console.log('ok  UI no dual-pane at lg');
+}
+
+if (!demoSrc.includes('hidden xl:flex') || !demoSrc.includes('xl:hidden sticky')) {
+  failed += 1;
+  console.error('FAIL UI: desktop dual-pane must be xl+ with sticky source below xl');
+} else {
+  console.log('ok  UI dual-pane only at xl+; sticky source below');
+}
+
+if (/snap-y|snap-mandatory|snap-start|snap-end/.test(demoSrc)) {
+  failed += 1;
+  console.error('FAIL UI: snap scrolling must stay removed (iOS stacked/ghost cards)');
+} else {
+  console.log('ok  UI no snap scrolling');
 }
 
 if (!demoSrc.includes('Source text — read this before answering')) {
@@ -318,6 +375,13 @@ if (!demoSrc.includes('Source text — read this before answering')) {
   console.error('FAIL UI: sticky source must stay visible with clear label');
 } else {
   console.log('ok  UI sticky source label');
+}
+
+if (!demoSrc.includes('contextual_without_passage')) {
+  failed += 1;
+  console.error('FAIL UI: must drop contextual rows without a real passage');
+} else {
+  console.log('ok  UI drops contextual-without-passage rows');
 }
 
 if (!demoSrc.includes('english-cloze-blank') || !demoSrc.includes('normalizeClozeBlankText')) {
@@ -336,11 +400,11 @@ if (!demoSrc.includes('stem_option_mismatch') || !demoSrc.includes('missing_cloz
 
 const cssPath = path.join(root, 'src/index.css');
 const cssSrc = fs.readFileSync(cssPath, 'utf8');
-if (!cssSrc.includes('.english-practice-shell') || !cssSrc.includes('.english-q-card')) {
+if (!cssSrc.includes('.english-session-shell') || !cssSrc.includes('.english-q-card') || !cssSrc.includes('scroll-snap-type: none')) {
   failed += 1;
-  console.error('FAIL CSS: missing english practice anti-ghost styles');
+  console.error('FAIL CSS: missing english session anti-ghost styles');
 } else {
-  console.log('ok  CSS practice anti-ghost styles');
+  console.log('ok  CSS session anti-ghost styles');
 }
 
 void modPath; // reserved if we later import compiled TS
