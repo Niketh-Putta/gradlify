@@ -20,7 +20,16 @@ export function routePracticeTopic(
   const lower = topic.toLowerCase();
 
   if (subject === 'english') {
-    if (lower === 'grammar' || lower === 'spelling' || lower === 'spag') {
+    if (lower === 'grammar') {
+      return { topics: 'SPaG', subtopic: 'grammar' };
+    }
+    if (lower === 'spelling') {
+      return { topics: 'SPaG', subtopic: 'spelling' };
+    }
+    if (lower === 'punctuation') {
+      return { topics: 'SPaG', subtopic: 'punctuation' };
+    }
+    if (lower === 'spag') {
       return { topics: 'SPaG' };
     }
     if (lower === 'vocabulary' || lower.includes('vocab')) {

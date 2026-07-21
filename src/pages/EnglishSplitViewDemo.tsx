@@ -32,6 +32,11 @@ import { assertLiveMockPaperScorable, normalizeLiveMockOptions } from '@/lib/liv
 import { mapEnglishSectionIds } from '@/lib/practiceTopicRouting';
 import { toStoredReadinessTopic } from '@/lib/canonicalTopics';
 import { resolveUserTrack } from '@/lib/track';
+import {
+  ensurePassageBlocks,
+  practiceInstructionsForFocus,
+  validateEnglishPassageRow,
+} from '@/lib/englishPassageQuality';
 
 /** Combined English papers require a matching event registration row. */
 const COMBINED_ENGLISH_EVENT_BY_SLUG: Record<string, string> = {
@@ -730,8 +735,11 @@ export function EnglishSplitViewDemo() {
         let query = supabase.from('english_passages' as any).select('*').eq('track', '11plus');
 
         if (selectedTopics.length > 0 && !selectedTopics.includes('all')) {
-           // Map Grammar/Spelling → spag so Train Weakness finds passages
-           query = query.in('sectionId', sectionIds);
+           // Map Grammar/Spelling → spag; also accept legacy sectionId values
+           const legacyIds = sectionIds.includes('spag')
+             ? Array.from(new Set([...sectionIds, 'spelling', 'punctuation', 'grammar', 'SPaG']))
+             : sectionIds;
+           query = query.in('sectionId', legacyIds);
         }
         
         const diffMinParam = searchParams.get('difficultyMin');
@@ -748,17 +756,40 @@ export function EnglishSplitViewDemo() {
         const { error } = passageResult;
         if (error) throw error;
         
-        // 2. FALLBACK: If specific topic search failed, widen the net
+        // 2. FALLBACK: only widen within the requested section family (never mix comprehension into SPaG)
         if (!data || data.length === 0) {
-           const { data: allData, error: allErr } = await supabase
-             .from('english_passages' as any)
-             .select('*')
-             .eq('track', '11plus');
+           let fallback = supabase.from('english_passages' as any).select('*').eq('track', '11plus');
+           if (sectionIds.includes('spag') && !sectionIds.includes('comprehension')) {
+             fallback = fallback.in('sectionId', ['spag', 'spelling', 'punctuation', 'grammar', 'SPaG']);
+           } else if (sectionIds.includes('comprehension') && !sectionIds.includes('spag')) {
+             fallback = fallback.eq('sectionId', 'comprehension');
+           }
+           const { data: allData, error: allErr } = await fallback;
            if (!allErr && allData) data = allData;
         }
 
         if (data && data.length > 0) {
-           const mapped: EnglishSection[] = data.map((row: any) => {
+           const mapped: EnglishSection[] = data
+             .filter((row: any) => {
+               const issues = validateEnglishPassageRow({
+                 id: row.id,
+                 title: row.title,
+                 sectionId: row.sectionId,
+                 subtopic: row.subtopic,
+                 passageBlocks: row.passageBlocks,
+                 questions: row.questions,
+               });
+               // Keep rows that only need block repair; drop rows with no questions / bad keys
+               const fatal = issues.some((i) =>
+                 ['empty_questions', 'correct_count', 'few_options', 'blank_stem'].includes(i.code)
+               );
+               if (fatal) {
+                 console.warn('[english-bank] skipping broken row', row.id, issues);
+                 return false;
+               }
+               return true;
+             })
+             .map((row: any) => {
              const sId = (row.sectionId || "").toLowerCase();
              const sub = (row.subtopic || "").toLowerCase();
              
@@ -777,6 +808,11 @@ export function EnglishSplitViewDemo() {
                 icon = BookOpen;
              }
 
+             const repairedBlocks = ensurePassageBlocks({
+               passageBlocks: row.passageBlocks,
+               questions: row.questions,
+             });
+
              return {
                sectionId: row.sectionId,
                uniqueId: row.id,
@@ -789,10 +825,11 @@ export function EnglishSplitViewDemo() {
                  sub === 'grammar' ? 'Choose the best word to complete each numbered gap so it makes grammatical sense.' :
                  row.desc || 'Read the text carefully and answer the following questions.'
                ),
+               // Story/source title on the left — not "Punctuation Questions" (that stays on the right)
                leftTitle: row.title || 'Practice Source',
                tier: row.tier || 'Level Unknown',
                difficulty: row.difficulty,
-               passageBlocks: row.passageBlocks || [],
+               passageBlocks: repairedBlocks,
                questions: row.questions || []
              };
            });
@@ -1187,8 +1224,21 @@ export function EnglishSplitViewDemo() {
       }
     }
 
-    // Safety fallback
-    if (selection.length === 0 && all.length > 0) selection.push(all[0]);
+    // Safety fallback — stay inside the requested family (never drop SPaG into a comprehension passage)
+    if (selection.length === 0) {
+      const wantsSpag = selectedSectionIds.includes('spag');
+      const wantsComp = selectedSectionIds.includes('comprehension');
+      const wantsVocab = selectedSectionIds.includes('vocabulary');
+      const fallbackPool = wantsSpag && !wantsComp
+        ? spagPool
+        : wantsVocab && !wantsComp && !wantsSpag
+          ? vocabPool
+          : wantsComp && !wantsSpag
+            ? compPool
+            : all;
+      const pick = pickOne(fallbackPool);
+      if (pick) selection.push({ ...pick, questions: pick.questions.slice(0, 10) });
+    }
 
     // Force alphabetical evidence sorting
     return selection.map(sec => ({
@@ -2313,7 +2363,11 @@ export function EnglishSplitViewDemo() {
               <div className="flex items-center gap-2">
                 <BookOpen className="w-4 h-4 text-amber-500" />
                 <span className="font-serif font-bold tracking-tight text-foreground line-clamp-1">
-                  {isLiveMock ? liveMockHeaderTitle : examMode === 'mock' ? 'Full Mock Examination Paper' : `Practice Source: ${activeSections[0]?.leftTitle}`}
+                  {isLiveMock
+                    ? liveMockHeaderTitle
+                    : examMode === 'mock'
+                      ? 'Full Mock Examination Paper'
+                      : (activeSections[0]?.leftTitle || 'Practice Source')}
                 </span>
               </div>
             </div>
@@ -2337,11 +2391,13 @@ export function EnglishSplitViewDemo() {
             ref={passageContainerRef} 
             onMouseUp={isHighlightMode ? handleHighlight : undefined}
             onTouchEnd={isHighlightMode ? handleHighlight : undefined}
-            className="flex-1 overflow-y-auto p-5 sm:p-8 md:px-10 md:py-12 text-sm sm:text-base md:text-[17px] leading-loose text-foreground/90 font-serif relative pb-48"
+            className="english-passage-text flex-1 overflow-y-auto p-5 sm:p-8 md:px-10 md:py-12 text-sm sm:text-base md:text-[17px] font-serif relative pb-48"
           >
-            <div className="absolute top-6 left-6 sm:left-8 text-[11px] font-black tracking-[0.2em] uppercase text-muted-foreground/30 select-none">Passage</div>
+            <div className="absolute top-6 left-6 sm:left-8 text-[11px] font-black tracking-[0.2em] uppercase text-muted-foreground/40 select-none pointer-events-none">
+              Source text
+            </div>
 
-            <div className="space-y-16 relative mt-8">
+            <div className="space-y-10 relative mt-8">
               {(() => {
                 const seenTitles = new Set<string>();
                 return activeSections.map((section, secIdx) => {
@@ -2359,9 +2415,8 @@ export function EnglishSplitViewDemo() {
                 else if (sType.includes('spag')) topicLabel = 'SPaG';
                 
                 const isComprehensionSection = topicLabel === 'Comprehension';
-                const typeNoun = isComprehensionSection ? 'Passage' : 'Questions';
-                const displayTitle = isComprehensionSection ? section.leftTitle : `${topicLabel} ${typeNoun}`;
-                const cleanDisplayTitle = isComprehensionSection ? `${topicLabel} ${typeNoun} - ${displayTitle}` : displayTitle;
+                // Left pane shows the story/source title only — question-type titles live on the right
+                const cleanDisplayTitle = section.leftTitle || `${topicLabel} source`;
 
                 const PAYWALL_THRESHOLD = 3;
                 let lastAllowedEvidenceIndex = -1;
@@ -2445,14 +2500,14 @@ export function EnglishSplitViewDemo() {
                             )}
                             <div 
                               className={cn(
-                                "transition-all duration-300 ease-out p-2 sm:p-4 -mx-2 sm:-mx-4 rounded-2xl relative border-l-[4px] whitespace-pre-wrap",
+                                "english-passage-block transition-colors duration-300 ease-out p-2 sm:p-4 -mx-2 sm:-mx-4 rounded-2xl relative border-l-[4px] whitespace-pre-wrap break-words",
                                 isPoetry 
-                                  ? "italic pl-8 sm:pl-12 !leading-relaxed text-foreground/80 font-serif border-amber-500/20" 
-                                  : "border-transparent opacity-85 group-hover:opacity-100 hover:bg-black/5 dark:hover:bg-white/5",
+                                  ? "italic pl-8 sm:pl-12 text-foreground font-serif border-amber-500/20" 
+                                  : "border-transparent hover:bg-black/5 dark:hover:bg-white/5",
                                 showScaffold 
-                                  ? "bg-amber-50/90 dark:bg-amber-500/10 border-amber-500 shadow-md ring-1 ring-amber-500/30 text-foreground z-10 scale-[1.01] opacity-100" 
+                                  ? "bg-amber-50/90 dark:bg-amber-500/10 border-amber-500 shadow-md ring-1 ring-amber-500/30 text-foreground z-10" 
                                   : "",
-                                isPaywalledBlock && "blur-[4px] opacity-30 select-none pointer-events-none scale-[0.98]"
+                                isPaywalledBlock && "blur-[4px] opacity-40 select-none pointer-events-none"
                               )}
                             >
                               {showScaffold && (
@@ -2559,7 +2614,14 @@ export function EnglishSplitViewDemo() {
                   {isLiveMock ? liveMockHeaderTitle : examMode === 'mock' ? 'Mock Exam' : (activeSections.length > 1 ? 'MIXED TOPIC DRILLS' : `${practiceFocus.toUpperCase()} DRILLS`)}
                 </h1>
                 <p className="text-[11px] sm:text-sm text-muted-foreground">
-                  {isLiveMock ? 'This one-off live mock uses the scheduled paper only and is separate from regular mocks. Your attempt is saved for cohort analytics when you finish or when time runs out.' : examMode === 'mock' ? 'You have configured a custom Mock Exam mixing multiple passages.' : 'Answer the questions based on the source texts strictly.'}
+                  {isLiveMock
+                    ? 'This one-off live mock uses the scheduled paper only and is separate from regular mocks. Your attempt is saved for cohort analytics when you finish or when time runs out.'
+                    : examMode === 'mock'
+                      ? 'You have configured a custom Mock Exam mixing multiple passages.'
+                      : practiceInstructionsForFocus(
+                          practiceFocus,
+                          activeSections[0]?.desc,
+                        )}
                 </p>
               </div>
             </div>
@@ -2665,9 +2727,9 @@ export function EnglishSplitViewDemo() {
                               className={cn(
                                 "p-2.5 sm:p-4 rounded-xl sm:rounded-2xl border transition-all duration-150 ease-out cursor-default scroll-m-12 sm:scroll-m-24 relative snap-start",
                                 isSelected 
-                                  ? (examMode === 'mock' ? "border-amber-500/30 dark:border-amber-500/40 bg-card shadow-lg ring-1 ring-amber-500/10 scale-[1.01]" : "border-amber-500/50 bg-card shadow-xl ring-4 ring-amber-500/10 scale-[1.01]")
-                                  : "border-border/60 dark:border-amber-500/20 bg-card/40 hover:bg-card/80 hover:border-amber-500/30 opacity-60 hover:opacity-100",
-                                isPaywalledQuestion && "blur-[2px] opacity-40 select-none pointer-events-none scale-[0.98]"
+                                  ? (examMode === 'mock' ? "border-amber-500/30 dark:border-amber-500/40 bg-card shadow-lg ring-1 ring-amber-500/10" : "border-amber-500/50 bg-card shadow-xl ring-4 ring-amber-500/10")
+                                  : "border-border/60 dark:border-amber-500/20 bg-card hover:bg-card hover:border-amber-500/40",
+                                isPaywalledQuestion && "blur-[2px] opacity-50 select-none pointer-events-none"
                               )}
                             >
                             {examMode === 'mock' && (
@@ -2736,11 +2798,11 @@ export function EnglishSplitViewDemo() {
                                           ? ((examMode === 'mock' && !isReviewMode) ? "bg-amber-500 text-white shadow-md shadow-amber-500/30" : (opt.correct ? "bg-emerald-500 text-white shadow-md shadow-emerald-500/20" : "bg-rose-500 text-white shadow-md shadow-rose-500/20"))
                                           : (isReviewMode && opt.correct
                                               ? "bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border-emerald-500/30"
-                                              : "bg-card border border-border/80 text-muted-foreground group-hover:text-foreground")
+                                              : "bg-muted border border-border text-foreground")
                                       )}>
                                         {opt.id}
                                       </span>
-                                      <span className="flex-1 text-[12px] sm:text-sm font-medium leading-tight sm:leading-normal">
+                                      <span className="flex-1 text-[13px] sm:text-sm font-medium leading-normal text-foreground">
                                         {opt.text}
                                       </span>
                                       {selected && examMode === 'mock' && <Check className="w-3.5 h-3.5 sm:w-5 sm:h-5 shrink-0 text-amber-500 font-bold" />}

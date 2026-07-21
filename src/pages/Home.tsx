@@ -337,7 +337,16 @@ export function Home() {
     const params = new URLSearchParams();
     const subject = currentSubject === 'english' ? 'english' : 'maths';
     if (confirmModalData.topic) {
-      const routed = routePracticeTopic(confirmModalData.topic, subject);
+      let topicForRoute = confirmModalData.topic;
+      // Section label "SPaG" → drill the weaker of Grammar vs Spelling
+      if (subject === 'english' && topicForRoute.trim().toLowerCase() === 'spag') {
+        const grammar = readinessTopics.find((t) => t.topic === 'Grammar');
+        const spelling = readinessTopics.find((t) => t.topic === 'Spelling');
+        const g = Number(grammar?.readiness ?? 0);
+        const s = Number(spelling?.readiness ?? 0);
+        topicForRoute = s <= g ? 'Spelling' : 'Grammar';
+      }
+      const routed = routePracticeTopic(topicForRoute, subject);
       params.set('topics', routed.topics);
       if (routed.subtopic) params.set('subtopic', routed.subtopic);
     }

@@ -413,6 +413,18 @@
   }
 }
 
+/* English split-view passage: lock readable line-height (iPad was collapsing serif lines). */
+.english-passage-text {
+  line-height: 1.75 !important;
+  letter-spacing: 0.01em;
+  color: hsl(var(--foreground) / 0.92);
+  -webkit-font-smoothing: antialiased;
+}
+.english-passage-text .english-passage-block {
+  line-height: 1.75 !important;
+  opacity: 1 !important;
+}
+
 /* Notes Interactive Diagram */
 .notes-interactive-diagram {
   @apply p-6 rounded-2xl border border-border/40 mb-6;
