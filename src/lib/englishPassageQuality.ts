@@ -195,6 +195,14 @@ export function validateEnglishPassageRow(row: EnglishPassageRow): EnglishPassag
       });
     }
 
+    const ids = options.map((o) => String(o?.id ?? '').trim().toUpperCase()).filter(Boolean);
+    if (ids.length !== new Set(ids).size) {
+      issues.push({
+        code: 'duplicate_option_ids',
+        message: `${qLabel}: duplicate option letters (e.g. two B's)`,
+      });
+    }
+
     const evidence = String(q?.evidenceLine ?? '').trim();
     if (evidence && blockIds.size > 0) {
       const evidenceKey = evidence.toLowerCase();
@@ -214,6 +222,37 @@ export function validateEnglishPassageRow(row: EnglishPassageRow): EnglishPassag
   });
 
   return issues;
+}
+
+/** Force unique A/B/C/D ids and one correct flag — bank rows often reuse "B" or skip letters. */
+export function normalizeQuestionOptions(
+  options: EnglishPassageOption[] | undefined | null,
+): EnglishPassageOption[] {
+  const list = (Array.isArray(options) ? options : [])
+    .filter((o) => String(o?.text ?? '').trim().length > 0)
+    .slice(0, 6);
+
+  const deduped: EnglishPassageOption[] = [];
+  const seenText = new Set<string>();
+  for (const o of list) {
+    const key = String(o.text ?? '')
+      .trim()
+      .toLowerCase();
+    if (seenText.has(key)) continue;
+    seenText.add(key);
+    deduped.push(o);
+  }
+
+  const correctIndexes = deduped
+    .map((o, i) => (o?.correct === true ? i : -1))
+    .filter((i) => i >= 0);
+  const keepCorrect = correctIndexes.length > 0 ? correctIndexes[0] : 0;
+
+  return deduped.map((o, i) => ({
+    id: String.fromCharCode(65 + i),
+    text: String(o.text ?? '').trim(),
+    correct: i === keepCorrect,
+  }));
 }
 
 /**

@@ -35,6 +35,7 @@ import { resolveUserTrack } from '@/lib/track';
 import {
   ensurePassageBlocks,
   normalizeClozeBlankText,
+  normalizeQuestionOptions,
   practiceInstructionsForFocus,
   spagDrillQualityScore,
   validateEnglishPassageRow,
@@ -823,6 +824,25 @@ export function EnglishSplitViewDemo() {
                questions: row.questions,
              });
 
+             const repairedQuestions = (Array.isArray(row.questions) ? row.questions : []).map((q: any) => {
+               const normalized = normalizeQuestionOptions(q?.options);
+               const options = normalized.map((opt) => {
+                 const raw = (Array.isArray(q?.options) ? q.options : []).find(
+                   (o: any) =>
+                     String(o?.text ?? '')
+                       .trim()
+                       .toLowerCase() === opt.text.toLowerCase(),
+                 );
+                 return {
+                   id: opt.id!,
+                   text: opt.text!,
+                   correct: Boolean(opt.correct),
+                   trap: raw?.trap ?? null,
+                 };
+               });
+               return { ...q, options };
+             });
+
              return {
                sectionId: row.sectionId,
                uniqueId: row.id,
@@ -840,7 +860,7 @@ export function EnglishSplitViewDemo() {
                tier: row.tier || 'Level Unknown',
                difficulty: row.difficulty,
                passageBlocks: repairedBlocks,
-               questions: row.questions || []
+               questions: repairedQuestions,
              };
            });
            setDbSections(mapped);
@@ -1136,14 +1156,40 @@ export function EnglishSplitViewDemo() {
 
   const sessionSeed = useMemo(() => Math.random(), []);
 
-  // 1. SIMPLIFIED SELECTION ENGINE
-  // --- STRIPPED & REBUILT SIMPLIFIED ROTATION ENGINE ---
-  const activeSections = useMemo(() => {
-    // Live mock papers are one-off authored tests. Do not pull rotating practice/mock content here.
-    if (isLiveMock) return liveMockSections;
+  // Stable topic key — NEVER put a fresh array in useMemo deps (that re-picked passages every render).
+  const selectedSectionKey = useMemo(
+    () => selectedSectionIds.slice().sort().join(','),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- intentionally keyed by joined string
+    [selectedSectionIds.join(',')],
+  );
+  const sessionResetKey = `${examMode}|${selectedSectionKey}|${diffParam || ''}|${searchParams.get('subtopic') || ''}|${searchParams.get('difficultyMin') || ''}|${searchParams.get('difficultyMax') || ''}`;
+
+  /** Locked once per practice/mock URL session so Q1 cannot reshuffle mid-answer (Dylan bug). */
+  const [lockedSections, setLockedSections] = useState<EnglishSection[] | null>(null);
+  const lockedForKeyRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    // New practice URL → unlock so we pick once for the new session.
+    if (lockedForKeyRef.current !== sessionResetKey) {
+      lockedForKeyRef.current = sessionResetKey;
+      setLockedSections(null);
+      setSelectedAnswers({});
+      setShowTrap(null);
+      setActiveQuestionId(null);
+    }
+  }, [sessionResetKey]);
+
+  // Pick EXACTLY once when DB is ready (or fallbacks if DB empty after load). Never re-pick while answering.
+  useEffect(() => {
+    if (isLiveMock) return;
+    if (isLoadingDb) return;
+    if (lockedSections) return;
 
     const all = dbSections.length > 0 ? dbSections : [...TEST_DATA, ...VOCAB_PRACTICE_SET];
-    if (all.length === 0) return [];
+    if (all.length === 0) {
+      setLockedSections([]);
+      return;
+    }
 
     let seen: string[] = [];
     try {
@@ -1152,54 +1198,44 @@ export function EnglishSplitViewDemo() {
       seen = [];
     }
 
-    // PARTITION: Sorted buckets for absolute clarity
     const compPool: EnglishSection[] = [];
     const spagPool: EnglishSection[] = [];
     const vocabPool: EnglishSection[] = [];
 
-    all.forEach(s => {
-      const id = (s.sectionId || "").toLowerCase();
-      const sub = (s.subEngine || "").toLowerCase();
-      const tit = (s.title || "").toLowerCase();
-      
-      if (id.includes('vocab') || sub.includes('vocab') || tit.includes('vocab')) {
-        vocabPool.push(s);
-      } else if (id.match(/spag|spell|punct|gramm/) || sub.match(/spell|punct|gramm/)) {
-        spagPool.push(s);
-      } else {
-        compPool.push(s);
-      }
+    all.forEach((s) => {
+      const id = (s.sectionId || '').toLowerCase();
+      const sub = (s.subEngine || '').toLowerCase();
+      const tit = (s.title || '').toLowerCase();
+      if (id.includes('vocab') || sub.includes('vocab') || tit.includes('vocab')) vocabPool.push(s);
+      else if (id.match(/spag|spell|punct|gramm/) || sub.match(/spell|punct|gramm/)) spagPool.push(s);
+      else compPool.push(s);
     });
 
-    const subtopicParam = (searchParams.get('subtopic') || "").toLowerCase();
+    const subtopicParam = (searchParams.get('subtopic') || '').toLowerCase();
     const selection: EnglishSection[] = [];
 
-    // Helper: Pick ONE fresh passage from any provided pool, strictly avoiding 'seen' list if possible.
-    // SPaG pools prefer slash-line / cloze drills over long prose so Train Weakness stays readable.
     const pickOne = (pool: EnglishSection[], preferSpagQuality = false) => {
       if (pool.length === 0) return null;
       const ranked = preferSpagQuality
         ? [...pool].sort((a, b) => spagDrillQualityScore(b) - spagDrillQualityScore(a))
         : pool;
-      const unseen = ranked.filter(p => !seen.includes(p.uniqueId));
+      const unseen = ranked.filter((p) => !seen.includes(p.uniqueId));
       const candidates = unseen.length > 0 ? unseen : ranked;
       if (preferSpagQuality) {
         const topScore = spagDrillQualityScore(candidates[0]);
-        const top = candidates.filter(c => spagDrillQualityScore(c) >= topScore - 1);
+        const top = candidates.filter((c) => spagDrillQualityScore(c) >= topScore - 1);
         return top[Math.floor(sessionSeed * 777) % top.length];
       }
       return candidates[Math.floor(sessionSeed * 777) % candidates.length];
     };
 
-    // PRACTICE: never mix families in one session (tablet dual-pane desync looked like overlapping junk).
-    // MOCK: may include one of each requested family.
     const practiceOnly =
       examMode === 'practice'
-        ? (selectedSectionIds.includes('spag')
-            ? (['spag'] as const)
-            : selectedSectionIds.includes('vocabulary')
-              ? (['vocabulary'] as const)
-              : (['comprehension'] as const))
+        ? selectedSectionIds.includes('spag')
+          ? (['spag'] as const)
+          : selectedSectionIds.includes('vocabulary')
+            ? (['vocabulary'] as const)
+            : (['comprehension'] as const)
         : null;
 
     const wantsComp = practiceOnly
@@ -1212,77 +1248,97 @@ export function EnglishSplitViewDemo() {
       ? practiceOnly[0] === 'vocabulary'
       : selectedSectionIds.includes('vocabulary');
 
-    // Slot 1: Comprehension (Exactly 1)
     if (wantsComp) {
       let pool = compPool;
-      const subFilter = subtopicParam.split(',').find(f => f.includes('comp|') || f.match(/fiction|poetry|non_fiction/));
+      const subFilter = subtopicParam.split(',').find((f) => f.includes('comp|') || f.match(/fiction|poetry|non_fiction/));
       if (subFilter) {
         const type = subFilter.split('|').pop() || subFilter;
-        const filtered = compPool.filter(c => (c.subEngine || "").toLowerCase().includes(type));
+        const filtered = compPool.filter((c) => (c.subEngine || '').toLowerCase().includes(type));
         if (filtered.length > 0) pool = filtered;
       }
       const passage = pickOne(pool);
-      if (passage) {
-        selection.push({ ...passage, questions: passage.questions.slice(0, 10) });
-      }
+      if (passage) selection.push({ ...passage, questions: passage.questions.slice(0, 10) });
     }
 
-    // Slot 2: SPaG (Exactly 1 per requested sub-topic in Mocks, or 1 total in Practice)
     if (wantsSpag) {
-      const activeSubKeys = subtopicParam.split(',').filter(k => k.match(/spell|punct|gramm/));
-      
+      const activeSubKeys = subtopicParam.split(',').filter((k) => k.match(/spell|punct|gramm/));
       if (examMode === 'mock' && activeSubKeys.length > 0) {
-        // MOCK MODE: Give one for EACH specifically checked subtopic to form a full technical paper
-        activeSubKeys.forEach(k => {
+        activeSubKeys.forEach((k) => {
           const type = k.split('|').pop() || k;
-          const subPool = spagPool.filter(s => (s.subEngine || "").toLowerCase().includes(type));
+          const subPool = spagPool.filter((s) => (s.subEngine || '').toLowerCase().includes(type));
           const p = pickOne(subPool.length ? subPool : spagPool, true);
           if (p) selection.push({ ...p, questions: p.questions.slice(0, 10) });
         });
       } else {
-        // PRACTICE MODE OR GENERAL SPAG: Pick exactly one overall SPaG passage
         let pool = spagPool;
         if (activeSubKeys.length > 0) {
-           const type = activeSubKeys[0].split('|').pop() || activeSubKeys[0];
-           const filtered = spagPool.filter(s => (s.subEngine || "").toLowerCase().includes(type));
-           if (filtered.length > 0) pool = filtered;
+          const type = activeSubKeys[0].split('|').pop() || activeSubKeys[0];
+          const filtered = spagPool.filter((s) => (s.subEngine || '').toLowerCase().includes(type));
+          if (filtered.length > 0) pool = filtered;
         }
         const choice = pickOne(pool, true);
         if (choice) selection.push({ ...choice, questions: choice.questions.slice(0, 10) });
       }
     }
 
-    // Slot 3: Vocabulary (Exactly 1)
     if (wantsVocab) {
       const passage = pickOne(vocabPool);
-      if (passage) {
-        selection.push({ ...passage, questions: passage.questions.slice(0, 10) });
-      }
+      if (passage) selection.push({ ...passage, questions: passage.questions.slice(0, 10) });
     }
 
-    // Safety fallback — stay inside the requested family (never drop SPaG into a comprehension passage)
     if (selection.length === 0) {
-      const fallbackPool = wantsSpag && !wantsComp
-        ? spagPool
-        : wantsVocab && !wantsComp && !wantsSpag
-          ? vocabPool
-          : wantsComp && !wantsSpag
-            ? compPool
-            : all;
+      const fallbackPool =
+        wantsSpag && !wantsComp
+          ? spagPool
+          : wantsVocab && !wantsComp && !wantsSpag
+            ? vocabPool
+            : wantsComp && !wantsSpag
+              ? compPool
+              : all;
       const pick = pickOne(fallbackPool, wantsSpag);
       if (pick) selection.push({ ...pick, questions: pick.questions.slice(0, 10) });
     }
 
-    // Force alphabetical evidence sorting
-    return selection.map(sec => ({
+    const finalized = selection.map((sec) => ({
       ...sec,
-      questions: [...(sec.questions || [])].sort((a, b) => {
-        const aNum = parseInt(a.evidenceLine?.match(/\d+/)?.[0] || '0', 10);
-        const bNum = parseInt(b.evidenceLine?.match(/\d+/)?.[0] || '0', 10);
-        return aNum - bNum;
-      })
+      questions: [...(sec.questions || [])]
+        .map((q) => ({
+          ...q,
+          options: normalizeQuestionOptions(q.options).map((opt) => {
+            const raw = (q.options || []).find(
+              (o) =>
+                String(o?.text ?? '')
+                  .trim()
+                  .toLowerCase() === String(opt.text ?? '').toLowerCase(),
+            );
+            return {
+              id: String(opt.id),
+              text: String(opt.text),
+              correct: Boolean(opt.correct),
+              trap: raw?.trap ?? null,
+            };
+          }),
+        }))
+        .sort((a, b) => {
+          const aNum = parseInt(a.evidenceLine?.match(/\d+/)?.[0] || '0', 10);
+          const bNum = parseInt(b.evidenceLine?.match(/\d+/)?.[0] || '0', 10);
+          return aNum - bNum;
+        }),
     }));
-  }, [dbSections, selectedSectionIds, searchParams, sessionSeed, isLiveMock, liveMockSections, examMode]);
+
+    setLockedSections(finalized);
+  }, [
+    isLiveMock,
+    isLoadingDb,
+    lockedSections,
+    dbSections,
+    examMode,
+    sessionSeed,
+    selectedSectionIds,
+    searchParams,
+  ]);
+
+  const activeSections = isLiveMock ? liveMockSections : lockedSections || [];
 
   // Sync focus header with active content automatically for accurate UI titles
   useEffect(() => {
@@ -1297,23 +1353,21 @@ export function EnglishSplitViewDemo() {
     }
   }, [activeSections]);
 
-  // Securely update the historic ledger of what texts have been seen
+  // Mark passages seen only when the student finishes — never mid-session (that re-picked Q1).
   useEffect(() => {
-    if (activeSections.length > 0) {
-      try {
-        let seen = JSON.parse(localStorage.getItem('seen_english_passages') || '[]');
-        const newIds = activeSections.map(s => s.uniqueId);
-        seen = [...new Set([...seen, ...newIds])];
-        
-        // If they have naturally exhausted almost the entire bank, reset the loop back to zero (minus current load)
-        if (dbSections.length > 10 && seen.length >= dbSections.length - 2) {
-            seen = newIds; 
-        }
-        
-        localStorage.setItem('seen_english_passages', JSON.stringify(seen));
-      } catch(e) { /* intentionally left empty */ }
+    if (!isFinished || isLiveMock || activeSections.length === 0) return;
+    try {
+      let seen = JSON.parse(localStorage.getItem('seen_english_passages') || '[]');
+      const newIds = activeSections.map((s) => s.uniqueId);
+      seen = [...new Set([...seen, ...newIds])];
+      if (dbSections.length > 10 && seen.length >= dbSections.length - 2) {
+        seen = newIds;
+      }
+      localStorage.setItem('seen_english_passages', JSON.stringify(seen));
+    } catch {
+      /* ignore */
     }
-  }, [activeSections, dbSections.length]);
+  }, [isFinished, isLiveMock, activeSections, dbSections.length]);
 
   /** URL `duration` overrides DB paper length for live mock only (defaults to published paper minutes, e.g. 50). */
   const liveMockEffectiveDurationMinutes = useMemo(() => {
@@ -2390,6 +2444,16 @@ export function EnglishSplitViewDemo() {
             </div>
           )}
         </div>
+      </div>
+    );
+  }
+
+  // Never show fallback bank while DB is loading — that swapped Q1 mid-session (Dylan).
+  if (!isLiveMock && (isLoadingDb || lockedSections === null)) {
+    return (
+      <div className="flex min-h-[calc(100vh-80px)] flex-col items-center justify-center gap-3 bg-background p-6">
+        <Loader2 className="h-8 w-8 animate-spin text-amber-500" />
+        <p className="text-sm font-medium text-muted-foreground">Loading practice session…</p>
       </div>
     );
   }

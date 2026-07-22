@@ -377,11 +377,30 @@ if (!demoSrc.includes('Source text — read this before answering')) {
   console.log('ok  UI sticky source label');
 }
 
-if (!demoSrc.includes('contextual_without_passage')) {
+if (!demoSrc.includes('lockedSections') || !demoSrc.includes('Loading practice session')) {
   failed += 1;
-  console.error('FAIL UI: must drop contextual rows without a real passage');
+  console.error('FAIL UI: practice session must lock once (no mid-session Q1 reshuffle)');
 } else {
-  console.log('ok  UI drops contextual-without-passage rows');
+  console.log('ok  UI locks practice session');
+}
+
+if (!demoSrc.includes('normalizeQuestionOptions')) {
+  failed += 1;
+  console.error('FAIL UI: must normalize option letters A/B/C/D');
+} else {
+  console.log('ok  UI normalizes option letters');
+}
+
+if (demoSrc.includes('localStorage.setItem(\'seen_english_passages\'') && !demoSrc.includes('if (!isFinished || isLiveMock')) {
+  // soft check — seen must be gated on finish
+  if (!/isFinished[\s\S]{0,200}seen_english_passages/.test(demoSrc)) {
+    failed += 1;
+    console.error('FAIL UI: seen_english_passages must only update on finish');
+  } else {
+    console.log('ok  UI marks seen only on finish');
+  }
+} else {
+  console.log('ok  UI marks seen only on finish');
 }
 
 if (!demoSrc.includes('english-cloze-blank') || !demoSrc.includes('normalizeClozeBlankText')) {

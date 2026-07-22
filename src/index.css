@@ -453,6 +453,22 @@
   background-color: hsl(var(--card)) !important;
   isolation: isolate;
   contain: layout paint;
+  /* iPad Safari was ghosting serif lines inside sticky source */
+  -webkit-font-smoothing: antialiased;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+.english-session-source .english-passage-block,
+.english-practice-source .english-passage-block {
+  position: relative;
+  z-index: 1;
+  background: transparent;
+  text-shadow: none !important;
+  -webkit-text-stroke: 0 !important;
+  filter: none !important;
+  mix-blend-mode: normal !important;
+  opacity: 1 !important;
+  line-height: 1.85 !important;
 }
 .english-session-section .english-q-card,
 .english-practice-section .english-q-card {
