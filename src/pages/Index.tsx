@@ -443,6 +443,10 @@ const Index = () => {
             <Route path="/auth" element={<Auth />} />
             <Route path="/mocks" element={<MockExams />} />
             <Route path="/mock-exam" element={<MockExamPage />} />
+            {/* Localhost-only: E2E Dylan vocab/session tests without OAuth */}
+            {import.meta.env.DEV ? (
+              <Route path="/english-demo" element={<EnglishSplitViewDemo />} />
+            ) : null}
             <Route path="*" element={<Navigate to="/11-plus" replace />} />
           </>
         )}

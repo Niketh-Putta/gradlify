@@ -20,7 +20,9 @@
     "verify:11plus": "node scripts/verify-11plus.mjs",
     "verify:mock-session": "node scripts/verify_mock_session_stability.mjs",
     "verify:topic-aliases": "node scripts/verify_topic_aliases.mjs",
-    "verify:english-bank": "node scripts/verify_english_practice_bank.mjs"
+    "verify:english-bank": "node scripts/verify_english_practice_bank.mjs",
+    "verify:english-session": "node scripts/verify_english_session_lock.mjs",
+    "e2e:english-vocab": "node scripts/e2e_english_vocab_session.mjs"
   },
   "reactSnap": {
     "source": "dist",

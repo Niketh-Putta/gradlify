@@ -665,7 +665,12 @@ const VOCAB_PRACTICE_SET: EnglishSection[] = [
 export function EnglishSplitViewDemo() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { user, profile } = useAppContext();
+  const appContext = useAppContext() as
+    | { user?: import('@supabase/supabase-js').User | null; profile?: Record<string, unknown> | null }
+    | null
+    | undefined;
+  const user = appContext?.user ?? null;
+  const profile = appContext?.profile ?? null;
   const { isPremium, incrementMockUsage, refreshUsage, canStartMockExam } = usePremium('11plus');
   const mockConsumedRef = useRef(false);
   

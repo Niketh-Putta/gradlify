@@ -248,11 +248,18 @@ export function normalizeQuestionOptions(
     .filter((i) => i >= 0);
   const keepCorrect = correctIndexes.length > 0 ? correctIndexes[0] : 0;
 
-  return deduped.map((o, i) => ({
-    id: String.fromCharCode(65 + i),
-    text: String(o.text ?? '').trim(),
-    correct: i === keepCorrect,
-  }));
+  // Keep SPaG "N" (No Mistake). Everything else gets unique A/B/C/D… in order.
+  let letterIdx = 0;
+  return deduped.map((o, i) => {
+    const rawId = String(o?.id ?? '').trim().toUpperCase();
+    const id =
+      rawId === 'N' ? 'N' : String.fromCharCode(65 + letterIdx++);
+    return {
+      id,
+      text: String(o.text ?? '').trim(),
+      correct: i === keepCorrect,
+    };
+  });
 }
 
 /**
