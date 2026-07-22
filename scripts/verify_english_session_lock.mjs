@@ -197,6 +197,9 @@ else ok('bank has no raw duplicate option letters (normalize still hardens)');
   const quality = fs.readFileSync(path.join(root, 'src/lib/englishPassageQuality.ts'), 'utf8');
   assert.ok(demo.includes('lockedSections'));
   assert.ok(demo.includes('Loading practice session'));
+  assert.ok(demo.includes('ENGLISH_SESSION_LOCK_V1'));
+  assert.ok(demo.includes('sessionContentFingerprint'));
+  assert.ok(demo.includes('Passage/Q1 changed mid-answer'));
   assert.ok(quality.includes("rawId === 'N'"));
   const pickStart = demo.indexOf('Pick EXACTLY once');
   const pickEnd = demo.indexOf('const activeSections');
@@ -211,10 +214,19 @@ else ok('bank has no raw duplicate option letters (normalize still hardens)');
   } else {
     ok('seen gated on isFinished');
   }
+  // Unstable deps that used to re-pick every render must stay out of the lock effect.
+  if (/selectedSectionIds,\s*\n\s*searchParams,/.test(pickEffect)) {
+    fail('pick effect still depends on unstable selectedSectionIds/searchParams');
+  } else {
+    ok('pick effect uses stable session keys only');
+  }
+  ok('ENGLISH_SESSION_LOCK_V1 tripwire present');
 }
 
-// --- Live production chunk ---
-{
+// --- Live production chunk (skip in CI with SKIP_PROD_CHECK=1) ---
+if (process.env.SKIP_PROD_CHECK === '1') {
+  ok('skipped live prod check (SKIP_PROD_CHECK=1)');
+} else {
   const html = await fetch('https://gradlify.com/').then((r) => r.text());
   const mainMatch = html.match(/\/assets\/main-[^"]+\.js/);
   assert.ok(mainMatch);
@@ -224,8 +236,6 @@ else ok('bank has no raw duplicate option letters (normalize still hardens)');
   const eng = await fetch(`https://gradlify.com/assets/${engMatch[0]}`).then((r) => r.text());
   if (!eng.includes('Loading practice session')) fail('prod missing loading gate');
   else ok(`prod ${engMatch[0]} has loading gate`);
-  // N preserve may not be live until redeploy — warn if missing marker string
-  // (minified may drop rawId === 'N' text differently)
 }
 
 if (failed) {

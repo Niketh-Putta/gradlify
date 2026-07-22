@@ -384,6 +384,13 @@ if (!demoSrc.includes('lockedSections') || !demoSrc.includes('Loading practice s
   console.log('ok  UI locks practice session');
 }
 
+if (!demoSrc.includes('ENGLISH_SESSION_LOCK_V1') || !demoSrc.includes('sessionContentFingerprint')) {
+  failed += 1;
+  console.error('FAIL UI: must keep ENGLISH_SESSION_LOCK_V1 tripwire (Dylan Q1 reshuffle)');
+} else {
+  console.log('ok  UI has session-lock tripwire marker');
+}
+
 if (!demoSrc.includes('normalizeQuestionOptions')) {
   failed += 1;
   console.error('FAIL UI: must normalize option letters A/B/C/D');

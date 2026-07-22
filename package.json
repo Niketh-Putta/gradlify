@@ -22,7 +22,9 @@
     "verify:topic-aliases": "node scripts/verify_topic_aliases.mjs",
     "verify:english-bank": "node scripts/verify_english_practice_bank.mjs",
     "verify:english-session": "node scripts/verify_english_session_lock.mjs",
-    "e2e:english-vocab": "node scripts/e2e_english_vocab_session.mjs"
+    "verify:english": "npm run verify:english-bank && npm run verify:english-session",
+    "e2e:english-vocab": "node scripts/e2e_english_vocab_session.mjs",
+    "verify:english:all": "npm run verify:english && npm run e2e:english-vocab"
   },
   "reactSnap": {
     "source": "dist",

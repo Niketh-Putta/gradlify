@@ -1,0 +1,60 @@
+name: English practice guards
+
+# Blocks regressions of Dylan's recurring English bugs:
+# - Q1/passage reshuffle mid-session
+# - bad option letters / wrong correct marking
+# - tablet dual-pane ghosting markers removed from source
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/pages/EnglishSplitViewDemo.tsx'
+      - 'src/lib/englishPassageQuality.ts'
+      - 'src/index.css'
+      - 'scripts/verify_english_*.mjs'
+      - 'scripts/e2e_english_vocab_session.mjs'
+      - 'package.json'
+      - '.github/workflows/english-practice-guards.yml'
+  pull_request:
+    paths:
+      - 'src/pages/EnglishSplitViewDemo.tsx'
+      - 'src/lib/englishPassageQuality.ts'
+      - 'src/index.css'
+      - 'scripts/verify_english_*.mjs'
+      - 'scripts/e2e_english_vocab_session.mjs'
+      - 'package.json'
+      - '.github/workflows/english-practice-guards.yml'
+
+jobs:
+  verify-english:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: English bank + UI source guards
+        run: npm run verify:english-bank
+
+      - name: English session-lock + live vocab bank
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+          SKIP_PROD_CHECK: '1'
+        run: |
+          if [ -z "$VITE_SUPABASE_URL" ] || [ -z "$VITE_SUPABASE_PUBLISHABLE_KEY" ]; then
+            echo "Supabase secrets missing — writing empty .env and running source-only path will fail fetch."
+            echo "Add VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY repo secrets."
+            # Still run: script loads .env if present; without secrets, fail loudly.
+          fi
+          printf 'VITE_SUPABASE_URL=%s\nVITE_SUPABASE_PUBLISHABLE_KEY=%s\n' \
+            "$VITE_SUPABASE_URL" "$VITE_SUPABASE_PUBLISHABLE_KEY" > .env
+          npm run verify:english-session

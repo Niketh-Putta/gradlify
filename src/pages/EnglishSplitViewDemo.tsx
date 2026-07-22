@@ -1172,11 +1172,13 @@ export function EnglishSplitViewDemo() {
   /** Locked once per practice/mock URL session so Q1 cannot reshuffle mid-answer (Dylan bug). */
   const [lockedSections, setLockedSections] = useState<EnglishSection[] | null>(null);
   const lockedForKeyRef = useRef<string | null>(null);
+  const sessionFingerprintRef = useRef<string | null>(null);
 
   useEffect(() => {
     // New practice URL → unlock so we pick once for the new session.
     if (lockedForKeyRef.current !== sessionResetKey) {
       lockedForKeyRef.current = sessionResetKey;
+      sessionFingerprintRef.current = null;
       setLockedSections(null);
       setSelectedAnswers({});
       setShowTrap(null);
@@ -1339,11 +1341,40 @@ export function EnglishSplitViewDemo() {
     dbSections,
     examMode,
     sessionSeed,
-    selectedSectionIds,
-    searchParams,
+    selectedSectionKey,
+    sessionResetKey,
   ]);
 
   const activeSections = isLiveMock ? liveMockSections : lockedSections || [];
+
+  // Tripwire: if passage/Q1 identity changes while the student already answered, scream in DEV.
+  // This is how Dylan's "keeps changing Q1" bug used to slip through unnoticed.
+  const sessionContentFingerprint = useMemo(() => {
+    if (isLiveMock || !lockedSections?.length) return null;
+    return lockedSections
+      .map((s) => `${s.uniqueId}:${(s.questions || []).map((q) => q.id).join(',')}`)
+      .join('|');
+  }, [isLiveMock, lockedSections]);
+  useEffect(() => {
+    if (!sessionContentFingerprint) {
+      sessionFingerprintRef.current = null;
+      return;
+    }
+    const prev = sessionFingerprintRef.current;
+    const answered = Object.keys(selectedAnswers).length > 0;
+    if (prev && prev !== sessionContentFingerprint && answered) {
+      const msg =
+        '[english-session] Passage/Q1 changed mid-answer — session lock broken (Dylan bug regression)';
+      console.error(msg, { prev, next: sessionContentFingerprint });
+      if (import.meta.env.DEV) {
+        throw new Error(msg);
+      }
+    }
+    if (!prev) sessionFingerprintRef.current = sessionContentFingerprint;
+  }, [sessionContentFingerprint, selectedAnswers]);
+
+  // ENGLISH_SESSION_LOCK_V1 — regression marker for verify scripts (do not remove)
+  void 'ENGLISH_SESSION_LOCK_V1';
 
   // Sync focus header with active content automatically for accurate UI titles
   useEffect(() => {
