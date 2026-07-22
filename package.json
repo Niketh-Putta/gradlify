@@ -24,7 +24,8 @@
     "verify:english-session": "node scripts/verify_english_session_lock.mjs",
     "verify:english": "npm run verify:english-bank && npm run verify:english-session",
     "e2e:english-vocab": "node scripts/e2e_english_vocab_session.mjs",
-    "verify:english:all": "npm run verify:english && npm run e2e:english-vocab"
+    "e2e:english-never-again": "node scripts/e2e_english_never_again.mjs",
+    "verify:english:all": "npm run verify:english && npm run e2e:english-never-again"
   },
   "reactSnap": {
     "source": "dist",
