@@ -327,6 +327,7 @@ export async function enrichLiveMockAnswerDetails(
     question_number: number | null;
     question_type: string | null;
     section_id: string;
+    stem: string | null;
     explanation: string | null;
     correct_answer: string | null;
     options: unknown;
@@ -335,7 +336,7 @@ export async function enrichLiveMockAnswerDetails(
   if (ids.length > 0) {
     const { data, error } = await supabase
       .from("live_mock_questions" as never)
-      .select("id, question_number, question_type, section_id, explanation, correct_answer, options")
+      .select("id, question_number, question_type, section_id, stem, explanation, correct_answer, options")
       .in("id", ids);
     if (error) console.error("enrichLiveMockAnswerDetails questions", error);
     else qMeta = (data as QRow[]) ?? [];
@@ -369,6 +370,10 @@ export async function enrichLiveMockAnswerDetails(
       if (!(next.section_key || "").trim() && q.section_id) {
         const sk = secMap.get(q.section_id);
         if (sk) next = { ...next, section_key: sk };
+      }
+      const stem = q.stem?.trim();
+      if (stem && !(next.stem_snapshot || "").trim()) {
+        next = { ...next, stem_snapshot: stem };
       }
       const exp = q.explanation?.trim();
       if (exp && !(next.explanation || "").trim()) {

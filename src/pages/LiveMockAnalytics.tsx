@@ -391,11 +391,17 @@ export default function LiveMockAnalytics() {
     const qid = reviewDetail.question_id;
     const snapOpts = parseLiveMockOptionsSnapshot(reviewDetail.options_snapshot);
     const wantsPassage = /comprehension/i.test(reviewDetail.section_key || "");
+    // Older rows often have options/labels but empty stem_snapshot — still fetch bank stem
+    // so review shows the question (Dylan parent feedback: only saw correct answer).
+    const needStemFallback = !reviewDetail.stem_snapshot?.trim();
+    const needOptsFallback = snapOpts.length === 0;
 
     void (async () => {
       const [passage, fb] = await Promise.all([
         wantsPassage ? getLiveMockPassageContextForQuestion(qid) : Promise.resolve(null),
-        snapOpts.length === 0 ? getLiveMockQuestionStemOptionsFallback(qid) : Promise.resolve(null),
+        needStemFallback || needOptsFallback
+          ? getLiveMockQuestionStemOptionsFallback(qid)
+          : Promise.resolve(null),
       ]);
       if (cancelled) return;
       setPassageCtx(passage);
@@ -858,6 +864,10 @@ export default function LiveMockAnalytics() {
                             <ChevronRight className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" aria-hidden />
                           </div>
                           <div className="mt-2 space-y-1.5 break-words text-[13px] leading-snug">
+                            <p className="text-slate-900">
+                              <span className="font-semibold text-slate-500">Question:</span>{" "}
+                              {row.stem_snapshot?.trim() || "Tap for full question"}
+                            </p>
                             <p className="text-slate-600">
                               <span className="font-semibold text-slate-500">Section:</span>{" "}
                               {(row.section_key || "-").replace(/_/g, " ")}
@@ -884,6 +894,7 @@ export default function LiveMockAnalytics() {
                       <thead className="sticky top-0 z-[1] bg-slate-50 text-[10px] font-black uppercase tracking-wide text-slate-500 shadow-[0_1px_0_rgba(226,232,240,0.9)]">
                         <tr>
                           <th className="whitespace-nowrap px-2 py-2">Q</th>
+                          <th className="min-w-[200px] px-2 py-2">Question</th>
                           <th className="px-2 py-2">Section</th>
                           <th className="px-2 py-2">Type</th>
                           <th className="min-w-[120px] px-2 py-2">Your answer</th>
@@ -928,6 +939,13 @@ export default function LiveMockAnalytics() {
                             >
                               <td className="whitespace-nowrap px-2 py-2 font-mono font-semibold text-slate-800">
                                 {row.question_number ?? "-"}
+                              </td>
+                              <td className="max-w-[280px] break-words px-2 py-2 text-slate-900">
+                                {row.stem_snapshot?.trim()
+                                  ? row.stem_snapshot.trim().length > 140
+                                    ? `${row.stem_snapshot.trim().slice(0, 140)}…`
+                                    : row.stem_snapshot.trim()
+                                  : "Open for full question"}
                               </td>
                               <td className="max-w-[140px] break-words px-2 py-2 text-slate-700">
                                 {(row.section_key || "-").replace(/_/g, " ")}

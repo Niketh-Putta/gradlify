@@ -3,7 +3,11 @@
  * Regression check for mid-maths lobby flicker (Q45+).
  * Simulates remount race: old persist-before-restore vs new hydrate guard.
  */
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 
+const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const STORAGE_KEY = "gradlify_local_combined_mock_both_subjects_live_mock_2_test-user";
 
 function applySavedMockState(saved, current) {
@@ -210,6 +214,19 @@ function main() {
   }
 
   console.log("\nAll local simulations passed.");
+
+  // Dylan parent: review must show question text, not only correct answer.
+  const analytics = readFileSync(join(ROOT, "src/pages/LiveMockAnalytics.tsx"), "utf8");
+  const lib = readFileSync(join(ROOT, "src/lib/liveMockAnalytics.ts"), "utf8");
+  if (!analytics.includes("needStemFallback") || !analytics.includes("Question:")) {
+    console.error("FAIL - LiveMockAnalytics must show question stem in review list/modal");
+    process.exit(1);
+  }
+  if (!lib.includes(", stem,") || !lib.includes("stem_snapshot")) {
+    console.error("FAIL - enrichLiveMockAnswerDetails must backfill stem_snapshot from bank");
+    process.exit(1);
+  }
+  console.log("PASS - live mock review shows question + answer (stem backfill)");
 }
 
 main();
