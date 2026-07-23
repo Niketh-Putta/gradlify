@@ -30,6 +30,12 @@ import {
 } from '@/lib/liveMockSessionGuard';
 import { assertLiveMockPaperScorable, normalizeLiveMockOptions } from '@/lib/liveMockScoringGuard';
 import { mapEnglishSectionIds } from '@/lib/practiceTopicRouting';
+import {
+  clearEnglishSessionLock,
+  hashSessionSeed,
+  readEnglishSessionLock,
+  writeEnglishSessionLock,
+} from '@/lib/englishSessionLock';
 import { toStoredReadinessTopic } from '@/lib/canonicalTopics';
 import { resolveUserTrack } from '@/lib/track';
 import {
@@ -723,6 +729,13 @@ export function EnglishSplitViewDemo() {
   const [liveMockPaperQuestionCount, setLiveMockPaperQuestionCount] = useState(70);
   const [isLoadingLiveMock, setIsLoadingLiveMock] = useState<boolean>(false);
   const [isSubmittingLiveMock, setIsSubmittingLiveMock] = useState<boolean>(false);
+  /** Once true, never flash the full-page DB loader again for this mount (stops mid-exam flicker). */
+  const hasLoadedDbOnceRef = useRef(false);
+  /** Live mock paper locked after first successful load — no clear/refetch thrash. */
+  const liveMockPaperLockedRef = useRef(false);
+
+  // Stable string — never depend on URLSearchParams object identity (refetch loops).
+  const searchKey = searchParams.toString();
 
   useEffect(() => {
     const fetchPassages = async () => {
@@ -733,7 +746,8 @@ export function EnglishSplitViewDemo() {
       }
 
       try {
-        setIsLoadingDb(true);
+        // Never flash the full-page loader mid-session once content has loaded (Dylan flicker).
+        if (!hasLoadedDbOnceRef.current) setIsLoadingDb(true);
         // 1. BROAD FETCH: Get all passages for all selected topics 
         // We filter subtopics LATER in memory, keeping the DB results inclusive.
         const topicsParam = searchParams.get('topics') || "";
@@ -869,6 +883,7 @@ export function EnglishSplitViewDemo() {
              };
            });
            setDbSections(mapped);
+           hasLoadedDbOnceRef.current = true;
         } else {
            // If DB is literally empty (shouldn't happen with 45 rows), use fallbacks
            setDbSections([]);
@@ -881,15 +896,22 @@ export function EnglishSplitViewDemo() {
       }
     };
     fetchPassages();
-  }, [diffParam, searchParams, isLiveMock]);
+  }, [diffParam, searchKey, isLiveMock]);
 
   useEffect(() => {
     const fetchLiveMockPaper = async () => {
       if (!isLiveMock || !liveMockSlug) {
+        liveMockPaperLockedRef.current = false;
         setLiveMockPaperId(null);
         setLiveMockSections([]);
         setLiveMockDurationMinutes(50);
         setLiveMockPaperQuestionCount(70);
+        setIsLoadingLiveMock(false);
+        return;
+      }
+
+      // Already locked this paper for this slug — do not clear/rebuild mid-exam.
+      if (liveMockPaperLockedRef.current) {
         setIsLoadingLiveMock(false);
         return;
       }
@@ -1069,15 +1091,18 @@ export function EnglishSplitViewDemo() {
 
         setLiveMockPaperId(paper.id);
         setLiveMockSections(mapped);
+        liveMockPaperLockedRef.current = true;
         setIsLoadingLiveMock(false);
         return;
       } catch (error) {
         if (attempt === maxAttempts) {
           console.error('Live mock fetch error (after retries):', error);
-          setLiveMockPaperId(null);
-          setLiveMockSections([]);
-          setLiveMockDurationMinutes(50);
-          setLiveMockPaperQuestionCount(70);
+          if (!liveMockPaperLockedRef.current) {
+            setLiveMockPaperId(null);
+            setLiveMockSections([]);
+            setLiveMockDurationMinutes(50);
+            setLiveMockPaperQuestionCount(70);
+          }
           setIsLoadingLiveMock(false);
           return;
         }
@@ -1159,8 +1184,6 @@ export function EnglishSplitViewDemo() {
   const rightPaneRef = useRef<HTMLDivElement>(null);
   const questionRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
-  const sessionSeed = useMemo(() => Math.random(), []);
-
   // Stable topic key — NEVER put a fresh array in useMemo deps (that re-picked passages every render).
   const selectedSectionKey = useMemo(
     () => selectedSectionIds.slice().sort().join(','),
@@ -1168,11 +1191,14 @@ export function EnglishSplitViewDemo() {
     [selectedSectionIds.join(',')],
   );
   const sessionResetKey = `${examMode}|${selectedSectionKey}|${diffParam || ''}|${searchParams.get('subtopic') || ''}|${searchParams.get('difficultyMin') || ''}|${searchParams.get('difficultyMax') || ''}`;
+  // Deterministic seed from URL key — Math.random() reshuffled Q1 on every remount/flicker.
+  const sessionSeed = useMemo(() => hashSessionSeed(sessionResetKey), [sessionResetKey]);
 
   /** Locked once per practice/mock URL session so Q1 cannot reshuffle mid-answer (Dylan bug). */
   const [lockedSections, setLockedSections] = useState<EnglishSection[] | null>(null);
   const lockedForKeyRef = useRef<string | null>(null);
   const sessionFingerprintRef = useRef<string | null>(null);
+  const activeQuestionIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     // New practice URL → unlock so we pick once for the new session.
@@ -1183,6 +1209,7 @@ export function EnglishSplitViewDemo() {
       setSelectedAnswers({});
       setShowTrap(null);
       setActiveQuestionId(null);
+      activeQuestionIdRef.current = null;
     }
   }, [sessionResetKey]);
 
@@ -1196,6 +1223,47 @@ export function EnglishSplitViewDemo() {
     if (all.length === 0) {
       setLockedSections([]);
       return;
+    }
+
+    const finalizeSection = (sec: EnglishSection): EnglishSection => ({
+      ...sec,
+      questions: [...(sec.questions || [])]
+        .map((q) => ({
+          ...q,
+          options: normalizeQuestionOptions(q.options).map((opt) => {
+            const raw = (q.options || []).find(
+              (o) =>
+                String(o?.text ?? '')
+                  .trim()
+                  .toLowerCase() === String(opt.text ?? '').toLowerCase(),
+            );
+            return {
+              id: String(opt.id),
+              text: String(opt.text),
+              correct: Boolean(opt.correct),
+              trap: raw?.trap ?? null,
+            };
+          }),
+        }))
+        .sort((a, b) => {
+          const aNum = parseInt(a.evidenceLine?.match(/\d+/)?.[0] || '0', 10);
+          const bNum = parseInt(b.evidenceLine?.match(/\d+/)?.[0] || '0', 10);
+          return aNum - bNum;
+        }),
+    });
+
+    // Survive remounts: restore exact passage IDs from sessionStorage for this URL key.
+    const stored = readEnglishSessionLock(sessionResetKey);
+    if (stored) {
+      const byId = new Map(all.map((s) => [s.uniqueId, s]));
+      const restored = stored.uniqueIds
+        .map((id) => byId.get(id))
+        .filter((s): s is EnglishSection => Boolean(s))
+        .map((s) => finalizeSection({ ...s, questions: s.questions.slice(0, 10) }));
+      if (restored.length === stored.uniqueIds.length) {
+        setLockedSections(restored);
+        return;
+      }
     }
 
     let seen: string[] = [];
@@ -1306,33 +1374,11 @@ export function EnglishSplitViewDemo() {
       if (pick) selection.push({ ...pick, questions: pick.questions.slice(0, 10) });
     }
 
-    const finalized = selection.map((sec) => ({
-      ...sec,
-      questions: [...(sec.questions || [])]
-        .map((q) => ({
-          ...q,
-          options: normalizeQuestionOptions(q.options).map((opt) => {
-            const raw = (q.options || []).find(
-              (o) =>
-                String(o?.text ?? '')
-                  .trim()
-                  .toLowerCase() === String(opt.text ?? '').toLowerCase(),
-            );
-            return {
-              id: String(opt.id),
-              text: String(opt.text),
-              correct: Boolean(opt.correct),
-              trap: raw?.trap ?? null,
-            };
-          }),
-        }))
-        .sort((a, b) => {
-          const aNum = parseInt(a.evidenceLine?.match(/\d+/)?.[0] || '0', 10);
-          const bNum = parseInt(b.evidenceLine?.match(/\d+/)?.[0] || '0', 10);
-          return aNum - bNum;
-        }),
-    }));
-
+    const finalized = selection.map(finalizeSection);
+    writeEnglishSessionLock(
+      sessionResetKey,
+      finalized.map((s) => s.uniqueId),
+    );
     setLockedSections(finalized);
   }, [
     isLiveMock,
@@ -1373,8 +1419,9 @@ export function EnglishSplitViewDemo() {
     if (!prev) sessionFingerprintRef.current = sessionContentFingerprint;
   }, [sessionContentFingerprint, selectedAnswers]);
 
-  // ENGLISH_SESSION_LOCK_V1 — regression marker for verify scripts (do not remove)
+  // ENGLISH_SESSION_LOCK_V1 + ENGLISH_SESSION_LOCK_V2 — regression markers (do not remove)
   void 'ENGLISH_SESSION_LOCK_V1';
+  void 'ENGLISH_SESSION_LOCK_V2';
 
   // Sync focus header with active content automatically for accurate UI titles
   useEffect(() => {
@@ -1400,10 +1447,11 @@ export function EnglishSplitViewDemo() {
         seen = newIds;
       }
       localStorage.setItem('seen_english_passages', JSON.stringify(seen));
+      clearEnglishSessionLock(sessionResetKey);
     } catch {
       /* ignore */
     }
-  }, [isFinished, isLiveMock, activeSections, dbSections.length]);
+  }, [isFinished, isLiveMock, activeSections, dbSections.length, sessionResetKey]);
 
   /** URL `duration` overrides DB paper length for live mock only (defaults to published paper minutes, e.g. 50). */
   const liveMockEffectiveDurationMinutes = useMemo(() => {
@@ -1525,13 +1573,13 @@ export function EnglishSplitViewDemo() {
     );
   }, [examMode, isFinished, isLiveMock, liveMockSlug, timeLeft, user?.id]);
 
-  // Timer logic for Mock Mode
+  // Timer logic for Mock Mode — timeLeft must NOT be a dep (recreated the interval every tick).
   useEffect(() => {
     if (examMode === 'mock' && !isFinished && !isReviewMode && timeLeft > 0) {
-      const timer = setInterval(() => setTimeLeft(prev => prev - 1), 1000);
+      const timer = setInterval(() => setTimeLeft((prev) => prev - 1), 1000);
       return () => clearInterval(timer);
     }
-  }, [examMode, isFinished, isReviewMode, timeLeft]);
+  }, [examMode, isFinished, isReviewMode, timeLeft > 0]);
 
   // Handle Highlighting
   const handleHighlight = () => {
@@ -1697,69 +1745,83 @@ export function EnglishSplitViewDemo() {
     setFlaggedQuestions(prev => ({ ...prev, [qId]: !prev[qId] }));
   };
 
-  // MACRO SCROLL INTELLIGENCE: 
-  // Track which question is dominant in the right pane
+  // MACRO SCROLL INTELLIGENCE:
+  // Track which question is dominant in the right pane.
+  // CRITICAL: do NOT put activeQuestionId in deps — that recreated the observer every
+  // change and fought left-pane auto-scroll (Dylan continuous flicker).
   useEffect(() => {
     if (isFinished) return;
+    const root = rightPaneRef.current;
+    if (!root) return;
+
+    let raf = 0;
     const observer = new IntersectionObserver((entries) => {
-      const visibleEntries = entries.filter(e => e.isIntersecting);
-      if (visibleEntries.length > 0) {
-        // Find the one whose intersection area is largest OR whose center is closest to viewport center
-        // But simply tightening the rootMargin to a "center line" is usually best
-        const sorted = visibleEntries.sort((a, b) => {
-          const aCenter = a.boundingClientRect.top + a.boundingClientRect.height / 2;
-          const bCenter = b.boundingClientRect.top + b.boundingClientRect.height / 2;
-          const viewportCenter = window.innerHeight / 2;
-          return Math.abs(aCenter - viewportCenter) - Math.abs(bCenter - viewportCenter);
-        });
-        
-        const centerQ = sorted[0].target.getAttribute('data-qid');
-        if (centerQ && centerQ !== activeQuestionId) {
-          setActiveQuestionId(centerQ);
-        }
-      }
+      const visibleEntries = entries.filter((e) => e.isIntersecting);
+      if (visibleEntries.length === 0) return;
+      const sorted = visibleEntries.sort((a, b) => {
+        const aCenter = a.boundingClientRect.top + a.boundingClientRect.height / 2;
+        const bCenter = b.boundingClientRect.top + b.boundingClientRect.height / 2;
+        const viewportCenter = window.innerHeight / 2;
+        return Math.abs(aCenter - viewportCenter) - Math.abs(bCenter - viewportCenter);
+      });
+      const centerQ = sorted[0]?.target.getAttribute('data-qid');
+      if (!centerQ || centerQ === activeQuestionIdRef.current) return;
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        if (centerQ === activeQuestionIdRef.current) return;
+        activeQuestionIdRef.current = centerQ;
+        setActiveQuestionId(centerQ);
+      });
     }, {
-      root: rightPaneRef.current,
-      rootMargin: "-50% 0px -50% 0px", // Exact center line intersection
-      threshold: [0, 0.5, 1.0]
+      root,
+      rootMargin: '-45% 0px -45% 0px',
+      threshold: [0, 0.25, 0.5, 1],
     });
 
-    Object.values(questionRefs.current).forEach(node => {
+    Object.values(questionRefs.current).forEach((node) => {
       if (node) observer.observe(node);
     });
 
-    return () => observer.disconnect();
-  }, [activeSections, isFinished, examMode, activeQuestionId]);
+    return () => {
+      cancelAnimationFrame(raf);
+      observer.disconnect();
+    };
+  }, [activeSections, isFinished, examMode]);
 
-  // LEFT-PANE AUTO-ALIGN: when the dominant question changes (via scroll or
-  // clicking a question), smoothly scroll the passage column so the matching
-  // passage/section is vertically centred in the reading pane.
+  // Active section for the single source pane (never stack all passages — that ghosted text).
+  const activePassageSection = useMemo(() => {
+    if (activeSections.length === 0) return null;
+    if (!activeQuestionId) return activeSections[0];
+    return (
+      activeSections.find((s) => activeQuestionId.startsWith(`${s.uniqueId}_`)) ||
+      activeSections[0]
+    );
+  }, [activeQuestionId, activeSections]);
+
+  // LEFT-PANE: only nudge evidence line into view — never smooth-scroll thrash.
   useEffect(() => {
-    if (isFinished || !activeQuestionId) return;
+    if (isFinished || !activeQuestionId || !activePassageSection) return;
     const container = passageContainerRef.current;
     if (!container) return;
 
-    let target: HTMLElement | null = null;
-    for (const section of activeSections) {
-      const q = (section.questions || []).find(
-        (qq) => `${section.uniqueId}_${qq.id}` === activeQuestionId
-      );
-      if (!q) continue;
-      const evidenceKey = `${section.uniqueId}_${q.evidenceLine}`;
-      target =
-        passageLineRefs.current[evidenceKey] ||
-        passageSectionRefs.current[section.uniqueId] ||
-        null;
-      break;
-    }
+    const q = (activePassageSection.questions || []).find(
+      (qq) => `${activePassageSection.uniqueId}_${qq.id}` === activeQuestionId,
+    );
+    if (!q) return;
+    const evidenceKey = `${activePassageSection.uniqueId}_${q.evidenceLine}`;
+    const target =
+      passageLineRefs.current[evidenceKey] ||
+      passageSectionRefs.current[activePassageSection.uniqueId] ||
+      null;
     if (!target) return;
 
     const containerRect = container.getBoundingClientRect();
     const targetRect = target.getBoundingClientRect();
     const delta =
       targetRect.top + targetRect.height / 2 - (containerRect.top + containerRect.height / 2);
-    container.scrollTo({ top: container.scrollTop + delta, behavior: "smooth" });
-  }, [activeQuestionId, activeSections, isFinished]);
+    if (Math.abs(delta) < 48) return;
+    container.scrollTo({ top: container.scrollTop + delta, behavior: 'auto' });
+  }, [activeQuestionId, activePassageSection, isFinished]);
 
   // First visit to session: ensure an in_progress attempt exists (never if already submitted).
   useEffect(() => {
@@ -2559,11 +2621,13 @@ export function EnglishSplitViewDemo() {
 
             <div className="space-y-10 relative mt-8">
               {(() => {
-                const seenTitles = new Set<string>();
-                return activeSections.map((section, secIdx) => {
-                  const isDuplicatePassage = seenTitles.has(section.leftTitle);
-                  seenTitles.add(section.leftTitle);
-                  if (isDuplicatePassage) return null;
+                // One active passage only — stacking every section caused ghosted/flickering text.
+                const section = activePassageSection;
+                if (!section) return null;
+                const secIdx = Math.max(
+                  0,
+                  activeSections.findIndex((s) => s.uniqueId === section.uniqueId),
+                );
 
                   const sType = (section.sectionId + " " + (section.subEngine || "")).toLowerCase();
                   const isPoetry = sType.includes('poetry') || sType.includes('poem');
@@ -2672,7 +2736,7 @@ export function EnglishSplitViewDemo() {
                             >
                               {showScaffold && (
                                 <div className="absolute -left-1.5 flex items-center justify-center h-full top-0">
-                                  <div className="h-2/3 w-[5px] bg-amber-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(245,158,11,0.5)]" />
+                                  <div className="h-2/3 w-[5px] bg-amber-500 rounded-full shadow-[0_0_8px_rgba(245,158,11,0.5)]" />
                                 </div>
                               )}
                               
@@ -2721,7 +2785,6 @@ export function EnglishSplitViewDemo() {
                   </div>
                 </div>
               );
-            });
           })()}
             </div>
             
@@ -2850,7 +2913,8 @@ export function EnglishSplitViewDemo() {
 
                 return (
                   <div key={section.uniqueId} className={cn("mb-6 sm:mb-10 english-session-section", secIndex === 0 ? "mt-2 sm:mt-4" : "")}>
-                    {/* Sticky source below xl (and always useful on tablet). Desktop xl+ uses left pane. */}
+                    {/* Sticky source only for the ACTIVE section — stacking every section ghosted text. */}
+                    {section.uniqueId === activePassageSection?.uniqueId ? (
                     <div className="xl:hidden sticky top-12 z-20 mb-5 rounded-2xl border border-border bg-card p-4 english-passage-text english-session-source shadow-md">
                       <div className="text-[10px] font-black tracking-[0.15em] uppercase text-muted-foreground mb-2">
                         Source text — read this before answering
@@ -2869,6 +2933,7 @@ export function EnglishSplitViewDemo() {
                         </div>
                       )}
                     </div>
+                    ) : null}
                     <div className={cn("relative flex flex-col md:flex-row justify-between items-start md:items-end gap-2 sm:gap-4 w-full border-b border-border/60 pb-2 sm:pb-3 mb-4 sm:mb-6 bg-background", secIndex === 0 ? "mt-2 sm:mt-4" : "mt-6 sm:mt-8")}>
                       <div className="flex flex-col gap-0.5 sm:gap-1 items-start">
                         <span className="px-1.5 py-0.5 rounded text-[8px] font-black tracking-[0.1em] uppercase bg-foreground/10 text-foreground/60">{badgeLabel}</span>
@@ -2915,6 +2980,7 @@ export function EnglishSplitViewDemo() {
                                 if (isPaywalledQuestion) {
                                   setShowPaywall(true);
                                 } else {
+                                  activeQuestionIdRef.current = qKey;
                                   setActiveQuestionId(qKey);
                                 }
                               }}

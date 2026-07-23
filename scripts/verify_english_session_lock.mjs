@@ -198,9 +198,23 @@ else ok('bank has no raw duplicate option letters (normalize still hardens)');
   assert.ok(demo.includes('lockedSections'));
   assert.ok(demo.includes('Loading practice session'));
   assert.ok(demo.includes('ENGLISH_SESSION_LOCK_V1'));
+  assert.ok(demo.includes('ENGLISH_SESSION_LOCK_V2'));
+  assert.ok(demo.includes('writeEnglishSessionLock'));
+  assert.ok(demo.includes('activePassageSection'));
+  assert.ok(demo.includes('hashSessionSeed'));
   assert.ok(demo.includes('sessionContentFingerprint'));
   assert.ok(demo.includes('Passage/Q1 changed mid-answer'));
   assert.ok(quality.includes("rawId === 'N'"));
+  if (/IntersectionObserver[\s\S]{0,1200}activeQuestionId\]/.test(demo)) {
+    fail('IntersectionObserver still depends on activeQuestionId (flicker loop)');
+  } else {
+    ok('IntersectionObserver deps exclude activeQuestionId');
+  }
+  if (demo.includes("behavior: \"smooth\"") && demo.includes('passageContainerRef')) {
+    fail('left-pane still uses smooth scroll (flicker thrash)');
+  } else {
+    ok('left-pane scroll is instant/thresholded');
+  }
   const pickStart = demo.indexOf('Pick EXACTLY once');
   const pickEnd = demo.indexOf('const activeSections');
   const pickEffect = demo.slice(pickStart, pickEnd);
@@ -220,7 +234,7 @@ else ok('bank has no raw duplicate option letters (normalize still hardens)');
   } else {
     ok('pick effect uses stable session keys only');
   }
-  ok('ENGLISH_SESSION_LOCK_V1 tripwire present');
+  ok('ENGLISH_SESSION_LOCK_V2 tripwire present');
 }
 
 // --- Live production chunk (skip in CI with SKIP_PROD_CHECK=1) ---
