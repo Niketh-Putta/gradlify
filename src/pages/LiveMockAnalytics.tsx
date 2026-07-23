@@ -6,11 +6,9 @@ import {
   CheckCircle2,
   ChevronRight,
   Clock3,
-  FileText,
   ListChecks,
   Loader2,
   Medal,
-  Timer,
   TrendingUp,
   Trophy,
   Users,
@@ -366,6 +364,19 @@ export default function LiveMockAnalytics() {
     return [...answers].sort((a, b) => (a.question_number ?? 0) - (b.question_number ?? 0));
   }, [answers]);
 
+  const [reviewFilter, setReviewFilter] = useState<"all" | "incorrect" | "correct">("all");
+  const filteredReviewQuestions = useMemo(() => {
+    if (reviewFilter === "incorrect") {
+      return reviewQuestions.filter(
+        (r) => r.is_correct === false || (!r.selected_option?.trim() && r.is_correct !== true),
+      );
+    }
+    if (reviewFilter === "correct") {
+      return reviewQuestions.filter((r) => r.is_correct === true);
+    }
+    return reviewQuestions;
+  }, [reviewFilter, reviewQuestions]);
+
   const [reviewDetail, setReviewDetail] = useState<LiveMockAnswerDetail | null>(null);
   const [passageCtx, setPassageCtx] = useState<LiveMockPassageContext | null>(null);
   const [fallbackEnrich, setFallbackEnrich] = useState<{
@@ -439,11 +450,27 @@ export default function LiveMockAnalytics() {
 
   const rankDisplay = useMemo(() => buildRankDisplay(scoreRank), [scoreRank]);
 
-  const qc = summary?.question_count ?? 0;
-  const correct = summary?.correct_count ?? 0;
-  const wrong = summary?.wrong_count ?? 0;
-  const blank = summary?.unanswered_count ?? 0;
-  const pct = summary?.score_percent;
+  // Prefer RPC rollup; fall back to counting answer rows so parents never see blank stats.
+  const answerRollup = useMemo(() => {
+    let correctN = 0;
+    let wrongN = 0;
+    let blankN = 0;
+    for (const row of answers) {
+      if (row.is_correct === true) correctN += 1;
+      else if (row.is_correct === false) wrongN += 1;
+      else if (!row.selected_option?.trim()) blankN += 1;
+      else wrongN += 1;
+    }
+    return { correctN, wrongN, blankN, totalN: answers.length };
+  }, [answers]);
+
+  const qc = summary?.question_count ?? answerRollup.totalN ?? 0;
+  const correct = summary?.correct_count ?? answerRollup.correctN;
+  const wrong = summary?.wrong_count ?? answerRollup.wrongN;
+  const blank = summary?.unanswered_count ?? answerRollup.blankN;
+  const pct =
+    summary?.score_percent ??
+    (qc > 0 ? Math.round((1000 * correct) / qc) / 10 : null);
 
   if (!isCombined) {
     return <Navigate to={defaultLiveMockAnalyticsPath()} replace />;
@@ -580,36 +607,65 @@ export default function LiveMockAnalytics() {
                 const stats = combinedBoth[subject];
                 const rank = buildRankDisplay(stats.scoreRank);
                 const active = combinedSubject === subject;
+                const s = stats.summary;
+                const sCorrect = s?.correct_count ?? null;
+                const sWrong = s?.wrong_count ?? null;
+                const sBlank = s?.unanswered_count ?? null;
+                const sQc = s?.question_count ?? null;
+                const sPct = s?.score_percent ?? null;
                 return (
-                  <div
+                  <button
                     key={subject}
+                    type="button"
+                    onClick={() => selectCombinedSubject(subject)}
                     className={[
-                      "min-w-0 rounded-xl border bg-[linear-gradient(135deg,#fbfdff_0%,#ffffff_62%,#f8fbff_100%)] p-3",
-                      active ? "border-blue-300 ring-1 ring-blue-200/80" : "border-slate-200",
+                      "min-w-0 rounded-xl border bg-[linear-gradient(135deg,#fbfdff_0%,#ffffff_62%,#f8fbff_100%)] p-3 text-left transition-colors",
+                      active ? "border-blue-300 ring-1 ring-blue-200/80" : "border-slate-200 hover:border-slate-300",
                     ].join(" ")}
                   >
                     <p className="text-[10px] font-black uppercase tracking-[0.14em] text-blue-700">
                       {COMBINED_SUBJECT_TITLES[subject]}
                     </p>
+                    <div className="mt-2 flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                      <span className="text-2xl font-black tracking-tight text-slate-950">
+                        {sCorrect != null && sQc != null ? `${sCorrect}/${sQc}` : "-"}
+                      </span>
+                      {sPct != null ? (
+                        <span className="text-lg font-bold text-blue-700">{sPct}%</span>
+                      ) : null}
+                    </div>
+                    <div className="mt-2 grid grid-cols-3 gap-1.5 text-center">
+                      <div className="rounded-lg border border-emerald-100 bg-emerald-50/80 px-1.5 py-1.5">
+                        <div className="text-[9px] font-bold uppercase tracking-wide text-emerald-800">Correct</div>
+                        <div className="text-base font-black text-emerald-900">{sCorrect ?? "-"}</div>
+                      </div>
+                      <div className="rounded-lg border border-rose-100 bg-rose-50/80 px-1.5 py-1.5">
+                        <div className="text-[9px] font-bold uppercase tracking-wide text-rose-800">Incorrect</div>
+                        <div className="text-base font-black text-rose-900">{sWrong ?? "-"}</div>
+                      </div>
+                      <div className="rounded-lg border border-slate-100 bg-slate-50 px-1.5 py-1.5">
+                        <div className="text-[9px] font-bold uppercase tracking-wide text-slate-500">Blank</div>
+                        <div className="text-base font-black text-slate-700">{sBlank ?? "-"}</div>
+                      </div>
+                    </div>
                     <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
-                      <div className="min-w-0 rounded-lg border border-amber-100 bg-gradient-to-br from-amber-50/90 to-white px-3 py-3 shadow-sm">
+                      <div className="min-w-0 rounded-lg border border-amber-100 bg-gradient-to-br from-amber-50/90 to-white px-3 py-2.5 shadow-sm">
                         <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wide text-amber-800/90">
                           <Trophy className="h-3.5 w-3.5 shrink-0" aria-hidden />
                           Your rank
                         </div>
-                        <div className="mt-1 font-mono text-2xl font-black tracking-tight text-slate-950">
+                        <div className="mt-0.5 font-mono text-xl font-black tracking-tight text-slate-950">
                           {rank.value}
                         </div>
-                        <p className="mt-1 text-[10px] leading-snug text-slate-500">{rank.hint}</p>
                       </div>
-                      <div className="min-w-0 rounded-lg border border-slate-100 bg-white px-3 py-3 shadow-sm">
+                      <div className="min-w-0 rounded-lg border border-slate-100 bg-white px-3 py-2.5 shadow-sm">
                         <div className="text-[10px] font-bold uppercase tracking-wide text-slate-400">Cohort mean</div>
-                        <div className="mt-1 text-2xl font-black text-slate-950">
+                        <div className="mt-0.5 text-xl font-black text-slate-950">
                           {stats.cohort?.mean_score_percent != null ? `${stats.cohort.mean_score_percent}%` : "-"}
                         </div>
                       </div>
                     </div>
-                  </div>
+                  </button>
                 );
               })}
             </div>
@@ -698,8 +754,26 @@ export default function LiveMockAnalytics() {
               </div>
             ) : null}
 
-            <div className="grid gap-3 pt-3 sm:grid-cols-2 lg:grid-cols-4">
-              <div className="min-w-0 rounded-xl border border-slate-200 bg-slate-50/70 p-3">
+            <div className="grid gap-3 pt-3 grid-cols-2 lg:grid-cols-3">
+              <div className="min-w-0 rounded-xl border border-emerald-200 bg-emerald-50/70 p-3">
+                <div className="flex items-center justify-between gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                </div>
+                <div className="mt-3 text-[9px] font-black uppercase tracking-[0.13em] text-emerald-800/80">Correct</div>
+                <div className="mt-0.5 text-3xl font-black tracking-tight text-emerald-900">{correct}</div>
+                <div className="mt-0.5 text-xs text-emerald-900/70">out of {qc || "-"} questions</div>
+              </div>
+
+              <div className="min-w-0 rounded-xl border border-rose-200 bg-rose-50/70 p-3">
+                <div className="flex items-center justify-between gap-2">
+                  <ListChecks className="h-4 w-4 text-rose-600" />
+                </div>
+                <div className="mt-3 text-[9px] font-black uppercase tracking-[0.13em] text-rose-800/80">Incorrect</div>
+                <div className="mt-0.5 text-3xl font-black tracking-tight text-rose-900">{wrong}</div>
+                <div className="mt-0.5 text-xs text-rose-900/70">answered wrong</div>
+              </div>
+
+              <div className="min-w-0 rounded-xl border border-slate-200 bg-slate-50/70 p-3 col-span-2 lg:col-span-1">
                 <div className="flex items-center justify-between gap-2">
                   <Medal className="h-4 w-4 text-amber-600" />
                 </div>
@@ -712,46 +786,10 @@ export default function LiveMockAnalytics() {
                     <span className="text-lg font-semibold text-blue-700">({pct}%)</span>
                   ) : null}
                 </div>
-                <div className="mt-0.5 text-xs text-slate-500">Correct out of total questions</div>
-              </div>
-
-              <div className="min-w-0 rounded-xl border border-slate-200 bg-slate-50/70 p-3">
-                <div className="flex items-center justify-between gap-2">
-                  <ListChecks className="h-4 w-4 text-blue-600" />
-                </div>
-                <div className="mt-3 text-[9px] font-black uppercase tracking-[0.13em] text-slate-400">Breakdown</div>
-                <div className="mt-0.5 text-lg font-bold text-slate-950">
-                  <span className="text-emerald-700">{correct}</span>
-                  <span className="mx-1 text-slate-300">/</span>
-                  <span className="text-rose-700">{wrong}</span>
-                  <span className="mx-1 text-slate-300">/</span>
-                  <span className="text-slate-500">{blank}</span>
-                </div>
-                <div className="mt-0.5 text-xs text-slate-500">Correct / Wrong / Unanswered</div>
-              </div>
-
-              <div className="min-w-0 rounded-xl border border-slate-200 bg-slate-50/70 p-3">
-                <div className="flex items-center justify-between gap-2">
-                  <Timer className="h-4 w-4 text-violet-600" />
-                </div>
-                <div className="mt-3 text-[9px] font-black uppercase tracking-[0.13em] text-slate-400">Time used</div>
-                <div className="mt-0.5 text-lg font-bold tracking-tight text-slate-950">
-                  {formatDuration(summary.duration_seconds)}
-                </div>
                 <div className="mt-0.5 text-xs text-slate-500">
-                  Answered {summary.answered_count ?? "-"} / {qc || "-"}
+                  {blank > 0 ? `${blank} unanswered · ` : ""}
+                  Time {formatDuration(summary.duration_seconds)} · {formatSubmittedAt(summary.submitted_at)}
                 </div>
-              </div>
-
-              <div className="min-w-0 rounded-xl border border-slate-200 bg-slate-50/70 p-3">
-                <div className="flex items-center justify-between gap-2">
-                  <FileText className="h-4 w-4 text-slate-600" />
-                </div>
-                <div className="mt-3 text-[9px] font-black uppercase tracking-[0.13em] text-slate-400">Submitted</div>
-                <div className="mt-0.5 break-words text-sm font-semibold leading-snug text-slate-950">
-                  {formatSubmittedAt(summary.submitted_at)}
-                </div>
-                <div className="mt-0.5 text-xs text-slate-500">When your attempt was saved</div>
               </div>
             </div>
 
@@ -812,8 +850,8 @@ export default function LiveMockAnalytics() {
                 Question-level review
               </h2>
               <p className="mt-0.5 text-xs leading-relaxed text-slate-500">
-                Every question in this paper, with your answer and the correct answer. Tap a row to see the full passage
-                (if any), question text, and every answer option.
+                Question, your answer, and the correct answer for each item. Tap a row for the full passage (if any) and
+                every option.
               </p>
 
               {reviewQuestions.length === 0 ? (
@@ -824,11 +862,44 @@ export default function LiveMockAnalytics() {
                 </div>
               ) : (
                 <>
+                  <div className="mt-3 inline-flex w-full gap-1 rounded-xl border border-slate-200 bg-slate-50 p-1 sm:w-auto">
+                    {(
+                      [
+                        { id: "all" as const, label: `All (${reviewQuestions.length})` },
+                        { id: "incorrect" as const, label: `Incorrect (${wrong})` },
+                        { id: "correct" as const, label: `Correct (${correct})` },
+                      ] as const
+                    ).map((tab) => {
+                      const active = reviewFilter === tab.id;
+                      return (
+                        <button
+                          key={tab.id}
+                          type="button"
+                          onClick={() => setReviewFilter(tab.id)}
+                          className={[
+                            "flex-1 rounded-lg px-3 py-1.5 text-xs font-bold transition-colors sm:flex-none",
+                            active
+                              ? tab.id === "incorrect"
+                                ? "bg-white text-rose-700 shadow-sm"
+                                : tab.id === "correct"
+                                  ? "bg-white text-emerald-700 shadow-sm"
+                                  : "bg-white text-blue-700 shadow-sm"
+                              : "text-slate-500 hover:text-slate-700",
+                          ].join(" ")}
+                        >
+                          {tab.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  {filteredReviewQuestions.length === 0 ? (
+                    <p className="mt-4 text-center text-sm text-slate-500">No questions in this filter.</p>
+                  ) : null}
                   <p className="mt-3 text-[11px] text-slate-400 md:hidden">
                     On small screens, use the cards below. On wider screens, scroll the table sideways if needed.
                   </p>
                   <div className="mt-3 space-y-2 md:hidden">
-                    {reviewQuestions.map((row) => {
+                    {filteredReviewQuestions.map((row) => {
                       const unanswered =
                         row.is_correct !== true &&
                         !row.selected_option?.trim() &&
@@ -903,7 +974,7 @@ export default function LiveMockAnalytics() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100">
-                        {reviewQuestions.map((row) => {
+                        {filteredReviewQuestions.map((row) => {
                           const unanswered =
                             row.is_correct !== true &&
                             !row.selected_option?.trim() &&
